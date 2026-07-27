@@ -1433,12 +1433,37 @@ serve(async (req) => {
     }
 
     const context = (body as { context?: string }).context;
-    const userId = (body as { user_id?: string }).user_id;
     let systemPrompt: string;
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+
+    // C1 fix: identity comes from a verified JWT, never from the request body.
+    // The lounge path reads and writes a user's own CRM data under the service
+    // role, so the caller MUST prove who they are. A body-supplied user_id let
+    // anyone dump or delete any account's data. The marketing path (context !==
+    // 'lounge') needs no identity and no privileged client.
+    let userId: string | null = null;
+    if (context === 'lounge') {
+      const authHeader = req.headers.get('Authorization') ?? '';
+      if (!authHeader.startsWith('Bearer ')) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+      const anonClient = createClient(supabaseUrl, anonKey);
+      const { data: { user }, error: authError } = await anonClient.auth.getUser(authHeader.slice(7));
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      userId = user.id;
+    }
 
     if (context === 'lounge' && userId) {
       const userContext = await fetchUserContext(userId, supabaseAdmin);

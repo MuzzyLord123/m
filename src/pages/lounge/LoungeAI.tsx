@@ -261,6 +261,14 @@ export default function LoungeAI() {
     historyForApi.push({ role: 'user', content: textToSend });
 
     try {
+      // C1 fix: the lounge assistant reads and writes this user's CRM data, so
+      // it must authenticate as the user. Send the session JWT (not the anon
+      // key) as the bearer token; the edge function derives identity from it
+      // and ignores any body-supplied user_id.
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) throw new Error('Your session has expired. Please sign in again.');
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/quooro-chat`,
         {
@@ -268,9 +276,9 @@ export default function LoungeAI() {
           headers: {
             'Content-Type': 'application/json',
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({ messages: historyForApi, context: 'lounge', user_id: user.id }),
+          body: JSON.stringify({ messages: historyForApi, context: 'lounge' }),
         }
       );
 

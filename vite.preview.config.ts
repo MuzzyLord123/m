@@ -61,6 +61,11 @@ function inlineEverything(): Plugin {
       // Preload hints point at files that no longer exist once inlined.
       source = source.replace(/<link[^>]*rel="modulepreload"[^>]*>\s*/g, "");
 
+      // inlineDynamicImports leaves Vite's preload placeholder unsubstituted
+      // (there are no chunk dep-lists to fill in). Any leftover token would
+      // throw ReferenceError at runtime, so neutralise it.
+      source = source.replace(/__VITE_PRELOAD__/g, "void 0");
+
       // The production CSP has no 'unsafe-inline' in script-src - correct for the
       // real deploy, fatal here, where the whole bundle is now an inline <script>.
       // The host serving this preview applies its own CSP.
@@ -77,6 +82,10 @@ function inlineEverything(): Plugin {
 export default defineConfig({
   plugins: [react(), inlineEverything()],
   resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
+  // With everything inlined into one module there are no dynamic-import chunks,
+  // so Vite's preload helper placeholder is never substituted. Neutralise it so
+  // it doesn't throw at runtime.
+  define: { __VITE_PRELOAD__: "void 0" },
   build: {
     outDir: "dist-preview",
     target: "esnext",

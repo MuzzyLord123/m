@@ -12,6 +12,11 @@ verify_jwt = false
 [functions.reset-client-password]
 verify_jwt = false
 
+# quooro-chat serves two paths from one function: a public marketing chatbot
+# (no identity) and the authenticated lounge assistant. Platform-level JWT
+# verification stays off so the marketing path is reachable without a login;
+# the lounge path (context === 'lounge') enforces a verified JWT inside the
+# handler and derives the user id from it - see the C1 fix in index.ts.
 [functions.quooro-chat]
 verify_jwt = false
 

@@ -77,11 +77,42 @@ async function executeNode(
     }
 
     case "code": {
+      // C2 fix: `new Function(code)` compiled in the isolate's global scope, so
+      // Deno, fetch and globalThis were all reachable - a workflow node of
+      // `return Deno.env.toObject()` returned every project secret (including
+      // the service-role key) to its author. Edge-function secrets are shared
+      // across all functions, so this was a full compromise.
+      //
+      // We fail closed: arbitrary code execution is disabled unless an operator
+      // explicitly opts in via WORKFLOW_ALLOW_CODE_EVAL=true. Even then we run
+      // it with the dangerous globals shadowed to `undefined`. This is a
+      // mitigation, NOT a real sandbox - before exposing code nodes to
+      // untrusted/multi-tenant users, move execution into a WASM isolate
+      // (e.g. quickjs-emscripten) with no host bindings.
       const { code } = node.settings;
-      // Simple safe eval for basic JS expressions
+      if (Deno.env.get("WORKFLOW_ALLOW_CODE_EVAL") !== "true") {
+        throw new Error(
+          "Code nodes are disabled for security. Set WORKFLOW_ALLOW_CODE_EVAL=true " +
+          "on this project only if you trust everyone who can create workflows."
+        );
+      }
+      // Block the obvious host-access identifiers outright before evaluating.
+      const forbidden = /\b(Deno|globalThis|process|require|import|eval|Function|constructor|fetch|WebAssembly|Reflect|Proxy)\b/;
+      if (forbidden.test(code)) {
+        throw new Error("Code node contains a disallowed identifier.");
+      }
       try {
-        const fn = new Function("input", "items", `"use strict"; ${code}`);
-        const result = fn(inputData, inputData);
+        // Shadow host globals as function parameters so they resolve to
+        // undefined inside the user code even if the denylist is bypassed.
+        const fn = new Function(
+          "Deno", "globalThis", "process", "fetch", "WebAssembly", "Reflect", "Proxy",
+          "input", "items",
+          `"use strict"; ${code}`
+        );
+        const result = fn(
+          undefined, undefined, undefined, undefined, undefined, undefined, undefined,
+          inputData, inputData
+        );
         return { output: result ?? inputData };
       } catch (e) {
         throw new Error(`Code execution error: ${(e as Error).message}`);

@@ -25,3 +25,6 @@ dist-ssr
 
 # Single-file preview build (see vite.preview.config.ts)
 dist-preview
+
+# Backup of the pre-migration Lovable project env
+.env.lovable-old.bak
