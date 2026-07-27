@@ -1,0 +1,2 @@
+import{a as d}from"./addDays-CdyK8INB.js";import{a as c}from"./isSameMonth-DgwwrFML.js";import{t as f,g as i}from"./en-US-BdoVNVtW.js";function p(e,t){const s=t*7;return d(e,s)}function l(e,t){return c(e,t*12)}function m(e,t){const s=i(),n=t?.weekStartsOn??t?.locale?.options?.weekStartsOn??s.weekStartsOn??s.locale?.options?.weekStartsOn??0,a=f(e),o=a.getDay(),r=(o<n?-7:0)+6-(o-n);return a.setDate(a.getDate()+r),a.setHours(23,59,59,999),a}export{p as a,l as b,m as e};
+//# sourceMappingURL=endOfWeek-Bc1e5dtE.js.map
