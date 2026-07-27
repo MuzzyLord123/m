@@ -1,0 +1,35 @@
+/* App-level styles */
+
+/* Hide native scrollbar for editor canvas */
+.hide-native-scrollbar::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+.hide-native-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Hide scrollbar but allow scrolling */
+.scrollbar-none::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+.scrollbar-none {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Hide Radix ScrollArea scrollbar in designer panels */
+[data-radix-scroll-area-viewport] {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+[data-radix-scroll-area-viewport]::-webkit-scrollbar {
+  display: none !important;
+}
+[data-radix-scroll-area-scrollbar] {
+  display: none !important;
+}

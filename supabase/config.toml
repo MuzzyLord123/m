@@ -1,0 +1,66 @@
+project_id = "ijybotwfiediocoewwux"
+
+[functions.calendar-ai]
+verify_jwt = false
+
+[functions.two-factor-auth]
+verify_jwt = false
+
+[functions.create-client]
+verify_jwt = false
+
+[functions.reset-client-password]
+verify_jwt = false
+
+[functions.quooro-chat]
+verify_jwt = false
+
+[functions.send-verification-email]
+verify_jwt = false
+
+[functions.create-product-checkout]
+verify_jwt = false
+
+[functions.site-visitor-auth]
+verify_jwt = false
+
+[functions.site-booking]
+verify_jwt = false
+
+[functions.google-calendar-auth]
+verify_jwt = false
+
+[functions.google-calendar-sync]
+verify_jwt = false
+
+[functions.email-sync]
+verify_jwt = false
+
+[functions.email-oauth]
+verify_jwt = false
+
+[functions.doc-ai]
+verify_jwt = false
+
+[functions.deploy-site]
+verify_jwt = false
+
+[functions.booking-api]
+verify_jwt = false
+
+[functions.log-user-activity]
+verify_jwt = false
+
+[functions.security-log]
+verify_jwt = false
+
+[functions.marketing-copy-rewrite]
+verify_jwt = false
+
+[functions.ecommerce-embed]
+verify_jwt = false
+
+[functions.store-checkout]
+verify_jwt = false
+
+

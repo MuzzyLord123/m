@@ -1,0 +1,57 @@
+# Security Headers
+# Implements CSP, HSTS, X-Frame-Options, Cache-Control, and other protective headers
+
+/*
+  # Prevent clickjacking
+  X-Frame-Options: DENY
+  
+  # Prevent MIME type sniffing
+  X-Content-Type-Options: nosniff
+  
+  # XSS protection for older browsers
+  X-XSS-Protection: 1; mode=block
+  
+  # Referrer policy - limit information leakage
+  Referrer-Policy: strict-origin-when-cross-origin
+  
+  # Disable unnecessary browser APIs
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()
+  
+  # HSTS - Force HTTPS (1 year)
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  
+  # Cache-Control - Prevent sensitive data caching
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+  
+  # Cross-Origin policies
+  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  
+  # Content Security Policy - Strict with nonce support
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.ipify.org https://ip-api.com https://api.qrserver.com wss://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content;
+
+# Static assets can be cached
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images can be cached
+/*.png
+  Cache-Control: public, max-age=86400
+
+/*.jpg
+  Cache-Control: public, max-age=86400
+
+/*.svg
+  Cache-Control: public, max-age=86400
+
+/*.ico
+  Cache-Control: public, max-age=86400

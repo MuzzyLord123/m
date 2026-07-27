@@ -1,0 +1,40 @@
+// Re-export types used by the Studio component library
+export interface DesignElement {
+  id: string;
+  type: 'rectangle' | 'ellipse' | 'text' | 'line' | 'frame' | 'image' | 'path' | 'star' | 'triangle' | 'polygon';
+  name: string;
+  x: number; y: number;
+  width: number; height: number;
+  rotation: number;
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+  opacity: number;
+  borderRadius: number;
+  text?: string;
+  fontSize?: number;
+  fontWeight?: string;
+  fontFamily?: string;
+  textAlign?: string;
+  lineHeight?: number;
+  letterSpacing?: number;
+  textDecoration?: string;
+  fontStyle?: string;
+  shadowX?: number;
+  shadowY?: number;
+  shadowBlur?: number;
+  shadowColor?: string;
+  blur?: number;
+  gradientType?: 'none' | 'linear' | 'radial';
+  gradientStart?: string;
+  gradientEnd?: string;
+  gradientAngle?: number;
+  starPoints?: number;
+  starInnerRadius?: number;
+  polygonSides?: number;
+  locked: boolean;
+  visible: boolean;
+  grouped?: string;
+  flipX?: boolean;
+  flipY?: boolean;
+}

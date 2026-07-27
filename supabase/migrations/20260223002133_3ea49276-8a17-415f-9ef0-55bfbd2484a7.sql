@@ -1,0 +1,2 @@
+ALTER TABLE public.comm_messages DROP CONSTRAINT comm_messages_message_type_check;
+ALTER TABLE public.comm_messages ADD CONSTRAINT comm_messages_message_type_check CHECK (message_type = ANY (ARRAY['text'::text, 'file'::text, 'image'::text, 'voice'::text, 'system'::text, 'code'::text, 'poll'::text]));
