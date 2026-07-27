@@ -1,0 +1,2 @@
+import{r as t,j as r}from"./vendor-react-aKtyoxEz.js";import{u as a,v as n}from"./vendor-radix-BacFFUca.js";import{h as d}from"./index-tV-zXlV7.js";const f=t.forwardRef(({className:s,value:o,...e},l)=>r.jsx(a,{ref:l,className:d("relative h-2.5 w-full overflow-hidden rounded-full bg-secondary/60",s),...e,children:r.jsx(n,{className:"h-full w-full flex-1 rounded-full bg-brand transition-all duration-300 ease-out",style:{transform:`translateX(-${100-(o||0)}%)`}})}));f.displayName=a.displayName;export{f as P};
+//# sourceMappingURL=progress-BTJ44vpY.js.map

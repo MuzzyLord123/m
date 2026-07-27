@@ -39,8 +39,7 @@ import { FloatingScreenshotHero } from "@/components/marketing/FloatingScreensho
 import { EditableField } from "@/components/marketing/EditableField";
 import { useHomepageHeader } from "@/hooks/useHomepageHeader";
 
-import { lazy, Suspense } from "react";
-const Globe3D = lazy(() => import("@/components/Globe3D").then(m => ({ default: m.Globe3D })));
+import { DeferredGlobe3D } from "@/components/DeferredGlobe3D";
 
 import heroWorkspace from "@/assets/hero-workspace.jpg";
 import codeTransform from "@/assets/code-transform.webp";
@@ -370,9 +369,7 @@ export default function Index() {
               <div className="flex flex-col items-center">
                 <div className="relative aspect-square max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-lg w-full">
                   <div className="absolute inset-0 bg-gradient-radial from-primary/20 via-transparent to-transparent rounded-full blur-3xl" />
-                  <Suspense fallback={<div className="w-full h-full rounded-full bg-muted/20 animate-pulse" />}>
-                    <Globe3D />
-                  </Suspense>
+                  <DeferredGlobe3D />
                 </div>
                 
                 <motion.p 
