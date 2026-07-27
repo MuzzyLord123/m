@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Single-file preview build (see vite.preview.config.ts)
+dist-preview
