@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import ReactMarkdown from "react-markdown";
+import { LazyMarkdown } from "@/components/LazyMarkdown";
 
 interface Attachment {
   id: string;
@@ -364,7 +364,7 @@ export function ChatBot({ isEmbedded, isOpen: externalOpen, onToggle }: ChatBotP
       if (match.index > lastIndex) {
         parts.push(
           <div key={`md-${lastIndex}`} className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-1 [&>ul]:mb-1 [&>ol]:mb-1">
-            <ReactMarkdown>{tempContent.slice(lastIndex, match.index)}</ReactMarkdown>
+            <LazyMarkdown>{tempContent.slice(lastIndex, match.index)}</LazyMarkdown>
           </div>
         );
       }
@@ -434,7 +434,7 @@ export function ChatBot({ isEmbedded, isOpen: externalOpen, onToggle }: ChatBotP
       if (message.role === "assistant") {
         return (
           <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-1 [&>ul]:mb-1 [&>ol]:mb-1 [&>p:last-child]:mb-0">
-            <ReactMarkdown>{content}</ReactMarkdown>
+            <LazyMarkdown>{content}</LazyMarkdown>
           </div>
         );
       }
@@ -444,7 +444,7 @@ export function ChatBot({ isEmbedded, isOpen: externalOpen, onToggle }: ChatBotP
     if (lastIndex < tempContent.length) {
       parts.push(
         <div key={`md-end`} className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-1 [&>ul]:mb-1">
-          <ReactMarkdown>{tempContent.slice(lastIndex)}</ReactMarkdown>
+          <LazyMarkdown>{tempContent.slice(lastIndex)}</LazyMarkdown>
         </div>
       );
     }

@@ -56,14 +56,25 @@ const mobilePlacements = [
 
 
 
+const MOBILE_QUERY = "(max-width: 639px)";
+
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+  // Seeded from the media query rather than defaulting to false: seeding false
+  // makes the first commit the 14-card desktop tree even on phones, and the
+  // browser evaluates loading="lazy" intersection before the effect corrects it -
+  // so all 14 screenshots get fetched to render 6, plus a visible 14->6 pop.
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches
+  );
+
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
-    check();
-    window.addEventListener("resize", check, { passive: true });
-    return () => window.removeEventListener("resize", check);
+    const mql = window.matchMedia(MOBILE_QUERY);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    setIsMobile(mql.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
   }, []);
+
   return isMobile;
 }
 
