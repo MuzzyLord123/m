@@ -68,7 +68,28 @@ why the route below restores from a real dump rather than replaying migrations.
 
 ---
 
-## Recommended route — restore from a dump (captures everything)
+## Fastest route — paste the schema into the SQL Editor (2 minutes, no CLI)
+
+The new project's `public` schema is empty and ready for this. It needs no password,
+no CLI and no network access on your side beyond a browser.
+
+1. Open the [SQL Editor](https://supabase.com/dashboard/project/tkvphfxqyoavnuibvmfp/sql/new)
+   for project `tkvphfxqyoavnuibvmfp`
+2. Open `supabase/consolidated-schema.sql` from this repo, select all, and paste it in
+3. Run
+
+That single file creates all 187 tables, 545 RLS policies, 351 functions, 146 triggers
+and 22 enum types. It was produced by replaying your 149 migrations against a real
+PostgreSQL 16 and dumping the result, so it applies in dependency order in one pass.
+
+If it errors with "already exists", the schema is not empty — reset it first at
+**Settings → General → Reset database**, then paste again.
+
+That gets you structure. It does **not** get you data or auth users — for those you
+still need the dump below, which is also the only route that captures objects created
+through the Lovable dashboard rather than migrations.
+
+## Complete route — restore from a dump (captures everything)
 
 Run these on your own machine, where the network isn't restricted. Get the two connection
 strings from **Dashboard → Project Settings → Database → Connection string (URI)**.
