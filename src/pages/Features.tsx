@@ -8,7 +8,7 @@ import {
   CheckCircle, X, ArrowRight
 } from "lucide-react";
 import { ParallaxBackground } from "@/components/ParallaxImage";
-import codeTransform from "@/assets/code-transform.jpg";
+import codeTransform from "@/assets/code-transform.webp";
 
 const allFeatures = [
   {

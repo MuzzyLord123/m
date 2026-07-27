@@ -7,8 +7,8 @@ import {
   Rocket, RefreshCw, Globe, Mail, CheckCircle, Plus 
 } from "lucide-react";
 import { ParallaxImage, ParallaxBackground } from "@/components/ParallaxImage";
-import aiNeural from "@/assets/ai-neural.jpg";
-import brandingStudio from "@/assets/branding-studio.jpg";
+import aiNeural from "@/assets/ai-neural.webp";
+import brandingStudio from "@/assets/branding-studio.webp";
 
 const addOns = [
   {

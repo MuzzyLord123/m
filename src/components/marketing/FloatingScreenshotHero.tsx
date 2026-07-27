@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import * as Icons from "lucide-react";
 import { ArrowRight, Shield, Heart, Zap, Check, Star, Award, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroParticleField } from "./HeroParticleField";
@@ -9,20 +8,21 @@ import { useSiteContent } from "@/hooks/useSiteContent";
 import { HOME_HERO_DEFAULTS, type HomeHeroContent } from "@/lib/siteContentSchemas";
 import { EditableField } from "@/components/marketing/EditableField";
 
-import site01 from "@/assets/hero-screenshots/site-01.jpg";
-import site02 from "@/assets/hero-screenshots/site-02.jpg";
-import site03 from "@/assets/hero-screenshots/site-03.jpg";
-import site04 from "@/assets/hero-screenshots/site-04.jpg";
-import site05 from "@/assets/hero-screenshots/site-05.jpg";
-import site06 from "@/assets/hero-screenshots/site-06.jpg";
-import site07 from "@/assets/hero-screenshots/site-07.jpg";
-import site08 from "@/assets/hero-screenshots/site-08.jpg";
-import site09 from "@/assets/hero-screenshots/site-09.jpg";
-import site10 from "@/assets/hero-screenshots/site-10.jpg";
-import site11 from "@/assets/hero-screenshots/site-11.jpg";
-import site12 from "@/assets/hero-screenshots/site-12.jpg";
-import site13 from "@/assets/hero-screenshots/site-13.jpg";
-import site14 from "@/assets/hero-screenshots/site-14.jpg";
+import site01 from "@/assets/hero-screenshots/site-01.webp";
+import site02 from "@/assets/hero-screenshots/site-02.webp";
+import site03 from "@/assets/hero-screenshots/site-03.webp";
+import site04 from "@/assets/hero-screenshots/site-04.webp";
+import site05 from "@/assets/hero-screenshots/site-05.webp";
+import site06 from "@/assets/hero-screenshots/site-06.webp";
+import site07 from "@/assets/hero-screenshots/site-07.webp";
+import site08 from "@/assets/hero-screenshots/site-08.webp";
+import site09 from "@/assets/hero-screenshots/site-09.webp";
+import site10 from "@/assets/hero-screenshots/site-10.webp";
+import site11 from "@/assets/hero-screenshots/site-11.webp";
+import site12 from "@/assets/hero-screenshots/site-12.webp";
+import site13 from "@/assets/hero-screenshots/site-13.webp";
+import site14 from "@/assets/hero-screenshots/site-14.webp";
+import { getIcon } from "@/lib/marketingIcons";
 
 const siteImages = [site01, site02, site03, site04, site05, site06, site07, site08, site09, site10, site11, site12, site13, site14];
 
@@ -55,10 +55,6 @@ const mobilePlacements = [
 
 
 
-function getIcon(name: string) {
-  const C = (Icons as any)[name];
-  return (C as React.ComponentType<{ className?: string; style?: React.CSSProperties }>) || Icons.Sparkles;
-}
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);

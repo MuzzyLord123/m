@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Search, TrendingUp, FileText, Link2, MapPin, BarChart, CheckCircle, ArrowUpRight, ArrowRight } from "lucide-react";
 import { ParallaxBackground } from "@/components/ParallaxImage";
 import { PricingCard3D } from "@/components/Card3D";
-import seoStrategy from "@/assets/seo-strategy.jpg";
+import seoStrategy from "@/assets/seo-strategy.webp";
 
 const services = [
   {

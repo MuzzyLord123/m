@@ -41,7 +41,7 @@ import { CostEstimator } from "@/components/marketing/CostEstimator";
 import websitesImg from "@/assets/packages-websites.jpg";
 import appsImg from "@/assets/packages-apps.jpg";
 import dashboardsImg from "@/assets/packages-dashboards.jpg";
-import inventoryImg from "@/assets/packages-inventory.jpg";
+import inventoryImg from "@/assets/packages-inventory.webp";
 import crmImg from "@/assets/packages-crm.jpg";
 import ecommerceImg from "@/assets/packages-ecommerce.jpg";
 

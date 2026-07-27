@@ -43,7 +43,7 @@ import { lazy, Suspense } from "react";
 const Globe3D = lazy(() => import("@/components/Globe3D").then(m => ({ default: m.Globe3D })));
 
 import heroWorkspace from "@/assets/hero-workspace.jpg";
-import codeTransform from "@/assets/code-transform.jpg";
+import codeTransform from "@/assets/code-transform.webp";
 
 // What We Do - 5 Pillars with color accents
 const whatWeDo = [

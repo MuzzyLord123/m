@@ -3,7 +3,7 @@ import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls, Sphere, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { TextureLoader } from "three";
-import earthTexture from "@/assets/earth-nasa.jpg";
+import earthTexture from "@/assets/earth-nasa.webp";
 import { useInViewport } from "@/hooks/useInViewport";
 
 // Client locations with flags

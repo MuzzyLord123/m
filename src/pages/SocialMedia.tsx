@@ -5,7 +5,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ParallaxBackground } from "@/components/ParallaxImage";
 import { PricingCard3D } from "@/components/Card3D";
-import socialMedia from "@/assets/social-media.jpg";
+import socialMedia from "@/assets/social-media.webp";
 
 const packages = [
   { 

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Target, TrendingUp, BarChart3, Check, MousePointer, RefreshCw, Zap, LineChart, CheckCircle, ArrowRight } from "lucide-react";
 import { ParallaxBackground } from "@/components/ParallaxImage";
 import { PricingCard3D } from "@/components/Card3D";
-import adManagement from "@/assets/ad-management.jpg";
+import adManagement from "@/assets/ad-management.webp";
 
 const services = [
   {

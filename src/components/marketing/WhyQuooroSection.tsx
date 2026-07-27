@@ -1,18 +1,14 @@
 import { motion } from "framer-motion";
-import * as Icons from "lucide-react";
 import { Check, X, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { HOME_WHY_DEFAULTS, type HomeWhyContent } from "@/lib/siteContentSchemas";
 import { EditableField } from "@/components/marketing/EditableField";
+import { getIcon } from "@/lib/marketingIcons";
 
 const NARDO_ACCENT = "from-zinc-500 to-zinc-700";
 
-function getIcon(name: string) {
-  const I = (Icons as any)[name];
-  return I || Icons.Sparkles;
-}
 
 
 const comparisonRows = [

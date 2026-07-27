@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Camera, Video, Palette, PenTool, BookOpen, Sparkles, CheckCircle, ArrowRight } from "lucide-react";
 import { ParallaxBackground } from "@/components/ParallaxImage";
-import brandingStudio from "@/assets/branding-studio.jpg";
+import brandingStudio from "@/assets/branding-studio.webp";
 
 const services = [
   {

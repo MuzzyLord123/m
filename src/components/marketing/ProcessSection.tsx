@@ -1,17 +1,13 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import * as Icons from "lucide-react";
 import { Check } from "lucide-react";
 import { useRef } from "react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { HOME_PROCESS_DEFAULTS, type HomeProcessContent } from "@/lib/siteContentSchemas";
 import { EditableField } from "@/components/marketing/EditableField";
+import { getIcon } from "@/lib/marketingIcons";
 
 const NARDO_ACCENT = "from-zinc-500 to-zinc-700";
 
-function getIcon(name: string) {
-  const I = (Icons as any)[name];
-  return I || Icons.Sparkles;
-}
 
 
 export function ProcessSection() {
