@@ -1,7 +1,4 @@
-project_id = "ijybotwfiediocoewwux"
-
-[functions.calendar-ai]
-verify_jwt = false
+project_id = "tkvphfxqyoavnuibvmfp"
 
 [functions.two-factor-auth]
 verify_jwt = false

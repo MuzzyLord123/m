@@ -57,7 +57,6 @@ import {
   BarChart3,
   Bell,
   Radio,
-  PenTool,
   Boxes,
   FileSpreadsheet,
   ClipboardList,
@@ -142,7 +141,6 @@ const ALL_NAV_ITEMS: NavItemDef[] = [
 { id: 'team-comms', label: 'Team Comms', icon: Radio, path: '/lounge/team-comms' },
 { id: 'tickets', label: 'Support Tickets', icon: Ticket, path: '/lounge/tickets' },
 { id: 'notifications', label: 'Notifications', icon: Bell, path: '/lounge/notifications' },
-{ id: 'cad-studio', label: 'CAD Studio', icon: PenTool, path: '/lounge/cad-studio' },
 { id: 'inventory', label: 'Inventory', icon: Boxes, path: '/lounge/inventory' },
 { id: 'office', label: 'Quooro Office', icon: FileSpreadsheet, path: '/lounge/office' },
 
@@ -183,7 +181,6 @@ const navGroups: NavGroup[] = [
   { label: 'Workflows', icon: Workflow, path: '/lounge/workflows' },
   
   { label: 'Content Requests', icon: FileText, path: '/lounge/content' },
-  { label: 'CAD Studio', icon: PenTool, path: '/lounge/cad-studio' },
   { label: 'Inventory', icon: Boxes, path: '/lounge/inventory' },
   { label: 'Quooro Office', icon: FileSpreadsheet, path: '/lounge/office' },
   { label: 'Planner', icon: ClipboardList, path: '/lounge/planner' },
@@ -194,7 +191,6 @@ const navGroups: NavGroup[] = [
   id: 'subscriptions', label: 'Subscriptions', icon: Crown,
   items: [
   { label: 'Workshop', icon: Paintbrush, path: '/lounge/website-designer' },
-  { label: 'CAD Studio', icon: PenTool, path: '/lounge/cad-studio' },
   { label: 'Inventory', icon: Boxes, path: '/lounge/inventory' },
   { label: 'Quooro Office', icon: FileSpreadsheet, path: '/lounge/office' },
   

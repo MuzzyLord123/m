@@ -2,6 +2,13 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.90.1";
 import { getCorsHeaders, handleCorsPreflightRequest, isOriginAllowed } from "../_shared/cors.ts";
+import {
+  chatStream,
+  chatWithTools,
+  ProviderError,
+  resolveChatProvider,
+  type OpenAIMessage,
+} from "./ai-provider.ts";
 
 const QUOORO_SALES_PROMPT = `
 You are Quooro Digital Intelligence — the friendly, expert sales & support assistant for Quooro, a premium web development agency in London, UK.
@@ -1435,6 +1442,18 @@ serve(async (req) => {
     const context = (body as { context?: string }).context;
     let systemPrompt: string;
 
+    // Lovable is gone, so the provider is resolved from the project's own keys.
+    // Failing here with an actionable 503 is better than a generic 500 later.
+    const aiProvider = resolveChatProvider();
+    if (!aiProvider) {
+      return new Response(
+        JSON.stringify({
+          error: 'No AI provider configured. Set ANTHROPIC_API_KEY (recommended) or OPENAI_API_KEY on this project.',
+        }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
@@ -1471,7 +1490,7 @@ serve(async (req) => {
 
       // === MULTI-ROUND TOOL-CALLING LOOP ===
       // Keep calling the AI until it stops requesting tools (max 5 rounds)
-      let conversationMessages: any[] = [
+      let conversationMessages: OpenAIMessage[] = [
         { role: 'system', content: systemPrompt },
         ...validatedMessages,
       ];
@@ -1480,38 +1499,10 @@ serve(async (req) => {
       let lastChoice: any = null;
 
       while (toolRound < MAX_TOOL_ROUNDS) {
-        const roundResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-3-flash-preview',
-            messages: conversationMessages,
-            tools: CRUD_TOOLS,
-            max_tokens: 1200,
-            temperature: 0.7,
-          }),
+        lastChoice = await chatWithTools(aiProvider, conversationMessages, CRUD_TOOLS, {
+          maxTokens: 1200,
+          temperature: 0.7,
         });
-
-        if (!roundResponse.ok) {
-          const errStatus = roundResponse.status;
-          if (errStatus === 429) {
-            return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }), {
-              status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          }
-          if (errStatus === 402) {
-            return new Response(JSON.stringify({ error: "Usage limit reached. Please add credits." }), {
-              status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          }
-          throw new Error(`AI Gateway error: ${errStatus}`);
-        }
-
-        const roundData = await roundResponse.json();
-        lastChoice = roundData.choices?.[0];
 
         // If no tool calls, we're done — break out to stream the final response
         if (!lastChoice?.message?.tool_calls || lastChoice.message.tool_calls.length === 0) {
@@ -1551,26 +1542,12 @@ serve(async (req) => {
       }
 
       // Final streaming response (with all tool context accumulated)
-      const finalStreamResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-3-flash-preview',
-          messages: conversationMessages,
-          max_tokens: 1200,
-          temperature: 0.7,
-          stream: true,
-        }),
+      const finalStream = await chatStream(aiProvider, conversationMessages, {
+        maxTokens: 1200,
+        temperature: 0.7,
       });
 
-      if (!finalStreamResponse.ok) {
-        throw new Error(`AI Gateway final stream error: ${finalStreamResponse.status}`);
-      }
-
-      return new Response(finalStreamResponse.body, {
+      return new Response(finalStream, {
         headers: {
           ...corsHeaders,
           'Content-Type': 'text/event-stream',
@@ -1586,40 +1563,16 @@ serve(async (req) => {
       // Sales context — no tools, just streaming
       systemPrompt = QUOORO_SALES_PROMPT;
 
-      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-3-flash-preview',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            ...validatedMessages,
-          ],
-          max_tokens: 800,
-          temperature: 0.7,
-          stream: true,
-        }),
-      });
+      const salesStream = await chatStream(
+        aiProvider,
+        [
+          { role: 'system', content: systemPrompt },
+          ...validatedMessages,
+        ],
+        { maxTokens: 800, temperature: 0.7 },
+      );
 
-      if (!response.ok) {
-        const errorStatus = response.status;
-        if (errorStatus === 429) {
-          return new Response(JSON.stringify({ error: "Rate limit exceeded." }), {
-            status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-        if (errorStatus === 402) {
-          return new Response(JSON.stringify({ error: "Usage limit reached." }), {
-            status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
-        throw new Error(`AI Gateway error: ${errorStatus}`);
-      }
-
-      return new Response(response.body, {
+      return new Response(salesStream, {
         headers: {
           ...corsHeaders,
           'Content-Type': 'text/event-stream',
@@ -1633,6 +1586,16 @@ serve(async (req) => {
       message: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
     });
+
+    // Rate limits and exhausted credits used to be handled inline at each call
+    // site; now they surface as ProviderError so the clients keep seeing the
+    // same 429/402 they were written against.
+    if (error instanceof ProviderError) {
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        { status: error.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     return new Response(
       JSON.stringify({ error: 'An error occurred processing your request' }),

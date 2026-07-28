@@ -35,6 +35,27 @@ interface NodeResult {
   startedAt: string;
 }
 
+/**
+ * AI node provider. Lovable removed entirely (2026-07-28, owner decision).
+ * Anthropic (recommended) or OpenAI, chosen by whichever key is set.
+ */
+type Provider = "anthropic" | "openai";
+
+function resolveAiProvider(requestedModel?: string): { provider: Provider; apiKey: string; model: string } | null {
+  const explicit = (Deno.env.get("AI_PROVIDER") || "").toLowerCase() as Provider | "";
+  const keys: Record<Provider, string | undefined> = {
+    anthropic: Deno.env.get("ANTHROPIC_API_KEY") || undefined,
+    openai: Deno.env.get("OPENAI_API_KEY") || undefined,
+  };
+  const defaults: Record<Provider, string> = { anthropic: "claude-sonnet-5", openai: "gpt-4o-mini" };
+  const order: Provider[] = explicit && keys[explicit] ? [explicit] : ["anthropic", "openai"];
+  for (const p of order) {
+    const apiKey = keys[p];
+    if (apiKey) return { provider: p, apiKey, model: requestedModel || Deno.env.get("AI_MODEL") || defaults[p] };
+  }
+  return null;
+}
+
 async function executeNode(
   node: WorkflowNode,
   inputData: any,
@@ -256,9 +277,15 @@ async function executeNode(
     }
 
     case "ai": {
-      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-      if (!LOVABLE_API_KEY) throw new Error("AI not configured");
+      // Lovable removed (2026-07-28). Anthropic or OpenAI only.
       const { prompt, model, temperature } = node.settings;
+      const cfg = resolveAiProvider(model);
+      if (!cfg) {
+        throw new Error(
+          "AI not configured. Set ANTHROPIC_API_KEY (recommended) or OPENAI_API_KEY on this project."
+        );
+      }
+
       let processedPrompt = prompt || "";
       if (inputData) {
         processedPrompt = processedPrompt.replace(/\{\{input\.(\w+)\}\}/g, (_: string, key: string) => {
@@ -267,25 +294,57 @@ async function executeNode(
         });
         if (!prompt) processedPrompt = `Process this data: ${JSON.stringify(inputData)}`;
       }
-      const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: model || "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: "You are a helpful assistant processing workflow data. Return concise, structured responses." },
-            { role: "user", content: processedPrompt },
-          ],
-          temperature: temperature ?? 0.7,
-        }),
-      });
-      if (!aiResp.ok) {
-        const errText = await aiResp.text();
-        throw new Error(`AI error [${aiResp.status}]: ${errText}`);
+
+      const system = "You are a helpful assistant processing workflow data. Return concise, structured responses.";
+      let content = "";
+
+      if (cfg.provider === "anthropic") {
+        const aiResp = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "x-api-key": cfg.apiKey,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: cfg.model,
+            max_tokens: 4096,
+            temperature: temperature ?? 0.7,
+            system,
+            messages: [{ role: "user", content: processedPrompt }],
+          }),
+        });
+        if (!aiResp.ok) {
+          const errText = await aiResp.text();
+          throw new Error(`AI error [${aiResp.status}]: ${errText.slice(0, 300)}`);
+        }
+        const aiData = await aiResp.json();
+        content = (aiData?.content ?? [])
+          .filter((b: { type?: string }) => b?.type === "text")
+          .map((b: { text?: string }) => b.text ?? "")
+          .join("");
+      } else {
+        const aiResp = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${cfg.apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: cfg.model,
+            messages: [
+              { role: "system", content: system },
+              { role: "user", content: processedPrompt },
+            ],
+            temperature: temperature ?? 0.7,
+          }),
+        });
+        if (!aiResp.ok) {
+          const errText = await aiResp.text();
+          throw new Error(`AI error [${aiResp.status}]: ${errText.slice(0, 300)}`);
+        }
+        const aiData = await aiResp.json();
+        content = aiData?.choices?.[0]?.message?.content || "";
       }
-      const aiData = await aiResp.json();
-      const content = aiData.choices?.[0]?.message?.content || "";
-      return { output: { result: content, model: model || "google/gemini-3-flash-preview" } };
+
+      return { output: { result: content, provider: cfg.provider, model: cfg.model } };
     }
 
     case "transform": {

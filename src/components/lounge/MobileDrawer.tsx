@@ -6,7 +6,7 @@ import {
   Megaphone, Share2, Calendar, HardDrive, Upload,
   Users, CreditCard, MessageSquare, Settings, Ticket,
   Paintbrush, Wand2, Package, Target, Workflow,
-  BarChart3, Bell, Radio, PenTool, X, Moon, Sun, LogOut,
+  BarChart3, Bell, Radio, X, Moon, Sun, LogOut,
   FileSpreadsheet
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -46,7 +46,6 @@ const drawerItems: NavItem[] = [
   { label: 'Team Comms', icon: Radio, path: '/lounge/team-comms' },
   { label: 'Support Tickets', icon: Ticket, path: '/lounge/tickets' },
   { label: 'Notifications', icon: Bell, path: '/lounge/notifications' },
-  { label: 'CAD Studio', icon: PenTool, path: '/lounge/cad-studio' },
   { label: 'Settings', icon: Settings, path: '/lounge/settings' },
 ];
 
