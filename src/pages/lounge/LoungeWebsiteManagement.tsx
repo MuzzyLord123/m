@@ -357,7 +357,7 @@ function LoungeWebsiteManagementInner() {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm text-muted-foreground">Hosting</p>
-                        <p className="font-medium truncate">{profile?.hosting_provider || 'Lovable Cloud'}</p>
+                        <p className="font-medium truncate">{profile?.hosting_provider || 'Quooro Cloud'}</p>
                       </div>
                     </div>
                   </CardContent>

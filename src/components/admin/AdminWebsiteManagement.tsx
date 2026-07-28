@@ -171,7 +171,7 @@ export default function AdminWebsiteManagement() {
       preview_url: client.preview_url || '',
       domain_name: client.domain_name || '',
       ssl_status: client.ssl_status || 'pending',
-      hosting_provider: client.hosting_provider || 'Lovable Cloud',
+      hosting_provider: client.hosting_provider || 'Quooro Cloud',
       site_files_url: client.site_files_url || '',
     });
   };
@@ -249,7 +249,7 @@ export default function AdminWebsiteManagement() {
           preview_url: formData.preview_url || null,
           domain_name: formData.domain_name || null,
           ssl_status: formData.ssl_status,
-          hosting_provider: formData.hosting_provider || 'Lovable Cloud',
+          hosting_provider: formData.hosting_provider || 'Quooro Cloud',
           site_files_url: formData.site_files_url || null,
         })
         .eq('id', selectedClient.id);
@@ -484,7 +484,7 @@ export default function AdminWebsiteManagement() {
                 <div className="space-y-2">
                   <Label>Hosting Provider</Label>
                   <Input
-                    placeholder="Lovable Cloud"
+                    placeholder="Quooro Cloud"
                     value={formData.hosting_provider}
                     onChange={(e) => setFormData(prev => ({ ...prev, hosting_provider: e.target.value }))}
                   />

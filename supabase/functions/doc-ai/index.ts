@@ -8,27 +8,22 @@ const corsHeaders = {
 /**
  * Provider selection.
  *
- * This function used to be hard-wired to Lovable's AI gateway on
- * LOVABLE_API_KEY. That is a dependency on the platform this project is
- * migrating off, so the writing assistant would have died the moment that key
- * was revoked. It now talks to whichever provider is configured, and the
- * Lovable gateway is only a last-resort fallback so nothing breaks mid-move.
+ * Lovable has been removed entirely (2026-07-28, owner decision): no
+ * LOVABLE_API_KEY, no ai.gateway.lovable.dev, not even as a fallback.
  *
  * Resolution order (first key present wins):
- *   1. ANTHROPIC_API_KEY  -> api.anthropic.com          (recommended)
+ *   1. ANTHROPIC_API_KEY  -> api.anthropic.com   (recommended)
  *   2. OPENAI_API_KEY     -> api.openai.com
- *   3. LOVABLE_API_KEY    -> ai.gateway.lovable.dev     (legacy)
  *
- * Override explicitly with DOC_AI_PROVIDER = anthropic | openai | lovable.
- * Override the model with DOC_AI_MODEL. To cut the Lovable dependency for
- * good, set ANTHROPIC_API_KEY and unset LOVABLE_API_KEY.
+ * Override explicitly with DOC_AI_PROVIDER = anthropic | openai, and the model
+ * with DOC_AI_MODEL. With neither key set the function returns 503 with an
+ * actionable message rather than silently failing.
  */
-type Provider = "anthropic" | "openai" | "lovable";
+type Provider = "anthropic" | "openai";
 
 const DEFAULT_MODELS: Record<Provider, string> = {
   anthropic: "claude-sonnet-5",
   openai: "gpt-4o-mini",
-  lovable: "google/gemini-3-flash-preview",
 };
 
 interface ProviderConfig {
@@ -42,12 +37,11 @@ function resolveProvider(): ProviderConfig | null {
   const keys: Record<Provider, string | undefined> = {
     anthropic: Deno.env.get("ANTHROPIC_API_KEY") || undefined,
     openai: Deno.env.get("OPENAI_API_KEY") || undefined,
-    lovable: Deno.env.get("LOVABLE_API_KEY") || undefined,
   };
 
   const order: Provider[] = explicit && keys[explicit]
     ? [explicit]
-    : ["anthropic", "openai", "lovable"];
+    : ["anthropic", "openai"];
 
   for (const p of order) {
     const apiKey = keys[p];
@@ -104,12 +98,7 @@ async function complete(cfg: ProviderConfig, userPrompt: string): Promise<string
       .trim();
   }
 
-  // OpenAI and the Lovable gateway both speak the chat/completions shape.
-  const endpoint = cfg.provider === "openai"
-    ? "https://api.openai.com/v1/chat/completions"
-    : "https://ai.gateway.lovable.dev/v1/chat/completions";
-
-  const res = await fetch(endpoint, {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${cfg.apiKey}`,
@@ -124,7 +113,7 @@ async function complete(cfg: ProviderConfig, userPrompt: string): Promise<string
       stream: false,
     }),
   });
-  if (!res.ok) throw await providerError(res, cfg.provider === "openai" ? "OpenAI" : "AI gateway");
+  if (!res.ok) throw await providerError(res, "OpenAI");
   const data = await res.json();
   return (data?.choices?.[0]?.message?.content ?? "").trim();
 }
@@ -140,7 +129,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           error:
-            "No AI provider configured. Set ANTHROPIC_API_KEY (recommended), OPENAI_API_KEY, or LOVABLE_API_KEY on this project.",
+            "No AI provider configured. Set ANTHROPIC_API_KEY (recommended) or OPENAI_API_KEY on this project.",
         }),
         { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );

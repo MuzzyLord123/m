@@ -20,10 +20,17 @@ export function GoogleSignInButton({
   const handleGoogleSignIn = async () => {
     setLoading(true);
     
+    // Pin the OAuth redirect to the canonical domain when we are already on it,
+    // so Google returns to quooro.com rather than a www/apex mismatch. Anywhere
+    // else - local dev, Vercel previews - use the current origin, which is what
+    // has to be registered in Supabase's Redirect URLs anyway.
+    //
+    // The old `hostname.includes('lovable.app')` branch is gone: Lovable is no
+    // longer used, and a substring match on a foreign domain was a loose test
+    // regardless.
     const productionDomain = 'https://quooro.com';
-    const isProduction = window.location.hostname === 'quooro.com' || 
-                         window.location.hostname === 'www.quooro.com' ||
-                         window.location.hostname.includes('lovable.app');
+    const isProduction = window.location.hostname === 'quooro.com' ||
+                         window.location.hostname === 'www.quooro.com';
     const baseUrl = isProduction ? productionDomain : window.location.origin;
     
     try {
