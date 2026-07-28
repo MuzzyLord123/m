@@ -31,6 +31,25 @@ serve(async (req) => {
       throw new Error("Missing siteId or pages");
     }
 
+    // H2 fix: the JWT was verified but siteId was never checked against it, so
+    // any authenticated user could publish arbitrary pages to any other
+    // tenant's site - overwriting a live website on a domain they do not own.
+    // The deployment row was even stamped with the *caller's* user_id, so the
+    // hijack looked legitimate afterwards.
+    const { data: ownedSite } = await supabase
+      .from("designer_sites")
+      .select("id")
+      .eq("id", siteId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!ownedSite) {
+      return new Response(
+        JSON.stringify({ error: "Site not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const buildLog: BuildLogEntry[] = [];
     const log = (step: string, status: string, details?: string) => {
       buildLog.push({ step, status, timestamp: new Date().toISOString(), details });
