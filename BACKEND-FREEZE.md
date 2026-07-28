@@ -47,7 +47,16 @@ file, re-read the data lines and confirm they are unchanged.
 
 ## Verification before ship
 
+**Diff against the branch point, not `main`.** `main` predates the Lovable-to-
+Supabase migration, so `git diff main` includes all of that backend work and
+looks like a catastrophic freeze breach when nothing is actually wrong. The
+redesign branched from `0f6742e`.
+
 ```bash
-git diff main --stat -- supabase/ src/integrations/ .env vite.config.ts
+git diff 0f6742e..HEAD --name-only -- \
+  supabase/ src/integrations/ .env vite.config.ts \
+  src/contexts/AuthContext.tsx src/components/auth/
 # must output nothing
 ```
+
+Verified empty at the end of Phase 2.
