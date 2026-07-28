@@ -239,15 +239,37 @@ async function syncGmail(adminClient: any, account: any, userId: string, headers
   }
 }
 
+/**
+ * OAuth tokens are encrypted at rest (AES-256, key in Supabase Vault), so the
+ * columns on `account` hold ciphertext. get_email_account_secrets is SECURITY
+ * DEFINER and granted to service_role only, which is what this function runs as.
+ */
+async function getAccountSecrets(adminClient: any, accountId: string):
+  Promise<{ access_token: string | null; refresh_token: string | null; imap_password: string | null }> {
+  const { data, error } = await adminClient.rpc("get_email_account_secrets", { p_account_id: accountId });
+  if (error) {
+    console.error("Could not decrypt email account secrets:", error.message);
+    return { access_token: null, refresh_token: null, imap_password: null };
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  return {
+    access_token: row?.access_token ?? null,
+    refresh_token: row?.refresh_token ?? null,
+    imap_password: row?.imap_password ?? null,
+  };
+}
+
 async function getValidGmailToken(adminClient: any, account: any): Promise<string | null> {
+  const secrets = await getAccountSecrets(adminClient, account.id);
+
   if (account.token_expires_at && new Date(account.token_expires_at) > new Date()) {
-    return account.access_token;
+    return secrets.access_token;
   }
 
   // Refresh token
   const clientId = Deno.env.get("GMAIL_CLIENT_ID");
   const clientSecret = Deno.env.get("GMAIL_CLIENT_SECRET");
-  if (!clientId || !clientSecret || !account.refresh_token) return null;
+  if (!clientId || !clientSecret || !secrets.refresh_token) return null;
 
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -255,7 +277,7 @@ async function getValidGmailToken(adminClient: any, account: any): Promise<strin
     body: new URLSearchParams({
       client_id: clientId,
       client_secret: clientSecret,
-      refresh_token: account.refresh_token,
+      refresh_token: secrets.refresh_token,
       grant_type: "refresh_token",
     }),
   });
@@ -376,13 +398,15 @@ async function syncOutlook(adminClient: any, account: any, userId: string, heade
 }
 
 async function getValidOutlookToken(adminClient: any, account: any): Promise<string | null> {
+  const secrets = await getAccountSecrets(adminClient, account.id);
+
   if (account.token_expires_at && new Date(account.token_expires_at) > new Date()) {
-    return account.access_token;
+    return secrets.access_token;
   }
 
   const clientId = Deno.env.get("OUTLOOK_CLIENT_ID");
   const clientSecret = Deno.env.get("OUTLOOK_CLIENT_SECRET");
-  if (!clientId || !clientSecret || !account.refresh_token) return null;
+  if (!clientId || !clientSecret || !secrets.refresh_token) return null;
 
   const res = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
     method: "POST",
@@ -390,7 +414,7 @@ async function getValidOutlookToken(adminClient: any, account: any): Promise<str
     body: new URLSearchParams({
       client_id: clientId,
       client_secret: clientSecret,
-      refresh_token: account.refresh_token,
+      refresh_token: secrets.refresh_token,
       grant_type: "refresh_token",
       scope: "https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/Mail.Send offline_access",
     }),
@@ -401,7 +425,7 @@ async function getValidOutlookToken(adminClient: any, account: any): Promise<str
 
   await adminClient.from("email_accounts").update({
     access_token: data.access_token,
-    refresh_token: data.refresh_token || account.refresh_token,
+    refresh_token: data.refresh_token || secrets.refresh_token,
     token_expires_at: new Date(Date.now() + data.expires_in * 1000).toISOString(),
   }).eq("id", account.id);
 
