@@ -19278,3 +19278,78 @@ REVOKE EXECUTE ON FUNCTION public.get_whitelisted_ips_decrypted() FROM PUBLIC, a
 GRANT EXECUTE ON FUNCTION public.get_security_logs_decrypted(integer) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_blocked_ips_decrypted() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_whitelisted_ips_decrypted() TO authenticated;
+-- ---------------------------------------------------------------------------
+-- Follow-up to 20260727000000_security_hardening_critical.sql
+--
+-- Two exposures the first pass missed, both found by asserting against a
+-- rebuilt database rather than trusting the migration was complete.
+--
+-- C3 (cont.): crm_activity_participants and crm_communication_attachments do
+-- not carry org_id themselves - their policies reach through a subquery to
+-- crm_communications.org_id = get_primary_admin_id(). That is the same
+-- everyone-owns-everything predicate, one level of indirection down, so
+-- meeting participants and communication attachments stayed readable and
+-- writable by every authenticated user after the first pass.
+--
+-- C5 (cont.): the three get_*_decrypted wrappers were revoked, but
+-- decrypt_pii itself - the primitive they wrap - was still EXECUTE-able by
+-- PUBLIC, and anon is a member of PUBLIC. Anyone with the publishable key
+-- could decrypt any ciphertext they could read. The SECURITY DEFINER callers
+-- (check_ip_blocked, check_ip_whitelisted) run as the owner, so revoking
+-- PUBLIC does not break them.
+-- ---------------------------------------------------------------------------
+
+DO $$
+BEGIN
+  IF to_regclass('public.crm_activity_participants') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "org members manage activity_participants" ON public.crm_activity_participants;
+    EXECUTE $p$
+      CREATE POLICY "crm members manage activity participants"
+        ON public.crm_activity_participants FOR ALL TO authenticated
+        USING (EXISTS (
+          SELECT 1 FROM public.crm_communications c
+          WHERE c.id = crm_activity_participants.communication_id
+            AND (public.has_role(auth.uid(), 'admin'::public.app_role)
+                 OR public.crm_is_org_member(auth.uid(), c.org_id))))
+        WITH CHECK (EXISTS (
+          SELECT 1 FROM public.crm_communications c
+          WHERE c.id = crm_activity_participants.communication_id
+            AND (public.has_role(auth.uid(), 'admin'::public.app_role)
+                 OR public.crm_is_org_member(auth.uid(), c.org_id))))
+    $p$;
+    REVOKE ALL ON public.crm_activity_participants FROM anon;
+  END IF;
+
+  IF to_regclass('public.crm_communication_attachments') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "org members manage crm_comm_attachments" ON public.crm_communication_attachments;
+    EXECUTE $p$
+      CREATE POLICY "crm members manage communication attachments"
+        ON public.crm_communication_attachments FOR ALL TO authenticated
+        USING (EXISTS (
+          SELECT 1 FROM public.crm_communications c
+          WHERE c.id = crm_communication_attachments.communication_id
+            AND (public.has_role(auth.uid(), 'admin'::public.app_role)
+                 OR public.crm_is_org_member(auth.uid(), c.org_id))))
+        WITH CHECK (EXISTS (
+          SELECT 1 FROM public.crm_communications c
+          WHERE c.id = crm_communication_attachments.communication_id
+            AND (public.has_role(auth.uid(), 'admin'::public.app_role)
+                 OR public.crm_is_org_member(auth.uid(), c.org_id))))
+    $p$;
+    REVOKE ALL ON public.crm_communication_attachments FROM anon;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF to_regprocedure('public.decrypt_pii(text)') IS NOT NULL THEN
+    REVOKE ALL ON FUNCTION public.decrypt_pii(text) FROM PUBLIC;
+    REVOKE ALL ON FUNCTION public.decrypt_pii(text) FROM anon;
+    REVOKE ALL ON FUNCTION public.decrypt_pii(text) FROM authenticated;
+  END IF;
+  -- encrypt_pii is write-side, but there is no reason for anon to reach it.
+  IF to_regprocedure('public.encrypt_pii(text)') IS NOT NULL THEN
+    REVOKE ALL ON FUNCTION public.encrypt_pii(text) FROM PUBLIC;
+    REVOKE ALL ON FUNCTION public.encrypt_pii(text) FROM anon;
+  END IF;
+END $$;
