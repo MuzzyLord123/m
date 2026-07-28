@@ -68,6 +68,11 @@ Deno.serve(async (req) => {
 });
 
 function buildWidgetScript(endpoint: string): string {
+  // Fix (2026-07-28): the fallback checkout URL was hard-coded to the old
+  // Lovable preview domain, which would send real customers to a dead host.
+  // Falls back to SITE_URL (or quooro.com) unless the embedding page supplies
+  // data-checkout-url.
+  const checkoutBase = (Deno.env.get('SITE_URL') || 'https://quooro.com').replace(/\/$/, '') + '/checkout';
   // Self-contained IIFE. Reads config from the <script data-*> tag,
   // renders a shadow-DOM widget into every [data-quooro-shop] target
   // (or after the script tag). Inherits colors/fonts from host page.
@@ -202,7 +207,7 @@ function buildWidgetScript(endpoint: string): string {
       writeCart(c); refresh();
     });
     wrap.querySelector('.q-checkout').addEventListener('click', function(){
-      var base = (THIS && THIS.getAttribute('data-checkout-url')) || 'https://id-preview--6fbf2a38-8cc4-4a7b-8250-344a8f1b0fb1.lovable.app/checkout';
+      var base = (THIS && THIS.getAttribute('data-checkout-url')) || ${JSON.stringify(checkoutBase)};
       var sep = base.indexOf('?') === -1 ? '?' : '&';
       window.location.href = base + sep + 'store=' + encodeURIComponent(cfg.userId || '');
     });
