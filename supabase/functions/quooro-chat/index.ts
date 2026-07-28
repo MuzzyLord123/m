@@ -343,7 +343,9 @@ const CRUD_TOOLS = [
           updates: {
             type: "object",
             properties: {
-              status: { type: "string", enum: ["draft", "sent", "awaiting_payment", "paid", "overdue", "cancelled"] },
+              // client_invoices_status_check allows 'pending', not
+              // 'awaiting_payment'; the old value could never be written.
+              status: { type: "string", enum: ["draft", "pending", "sent", "paid", "overdue", "cancelled"] },
               amount: { type: "number" },
               notes: { type: "string" },
               due_date: { type: "string" },
@@ -446,7 +448,11 @@ const CRUD_TOOLS = [
         type: "object",
         properties: {
           title: { type: "string", description: "Request title" },
-          request_type: { type: "string", enum: ["blog_post", "social_post", "ad_copy", "email_campaign", "video_script", "infographic", "case_study", "press_release", "other"], description: "Type of content" },
+          // Must match content_requests_request_type_check exactly. The old
+          // list ("blog_post", "email_campaign", "video_script", ...) shared
+          // only two values with the constraint, so most AI-created content
+          // requests failed with a check violation.
+          request_type: { type: "string", enum: ["blog", "social_post", "ad_copy", "website_section"], description: "Type of content" },
           description: { type: "string", description: "Detailed description/brief" },
           priority: { type: "string", enum: ["low", "medium", "high", "urgent"], description: "Priority level" },
           scheduled_date: { type: "string", description: "Target date (YYYY-MM-DD)" }
@@ -544,7 +550,8 @@ const CRUD_TOOLS = [
         properties: {
           campaign_name: { type: "string", description: "Campaign name" },
           platform: { type: "string", enum: ["meta", "google", "tiktok", "linkedin", "twitter"], description: "Ad platform" },
-          objective: { type: "string", description: "Campaign objective" },
+          // Constrained by ad_campaigns_objective_check.
+          objective: { type: "string", enum: ["leads", "traffic", "sales", "awareness", "engagement"], description: "Campaign objective" },
           monthly_budget: { type: "number", description: "Monthly budget in GBP" },
           start_date: { type: "string", description: "Start date (YYYY-MM-DD)" },
           notes: { type: "string", description: "Campaign notes" }
@@ -1006,7 +1013,9 @@ async function executeTool(
           monthly_budget: args.monthly_budget || null,
           start_date: args.start_date || null,
           notes: args.notes || null,
-          status: "draft",
+          // ad_campaigns_status_check allows running/paused/completed/scheduled.
+          // "draft" is not one of them, so every AI-created campaign failed.
+          status: "paused",
         }).select().single();
         if (error) throw new Error(error.message);
         return { success: true, data };
@@ -1230,7 +1239,9 @@ async function executeAutomation(
     case "send_overdue_reminders": {
       const { data: overdue } = await supabase.from("client_invoices")
         .select("id, invoice_number, amount, due_date, team_id")
-        .eq("created_by", userId).eq("status", "awaiting_payment")
+        // "awaiting_payment" is not an allowed status, so this filter could
+        // never match and the automation always reported zero overdue invoices.
+        .eq("created_by", userId).in("status", ["sent", "pending"])
         .lt("due_date", new Date().toISOString().split("T")[0]);
       
       if (!overdue || overdue.length === 0) {
