@@ -2,6 +2,8 @@
 
 Prepared for the owner ahead of the Lovable → Claude Code handover. Every item below traces to a verified finding with a file and line. Findings that shared a root cause across audit dimensions have been merged and are marked **[merged: …]**.
 
+> **Update 2026-07-28.** C1–C6 were found by reading the Lovable export. C7–C10 were found later, by rebuilding the schema into the new Supabase project and then interrogating the live database (`pg_policies`, `pg_proc`, `pg_class.reloptions`, and Supabase's own advisors) — they are not visible from the source files alone. C3, C4, C5, C7, C8, C9 and C10 are **fixed and verified in the new project**; C1, C2 and C6 are edge-function and client-side code changes that remain open. See "Status in the new project" at the end of this document.
+
 ## Executive summary
 
 Quooro is not safe to run in production today. There are six independent, currently-live paths to a total compromise of customer data, and two of them require no account, no JWT, and no anon key at all: `quooro-chat` performs full CRM CRUD under the service-role key using a `user_id` taken straight from the request body, and `ecommerce_orders` has an `anon` `SELECT` policy of `USING (true)` that dumps every merchant's orders and customer PII to anyone holding the public key committed in `.env`. The single most urgent item is not a code fix — it is key rotation: `supabase/functions/execute-workflow/index.ts:83` runs arbitrary user-authored JavaScript via `new Function` in the edge isolate, so any user who ever signed up could have executed `return Deno.env.toObject()` and walked away with `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `RESEND_API_KEY`, `LOVABLE_API_KEY` and `FIRECRAWL_API_KEY`. Assume those are burned until rotated. Underneath the acute bugs sits a structural problem: authorization is consistently implemented in React (2FA is a `navigate()` call, the accountant read-only mode is `location.pathname.startsWith('/accountant/')`, paywalls are `if (subscribed) return children`) while the database policies behind those screens are ownership-only or, in the CRM's case, a constant. Performance is genuinely good in places (the landing page is code-split and the globe is deferred) but carries ~150 KB gzip of avoidable JavaScript and several admin screens that download whole tables. Do not run further launch activity, paid acquisition, or onboard new merchants until the Critical section is closed.
@@ -160,6 +162,66 @@ const cleanHtml = useMemo(() => DOMPurify.sanitize(selectedEmail?.body_html ?? '
 
 ---
 
+### C7. Share/resume tokens are never compared — the policy only checks one *exists*
+
+**Found during the schema rebuild, 2026-07-28. Fixed in `supabase/migrations/20260728000000_security_hardening_share_tokens.sql`.**
+
+Two policies gate access on a token being non-null rather than on the caller presenting the correct one:
+
+```sql
+-- enquiries
+CREATE POLICY "Public can resume drafts with token" ON public.enquiries
+  FOR SELECT USING (is_draft = true AND resume_token IS NOT NULL);
+CREATE POLICY "Public can update drafts with token" ON public.enquiries
+  FOR UPDATE USING (is_draft = true AND resume_token IS NOT NULL);
+-- cad_projects
+CREATE POLICY "Anyone can view shared CAD projects" ON public.cad_projects
+  FOR SELECT USING (shared_mode <> 'private' AND share_token IS NOT NULL);
+```
+
+`resume_token` / `share_token` never appear on the right-hand side of a comparison. Both policies are granted to role `public`, which **every** authenticated user belongs to. So any logged-in user can read every draft enquiry (`name`, `email`, `phone`, message body) and overwrite any of them, and read every non-private CAD project.
+
+Filtering in the client (`.eq('resume_token', token)`) is not a control: PostgREST applies RLS first and the caller's filter second, so a caller who simply omits the filter receives the whole table.
+
+**Fix.** Both policies dropped. Neither feature is referenced anywhere in `src/` or `supabase/functions/` — the columns exist but nothing reads or writes them — so nothing working was removed. Added `get_enquiry_draft(uuid)` and `get_shared_cad_project(uuid)`: `SECURITY DEFINER`, token as an argument, compared internally, so the check cannot be skipped. If the resume-draft *write* path is built later it needs the same treatment; there is deliberately no update RPC yet.
+
+### C8. Every `SECURITY DEFINER` function was callable with the public anon key
+
+**Found 2026-07-28. Fixed in `supabase/migrations/20260728010000_security_hardening_function_grants.sql`.**
+
+Postgres grants `EXECUTE` to `PUBLIC` by default on every new function, and the source project never revoked it. 65 `SECURITY DEFINER` functions — which by definition run as the owner and bypass RLS entirely — were therefore callable by `anon`, i.e. by anyone holding the publishable key that ships in the browser bundle. Confirmed against the rebuilt database via Supabase's own advisor (`anon_security_definer_function_executable` × 65).
+
+The exposed surface included:
+
+- **The entire accounting mutation API** — `acc_post_ar_invoice`, `acc_post_ap_bill`, `acc_void_ar_invoice`, `acc_void_ap_bill`, `acc_pay_pay_run`, `acc_pay_vat_return`, `acc_dispose_asset`, `acc_post_depreciation_run`, `acc_complete_bank_reconciliation` and ~20 more. Each takes a row uuid and writes to the ledger with no caller check.
+- **Role oracles** — `has_role`, `has_rbac_permission`, `acc_is_org_member`, `is_owner`: an unauthenticated caller can test whether any given uuid is an admin.
+- **`get_primary_admin_id()` / `get_available_admin_id()`** — hand out admin user ids directly, no arguments needed.
+- **Auth-adjacent helpers** — `generate_verification_token`, `increment_verification_resend`, `check_verification_resend_limit`, `check_ip_blocked`, `check_ip_whitelisted`.
+
+**Fix.** `EXECUTE` revoked from `PUBLIC` and `anon` across every `SECURITY DEFINER` function in `public`, then granted back to `authenticated` and `service_role` — so logged-in users keep exactly the access they had and only the unauthenticated surface shrinks. Trigger functions (`prorettype = trigger`) are skipped deliberately: PostgREST cannot invoke them and their grants do not affect how triggers fire. Three functions stay anon-callable on purpose, each taking its secret as an argument: `verify_email_token` (clicked from an email, before a session exists), `get_enquiry_draft`, `get_shared_cad_project`.
+
+Anon-executable non-trigger `SECURITY DEFINER` functions: **65 → 3**.
+
+### C9. `crm_deals_compat` is a `SECURITY DEFINER` view — it reopens the whole CRM
+
+**Found 2026-07-28. Fixed in `supabase/migrations/20260728020000_security_hardening_definer_view.sql`.**
+
+`public.crm_deals_compat` is a compatibility view over `crm_opportunities`. The project's three other views (`acc_ap_aging`, `acc_ar_aging`, `acc_trial_balance`) are all created with `security_invoker=true`; this one was not, so it ran with the view owner's rights and the querying user's RLS on `crm_opportunities` was never evaluated. `authenticated` holds `SELECT` on it.
+
+This silently defeats the C3 fix: with tenant isolation correctly installed on `crm_opportunities`, any logged-in user could still `select * from crm_deals_compat` and read every organisation's pipeline — title, value, currency, stage, company, contact, notes — with no org filter at all. A view is the one place where fixing the base table's policy is not enough.
+
+**Fix.** `ALTER VIEW public.crm_deals_compat SET (security_invoker = true);` — all four views now evaluate the caller's policies.
+
+### C10. `acc_accountant_invites` UPDATE has `WITH CHECK (true)` — invite into any org
+
+**Found 2026-07-28. Fixed in `supabase/migrations/20260728010000_security_hardening_function_grants.sql`.**
+
+`acc_inv owner update` restricts *which* rows you may target via `USING` (admin, or owner of the invite's org) but its `WITH CHECK` is `true`, leaving the post-update row unconstrained. `USING` gates the row you start from; `WITH CHECK` gates the row you end up with — omitting the latter means an org owner can take one of their own invites and rewrite its `org_id` to point at somebody else's organisation, manufacturing an accountant invite into an org they have no rights over. The accept path (`acc-accept-invite`, service role, looks the invite up by token) would then honour it.
+
+**Fix.** `WITH CHECK` set to the same predicate as `USING`.
+
+---
+
 ## High
 
 ### H1. `booking-api` — unauthenticated cancel/reschedule of any booking, plus PII echo
@@ -228,6 +290,12 @@ The only remaining browser-side writer is `src/components/admin/AdminWebsiteMana
 Two independent breaks. (1) The key is the constant `sha256('postgres' || 'quooro_pii_key_2024')` — `current_database()` is `postgres` on every Supabase project and the literal is in the repo, so any dump/backup/replica decrypts offline and the at-rest encryption provides zero value against the exact threat it was built for. (2) Anyone with the anon key POSTs ciphertext and gets plaintext back on demand. Chained with H4 this converts the unassigned-lead dump into every prospect's real phone and email.
 
 **Fix:** new migration — `REVOKE EXECUTE ON FUNCTION public.encrypt_pii(text), public.decrypt_pii(text) FROM PUBLIC, anon, authenticated;`. The trigger functions and the `check_ip_blocked`/`check_ip_whitelisted` wrappers call these as definer and keep working. Rework `src/lib/piiDecrypt.ts` to call a service-role edge function that verifies row ownership. Then move the key into Supabase Vault or `Deno.env` and re-encrypt every `ENC:` row.
+
+> **Correction, 2026-07-28 — partially applied.** Revoking from `authenticated` as written above breaks the app, and the first hardening pass on the new project did exactly that before it was caught. `profiles.phone` is encrypted by trigger for **every** user (`encrypt_profile_pii`), and `src/lib/piiDecrypt.ts:13` is the only path that renders it, so with `authenticated` revoked every user's own phone number displays as the raw `ENC:…` string. (It degrades rather than crashes — `decryptPiiValue` returns the input on error.)
+>
+> What is applied in the new project: `EXECUTE` revoked from `PUBLIC` and `anon`, retained for `authenticated`. That closes break (2) for unauthenticated callers — the anon oracle — and leaves it open for logged-in ones. Break (1), the committed key, is untouched and still fully valid: **the at-rest encryption should be treated as providing no confidentiality**, since `sha256('postgres' || 'quooro_pii_key_2024')` is derivable by anyone who can read this repo. RLS, not the ciphertext, is what actually protects this data.
+>
+> The rest of the fix stands and is the right next step: per-table ownership-gated readers (the shape `get_security_logs_decrypted` already uses), drop the raw `decrypt_pii` RPC, then rotate the key and re-encrypt. That is an application refactor touching every `piiDecrypt` call site, not a grant change, which is why it was not folded into the hardening migrations.
 
 ### H7. Two-factor authentication is advisory — the session is fully valid before any code is entered
 **[merged: frontend-authz #26 + #28 + secrets-crypto #42]**
@@ -439,3 +507,53 @@ Preloading all 18 would contend with the entry chunk.
 31. Font preload plugin, woff1 strip plugin, Inter removal from the body stack, favicon and logo re-encode (P6, P7, P8, P9, P10).
 32. Route-scoped CSS extraction + critical-CSS inlining (P5); hero `srcset` (P4); `ParallaxImage` srcset passthrough (P11).
 33. Runtime N+1 and unbounded-query fixes, in the order listed in P12 — `AdminMessaging` first (it multiplies across every open admin tab), then `LoungeCRM` virtualization, then the rest.
+---
+
+## Status in the new project (`tkvphfxqyoavnuibvmfp`), 2026-07-28
+
+The Lovable schema was replayed into the new Supabase project (149 migrations, applied as 17 batches) and the hardening below was applied on top. Every "fixed" row was verified by querying the live catalog, not by reading the migration.
+
+| # | Finding | Status | Where |
+|---|---------|--------|-------|
+| C1 | `quooro-chat` takes identity from `body.user_id` under service role | **OPEN** — edge function code | `supabase/functions/quooro-chat/index.ts:1436` |
+| C2 | `execute-workflow` runs `new Function` in the isolate | **OPEN** — edge function code; **rotate keys regardless** | `supabase/functions/execute-workflow/index.ts:76-84` |
+| C3 | CRM tenant isolation is a constant | **FIXED** | `20260727000000`, `q17` |
+| C4 | `ecommerce_orders` readable by `anon` | **FIXED** | `q17` |
+| C5 | Decrypt RPCs callable by `anon` | **FIXED** | `q17`, `20260728010000` |
+| C6 | Stored XSS from inbound email HTML | **OPEN** — client code | `src/…` email viewer |
+| C7 | Share/resume tokens never compared | **FIXED** | `20260728000000` |
+| C8 | 65 `SECURITY DEFINER` functions callable by `anon` | **FIXED** | `20260728010000` |
+| C9 | `crm_deals_compat` definer view bypasses CRM RLS | **FIXED** | `20260728020000` |
+| C10 | `acc_accountant_invites` UPDATE `WITH CHECK (true)` | **FIXED** | `20260728010000` |
+| H6 | `decrypt_pii` oracle + committed key | **PARTIAL** — anon closed, `authenticated` and the key remain | see H6 correction |
+
+### Verified end state
+
+```
+188 tables · 4 views · 544 policies · 22 enums · 87 functions · 150 triggers
+tables without RLS ......................................... 0
+policies granting anon a blanket read ...................... 0
+anon privileges on any crm_* table ......................... 0
+anon SELECT on ecommerce_orders ............................ 0
+decrypt/PII RPCs reachable by anon or PUBLIC ............... 0
+CRM policies still on the constant get_primary_admin_id() .. 0
+policies gating on "token IS NOT NULL" ..................... 0
+non-INSERT policies with WITH CHECK (true) ................. 0
+views running as DEFINER ................................... 0
+anon-executable non-trigger SECURITY DEFINER functions ..... 3  (all token-validated)
+```
+
+Supabase security advisors: **142 → 94 lints, 1 → 0 ERROR**. The 94 remaining are `WARN`s: 74 `authenticated_security_definer_function_executable` (expected — that is the app's own RPC surface, and it is what keeps the accounting screens working), 16 `anon_security_definer_function_executable` of which 13 are trigger functions PostgREST cannot invoke and 3 are the intentional token-validated readers, and 3 `rls_policy_always_true` which are the deliberate anonymous write paths (`bookings`, `ecommerce_orders`, `marketing_page_views` INSERT).
+
+### Deliberately not changed
+
+- **`site_content`, `product_categories`, `booking_*` public reads.** Blanket-true `SELECT` to `public`, but these back the public marketing site, storefront and booking page. They carry no personal data. `booking_blocked_dates` and `booking_staff_services` do leak across tenants (a visitor can enumerate any tenant's blocked dates and staff/service mapping) — noise, not PII. Left alone rather than risk breaking the public pages.
+- **`acc_accountant_invites` anon `SELECT` grant.** Present in the source dump, and `AccountantAccept.tsx:36-41` reads the invite anonymously — but the RLS policy requires `auth.uid()` to be an admin or the org owner, so a logged-out invitee gets zero rows and the page shows "Invite not found". That flow is **already broken in the source project**; it fails closed, so it is a functional bug, not a hole. The fix is to read the invite through a service-role edge function (`acc-accept-invite` already exists), *not* to loosen the policy.
+- **H7 (2FA columns are client-writable).** Still open. `"Users can update own profile"` has no `WITH CHECK`, so Postgres reuses `USING (auth.uid() = user_id)` — row-level this is sound, but nothing stops a user `PATCH`ing `two_factor_enabled: false` on their *own* row. Closing it needs column-level `REVOKE UPDATE (two_factor_enabled, two_factor_secret, backup_codes, known_ips)`, which will break 2FA setup if the client writes those columns directly rather than going through `two-factor-auth`. Not attempted blind.
+
+### Still required before this database serves traffic
+
+1. **Rotate every key named in C2** — service role, Stripe, Resend, Lovable, Firecrawl. The new project's keys are fine; the *old* project's are burned.
+2. **Load the data.** `pg_dump` the Lovable project and restore **`auth` before `public`** — the 4,000+ leads carry `user_id` FKs into `auth.users`, and both owner logins live there. Runbook: `docs/BACKEND-MIGRATION.md`.
+3. **Set the edge function secrets** in the new project, then deploy the functions. None are deployed yet.
+4. **Fix C1, C2 and C6** — all three are code, none are schema, so none are covered by the migrations above.

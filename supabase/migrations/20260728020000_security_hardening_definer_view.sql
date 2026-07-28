@@ -1,0 +1,18 @@
+-- Security hardening: SECURITY DEFINER view bypasses CRM tenant isolation (C9)
+--
+-- `public.crm_deals_compat` is a compatibility view over crm_opportunities.
+-- The project's three other views (acc_ap_aging, acc_ar_aging,
+-- acc_trial_balance) are all created with security_invoker=true; this one was
+-- not, so it runs with the view owner's rights and the querying user's RLS on
+-- crm_opportunities is never evaluated.
+--
+-- `authenticated` holds SELECT on the view, so this silently reopens exactly
+-- what the CRM tenant-isolation work closed: any logged-in user could
+-- `select * from crm_deals_compat` and read every organisation's opportunity
+-- pipeline -- title, value, currency, stage, company, contact, notes -- with
+-- no org filter at all.
+--
+-- security_invoker=true makes the view evaluate crm_opportunities' policies as
+-- the caller, which is the behaviour the compat view was always assumed to
+-- have.
+ALTER VIEW public.crm_deals_compat SET (security_invoker = true);
