@@ -85,7 +85,11 @@ export default defineConfig({
   // With everything inlined into one module there are no dynamic-import chunks,
   // so Vite's preload helper placeholder is never substituted. Neutralise it so
   // it doesn't throw at runtime.
-  define: { __VITE_PRELOAD__: "void 0" },
+  // esbuild's define only accepts an identifier or valid JSON, so `void 0` is
+  // rejected during the commonjs transform pass. `undefined` is an identifier
+  // and behaves the same: Vite's preload helper short-circuits on a falsy dep
+  // list, which is exactly what we want with everything inlined.
+  define: { __VITE_PRELOAD__: "undefined" },
   build: {
     outDir: "dist-preview",
     target: "esnext",
