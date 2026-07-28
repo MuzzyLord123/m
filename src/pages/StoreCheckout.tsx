@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
-const FUNCTIONS_URL = `https://ijybotwfiediocoewwux.supabase.co/functions/v1/store-checkout`;
+// Was hardcoded to the old Lovable project ref, so every storefront checkout
+// would have posted to a dead host.
+const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/store-checkout`;
 const CART_KEY = 'quooro_cart_v1';
 
 interface CartItem { id: string; qty: number; name?: string; price?: number; currency?: string; image?: string; }

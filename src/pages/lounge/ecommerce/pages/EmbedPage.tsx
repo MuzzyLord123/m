@@ -7,7 +7,10 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-const FUNCTIONS_URL = `https://ijybotwfiediocoewwux.supabase.co/functions/v1/ecommerce-embed`;
+// This URL is handed to customers to paste onto their own sites, so it must
+// never be hardcoded to a project ref - it was still pointing at the old
+// Lovable project, which would have served every embed from a dead host.
+const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ecommerce-embed`;
 
 export default function EmbedPage() {
   const [userId, setUserId] = useState<string>('');

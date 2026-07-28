@@ -166,7 +166,7 @@ export function ProductsPanel({ siteId }: { siteId?: string }) {
 <script>
 (function(){
   var s=document.createElement('script');
-  s.src='https://${projectId}.supabase.co/functions/v1/storefront-embed?site_id=${siteId}';
+  s.src='https://${projectId}.supabase.co/functions/v1/ecommerce-embed?site_id=${siteId}';
   s.async=true;
   document.head.appendChild(s);
 })();
