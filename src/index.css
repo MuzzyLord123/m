@@ -77,46 +77,51 @@
 
 @layer base {
   :root {
-    /* Light theme — warm ivory with blue accent, premium editorial feel */
-    --background: 220 14% 96%;
-    --foreground: 222 47% 11%;
+    /* NIGHT SHIFT - light mode.
+       Not an inversion of dark. A genuine paper-and-ink counterpart: warm
+       off-white stock, cool near-black ink, and the ember accent DARKENED to
+       #C2410C. The bright dark-mode ember scores only 3.05:1 on this paper and
+       would fail AA, which is why the accent shifts between modes rather than
+       being reused. Measured: ink on paper 16.31:1, ember on paper 4.66:1. */
+    --background: 48 19% 95%;      /* #F4F3EF warm paper */
+    --foreground: 220 13% 9%;      /* #14161A cool ink   */
 
-    --card: 220 13% 98%;
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 100%;             /* raised = brighter in light */
+    --card-foreground: 220 13% 9%;
 
-    --popover: 220 13% 98%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 9%;
 
-    /* Blue accent primary */
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
+    /* Ember, darkened for AA on paper */
+    --primary: 17 88% 40%;         /* #C2410C */
+    --primary-foreground: 48 19% 97%;
 
-    --secondary: 220 14% 92%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 45 12% 91%;
+    --secondary-foreground: 220 13% 9%;
 
-    --muted: 220 14% 92%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 45 12% 91%;
+    --muted-foreground: 220 8% 38%;
 
-    --accent: 220 14% 92%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 45 12% 91%;
+    --accent-foreground: 220 13% 9%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 44%;
+    --destructive-foreground: 48 19% 97%;
 
-    --border: 220 13% 89%;
-    --input: 220 13% 89%;
-    --ring: 217 91% 60%;
+    --border: 45 10% 87%;
+    --input: 45 10% 87%;
+    --ring: 17 88% 40%;
 
     --radius: 0.625rem;
 
     /* Brand accent */
-    --brand: 217 91% 60%;
-    --brand-foreground: 0 0% 100%;
+    --brand: 13 79% 57%;
+    --brand-foreground: 240 4% 5%;
 
     /* Semantic status */
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
-    --info: 217 91% 60%;
+    --info: 213 42% 52%;
 
     /* Custom tokens - light */
     --gold: 45 93% 47%;
@@ -128,20 +133,21 @@
     --slate-600: 215 16% 47%;
 
     /* Gradients - light */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(263 70% 58%) 100%);
+    /* was blue->violet, the exact banned ramp. Now a tonal ember step. */
+    --gradient-primary: linear-gradient(135deg, hsl(13 79% 57%) 0%, hsl(22 85% 47%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(45 93% 47%) 0%, hsl(35 91% 55%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(220 14% 96%) 0%, hsl(220 14% 92%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(220 13% 98%) 0%, hsl(220 14% 96%) 100%);
     --gradient-hero: linear-gradient(135deg, hsl(220 14% 96% / 0.95) 0%, hsl(220 14% 92% / 0.98) 100%);
-    --gradient-vibrant-1: linear-gradient(135deg, hsl(217 91% 60% / 0.08) 0%, hsl(263 70% 58% / 0.12) 50%, hsl(330 80% 60% / 0.06) 100%);
-    --gradient-vibrant-2: linear-gradient(160deg, hsl(180 70% 50% / 0.06) 0%, hsl(217 91% 60% / 0.1) 50%, hsl(45 93% 47% / 0.06) 100%);
-    --gradient-vibrant-3: linear-gradient(135deg, hsl(263 70% 58% / 0.08) 0%, hsl(330 80% 60% / 0.1) 50%, hsl(17 90% 55% / 0.06) 100%);
+    --gradient-vibrant-1: linear-gradient(135deg, hsl(13 79% 57% / 0.05) 0%, transparent 60%);
+    --gradient-vibrant-2: linear-gradient(160deg, hsl(22 85% 47% / 0.04) 0%, transparent 65%);
+    --gradient-vibrant-3: linear-gradient(135deg, hsl(17 88% 40% / 0.05) 0%, transparent 62%);
     --gradient-section-blue: linear-gradient(180deg, hsl(217 91% 97%) 0%, hsl(220 14% 96%) 100%);
     --gradient-section-purple: linear-gradient(180deg, hsl(263 70% 97%) 0%, hsl(220 14% 96%) 100%);
     --gradient-section-teal: linear-gradient(180deg, hsl(180 60% 97%) 0%, hsl(220 14% 96%) 100%);
 
     /* Shadows - light */
-    --shadow-glow: 0 0 30px hsl(217 91% 60% / 0.08);
+    --shadow-glow: 0 18px 48px hsl(13 40% 6% / 0.28);
     --shadow-gold: 0 0 30px hsl(45 93% 47% / 0.12);
     --shadow-card: 0 1px 3px hsl(222 47% 11% / 0.04), 0 1px 2px hsl(222 47% 11% / 0.02);
     --shadow-lg: 0 10px 25px -5px hsl(222 47% 11% / 0.08), 0 4px 6px -2px hsl(222 47% 11% / 0.04);
@@ -149,53 +155,56 @@
     /* Sidebar - light */
     --sidebar-background: 220 13% 97%;
     --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 13 79% 57%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 14% 92%;
     --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 220 13% 89%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 13 79% 57%;
   }
 
   .dark {
-    /* Dark theme — deep navy-black with luminous blue accent */
-    --background: 222 47% 4%;
-    --foreground: 220 30% 96%;
+    /* NIGHT SHIFT - dark mode, the primary expression.
+       True near-black with NO blue cast. The outgoing 222 47% 4% was navy, and
+       navy-plus-blue-accent is the LLM house style the overhaul exists to
+       remove. Measured: text on base 16.77:1, ember on base 5.81:1. */
+    --background: 240 4% 5%;       /* #0B0B0C true near-black */
+    --foreground: 60 8% 92%;       /* #EDEDEA warm paper      */
 
-    --card: 222 35% 6%;
-    --card-foreground: 220 30% 96%;
+    --card: 240 7% 8%;             /* #131316 raised surface  */
+    --card-foreground: 60 8% 92%;
 
-    --popover: 222 35% 6%;
-    --popover-foreground: 220 30% 96%;
+    --popover: 240 7% 8%;
+    --popover-foreground: 60 8% 92%;
 
-    /* Luminous blue primary */
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
+    /* Ember, full brightness against near-black */
+    --primary: 13 79% 57%;         /* #E8613C */
+    --primary-foreground: 240 4% 5%;
 
-    --secondary: 222 30% 10%;
-    --secondary-foreground: 220 30% 96%;
+    --secondary: 240 6% 11%;
+    --secondary-foreground: 60 8% 92%;
 
-    --muted: 222 30% 10%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 240 6% 11%;
+    --muted-foreground: 60 5% 62%;
 
-    --accent: 222 30% 12%;
-    --accent-foreground: 220 30% 96%;
+    --accent: 240 6% 13%;
+    --accent-foreground: 60 8% 92%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 220 30% 96%;
+    --destructive-foreground: 60 8% 92%;
 
-    --border: 222 20% 12%;
-    --input: 222 20% 12%;
-    --ring: 217 91% 60%;
+    --border: 240 5% 14%;
+    --input: 240 5% 14%;
+    --ring: 13 79% 57%;
 
     /* Brand accent */
-    --brand: 217 91% 60%;
-    --brand-foreground: 0 0% 100%;
+    --brand: 13 79% 57%;
+    --brand-foreground: 240 4% 5%;
 
     /* Semantic status */
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
-    --info: 217 91% 60%;
+    --info: 213 42% 52%;
 
     /* Custom tokens */
     --gold: 45 93% 47%;
@@ -207,20 +216,21 @@
     --slate-600: 215 15% 35%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(263 70% 58%) 100%);
+    /* was blue->violet, the exact banned ramp. Now a tonal ember step. */
+    --gradient-primary: linear-gradient(135deg, hsl(13 79% 57%) 0%, hsl(22 85% 47%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(45 93% 47%) 0%, hsl(35 91% 55%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(222 35% 6%) 0%, hsl(222 47% 4%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(222 35% 8%) 0%, hsl(222 35% 6%) 100%);
     --gradient-hero: linear-gradient(135deg, hsl(222 47% 4% / 0.95) 0%, hsl(222 47% 3% / 0.98) 100%);
-    --gradient-vibrant-1: linear-gradient(135deg, hsl(217 91% 60% / 0.12) 0%, hsl(263 70% 58% / 0.18) 50%, hsl(330 80% 60% / 0.1) 100%);
-    --gradient-vibrant-2: linear-gradient(160deg, hsl(180 70% 50% / 0.1) 0%, hsl(217 91% 60% / 0.14) 50%, hsl(45 93% 47% / 0.08) 100%);
-    --gradient-vibrant-3: linear-gradient(135deg, hsl(263 70% 58% / 0.12) 0%, hsl(330 80% 60% / 0.14) 50%, hsl(17 90% 55% / 0.08) 100%);
+    --gradient-vibrant-1: linear-gradient(135deg, hsl(13 79% 57% / 0.07) 0%, transparent 60%);
+    --gradient-vibrant-2: linear-gradient(160deg, hsl(22 85% 47% / 0.06) 0%, transparent 65%);
+    --gradient-vibrant-3: linear-gradient(135deg, hsl(17 88% 40% / 0.07) 0%, transparent 62%);
     --gradient-section-blue: linear-gradient(180deg, hsl(217 50% 8%) 0%, hsl(222 47% 4%) 100%);
     --gradient-section-purple: linear-gradient(180deg, hsl(263 40% 8%) 0%, hsl(222 47% 4%) 100%);
     --gradient-section-teal: linear-gradient(180deg, hsl(180 30% 7%) 0%, hsl(222 47% 4%) 100%);
 
     /* Shadows */
-    --shadow-glow: 0 0 30px hsl(217 91% 60% / 0.08);
+    --shadow-glow: 0 18px 48px hsl(13 40% 6% / 0.28);
     --shadow-gold: 0 0 30px hsl(45 93% 47% / 0.2);
     --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.3), 0 1px 2px hsl(0 0% 0% / 0.2);
     --shadow-lg: 0 10px 25px -5px hsl(0 0% 0% / 0.5), 0 4px 6px -2px hsl(0 0% 0% / 0.3);
@@ -228,12 +238,12 @@
     /* Sidebar */
     --sidebar-background: 222 35% 5%;
     --sidebar-foreground: 220 30% 96%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 13 79% 57%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 30% 10%;
     --sidebar-accent-foreground: 220 30% 96%;
     --sidebar-border: 222 20% 12%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 13 79% 57%;
   }
 }
 
@@ -309,23 +319,30 @@
     font-feature-settings: "ss01", "ss02", "kern", "liga", "calt";
   }
 
-  /* Every .text-gradient inside a heading becomes refined editorial serif italic.
-     This propagates the premium hero tone to every section heading automatically. */
+  /* `.text-gradient` inside a heading used to do two banned things at once:
+     swap to a serif mid-headline (mixed-family emphasis) and fill the glyphs
+     with a background-clip gradient. Both are removed here rather than in 133
+     components, so gradient text disappears site-wide in one edit.
+
+     Emphasis is now carried the way it should be - the same display family, one
+     step heavier, in the ember accent. */
   h1 .text-gradient,
   h2 .text-gradient,
   h3 .text-gradient,
   .heading-xl .text-gradient,
   .heading-lg .text-gradient,
   .heading-md .text-gradient {
-    font-family: "Instrument Serif", ui-serif, Georgia, serif !important;
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    background-image: linear-gradient(135deg, hsl(220 6% 42%) 0%, hsl(220 5% 62%) 50%, hsl(220 6% 42%) 100%) !important;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    padding-right: 0.05em;
+    font-family: inherit;
+    font-style: normal;
+    font-weight: 700;
+    color: hsl(var(--primary));
+    background-image: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: currentColor;
+    /* Italic descender clearance is not needed now the italic is gone, but the
+       reserve stays so ascender-heavy display type never clips. */
+    padding-right: 0.02em;
   }
 
   /* Editorial body refinement — slightly looser for readability, lighter color */

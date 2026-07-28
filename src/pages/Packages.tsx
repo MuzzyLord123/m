@@ -28,7 +28,6 @@ import { PackageQuiz } from "@/components/packages/PackageQuiz";
 import { ResponsiveComparisonTable } from "@/components/packages/ResponsiveComparisonTable";
 import { PackagesStickyNav } from "@/components/packages/PackagesStickyNav";
 import { TrustBadgesRow } from "@/components/packages/TrustBadgesRow";
-import { SocialProofRotator } from "@/components/packages/SocialProofRotator";
 
 import { EnhancedPackageCard } from "@/components/packages/EnhancedPackageCard";
 import { EnhancedFAQ } from "@/components/packages/EnhancedFAQ";
@@ -346,7 +345,6 @@ export default function Packages() {
       </section>
 
       {/* Social Proof */}
-      <SocialProofRotator />
 
       {/* Website Packages */}
       <section id="websites" className="section-padding scroll-mt-32">
@@ -402,7 +400,6 @@ export default function Packages() {
       </section>
 
       {/* Social Proof Between Sections */}
-      <SocialProofRotator />
 
       {/* Dashboards */}
       <section id="dashboards" className="section-padding scroll-mt-32 bg-muted/30">

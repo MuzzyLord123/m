@@ -1,0 +1,31 @@
+/**
+ * Night Shift — type foundation.
+ *
+ * Fontshare is unreachable from the build environment, so Clash Display and
+ * Satoshi (the pairing named in the brief) cannot be self-hosted. Substituted on
+ * merit from what is obtainable, staying inside "free for commercial use,
+ * self-hosted":
+ *
+ *   Display  Bricolage Grotesque Variable  (SIL OFL, npm @fontsource-variable)
+ *   Text     Geist Variable                (SIL OFL, npm `geist`, by Vercel)
+ *   Micro    JetBrains Mono                (already installed)
+ *
+ * Bricolage is a contemporary variable grotesque with genuine character - tight
+ * apertures, slightly condensed, an `opsz` axis built for display use. Geist is
+ * a refined neutral text face. Neither appears on the brief's banned list, and
+ * neither is one of the two display serifs the design skill flags as the
+ * LLM-favourite tell.
+ *
+ * Both are variable, so the whole weight range costs two files rather than ten.
+ */
+
+/* wght axis only - the opsz/wdth builds add files we do not use. Covers 200-800. */
+@import "@fontsource-variable/bricolage-grotesque/wght.css";
+
+@font-face {
+  font-family: "Geist Variable";
+  src: url("/fonts/Geist-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}

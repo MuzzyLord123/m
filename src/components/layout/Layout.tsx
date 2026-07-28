@@ -4,7 +4,6 @@ import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { ChatBot } from "@/components/ChatBot";
 import { MobileStickyCTA } from "@/components/MobileStickyCTA";
-import { SocialProofToast } from "@/components/SocialProofToast";
 import { SkipToContent } from "@/components/SkipToContent";
 import { useMarketingPageTracker } from "@/hooks/useMarketingPageTracker";
 
@@ -32,7 +31,6 @@ export function Layout({ children }: LayoutProps) {
       <ChatBot />
 
       {isHomePage && <MobileStickyCTA />}
-      {isHomePage && <SocialProofToast />}
     </div>
   );
 }

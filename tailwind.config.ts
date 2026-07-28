@@ -14,9 +14,13 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Sora", "system-ui", "sans-serif"],
-        body: ["'Work Sans'", "Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        // Night Shift. Bricolage carries display, Geist carries text, JetBrains
+        // Mono carries micro-labels and figures. Instrument Serif is retained
+        // only as a rare editorial accent, never as the brand face.
+        display: ["'Bricolage Grotesque Variable'", "'Geist Variable'", "system-ui", "sans-serif"],
+        body: ["'Geist Variable'", "system-ui", "sans-serif"],
+        sans: ["'Geist Variable'", "system-ui", "sans-serif"],
+        mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
         serif: ["'Instrument Serif'", "ui-serif", "Georgia", "serif"],
         editorial: ["'Instrument Serif'", "ui-serif", "Georgia", "serif"],
       },
