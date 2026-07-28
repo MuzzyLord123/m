@@ -6,13 +6,13 @@ import { HOME_PROCESS_DEFAULTS, type HomeProcessContent } from "@/lib/siteConten
 import { EditableField } from "@/components/marketing/EditableField";
 import { getIcon } from "@/lib/marketingIcons";
 
-const NARDO_ACCENT = "from-zinc-500 to-zinc-700";
+const STEP_CHIP = "from-primary/16 to-primary/[0.06] border border-primary/25";
 
 
 
 export function ProcessSection() {
   const { data } = useSiteContent<HomeProcessContent>("home_process", HOME_PROCESS_DEFAULTS);
-  const processSteps = data.steps.map(s => ({ ...s, accent: NARDO_ACCENT }));
+  const processSteps = data.steps.map(s => ({ ...s, accent: STEP_CHIP }));
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -87,7 +87,7 @@ export function ProcessSection() {
                     whileInView={{ scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
-                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.accent} flex items-center justify-center text-white font-bold shadow-xl`}
+                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.accent} flex items-center justify-center text-primary font-semibold shadow-lg`}
                     style={{
                       boxShadow: `0 8px 32px hsl(var(--primary) / 0.2), 0 0 0 4px hsl(var(--background))`,
                     }}
@@ -109,14 +109,14 @@ export function ProcessSection() {
                     className="liquid-glass-card p-5 sm:p-6 lg:p-8 rounded-2xl border border-border/50 hover:border-primary/20 transition-all duration-500 group relative overflow-hidden"
                   >
                     {/* Gradient accent bar */}
-                    <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${step.accent} opacity-60 group-hover:opacity-100 transition-opacity duration-500`} />
+                    <div className="absolute top-0 left-0 right-0 h-px bg-primary/30 group-hover:bg-primary/70 transition-colors duration-500" />
 
                     {/* Hover glow */}
                     <div className={`absolute inset-0 bg-gradient-to-br ${step.accent} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500 pointer-events-none`} />
 
                     {/* Mobile step number */}
                     <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 lg:hidden">
-                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${step.accent} flex items-center justify-center text-white font-bold text-sm shadow-lg`}>
+                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${step.accent} flex items-center justify-center text-primary font-semibold text-sm`}>
                         {step.step}
                       </div>
                       <h3 className="font-display font-bold text-lg sm:text-xl">{step.title}</h3>

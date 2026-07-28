@@ -20,7 +20,11 @@ const buttonVariants = cva(
         ghost: "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
         link: "text-foreground underline-offset-4 hover:underline p-0 h-auto",
         hero: "bg-primary text-primary-foreground font-semibold shadow-md hover:shadow-glow-sm hover:bg-primary/90",
-        premium: "bg-gradient-to-r from-primary to-[hsl(263_70%_58%)] text-white font-semibold shadow-md hover:shadow-glow hover:brightness-110 btn-shimmer-overlay",
+        // Was `from-primary to-[hsl(263_70%_58%)]` — a hardcoded violet stop, the
+        // exact blue-to-purple ramp the overhaul removes. The loudest CTA on the
+        // site is now solid ember: one colour, more weight, no ramp.
+        premium:
+          "bg-primary text-primary-foreground font-semibold shadow-md hover:shadow-glow hover:brightness-[1.08] hover:-translate-y-px",
         gold: "bg-gradient-gold text-gold-foreground font-semibold shadow-md hover:shadow-lg hover:brightness-110",
         glass: "bg-card/50 backdrop-blur-sm text-foreground border border-border/50 hover:bg-card/70 hover:border-foreground/15",
       },

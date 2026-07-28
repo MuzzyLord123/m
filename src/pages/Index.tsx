@@ -1,48 +1,36 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useRef } from "react";
-import { 
-  ArrowRight, 
-  Check, 
-  Zap, 
-  Shield, 
-  Clock, 
-  Code2, 
-  TrendingUp,
-  Users,
-  Globe,
-  Palette,
+import {
+  ArrowRight,
   BarChart3,
-  MessageSquare,
-  Heart,
-  Rocket,
-  Target,
-  Sparkles,
-  Lock,
-  Upload,
-  Eye,
-  FileText,
+  Check,
   Database,
+  FileText,
+  Globe,
   Layers,
-  Settings,
+  Lock,
+  MessageSquare,
   Monitor,
-  Smartphone
+  Palette,
+  Rocket,
+  Settings,
+  Shield,
+  Smartphone,
+  TrendingUp,
+  Upload,
+  Users,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ScrollSection, StaggeredScrollSection, ScrollItem } from "@/components/ScrollSection";
 import { ProcessSection } from "@/components/marketing/ProcessSection";
 import { WhyQuooroSection } from "@/components/marketing/WhyQuooroSection";
-import { ParallaxImage, ParallaxBackground } from "@/components/ParallaxImage";
-import { TestimonialCarousel } from "@/components/TestimonialCarousel";
-import { FloatingScreenshotHero } from "@/components/marketing/FloatingScreenshotHero";
+import { ParallaxImage } from "@/components/ParallaxImage";
+import { HomeHero } from "@/components/marketing/HomeHero";
 import { EditableField } from "@/components/marketing/EditableField";
 import { useHomepageHeader } from "@/hooks/useHomepageHeader";
 
-import { DeferredGlobe3D } from "@/components/DeferredGlobe3D";
-
 import heroWorkspace from "@/assets/hero-workspace.jpg";
-import codeTransform from "@/assets/code-transform.webp";
 
 // What We Do - 5 Pillars with color accents
 const whatWeDo = [
@@ -51,21 +39,21 @@ const whatWeDo = [
     title: "Websites",
     description: "High-performance marketing websites built for conversion and scale.",
     gradient: "from-foreground/5 to-foreground/10",
-    iconBg: "from-foreground/90 to-foreground/60",
+    iconBg: "from-primary/16 to-primary/[0.06]",
   },
   {
     icon: Layers,
     title: "Apps & Dashboards",
     description: "Custom-built applications, internal tools, and dashboards tailored to how your business operates.",
     gradient: "from-foreground/5 to-foreground/10",
-    iconBg: "from-foreground/90 to-foreground/60",
+    iconBg: "from-primary/16 to-primary/[0.06]",
   },
   {
     icon: Database,
     title: "Digital Operations Platform",
     description: "A secure client dashboard where your business, data, assets, and communication live.",
     gradient: "from-foreground/5 to-foreground/10",
-    iconBg: "from-foreground/90 to-foreground/60",
+    iconBg: "from-primary/16 to-primary/[0.06]",
   },
   {
     icon: FileText,
@@ -73,14 +61,14 @@ const whatWeDo = [
     description: "An enterprise productivity suite with 25+ tools — Docs, Sheets, Invoices, Tasks, and more.",
     href: "/quooro-office",
     gradient: "from-foreground/5 to-foreground/10",
-    iconBg: "from-foreground/90 to-foreground/60",
+    iconBg: "from-primary/16 to-primary/[0.06]",
   },
   {
     icon: Settings,
     title: "Ongoing Management",
     description: "We don't disappear after launch — we manage, support, and evolve your systems.",
     gradient: "from-foreground/5 to-foreground/10",
-    iconBg: "from-foreground/90 to-foreground/60",
+    iconBg: "from-primary/16 to-primary/[0.06]",
   }
 ];
 
@@ -100,9 +88,9 @@ const dashboardFeatures = [
 
 // Free Preview Structure
 const freePreviewIncludes = [
-  { title: "Homepage Design", description: "Full homepage concept tailored to your brand", color: "from-foreground/90 to-foreground/60" },
-  { title: "Up to 2 Additional Pages", description: "Key pages to demonstrate site structure", color: "from-foreground/90 to-foreground/60" },
-  { title: "Mobile-Responsive Preview", description: "See how it looks on all devices", color: "from-foreground/90 to-foreground/60" }
+  { title: "Homepage Design", description: "Full homepage concept tailored to your brand", color: "from-primary/16 to-primary/[0.06]" },
+  { title: "Up to 2 Additional Pages", description: "Key pages to demonstrate site structure", color: "from-primary/16 to-primary/[0.06]" },
+  { title: "Mobile-Responsive Preview", description: "See how it looks on all devices", color: "from-primary/16 to-primary/[0.06]" }
 ];
 
 // App Examples
@@ -121,60 +109,39 @@ const services = [
     icon: Globe,
     title: "Web Development",
     description: "Custom-built websites from landing pages to enterprise platforms",
-    color: "from-foreground/90 to-foreground/60",
+    color: "from-primary/16 to-primary/[0.06]",
   },
   {
     icon: MessageSquare,
     title: "Social Media",
     description: "Complete platform management across all major networks",
-    color: "from-foreground/90 to-foreground/60",
+    color: "from-primary/16 to-primary/[0.06]",
   },
   {
     icon: BarChart3,
     title: "Ad Management",
     description: "PPC campaigns, social ads, and conversion optimisation",
-    color: "from-foreground/90 to-foreground/60",
+    color: "from-primary/16 to-primary/[0.06]",
   },
   {
     icon: Palette,
     title: "Content Creation",
     description: "Professional photography, video, and copywriting",
-    color: "from-foreground/90 to-foreground/60",
+    color: "from-primary/16 to-primary/[0.06]",
   },
   {
     icon: TrendingUp,
     title: "SEO & Strategy",
     description: "Keyword research, competitor analysis, and growth tactics",
-    color: "from-foreground/90 to-foreground/60",
+    color: "from-primary/16 to-primary/[0.06]",
   },
   {
     icon: Users,
     title: "Account Management",
     description: "Complete digital presence and reputation oversight",
-    color: "from-foreground/90 to-foreground/60",
+    color: "from-primary/16 to-primary/[0.06]",
   }
 ];
-
-const trustSignals = [
-  { icon: Shield, text: "Enterprise-grade security" },
-  { icon: Heart, text: "UK-based team" },
-  { icon: Zap, text: "Built for scale" },
-  { icon: Check, text: "Full ownership" },
-];
-
-// Lightweight CSS-only floating orb — no JS animation overhead
-function FloatingOrb({ className, delay = 0 }: { className: string; delay?: number }) {
-  return (
-    <div
-      className={`absolute rounded-full pointer-events-none ${className}`}
-      style={{
-        animation: `floatingOrb 8s ease-in-out ${delay}s infinite`,
-        willChange: 'transform, opacity',
-        contain: 'layout style paint',
-      }}
-    />
-  );
-}
 
 export default function Index() {
   const hWhatWeDo = useHomepageHeader("home_what_we_do").data;
@@ -188,74 +155,16 @@ export default function Index() {
 
   return (
     <Layout>
-      {/* Hero Section - 3D Floating Screenshots */}
-      <FloatingScreenshotHero />
+      {/* Hero — type left, live globe right. The badges and stats that used to be
+          duplicated here for mobile now live inside the hero at every width. */}
+      <HomeHero />
 
-      {/* Mobile-only trust badges + stats (shown between hero screens and What We Do) */}
-      <div className="md:hidden px-4 pt-8 pb-2">
-        <div className="flex flex-wrap gap-2 justify-center mb-6">
-          {[
-            { icon: Shield, text: "Enterprise-grade security" },
-            { icon: Heart, text: "UK-based team" },
-            { icon: Zap, text: "Built for scale" },
-            { icon: Check, text: "Full ownership" },
-          ].map((signal, index) => (
-            <motion.div
-              key={signal.text}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.4, delay: index * 0.08 }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-foreground/80"
-              style={{
-                backgroundColor: 'hsl(var(--muted) / 0.4)',
-                border: '1px solid hsl(var(--border) / 0.3)',
-                backdropFilter: 'blur(8px)',
-              }}
-            >
-              <signal.icon className="w-3 h-3 text-primary" />
-              <span>{signal.text}</span>
-            </motion.div>
-          ))}
-        </div>
-        <div className="grid grid-cols-4 gap-3 max-w-xl mx-auto">
-          {[
-            { value: "UK", label: "Based" },
-            { value: "25+", label: "Tools" },
-            { value: "100%", label: "Ownership" },
-            { value: "Free", label: "Preview" },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.4, delay: 0.2 + i * 0.08 }}
-              className="text-center"
-            >
-              <span className="text-lg font-bold text-gradient block">{stat.value}</span>
-              <span className="text-[9px] text-muted-foreground/60 uppercase tracking-wider font-medium">{stat.label}</span>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Elegant gradient divider */}
-      <div className="relative h-24 sm:h-32 overflow-hidden">
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--primary) / 0.03) 40%, hsl(var(--primary) / 0.06) 60%, hsl(var(--background)) 100%)',
-        }} />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-24 sm:w-32 h-px" style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--primary) / 0.2), transparent)' }} />
-        </div>
-      </div>
-
-      {/* What We Do — editorial Apple-style index */}
+      {/* What We Do — editorial index */}
       <section id="section-what-we-do" className="section-padding relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 40% at 50% 0%, hsl(var(--foreground) / 0.025), transparent 70%)' }} />
 
         <div className="container-tight relative z-10 max-w-5xl">
-          <ScrollSection direction="up" className="text-center mb-16 sm:mb-24">
+          <ScrollSection direction="up" className="text-center mb-12 sm:mb-16">
             <span className="eyebrow">
               <EditableField sectionKey="home_what_we_do" field="eyebrow" value={hWhatWeDo.eyebrow} label="Eyebrow">{hWhatWeDo.eyebrow}</EditableField>
             </span>
@@ -294,7 +203,7 @@ export default function Index() {
                   />
 
                   <div className="relative flex flex-col items-center text-center gap-3 px-5 py-8 sm:grid sm:grid-cols-[72px_56px_1fr_40px] sm:items-center sm:text-left sm:gap-8 sm:px-10 sm:py-9">
-                    <span className="font-serif italic text-foreground/30 text-base sm:text-2xl tabular-nums tracking-tight order-1 sm:order-none">
+                    <span className="font-mono text-foreground/60 text-[11px] sm:text-xs tabular-nums tracking-[0.2em] order-1 sm:order-none">
                       {number}
                     </span>
 
@@ -332,129 +241,75 @@ export default function Index() {
       </section>
 
 
-      {/* Minimal accent divider */}
-      <div className="relative h-16 sm:h-24 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 sm:w-16 h-px" style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--border) / 0.4))' }} />
-            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'hsl(var(--primary) / 0.3)' }} />
-            <div className="w-8 sm:w-16 h-px" style={{ background: 'linear-gradient(90deg, hsl(var(--border) / 0.4), transparent)' }} />
-          </div>
-        </div>
-      </div>
-
-      {/* Global Reach Section with 3D Globe */}
+      {/* How far we work — the globe that used to sit here is now the hero, so
+          this section carries its weight in type instead of repeating the asset.
+          The old "Worldwide" card claimed clients across the globe and 24/7
+          support across time zones; neither is true of a Wales studio of this
+          size, so the copy now describes reach rather than asserting a roster. */}
       <section id="section-global-reach" className="section-padding relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% 100%, hsl(var(--foreground) / 0.03), transparent 70%)' }} />
-        <FloatingOrb className="w-72 h-72 bg-gradient-to-br from-foreground/5 to-foreground/10 blur-3xl -bottom-20 -right-20" delay={1} />
-        <FloatingOrb className="w-56 h-56 bg-gradient-to-br from-foreground/5 to-foreground/10 blur-3xl top-10 -left-10" delay={3} />
 
-        <div className="container mx-auto px-4 relative z-10">
-          <ScrollSection direction="up" className="text-center mb-8 sm:mb-12">
-            <span className="eyebrow">
-              <EditableField sectionKey="home_global_reach" field="eyebrow" value={hGlobal.eyebrow} label="Eyebrow">{hGlobal.eyebrow}</EditableField>
-            </span>
-            <h2 className="heading-lg mb-3 sm:mb-4">
-              <EditableField sectionKey="home_global_reach" field="titlePrefix" value={hGlobal.titlePrefix} label="Title">{hGlobal.titlePrefix}</EditableField>{" "}
-              <span className="text-gradient"><EditableField sectionKey="home_global_reach" field="titleHighlight" value={hGlobal.titleHighlight} label="Title highlight">{hGlobal.titleHighlight}</EditableField></span>
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-              <EditableField sectionKey="home_global_reach" field="subtitle" value={hGlobal.subtitle} label="Subtitle" kind="textarea">{hGlobal.subtitle}</EditableField>
-            </p>
-          </ScrollSection>
+        <div className="container-tight relative z-10">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <ScrollSection direction="up" className="lg:col-span-5">
+              <span className="eyebrow">
+                <EditableField sectionKey="home_global_reach" field="eyebrow" value={hGlobal.eyebrow} label="Eyebrow">{hGlobal.eyebrow}</EditableField>
+              </span>
+              <h2 className="heading-lg mb-4">
+                <EditableField sectionKey="home_global_reach" field="titlePrefix" value={hGlobal.titlePrefix} label="Title">{hGlobal.titlePrefix}</EditableField>{" "}
+                <span className="text-gradient"><EditableField sectionKey="home_global_reach" field="titleHighlight" value={hGlobal.titleHighlight} label="Title highlight">{hGlobal.titleHighlight}</EditableField></span>
+              </h2>
+              <p className="body-md max-w-md">
+                <EditableField sectionKey="home_global_reach" field="subtitle" value={hGlobal.subtitle} label="Subtitle" kind="textarea">{hGlobal.subtitle}</EditableField>
+              </p>
+              <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                Studio: Wales, UK · Remote by default
+              </p>
+            </ScrollSection>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-6xl mx-auto">
-            {/* 3D Globe */}
-            <ScrollSection direction="left">
-              <div className="flex flex-col items-center">
-                <div className="relative aspect-square max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-lg w-full">
-                  <div className="absolute inset-0 bg-gradient-radial from-primary/20 via-transparent to-transparent rounded-full blur-3xl" />
-                  <DeferredGlobe3D />
-                </div>
-                
-                <motion.p 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.5, duration: 0.6 }}
-                  className="text-center text-xs sm:text-sm lg:text-base text-white/80 mt-4 sm:mt-6 px-3 py-1.5 sm:px-4 sm:py-2 bg-black/50 backdrop-blur-sm rounded-full"
-                  style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+            <div className="lg:col-span-7">
+              {[
+                {
+                  icon: Smartphone,
+                  title: "Local",
+                  desc: "Work that has to earn its place in a specific town. Local search, local proof, and a site that loads on a phone with two bars of signal.",
+                },
+                {
+                  icon: TrendingUp,
+                  title: "Nationwide",
+                  desc: "Multi-location businesses, multi-branch content, and structures that stay tidy as the estate grows rather than being rebuilt at every stage.",
+                },
+                {
+                  icon: Globe,
+                  title: "Beyond the UK",
+                  desc: "The platform is not geographically limited — multilingual content, multi-currency billing and international hosting are all supported when a project calls for them.",
+                },
+              ].map((item, idx) => (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-60px' }}
+                  transition={{ duration: 0.6, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  className="group grid grid-cols-[auto_1fr] items-start gap-5 border-t border-border/60 py-7 last:border-b sm:gap-7 sm:py-8"
                 >
-                  Drag to explore • Touch & swipe on mobile
-                </motion.p>
-              </div>
-            </ScrollSection>
-
-            {/* Reach Cards with colorful accents */}
-            <ScrollSection direction="right">
-              <div className="space-y-4 sm:space-y-6">
-                {[
-                  { icon: Smartphone, title: "Local", color: "from-foreground/90 to-foreground/60", desc: "We understand local markets. Whether you're a startup in London or an established business in Manchester, we build systems that connect you with customers in your community." },
-                  { icon: TrendingUp, title: "Nationwide", color: "from-foreground/90 to-foreground/60", desc: "Expanding across the UK? We create scalable solutions that grow with your business, with multi-location support and national strategies." },
-                  { icon: Globe, title: "Worldwide", color: "from-foreground/90 to-foreground/60", desc: "No borders, no limits. We serve clients across the globe with multilingual platforms, international systems, and 24/7 support across time zones." },
-                ].map((item, idx) => (
-                  <motion.div
-                    key={item.title}
-                    initial={{ opacity: 0, x: 30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 * (idx + 1) }}
-                    className="liquid-glass-card p-4 sm:p-6 relative overflow-hidden premium-hover premium-shimmer"
-                  >
-                    <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${item.color}`} />
-                    <div className="flex items-start gap-3 sm:gap-4">
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shrink-0`}>
-                        <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1 sm:mb-2">{item.title}</h3>
-                        <p className="text-sm sm:text-base text-muted-foreground">{item.desc}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </ScrollSection>
-          </div>
-          
-          {/* Stats Section — colorful */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mt-8 sm:mt-12">
-            {[
-              { value: "UK", label: "Based Team", color: "from-foreground/90 to-foreground/60" },
-              { value: "25+", label: "Built-in Tools", color: "from-foreground/90 to-foreground/60" },
-              { value: "Full", label: "Ownership", color: "from-foreground/90 to-foreground/60" },
-              { value: "Free", label: "Preview First", color: "from-foreground/90 to-foreground/60" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center p-4 sm:p-6 rounded-2xl liquid-glass-subtle relative overflow-hidden">
-                <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-[0.06] pointer-events-none`} />
-                <span className={`text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent block`}>{stat.value}</span>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">{stat.label}</p>
-              </div>
-            ))}
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/70 transition-colors duration-500 group-hover:border-primary/40">
+                    <item.icon className="h-5 w-5 text-primary" strokeWidth={1.6} />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-xl font-semibold tracking-tight sm:text-2xl">{item.title}</h3>
+                    <p className="mt-2 max-w-xl text-sm font-light leading-relaxed text-muted-foreground sm:text-[15px]">{item.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Quote divider */}
-      <div className="relative py-12 sm:py-16 overflow-hidden">
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, hsl(var(--background)), hsl(var(--primary) / 0.02), hsl(var(--background)))' }} />
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <p className="text-lg sm:text-2xl md:text-3xl font-display font-bold">
-              Your Team. Your Vision. <span className="text-gradient">Our Platform.</span>
-            </p>
-          </motion.div>
-        </div>
-      </div>
-
       {/* Customer Dashboard Section */}
       <section id="section-dashboard" className="section-padding relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, hsl(var(--foreground) / 0.025), transparent 70%)' }} />
-        <FloatingOrb className="w-80 h-80 bg-gradient-to-br from-foreground/5 to-foreground/10 blur-3xl -top-32 right-0" delay={2} />
 
         <div className="container-tight relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
@@ -480,8 +335,8 @@ export default function Index() {
                     transition={{ delay: index * 0.05 }}
                     className="flex items-center gap-2 sm:gap-3"
                   >
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-foreground/90 to-foreground/60 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-white" />
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/16 to-primary/[0.06] border border-primary/25 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-primary" strokeWidth={2.4} />
                     </div>
                     <span className="text-xs sm:text-sm text-muted-foreground">{feature}</span>
                   </motion.div>
@@ -500,8 +355,8 @@ export default function Index() {
                 <div className="absolute -inset-4 bg-gradient-to-br from-foreground/5 via-foreground/5 to-foreground/10 rounded-3xl blur-2xl" />
                 <div className="relative p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl liquid-glass-card border border-primary/20">
                   <div className="flex items-center gap-2 sm:gap-3 pb-4 sm:pb-6 border-b border-border/50 mb-4 sm:mb-6">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-foreground/90 to-foreground/60 flex items-center justify-center">
-                      <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-primary/16 to-primary/[0.06] border border-primary/25 flex items-center justify-center">
+                      <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-primary" strokeWidth={1.6} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm sm:text-base truncate">Quooro Dashboard</p>
@@ -515,11 +370,11 @@ export default function Index() {
                   
                   <div className="space-y-2 sm:space-y-4">
                     {[
-                      { icon: Monitor, title: "Website Management", desc: "Preview, status & updates", color: "from-foreground/90 to-foreground/60" },
-                      { icon: Layers, title: "App Projects", desc: "Track milestones & progress", color: "from-foreground/90 to-foreground/60" },
-                      { icon: Upload, title: "Asset Centre", desc: "Upload & manage files", color: "from-foreground/90 to-foreground/60" },
-                      { icon: MessageSquare, title: "Team Messages", desc: "Direct communication", color: "from-foreground/90 to-foreground/60" },
-                      { icon: BarChart3, title: "SEO & Marketing", desc: "Analytics & campaigns", color: "from-foreground/90 to-foreground/60" },
+                      { icon: Monitor, title: "Website Management", desc: "Preview, status & updates", color: "from-primary/16 to-primary/[0.06]" },
+                      { icon: Layers, title: "App Projects", desc: "Track milestones & progress", color: "from-primary/16 to-primary/[0.06]" },
+                      { icon: Upload, title: "Asset Centre", desc: "Upload & manage files", color: "from-primary/16 to-primary/[0.06]" },
+                      { icon: MessageSquare, title: "Team Messages", desc: "Direct communication", color: "from-primary/16 to-primary/[0.06]" },
+                      { icon: BarChart3, title: "SEO & Marketing", desc: "Analytics & campaigns", color: "from-primary/16 to-primary/[0.06]" },
                     ].map((item, index) => (
                       <motion.div
                         key={item.title}
@@ -529,8 +384,8 @@ export default function Index() {
                         transition={{ delay: 0.1 + index * 0.1 }}
                         className="flex items-center gap-3 sm:gap-4 p-2 sm:p-3 rounded-xl liquid-glass-subtle"
                       >
-                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.color} flex items-center justify-center flex-shrink-0`}>
-                          <item.icon className="w-4 h-4 text-white" />
+                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.color} border border-primary/25 flex items-center justify-center flex-shrink-0`}>
+                          <item.icon className="w-4 h-4 text-primary" strokeWidth={1.7} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs sm:text-sm font-medium truncate">{item.title}</p>
@@ -552,17 +407,10 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Minimal divider */}
-      <div className="relative h-12 sm:h-16 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-24 sm:w-40 h-px" style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--border) / 0.3), transparent)' }} />
-        </div>
-      </div>
 
       {/* Free Previews Section */}
       <section id="section-free-previews" className="section-padding relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% 0%, hsl(var(--foreground) / 0.03), transparent 70%)' }} />
-        <FloatingOrb className="w-60 h-60 bg-gradient-to-br from-foreground/5 to-foreground/10 blur-3xl bottom-0 left-10" delay={1.5} />
 
         <div className="container-tight relative z-10">
           <div className="max-w-4xl mx-auto text-center px-4">
@@ -586,9 +434,9 @@ export default function Index() {
                     whileHover={{ y: -4 }}
                     className="p-4 sm:p-6 rounded-2xl liquid-glass-card h-full relative overflow-hidden"
                   >
-                    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${item.color}`} />
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mx-auto mb-3 sm:mb-4`}>
-                      <Check className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                    <div className={`absolute top-0 left-0 right-0 h-px bg-primary/40`} />
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${item.color} border border-primary/25 flex items-center justify-center mx-auto mb-3 sm:mb-4`}>
+                      <Check className="w-5 h-5 sm:w-6 sm:h-6 text-primary" strokeWidth={2} />
                     </div>
                     <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">{item.title}</h3>
                     <p className="text-xs sm:text-sm text-muted-foreground">{item.description}</p>
@@ -602,13 +450,13 @@ export default function Index() {
                 <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Project Payment Structure</h3>
                 <div className="space-y-2 sm:space-y-3 text-left">
                   {[
-                    { num: "1", text: "Optional paid preview expansion:", desc: "Pay a non-refundable fee per additional page to protect developer time", color: "from-foreground/90 to-foreground/60" },
-                    { num: "2", text: "Deposit required:", desc: "Secure your project slot with a deposit", color: "from-foreground/90 to-foreground/60" },
-                    { num: "3", text: "Staged payments:", desc: "Remaining balance paid after each key milestone", color: "from-foreground/90 to-foreground/60" },
+                    { num: "1", text: "Optional paid preview expansion:", desc: "Pay a non-refundable fee per additional page to protect developer time", color: "from-primary/16 to-primary/[0.06]" },
+                    { num: "2", text: "Deposit required:", desc: "Secure your project slot with a deposit", color: "from-primary/16 to-primary/[0.06]" },
+                    { num: "3", text: "Staged payments:", desc: "Remaining balance paid after each key milestone", color: "from-primary/16 to-primary/[0.06]" },
                   ].map((step) => (
                     <div key={step.num} className="flex items-start gap-2 sm:gap-3">
-                      <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br ${step.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                        <span className="text-[10px] sm:text-xs font-bold text-white">{step.num}</span>
+                      <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br ${step.color} border border-primary/25 flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                        <span className="font-mono text-[10px] sm:text-xs font-semibold text-primary">{step.num}</span>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
                         <strong className="text-foreground">{step.text}</strong> {step.desc}
@@ -628,21 +476,10 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Minimal divider */}
-      <div className="relative h-12 sm:h-16 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 sm:w-16 h-px" style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--border) / 0.4))' }} />
-            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'hsl(var(--primary) / 0.3)' }} />
-            <div className="w-8 sm:w-16 h-px" style={{ background: 'linear-gradient(90deg, hsl(var(--border) / 0.4), transparent)' }} />
-          </div>
-        </div>
-      </div>
 
       {/* Apps & Dashboards Section */}
       <section id="section-apps" className="section-padding relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% 100%, hsl(var(--foreground) / 0.03), transparent 70%)' }} />
-        <FloatingOrb className="w-72 h-72 bg-gradient-to-br from-foreground/5 to-foreground/10 blur-3xl -top-20 right-20" delay={0.5} />
 
         <div className="container-tight relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
@@ -651,6 +488,7 @@ export default function Index() {
                 src={heroWorkspace}
                 alt="Custom application development"
                 className="rounded-2xl sm:rounded-3xl h-[280px] sm:h-[350px] md:h-[450px] shadow-2xl"
+                imgClassName="[filter:saturate(0.5)_sepia(0.16)_contrast(1.04)_brightness(0.96)]"
                 enableHover3D={false}
                 parallaxSpeed={0.15}
                 overlayGradient="bg-gradient-to-t from-background/90 via-background/20 to-transparent"
@@ -718,65 +556,44 @@ export default function Index() {
       {/* Why Quooro — Differentiator Section */}
       <WhyQuooroSection />
 
-      {/* Code to Design Visual with Parallax */}
-      <section className="py-0 relative">
-        <ParallaxImage
-          src={codeTransform}
-          alt="Code transforming into beautiful systems"
-          className="h-[50vh] sm:h-[60vh] min-h-[350px] sm:min-h-[500px] bg-background"
-          imgClassName="object-contain object-right sm:object-cover"
-          enableHover3D={false}
-          parallaxSpeed={0.25}
-          overlayGradient="bg-gradient-to-r from-background via-background/60 to-transparent"
-        >
-          <div className="flex items-center h-full">
-            <div className="container-tight">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="max-w-lg px-4"
-              >
-                <motion.p 
-                  className="text-primary font-medium mb-1 sm:mb-2 text-sm sm:text-base"
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Infrastructure that scales
-                </motion.p>
-                <motion.h2 
-                  className="heading-lg mb-3 sm:mb-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 }}
-                >
+      {/* A full-bleed stock render used to sit here — a violet-lit laptop showing
+          an invented "Welcome / About Us" website, with the section heading laid
+          over the busy half of the image so half the sentence was unreadable.
+          Wrong palette, wrong claim, wrong legibility. The statement it was
+          carrying is worth keeping, so it is now carried by type. */}
+      <section className="relative overflow-hidden border-y border-border/60 py-20 sm:py-24 lg:py-28">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse 50% 60% at 15% 50%, hsl(var(--primary) / 0.08), transparent 70%)' }}
+        />
+        <div className="container-tight relative z-10">
+          <ScrollSection direction="up">
+            <div className="grid gap-8 lg:grid-cols-12 lg:gap-16">
+              <div className="lg:col-span-5">
+                <div className="mb-6 flex items-center gap-3">
+                  <span className="h-px w-8 bg-primary" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px]">
+                    Infrastructure that scales
+                  </span>
+                </div>
+                <h2 className="heading-lg">
                   Built for <span className="text-gradient">Growth</span>
-                </motion.h2>
-                <motion.p 
-                  className="body-md text-muted-foreground"
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4 }}
-                >
-                  Every system we build is crafted to deliver exceptional performance and user experiences, 
-                  designed to grow with your business.
-                </motion.p>
-              </motion.div>
+                </h2>
+              </div>
+              <div className="lg:col-span-7 lg:pt-2">
+                <p className="max-w-xl text-lg font-light leading-relaxed text-foreground/80 sm:text-xl md:text-2xl">
+                  Every system is built to hold up under load and to keep making sense
+                  as the business changes shape around it.
+                </p>
+              </div>
             </div>
-          </div>
-        </ParallaxImage>
+          </ScrollSection>
+        </div>
       </section>
 
       {/* Services Grid */}
       <section className="section-padding relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, hsl(var(--foreground) / 0.025), transparent 70%)' }} />
-        <FloatingOrb className="w-64 h-64 bg-gradient-to-br from-foreground/5 to-foreground/10 blur-3xl top-10 -left-20" delay={1} />
-        <FloatingOrb className="w-48 h-48 bg-gradient-to-br from-foreground/5 to-foreground/10 blur-3xl bottom-10 right-10" delay={2.5} />
 
         <div className="container-tight relative z-10">
           <ScrollSection direction="up" className="text-center mb-8 sm:mb-12 md:mb-16">
@@ -800,13 +617,13 @@ export default function Index() {
                   className="group p-4 sm:p-6 md:p-8 rounded-2xl liquid-glass-card h-full relative overflow-hidden"
                 >
                   {/* Top gradient bar */}
-                  <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${service.color} opacity-70 group-hover:opacity-100 transition-opacity`} />
+                  <div className={`absolute top-0 left-0 right-0 h-px bg-primary/30 group-hover:bg-primary/70 transition-colors`} />
                   {/* Hover glow */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500 pointer-events-none`} />
                   <div className="relative z-10">
                     <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                        <service.icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br ${service.color} border border-primary/25 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                        <service.icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" strokeWidth={1.5} />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-display font-bold text-base sm:text-lg md:text-xl">{service.title}</h3>
@@ -832,7 +649,6 @@ export default function Index() {
       {/* Built for Businesses That Want More */}
       <section className="section-padding relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% 0%, hsl(var(--foreground) / 0.03), transparent 70%)' }} />
-        <FloatingOrb className="w-56 h-56 bg-gradient-to-br from-foreground/5 to-foreground/10 blur-3xl top-20 right-20" delay={0} />
 
         <div className="container-tight relative z-10">
           <ScrollSection direction="up" className="text-center max-w-3xl mx-auto px-4">
@@ -868,96 +684,87 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Testimonials Carousel */}
-      <TestimonialCarousel />
+      {/* The testimonial carousel that sat here quoted six named people at six
+          named companies. None of them exist. Removed rather than restyled —
+          see PLACEHOLDERS.md P2 for what real quotes would need. */}
 
       {/* CTA Section */}
       <section id="section-cta" className="section-padding relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% 100%, hsl(var(--foreground) / 0.03), transparent 70%)' }} />
-        <FloatingOrb className="w-80 h-80 bg-gradient-to-br from-foreground/5 to-foreground/10 blur-3xl -bottom-20 left-1/4" delay={1} />
 
         <div className="container-tight relative z-10">
-          <ScrollSection direction="scale">
-            <div
-              className="p-4 sm:p-8 md:p-12 lg:p-16 rounded-2xl sm:rounded-3xl relative overflow-hidden border border-white/10"
-              style={{ background: 'linear-gradient(135deg, hsl(220 25% 8%) 0%, hsl(220 22% 12%) 50%, hsl(220 20% 16%) 100%)' }}
-            >
-              {/* Animated mesh overlay */}
-              <div className="absolute inset-0 pointer-events-none rounded-2xl sm:rounded-3xl overflow-hidden">
-                <div className="absolute inset-0" style={{
+          <ScrollSection direction="up">
+            {/* One panel where the ember owns the whole surface. The old block
+                was hardcoded navy (hsl(220 25% 8%)) with rgba white overlays, so
+                it ignored the theme entirely and read as a different brand. This
+                is drawn from --primary, so it flips with the mode. */}
+            <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-14 text-primary-foreground sm:px-12 sm:py-20 lg:px-20">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.09]"
+                style={{
                   backgroundImage: `
-                    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.08) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 70%, rgba(255,255,255,0.06) 0%, transparent 50%)
+                    linear-gradient(hsl(var(--primary-foreground) / 0.5) 1px, transparent 1px),
+                    linear-gradient(90deg, hsl(var(--primary-foreground) / 0.5) 1px, transparent 1px)
                   `,
-                }} />
-              </div>
-              
-              <div className="relative z-10 text-center">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 }}
-                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 sm:mb-8"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-white/80" />
-                  <span className="text-xs sm:text-sm font-medium text-white/80">
+                  backgroundSize: '44px 44px',
+                  maskImage: 'radial-gradient(ellipse 60% 90% at 100% 0%, black, transparent 72%)',
+                  WebkitMaskImage: 'radial-gradient(ellipse 60% 90% at 100% 0%, black, transparent 72%)',
+                }}
+              />
+
+              <div className="relative z-10 max-w-3xl">
+                <div className="mb-7 flex items-center gap-3">
+                  <span className="h-px w-8 bg-primary-foreground/50" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-primary-foreground sm:text-[11px]">
                     <EditableField sectionKey="home_cta" field="eyebrow" value={hCta.eyebrow} label="Eyebrow">{hCta.eyebrow}</EditableField>
                   </span>
-                </motion.div>
+                </div>
 
-                <motion.h2 
-                  className="heading-lg mb-4 sm:mb-6 text-white"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                >
+                <h2 className="heading-lg mb-5">
                   <EditableField sectionKey="home_cta" field="titlePrefix" value={hCta.titlePrefix} label="Title">{hCta.titlePrefix}</EditableField>{" "}
-                  <span className="text-primary"><EditableField sectionKey="home_cta" field="titleHighlight" value={hCta.titleHighlight} label="Title highlight">{hCta.titleHighlight}</EditableField></span>
-                </motion.h2>
-                <motion.p 
-                  className="text-sm sm:text-base md:text-lg text-white/80 max-w-2xl mx-auto mb-6 sm:mb-8 md:mb-10 leading-relaxed"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 }}
-                >
+                  <span className="text-primary-foreground/70">
+                    <EditableField sectionKey="home_cta" field="titleHighlight" value={hCta.titleHighlight} label="Title highlight">{hCta.titleHighlight}</EditableField>
+                  </span>
+                </h2>
+
+                <p className="max-w-xl text-sm font-light leading-relaxed text-primary-foreground/80 sm:text-base md:text-lg">
                   <EditableField sectionKey="home_cta" field="subtitle" value={hCta.subtitle} label="Subtitle" kind="textarea">{hCta.subtitle}</EditableField>
-                </motion.p>
-                <motion.div 
-                  className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <Button size="xl" asChild className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 font-semibold shadow-lg group">
+                </p>
+
+                <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+                  <Button
+                    size="xl"
+                    asChild
+                    className="group w-full bg-primary-foreground font-semibold text-primary shadow-lg hover:bg-primary-foreground/90 sm:w-auto"
+                  >
                     <Link to="/get-started">
-                      Request a Free Preview <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                      Request a Free Preview
+                      <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
                   </Button>
-                  <Button size="xl" asChild className="w-full sm:w-auto bg-white/15 text-white border border-white/30 hover:bg-white/25 font-semibold backdrop-blur-sm">
-                    <Link to="/portfolio">View Our Work</Link>
-                  </Button>
-                </motion.div>
+                  {/* Was "View Our Work" → /portfolio. The portfolio entries are
+                      design studies, not client work (PLACEHOLDERS.md P1), so the
+                      homepage no longer sends buyers there expecting a roster. */}
+                  <Link
+                    to="/features"
+                    className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-primary-foreground/85 transition-colors hover:text-primary-foreground"
+                  >
+                    <span className="relative">
+                      See what&rsquo;s included
+                      <span className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-primary-foreground transition-transform duration-300 group-hover:scale-x-100" />
+                    </span>
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </div>
 
-                {/* Bottom trust row */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.6 }}
-                  className="mt-8 sm:mt-10 flex flex-wrap gap-4 sm:gap-6 justify-center"
-                >
+                <ul className="mt-12 flex flex-wrap gap-x-8 gap-y-3 border-t border-primary-foreground/20 pt-7">
                   {["No commitment", "Full ownership", "UK-based team"].map((text) => (
-                    <div key={text} className="flex items-center gap-1.5 text-white/60 text-xs sm:text-sm">
-                      <Check className="w-3.5 h-3.5" />
+                    <li key={text} className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-primary-foreground">
+                      <Check className="h-3.5 w-3.5" strokeWidth={2.2} />
                       <span>{text}</span>
-                    </div>
+                    </li>
                   ))}
-                </motion.div>
+                </ul>
               </div>
             </div>
           </ScrollSection>

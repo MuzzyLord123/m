@@ -145,8 +145,11 @@ export const HOME_WHY_DEFAULTS: HomeWhyContent = {
     {
       icon: "Shield",
       title: "Enterprise Security",
+      // "SOC-2 aligned practices" was here. SOC 2 is an audited attestation the
+      // studio does not hold, and "aligned" reads as a certification to anyone
+      // skimming. Replaced with what is true and checkable.
       description:
-        "Bank-grade encryption, 2FA, role-based access, and SOC-2 aligned practices.",
+        "AES-256 encryption at rest, 2FA, and role-based access on every account.",
     },
     {
       icon: "Code2",
@@ -183,11 +186,14 @@ export const HOMEPAGE_HEADERS: Record<string, HomepageHeaderMeta> = {
   },
   home_global_reach: {
     label: "Global Reach",
-    eyebrow: "Global Reach",
-    titlePrefix: "Serving Clients",
-    titleHighlight: "Worldwide",
+    eyebrow: "Reach",
+    // Was "Serving Clients Worldwide" / "From local businesses to global
+    // enterprises…", which asserts a client roster the studio does not have.
+    // The section now describes what the work can cover, not who has bought it.
+    titlePrefix: "One studio.",
+    titleHighlight: "Any postcode.",
     subtitle:
-      "From local businesses to global enterprises — we deliver exceptional digital experiences anywhere in the world.",
+      "Built in Wales and run remotely, so the size of the job matters more than where it is. A high street shopfront and a multi-site operation get the same system underneath.",
   },
   home_dashboard: {
     label: "Dashboard",

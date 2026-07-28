@@ -7,7 +7,7 @@ import { HOME_WHY_DEFAULTS, type HomeWhyContent } from "@/lib/siteContentSchemas
 import { EditableField } from "@/components/marketing/EditableField";
 import { getIcon } from "@/lib/marketingIcons";
 
-const NARDO_ACCENT = "from-zinc-500 to-zinc-700";
+const CHIP_ACCENT = "from-primary/16 to-primary/[0.06] border border-primary/25";
 
 
 
@@ -22,14 +22,15 @@ const comparisonRows = [
 ];
 
 function CellValue({ value }: { value: boolean | string }) {
-  if (value === true) return <Check className="w-4 h-4 text-emerald-500 mx-auto" />;
+  // Was text-emerald-500 — an off-system green in a page with one accent.
+  if (value === true) return <Check className="w-4 h-4 text-primary mx-auto" strokeWidth={2.4} />;
   if (value === false) return <X className="w-4 h-4 text-muted-foreground/30 mx-auto" />;
   return <span className="text-xs text-muted-foreground">{value}</span>;
 }
 
 export function WhyQuooroSection() {
   const { data } = useSiteContent<HomeWhyContent>("home_why", HOME_WHY_DEFAULTS);
-  const differentiators = data.differentiators.map(d => ({ ...d, accent: NARDO_ACCENT }));
+  const differentiators = data.differentiators.map(d => ({ ...d, accent: CHIP_ACCENT }));
 
   return (
     <section className="section-padding relative overflow-hidden">
@@ -72,9 +73,9 @@ export function WhyQuooroSection() {
               whileHover={{ y: -6 }}
               className="p-5 sm:p-6 rounded-2xl liquid-glass-card h-full relative overflow-hidden group"
             >
-              <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${item.accent} opacity-50 group-hover:opacity-100 transition-opacity`} />
+              <div className="absolute top-0 left-0 right-0 h-px bg-primary/30 group-hover:bg-primary/70 transition-colors" />
               <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${item.accent} flex items-center justify-center mb-4`}>
-                <Icon className="w-5 h-5 text-white" />
+                <Icon className="w-5 h-5 text-primary" strokeWidth={1.6} />
               </div>
               <h3 className="font-display font-bold text-base sm:text-lg mb-2">{item.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>

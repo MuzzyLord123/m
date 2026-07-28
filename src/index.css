@@ -123,44 +123,48 @@
     --warning: 38 92% 50%;
     --info: 213 42% 52%;
 
-    /* Custom tokens - light */
-    --gold: 45 93% 47%;
-    --gold-foreground: 222 47% 11%;
-    --cyan-glow: 217 30% 40%;
-    --navy-deep: 220 14% 92%;
-    --slate-800: 220 13% 89%;
-    --slate-700: 215 16% 62%;
-    --slate-600: 215 16% 47%;
+    /* Custom tokens - light.
+       These are legacy names kept so no component has to be rewired. Only the
+       VALUES changed: every navy/slate/cyan literal below was a leftover from
+       the blue system and is now a warm paper neutral or a brass that sits with
+       the ember. Nothing in the palette is blue any more. */
+    --gold: 32 82% 42%;            /* brass, darkened for AA on paper */
+    --gold-foreground: 48 19% 97%;
+    --cyan-glow: 22 85% 47%;       /* legacy name, ember value */
+    --navy-deep: 45 12% 90%;
+    --slate-800: 45 10% 87%;
+    --slate-700: 220 8% 55%;
+    --slate-600: 220 8% 42%;
 
     /* Gradients - light */
     /* was blue->violet, the exact banned ramp. Now a tonal ember step. */
     --gradient-primary: linear-gradient(135deg, hsl(13 79% 57%) 0%, hsl(22 85% 47%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(45 93% 47%) 0%, hsl(35 91% 55%) 100%);
-    --gradient-dark: linear-gradient(180deg, hsl(220 14% 96%) 0%, hsl(220 14% 92%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(220 13% 98%) 0%, hsl(220 14% 96%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(220 14% 96% / 0.95) 0%, hsl(220 14% 92% / 0.98) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(32 82% 42%) 0%, hsl(26 78% 48%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(48 19% 95%) 0%, hsl(45 12% 91%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(48 19% 96%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(48 19% 95% / 0.95) 0%, hsl(45 12% 91% / 0.98) 100%);
     --gradient-vibrant-1: linear-gradient(135deg, hsl(13 79% 57% / 0.05) 0%, transparent 60%);
     --gradient-vibrant-2: linear-gradient(160deg, hsl(22 85% 47% / 0.04) 0%, transparent 65%);
     --gradient-vibrant-3: linear-gradient(135deg, hsl(17 88% 40% / 0.05) 0%, transparent 62%);
-    --gradient-section-blue: linear-gradient(180deg, hsl(217 91% 97%) 0%, hsl(220 14% 96%) 100%);
-    --gradient-section-purple: linear-gradient(180deg, hsl(263 70% 97%) 0%, hsl(220 14% 96%) 100%);
-    --gradient-section-teal: linear-gradient(180deg, hsl(180 60% 97%) 0%, hsl(220 14% 96%) 100%);
+    --gradient-section-blue: linear-gradient(180deg, hsl(45 16% 93%) 0%, hsl(48 19% 95%) 100%);
+    --gradient-section-purple: linear-gradient(180deg, hsl(24 30% 94%) 0%, hsl(48 19% 95%) 100%);
+    --gradient-section-teal: linear-gradient(180deg, hsl(40 20% 93%) 0%, hsl(48 19% 95%) 100%);
 
     /* Shadows - light */
     --shadow-glow: 0 18px 48px hsl(13 40% 6% / 0.28);
-    --shadow-gold: 0 0 30px hsl(45 93% 47% / 0.12);
-    --shadow-card: 0 1px 3px hsl(222 47% 11% / 0.04), 0 1px 2px hsl(222 47% 11% / 0.02);
-    --shadow-lg: 0 10px 25px -5px hsl(222 47% 11% / 0.08), 0 4px 6px -2px hsl(222 47% 11% / 0.04);
+    --shadow-gold: 0 0 30px hsl(32 82% 42% / 0.12);
+    --shadow-card: 0 1px 3px hsl(220 13% 9% / 0.05), 0 1px 2px hsl(220 13% 9% / 0.03);
+    --shadow-lg: 0 10px 25px -5px hsl(220 13% 9% / 0.09), 0 4px 6px -2px hsl(220 13% 9% / 0.05);
 
     /* Sidebar - light */
-    --sidebar-background: 220 13% 97%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 13 79% 57%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 92%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 220 13% 89%;
-    --sidebar-ring: 13 79% 57%;
+    --sidebar-background: 45 16% 93%;
+    --sidebar-foreground: 220 13% 9%;
+    --sidebar-primary: 17 88% 40%;
+    --sidebar-primary-foreground: 48 19% 97%;
+    --sidebar-accent: 45 12% 89%;
+    --sidebar-accent-foreground: 220 13% 9%;
+    --sidebar-border: 45 10% 85%;
+    --sidebar-ring: 17 88% 40%;
   }
 
   .dark {
@@ -206,43 +210,46 @@
     --warning: 38 92% 50%;
     --info: 213 42% 52%;
 
-    /* Custom tokens */
-    --gold: 45 93% 47%;
-    --gold-foreground: 222 47% 4%;
-    --cyan-glow: 217 60% 70%;
-    --navy-deep: 222 47% 3%;
-    --slate-800: 222 20% 12%;
-    --slate-700: 222 15% 20%;
-    --slate-600: 215 15% 35%;
+    /* Custom tokens.
+       Legacy names, Night Shift values. Every navy/slate/cyan literal that used
+       to live here was a leftover from the blue system; the names stay so no
+       component needs rewiring, but nothing resolves to blue any more. */
+    --gold: 38 74% 52%;            /* brass, harmonises with ember */
+    --gold-foreground: 240 4% 5%;
+    --cyan-glow: 22 85% 47%;       /* legacy name, ember value */
+    --navy-deep: 240 6% 7%;
+    --slate-800: 240 6% 11%;
+    --slate-700: 240 5% 18%;
+    --slate-600: 240 4% 34%;
 
     /* Gradients */
     /* was blue->violet, the exact banned ramp. Now a tonal ember step. */
     --gradient-primary: linear-gradient(135deg, hsl(13 79% 57%) 0%, hsl(22 85% 47%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(45 93% 47%) 0%, hsl(35 91% 55%) 100%);
-    --gradient-dark: linear-gradient(180deg, hsl(222 35% 6%) 0%, hsl(222 47% 4%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(222 35% 8%) 0%, hsl(222 35% 6%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(222 47% 4% / 0.95) 0%, hsl(222 47% 3% / 0.98) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(38 74% 52%) 0%, hsl(28 80% 50%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(240 6% 8%) 0%, hsl(240 4% 5%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(240 7% 9%) 0%, hsl(240 7% 7%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(240 4% 5% / 0.95) 0%, hsl(240 5% 4% / 0.98) 100%);
     --gradient-vibrant-1: linear-gradient(135deg, hsl(13 79% 57% / 0.07) 0%, transparent 60%);
     --gradient-vibrant-2: linear-gradient(160deg, hsl(22 85% 47% / 0.06) 0%, transparent 65%);
     --gradient-vibrant-3: linear-gradient(135deg, hsl(17 88% 40% / 0.07) 0%, transparent 62%);
-    --gradient-section-blue: linear-gradient(180deg, hsl(217 50% 8%) 0%, hsl(222 47% 4%) 100%);
-    --gradient-section-purple: linear-gradient(180deg, hsl(263 40% 8%) 0%, hsl(222 47% 4%) 100%);
-    --gradient-section-teal: linear-gradient(180deg, hsl(180 30% 7%) 0%, hsl(222 47% 4%) 100%);
+    --gradient-section-blue: linear-gradient(180deg, hsl(240 6% 8%) 0%, hsl(240 4% 5%) 100%);
+    --gradient-section-purple: linear-gradient(180deg, hsl(13 22% 9%) 0%, hsl(240 4% 5%) 100%);
+    --gradient-section-teal: linear-gradient(180deg, hsl(30 12% 8%) 0%, hsl(240 4% 5%) 100%);
 
     /* Shadows */
     --shadow-glow: 0 18px 48px hsl(13 40% 6% / 0.28);
-    --shadow-gold: 0 0 30px hsl(45 93% 47% / 0.2);
+    --shadow-gold: 0 0 30px hsl(38 74% 52% / 0.2);
     --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.3), 0 1px 2px hsl(0 0% 0% / 0.2);
     --shadow-lg: 0 10px 25px -5px hsl(0 0% 0% / 0.5), 0 4px 6px -2px hsl(0 0% 0% / 0.3);
 
     /* Sidebar */
-    --sidebar-background: 222 35% 5%;
-    --sidebar-foreground: 220 30% 96%;
+    --sidebar-background: 240 6% 7%;
+    --sidebar-foreground: 60 8% 92%;
     --sidebar-primary: 13 79% 57%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 30% 10%;
-    --sidebar-accent-foreground: 220 30% 96%;
-    --sidebar-border: 222 20% 12%;
+    --sidebar-primary-foreground: 240 4% 5%;
+    --sidebar-accent: 240 6% 11%;
+    --sidebar-accent-foreground: 60 8% 92%;
+    --sidebar-border: 240 5% 14%;
     --sidebar-ring: 13 79% 57%;
   }
 }
@@ -597,8 +604,11 @@
     @apply scale-110;
   }
 
+  /* Was lg:py-32. Stacked against each section's own header margins that left
+     ~300px of dead ground between blocks at desktop widths — the page read as
+     unfinished rather than spacious. */
   .section-padding {
-    @apply py-16 sm:py-20 md:py-24 lg:py-32;
+    @apply py-14 sm:py-16 md:py-20 lg:py-24;
   }
 
   .container-tight {
@@ -631,21 +641,21 @@
   /* Editorial eyebrow — nardo grey uppercase kicker used above section headings */
   .eyebrow {
     @apply inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.22em] mb-4;
-    color: hsl(220 6% 50%);
+    color: hsl(var(--muted-foreground));
   }
   .eyebrow::before {
     content: "";
     display: inline-block;
     width: 1.5rem;
     height: 1px;
-    background: linear-gradient(90deg, transparent, hsl(220 6% 50% / 0.6));
+    background: linear-gradient(90deg, transparent, hsl(var(--muted-foreground) / 0.6));
   }
   .eyebrow::after {
     content: "";
     display: inline-block;
     width: 1.5rem;
     height: 1px;
-    background: linear-gradient(90deg, hsl(220 6% 50% / 0.6), transparent);
+    background: linear-gradient(90deg, hsl(var(--muted-foreground) / 0.6), transparent);
   }
 
 

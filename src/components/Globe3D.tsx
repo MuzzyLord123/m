@@ -6,15 +6,23 @@ import { TextureLoader } from "three";
 import earthTexture from "@/assets/earth-nasa.webp";
 import { useInViewport } from "@/hooks/useInViewport";
 
-// Client locations with flags
-const clientLocations = [
-  { name: "UK", lat: 51.5, lng: -0.1, flag: "🇬🇧", color: "#f59e0b" },
-  { name: "USA", lat: 40.7, lng: -74, flag: "🇺🇸", color: "#3b82f6" },
-  { name: "Germany", lat: 52.5, lng: 13.4, flag: "🇩🇪", color: "#22c55e" },
-  { name: "Australia", lat: -33.9, lng: 151.2, flag: "🇦🇺", color: "#a855f7" },
-  { name: "Canada", lat: 43.7, lng: -79.4, flag: "🇨🇦", color: "#ef4444" },
-  { name: "UAE", lat: 25.2, lng: 55.3, flag: "🇦🇪", color: "#14b8a6" },
-];
+/**
+ * ONE marker, on Wales.
+ *
+ * This previously plotted six "client locations" - UK, USA, Germany, Australia,
+ * Canada, UAE - each with a flag emoji, joined by animated arcs. Two problems:
+ * emoji are banned in the UI, and the arcs asserted a global client base that
+ * does not exist.
+ *
+ * A rotating globe implying global reach is also a SaaS cliche. For a studio in
+ * Wales it is far more interesting inverted: a single ember marker on Wales.
+ * Specificity of place reads as confidence, and it happens to be true.
+ */
+const STUDIO = { name: "Wales", lat: 52.13, lng: -3.78 };
+
+/** Matches --primary in dark mode (#E8613C). The globe reads on the dark hero. */
+const EMBER = "#E8613C";
+
 
 // Hook to listen for mobile menu state
 function useMobileMenuOpen() {
@@ -67,19 +75,6 @@ function EarthWithMarkers({ hideLabels = false, isPaused = false }: { hideLabels
     }
   });
 
-  // Generate connection lines
-  const connections = useMemo(() => {
-    const conns: { start: THREE.Vector3; end: THREE.Vector3; color: string }[] = [];
-    const ukPos = latLngToVector3(clientLocations[0].lat, clientLocations[0].lng, 2.05);
-    
-    for (let i = 1; i < clientLocations.length; i++) {
-      const endPos = latLngToVector3(clientLocations[i].lat, clientLocations[i].lng, 2.05);
-      conns.push({ start: ukPos, end: endPos, color: clientLocations[i].color });
-    }
-    
-    return conns;
-  }, []);
-
   return (
     <group>
       {/* Rotating group with Earth, markers, and connections */}
@@ -88,64 +83,44 @@ function EarthWithMarkers({ hideLabels = false, isPaused = false }: { hideLabels
         <Sphere args={[2, 128, 128]}>
           <meshPhongMaterial
             map={texture}
+            /* Multiplies the NASA texture with a warm tint. The raw imagery is a
+               vivid photographic blue that fights the ember palette; graded, the
+               oceans settle into deep slate-teal and the globe sits in the page
+               instead of shouting at it. */
+            color={new THREE.Color(0xffe4d2)}
             specularMap={texture}
-            specular={new THREE.Color(0x999999)}
-            shininess={15}
+            specular={new THREE.Color(0x8a7a70)}
+            shininess={14}
             bumpMap={texture}
             bumpScale={0.015}
             emissiveMap={texture}
-            emissive={new THREE.Color(0x222222)}
+            emissive={new THREE.Color(0x2a1a14)}
             emissiveIntensity={0.3}
           />
         </Sphere>
 
-        {/* Location Markers - rotate with Earth */}
-        {clientLocations.map((location, index) => {
-          const position = latLngToVector3(location.lat, location.lng, 2.08);
+        {/* The single studio marker, rotating with the Earth. */}
+        {(() => {
+          const p = latLngToVector3(STUDIO.lat, STUDIO.lng, 2.08);
           return (
             <LocationMarker
-              key={location.name}
-              position={[position.x, position.y, position.z]}
-              color={location.color}
-              flag={location.flag}
-              name={location.name}
-              delay={index * 0.2}
+              position={[p.x, p.y, p.z]}
+              color={EMBER}
+              name={STUDIO.name}
+              delay={0}
               hideLabels={hideLabels}
             />
           );
-        })}
-
-        {/* Connection Lines - rotate with Earth */}
-        {connections.map((conn, index) => (
-          <AnimatedArc key={index} start={conn.start} end={conn.end} color={conn.color} delay={index * 0.5} />
-        ))}
+        })()}
       </group>
 
-      {/* Atmosphere inner glow */}
-      <Sphere args={[2.03, 64, 64]}>
+      {/* One tight ember rim, replacing three blue shells (#4a9eff / #6db3f8 /
+          #87ceeb). That blue was the LLM house palette rendered in 3D. */}
+      <Sphere args={[2.14, 64, 64]}>
         <meshBasicMaterial
-          color="#4a9eff"
+          color={EMBER}
           transparent
-          opacity={0.06}
-        />
-      </Sphere>
-
-      {/* Atmosphere outer glow – Fresnel-like rim */}
-      <Sphere args={[2.15, 64, 64]}>
-        <meshBasicMaterial
-          color="#6db3f8"
-          transparent
-          opacity={0.08}
-          side={THREE.BackSide}
-        />
-      </Sphere>
-
-      {/* Thin haze layer */}
-      <Sphere args={[2.25, 32, 32]}>
-        <meshBasicMaterial
-          color="#87ceeb"
-          transparent
-          opacity={0.03}
+          opacity={0.09}
           side={THREE.BackSide}
         />
       </Sphere>
@@ -153,52 +128,24 @@ function EarthWithMarkers({ hideLabels = false, isPaused = false }: { hideLabels
   );
 }
 
-function AnimatedArc({ start, end, color, delay }: { start: THREE.Vector3; end: THREE.Vector3; color: string; delay: number }) {
-  const lineRef = useRef<THREE.Line>(null);
-  
-  const lineObject = useMemo(() => {
-    const midPoint = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
-    const distance = start.distanceTo(end);
-    midPoint.normalize().multiplyScalar(2 + distance * 0.3);
-    
-    const curve = new THREE.QuadraticBezierCurve3(start, midPoint, end);
-    const points = curve.getPoints(50);
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.8 });
-    
-    return new THREE.Line(geometry, material);
-  }, [start, end, color]);
-
-  useFrame((state) => {
-    if (lineRef.current && lineRef.current.material) {
-      const material = lineRef.current.material as THREE.LineBasicMaterial;
-      if (material && material.opacity !== undefined) {
-        const pulse = Math.sin(state.clock.elapsedTime * 2 - delay) * 0.5 + 0.5;
-        material.opacity = 0.3 + pulse * 0.5;
-      }
-    }
-  });
-
-  return <primitive object={lineObject} ref={lineRef} />;
-}
-
-function LocationMarker({ 
-  position, 
-  color, 
-  flag, 
+function LocationMarker({
+  position,
+  color,
   name,
   delay,
   hideLabels = false
-}: { 
-  position: [number, number, number]; 
-  color: string; 
-  flag: string;
+}: {
+  position: [number, number, number];
+  color: string;
   name: string;
   delay: number;
   hideLabels?: boolean;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
+  const worldPos = useRef(new THREE.Vector3());
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -210,14 +157,30 @@ function LocationMarker({
       ringRef.current.scale.setScalar(scale);
       ringRef.current.lookAt(0, 0, 0);
     }
+
+    // drei's <Html> has no depth, so the label would otherwise stay visible
+    // while Wales is round the back of the planet. Fade it on the facing angle
+    // instead — written straight to the DOM node so this costs no re-renders.
+    if (groupRef.current) {
+      groupRef.current.getWorldPosition(worldPos.current);
+      const facing = worldPos.current
+        .clone()
+        .normalize()
+        .dot(state.camera.position.clone().normalize());
+      const opacity = THREE.MathUtils.clamp((facing - 0.1) / 0.35, 0, 1);
+      if (labelRef.current) labelRef.current.style.opacity = String(opacity);
+      if (meshRef.current) {
+        (meshRef.current.material as THREE.MeshBasicMaterial).opacity = 0.25 + opacity * 0.75;
+      }
+    }
   });
 
   return (
-    <group position={position}>
+    <group ref={groupRef} position={position}>
       {/* Glowing marker */}
       <mesh ref={meshRef}>
         <sphereGeometry args={[0.07, 16, 16]} />
-        <meshBasicMaterial color={color} />
+        <meshBasicMaterial color={color} transparent />
       </mesh>
       
       {/* Outer ring pulse */}
@@ -226,22 +189,16 @@ function LocationMarker({
         <meshBasicMaterial color={color} transparent opacity={0.4} side={THREE.DoubleSide} />
       </mesh>
       
-      {/* Flag label - hidden when mobile menu is open */}
+      {/* Label. The flag emoji is gone - emoji are banned in the UI, and this
+          one asserted a client presence that does not exist. */}
       {!hideLabels && (
-        <Html
-          position={[0, 0.25, 0]}
-          center
-          style={{
-            pointerEvents: 'none',
-            userSelect: 'none',
-          }}
-        >
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-xl drop-shadow-lg">{flag}</span>
-            <span className="text-[9px] font-bold text-white bg-black/60 px-1.5 py-0.5 rounded whitespace-nowrap">
-              {name}
-            </span>
-          </div>
+        <Html position={[0, 0.24, 0]} center style={{ pointerEvents: 'none', userSelect: 'none' }}>
+          <span
+            ref={labelRef}
+            className="font-mono text-[10px] uppercase tracking-[0.14em] text-foreground/80 whitespace-nowrap"
+          >
+            {name}
+          </span>
         </Html>
       )}
     </group>
@@ -256,16 +213,17 @@ function Scene({ hideLabels = false, isPaused = false }: { hideLabels?: boolean;
   
   return (
     <>
-      {/* Key light – bright sunlight */}
-      <directionalLight position={[5, 3, 5]} intensity={2.8} color="#ffffff" />
-      {/* Secondary light – fills shadows */}
-      <directionalLight position={[-4, 2, -3]} intensity={1.2} color="#aaccff" />
-      {/* Fill light */}
-      <directionalLight position={[-3, -1, -4]} intensity={0.6} color="#e0e0e0" />
-      {/* Ambient – strong overall fill so dark side isn't black */}
-      <ambientLight intensity={1.1} />
-      {/* Rim light for depth */}
-      <pointLight position={[0, 0, 8]} intensity={0.5} color="#ffffff" />
+      {/* Key light – warm sun */}
+      <directionalLight position={[5, 3, 5]} intensity={2.6} color="#fff3e6" />
+      {/* Secondary fill. Was #aaccff — a blue fill light, which is most of why
+          the oceans read as brand blue rather than as water. */}
+      <directionalLight position={[-4, 2, -3]} intensity={1.1} color="#e8c4a8" />
+      {/* Low fill */}
+      <directionalLight position={[-3, -1, -4]} intensity={0.55} color="#d8cec6" />
+      {/* Ambient – keeps the terminator readable */}
+      <ambientLight intensity={1.05} />
+      {/* Ember rim, matching the bloom behind the sphere */}
+      <pointLight position={[0, 0, 8]} intensity={0.55} color="#ffb894" />
       
       <EarthWithMarkers hideLabels={hideLabels} isPaused={shouldPauseRotation} />
       

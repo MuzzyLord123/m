@@ -10,7 +10,7 @@ import { useSiteContent } from "@/hooks/useSiteContent";
 import { HOME_HERO_DEFAULTS, type HomeHeroContent } from "@/lib/siteContentSchemas";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
-import { FloatingScreenshotHero } from "@/components/marketing/FloatingScreenshotHero";
+import { HomeHero } from "@/components/marketing/HomeHero";
 
 export default function AdminMarketingHero() {
   const navigate = useNavigate();
@@ -73,7 +73,7 @@ export default function AdminMarketingHero() {
             </CardHeader>
             <CardContent className="p-0 overflow-hidden rounded-b-lg">
               <div className="relative h-[600px] overflow-hidden">
-                <FloatingScreenshotHero />
+                <HomeHero />
               </div>
             </CardContent>
           </Card>
@@ -82,7 +82,7 @@ export default function AdminMarketingHero() {
         <Card>
           <CardHeader>
             <CardTitle>Headline</CardTitle>
-            <CardDescription>Top eyebrow, main title, and the rotating italic words.</CardDescription>
+            <CardDescription>Top eyebrow, main title, and the rotating words.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div>
