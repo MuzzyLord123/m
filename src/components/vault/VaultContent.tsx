@@ -15,6 +15,7 @@ import {
   Download, Plus, Copy, CheckCircle2, AlertTriangle, Fingerprint,
   ShieldCheck, X, ArrowRight, ArrowLeft, RefreshCw, File, FolderLock, Key
 } from 'lucide-react';
+import { encryptText, decryptText } from '@/lib/vaultCrypto';
 
 // ─── Crypto helpers ───
 async function sha256(message: string): Promise<string> {
@@ -54,27 +55,6 @@ function generateTOTPUri(secret: string, email: string, vaultName: string): stri
   return `otpauth://totp/Quooro%20Vault%20(${encodeURIComponent(vaultName)}):${encodeURIComponent(email)}?secret=${secret}&issuer=Quooro%20Vault&digits=6&period=30`;
 }
 
-async function encryptText(text: string, password: string): Promise<string> {
-  const enc = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password.padEnd(32, '0').slice(0, 32)), 'AES-GCM', false, ['encrypt']);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, keyMaterial, enc.encode(text));
-  const combined = new Uint8Array(iv.length + new Uint8Array(encrypted).length);
-  combined.set(iv);
-  combined.set(new Uint8Array(encrypted), iv.length);
-  return btoa(String.fromCharCode(...combined));
-}
-
-async function decryptText(ciphertext: string, password: string): Promise<string> {
-  const dec = new TextDecoder();
-  const enc = new TextEncoder();
-  const data = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
-  const iv = data.slice(0, 12);
-  const encrypted = data.slice(12);
-  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password.padEnd(32, '0').slice(0, 32)), 'AES-GCM', false, ['decrypt']);
-  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, keyMaterial, encrypted);
-  return dec.decode(decrypted);
-}
 
 const SECURITY_QUESTION_OPTIONS = [
   "What was the name of your first pet?",

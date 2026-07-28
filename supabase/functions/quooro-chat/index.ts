@@ -133,21 +133,27 @@ const CRUD_TOOLS = [
     type: "function",
     function: {
       name: "create_lead",
-      description: "Create a new lead/contact in the CRM. Use when user wants to add a new lead, prospect, or contact.",
+      // `leads` is the agency's prospecting table, not a generic contacts
+      // table. It has no user_id/name/company/industry/budget_range columns -
+      // the previous definitions targeted all five and failed every time.
+      // Ownership is `assigned_to`, which the RLS policy checks.
+      description: "Create a new prospect lead. Businesses use business_name; sole traders/individuals set is_personal and personal_name.",
       parameters: {
         type: "object",
         properties: {
-          name: { type: "string", description: "Full name of the lead" },
+          business_name: { type: "string", description: "Trading name of the business" },
+          personal_name: { type: "string", description: "Person's name when the lead is an individual/sole trader" },
+          contact_name: { type: "string", description: "Named contact at the business" },
+          is_personal: { type: "boolean", description: "True for an individual rather than a business" },
           email: { type: "string", description: "Email address" },
           phone: { type: "string", description: "Phone number" },
-          company: { type: "string", description: "Company name" },
-          source: { type: "string", description: "Lead source (e.g. website, referral, social)" },
-          status: { type: "string", enum: ["new", "contacted", "qualified", "proposal", "negotiation", "won", "lost"], description: "Lead status" },
-          notes: { type: "string", description: "Any notes about the lead" },
-          industry: { type: "string", description: "Lead's industry" },
-          budget_range: { type: "string", description: "Budget range if known" }
+          website_url: { type: "string", description: "Existing website, if any" },
+          location_city: { type: "string", description: "City / town" },
+          location_postcode: { type: "string", description: "Postcode" },
+          category: { type: "string", description: "Trade or business category, e.g. plumber, dentist" },
+          source: { type: "string", enum: ["google_maps", "manual", "csv_import", "html_import", "json_import"], description: "How the lead was sourced" },
+          status: { type: "string", enum: ["new", "contacted", "engaged", "live_preview_wanted", "converted", "lost", "do_not_contact"], description: "Lead status" }
         },
-        required: ["name"],
         additionalProperties: false
       }
     }
@@ -161,17 +167,21 @@ const CRUD_TOOLS = [
         type: "object",
         properties: {
           lead_id: { type: "string", description: "Lead ID if known" },
-          lead_name: { type: "string", description: "Lead name to search for if ID not known" },
+          lead_name: { type: "string", description: "Business or contact name to search for if ID not known" },
           updates: {
             type: "object",
             properties: {
-              name: { type: "string" },
+              business_name: { type: "string" },
+              personal_name: { type: "string" },
+              contact_name: { type: "string" },
               email: { type: "string" },
               phone: { type: "string" },
-              company: { type: "string" },
-              status: { type: "string", enum: ["new", "contacted", "qualified", "proposal", "negotiation", "won", "lost"] },
-              notes: { type: "string" },
-              source: { type: "string" }
+              website_url: { type: "string" },
+              location_city: { type: "string" },
+              location_postcode: { type: "string" },
+              category: { type: "string" },
+              status: { type: "string", enum: ["new", "contacted", "engaged", "live_preview_wanted", "converted", "lost", "do_not_contact"] },
+              last_contacted_at: { type: "string", description: "ISO 8601 timestamp" }
             },
             additionalProperties: false
           }
@@ -190,7 +200,7 @@ const CRUD_TOOLS = [
         type: "object",
         properties: {
           lead_id: { type: "string", description: "Lead ID" },
-          lead_name: { type: "string", description: "Lead name to search for" }
+          lead_name: { type: "string", description: "Business or contact name to search for" }
         },
         additionalProperties: false
       }
@@ -200,12 +210,12 @@ const CRUD_TOOLS = [
     type: "function",
     function: {
       name: "get_leads",
-      description: "Retrieve leads from the CRM with optional filters. Use to show pipeline, search leads, or get lead details.",
+      description: "Retrieve prospect leads with optional filters. Use to show the pipeline, search leads, or get lead details.",
       parameters: {
         type: "object",
         properties: {
-          status: { type: "string", description: "Filter by status" },
-          search: { type: "string", description: "Search by name or company" },
+          status: { type: "string", enum: ["new", "contacted", "engaged", "live_preview_wanted", "converted", "lost", "do_not_contact"], description: "Filter by status" },
+          search: { type: "string", description: "Search business name, contact name or email" },
           limit: { type: "number", description: "Max results (default 20)" }
         },
         additionalProperties: false
@@ -718,18 +728,27 @@ async function executeTool(
   try {
     switch (toolName) {
       // === LEADS ===
+      // `leads` is the prospecting table: ownership is `assigned_to`, and there
+      // is no user_id/name/company column. Every one of these previously used
+      // columns that do not exist.
       case "create_lead": {
+        if (!args.business_name && !args.personal_name && !args.contact_name) {
+          return { success: false, error: "A business_name, personal_name or contact_name is required." };
+        }
         const { data, error } = await supabase.from("leads").insert({
-          user_id: userId,
-          name: args.name,
+          assigned_to: userId,
+          business_name: args.business_name || null,
+          personal_name: args.personal_name || null,
+          contact_name: args.contact_name || null,
+          is_personal: args.is_personal ?? false,
           email: args.email || null,
           phone: args.phone || null,
-          company: args.company || null,
-          source: args.source || "ai_assistant",
+          website_url: args.website_url || null,
+          location_city: args.location_city || null,
+          location_postcode: args.location_postcode || null,
+          category: args.category || null,
+          source: args.source || "manual",
           status: args.status || "new",
-          notes: args.notes || null,
-          industry: args.industry || null,
-          budget_range: args.budget_range || null,
         }).select().single();
         if (error) throw new Error(error.message);
         return { success: true, data };
@@ -739,13 +758,14 @@ async function executeTool(
         let leadId = args.lead_id;
         if (!leadId && args.lead_name) {
           const { data: found } = await supabase.from("leads")
-            .select("id").eq("user_id", userId)
-            .ilike("name", `%${args.lead_name}%`).limit(1).single();
+            .select("id").eq("assigned_to", userId)
+            .or(`business_name.ilike.%${args.lead_name}%,contact_name.ilike.%${args.lead_name}%,personal_name.ilike.%${args.lead_name}%`)
+            .limit(1).maybeSingle();
           leadId = found?.id;
         }
         if (!leadId) return { success: false, error: "Lead not found" };
         const { data, error } = await supabase.from("leads")
-          .update(args.updates).eq("id", leadId).eq("user_id", userId).select().single();
+          .update(args.updates).eq("id", leadId).eq("assigned_to", userId).select().single();
         if (error) throw new Error(error.message);
         return { success: true, data };
       }
@@ -754,21 +774,24 @@ async function executeTool(
         let leadId = args.lead_id;
         if (!leadId && args.lead_name) {
           const { data: found } = await supabase.from("leads")
-            .select("id").eq("user_id", userId)
-            .ilike("name", `%${args.lead_name}%`).limit(1).single();
+            .select("id").eq("assigned_to", userId)
+            .or(`business_name.ilike.%${args.lead_name}%,contact_name.ilike.%${args.lead_name}%,personal_name.ilike.%${args.lead_name}%`)
+            .limit(1).maybeSingle();
           leadId = found?.id;
         }
         if (!leadId) return { success: false, error: "Lead not found" };
-        const { error } = await supabase.from("leads").delete().eq("id", leadId).eq("user_id", userId);
+        const { error } = await supabase.from("leads").delete().eq("id", leadId).eq("assigned_to", userId);
         if (error) throw new Error(error.message);
         return { success: true, data: { deleted: true } };
       }
 
       case "get_leads": {
-        let q = supabase.from("leads").select("*").eq("user_id", userId)
+        let q = supabase.from("leads").select("*").eq("assigned_to", userId)
           .order("created_at", { ascending: false }).limit(args.limit || 20);
         if (args.status) q = q.eq("status", args.status);
-        if (args.search) q = q.or(`name.ilike.%${args.search}%,company.ilike.%${args.search}%`);
+        if (args.search) {
+          q = q.or(`business_name.ilike.%${args.search}%,contact_name.ilike.%${args.search}%,personal_name.ilike.%${args.search}%,email.ilike.%${args.search}%`);
+        }
         const { data, error } = await q;
         if (error) throw new Error(error.message);
         return { success: true, data };
@@ -1027,9 +1050,11 @@ async function executeTool(
         const summary: Record<string, any> = {};
 
         if (sections.includes("leads")) {
-          const { data } = await supabase.from("leads").select("id, name, company, status, created_at")
-            .eq("user_id", userId).order("created_at", { ascending: false }).limit(10);
-          const { count } = await supabase.from("leads").select("id", { count: "exact", head: true }).eq("user_id", userId);
+          const { data } = await supabase.from("leads")
+            .select("id, business_name, personal_name, contact_name, status, created_at")
+            .eq("assigned_to", userId).order("created_at", { ascending: false }).limit(10);
+          const { count } = await supabase.from("leads")
+            .select("id", { count: "exact", head: true }).eq("assigned_to", userId);
           summary.leads = { total: count || 0, recent: data || [] };
         }
         if (sections.includes("deals")) {
@@ -1261,26 +1286,27 @@ async function executeAutomation(
     }
 
     case "auto_qualify_leads": {
-      // Find leads that have been in "contacted" status for 7+ days with a company
+      // Promote leads that have sat in "contacted" for 7+ days. Ownership is
+      // assigned_to, and lead_status has no "qualified" member - the next stage
+      // after "contacted" is "engaged", so the old value could never be written.
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const { data: leads } = await supabase.from("leads")
-        .select("id, name, company")
-        .eq("user_id", userId).eq("status", "contacted")
-        .lt("created_at", sevenDaysAgo)
-        .not("company", "is", null);
-      
+        .select("id, business_name, personal_name, contact_name")
+        .eq("assigned_to", userId).eq("status", "contacted")
+        .lt("created_at", sevenDaysAgo);
+
       if (!leads || leads.length === 0) {
         return { success: true, data: { message: "No leads ready for auto-qualification.", count: 0 } };
       }
-      
+
       for (const lead of leads) {
-        await supabase.from("leads").update({ status: "qualified" }).eq("id", lead.id);
+        await supabase.from("leads").update({ status: "engaged" }).eq("id", lead.id);
       }
-      
-      return { success: true, data: { 
-        message: `Auto-qualified ${leads.length} lead(s) that were contacted 7+ days ago.`, 
-        count: leads.length, 
-        leads: leads.map((l: any) => l.name)
+
+      return { success: true, data: {
+        message: `Moved ${leads.length} lead(s) to engaged after 7+ days in contacted.`,
+        count: leads.length,
+        leads: leads.map((l: any) => l.business_name || l.personal_name || l.contact_name)
       }};
     }
 
@@ -1317,7 +1343,7 @@ async function executeAutomation(
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       
       const [leadsRes, dealsRes, invoicesRes, eventsRes] = await Promise.all([
-        supabase.from("leads").select("id, status", { count: "exact" }).eq("user_id", userId).gte("created_at", oneWeekAgo),
+        supabase.from("leads").select("id, status", { count: "exact" }).eq("assigned_to", userId).gte("created_at", oneWeekAgo),
         supabase.from("crm_deals").select("id, deal_value, stage").eq("user_id", userId).gte("created_at", oneWeekAgo),
         supabase.from("client_invoices").select("id, amount, status").eq("created_by", userId).gte("created_at", oneWeekAgo),
         supabase.from("calendar_events").select("id").eq("user_id", userId).gte("start_time", oneWeekAgo),
@@ -1392,7 +1418,7 @@ async function fetchUserContext(userId: string, supabase: any): Promise<string> 
 
     // Quick stats
     const [leadsCount, dealsCount, projectsCount] = await Promise.all([
-      supabase.from('leads').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('leads').select('id', { count: 'exact', head: true }).eq('assigned_to', userId),
       supabase.from('crm_deals').select('id', { count: 'exact', head: true }).eq('user_id', userId),
       supabase.from('app_projects').select('id', { count: 'exact', head: true }).eq('user_id', userId),
     ]);
