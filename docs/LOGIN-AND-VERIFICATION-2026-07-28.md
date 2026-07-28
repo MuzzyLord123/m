@@ -63,14 +63,39 @@ allowlist matched, and the new `ai-provider.ts` module loaded.
 their validation errors fall through to the generic catch. Behaviour is correct,
 only the status code is wrong. Not fixed here; it changes no functionality.
 
+## Missing vendor secrets — confirmed by probing, not inferred
+
+The boot sweep above is not evidence that a function is *configured*: most
+returned `401` before reaching their config checks. Re-probed afterwards with a
+real logged-in token, against read-only endpoints only (nothing that creates a
+checkout session, sends an email, or has any other outward-facing effect):
+
+| Secret | Confirmed by | What is dead without it |
+| --- | --- | --- |
+| `STRIPE_SECRET_KEY` | `check-subscriptions-plan` and `check-designer-subscription` both return `STRIPE_SECRET_KEY is not set` | **All payments** — checkout, subscriptions, plan checks, client invoicing |
+| `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY`) | `quooro-chat`, `doc-ai`, `marketing-copy-rewrite` return the designed 503 | All six AI features |
+| `RESEND_API_KEY` | `send-verification-email` returns `RESEND_API_KEY is not configured` | All outbound email |
+
+That the token was accepted this far is itself a result: it proves a session
+minted from the SQL-created account passes the edge functions' own auth checks,
+not just the auth endpoint.
+
+`SITE_URL` is read by three functions for redirect construction and is likely
+unset as well; it degrades links rather than breaking a feature outright.
+
+**Google Calendar is not a missing secret.** `google-calendar-auth` returns
+"Please add your Client ID and Secret on the Connections page first", i.e. those
+credentials are stored per-user in the database, so they can be configured from
+inside the app with no dashboard access.
+
 ## Still blocked — and why none of it is a Supabase-access problem
 
 | Item | Why it cannot be done from here |
 | --- | --- |
-| Google OAuth | Needs a Google Cloud OAuth client plus Supabase Auth provider config. Both are control-plane/console only. **Email + password login works today without it.** |
-| `ANTHROPIC_API_KEY` | Requires an AI vendor account and billing. No amount of database access substitutes for it. All six AI functions return an actionable 503 until set. |
-| `RESEND_API_KEY` | `send-verification-email` returns `RESEND_API_KEY is not configured`. Transactional email is off until set. Login does not depend on it. |
+| Google OAuth sign-in | Needs a Google Cloud OAuth client plus Supabase Auth provider config. Both are control-plane/console only. **Email + password login works today without it.** |
+| The three secrets above | Each needs a vendor account and billing. No amount of database access substitutes for one. |
 | Old Lovable data (4,000+ leads) | The old project `ijybotwfiediocoewwux` is not in this Supabase organisation, so it cannot be read from here. |
 
 Edge-function secrets are control-plane too, so even a key that exists elsewhere
-cannot be installed from this session.
+cannot be installed from this session. Adding all three in
+Settings -> Edge Functions -> Secrets requires no further code changes.
