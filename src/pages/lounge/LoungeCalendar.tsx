@@ -15,7 +15,6 @@ import { AgendaView } from '@/components/calendar/AgendaView';
 import { YearView } from '@/components/calendar/YearView';
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { EventPopover } from '@/components/calendar/EventPopover';
-import { CalendarAIChat } from '@/components/calendar/CalendarAIChat';
 import { MiniCalendar } from '@/components/calendar/MiniCalendar';
 import { AnimatePresence } from 'framer-motion';
 import { useSwipe } from '@/hooks/useTouch';
@@ -155,12 +154,6 @@ export default function LoungeCalendar() {
       // Push new event to Google Calendar
       if (isGcalConnected && created) pushEvent(created);
     }
-  };
-
-  const handleAICreate = async (data: CreateEventData) => {
-    const created = await createEvent(data);
-    if (isGcalConnected && created) pushEvent(created);
-    return created;
   };
 
   // Drag-to-reschedule handler
@@ -340,10 +333,6 @@ export default function LoungeCalendar() {
           )}
         </div>
 
-        {/* AI Chat Bar */}
-        <div className="mx-2 lg:mx-6 mb-3">
-          <CalendarAIChat onCreateEvent={handleAICreate} />
-        </div>
       </div>
 
       {/* Mobile FAB for quick event creation */}
