@@ -107,7 +107,7 @@ const policyItems = [
     value: "terms-of-service",
     icon: FileText,
     title: "Terms of Service",
-    body: "Our Terms of Service outline the agreement between you and Echelon Sites Ltd when using our services.",
+    body: "Our Terms of Service outline the agreement between you and Quooro when using our services.",
     points: [
       "Service agreements and project scope",
       "Payment terms and refund policy",

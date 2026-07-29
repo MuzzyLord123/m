@@ -101,13 +101,16 @@ The Packages page floating "Need Help?" button linked to
 real enquiry. It now routes to `/get-started`.
 `[PLACEHOLDER: if the studio wants WhatsApp contact, wire the real number]`
 
-### P7. Legal entity name
+### P7. Legal entity name — RESOLVED 2026-07-29
 
-The Support page and Terms of Service name **Echelon Sites Ltd** as the
-contracting entity while the brand everywhere else is Quooro. Left untouched —
-a legal name is not a design decision. `[PLACEHOLDER: owner to confirm the
-registered company name and whether Terms should read "Quooro (a trading name
-of …)" ]`
+The owner confirmed the rebrand: every customer-facing "Echelon Sites"
+reference now reads **Quooro** (Support page Terms summary, Ownership
+comparison header, admin "managed_by" default). Remaining server-side:
+the database column default `managed_by = 'Echelon Team'` and two granted
+emails live in frozen supabase files — the admin UI now always sends
+'Quooro Team', so new records are unaffected, but a migration would be
+needed to change the DB default itself. `[NOTE: if Terms must cite a
+registered company number/name, the owner should supply the exact wording]`
 
 ### P8. Fabricated service statistics (removed 2026-07-29)
 

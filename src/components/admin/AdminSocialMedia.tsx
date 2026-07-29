@@ -115,7 +115,7 @@ export default function AdminSocialMedia() {
     account_handle: '',
     account_name: '',
     profile_url: '',
-    managed_by: 'Echelon Team',
+    managed_by: 'Quooro Team',
     posting_frequency: 'Weekly',
     status: 'active',
     notes: ''
@@ -219,7 +219,7 @@ export default function AdminSocialMedia() {
       account_handle: '',
       account_name: '',
       profile_url: '',
-      managed_by: 'Echelon Team',
+      managed_by: 'Quooro Team',
       posting_frequency: 'Weekly',
       status: 'active',
       notes: ''
@@ -235,7 +235,7 @@ export default function AdminSocialMedia() {
         account_handle: account.account_handle,
         account_name: account.account_name || '',
         profile_url: account.profile_url || '',
-        managed_by: account.managed_by || 'Echelon Team',
+        managed_by: account.managed_by || 'Quooro Team',
         posting_frequency: account.posting_frequency || 'Weekly',
         status: account.status,
         notes: account.notes || ''
@@ -260,7 +260,7 @@ export default function AdminSocialMedia() {
         account_handle: accountForm.account_handle,
         account_name: accountForm.account_name || null,
         profile_url: accountForm.profile_url || null,
-        managed_by: accountForm.managed_by || 'Echelon Team',
+        managed_by: accountForm.managed_by || 'Quooro Team',
         posting_frequency: accountForm.posting_frequency || 'Weekly',
         status: accountForm.status,
         notes: accountForm.notes || null
