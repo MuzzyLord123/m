@@ -1,15 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DesignerSplash } from '@/components/splash/DesignerSplash';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Paintbrush, Globe, Loader2, ExternalLink, Trash2, Download,
-  MoreHorizontal, Crown, Clock, Layout, Pencil, Search,
-  FolderOpen, LayoutGrid, List, ArrowUpDown, Eye, Sparkles,
-  ChevronRight, X, Layers, Palette, Store, Filter,
+  MoreHorizontal, Layout, Pencil, Search, LayoutGrid, List, ArrowUpDown,
+  Eye, Wand2, Layers, Palette, Store,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogDescription, DialogFooter,
@@ -21,14 +18,18 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { TEMPLATES } from '@/components/designer/constants/templates';
 import { useUserRole } from '@/hooks/useUserRole';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
 import { TemplatePreviewModal } from '@/components/designer/TemplatePreviewModal';
 import { TemplateThumbnail } from '@/components/designer/TemplateThumbnail';
+import { cn } from '@/lib/utils';
+import {
+  PageHeader, Panel, StatusBadge, RelativeTime, EmptyState, ConfirmDialog,
+  DataTable, SkeletonBlock, FIELD, FIELD_LABEL, CHIP_ON, CHIP_OFF,
+  type Column,
+} from '@/components/platform';
 
 const DESIGNER_PRODUCT_ID = 'prod_TylFkDdlGGffHp';
 const DESIGNER_PRICE_ID = 'price_1T0nj5RsdRM0b4FvfJtuGFXU';
@@ -44,61 +45,12 @@ interface DesignerSite {
   updated_at: string;
 }
 
-/* ─────────────── helpers ─────────────── */
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString();
-}
-
-const statusColors: Record<string, string> = {
-  draft: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
-  published: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-  archived: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20',
-};
-
 type SortOption = 'updated' | 'created' | 'name';
 type ViewMode = 'grid' | 'list';
 type DashTab = 'sites' | 'marketplace';
 
 /* ─── template categories for marketplace ─── */
 const TEMPLATE_CATEGORIES = ['All', ...Array.from(new Set(TEMPLATES.map(t => t.category)))];
-
-/* ─── thumbnail placeholders for templates ─── */
-const CATEGORY_IMAGES: Record<string, string> = {
-  Starter: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=400&fit=crop',
-  Business: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop',
-  'Real Estate': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&h=400&fit=crop',
-  Portfolio: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=400&fit=crop',
-  'E-commerce': 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop',
-  Agency: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop',
-  Restaurant: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
-  Healthcare: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&h=400&fit=crop',
-  Education: 'https://images.unsplash.com/photo-1523050854058-8df90110c476?w=600&h=400&fit=crop',
-  Fitness: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=400&fit=crop',
-  Technology: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=400&fit=crop',
-  Blog: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&h=400&fit=crop',
-  Events: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=400&fit=crop',
-  Travel: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=400&fit=crop',
-  Music: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&h=400&fit=crop',
-  'Non-Profit': 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=600&h=400&fit=crop',
-  Fashion: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&h=400&fit=crop',
-  Photography: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=600&h=400&fit=crop',
-  Legal: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&h=400&fit=crop',
-  Wedding: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop',
-  Creative: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=400&fit=crop',
-  Hospitality: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop',
-  Nonprofit: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&h=400&fit=crop',
-  Professional: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=400&fit=crop',
-  Lifestyle: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=400&fit=crop',
-  Entertainment: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&h=400&fit=crop',
-};
 
 /* ─────────────── component ─────────────── */
 export default function LoungeWebsiteDesigner() {
@@ -320,10 +272,13 @@ export default function LoungeWebsiteDesigner() {
   /* ── loading ── */
   if (checkingSubscription) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-border/30 border-t-foreground/70 rounded-full animate-spin" />
-          <span className="text-muted-foreground text-xs tracking-wide">Loading…</span>
+      <div className="min-h-[80vh] p-4 md:p-6 lg:p-8" aria-hidden>
+        <span className="block h-5 w-40 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-3.5 w-64 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }, (_, i) => (
+            <SkeletonBlock key={i} className="h-56 rounded-[10px]" />
+          ))}
         </div>
       </div>
     );
@@ -332,50 +287,54 @@ export default function LoungeWebsiteDesigner() {
   /* ── paywall ── */
   if (!subscribed) {
     return (
-      <div className="max-w-lg mx-auto py-20 px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-8">
-          <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto">
-            <Paintbrush className="w-7 h-7 text-white/60" />
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold text-white tracking-tight">Website Dashboard</h1>
-            <p className="text-[#999] text-sm max-w-sm mx-auto leading-relaxed">
-              Build stunning websites with our drag-and-drop editor. Templates, pages, SEO — all in one place.
+      <div className="mx-auto max-w-md px-4 py-20">
+        <div className="space-y-6">
+          <div>
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              Client portal
+            </span>
+            <h1 className="mt-1 flex items-center gap-2 text-[17px] font-semibold tracking-[-0.015em] text-foreground">
+              <Paintbrush className="h-4 w-4 text-primary" aria-hidden />
+              Website designer
+            </h1>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">
+              Build websites with the drag-and-drop editor. Templates, pages and SEO in one place.
             </p>
           </div>
-          <div className="bg-[#161616] border border-[#2a2a2a] rounded-2xl p-6 space-y-5 text-left">
+          <Panel className="space-y-5 p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white font-medium">Pro Plan</p>
-                <p className="text-[#777] text-xs mt-0.5">Full access to all features</p>
+                <p className="text-[13px] font-medium text-foreground">Pro plan</p>
+                <p className="mt-0.5 text-[11.5px] text-muted-foreground">Full access to all features</p>
               </div>
-              <Badge className="bg-white/10 text-white/80 border-white/10 text-[10px] font-medium tracking-wider uppercase">
-                <Crown className="w-3 h-3 mr-1" /> Pro
-              </Badge>
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Pro</span>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-white">£49.99</span>
-              <span className="text-[#666] text-sm">/month</span>
+              <span className="text-2xl font-semibold tabular-nums text-foreground">£49.99</span>
+              <span className="text-[13px] text-muted-foreground">/month</span>
             </div>
-            <ul className="text-xs space-y-2.5 text-[#aaa]">
-              <li className="flex items-center gap-2.5"><Layout className="w-3.5 h-3.5 text-white/40" /> 50+ starter templates across 20+ niches</li>
-              <li className="flex items-center gap-2.5"><Store className="w-3.5 h-3.5 text-white/40" /> Full template marketplace with preview</li>
-              <li className="flex items-center gap-2.5"><Globe className="w-3.5 h-3.5 text-white/40" /> Unlimited websites & pages</li>
-              <li className="flex items-center gap-2.5"><Paintbrush className="w-3.5 h-3.5 text-white/40" /> Drag-and-drop visual editor (Workshop)</li>
-              <li className="flex items-center gap-2.5"><Sparkles className="w-3.5 h-3.5 text-[#a78bfa]" /> AI-powered website generation</li>
-              <li className="flex items-center gap-2.5"><Layers className="w-3.5 h-3.5 text-white/40" /> 70+ section blocks & component library</li>
-              <li className="flex items-center gap-2.5"><Palette className="w-3.5 h-3.5 text-white/40" /> Global design system & style tokens</li>
-              <li className="flex items-center gap-2.5"><Eye className="w-3.5 h-3.5 text-white/40" /> Live preview & responsive testing</li>
+            <ul className="space-y-2.5 text-xs text-ink-2">
+              <li className="flex items-center gap-2.5"><Layout className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> 50+ starter templates across 20+ niches</li>
+              <li className="flex items-center gap-2.5"><Store className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> Full template marketplace with preview</li>
+              <li className="flex items-center gap-2.5"><Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> Unlimited websites and pages</li>
+              <li className="flex items-center gap-2.5"><Paintbrush className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> Drag-and-drop visual editor (Workshop)</li>
+              <li className="flex items-center gap-2.5"><Wand2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> AI-powered website generation</li>
+              <li className="flex items-center gap-2.5"><Layers className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> 70+ section blocks and component library</li>
+              <li className="flex items-center gap-2.5"><Palette className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> Global design system and style tokens</li>
+              <li className="flex items-center gap-2.5"><Eye className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> Live preview and responsive testing</li>
             </ul>
-            <Button onClick={handleCheckout} disabled={checkoutLoading} className="w-full bg-white text-black hover:bg-white/90 font-medium h-10">
-              {checkoutLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Subscribe Now
+            <Button onClick={handleCheckout} disabled={checkoutLoading} className="h-9 w-full rounded-lg text-xs">
+              {checkoutLoading ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
+              Subscribe now
             </Button>
-            <button onClick={checkSubscription} className="w-full text-center text-[10px] text-[#666] hover:text-[#999] transition-colors pt-1">
+            <button
+              onClick={checkSubscription}
+              className="w-full pt-1 text-center text-[11px] text-muted-foreground transition-colors duration-150 hover:text-foreground"
+            >
               Already subscribed? Refresh status
             </button>
-          </div>
-        </motion.div>
+          </Panel>
+        </div>
       </div>
     );
   }
@@ -389,14 +348,13 @@ export default function LoungeWebsiteDesigner() {
         setPendingEditorUrl(null);
       }} />
     )}
-    <div className="min-h-[80vh] p-4 md:p-6 lg:p-8 space-y-6">
-      <LoungePageHeader
-        title="Website Dashboard"
+    <div className="min-h-[80vh] space-y-6 p-4 md:p-6 lg:p-8">
+      <PageHeader
+        kicker="Client portal"
+        title="Website designer"
         description={subscriptionEnd
           ? `Renews ${new Date(subscriptionEnd).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
           : 'Subscription active'}
-        icon={Globe}
-        badge="Pro"
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -404,52 +362,54 @@ export default function LoungeWebsiteDesigner() {
               size="sm"
               onClick={handleManageSubscription}
               disabled={portalLoading}
-              className="text-muted-foreground hover:text-foreground text-xs h-8 px-3"
+              className="h-8 rounded-lg px-3 text-xs text-muted-foreground hover:text-foreground"
             >
-              {portalLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <ExternalLink className="w-3 h-3 mr-1.5" />}
-              Manage Plan
+              {portalLoading ? <Loader2 className="mr-1.5 h-3 w-3 animate-spin" /> : <ExternalLink className="mr-1.5 h-3 w-3" />}
+              Manage plan
             </Button>
             <Button
               onClick={() => setShowNewSiteDialog(true)}
               size="sm"
-              className="text-xs h-8 px-4"
+              className="h-8 rounded-lg px-3 text-xs"
             >
-              <Plus className="w-3.5 h-3.5 mr-1.5" /> New Site
+              <Plus className="mr-1.5 h-3.5 w-3.5" /> New site
             </Button>
           </div>
         }
       />
 
-      {/* ─── Tabs: Sites / Marketplace ─── */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
-        <div className="flex gap-2">
+      {/* ─── Tabs: sites / marketplace ─── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
+        <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => setActiveTab('sites')}
-            className={`px-4 py-2 text-xs font-medium rounded-lg border transition-colors ${
+            className={cn(
+              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-150',
               activeTab === 'sites'
-                ? 'bg-muted text-foreground border-border'
-                : 'bg-transparent text-muted-foreground border-transparent hover:bg-muted/50 hover:text-foreground'
-            }`}
+                ? 'bg-foreground/[0.05] text-foreground'
+                : 'text-muted-foreground hover:bg-foreground/[0.025] hover:text-foreground',
+            )}
           >
-            <Layers className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
-            My Sites
+            <Layers className="h-3.5 w-3.5" />
+            My sites
           </button>
           <button
             onClick={() => setActiveTab('marketplace')}
-            className={`px-4 py-2 text-xs font-medium rounded-lg border transition-colors ${
+            className={cn(
+              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-150',
               activeTab === 'marketplace'
-                ? 'bg-muted text-foreground border-border'
-                : 'bg-transparent text-muted-foreground border-transparent hover:bg-muted/50 hover:text-foreground'
-            }`}
+                ? 'bg-foreground/[0.05] text-foreground'
+                : 'text-muted-foreground hover:bg-foreground/[0.025] hover:text-foreground',
+            )}
           >
-            <Store className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
-            Template Marketplace
+            <Store className="h-3.5 w-3.5" />
+            Template marketplace
           </button>
           <button
             onClick={() => navigate('/lounge/workshop-studio')}
-            className="px-4 py-2 text-xs font-medium rounded-lg border transition-colors bg-transparent text-muted-foreground border-transparent hover:bg-muted/50 hover:text-foreground"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.025] hover:text-foreground"
           >
-            <Paintbrush className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
+            <Paintbrush className="h-3.5 w-3.5" />
             Workshop Studio
           </button>
           <button
@@ -461,167 +421,168 @@ export default function LoungeWebsiteDesigner() {
                 toast({ title: 'Import successful', description: `Imported ${imported.length} elements from Workshop Studio` });
               } catch { toast({ title: 'Import failed', description: 'Failed to parse Studio export' }); }
             }}
-            className="px-4 py-2 text-xs font-medium rounded-lg border transition-colors bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.025] hover:text-foreground"
           >
-            <Download className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
+            <Download className="h-3.5 w-3.5" />
             Import from Studio
           </button>
         </div>
 
         {activeTab === 'sites' && sites.length > 0 && (
-          <div className="flex items-center gap-2 -mb-px pb-2">
+          <div className="flex items-center gap-2">
             {/* View toggle */}
-            <div className="flex items-center bg-[#1a1a1a] border border-[#2a2a2a] rounded-md overflow-hidden">
+            <div className="flex h-8 items-center overflow-hidden rounded-lg border border-border/60">
               <button
+                type="button"
+                aria-label="Grid view"
+                aria-pressed={viewMode === 'grid'}
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-[#555] hover:text-[#888]'}`}
+                className={cn(
+                  'flex h-full w-8 items-center justify-center transition-colors duration-150',
+                  viewMode === 'grid' ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground hover:text-foreground',
+                )}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
+                <LayoutGrid className="h-3.5 w-3.5" />
               </button>
               <button
+                type="button"
+                aria-label="List view"
+                aria-pressed={viewMode === 'list'}
                 onClick={() => setViewMode('list')}
-                className={`p-1.5 transition-colors ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-[#555] hover:text-[#888]'}`}
+                className={cn(
+                  'flex h-full w-8 items-center justify-center border-l border-border/60 transition-colors duration-150',
+                  viewMode === 'list' ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground hover:text-foreground',
+                )}
               >
-                <List className="w-3.5 h-3.5" />
+                <List className="h-3.5 w-3.5" />
               </button>
             </div>
 
             {/* Sort */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] text-[#777] hover:text-white bg-[#1a1a1a] border border-[#2a2a2a] rounded-md transition-colors">
-                  <ArrowUpDown className="w-3 h-3" />
+                <button
+                  type="button"
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-border/60 px-2.5 text-[11px] text-muted-foreground transition-colors duration-150 hover:text-foreground"
+                >
+                  <ArrowUpDown className="h-3 w-3" />
                   {sortBy === 'updated' ? 'Last edited' : sortBy === 'created' ? 'Date created' : 'Name'}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-[#2a2a2a] min-w-[140px]">
-                <DropdownMenuItem onClick={() => setSortBy('updated')} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">Last edited</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('created')} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">Date created</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('name')} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">Name</DropdownMenuItem>
+              <DropdownMenuContent align="end" className="min-w-[140px] rounded-[10px] border-border/60">
+                <DropdownMenuItem onClick={() => setSortBy('updated')} className="text-xs">Last edited</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('created')} className="text-xs">Date created</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('name')} className="text-xs">Name</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         )}
       </div>
 
-      {/* ─── Sites Tab ─── */}
+      {/* ─── Sites tab ─── */}
       {activeTab === 'sites' && (
         <>
-          {/* Search bar + Delete All */}
+          {/* Search bar + delete all */}
           {sites.length > 0 && (
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3">
               <div className="relative max-w-sm flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#555]" />
-                <input
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
                   type="text"
-                  placeholder="Search sites…"
+                  placeholder="Search sites"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#141414] border border-[#2a2a2a] rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder:text-[#555] focus:outline-none focus:border-[#444] transition-colors"
+                  className={cn(FIELD, 'pl-9')}
                 />
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowDeleteAllDialog(true)}
-                className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive text-xs h-8 px-3"
+                className="h-8 rounded-lg border-destructive/30 px-3 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
-                <Trash2 className="w-3 h-3 mr-1.5" /> Delete All
+                <Trash2 className="mr-1.5 h-3 w-3" /> Delete all
               </Button>
             </div>
           )}
 
-          {/* Grid / List */}
+          {/* Grid / list */}
           {loadingSites ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="w-6 h-6 border-2 border-[#333] border-t-white/70 rounded-full animate-spin" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-hidden>
+              {Array.from({ length: 4 }, (_, i) => (
+                <SkeletonBlock key={i} className="h-56 rounded-[10px]" />
+              ))}
             </div>
           ) : filtered.length === 0 && sites.length === 0 ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-24 space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-[#161616] border border-[#2a2a2a] flex items-center justify-center">
-                <FolderOpen className="w-6 h-6 text-[#555]" />
-              </div>
-              <div className="text-center space-y-1">
-                <p className="text-white/80 text-sm font-medium">No sites yet</p>
-                <p className="text-[#666] text-xs">Create your first site or browse the marketplace</p>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={() => setShowNewSiteDialog(true)} className="bg-white text-black hover:bg-white/90 font-medium text-xs h-8 px-4">
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Create Site
-                </Button>
-                <Button variant="outline" onClick={() => setActiveTab('marketplace')} className="border-[#333] text-[#aaa] hover:text-white hover:bg-white/5 text-xs h-8 px-4">
-                  <Store className="w-3.5 h-3.5 mr-1" /> Browse Templates
-                </Button>
-              </div>
-            </motion.div>
+            <Panel>
+              <EmptyState
+                title="No sites yet"
+                body="Create your first site, or browse the template marketplace to start from a design."
+                action={{ label: 'Create site', onClick: () => setShowNewSiteDialog(true) }}
+              />
+            </Panel>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-[#666] text-xs">No sites match "{searchQuery}"</p>
-            </div>
+            <Panel>
+              <EmptyState compact title="No matching sites" body={`Nothing matches "${searchQuery}".`} />
+            </Panel>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              <AnimatePresence mode="popLayout">
-                {filtered.map((site, i) => (
-                  <SiteCard
-                    key={site.id}
-                    site={site}
-                    index={i}
-                    onOpen={() => openWithSplash(site.id)}
-                    onDelete={() => handleDeleteSite(site)}
-                  />
-                ))}
-              </AnimatePresence>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filtered.map((site) => (
+                <SiteCard
+                  key={site.id}
+                  site={site}
+                  onOpen={() => openWithSplash(site.id)}
+                  onDelete={() => handleDeleteSite(site)}
+                />
+              ))}
             </div>
           ) : (
-            <div className="space-y-1">
-              <AnimatePresence mode="popLayout">
-                {filtered.map((site, i) => (
-                  <SiteListItem
-                    key={site.id}
-                    site={site}
-                    index={i}
-                    onOpen={() => openWithSplash(site.id)}
-                    onDelete={() => handleDeleteSite(site)}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
+            <Panel className="overflow-hidden">
+              <SiteTable
+                sites={filtered}
+                onOpen={openWithSplash}
+                onDelete={handleDeleteSite}
+              />
+            </Panel>
           )}
         </>
       )}
 
-      {/* ─── Marketplace Tab ─── */}
+      {/* ─── Marketplace tab ─── */}
       {activeTab === 'marketplace' && (
-        <div>
+        <div className="space-y-5">
           {/* Marketplace header */}
-          <div className="flex items-start justify-between mb-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-foreground mb-1">Template Marketplace</h2>
-              <p className="text-muted-foreground text-xs">{TEMPLATES.length} professionally designed templates across {TEMPLATE_CATEGORIES.length - 1} industries</p>
+              <h2 className="text-[13.5px] font-[550] tracking-[-0.01em] text-foreground">Template marketplace</h2>
+              <p className="mt-0.5 text-[11.5px] text-muted-foreground">
+                {TEMPLATES.length} professionally designed templates across {TEMPLATE_CATEGORIES.length - 1} industries
+              </p>
             </div>
-            <div className="relative max-w-[240px] w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <input
+            <div className="relative w-full max-w-[240px]">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
                 type="text"
-                placeholder="Search templates…"
+                placeholder="Search templates"
                 value={marketplaceSearch}
                 onChange={e => setMarketplaceSearch(e.target.value)}
-                className="w-full bg-muted border border-border rounded-lg pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring transition-colors"
+                className={cn(FIELD, 'h-9 pl-9')}
               />
             </div>
           </div>
 
-          {/* Category pills */}
-          <div className="flex flex-wrap gap-1.5 mb-6">
+          {/* Category chips */}
+          <div className="flex flex-wrap gap-1.5">
             {TEMPLATE_CATEGORIES.map(cat => (
               <button
                 key={cat}
+                type="button"
                 onClick={() => setMarketplaceCategory(cat)}
-                className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${
-                  marketplaceCategory === cat
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:text-foreground border border-border hover:border-ring'
-                }`}
+                aria-pressed={marketplaceCategory === cat}
+                className={cn(
+                  'rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150',
+                  marketplaceCategory === cat ? CHIP_ON : CHIP_OFF,
+                )}
               >
                 {cat}
               </button>
@@ -630,16 +591,15 @@ export default function LoungeWebsiteDesigner() {
 
           {/* Template grid */}
           {filteredTemplates.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground text-xs">No templates match your search</p>
-            </div>
+            <Panel>
+              <EmptyState compact title="No matching templates" body="Try a different search or category." />
+            </Panel>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {filteredTemplates.map((template, i) => (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredTemplates.map((template) => (
                 <TemplateCard
                   key={template.id}
                   template={template}
-                  index={i}
                   onSelect={() => {
                     setSelectedTemplate(template);
                     setTemplateSiteName(template.name);
@@ -652,123 +612,116 @@ export default function LoungeWebsiteDesigner() {
         </div>
       )}
 
-      {/* ─── New Site Dialog ─── */}
+      {/* ─── New site dialog ─── */}
       <Dialog open={showNewSiteDialog} onOpenChange={setShowNewSiteDialog}>
-        <DialogContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white sm:max-w-md">
+        <DialogContent className="rounded-xl border-border/60 bg-card sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white text-base">New Site</DialogTitle>
-            <DialogDescription className="text-[#888] text-xs">Give your site a name to get started.</DialogDescription>
+            <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">New site</DialogTitle>
+            <DialogDescription className="text-[13px] text-muted-foreground">
+              Give your site a name to get started.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-[#aaa] text-xs">Site Name</Label>
+              <Label className={FIELD_LABEL}>Site name</Label>
               <Input
                 value={newSiteName}
                 onChange={e => setNewSiteName(e.target.value)}
-                placeholder="My Awesome Website"
+                placeholder="My new website"
                 autoFocus
-                className="bg-[#111] border-[#2a2a2a] text-white placeholder:text-[#555] text-sm h-9 focus:border-[#444]"
+                className={FIELD}
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[#aaa] text-xs">Description <span className="text-[#555]">(optional)</span></Label>
+              <Label className={FIELD_LABEL}>Description (optional)</Label>
               <Textarea
                 value={newSiteDesc}
                 onChange={e => setNewSiteDesc(e.target.value)}
                 placeholder="What is this site for?"
                 rows={2}
-                className="bg-[#111] border-[#2a2a2a] text-white placeholder:text-[#555] text-sm resize-none focus:border-[#444]"
+                className={cn(FIELD, 'h-auto min-h-[64px] resize-none')}
               />
             </div>
           </div>
           <DialogFooter className="pt-4">
-            <Button variant="ghost" onClick={() => setShowNewSiteDialog(false)} className="text-[#888] hover:text-white hover:bg-white/5 text-xs">Cancel</Button>
-            <Button onClick={() => handleCreateSite()} disabled={creating || !newSiteName.trim()} className="bg-white text-black hover:bg-white/90 font-medium text-xs h-9 px-5">
-              {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Plus className="w-3.5 h-3.5 mr-1" />}
+            <Button variant="ghost" onClick={() => setShowNewSiteDialog(false)} className="h-8 rounded-lg px-3 text-xs">
+              Cancel
+            </Button>
+            <Button onClick={() => handleCreateSite()} disabled={creating || !newSiteName.trim()} className="h-8 rounded-lg px-3 text-xs">
+              {creating ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Plus className="mr-1 h-3.5 w-3.5" />}
               Create
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* ─── Delete All Confirmation Dialog ─── */}
-      <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
-        <DialogContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white text-base">Delete All Sites</DialogTitle>
-            <DialogDescription className="text-[#888] text-xs">
-              Are you sure you want to delete all {sites.length} site{sites.length !== 1 ? 's' : ''}? This action cannot be undone and all pages, assets, and settings will be permanently removed.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="pt-4">
-            <Button variant="ghost" onClick={() => setShowDeleteAllDialog(false)} className="text-[#888] hover:text-white hover:bg-white/5 text-xs">
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAll}
-              disabled={deletingAll}
-              className="text-xs h-9 px-5"
-            >
-              {deletingAll ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Trash2 className="w-3.5 h-3.5 mr-1" />}
-              Delete All Sites
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* ─── Delete all confirmation ─── */}
+      <ConfirmDialog
+        open={showDeleteAllDialog}
+        onOpenChange={setShowDeleteAllDialog}
+        title="Delete all sites"
+        consequence={`This permanently deletes all ${sites.length} site${sites.length !== 1 ? 's' : ''}, including pages, assets and settings. It cannot be undone.`}
+        confirmLabel="Delete all sites"
+        onConfirm={handleDeleteAll}
+        loading={deletingAll}
+      />
 
-      {/* ─── Template Use Dialog ─── */}
+      {/* ─── Template use dialog ─── */}
       <Dialog open={!!selectedTemplate} onOpenChange={() => setSelectedTemplate(null)}>
-        <DialogContent className="bg-[#1a1a1a] border-[#2a2a2a] text-white sm:max-w-lg">
+        <DialogContent className="rounded-xl border-border/60 bg-card sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-white text-base">Use Template</DialogTitle>
-            <DialogDescription className="text-[#888] text-xs">
+            <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">Use template</DialogTitle>
+            <DialogDescription className="text-[13px] text-muted-foreground">
               Create a new site using the "{selectedTemplate?.name}" template.
             </DialogDescription>
           </DialogHeader>
 
           {/* Template preview */}
           {selectedTemplate && (
-            <div className="rounded-lg overflow-hidden border border-[#2a2a2a] aspect-[16/10] bg-[#0a0a0a] mb-2 relative">
+            <div className="relative mb-2 aspect-[16/10] overflow-hidden rounded-[10px] border border-border/60 bg-foreground/[0.02]">
               <TemplateThumbnail template={selectedTemplate} />
             </div>
           )}
 
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] text-[#888] border-[#333] px-2 py-0 h-5 font-normal">
+              <span className="rounded-md border border-border/60 px-2 py-0.5 text-[10px] text-muted-foreground">
                 {selectedTemplate?.category}
-              </Badge>
-              <span className="text-[#555] text-[11px]">{selectedTemplate?.elements.length} sections</span>
+              </span>
+              <span className="font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                {selectedTemplate?.elements.length} sections
+              </span>
             </div>
-            <p className="text-[#aaa] text-xs leading-relaxed">{selectedTemplate?.description}</p>
+            <p className="text-xs leading-relaxed text-ink-2">{selectedTemplate?.description}</p>
 
             <div className="space-y-1.5 pt-2">
-              <Label className="text-[#aaa] text-xs">Site Name</Label>
+              <Label className={FIELD_LABEL}>Site name</Label>
               <Input
                 value={templateSiteName}
                 onChange={e => setTemplateSiteName(e.target.value)}
-                placeholder="My Website"
+                placeholder="My website"
                 autoFocus
-                className="bg-[#111] border-[#2a2a2a] text-white placeholder:text-[#555] text-sm h-9 focus:border-[#444]"
+                className={FIELD}
               />
             </div>
           </div>
 
           <DialogFooter className="pt-4">
-            <Button variant="ghost" onClick={() => setSelectedTemplate(null)} className="text-[#888] hover:text-white hover:bg-white/5 text-xs">Cancel</Button>
+            <Button variant="ghost" onClick={() => setSelectedTemplate(null)} className="h-8 rounded-lg px-3 text-xs">
+              Cancel
+            </Button>
             <Button
               onClick={() => selectedTemplate && handleCreateSite(selectedTemplate.id)}
               disabled={creatingFromTemplate || !templateSiteName.trim()}
-              className="bg-white text-black hover:bg-white/90 font-medium text-xs h-9 px-5"
+              className="h-8 rounded-lg px-3 text-xs"
             >
-              {creatingFromTemplate ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Sparkles className="w-3.5 h-3.5 mr-1" />}
-              Use Template & Edit
+              {creatingFromTemplate ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Plus className="mr-1 h-3.5 w-3.5" />}
+              Use template
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* ─── Template Preview Modal ─── */}
+      {/* ─── Template preview modal ─── */}
       <TemplatePreviewModal
         open={!!previewTemplate}
         onOpenChange={(open) => { if (!open) setPreviewTemplate(null); }}
@@ -781,213 +734,182 @@ export default function LoungeWebsiteDesigner() {
 
 /* ─────────────── site card (grid) ─────────────── */
 function SiteCard({
-  site, index, onOpen, onDelete,
+  site, onOpen, onDelete,
 }: {
-  site: DesignerSite; index: number; onOpen: () => void; onDelete: () => void;
+  site: DesignerSite; onOpen: () => void; onDelete: () => void;
 }) {
-  const statusClass = statusColors[site.status] || statusColors.draft;
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.97 }}
-      transition={{ delay: index * 0.03, duration: 0.2 }}
-    >
-      <div className="group relative bg-[#141414] border border-[#222] rounded-xl overflow-hidden hover:border-[#3a3a3a] transition-all duration-200">
-        {/* Thumbnail */}
-        <div className="relative aspect-[16/10] bg-[#0e0e0e] overflow-hidden">
+    <div className="group relative overflow-hidden rounded-[10px] border border-border/60 bg-card transition-colors duration-150 hover:bg-foreground/[0.025]">
+      {/* Thumbnail */}
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`Open ${site.site_name} in the Workshop`}
+        className="block w-full text-left"
+      >
+        <div className="relative flex aspect-[16/10] items-center justify-center border-b border-border/60 bg-foreground/[0.02]">
           {site.thumbnail_url ? (
-            <img src={site.thumbnail_url} alt={site.site_name} className="w-full h-full object-cover" />
+            <img src={site.thumbnail_url} alt={site.site_name} className="h-full w-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#111] to-[#0a0a0a]">
-              <div className="flex flex-col items-center gap-3">
-                <div className="grid grid-cols-3 gap-1 opacity-20">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className={`${i < 3 ? 'w-8 h-5' : 'w-8 h-4'} bg-white/30 rounded-sm`} />
-                  ))}
-                </div>
-              </div>
+            <div className="grid grid-cols-3 gap-1 opacity-40" aria-hidden>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className={`${i < 3 ? 'h-5 w-8' : 'h-4 w-8'} rounded-sm bg-foreground/15`} />
+              ))}
             </div>
           )}
+        </div>
+      </button>
 
-          {/* Hover overlay */}
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
-            <Button
-              onClick={(e) => { e.stopPropagation(); onOpen(); }}
-              className="bg-white text-black hover:bg-white/90 font-medium text-xs h-8 px-4 shadow-xl"
+      {/* Info */}
+      <div className="flex items-start justify-between gap-2 p-3.5">
+        <div className="min-w-0">
+          <p className="truncate text-[13px] font-medium leading-tight text-foreground">{site.site_name}</p>
+          <div className="mt-1 flex items-center gap-2.5">
+            <StatusBadge status={site.status} className="text-[11px]" />
+            <RelativeTime date={site.updated_at} />
+          </div>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
+            <button
+              type="button"
+              aria-label="Site actions"
+              className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors duration-150 hover:text-foreground"
             >
-              <Pencil className="w-3 h-3 mr-1.5" />
-              Open Workshop
-            </Button>
-          </div>
-
-          {/* More menu */}
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                <button className="w-7 h-7 rounded-md bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-black/70 transition-colors">
-                  <MoreHorizontal className="w-3.5 h-3.5 text-white/70" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-[#2a2a2a] min-w-[140px]">
-                <DropdownMenuItem onClick={e => { e.stopPropagation(); onOpen(); }} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">
-                  <Pencil className="w-3 h-3 mr-2" /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#2a2a2a]" />
-                <DropdownMenuItem onClick={e => { e.stopPropagation(); onDelete(); }} className="text-red-400 text-xs focus:bg-red-500/10 focus:text-red-400">
-                  <Trash2 className="w-3 h-3 mr-2" /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        {/* Info */}
-        <div className="p-3.5 space-y-1.5">
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-white text-[13px] font-medium truncate leading-tight">{site.site_name}</p>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                <button className="shrink-0 text-[#555] hover:text-[#999] transition-colors">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-[#2a2a2a] min-w-[140px]">
-                <DropdownMenuItem onClick={e => { e.stopPropagation(); onOpen(); }} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">
-                  <Pencil className="w-3 h-3 mr-2" /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#2a2a2a]" />
-                <DropdownMenuItem onClick={e => { e.stopPropagation(); onDelete(); }} className="text-red-400 text-xs focus:bg-red-500/10 focus:text-red-400">
-                  <Trash2 className="w-3 h-3 mr-2" /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className={`text-[10px] capitalize shrink-0 border px-1.5 py-0 h-5 font-normal ${statusClass}`}>
-              {site.status}
-            </Badge>
-            <span className="text-[#444] text-[11px]">·</span>
-            <span className="text-[#555] text-[11px] flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {timeAgo(site.updated_at)}
-            </span>
-          </div>
-        </div>
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[140px] rounded-[10px] border-border/60">
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onOpen(); }} className="text-xs">
+              <Pencil className="mr-2 h-3 w-3" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onDelete(); }} className="text-xs text-destructive">
+              <Trash2 className="mr-2 h-3 w-3" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-/* ─────────────── site list item ─────────────── */
-function SiteListItem({
-  site, index, onOpen, onDelete,
+/* ─────────────── site table (list view) ─────────────── */
+function SiteTable({
+  sites, onOpen, onDelete,
 }: {
-  site: DesignerSite; index: number; onOpen: () => void; onDelete: () => void;
+  sites: DesignerSite[];
+  onOpen: (siteId: string) => void;
+  onDelete: (site: DesignerSite) => void;
 }) {
-  const statusClass = statusColors[site.status] || statusColors.draft;
+  const columns: Column<DesignerSite>[] = [
+    {
+      key: 'site',
+      header: 'Site',
+      render: (s) => (
+        <span className="flex min-w-0 items-center gap-3 py-1">
+          <span className="flex h-9 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/60 bg-foreground/[0.02]">
+            {s.thumbnail_url ? (
+              <img src={s.thumbnail_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <Layout className="h-3.5 w-3.5 text-muted-foreground/50" />
+            )}
+          </span>
+          <span className="truncate text-[13px] font-medium text-foreground">{s.site_name}</span>
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      hideBelowMd: true,
+      render: (s) => <StatusBadge status={s.status} />,
+    },
+    {
+      key: 'updated',
+      header: 'Edited',
+      align: 'right',
+      render: (s) => <RelativeTime date={s.updated_at} />,
+    },
+    {
+      key: 'actions',
+      header: '',
+      align: 'right',
+      width: '84px',
+      render: (s) => (
+        <span className="inline-flex items-center justify-end gap-1">
+          <button
+            type="button"
+            aria-label={`Edit ${s.site_name}`}
+            onClick={(e) => { e.stopPropagation(); onOpen(s.id); }}
+            className="rounded-md p-1.5 text-muted-foreground transition-colors duration-150 hover:text-foreground"
+          >
+            <Pencil className="h-3 w-3" />
+          </button>
+          <button
+            type="button"
+            aria-label={`Delete ${s.site_name}`}
+            onClick={(e) => { e.stopPropagation(); onDelete(s); }}
+            className="rounded-md p-1.5 text-muted-foreground transition-colors duration-150 hover:text-risk"
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </span>
+      ),
+    },
+  ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ delay: index * 0.02 }}
-    >
-      <div
-        onClick={onOpen}
-        className="group flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-white/[0.03] border border-transparent hover:border-[#2a2a2a] cursor-pointer transition-all"
-      >
-        {/* Mini thumbnail */}
-        <div className="w-16 h-10 rounded-md bg-[#111] border border-[#222] overflow-hidden shrink-0">
-          {site.thumbnail_url ? (
-            <img src={site.thumbnail_url} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Layout className="w-3.5 h-3.5 text-[#333]" />
-            </div>
-          )}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <p className="text-white text-[13px] font-medium truncate">{site.site_name}</p>
-          <p className="text-[#555] text-[11px]">Edited {timeAgo(site.updated_at)}</p>
-        </div>
-
-        <Badge variant="outline" className={`text-[10px] capitalize border px-1.5 py-0 h-5 font-normal ${statusClass}`}>
-          {site.status}
-        </Badge>
-
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="h-7 px-2 text-[#888] hover:text-white hover:bg-white/5">
-            <Pencil className="w-3 h-3" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onDelete(); }} className="h-7 px-2 text-red-400/60 hover:text-red-400 hover:bg-red-500/10">
-            <Trash2 className="w-3 h-3" />
-          </Button>
-        </div>
-      </div>
-    </motion.div>
+    <DataTable
+      rows={sites}
+      columns={columns}
+      rowKey={(s) => s.id}
+      onRowClick={(s) => onOpen(s.id)}
+      aria-label="Designer sites"
+    />
   );
 }
 
 /* ─────────────── template card (marketplace) ─────────────── */
 function TemplateCard({
-  template, index, onSelect, onPreview,
+  template, onSelect, onPreview,
 }: {
-  template: typeof TEMPLATES[0]; index: number; onSelect: () => void; onPreview: () => void;
+  template: typeof TEMPLATES[0]; onSelect: () => void; onPreview: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.025, duration: 0.2 }}
-    >
-      <div className="group relative bg-card border border-border rounded-xl overflow-hidden hover:border-ring transition-all duration-200">
-        {/* Live Preview Thumbnail */}
-        <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-          <TemplateThumbnail template={template} />
-          {/* Hover overlay with buttons */}
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
-            <Button
-              onClick={onPreview}
-              variant="outline"
-              className="bg-transparent border-white/30 text-white hover:bg-white/10 font-medium text-xs h-8 px-3 shadow-xl"
-            >
-              <Eye className="w-3 h-3 mr-1.5" />
-              Preview
-            </Button>
-            <Button
-              onClick={onSelect}
-              className="bg-white text-black hover:bg-white/90 font-medium text-xs h-8 px-3 shadow-xl"
-            >
-              <Sparkles className="w-3 h-3 mr-1.5" />
-              Use
-            </Button>
-          </div>
-          {/* Category badge */}
-          <div className="absolute top-2.5 left-2.5 z-10">
-            <Badge className="bg-black/50 backdrop-blur-sm text-white/70 border-white/10 text-[10px] font-normal px-2 py-0 h-5">
-              {template.category}
-            </Badge>
-          </div>
-          {/* Page count badge */}
-          {template.pages && template.pages.length > 1 && (
-            <div className="absolute top-2.5 right-2.5 z-10">
-              <Badge className="bg-black/50 backdrop-blur-sm text-white/70 border-white/10 text-[10px] font-normal px-2 py-0 h-5">
-                {template.pages.length} pages
-              </Badge>
-            </div>
-          )}
-        </div>
+    <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      {/* Live preview thumbnail */}
+      <div className="relative aspect-[16/10] overflow-hidden border-b border-border/60 bg-foreground/[0.02]">
+        <TemplateThumbnail template={template} />
+      </div>
 
-        {/* Info */}
-        <div className="p-3.5 space-y-1">
-          <p className="text-foreground text-[13px] font-medium truncate">{template.name}</p>
-          <p className="text-muted-foreground text-[11px] line-clamp-1">{template.description}</p>
+      {/* Info */}
+      <div className="p-3.5">
+        <p className="truncate text-[13px] font-medium text-foreground">{template.name}</p>
+        <p className="mt-0.5 truncate text-[11.5px] text-muted-foreground">
+          {template.category}
+          {template.pages && template.pages.length > 1 ? ` · ${template.pages.length} pages` : ''}
+        </p>
+        <div className="mt-3 flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onPreview}
+            className="h-7 flex-1 rounded-lg text-[11px] text-muted-foreground hover:text-foreground"
+          >
+            <Eye className="mr-1.5 h-3 w-3" />
+            Preview
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSelect}
+            className="h-7 flex-1 rounded-lg text-[11px]"
+          >
+            Use template
+          </Button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
