@@ -135,3 +135,27 @@ and `allow_member_role_in_team_memberships`):
 Verified by SQL simulation of both signup paths (primary → team + owner
 membership + customer ID; team_member → joins team as `member`), anon RPC
 execution, and cleanup. Both flows now provision correctly server-side.
+
+---
+
+# PLATFORM OVERHAUL FREEZE — 2026-07-29 (branch `platform-overhaul`)
+
+The platform overhaul (Client Portal + Quooro Office) is **presentation
+only** and re-freezes the backend TOTALLY — the signup exception above was
+the last backend change before this freeze. Until the overhaul is signed
+off:
+
+- Everything in the frozen lists above stays frozen. No supabase/**, no
+  src/integrations/**, no edge functions, no migrations, no auth logic,
+  no role gating changes, no env, no deploy config.
+- **Data contracts are the regression net.** Every request the platform
+  UI makes is inventoried in `DATA-CONTRACTS.md`; the rebuilt screens
+  must issue byte-identical requests (same tables, columns, payload
+  keys, filters, RPCs, edge functions, buckets, channels, localStorage
+  auth keys).
+- **No route changes** (`SCREENS.md` is the inventory of the 110
+  platform routes). Guard components (`ProtectedRoute`, `TeamGuard`,
+  `CustomerGuard`, `ExecutiveGuard`) are frozen files.
+- Mixed data+render files: restyle rendering only, per the mixed-files
+  rule above; re-verify data lines after every edit.
+- Flows in `FLOWS.md` must pass identically at the end of every phase.
