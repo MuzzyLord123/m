@@ -60,6 +60,7 @@ import AdminAnnouncements from '@/components/admin/AdminAnnouncements';
 import AdminEnquiries from '@/components/admin/AdminEnquiries';
 import { WorkflowListPage } from '@/components/workflow/WorkflowListPage';
 import { WorkflowBuilder } from '@/components/workflow/WorkflowBuilder';
+import { EmptyState, SkeletonBlock, SkeletonLedger } from '@/components/platform';
 
 import AdminCommandCenter from '@/components/admin/AdminCommandCenter';
 import AccountCreation from '@/pages/admin/AccountCreation';
@@ -154,48 +155,48 @@ interface CustomerUpload {
 }
 
 const uploadStatusColors: Record<string, string> = {
-  pending: 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30',
-  reviewed: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-  implemented: 'bg-green-500/20 text-green-500 border-green-500/30',
-  'needs-clarification': 'bg-orange-500/20 text-orange-500 border-orange-500/30',
+  pending: 'bg-attend/10 text-attend border-attend/25',
+  reviewed: 'bg-muted text-muted-foreground border-border',
+  implemented: 'bg-ok/10 text-ok border-ok/25',
+  'needs-clarification': 'bg-risk/10 text-risk border-risk/25',
 };
 
 const uploadStatusLabels: Record<string, string> = {
   pending: 'Pending',
   reviewed: 'Reviewed',
   implemented: 'Implemented',
-  'needs-clarification': 'Needs Clarification',
+  'needs-clarification': 'Needs clarification',
 };
 
 const statusColors: Record<string, string> = {
-  new: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-  contacted: 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30',
-  'in-progress': 'bg-purple-500/20 text-purple-500 border-purple-500/30',
-  completed: 'bg-green-500/20 text-green-500 border-green-500/30',
+  new: 'bg-primary/10 text-primary border-primary/25',
+  contacted: 'bg-muted text-muted-foreground border-border',
+  'in-progress': 'bg-attend/10 text-attend border-attend/25',
+  completed: 'bg-ok/10 text-ok border-ok/25',
   closed: 'bg-muted text-muted-foreground border-border',
 };
 
 const statusLabels: Record<string, string> = {
   new: 'New',
   contacted: 'Contacted',
-  'in-progress': 'In Progress',
+  'in-progress': 'In progress',
   completed: 'Completed',
   closed: 'Closed',
 };
 
 const clientStatusColors: Record<string, string> = {
-  active: 'bg-green-500/20 text-green-500 border-green-500/30',
-  pending: 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30',
+  active: 'bg-ok/10 text-ok border-ok/25',
+  pending: 'bg-attend/10 text-attend border-attend/25',
   inactive: 'bg-muted text-muted-foreground border-border',
-  preview: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
+  preview: 'bg-primary/10 text-primary border-primary/25',
 };
 
 const websiteStatusOptions = [
-  { value: 'design', label: 'Design', color: 'bg-purple-500' },
-  { value: 'development', label: 'Development', color: 'bg-blue-500' },
-  { value: 'review', label: 'Review', color: 'bg-amber-500' },
-  { value: 'live', label: 'Live', color: 'bg-emerald-500' },
-  { value: 'not_published', label: 'Not Published', color: 'bg-muted' },
+  { value: 'design', label: 'Design', color: 'bg-muted-foreground' },
+  { value: 'development', label: 'Development', color: 'bg-primary' },
+  { value: 'review', label: 'Review', color: 'bg-attend' },
+  { value: 'live', label: 'Live', color: 'bg-ok' },
+  { value: 'not_published', label: 'Not published', color: 'bg-muted' },
 ];
 
 const planOptions = [
@@ -750,11 +751,11 @@ export default function Dashboard() {
   const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | null | undefined }) => {
     if (!value) return null;
     return (
-      <div className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0">
-        <Icon className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+      <div className="flex items-start gap-3 py-2 border-b border-border/60 last:border-0">
+        <Icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">{label}</p>
-          <p className="font-medium text-sm mt-0.5 break-words">{value}</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+          <p className="text-[13px] text-foreground mt-0.5 break-words">{value}</p>
         </div>
       </div>
     );
@@ -762,7 +763,7 @@ export default function Dashboard() {
 
   return (
     <TeamLayout activeTab={mainTab} onTabChange={(tab) => setMainTab(tab as typeof mainTab)}>
-      <div className="workshop-ui container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
+      <div className="workshop-ui container mx-auto px-4 sm:px-5 lg:px-6 py-4 space-y-4">
 
           {/* Command Center Tab */}
           {mainTab === 'command-center' && <AdminCommandCenter />}
@@ -791,90 +792,70 @@ export default function Dashboard() {
 
           {/* Clients Tab */}
           {mainTab === 'clients' && (
-            <div className="space-y-4 sm:space-y-6">
-            {/* Client Stats - Mobile Optimized */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+            <div className="space-y-4">
+            {/* Client facts */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-[10px] border border-border/60 bg-border/60">
               {[
-                { label: 'Total Clients', value: clientStats.total, icon: Users, color: 'text-primary' },
-                { label: 'Active', value: clientStats.active, icon: CheckCircle, color: 'text-green-500' },
-                { label: 'Pending', value: clientStats.pending, icon: Clock, color: 'text-yellow-500' },
-                { label: 'With Plan', value: clientStats.withPlan, icon: Package, color: 'text-purple-500' },
+                { label: 'Total clients', value: clientStats.total },
+                { label: 'Active', value: clientStats.active },
+                { label: 'Pending', value: clientStats.pending },
+                { label: 'With plan', value: clientStats.withPlan },
               ].map((stat) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="glass rounded-xl sm:rounded-2xl p-3 sm:p-5 hover:border-primary/20 transition-colors"
-                >
-                  <div className="flex items-center gap-2 sm:gap-4">
-                    <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-muted ${stat.color}`}>
-                      <stat.icon className="w-4 h-4 sm:w-6 sm:h-6" />
-                    </div>
-                    <div>
-                      <p className="text-xl sm:text-3xl font-bold">{stat.value}</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
-                    </div>
-                  </div>
-                </motion.div>
+                <div key={stat.label} className="bg-card p-3">
+                  <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{stat.label}</p>
+                  <p className="mt-1 font-mono text-lg font-medium tabular-nums text-foreground">{stat.value}</p>
+                </div>
               ))}
             </div>
 
-            {/* Client Filters & Create Button - Mobile Optimized */}
-            <div className="flex flex-col gap-2 sm:gap-4">
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search..."
-                    value={clientSearchTerm}
-                    onChange={(e) => setClientSearchTerm(e.target.value)}
-                    className="pl-9 sm:pl-11 h-10 sm:h-12 text-sm"
-                  />
-                </div>
-                <Select value={clientStatusFilter} onValueChange={setClientStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-48 h-10 sm:h-12 text-sm">
-                    <Filter className="w-4 h-4 mr-2" />
-                    <SelectValue placeholder="Filter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* Client filters and create action */}
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search..."
+                  value={clientSearchTerm}
+                  onChange={(e) => setClientSearchTerm(e.target.value)}
+                  className="pl-9 h-9 text-[13px]"
+                />
               </div>
-              <Button onClick={() => setShowCreateClient(true)} className="h-10 sm:h-12 gap-2 w-full sm:w-auto sm:self-end">
+              <Select value={clientStatusFilter} onValueChange={setClientStatusFilter}>
+                <SelectTrigger className="w-full sm:w-44 h-9 text-[13px]">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button onClick={() => setShowCreateClient(true)} className="h-9 gap-2 w-full sm:w-auto">
                 <UserPlus className="w-4 h-4" />
-                <span className="sm:inline">Create Client</span>
+                <span className="sm:inline">Create client</span>
               </Button>
             </div>
 
-            {/* Clients List - Mobile Optimized */}
-            <div className="space-y-3 sm:space-y-4">
+            {/* Clients list */}
+            <div className="space-y-2">
               {loadingClients ? (
-                <div className="text-center py-12 sm:py-16">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-muted-foreground mt-4 text-sm">Loading clients...</p>
+                <div className="rounded-[10px] border border-border/60 bg-card" aria-hidden>
+                  <SkeletonLedger rows={6} />
                 </div>
               ) : filteredClients.length === 0 ? (
-                <div className="text-center py-12 sm:py-16 glass rounded-xl sm:rounded-2xl">
-                  <Users className="w-10 h-10 sm:w-14 sm:h-14 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-base sm:text-lg font-semibold mb-2">No clients found</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Create your first client account to get started</p>
-                  <Button onClick={() => setShowCreateClient(true)} className="gap-2">
-                    <UserPlus className="w-4 h-4" />
-                    Create Client
-                  </Button>
+                <div className="rounded-[10px] border border-border/60 bg-card">
+                  <EmptyState
+                    title="No clients found"
+                    body="Create your first client account to get started."
+                    action={{ label: 'Create client', onClick: () => setShowCreateClient(true) }}
+                  />
                 </div>
               ) : (
                 filteredClients.map((client, index) => (
-                  <motion.div
+                  <div
                     key={client.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="glass rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-primary/30 transition-all cursor-pointer group active:scale-[0.99]"
+                    className="rounded-[10px] border border-border/60 bg-card p-3 sm:p-4 hover:bg-foreground/[0.025] transition-colors duration-150 cursor-pointer group"
                     onClick={() => {
                       setSelectedClient(client);
                       setEditClientNotes(client.notes || '');
@@ -882,11 +863,11 @@ export default function Dashboard() {
                       fetchClientUploads(client.user_id);
                     }}
                   >
-                    <div className="flex flex-col gap-3 sm:gap-4">
-                      <div className="space-y-2 sm:space-y-3 flex-1">
+                    <div className="flex flex-col gap-3">
+                      <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-base sm:text-lg group-hover:text-primary transition-colors">
-                            {client.full_name || 'No Name'}
+                          <h3 className="text-[13.5px] font-[550] text-foreground">
+                            {client.full_name || 'No name'}
                           </h3>
                           {client.customer_id && (
                             <Badge variant="outline" className="font-mono text-[10px] sm:text-xs">
@@ -911,19 +892,19 @@ export default function Dashboard() {
                             </Badge>
                           )}
                         </div>
-                        <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-2 text-xs sm:text-sm text-muted-foreground">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1.5 text-[11px] text-muted-foreground">
                           <span className="flex items-center gap-1.5 truncate">
-                            <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                            <Mail className="w-3.5 h-3.5 shrink-0" />
                             <span className="truncate">{client.email}</span>
                           </span>
                           {client.company && (
                             <span className="flex items-center gap-1.5 truncate hidden sm:flex">
-                              <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                              <Building className="w-3.5 h-3.5 shrink-0" />
                               <span className="truncate">{client.company}</span>
                             </span>
                           )}
-                          <span className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                          <span className="flex items-center gap-1.5 font-mono tabular-nums">
+                            <Calendar className="w-3.5 h-3.5 shrink-0" />
                             {new Date(client.created_at).toLocaleDateString('en-GB', {
                               day: 'numeric',
                               month: 'short',
@@ -933,10 +914,10 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="flex items-center justify-end">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-8 sm:h-9 text-xs sm:text-sm"
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedClient(client);
@@ -945,12 +926,12 @@ export default function Dashboard() {
                             fetchClientUploads(client.user_id);
                           }}
                         >
-                          <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" />
+                          <Eye className="w-3.5 h-3.5 mr-1.5" />
                           View
                         </Button>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))
               )}
             </div>
@@ -1022,42 +1003,42 @@ export default function Dashboard() {
 
           {/* Website Designer Tab */}
           {mainTab === 'website-designer' && (
-            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-border/30 border-t-foreground/70 rounded-full animate-spin" /></div>}>
+            <Suspense fallback={<div className="rounded-[10px] border border-border/60 bg-card" aria-hidden><SkeletonLedger rows={6} /></div>}>
               <LoungeWebsiteDesigner />
             </Suspense>
           )}
 
           {/* CAD Studio Tab */}
           {mainTab === 'cad-studio' && (
-            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-border/30 border-t-foreground/70 rounded-full animate-spin" /></div>}>
+            <Suspense fallback={<div className="rounded-[10px] border border-border/60 bg-card" aria-hidden><SkeletonLedger rows={6} /></div>}>
               <LoungeCADStudio />
             </Suspense>
           )}
 
           {/* Quooro Office Tab */}
           {mainTab === 'office' && (
-            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-border/30 border-t-foreground/70 rounded-full animate-spin" /></div>}>
+            <Suspense fallback={<div className="rounded-[10px] border border-border/60 bg-card" aria-hidden><SkeletonLedger rows={6} /></div>}>
               <LoungeOffice />
             </Suspense>
           )}
 
-          {/* E-commerce — Product Catalog Manager */}
+          {/* E-commerce: product catalogue manager */}
           {mainTab === 'ecommerce' && (
-            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-border/30 border-t-foreground/70 rounded-full animate-spin" /></div>}>
+            <Suspense fallback={<div className="rounded-[10px] border border-border/60 bg-card" aria-hidden><SkeletonLedger rows={6} /></div>}>
               <EcommerceShell />
             </Suspense>
           )}
 
           {/* Subscription Websites (running subscriptions) */}
           {mainTab === 'subscription-sites' && (
-            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-border/30 border-t-foreground/70 rounded-full animate-spin" /></div>}>
+            <Suspense fallback={<div className="rounded-[10px] border border-border/60 bg-card" aria-hidden><SkeletonLedger rows={6} /></div>}>
               <OfficeEcommerce initialTab="running" />
             </Suspense>
           )}
 
           {/* Hosted Websites (paid, hosted-only) */}
           {mainTab === 'hosted-sites' && (
-            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-border/30 border-t-foreground/70 rounded-full animate-spin" /></div>}>
+            <Suspense fallback={<div className="rounded-[10px] border border-border/60 bg-card" aria-hidden><SkeletonLedger rows={6} /></div>}>
               <OfficeEcommerce initialTab="hosted" />
             </Suspense>
           )}
@@ -1065,12 +1046,12 @@ export default function Dashboard() {
 
       {/* Enquiry Detail Dialog - Mobile Optimized */}
       <Dialog open={!!selectedEnquiry} onOpenChange={() => setSelectedEnquiry(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] w-[calc(100vw-2rem)] sm:w-full overflow-hidden flex flex-col p-0 rounded-xl sm:rounded-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] w-[calc(100vw-2rem)] sm:w-full overflow-hidden flex flex-col p-0 rounded-xl">
           <DialogHeader className="p-4 sm:p-6 pb-0">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
               <div className="min-w-0 flex-1">
-                <DialogTitle className="text-lg sm:text-2xl font-bold truncate">
-                  {selectedEnquiry?.first_name && selectedEnquiry?.last_name 
+                <DialogTitle className="text-[17px] font-semibold tracking-[-0.015em] truncate">
+                  {selectedEnquiry?.first_name && selectedEnquiry?.last_name
                     ? `${selectedEnquiry.first_name} ${selectedEnquiry.last_name}`
                     : selectedEnquiry?.name
                   }
@@ -1092,7 +1073,7 @@ export default function Dashboard() {
             <div className="flex-1 overflow-hidden flex flex-col">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                 <div className="px-4 sm:px-6 overflow-x-auto">
-                  <TabsList className="w-full grid grid-cols-5 h-10 sm:h-12 min-w-[300px]">
+                  <TabsList className="w-full grid grid-cols-5 h-9 min-w-[300px]">
                     <TabsTrigger value="contact" className="text-[10px] sm:text-sm px-1 sm:px-3">Contact</TabsTrigger>
                     <TabsTrigger value="business" className="text-[10px] sm:text-sm px-1 sm:px-3">Business</TabsTrigger>
                     <TabsTrigger value="project" className="text-[10px] sm:text-sm px-1 sm:px-3">Project</TabsTrigger>
@@ -1103,9 +1084,9 @@ export default function Dashboard() {
 
                 <div className="flex-1 overflow-y-auto p-6 pt-4">
                   <TabsContent value="contact" className="mt-0 space-y-0">
-                    <div className="glass rounded-xl p-4">
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Users className="w-4 h-4 text-primary" />
+                    <div className="rounded-[10px] border border-border/60 bg-card p-3">
+                      <h4 className="text-[13px] font-[550] mb-2 flex items-center gap-2">
+                        <Users className="w-4 h-4 text-muted-foreground" />
                         Contact Information
                       </h4>
                       <InfoRow icon={Mail} label="Email" value={selectedEnquiry.email} />
@@ -1117,9 +1098,9 @@ export default function Dashboard() {
                   </TabsContent>
 
                   <TabsContent value="business" className="mt-0 space-y-0">
-                    <div className="glass rounded-xl p-4">
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Building className="w-4 h-4 text-primary" />
+                    <div className="rounded-[10px] border border-border/60 bg-card p-3">
+                      <h4 className="text-[13px] font-[550] mb-2 flex items-center gap-2">
+                        <Building className="w-4 h-4 text-muted-foreground" />
                         Business Details
                       </h4>
                       <InfoRow icon={Building} label="Business Name" value={selectedEnquiry.company} />
@@ -1132,9 +1113,9 @@ export default function Dashboard() {
                   </TabsContent>
 
                   <TabsContent value="project" className="mt-0 space-y-4">
-                    <div className="glass rounded-xl p-4">
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Package className="w-4 h-4 text-primary" />
+                    <div className="rounded-[10px] border border-border/60 bg-card p-3">
+                      <h4 className="text-[13px] font-[550] mb-2 flex items-center gap-2">
+                        <Package className="w-4 h-4 text-muted-foreground" />
                         Project Requirements
                       </h4>
                       <InfoRow icon={Star} label="Selected Package" value={selectedEnquiry.selected_package || selectedEnquiry.interest} />
@@ -1145,9 +1126,9 @@ export default function Dashboard() {
                     </div>
                     
                     {selectedEnquiry.project_details && (
-                      <div className="glass rounded-xl p-4">
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-primary" />
+                      <div className="rounded-[10px] border border-border/60 bg-card p-3">
+                        <h4 className="text-[13px] font-[550] mb-2 flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-muted-foreground" />
                           Project Description
                         </h4>
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedEnquiry.project_details}</p>
@@ -1156,9 +1137,9 @@ export default function Dashboard() {
                   </TabsContent>
 
                   <TabsContent value="goals" className="mt-0 space-y-4">
-                    <div className="glass rounded-xl p-4">
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Target className="w-4 h-4 text-primary" />
+                    <div className="rounded-[10px] border border-border/60 bg-card p-3">
+                      <h4 className="text-[13px] font-[550] mb-2 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-muted-foreground" />
                         Goals & Vision
                       </h4>
                       <InfoRow icon={Target} label="Primary Goal" value={selectedEnquiry.primary_goal} />
@@ -1168,8 +1149,8 @@ export default function Dashboard() {
                     </div>
 
                     {selectedEnquiry.must_have_features && selectedEnquiry.must_have_features.length > 0 && (
-                      <div className="glass rounded-xl p-4">
-                        <h4 className="font-semibold mb-3">Must-Have Features</h4>
+                      <div className="rounded-[10px] border border-border/60 bg-card p-3">
+                        <h4 className="text-[13px] font-[550] mb-2">Must-have features</h4>
                         <div className="flex flex-wrap gap-2">
                           {selectedEnquiry.must_have_features.map((feature, i) => (
                             <Badge key={i} variant="secondary" className="bg-primary/10 text-primary">
@@ -1181,9 +1162,9 @@ export default function Dashboard() {
                     )}
 
                     {selectedEnquiry.additional_notes && (
-                      <div className="glass rounded-xl p-4">
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4 text-primary" />
+                      <div className="rounded-[10px] border border-border/60 bg-card p-3">
+                        <h4 className="text-[13px] font-[550] mb-2 flex items-center gap-2">
+                          <MessageSquare className="w-4 h-4 text-muted-foreground" />
                           Additional Notes from Client
                         </h4>
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedEnquiry.additional_notes}</p>
@@ -1192,9 +1173,9 @@ export default function Dashboard() {
                   </TabsContent>
 
                   <TabsContent value="notes" className="mt-0 space-y-4">
-                    <div className="glass rounded-xl p-4">
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-primary" />
+                    <div className="rounded-[10px] border border-border/60 bg-card p-3">
+                      <h4 className="text-[13px] font-[550] mb-2 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-muted-foreground" />
                         Internal Notes
                       </h4>
                       <Textarea
@@ -1206,7 +1187,7 @@ export default function Dashboard() {
                       />
                       <div className="flex justify-end mt-4">
                         <Button onClick={saveEnquiryNotes} size="sm">
-                          Save Notes
+                          Save notes
                         </Button>
                       </div>
                     </div>
@@ -1222,9 +1203,9 @@ export default function Dashboard() {
       <Dialog open={showCreateClient} onOpenChange={setShowCreateClient}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-primary" />
-              Create Client Account
+            <DialogTitle className="flex items-center gap-2 text-[17px] font-semibold tracking-[-0.015em]">
+              <UserPlus className="w-4 h-4 text-muted-foreground" />
+              Create client account
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
@@ -1384,14 +1365,11 @@ export default function Dashboard() {
               disabled={creatingClient}
             >
               {creatingClient ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                  Creating Account...
-                </>
+                'Creating account...'
               ) : (
                 <>
                   <UserPlus className="w-4 h-4 mr-2" />
-                  Create Account
+                  Create account
                 </>
               )}
             </Button>
@@ -1404,15 +1382,15 @@ export default function Dashboard() {
 
       {/* Client Detail Dialog - Mobile Optimized */}
       <Dialog open={!!selectedClient} onOpenChange={() => setSelectedClient(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] w-[calc(100vw-2rem)] sm:w-full overflow-hidden flex flex-col p-0 rounded-xl sm:rounded-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] w-[calc(100vw-2rem)] sm:w-full overflow-hidden flex flex-col p-0 rounded-xl">
           <DialogHeader className="p-4 sm:p-6 pb-0">
             <div className="flex flex-col gap-3 sm:gap-4">
               <div className="flex items-start justify-between gap-2 pr-8">
                 <div className="min-w-0 flex-1">
-                  <DialogTitle className="text-lg sm:text-2xl font-bold flex items-center gap-2 flex-wrap">
+                  <DialogTitle className="text-[17px] font-semibold tracking-[-0.015em] flex items-center gap-2 flex-wrap">
                     <span className="truncate">{selectedClient?.full_name || 'Client'}</span>
                     {selectedClient?.customer_id && (
-                      <Badge variant="outline" className="font-mono text-[10px] sm:text-sm shrink-0">
+                      <Badge variant="outline" className="font-mono text-[10px] sm:text-xs shrink-0">
                         <Hash className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
                         {selectedClient.customer_id}
                       </Badge>
@@ -1456,7 +1434,7 @@ export default function Dashboard() {
                   className="h-8 text-xs sm:text-sm flex-1 sm:flex-none"
                 >
                   <Key className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
-                  <span className="hidden sm:inline">Reset Password</span>
+                  <span className="hidden sm:inline">Reset password</span>
                   <span className="sm:hidden">Password</span>
                 </Button>
                 <Button
@@ -1479,7 +1457,7 @@ export default function Dashboard() {
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <Users className="w-4 h-4 text-primary" />
+                      <Users className="w-4 h-4 text-muted-foreground" />
                       Client Details
                     </CardTitle>
                   </CardHeader>
@@ -1515,7 +1493,7 @@ export default function Dashboard() {
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <Package className="w-4 h-4 text-primary" />
+                      <Package className="w-4 h-4 text-muted-foreground" />
                       Plan Details
                     </CardTitle>
                   </CardHeader>
@@ -1579,7 +1557,7 @@ export default function Dashboard() {
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-primary" />
+                      <FileText className="w-4 h-4 text-muted-foreground" />
                       Original Enquiry Submission
                     </CardTitle>
                   </CardHeader>
@@ -1623,10 +1601,10 @@ export default function Dashboard() {
               )}
 
               {/* Website Status Section */}
-              <Card className="border-2 border-primary/20">
+              <Card className="border-border/60">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-primary" />
+                    <Globe className="w-4 h-4 text-muted-foreground" />
                     Website Status
                   </CardTitle>
                 </CardHeader>
@@ -1671,14 +1649,14 @@ export default function Dashboard() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">Current Status</span>
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={`${
-                            selectedClient.website_status === 'live' ? 'bg-emerald-500/20 text-emerald-600 border-emerald-500/30' :
-                            selectedClient.website_status === 'development' ? 'bg-blue-500/20 text-blue-600 border-blue-500/30' :
-                            selectedClient.website_status === 'review' ? 'bg-amber-500/20 text-amber-600 border-amber-500/30' :
+                            selectedClient.website_status === 'live' ? 'bg-ok/10 text-ok border-ok/25' :
+                            selectedClient.website_status === 'development' ? 'bg-primary/10 text-primary border-primary/25' :
+                            selectedClient.website_status === 'review' ? 'bg-attend/10 text-attend border-attend/25' :
                             selectedClient.website_status === 'not_published' ? 'bg-muted text-muted-foreground border-border' :
-                            'bg-purple-500/20 text-purple-600 border-purple-500/30'
+                            'bg-muted text-muted-foreground border-border'
                           }`}
                         >
                           {websiteStatusOptions.find(s => s.value === selectedClient.website_status)?.label || 'Design'}
@@ -1716,7 +1694,7 @@ export default function Dashboard() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-primary" />
+                    <FileText className="w-4 h-4 text-muted-foreground" />
                     Internal Notes
                   </CardTitle>
                 </CardHeader>
@@ -1735,7 +1713,7 @@ export default function Dashboard() {
                 <div className="flex justify-end">
                   <Button onClick={updateClient} className="gap-2">
                     <Save className="w-4 h-4" />
-                    Save Changes
+                    Save changes
                   </Button>
                 </div>
               )}
@@ -1746,7 +1724,7 @@ export default function Dashboard() {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                       <CardTitle className="text-sm flex items-center gap-2">
-                        <Upload className="w-4 h-4 text-primary" />
+                        <Upload className="w-4 h-4 text-muted-foreground" />
                         Client Uploads
                         <Badge variant="secondary" className="ml-2">{filteredClientUploads.length}</Badge>
                       </CardTitle>
@@ -1763,25 +1741,25 @@ export default function Dashboard() {
                         <SelectItem value="all">All Statuses</SelectItem>
                         <SelectItem value="pending">
                           <span className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                            <span className="w-2 h-2 rounded-full bg-attend" />
                             Pending
                           </span>
                         </SelectItem>
                         <SelectItem value="reviewed">
                           <span className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-blue-500" />
+                            <span className="w-2 h-2 rounded-full bg-muted-foreground" />
                             Reviewed
                           </span>
                         </SelectItem>
                         <SelectItem value="implemented">
                           <span className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-green-500" />
+                            <span className="w-2 h-2 rounded-full bg-ok" />
                             Implemented
                           </span>
                         </SelectItem>
                         <SelectItem value="needs-clarification">
                           <span className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-orange-500" />
+                            <span className="w-2 h-2 rounded-full bg-risk" />
                             Needs Clarification
                           </span>
                         </SelectItem>
@@ -1791,27 +1769,26 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   {loadingUploads ? (
-                    <div className="text-center py-8">
-                      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                      <p className="text-sm text-muted-foreground mt-2">Loading uploads...</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-hidden>
+                      <SkeletonBlock className="h-32 rounded-[10px]" />
+                      <SkeletonBlock className="h-32 rounded-[10px]" />
                     </div>
                   ) : filteredClientUploads.length === 0 ? (
-                    <div className="text-center py-8 border border-dashed border-border rounded-xl">
-                      <Image className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">
+                    <div className="text-center py-8 border border-dashed border-border/60 rounded-[10px]">
+                      <p className="text-[13px] text-muted-foreground">
                         {uploadStatusFilter === 'all' ? 'No uploads from this client yet' : `No ${uploadStatusLabels[uploadStatusFilter]?.toLowerCase()} uploads`}
                       </p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {filteredClientUploads.map((upload) => (
-                        <div key={upload.id} className="border border-border rounded-xl overflow-hidden group">
+                        <div key={upload.id} className="border border-border/60 rounded-[10px] overflow-hidden group">
                           {upload.image_url && (
                             <div className="relative h-40 overflow-hidden">
                               <SecureImage
                                 src={upload.image_url}
                                 alt={upload.title}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                className="w-full h-full object-cover"
                               />
                               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button
@@ -1836,8 +1813,8 @@ export default function Dashboard() {
                           <div className="p-3">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-sm truncate">{upload.title}</h4>
-                                <p className="text-xs text-muted-foreground">
+                                <h4 className="font-medium text-[13px] truncate">{upload.title}</h4>
+                                <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
                                   {new Date(upload.created_at).toLocaleDateString('en-GB', {
                                     day: 'numeric',
                                     month: 'short',
@@ -1874,25 +1851,25 @@ export default function Dashboard() {
                                 <SelectContent>
                                   <SelectItem value="pending">
                                     <span className="flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                                      <span className="w-2 h-2 rounded-full bg-attend" />
                                       Pending
                                     </span>
                                   </SelectItem>
                                   <SelectItem value="reviewed">
                                     <span className="flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-blue-500" />
+                                      <span className="w-2 h-2 rounded-full bg-muted-foreground" />
                                       Reviewed
                                     </span>
                                   </SelectItem>
                                   <SelectItem value="implemented">
                                     <span className="flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-green-500" />
+                                      <span className="w-2 h-2 rounded-full bg-ok" />
                                       Implemented
                                     </span>
                                   </SelectItem>
                                   <SelectItem value="needs-clarification">
                                     <span className="flex items-center gap-2">
-                                      <span className="w-2 h-2 rounded-full bg-orange-500" />
+                                      <span className="w-2 h-2 rounded-full bg-risk" />
                                       Needs Clarification
                                     </span>
                                   </SelectItem>
@@ -1915,9 +1892,9 @@ export default function Dashboard() {
       <Dialog open={showDeleteClient} onOpenChange={setShowDeleteClient}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
-              <Trash2 className="w-5 h-5" />
-              Delete Client Account
+            <DialogTitle className="flex items-center gap-2 text-[17px] font-semibold tracking-[-0.015em] text-destructive">
+              <Trash2 className="w-4 h-4" />
+              Delete client account
             </DialogTitle>
             <DialogDescription className="pt-2">
               This action is <strong>permanent</strong> and cannot be undone. All client data, uploads, and account information will be deleted.
@@ -1962,14 +1939,11 @@ export default function Dashboard() {
               disabled={deleteInputWord !== deleteConfirmWord || deletingClient}
             >
               {deletingClient ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                  Deleting...
-                </>
+                'Deleting...'
               ) : (
                 <>
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Account
+                  Delete account
                 </>
               )}
             </Button>
@@ -1981,9 +1955,9 @@ export default function Dashboard() {
       <Dialog open={showResetPassword} onOpenChange={setShowResetPassword}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Key className="w-5 h-5 text-primary" />
-              Reset Client Password
+            <DialogTitle className="flex items-center gap-2 text-[17px] font-semibold tracking-[-0.015em]">
+              <Key className="w-4 h-4 text-muted-foreground" />
+              Reset client password
             </DialogTitle>
             <DialogDescription className="pt-2">
               Set a new password for this client's account. They will need to use this password to log in.
@@ -2033,14 +2007,11 @@ export default function Dashboard() {
               disabled={!newPassword || newPassword.length < 6 || resettingPassword}
             >
               {resettingPassword ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                  Resetting...
-                </>
+                'Resetting...'
               ) : (
                 <>
                   <Key className="w-4 h-4 mr-2" />
-                  Reset Password
+                  Reset password
                 </>
               )}
             </Button>

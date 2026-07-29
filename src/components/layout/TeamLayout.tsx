@@ -16,6 +16,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import TwoFactorWarning from '@/components/security/TwoFactorWarning';
 import TeamSidebar from './TeamSidebar';
+import {
+  TemperamentProvider,
+  CommandPalette,
+  ShortcutOverlay,
+  usePlatformKeys,
+} from '@/components/platform';
 
 // Mobile nav items for sheet menu
 import {
@@ -81,6 +87,12 @@ export default function TeamLayout({ activeTab, onTabChange, children }: TeamLay
   });
   const { status: twoFactorStatus, loading: twoFactorLoading } = useTwoFactor();
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  usePlatformKeys({
+    onPalette: () => setPaletteOpen(true),
+    onShortcuts: () => setShortcutsOpen(true),
+  });
 
   useSessionTimeout(true);
   const show2FAWarning = !twoFactorLoading && !twoFactorStatus?.enabled;
@@ -146,6 +158,7 @@ export default function TeamLayout({ activeTab, onTabChange, children }: TeamLay
 
   return (
     <TooltipProvider>
+      <TemperamentProvider value="office">
       <div className="h-screen overflow-hidden bg-background flex workshop-ui">
         {/* Desktop Sidebar */}
         <TeamSidebar
@@ -162,11 +175,10 @@ export default function TeamLayout({ activeTab, onTabChange, children }: TeamLay
         {/* Mobile Header & Content */}
         <div className={cn("flex-1 flex flex-col min-w-0 h-screen overflow-hidden transition-all duration-300", sidebarWidth)}>
           {/* Mobile Header */}
-          <header className="lg:hidden sticky top-0 z-50 border-b border-border bg-card backdrop-blur-xl">
-            <div className="flex h-16 items-center justify-between px-4">
+          <header className="lg:hidden sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
+            <div className="flex h-12 items-center justify-between px-4">
               <div className="flex items-center gap-2">
-                
-                <span className="text-primary uppercase tracking-wider text-lg font-semibold">QuOORO tEAM  </span>
+                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground">Quooro office</span>
               </div>
               <div className="flex items-center gap-2">
                 <ThemeToggle />
@@ -203,8 +215,20 @@ export default function TeamLayout({ activeTab, onTabChange, children }: TeamLay
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>
+
+          {/* Build marker */}
+          <footer className="flex h-7 shrink-0 items-center border-t border-border/60 bg-background px-4">
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              Quooro office · internal
+            </span>
+          </footer>
         </div>
       </div>
+
+      {/* ⌘K jump-anywhere + ? shortcut overlay (client-side only) */}
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} role="admin" />
+      <ShortcutOverlay open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+      </TemperamentProvider>
     </TooltipProvider>);
 
 }

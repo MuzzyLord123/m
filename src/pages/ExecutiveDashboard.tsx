@@ -2,12 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { motion } from 'framer-motion';
 import {
-  TrendingUp, TrendingDown, Users, DollarSign, Briefcase, CheckCircle2,
-  Activity, UserPlus, Target, ArrowUpRight, ArrowDownRight, Minus,
-  BarChart3, PieChart as PieChartIcon, AlertTriangle, Clock, FileText,
-  Zap, Bell, ChevronRight, Building2, LayoutDashboard, LogOut,
+  Users, DollarSign, Briefcase, CheckCircle2, UserPlus, TrendingUp,
+  BarChart3, FileText, ChevronRight, Building2, LayoutDashboard, LogOut,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -15,103 +12,77 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
-import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Panel, PanelHeader } from '@/components/platform';
 
-// ── Chart colors ──
-const COLORS = {
-  blue: '#3b82f6',
-  emerald: '#10b981',
-  amber: '#f59e0b',
-  rose: '#f43f5e',
-  violet: '#8b5cf6',
-  sky: '#0ea5e9',
-  slate: '#64748b',
+// ── Chart colours: tokens only ──
+const CHART = {
+  primary: 'hsl(var(--primary))',
+  gold: 'hsl(var(--gold))',
+  ok: 'hsl(var(--ok))',
+  attend: 'hsl(var(--attend))',
+  risk: 'hsl(var(--risk))',
+  muted: 'hsl(var(--muted-foreground))',
 };
 
-const PIE_COLORS = [COLORS.blue, COLORS.emerald, COLORS.amber, COLORS.violet, COLORS.rose, COLORS.sky];
+const PIE_COLORS = [CHART.primary, CHART.gold, CHART.ok, CHART.attend, CHART.muted, CHART.risk];
 
 // ── Tooltip ──
 const ChartTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-xl">
-      <p className="font-semibold text-foreground mb-1">{label}</p>
+    <div className="rounded-lg border border-border/60 bg-popover px-3 py-2 text-xs">
+      <p className="font-medium text-foreground mb-1">{label}</p>
       {payload.map((p: any) => (
         <p key={p.dataKey} className="text-muted-foreground flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: p.color }} />
-          {p.name}: <span className="font-semibold text-foreground">{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</span>
+          <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: p.color }} />
+          {p.name}: <span className="font-mono tabular-nums text-foreground">{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</span>
         </p>
       ))}
     </div>
   );
 };
 
-// ── KPI Card ──
-function KPICard({ label, value, trend, trendValue, icon: Icon, color, prefix = '', suffix = '' }: {
-  label: string; value: string | number; trend: 'up' | 'down' | 'flat';
-  trendValue: string; icon: any; color: string; prefix?: string; suffix?: string;
-}) {
-  const TrendIcon = trend === 'up' ? ArrowUpRight : trend === 'down' ? ArrowDownRight : Minus;
-  const trendColor = trend === 'up' ? 'text-emerald-500' : trend === 'down' ? 'text-rose-500' : 'text-muted-foreground';
-
+// ── Fact row: label left, mono tabular value right, delta as quiet text ──
+function FactRow({ label, value, delta }: { label: string; value: string | number; delta?: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-border bg-card p-5 hover:shadow-lg transition-shadow group cursor-default"
-    >
-      <div className="flex items-start justify-between mb-3">
-        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", color)}>
-          <Icon className="w-5 h-5 text-white" />
-        </div>
-        <div className={cn("flex items-center gap-1 text-xs font-medium", trendColor)}>
-          <TrendIcon className="w-3.5 h-3.5" />
-          {trendValue}
-        </div>
-      </div>
-      <p className="text-2xl font-bold text-foreground tracking-tight">{prefix}{typeof value === 'number' ? value.toLocaleString() : value}{suffix}</p>
-      <p className="text-xs text-muted-foreground mt-1">{label}</p>
-    </motion.div>
+    <div className="flex items-baseline justify-between gap-3 border-t border-border/60 px-4 py-2 first:border-t-0">
+      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <span className="flex items-baseline gap-2">
+        {delta && <span className="text-[11px] tabular-nums text-muted-foreground">{delta}</span>}
+        <span className="font-mono text-[13px] font-medium tabular-nums text-foreground">
+          {typeof value === 'number' ? value.toLocaleString() : value}
+        </span>
+      </span>
+    </div>
   );
 }
 
-// ── Alert Card ──
+// ── Alert row ──
 function AlertCard({ title, message, severity }: { title: string; message: string; severity: 'green' | 'yellow' | 'red' }) {
-  const colors = {
-    green: 'border-emerald-500/30 bg-emerald-500/5',
-    yellow: 'border-amber-500/30 bg-amber-500/5',
-    red: 'border-rose-500/30 bg-rose-500/5',
-  };
-  const icons = {
-    green: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
-    yellow: <AlertTriangle className="w-4 h-4 text-amber-500" />,
-    red: <Bell className="w-4 h-4 text-rose-500" />,
-  };
-
+  const dots = { green: 'bg-ok', yellow: 'bg-attend', red: 'bg-risk' };
   return (
-    <div className={cn("rounded-lg border p-3 flex items-start gap-3", colors[severity])}>
-      <div className="mt-0.5">{icons[severity]}</div>
-      <div>
-        <p className="text-sm font-semibold text-foreground">{title}</p>
-        <p className="text-xs text-muted-foreground">{message}</p>
+    <div className="flex items-start gap-3 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+      <span className={cn('mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full', dots[severity])} />
+      <div className="min-w-0">
+        <p className="text-[13px] font-[450] text-foreground">{title}</p>
+        <p className="text-[11.5px] text-muted-foreground">{message}</p>
       </div>
     </div>
   );
 }
 
-// ── Activity Item ──
+// ── Activity row ──
 function ActivityItem({ action, detail, time, icon: Icon }: { action: string; detail: string; time: string; icon: any }) {
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-border/50 last:border-0">
-      <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-0.5">
-        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-      </div>
+    <div className="flex items-start gap-3 border-t border-border/60 px-4 py-2 first:border-t-0">
+      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-foreground font-medium truncate">{action}</p>
-        <p className="text-xs text-muted-foreground truncate">{detail}</p>
+        <p className="truncate text-[13px] font-[450] text-foreground">{action}</p>
+        <p className="truncate text-[11.5px] text-muted-foreground">{detail}</p>
       </div>
-      <span className="text-[10px] text-muted-foreground whitespace-nowrap">{time}</span>
+      <span className="font-mono text-[10px] tabular-nums text-muted-foreground whitespace-nowrap">{time}</span>
     </div>
   );
 }
@@ -230,13 +201,13 @@ export default function ExecutiveDashboard() {
   // ── Alerts ──
   const alerts: { title: string; message: string; severity: 'green' | 'yellow' | 'red' }[] = [];
   if ((invoiceData?.outstanding || 0) > 0) {
-    alerts.push({ title: 'Outstanding Invoices', message: `£${invoiceData?.outstanding.toLocaleString()} in unpaid invoices`, severity: 'yellow' });
+    alerts.push({ title: 'Outstanding invoices', message: `£${invoiceData?.outstanding.toLocaleString()} in unpaid invoices`, severity: 'yellow' });
   }
   if ((projects?.active || 0) > 10) {
-    alerts.push({ title: 'High Project Load', message: `${projects?.active} active projects in pipeline`, severity: 'yellow' });
+    alerts.push({ title: 'High project load', message: `${projects?.active} active projects in pipeline`, severity: 'yellow' });
   }
   if (alerts.length === 0) {
-    alerts.push({ title: 'All Systems Healthy', message: 'No critical alerts at this time', severity: 'green' });
+    alerts.push({ title: 'All systems healthy', message: 'No critical alerts at this time', severity: 'green' });
   }
 
   const paymentRate = invoiceData?.totalCount ? Math.round((invoiceData.paidCount / invoiceData.totalCount) * 100) : 0;
@@ -244,27 +215,22 @@ export default function ExecutiveDashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-xl">
-        <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <LayoutDashboard className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-foreground tracking-tight">Executive Dashboard</h1>
-              <p className="text-[11px] text-muted-foreground -mt-0.5">Quooro Command Center</p>
-            </div>
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-md">
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-6 h-12 flex items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3 min-w-0">
+            <span className="hidden sm:block font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Quooro office</span>
+            <h1 className="truncate text-[15px] font-semibold tracking-[-0.015em] text-foreground">Executive dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
             {/* Time range selector */}
-            <div className="flex bg-muted rounded-lg p-0.5">
+            <div className="flex rounded-lg border border-border/60 p-0.5">
               {(['7d', '30d', '90d'] as const).map(range => (
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
                   className={cn(
-                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                    timeRange === range ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    "px-2.5 py-1 font-mono text-[11px] rounded-md transition-colors duration-150",
+                    timeRange === range ? "bg-foreground/[0.06] text-foreground" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {range}
@@ -279,105 +245,62 @@ export default function ExecutiveDashboard() {
         </div>
       </header>
 
-      <main className="max-w-[1600px] mx-auto px-6 py-6 space-y-6">
-        {/* ── KPI Grid ── */}
-        <section>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <KPICard label="Total Clients" value={clients || 0} trend="up" trendValue="+12%" icon={Users} color="bg-blue-500" />
-            <KPICard label="Revenue Generated" value={`£${((invoiceData?.paid || 0) / 1000).toFixed(1)}k`} trend="up" trendValue="+8.3%" icon={DollarSign} color="bg-emerald-500" />
-            <KPICard label="Active Projects" value={projects?.active || 0} trend="flat" trendValue="0%" icon={Briefcase} color="bg-violet-500" />
-            <KPICard label="New Leads" value={leads?.thisWeek || 0} trend="up" trendValue={`+${leads?.thisWeek || 0}`} icon={UserPlus} color="bg-amber-500" suffix="/wk" />
-            <KPICard label="Conversion Rate" value={`${leads?.rate || 0}%`} trend={leads?.rate && leads.rate > 20 ? 'up' : 'down'} trendValue={`${leads?.rate || 0}%`} icon={Target} color="bg-rose-500" />
-          </div>
+      <main className="max-w-[1600px] mx-auto px-4 lg:px-6 py-4 space-y-4">
+        {/* ── Fact ledgers ── */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Panel>
+            <PanelHeader label="Key figures" />
+            <FactRow label="Total clients" value={clients || 0} delta="+12%" />
+            <FactRow label="Revenue generated" value={`£${((invoiceData?.paid || 0) / 1000).toFixed(1)}k`} delta="+8.3%" />
+            <FactRow label="Active projects" value={projects?.active || 0} delta="0%" />
+            <FactRow label="New leads this week" value={leads?.thisWeek || 0} delta={`+${leads?.thisWeek || 0}`} />
+            <FactRow label="Conversion rate" value={`${leads?.rate || 0}%`} />
+          </Panel>
+
+          <Panel>
+            <PanelHeader label="Financial summary" />
+            <FactRow label="Total revenue" value={`£${(invoiceData?.paid || 0).toLocaleString()}`} />
+            <FactRow label="Outstanding" value={`£${(invoiceData?.outstanding || 0).toLocaleString()}`} />
+            <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-2">
+              <span className="text-[13px] text-muted-foreground">Payment rate</span>
+              <span className="flex items-center gap-3">
+                <span className="h-1 w-24 rounded-full bg-muted">
+                  <span className="block h-1 rounded-full bg-ok transition-all" style={{ width: `${paymentRate}%` }} />
+                </span>
+                <span className="font-mono text-[13px] font-medium tabular-nums text-foreground">{paymentRate}%</span>
+              </span>
+            </div>
+            <FactRow label="Pipeline value" value={`£${(deals?.pipeline || 0).toLocaleString()}`} />
+            <FactRow label="Deals won" value={`£${(deals?.won || 0).toLocaleString()}`} />
+            <FactRow label="Team members" value={teamMembers || 0} />
+          </Panel>
         </section>
 
-        {/* ── Financial + Operations Row ── */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Revenue Chart (2/3) */}
-          <div className="lg:col-span-2 rounded-xl border border-border bg-card">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-blue-500" />
-                <span className="text-sm font-semibold text-foreground">Revenue vs Expenses</span>
-              </div>
-              <span className="text-xs text-muted-foreground">Last 12 months</span>
-            </div>
-            <div className="p-5 h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={revenueChart}>
-                  <defs>
-                    <linearGradient id="gRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={COLORS.emerald} stopOpacity={0.2} />
-                      <stop offset="95%" stopColor={COLORS.emerald} stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="gExp" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={COLORS.rose} stopOpacity={0.15} />
-                      <stop offset="95%" stopColor={COLORS.rose} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40} tickFormatter={v => `£${(v/1000).toFixed(0)}k`} />
-                  <Tooltip content={<ChartTooltip />} />
-                  <Area type="monotone" dataKey="revenue" name="Revenue" stroke={COLORS.emerald} fill="url(#gRev)" strokeWidth={2} dot={false} />
-                  <Area type="monotone" dataKey="expenses" name="Expenses" stroke={COLORS.rose} fill="url(#gExp)" strokeWidth={2} dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+        {/* ── Revenue chart ── */}
+        <Panel>
+          <PanelHeader label="Revenue vs expenses">
+            <span className="text-[11px] text-muted-foreground">Last 12 months</span>
+          </PanelHeader>
+          <div className="p-3 h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueChart}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={40} tickFormatter={v => `£${(v/1000).toFixed(0)}k`} />
+                <Tooltip content={<ChartTooltip />} />
+                <Area type="monotone" dataKey="revenue" name="Revenue" stroke={CHART.primary} fill={CHART.primary} fillOpacity={0.08} strokeWidth={2} dot={false} />
+                <Area type="monotone" dataKey="expenses" name="Expenses" stroke={CHART.muted} fill={CHART.muted} fillOpacity={0.06} strokeWidth={2} dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
+        </Panel>
 
-          {/* Financial Summary (1/3) */}
-          <div className="rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-              <DollarSign className="w-4 h-4 text-emerald-500" />
-              <span className="text-sm font-semibold text-foreground">Financial Summary</span>
-            </div>
-            <div className="p-5 space-y-4">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Total Revenue</span>
-                  <span className="text-sm font-bold text-foreground">£{(invoiceData?.paid || 0).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Outstanding</span>
-                  <span className="text-sm font-bold text-amber-500">£{(invoiceData?.outstanding || 0).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Payment Rate</span>
-                  <span className="text-sm font-bold text-foreground">{paymentRate}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2 mt-1">
-                  <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{ width: `${paymentRate}%` }} />
-                </div>
-              </div>
-
-              <div className="border-t border-border pt-4 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Pipeline Value</span>
-                  <span className="text-sm font-bold text-foreground">£{(deals?.pipeline || 0).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Deals Won</span>
-                  <span className="text-sm font-bold text-emerald-500">£{(deals?.won || 0).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Team Members</span>
-                  <span className="text-sm font-bold text-foreground">{teamMembers || 0}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Operations + Sales Row ── */}
+        {/* ── Operations + sales ── */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Project Status Donut */}
-          <div className="rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-              <PieChartIcon className="w-4 h-4 text-violet-500" />
-              <span className="text-sm font-semibold text-foreground">Project Status</span>
-            </div>
-            <div className="p-5 h-[200px] flex items-center justify-center">
+          {/* Project status donut */}
+          <Panel>
+            <PanelHeader label="Project status" />
+            <div className="p-3 h-[200px] flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={projectStatusData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value" strokeWidth={0}>
@@ -389,118 +312,101 @@ export default function ExecutiveDashboard() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="px-5 pb-4 flex flex-wrap gap-3">
+            <div className="px-4 pb-3 flex flex-wrap gap-3">
               {projectStatusData.map((s, i) => (
                 <div key={s.name} className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
                   <span className="text-[10px] text-muted-foreground capitalize">{s.name.replace(/_/g, ' ')}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </Panel>
 
-          {/* Sales Pipeline */}
-          <div className="rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-              <Target className="w-4 h-4 text-amber-500" />
-              <span className="text-sm font-semibold text-foreground">Sales Pipeline</span>
-            </div>
-            <div className="p-5 h-[200px]">
+          {/* Sales pipeline */}
+          <Panel>
+            <PanelHeader label="Sales pipeline" />
+            <div className="p-3 h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={dealStageData} layout="vertical">
                   <XAxis type="number" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={80} />
                   <Tooltip content={<ChartTooltip />} />
-                  <Bar dataKey="value" fill={COLORS.amber} radius={[0, 6, 6, 0]} barSize={16} />
+                  <Bar dataKey="value" fill={CHART.gold} radius={[0, 6, 6, 0]} barSize={16} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="px-5 pb-4 flex gap-4 text-xs text-muted-foreground">
-              <span>Total Deals: <strong className="text-foreground">{deals?.count || 0}</strong></span>
-              <span>Converted: <strong className="text-foreground">{leads?.converted || 0}</strong></span>
+            <div className="px-4 pb-3 flex gap-4 text-[11px] text-muted-foreground">
+              <span>Total deals: <span className="font-mono font-medium tabular-nums text-foreground">{deals?.count || 0}</span></span>
+              <span>Converted: <span className="font-mono font-medium tabular-nums text-foreground">{leads?.converted || 0}</span></span>
             </div>
-          </div>
+          </Panel>
 
-          {/* Platform Activity */}
-          <div className="rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-              <Activity className="w-4 h-4 text-sky-500" />
-              <span className="text-sm font-semibold text-foreground">Platform Activity</span>
-            </div>
-            <div className="p-5 h-[200px]">
+          {/* Platform activity */}
+          <Panel>
+            <PanelHeader label="Platform activity" />
+            <div className="p-3 h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={weeklyActivity}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
                   <XAxis dataKey="day" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={30} />
                   <Tooltip content={<ChartTooltip />} />
-                  <Line type="monotone" dataKey="logins" name="Logins" stroke={COLORS.sky} strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="actions" name="Actions" stroke={COLORS.violet} strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="logins" name="Logins" stroke={CHART.primary} strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="actions" name="Actions" stroke={CHART.muted} strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <div className="px-5 pb-4 flex gap-4 text-xs">
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-500" /> Logins</span>
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-violet-500" /> Actions</span>
+            <div className="px-4 pb-3 flex gap-4 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Logins</span>
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-muted-foreground" /> Actions</span>
             </div>
-          </div>
+          </Panel>
         </section>
 
-        {/* ── Alerts + Activity Feed Row ── */}
+        {/* ── Alerts + activity feed ── */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Executive Alerts */}
-          <div className="rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-              <Bell className="w-4 h-4 text-rose-500" />
-              <span className="text-sm font-semibold text-foreground">Executive Alerts</span>
-            </div>
-            <div className="p-5 space-y-3">
+          <Panel>
+            <PanelHeader label="Alerts" />
+            <div className="pb-1">
               {alerts.map((a, i) => (
                 <AlertCard key={i} {...a} />
               ))}
               {(contentRequests?.pending || 0) > 0 && (
-                <AlertCard title="Pending Content" message={`${contentRequests?.pending} content requests awaiting delivery`} severity="yellow" />
+                <AlertCard title="Pending content" message={`${contentRequests?.pending} content requests awaiting delivery`} severity="yellow" />
               )}
             </div>
-          </div>
+          </Panel>
 
-          {/* Live Activity Feed */}
-          <div className="rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-              <Zap className="w-4 h-4 text-amber-500" />
-              <span className="text-sm font-semibold text-foreground">Live Activity Feed</span>
-            </div>
-            <div className="p-5 max-h-[300px] overflow-y-auto">
+          <Panel>
+            <PanelHeader label="Activity feed" />
+            <div className="max-h-[300px] overflow-y-auto pb-1">
               <ActivityItem action="New lead added" detail="Sarah Thompson via website enquiry" time="2m ago" icon={UserPlus} />
-              <ActivityItem action="Invoice paid" detail="INV-2026-00042 — £2,400" time="15m ago" icon={DollarSign} />
+              <ActivityItem action="Invoice paid" detail="INV-2026-00042 · £2,400" time="15m ago" icon={DollarSign} />
               <ActivityItem action="Project updated" detail="Acme Corp Website → In Review" time="32m ago" icon={Briefcase} />
-              <ActivityItem action="Content delivered" detail="Monthly blog package — 4 articles" time="1h ago" icon={FileText} />
-              <ActivityItem action="Contract signed" detail="Premium Support Agreement — TechStart Ltd" time="2h ago" icon={CheckCircle2} />
-              <ActivityItem action="Team member joined" detail="Alex Rodriguez — Designer" time="3h ago" icon={Users} />
-              <ActivityItem action="Deal won" detail="£8,500 — Digital Transformation Package" time="5h ago" icon={TrendingUp} />
+              <ActivityItem action="Content delivered" detail="Monthly blog package · 4 articles" time="1h ago" icon={FileText} />
+              <ActivityItem action="Contract signed" detail="Premium Support Agreement · TechStart Ltd" time="2h ago" icon={CheckCircle2} />
+              <ActivityItem action="Team member joined" detail="Alex Rodriguez · Designer" time="3h ago" icon={Users} />
+              <ActivityItem action="Deal won" detail="£8,500 · Digital Transformation Package" time="5h ago" icon={TrendingUp} />
             </div>
-          </div>
+          </Panel>
         </section>
 
-        {/* ── Quick Actions ── */}
-        <section className="rounded-xl border border-border bg-card">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-            <Zap className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold text-foreground">Quick Actions</span>
-          </div>
-          <div className="p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* ── Quick actions ── */}
+        <Panel>
+          <PanelHeader label="Quick actions" />
+          <div className="p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             {[
               { label: 'View CRM', icon: Users, path: '/lounge/crm' },
               { label: 'Invoices', icon: FileText, path: '/lounge/billing' },
               { label: 'Projects', icon: Briefcase, path: '/lounge/apps' },
               { label: 'Analytics', icon: BarChart3, path: '/lounge/office/analytics' },
               { label: 'Team', icon: Building2, path: '/lounge/team' },
-              { label: 'Admin Panel', icon: LayoutDashboard, path: '/dashboard' },
+              { label: 'Admin panel', icon: LayoutDashboard, path: '/dashboard' },
             ].map(action => (
               <button
                 key={action.label}
                 onClick={() => navigate(action.path)}
-                className="flex items-center gap-2.5 px-4 py-3 rounded-lg border border-border bg-muted/30 hover:bg-muted transition-colors text-sm text-foreground font-medium group"
+                className="flex h-10 items-center gap-2.5 px-3 rounded-lg border border-border/60 hover:bg-foreground/[0.025] transition-colors duration-150 text-[13px] text-foreground font-medium group"
               >
                 <action.icon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 {action.label}
@@ -508,7 +414,7 @@ export default function ExecutiveDashboard() {
               </button>
             ))}
           </div>
-        </section>
+        </Panel>
       </main>
     </div>
   );

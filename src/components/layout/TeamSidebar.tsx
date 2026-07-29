@@ -131,11 +131,11 @@ function SortableTeamNavItem({
       onTouchCancel={onLongPress ? lp.onTouchCancel : undefined}
       onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); onEnterEditMode(); }}
       className={cn(
-        "flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 w-full text-left relative z-10 select-none",
-        collapsed ? "px-3 py-2 justify-center" : "px-3 py-2",
+        "flex h-[30px] items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 w-full text-left relative z-10 select-none",
+        collapsed ? "px-3 justify-center" : "px-3",
         isActive ?
-        "bg-brand/10 text-primary border-l-2 border-brand shadow-sm" :
-        "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+        "bg-foreground/[0.05] text-foreground border-l-2 border-primary" :
+        "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]",
         editMode && "ring-1 ring-primary/20 cursor-grab",
         isDragging && "scale-105 shadow-xl shadow-brand/10 ring-2 ring-brand/20 rounded-lg"
       )}
@@ -145,13 +145,13 @@ function SortableTeamNavItem({
           {editMode && !collapsed && <GripVertical className="w-3 h-3 mr-0.5 opacity-60" />}
           <Icon className="w-[18px] h-[18px]" />
           {showWarning && collapsed &&
-        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-attend ring-2 ring-sidebar" />
         }
         </div>
         {!collapsed &&
       <>
             <span className="flex-1 tracking-wide truncate">{item.label}</span>
-            {showWarning && <AlertTriangle className="w-3.5 h-3.5 ml-auto text-destructive animate-pulse" />}
+            {showWarning && <AlertTriangle className="w-3.5 h-3.5 ml-auto text-attend" />}
           </>
       }
       </motion.button>
@@ -346,7 +346,7 @@ export default function TeamSidebar({
   return (
     <>
     <aside data-team-sidebar="true" className={cn(
-      "flex flex-col border-border/40 bg-card transition-all duration-300",
+      "flex flex-col border-border/60 bg-sidebar transition-all duration-300",
       mobile
         ? "w-full h-dvh max-h-dvh overflow-hidden"
         : cn(
@@ -356,27 +356,23 @@ export default function TeamSidebar({
       editMode && "ring-2 ring-primary/40"
     )}>
       {/* Title */}
-      <div className={cn("flex items-center justify-center transition-all duration-300 shrink-0", collapsed ? "px-3 py-3" : "px-4 py-5")}>
+      <div className={cn("flex items-center justify-center transition-all duration-300 shrink-0", collapsed ? "px-3 py-3" : "px-4 py-4")}>
         {collapsed ?
         <span className="text-xs font-bold text-foreground">Q</span> :
-
-        <h1 className="text-lg font-bold text-foreground tracking-tight flex items-baseline gap-2">
-            <span className="text-slate-50 font-extrabold text-lg">Quooro</span>
-            <span>{activeItem?.label || 'Team'}</span>
-          </h1>
+        <h1 className="text-foreground tracking-tight font-semibold text-[15px]">Quooro Office</h1>
         }
       </div>
 
       {editMode && !collapsed && (
         <div className="mx-3 mb-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-between gap-2">
-          <span className="text-[11px] font-medium text-primary">Edit mode — drag pages into folders</span>
+          <span className="text-[11px] font-medium text-primary">Edit mode · drag pages into folders</span>
           <button onClick={() => setEditMode(false)} className="text-primary/70 hover:text-primary">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      <div className="mx-4 h-px bg-border/40" />
+      <div className="mx-4 h-px bg-border/60" />
 
 
       {/* Navigation */}
@@ -398,9 +394,9 @@ export default function TeamSidebar({
               <motion.button key={item.id} onClick={() => handleNavClick(item.tab)}
               whileHover={{ x: collapsed ? 0 : 2 }} whileTap={{ scale: 0.98 }}
               className={cn(
-                "flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 w-full text-left",
-                collapsed ? "px-3 py-2 justify-center" : "px-3 py-2",
-                active ? "bg-brand/10 text-primary border-l-2 border-brand shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                "flex h-[30px] items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 w-full text-left",
+                collapsed ? "px-3 justify-center" : "px-3",
+                active ? "bg-foreground/[0.05] text-foreground border-l-2 border-primary" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
               )}>
                   <Icon className="w-[18px] h-[18px]" />
                   {!collapsed && <span className="flex-1 tracking-wide truncate">{item.label}</span>}
@@ -417,7 +413,7 @@ export default function TeamSidebar({
               return <div key={item.id}>{btn}</div>;
             })}
 
-            {!collapsed && <div className="relative mx-2 my-2"><div className="h-px bg-border/30" /></div>}
+            {!collapsed && <div className="relative mx-2 my-2"><div className="h-px bg-border/60" /></div>}
 
             {/* Draggable zone */}
             <SortableContext items={orderedRootEntries} strategy={verticalListSortingStrategy}>
@@ -463,12 +459,12 @@ export default function TeamSidebar({
             {!collapsed &&
             <div className="space-y-0.5 mt-1">
                 <button onClick={() => createFolder('New Folder', '#6b7280')}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-[11px] text-muted-foreground/50 hover:text-muted-foreground rounded-lg hover:bg-accent/30 transition-all">
-                  <FolderPlus className="w-3.5 h-3.5" />Create Folder
+              className="flex items-center gap-2.5 w-full px-3 py-2 text-[11px] text-muted-foreground/50 hover:text-muted-foreground rounded-lg hover:bg-foreground/[0.03] transition-all">
+                  <FolderPlus className="w-3.5 h-3.5" />Create folder
                 </button>
                 <button onClick={() => resetToPresets()}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-[11px] text-muted-foreground/50 hover:text-muted-foreground rounded-lg hover:bg-accent/30 transition-all">
-                  <Hammer className="w-3.5 h-3.5" />Preset Folders
+              className="flex items-center gap-2.5 w-full px-3 py-2 text-[11px] text-muted-foreground/50 hover:text-muted-foreground rounded-lg hover:bg-foreground/[0.03] transition-all">
+                  <Hammer className="w-3.5 h-3.5" />Preset folders
                 </button>
               </div>
             }
@@ -482,26 +478,26 @@ export default function TeamSidebar({
 
       {/* Footer Controls */}
       <div className="mt-auto">
-        {!mobile && <div className="mx-4 h-px bg-border/40" />}
+        {!mobile && <div className="mx-4 h-px bg-border/60" />}
         {!mobile && (
           <div className={cn("transition-all duration-300", collapsed ? "p-2 space-y-0.5" : "px-3 py-1.5 space-y-0.5")}>
             <Button variant="ghost" size="sm" onClick={() => onCollapsedChange(!collapsed)}
-            className={cn("w-full gap-2.5 text-muted-foreground hover:text-foreground h-9 rounded-lg text-[13px]", collapsed ? "justify-center px-2" : "justify-start")}>
+            className={cn("w-full gap-2.5 text-muted-foreground hover:text-foreground h-8 rounded-lg text-[13px]", collapsed ? "justify-center px-2" : "justify-start")}>
               {collapsed ? <ChevronRight className="w-4 h-4" /> : <><ChevronLeft className="w-4 h-4" /><span>Collapse</span></>}
             </Button>
           </div>
         )}
 
         {/* Account Section */}
-        <div className="mx-4 h-px bg-border/40" />
+        <div className="mx-4 h-px bg-border/60" />
         <div className={cn("transition-all duration-300", collapsed ? "p-2" : "p-2")}>
           <Popover open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
             <PopoverTrigger asChild>
               <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-              className={cn("flex items-center w-full rounded-lg hover:bg-accent/50 transition-all duration-200", collapsed ? "justify-center p-2" : "gap-3 p-2.5")}>
-                <Avatar className={cn("border-2 border-primary/25 transition-all duration-300", collapsed ? "h-8 w-8" : "h-10 w-10")}>
+              className={cn("flex items-center w-full rounded-lg hover:bg-foreground/[0.04] transition-all duration-200", collapsed ? "justify-center p-2" : "gap-3 p-2.5")}>
+                <Avatar className={cn("border border-border/60 transition-all duration-300", collapsed ? "h-8 w-8" : "h-9 w-9")}>
                   <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'Admin'} />
-                  <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-sm">{getInitials()}</AvatarFallback>
+                  <AvatarFallback className="bg-primary/12 text-primary font-semibold text-sm">{getInitials()}</AvatarFallback>
                 </Avatar>
                 {!collapsed &&
                 <>
@@ -518,7 +514,7 @@ export default function TeamSidebar({
             </PopoverTrigger>
             <PopoverContent side="top" align={collapsed ? "center" : "start"} className={cn("p-1.5 rounded-lg", collapsed ? "w-64" : "w-[calc(272px-1.5rem)]")} sideOffset={8}>
               <div className="space-y-0.5">
-                <div className="px-3 py-2.5 border-b border-border/40 mb-1.5">
+                <div className="px-3 py-2.5 border-b border-border/60 mb-1.5">
                   <p className="text-sm font-semibold truncate">{profile?.full_name || 'Admin'}</p>
                   <p className="text-[11px] text-muted-foreground truncate mt-0.5">{user?.email}</p>
                 </div>
@@ -530,12 +526,12 @@ export default function TeamSidebar({
                   <span className="text-[13px] text-muted-foreground">Theme</span>
                   <ThemeToggle />
                 </div>
-                <div className="h-px bg-border/40 my-1" />
+                <div className="h-px bg-border/60 my-1" />
                 <AccountSwitcher portal="team" onSwitch={() => setAccountMenuOpen(false)} />
-                <div className="h-px bg-border/40 my-1" />
+                <div className="h-px bg-border/60 my-1" />
                 <Button variant="ghost" size="sm" onClick={() => {setAccountMenuOpen(false);onSignOut();}}
                 className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-[13px] h-9 rounded-md">
-                  <LogOut className="w-4 h-4 mr-2.5" />Sign Out
+                  <LogOut className="w-4 h-4 mr-2.5" />Sign out
                 </Button>
               </div>
             </PopoverContent>
