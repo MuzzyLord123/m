@@ -8,7 +8,7 @@ import { LineDraw, DrawPath, DrawPoint } from '@/components/motion/LineDraw';
  */
 export function AuthBrandPanel({
   headline = ['One secure', 'platform.'],
-  body = 'Your websites, projects, files and billing — signed in once, in one place, encrypted at rest.',
+  body = 'Your websites, projects, files and billing. Signed in once, in one place, encrypted at rest.',
 }: {
   headline?: [string, string];
   body?: string;

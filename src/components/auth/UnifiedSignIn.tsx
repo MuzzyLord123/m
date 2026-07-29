@@ -682,7 +682,7 @@ export default function UnifiedSignIn() {
                             </div>
                           )}
                           <div>
-                            <p className="text-sm font-medium">Welcome back, {savedName.split(' ')[0]}!</p>
+                            <p className="text-sm font-medium">Welcome back, {savedName.split(' ')[0]}</p>
                             <p className="text-xs text-muted-foreground">
                               {selectedPortal === 'accountant' ? `Login ID: ${email.value}` : email.value}
                             </p>
@@ -823,7 +823,7 @@ export default function UnifiedSignIn() {
                       ) : (
                         <span className="flex items-center gap-2">
                           <LogIn className="w-4 h-4" />
-                          Sign In
+                          Sign in
                         </span>
                       )}
                     </Button>
