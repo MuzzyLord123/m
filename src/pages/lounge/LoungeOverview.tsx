@@ -272,25 +272,27 @@ export default function LoungeOverview() {
         }
       />
 
-      {/* View tabs — quiet segmented control */}
-      <div className="mt-5 flex items-center gap-1 border-b border-border/60">
-        {viewTabs.map(v => (
-          <button
-            key={v.key}
-            onClick={() => setViewMode(v.key)}
-            className={cn(
-              'relative -mb-px px-3 py-2 text-[13px] transition-colors duration-150',
-              viewMode === v.key
-                ? 'border-b-2 border-primary font-medium text-foreground'
-                : 'border-b-2 border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {v.label}
-          </button>
-        ))}
+      {/* View tabs — quiet segmented control; scrolls on phones */}
+      <div className="mt-5 flex items-center border-b border-border/60">
+        <div className="scrollbar-hide flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+          {viewTabs.map(v => (
+            <button
+              key={v.key}
+              onClick={() => setViewMode(v.key)}
+              className={cn(
+                'relative -mb-px shrink-0 whitespace-nowrap px-3 py-2 text-[13px] transition-colors duration-150',
+                viewMode === v.key
+                  ? 'border-b-2 border-primary font-medium text-foreground'
+                  : 'border-b-2 border-transparent text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
         <button
           onClick={fetchData}
-          className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
+          className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/[0.04] hover:text-foreground"
           aria-label="Refresh dashboard"
         >
           <RefreshCw className="h-3.5 w-3.5" />
@@ -322,17 +324,22 @@ export default function LoungeOverview() {
                 </button>
               )}
             </PanelHeader>
-            <div className="px-5 pb-5 pt-6">
-              <div className="relative grid grid-cols-4">
-                <span aria-hidden className="absolute left-[12.5%] right-[12.5%] top-[5px] h-px bg-border" />
+            <div className="px-5 pb-5 pt-6 max-sm:pt-4">
+              {/* Desktop: horizontal rail. Phones: a ladder, never a squash. */}
+              <div className="relative sm:grid sm:grid-cols-4">
+                <span aria-hidden className="absolute left-[12.5%] right-[12.5%] top-[5px] hidden h-px bg-border sm:block" />
+                <span aria-hidden className="absolute bottom-3 left-[5px] top-3 w-px bg-border sm:hidden" />
                 {RAIL_STAGES.map((stage, i) => {
                   const done = railIndex > i;
                   const now = railIndex === i;
                   return (
-                    <div key={stage} className="relative flex flex-col items-center gap-2">
+                    <div
+                      key={stage}
+                      className="relative flex items-center gap-3 py-1.5 sm:flex-col sm:gap-2 sm:py-0"
+                    >
                       <span
                         className={cn(
-                          'z-10 h-[11px] w-[11px] rounded-full border-[1.5px]',
+                          'z-10 h-[11px] w-[11px] shrink-0 rounded-full border-[1.5px]',
                           done && 'border-transparent bg-foreground/45',
                           now && 'border-transparent bg-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.18)]',
                           !done && !now && 'border-border bg-background',
@@ -347,7 +354,7 @@ export default function LoungeOverview() {
                         {statusLabel(stage)}
                       </span>
                       {now && (
-                        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-primary">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-primary max-sm:ml-auto">
                           In progress
                         </span>
                       )}
