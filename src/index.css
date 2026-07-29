@@ -74,11 +74,8 @@
   to   { transform: translate3d(-50%, 0, 0); }
 }
 
-/* Vocabulary rule: the ticker pauses under the pointer. */
-.group\:marquee:hover [style*="marquee-scroll"],
-.marquee-host:hover [style*="marquee-scroll"] {
-  animation-play-state: paused !important;
-}
+/* The ticker runs continuously — the full-bleed strip made hover-pause
+   fire constantly on desktop, which read as "the marquee is broken". */
 
 @media (prefers-reduced-motion: reduce) {
   [style*="marquee-scroll"] { animation: none !important; }

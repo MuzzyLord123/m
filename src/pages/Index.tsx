@@ -53,18 +53,21 @@ const practice = [
     title: "Websites",
     description:
       "Marketing sites built to load fast, rank, and convert — not to win awards for loading spinners.",
+    href: "/packages",
   },
   {
     icon: Layers,
     title: "Apps & Dashboards",
     description:
       "Custom applications, internal tools and dashboards shaped around how the business actually runs.",
+    href: "/apps-dashboards",
   },
   {
     icon: Database,
     title: "Digital Operations Platform",
     description:
       "A private client dashboard where the work, the files, the data and the conversation all live.",
+    href: "/client-portal",
   },
   {
     icon: FileText,
@@ -78,6 +81,7 @@ const practice = [
     title: "Ongoing Management",
     description:
       "We don't disappear at launch. The system is maintained, monitored and moved forward.",
+    href: "/website-management",
   },
 ];
 

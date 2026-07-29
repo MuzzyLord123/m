@@ -1,5 +1,16 @@
 import jsPDF from "jspdf";
 
+/**
+ * The Quooro handover agreement, generated client-side.
+ *
+ * The document mirrors the /handover page one-to-one: every commitment the
+ * page makes appears here as a numbered section — transfer methods, the
+ * full per-project-type inventories, the six-step process with timings,
+ * ownership clauses, support warranty, confidentiality and security
+ * measures. The on-page preview lists these same section titles, so what
+ * you see before downloading is exactly what you receive.
+ */
+
 interface HandoverAgreementData {
   clientName?: string;
   projectName?: string;
@@ -7,283 +18,289 @@ interface HandoverAgreementData {
   date?: string;
 }
 
+const EMBER: [number, number, number] = [232, 97, 60];
+const INK: [number, number, number] = [31, 31, 31];
+const BODY: [number, number, number] = [60, 60, 60];
+const QUIET: [number, number, number] = [130, 130, 130];
+
 export const generateHandoverAgreementPDF = (data: HandoverAgreementData = {}): void => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
   const contentWidth = pageWidth - margin * 2;
-  let y = 20;
+  let y = 0;
+  let sectionNo = 0;
 
-  const addNewPageIfNeeded = (requiredSpace: number = 30) => {
-    if (y + requiredSpace > 280) {
+  const newPageIfNeeded = (requiredSpace = 30) => {
+    if (y + requiredSpace > 276) {
       doc.addPage();
-      y = 20;
+      pageChrome();
+      y = 28;
     }
   };
 
-  // Header
-  doc.setFontSize(24);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(31, 31, 31);
-  doc.text("Project Handover Agreement", margin, y);
-  y += 15;
+  /** Ember top rule + running footer on every page — the drafting-sheet mark. */
+  const pageChrome = () => {
+    doc.setFillColor(...EMBER);
+    doc.rect(0, 0, pageWidth, 2.2, "F");
+    doc.setFontSize(7.5);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...QUIET);
+    doc.text("QUOORO — PROJECT HANDOVER AGREEMENT", margin, 288);
+    doc.text("EST. WALES, UNITED KINGDOM · QUOORO.COM", pageWidth - margin, 288, { align: "right" });
+  };
 
-  // Subtitle
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(100, 100, 100);
-  doc.text("Quooro Ltd - Complete Ownership Transfer", margin, y);
-  y += 8;
-  doc.text(`Date: ${data.date || new Date().toLocaleDateString()}`, margin, y);
-  y += 20;
+  const sectionTitle = (title: string) => {
+    newPageIfNeeded(24);
+    sectionNo += 1;
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...EMBER);
+    doc.text(String(sectionNo).padStart(2, "0"), margin, y);
+    doc.setTextColor(...INK);
+    doc.text(title, margin + 12, y);
+    y += 3;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 8;
+  };
 
-  // Divider
-  doc.setDrawColor(200, 200, 200);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 15;
-
-  // Section 1: Parties
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(31, 31, 31);
-  doc.text("1. Parties to This Agreement", margin, y);
-  y += 10;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-  const partiesText = [
-    `Provider: Quooro Ltd (hereinafter "Quooro")`,
-    `Client: ${data.clientName || "[Client Name]"} (hereinafter "Client")`,
-    `Project: ${data.projectName || "[Project Name]"}`,
-    `Project Type: ${data.projectType || "[Website/App/Dashboard/Custom System]"}`
-  ];
-  partiesText.forEach(line => {
-    doc.text(line, margin, y);
-    y += 6;
-  });
-  y += 10;
-
-  // Section 2: Ownership Transfer
-  addNewPageIfNeeded(60);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(31, 31, 31);
-  doc.text("2. Ownership Transfer", margin, y);
-  y += 10;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-  const ownershipPoints = [
-    "• Full intellectual property rights transfer upon final payment",
-    "• No royalties, licensing fees, or ongoing charges for code usage",
-    "• Right to modify, redistribute, or resell the delivered work",
-    "• Transfer of all domain registrations to Client's account",
-    "• Complete source code ownership with no restrictions",
-    "• All custom designs and assets become Client property"
-  ];
-  ownershipPoints.forEach(point => {
-    const lines = doc.splitTextToSize(point, contentWidth);
-    lines.forEach((line: string) => {
-      addNewPageIfNeeded();
+  const paragraph = (text: string) => {
+    doc.setFontSize(9.5);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...BODY);
+    const lines = doc.splitTextToSize(text, contentWidth) as string[];
+    for (const line of lines) {
+      newPageIfNeeded(8);
       doc.text(line, margin, y);
-      y += 6;
-    });
-  });
-  y += 10;
-
-  // Section 3: Deliverables
-  addNewPageIfNeeded(60);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(31, 31, 31);
-  doc.text("3. Deliverables Guarantee", margin, y);
-  y += 10;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-  const deliverablesPoints = [
-    "• Complete and functional source code as per specifications",
-    "• All design files in editable formats (Figma, PSD, AI where applicable)",
-    "• Database schemas, migrations, and seed data where applicable",
-    "• Comprehensive documentation and user guides",
-    "• README files with setup instructions",
-    "• Environment configuration templates"
-  ];
-  deliverablesPoints.forEach(point => {
-    const lines = doc.splitTextToSize(point, contentWidth);
-    lines.forEach((line: string) => {
-      addNewPageIfNeeded();
-      doc.text(line, margin, y);
-      y += 6;
-    });
-  });
-  y += 10;
-
-  // Section 4: Handover Methods
-  addNewPageIfNeeded(50);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(31, 31, 31);
-  doc.text("4. Handover Methods", margin, y);
-  y += 10;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-  const methodsText = [
-    "Quooro offers two secure handover methods:",
-    "",
-    "Option A: GitHub Repository Transfer (Recommended)",
-    "• Complete repository transferred to Client's GitHub account",
-    "• Full version history and all branches included",
-    "• Secure, encrypted transfer via GitHub's platform",
-    "",
-    "Option B: Encrypted File Package",
-    "• AES-256 encrypted ZIP archive",
-    "• Password delivered via separate secure channel",
-    "• Complete source code and all assets included"
-  ];
-  methodsText.forEach(line => {
-    if (line.startsWith("Option")) {
-      doc.setFont("helvetica", "bold");
-    } else {
-      doc.setFont("helvetica", "normal");
+      y += 5;
     }
-    const lines = doc.splitTextToSize(line, contentWidth);
-    lines.forEach((splitLine: string) => {
-      addNewPageIfNeeded();
-      doc.text(splitLine, margin, y);
-      y += 6;
-    });
-  });
-  y += 10;
+    y += 3;
+  };
 
-  // Section 5: Post-Handover Support
-  addNewPageIfNeeded(50);
-  doc.setFontSize(14);
+  const bullets = (items: string[], indent = 4) => {
+    doc.setFontSize(9.5);
+    doc.setFont("helvetica", "normal");
+    for (const item of items) {
+      const lines = doc.splitTextToSize(item, contentWidth - indent - 4) as string[];
+      newPageIfNeeded(6 + lines.length * 5);
+      doc.setTextColor(...EMBER);
+      doc.text("—", margin + indent - 4, y);
+      doc.setTextColor(...BODY);
+      lines.forEach((line, i) => {
+        doc.text(line, margin + indent + 2, y);
+        y += 5;
+      });
+      y += 1;
+    }
+    y += 3;
+  };
+
+  const subhead = (text: string) => {
+    newPageIfNeeded(14);
+    doc.setFontSize(10.5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...INK);
+    doc.text(text, margin, y);
+    y += 6;
+  };
+
+  // ── Cover header ─────────────────────────────────────────────────────
+  pageChrome();
+  y = 26;
+  doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(31, 31, 31);
-  doc.text("5. Post-Handover Support", margin, y);
-  y += 10;
+  doc.setTextColor(...INK);
+  doc.text("QUOORO", margin, y);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...QUIET);
+  doc.text("The studio · 52.13° N, 3.78° W", pageWidth - margin, y, { align: "right" });
+  y += 14;
 
+  doc.setFontSize(23);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...INK);
+  doc.text("Project Handover Agreement", margin, y);
+  y += 9;
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...BODY);
+  doc.text("Complete ownership transfer — everything we say we do, in writing.", margin, y);
+  y += 7;
+  doc.setFontSize(9.5);
+  doc.setTextColor(...QUIET);
+  doc.text(`Date: ${data.date || new Date().toLocaleDateString("en-GB")}`, margin, y);
+  y += 12;
+
+  // ── 01 Parties ───────────────────────────────────────────────────────
+  sectionTitle("Parties to This Agreement");
+  bullets([
+    `Provider: Quooro (hereinafter "Quooro")`,
+    `Client: ${data.clientName || "[Client name]"} (hereinafter "Client")`,
+    `Project: ${data.projectName || "[Project name]"}`,
+    `Project type: ${data.projectType || "[Website / Web application / Dashboard / Custom system]"}`,
+  ]);
+
+  // ── 02 Ownership Transfer ────────────────────────────────────────────
+  sectionTitle("Ownership Transfer");
+  paragraph("Upon final payment, complete ownership of the delivered work transfers to the Client:");
+  bullets([
+    "Full intellectual property rights transfer upon final payment",
+    "No royalties, licensing fees, or ongoing charges for code usage",
+    "Right to modify, redistribute, or resell the delivered work",
+    "Transfer of all domain registrations to the Client's account",
+    "No vendor lock-in: the project may be maintained by any developer, agency, or in-house team",
+    "Third-party and open-source licences used in the project are clearly documented",
+  ]);
+
+  // ── 03 Deliverables Guarantee ────────────────────────────────────────
+  sectionTitle("Deliverables Guarantee");
+  bullets([
+    "Complete and functional source code as per the agreed specifications",
+    "All design files in editable formats (Figma, PSD, AI where applicable)",
+    "Database schemas, migrations, and seed data where applicable",
+    "Comprehensive documentation and user guides",
+  ]);
+
+  // ── 04 Handover Methods ──────────────────────────────────────────────
+  sectionTitle("Handover Methods");
+  subhead("Method A — GitHub repository transfer (recommended)");
+  bullets([
+    "Complete version control history preserved",
+    "All branches and commits transferred to the Client's GitHub account",
+    "Secure encrypted transfer via GitHub",
+    "Immediate access to all project files",
+    "Documentation and README included",
+    "CI/CD workflows included where applicable",
+  ]);
+  subhead("Method B — Encrypted file package");
+  bullets([
+    "AES-256 encrypted ZIP archive",
+    "Password delivered separately from the archive",
+    "Complete source code, assets and media files included",
+    "Database exports where applicable",
+    "Deployment documentation included",
+  ]);
+
+  // ── 05 What Transfers, by Project Type ───────────────────────────────
+  sectionTitle("What Transfers, by Project Type");
+  subhead("Websites (marketing sites, landing pages, corporate sites)");
+  bullets([
+    "Complete source code (HTML/CSS/JS or React)",
+    "All design assets (images, fonts, icons)",
+    "Content management setup documentation",
+    "SEO configuration files (robots.txt, sitemap)",
+    "SSL certificate details",
+    "Hosting credentials and access",
+    "Domain transfer assistance",
+    "Analytics access (GA4, etc.)",
+  ]);
+  subhead("Web applications (custom dashboards, portals, PWAs)");
+  bullets([
+    "Full application source code — frontend and backend codebases",
+    "API documentation",
+    "Environment configuration files",
+    "Database schema and migrations",
+    "Authentication system documentation",
+    "Third-party integration keys",
+    "Deployment scripts and CI/CD",
+  ]);
+  subhead("Dashboards & admin panels (CRM, inventory, reporting)");
+  bullets([
+    "Complete dashboard source code",
+    "Database exports and schema",
+    "User role configurations",
+    "Report templates and queries",
+    "Integration credentials",
+    "Admin documentation and backup procedures",
+    "Security audit report",
+  ]);
+  subhead("Custom systems (booking, e-commerce, API platforms)");
+  bullets([
+    "Full system architecture documentation",
+    "All microservices source code",
+    "API specifications (OpenAPI/Swagger)",
+    "Database instances or exports",
+    "Message queue and load balancer configurations",
+    "Monitoring dashboards access",
+    "Incident response procedures",
+  ]);
+
+  // ── 06 The Transfer Process ──────────────────────────────────────────
+  sectionTitle("The Transfer Process");
+  paragraph("Handover follows six steps, typically completed within 5–7 business days of final payment and sign-off:");
+  bullets([
+    "Step 1 — Project completion sign-off (1–2 days): final review meeting; both parties sign off on completion",
+    "Step 2 — Documentation package (2–3 days): technical specs, admin guides, and maintenance procedures",
+    "Step 3 — Credentials & access transfer (1 day): all credentials, API keys and service access via encrypted channels",
+    "Step 4 — Repository transfer (same day): GitHub transfer or encrypted delivery; full control of all source code",
+    "Step 5 — Knowledge transfer session (1–2 hours): live walkthrough of architecture, codebase and maintenance",
+    "Step 6 — Support transition (30 days): post-handover support period as the Client takes ownership",
+  ]);
+
+  // ── 07 Post-Handover Support ─────────────────────────────────────────
+  sectionTitle("Post-Handover Support");
+  bullets([
+    "30-day bug-fix warranty for issues in the delivered code",
+    "Email support for handover-related questions",
+    "One free knowledge transfer session (video call)",
+    "Issues arising from changes made by the Client after handover are excluded from warranty, but assistance is available at standard rates",
+    "Optional ongoing maintenance packages available",
+  ]);
+
+  // ── 08 Confidentiality ───────────────────────────────────────────────
+  sectionTitle("Confidentiality");
+  bullets([
+    "Mutual NDA covering all project details",
+    "Secure deletion of Quooro's copies after handover, on request",
+    "No portfolio usage without written consent",
+    "Compliance with data protection regulations (UK GDPR)",
+  ]);
+
+  // ── 09 Security Measures ─────────────────────────────────────────────
+  sectionTitle("Security Measures");
+  bullets([
+    "Encrypted transfers: all file transfers use AES-256; credentials shared via secure, time-limited links",
+    "Access revocation: Quooro's access to all systems is revoked immediately upon handover completion",
+    "Audit trail: a complete log of access and changes made during the project, for the Client's records",
+    "Vulnerability report: security assessment summary and recommendations for ongoing maintenance",
+  ]);
+
+  // ── Signatures ───────────────────────────────────────────────────────
+  newPageIfNeeded(70);
+  sectionTitle("Signatures");
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-  const supportPoints = [
-    "• 30-day bug-fix warranty for issues in delivered code",
-    "• Email support for handover-related questions",
-    "• One complimentary knowledge transfer session (video call)",
-    "• Optional ongoing maintenance packages available upon request"
-  ];
-  supportPoints.forEach(point => {
-    const lines = doc.splitTextToSize(point, contentWidth);
-    lines.forEach((line: string) => {
-      addNewPageIfNeeded();
-      doc.text(line, margin, y);
-      y += 6;
-    });
-  });
-  y += 10;
+  doc.setTextColor(...BODY);
 
-  // Section 6: Confidentiality
-  addNewPageIfNeeded(50);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(31, 31, 31);
-  doc.text("6. Confidentiality", margin, y);
-  y += 10;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-  const confidentialityPoints = [
-    "• Mutual NDA covering all project details",
-    "• Secure deletion of Quooro's copies after handover (upon request)",
-    "• No portfolio usage without Client's written consent",
-    "• Full compliance with data protection regulations (GDPR, CCPA)"
-  ];
-  confidentialityPoints.forEach(point => {
-    const lines = doc.splitTextToSize(point, contentWidth);
-    lines.forEach((line: string) => {
-      addNewPageIfNeeded();
-      doc.text(line, margin, y);
-      y += 6;
-    });
-  });
-  y += 10;
-
-  // Section 7: Security Measures
-  addNewPageIfNeeded(50);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(31, 31, 31);
-  doc.text("7. Security Measures", margin, y);
-  y += 10;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-  const securityPoints = [
-    "• All file transfers use AES-256 encryption",
-    "• Credentials shared via secure, time-limited links",
-    "• Immediate revocation of Quooro's access upon handover completion",
-    "• Complete audit trail of all access and changes provided",
-    "• Security assessment summary and recommendations included"
-  ];
-  securityPoints.forEach(point => {
-    const lines = doc.splitTextToSize(point, contentWidth);
-    lines.forEach((line: string) => {
-      addNewPageIfNeeded();
-      doc.text(line, margin, y);
-      y += 6;
-    });
-  });
-  y += 15;
-
-  // Signature Section
-  addNewPageIfNeeded(60);
-  doc.setDrawColor(200, 200, 200);
-  doc.line(margin, y, pageWidth - margin, y);
-  y += 15;
-
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(31, 31, 31);
-  doc.text("Signatures", margin, y);
-  y += 15;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(60, 60, 60);
-
-  // Provider signature
-  doc.text("For Quooro Ltd:", margin, y);
-  y += 20;
+  doc.text("For Quooro:", margin, y);
+  y += 16;
+  doc.setDrawColor(160, 160, 160);
   doc.line(margin, y, margin + 70, y);
   y += 5;
   doc.text("Signature", margin, y);
   doc.text("Date: _______________", margin + 90, y);
-  y += 20;
+  y += 16;
 
-  // Client signature
-  doc.text("For Client:", margin, y);
-  y += 20;
+  doc.text("For the Client:", margin, y);
+  y += 16;
   doc.line(margin, y, margin + 70, y);
   y += 5;
   doc.text("Signature", margin, y);
   doc.text("Date: _______________", margin + 90, y);
-  y += 20;
 
-  // Footer
-  addNewPageIfNeeded(30);
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  const footerText = "This document was generated by Quooro Ltd. For questions, contact Support@quooro.com";
-  doc.text(footerText, pageWidth / 2, 285, { align: "center" });
-
-  // Save the PDF
-  doc.save(`Quooro-Handover-Agreement-${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`Quooro-Handover-Agreement-${new Date().toISOString().split("T")[0]}.pdf`);
 };
+
+/** The document's contents, exported so the on-page preview mirrors it exactly. */
+export const HANDOVER_AGREEMENT_SECTIONS = [
+  "Parties to This Agreement",
+  "Ownership Transfer",
+  "Deliverables Guarantee",
+  "Handover Methods",
+  "What Transfers, by Project Type",
+  "The Transfer Process",
+  "Post-Handover Support",
+  "Confidentiality",
+  "Security Measures",
+] as const;

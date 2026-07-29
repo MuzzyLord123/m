@@ -30,7 +30,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { HandoverChecklist } from "@/components/handover/HandoverChecklist";
-import { generateHandoverAgreementPDF } from "@/lib/handoverPdfGenerator";
+import { generateHandoverAgreementPDF, HANDOVER_AGREEMENT_SECTIONS } from "@/lib/handoverPdfGenerator";
 
 /**
  * The handover contract as a document a buyer can actually read: methods,
@@ -671,29 +671,36 @@ export default function Handover() {
                 Download PDF Agreement
               </Button>
             </div>
-            {/* Document motif — hairline page mock in the drafting voice */}
-            <div className="hidden md:block" aria-hidden>
+            {/* The document itself, in miniature — these are the PDF's actual
+                sections, imported from the generator so they can never drift. */}
+            <div className="hidden md:block">
               <div className="relative border border-border/60 bg-background p-8">
-                <span className="absolute inset-x-0 top-0 h-px bg-primary" />
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="mono-label">Handover agreement</span>
+                <span className="absolute inset-x-0 top-0 h-px bg-primary" aria-hidden />
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="mono-label">Quooro — Handover agreement</span>
                   <span className="mono-label text-primary">PDF</span>
                 </div>
-                <div className="space-y-3">
-                  <div className="h-3 w-3/4 bg-foreground/[0.07]" />
-                  <div className="h-2 w-full bg-foreground/[0.05]" />
-                  <div className="h-2 w-5/6 bg-foreground/[0.05]" />
-                  <div className="h-2 w-4/5 bg-foreground/[0.05]" />
-                  <div className="h-5" />
-                  <div className="h-3 w-2/3 bg-foreground/[0.07]" />
-                  <div className="h-2 w-full bg-foreground/[0.05]" />
-                  <div className="h-2 w-3/4 bg-foreground/[0.05]" />
-                  <div className="h-5" />
-                  <div className="h-3 w-1/2 bg-foreground/[0.07]" />
-                  <div className="h-2 w-4/5 bg-foreground/[0.05]" />
-                  <div className="h-2 w-full bg-foreground/[0.05]" />
-                </div>
-                <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-4">
+                <p className="mb-5 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+                  Contents — exactly what you'll download
+                </p>
+                <ol className="border-t border-border/60">
+                  {HANDOVER_AGREEMENT_SECTIONS.map((section, i) => (
+                    <li
+                      key={section}
+                      className="flex items-baseline gap-3 border-b border-border/40 py-2 text-[13px] font-light text-foreground/85"
+                    >
+                      <span className="font-mono text-[10px] tabular-nums text-primary">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      {section}
+                    </li>
+                  ))}
+                  <li className="flex items-baseline gap-3 py-2 text-[13px] font-light text-muted-foreground">
+                    <span className="font-mono text-[10px] tabular-nums text-primary">10</span>
+                    Signatures
+                  </li>
+                </ol>
+                <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
                   <span className="mono-label">EST. Wales · United Kingdom</span>
                   <span className="mono-label">quooro.com</span>
                 </div>
