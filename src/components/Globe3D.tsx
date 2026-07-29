@@ -87,18 +87,17 @@ function EarthWithMarkers({ hideLabels = false, isPaused = false }: { hideLabels
         <Sphere args={[2, 96, 96]}>
           <meshPhongMaterial
             map={texture}
-            /* Multiplies the NASA texture with a warm tint. The raw imagery is a
-               vivid photographic blue that fights the ember palette; graded, the
-               oceans settle into deep slate-teal and the globe sits in the page
-               instead of shouting at it. */
-            color={new THREE.Color(0xffe4d2)}
+            /* Untinted. A warm grade was tried here to sit the globe inside the
+               ember palette and the owner called the result dull — the vivid
+               photographic Earth IS the point of this asset. Colour identity
+               beats palette purity for the one photographic object on the site. */
             specularMap={texture}
-            specular={new THREE.Color(0x8a7a70)}
-            shininess={14}
+            specular={new THREE.Color(0x999999)}
+            shininess={15}
             bumpMap={texture}
             bumpScale={0.015}
             emissiveMap={texture}
-            emissive={new THREE.Color(0x2a1a14)}
+            emissive={new THREE.Color(0x222222)}
             emissiveIntensity={0.3}
           />
         </Sphere>
@@ -219,17 +218,13 @@ function Scene({ hideLabels = false, isPaused = false }: { hideLabels?: boolean;
   
   return (
     <>
-      {/* Key light – warm sun */}
-      <directionalLight position={[5, 3, 5]} intensity={2.6} color="#fff3e6" />
-      {/* Secondary fill. Was #aaccff — a blue fill light, which is most of why
-          the oceans read as brand blue rather than as water. */}
-      <directionalLight position={[-4, 2, -3]} intensity={1.1} color="#e8c4a8" />
-      {/* Low fill */}
-      <directionalLight position={[-3, -1, -4]} intensity={0.55} color="#d8cec6" />
-      {/* Ambient – keeps the terminator readable */}
-      <ambientLight intensity={1.05} />
-      {/* Ember rim, matching the bloom behind the sphere */}
-      <pointLight position={[0, 0, 8]} intensity={0.55} color="#ffb894" />
+      {/* The original daylight rig, restored at the owner's request — the warm
+          rig muted the oceans. Key sun, cool sky fill, neutral low fill. */}
+      <directionalLight position={[5, 3, 5]} intensity={2.8} color="#ffffff" />
+      <directionalLight position={[-4, 2, -3]} intensity={1.2} color="#aaccff" />
+      <directionalLight position={[-3, -1, -4]} intensity={0.6} color="#e0e0e0" />
+      <ambientLight intensity={1.1} />
+      <pointLight position={[0, 0, 8]} intensity={0.5} color="#ffffff" />
       
       <EarthWithMarkers hideLabels={hideLabels} isPaused={shouldPauseRotation} />
       

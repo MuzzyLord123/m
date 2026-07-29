@@ -24,7 +24,7 @@ project, and is verified working end to end. The redesign is presentation only.
 | `vercel.json`, `vite.config.ts`, `vite.preview.config.ts` | Build and deploy |
 | `package.json` scripts block | Build pipeline |
 | `src/contexts/AuthContext.tsx` | Session handling, `signInWithPassword` |
-| `src/components/auth/**` | Login/OAuth surface logic |
+| `src/components/auth/**` | Login/OAuth surface **logic** — see exception below |
 | `src/hooks/use*Supabase*.ts`, data-fetching hooks | Query shapes |
 
 ## Frozen behaviour (may be restyled, never rewired)
@@ -37,6 +37,16 @@ project, and is verified working end to end. The redesign is presentation only.
 - **All 133 routes** in `src/App.tsx` stay reachable at their current paths.
 - `src/components/Globe3D.tsx` may be **restyled** (colours, materials, markers,
   size) but not removed, replaced with an image, or stopped from spinning.
+
+## Recorded exception — 2026-07-29
+
+`UnifiedSignIn.tsx` was restyled at the owner's explicit request ("make the
+login portal more professional"). Presentation only: page shell, classNames,
+copy, and off-system colours. Every handler, validation function, supabase
+call, field id/name/autoComplete and state flow is byte-identical — verified
+by diffing all logic-bearing lines before and after (47 lines, zero
+differences). The verification snapshots are the `auth-logic-before/after`
+pair produced during the change.
 
 ## Rule for mixed files
 

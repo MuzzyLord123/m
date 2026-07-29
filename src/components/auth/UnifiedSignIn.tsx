@@ -21,6 +21,7 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { SocialAuthDivider } from '@/components/auth/SocialAuthDivider';
 import { getLastPortal, setLastPortal } from '@/hooks/useAuthSync';
 import { cn } from '@/lib/utils';
+import { LineDraw, DrawPath, DrawPoint } from '@/components/motion/LineDraw';
 
 type Portal = 'customer' | 'team' | 'accountant';
 type Tab = 'login' | 'signup' | 'forgot';
@@ -402,64 +403,104 @@ export default function UnifiedSignIn() {
     }
   };
 
-  // Portal tab styling
+  // Portal tab styling — a segmented hairline control rather than glowing pills
   const portalTabClass = (portal: Portal) => cn(
-    "flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 cursor-pointer whitespace-nowrap",
+    "flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 px-2 sm:px-4 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 cursor-pointer whitespace-nowrap",
     selectedPortal === portal
-      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-      : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+      ? "bg-primary text-primary-foreground"
+      : "text-muted-foreground hover:text-foreground"
   );
 
   return (
-    <div 
-      className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden"
+    <div
+      className="relative min-h-screen bg-background lg:grid lg:grid-cols-[1.1fr_1fr]"
       onKeyDown={handleKeyDown}
     >
-      {/* Ambient background glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand/[0.04] via-transparent to-brand/[0.06]" />
-      <div 
-        className="absolute inset-0 opacity-[0.015] dark:opacity-[0.025]"
-        style={{
-          backgroundImage: `linear-gradient(hsl(var(--brand) / 0.2) 1px, transparent 1px),
-                            linear-gradient(90deg, hsl(var(--brand) / 0.2) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px'
-        }}
-      />
-      <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-brand/[0.06] rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-brand/[0.04] rounded-full blur-[100px]" />
-      
+      {/* ── Brand panel — presentation only, hidden below lg ─────────────── */}
+      <aside className="relative hidden overflow-hidden border-r border-border/60 lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16" aria-hidden>
+        <div className="hero-aurora" />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `linear-gradient(hsl(var(--foreground) / 0.028) 1px, transparent 1px),
+                              linear-gradient(90deg, hsl(var(--foreground) / 0.028) 1px, transparent 1px)`,
+            backgroundSize: '72px 72px',
+            maskImage: 'radial-gradient(ellipse 90% 80% at 40% 30%, black 8%, transparent 80%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 90% 80% at 40% 30%, black 8%, transparent 80%)',
+          }}
+        />
+        <div className="pointer-events-none absolute inset-x-0 top-1/4 overflow-hidden">
+          <LineDraw viewBox="0 0 900 420" className="h-auto w-full min-w-[640px]">
+            <DrawPath d="M -30 330 Q 450 60 930 280" stroke="hsl(var(--foreground))" opacity={0.13} duration={1.6} />
+            <DrawPath d="M -30 400 Q 450 210 930 370" stroke="hsl(var(--foreground))" opacity={0.08} dashed at={0.3} />
+            <DrawPath d="M 480 150 Q 650 96 840 176" stroke="hsl(var(--primary))" strokeWidth={1.3} opacity={0.85} at={0.7} duration={0.9} />
+            <DrawPoint cx={480} cy={150} r={3} fill="hsl(var(--primary))" ring at={0.65} />
+            <DrawPoint cx={840} cy={176} r={2.5} fill="hsl(var(--foreground))" at={1.5} />
+          </LineDraw>
+        </div>
+
+        <div className="relative z-10 flex items-center justify-between">
+          <span className="mono-label">52.13° N · 3.78° W</span>
+          <span className="mono-label text-primary">The studio</span>
+        </div>
+
+        <div className="relative z-10">
+          <p className="font-display font-semibold uppercase leading-[0.95] tracking-[-0.03em] text-[clamp(2.6rem,4.2vw,4.2rem)]">
+            One secure
+            <span className="block text-primary">platform.</span>
+          </p>
+          <p className="mt-6 max-w-sm text-sm font-light leading-relaxed text-muted-foreground">
+            Your websites, projects, files and billing — signed in once, in one
+            place, encrypted at rest.
+          </p>
+        </div>
+
+        <div className="relative z-10 flex items-center justify-between border-t border-border/60 pt-6">
+          <span className="mono-label">EST. Wales · United Kingdom</span>
+          <span className="mono-label">quooro.com</span>
+        </div>
+      </aside>
+
+      {/* ── Form panel ────────────────────────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        className="w-full max-w-md relative z-10"
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:px-8"
       >
-        <Link 
-          to="/" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-150 mb-6 text-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to website
-        </Link>
-        
-        <div className="glass-strong rounded-2xl p-8 space-y-6">
-          {/* Logo */}
-          <div className="text-center space-y-2">
+        <div className="w-full max-w-md">
+        <div className="mb-8 flex items-center justify-between">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to website
+          </Link>
+          <span className="mono-label lg:hidden">52.13° N · 3.78° W</span>
+        </div>
+
+        <div className="space-y-6">
+          {/* Masthead */}
+          <div className="space-y-3">
             <motion.img 
               src={quooroLogo} 
               alt="Quooro" 
-              className="h-14 w-auto mx-auto mb-4 dark:brightness-0 dark:invert"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              className="h-9 w-auto dark:brightness-0 dark:invert"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
             />
-            <h1 className="text-2xl font-bold font-display tracking-tight">Welcome Back</h1>
-            <p className="text-sm text-muted-foreground">Sign in to your account</p>
+            <div className="flex items-center gap-3 pt-2">
+              <span className="h-px w-8 bg-primary" />
+              <p className="mono-label">Sign in to your account</p>
+            </div>
+            <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Welcome back</h1>
           </div>
 
           {/* Portal Selection Tabs */}
           <div className="relative">
-            <div className="flex gap-2 p-1 bg-muted/30 rounded-xl">
+            <div className="flex gap-1 rounded-full border border-border p-1">
               <motion.button
                 type="button"
                 onClick={() => setSelectedPortal('customer')}
@@ -503,7 +544,7 @@ export default function UnifiedSignIn() {
                 selectedPortal === 'team'
                   ? "text-warning bg-warning/10 border-warning/30"
                   : selectedPortal === 'accountant'
-                  ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/30"
+                  ? "text-[hsl(var(--success))] bg-[hsl(var(--success)/0.1)] border-[hsl(var(--success)/0.3)]"
                   : "text-muted-foreground bg-muted/30 border-border/50"
               )}
             >
@@ -527,9 +568,9 @@ export default function UnifiedSignIn() {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center"
+                  className="w-16 h-16 bg-[hsl(var(--success)/0.18)] rounded-full flex items-center justify-center"
                 >
-                  <Check className="w-8 h-8 text-emerald-500" />
+                  <Check className="w-8 h-8 text-[hsl(var(--success))]" />
                 </motion.div>
                 <p className="mt-4 text-sm text-muted-foreground">Redirecting...</p>
               </motion.div>
@@ -554,9 +595,9 @@ export default function UnifiedSignIn() {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', delay: 0.1 }}
-                        className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto"
+                        className="w-16 h-16 bg-[hsl(var(--success)/0.18)] rounded-full flex items-center justify-center mx-auto"
                       >
-                        <Check className="w-8 h-8 text-emerald-500" />
+                        <Check className="w-8 h-8 text-[hsl(var(--success))]" />
                       </motion.div>
                       <div>
                         <h2 className="text-lg font-semibold">Check your email</h2>
@@ -851,6 +892,7 @@ export default function UnifiedSignIn() {
           <p className="text-center text-xs text-muted-foreground">
             Need help? <a href="mailto:support@quooro.com" className="text-primary hover:underline">Contact Support</a>
           </p>
+        </div>
         </div>
       </motion.div>
     </div>
