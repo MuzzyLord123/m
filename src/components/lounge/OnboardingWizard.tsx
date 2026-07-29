@@ -4,10 +4,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import {
   User, Globe, MessageSquare, Upload, Calendar,
-  CheckCircle2, X, ChevronRight, Sparkles
+  Check, ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Panel, PanelHeader } from '@/components/platform';
 
 interface OnboardingStep {
   id: string;
@@ -44,7 +44,7 @@ export function OnboardingWizard() {
 
   useEffect(() => {
     if (!user) return;
-    
+
     const fetchOnboarding = async () => {
       const { data: existing } = await supabase
         .from('user_onboarding')
@@ -72,7 +72,6 @@ export function OnboardingWizard() {
   if (loading || !data || data.dismissed) return null;
 
   const completedCount = STEPS.filter(s => data[s.dbField as keyof OnboardingData]).length;
-  const progress = Math.round((completedCount / STEPS.length) * 100);
   const allComplete = completedCount === STEPS.length;
 
   if (allComplete) return null;
@@ -99,87 +98,59 @@ export function OnboardingWizard() {
     navigate(step.path);
   };
 
+  if (dismissing) return null;
+
   return (
-    <AnimatePresence>
-      {!dismissing && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12, height: 0 }}
-          transition={{ duration: 0.3 }}
-          className="rounded-lg border border-border bg-card overflow-hidden"
+    <Panel>
+      <PanelHeader label="Getting started">
+        <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+          {completedCount} of {STEPS.length}
+        </span>
+        <button
+          onClick={handleDismiss}
+          className="text-[11px] text-muted-foreground transition-colors duration-150 hover:text-foreground"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-[#0073E6]" />
-              <span className="text-[11px] font-semibold text-foreground/80">Getting Started</span>
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#0073E6]/20 text-[#0073E6]">
-                {completedCount}/{STEPS.length}
-              </span>
-            </div>
+          Dismiss
+        </button>
+      </PanelHeader>
+
+      {/* Numbered intake ledger */}
+      <div>
+        {STEPS.map((step, index) => {
+          const isComplete = data[step.dbField as keyof OnboardingData];
+          return (
             <button
-              onClick={handleDismiss}
-              className="text-[9px] font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              key={step.id}
+              onClick={() => handleStepClick(step)}
+              className="group flex w-full items-center gap-3 border-t border-border/60 px-4 py-2.5 text-left transition-colors duration-150 first:border-t-0 hover:bg-foreground/[0.025]"
             >
-              <X className="w-3 h-3" />
-              Dismiss
+              <span className="flex w-5 shrink-0 items-center justify-center">
+                {isComplete ? (
+                  <Check className="h-3.5 w-3.5 text-primary" aria-hidden />
+                ) : (
+                  <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                )}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className={cn(
+                  "block truncate text-[13px] font-[450]",
+                  isComplete ? "text-muted-foreground" : "text-foreground"
+                )}>
+                  {step.label}
+                </span>
+                <span className="block truncate text-[11.5px] text-muted-foreground">
+                  {step.description}
+                </span>
+              </span>
+              {!isComplete && (
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100" />
+              )}
             </button>
-          </div>
-
-          {/* Progress bar */}
-          <div className="h-1 bg-muted">
-            <motion.div
-              className="h-full bg-[#0073E6]"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-            />
-          </div>
-
-          {/* Steps */}
-          <div className="p-3 space-y-1">
-            {STEPS.map(step => {
-              const isComplete = data[step.dbField as keyof OnboardingData];
-              return (
-                <button
-                  key={step.id}
-                  onClick={() => handleStepClick(step)}
-                  className={cn(
-                    "flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-left transition-all group",
-                    isComplete
-                      ? "opacity-60"
-                      : "hover:bg-accent"
-                  )}
-                >
-                  <div className={cn(
-                    "w-7 h-7 rounded-md flex items-center justify-center shrink-0 transition-colors",
-                    isComplete ? "bg-[#34d399]/20" : "bg-muted"
-                  )}>
-                    {isComplete ? (
-                      <CheckCircle2 className="w-4 h-4 text-[#34d399]" />
-                    ) : (
-                      <step.icon className="w-3.5 h-3.5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={cn(
-                      "text-[11px] font-medium truncate",
-                      isComplete ? "line-through text-muted-foreground" : "text-foreground/80"
-                    )}>
-                      {step.label}
-                    </p>
-                    <p className="text-[9px] text-muted-foreground truncate">{step.description}</p>
-                  </div>
-                  {!isComplete && (
-                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          );
+        })}
+      </div>
+    </Panel>
   );
 }

@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, Command, Globe, Layout, FileText, Megaphone, Share2,
+  Search, Globe, Layout, FileText, Megaphone, Share2,
   Calendar, HardDrive, Upload, Users, CreditCard, MessageSquare,
-  Settings, Home, ArrowRight, X, Clock, Code, Briefcase
+  Settings, Home, ArrowRight, X, Code, Briefcase
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -206,26 +205,26 @@ export function GlobalSearch({ className }: GlobalSearchProps) {
       <button
         onClick={() => setOpen(true)}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50 hover:bg-muted border border-border/50 transition-colors text-muted-foreground hover:text-foreground",
+          "flex h-8 items-center gap-2 rounded-lg border border-border/60 bg-foreground/[0.03] px-2.5 text-[12.5px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground",
           className
         )}
         aria-label="Open search (Cmd+K)"
       >
-        <Search className="w-4 h-4" />
-        <span className="text-sm hidden sm:inline">Search...</span>
-        <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium bg-background rounded border border-border">
-          <Command className="w-3 h-3" />K
+        <Search className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Search</span>
+        <kbd className="hidden items-center rounded border border-border/60 bg-card px-1 py-px font-mono text-[10px] text-muted-foreground sm:inline-flex">
+          ⌘K
         </kbd>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-xl p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-xl rounded-xl border-border/60 bg-popover p-0 gap-0 overflow-hidden">
           <VisuallyHidden>
             <DialogTitle>Search</DialogTitle>
           </VisuallyHidden>
           
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-            <Search className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border/60">
+            <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             <Input
               ref={inputRef}
               value={query}
@@ -234,8 +233,8 @@ export function GlobalSearch({ className }: GlobalSearchProps) {
                 setSelectedIndex(0);
               }}
               onKeyDown={handleKeyDown}
-              placeholder="Search pages, projects, content..."
-              className="border-0 bg-transparent focus-visible:ring-0 px-0 text-base placeholder:text-muted-foreground/60"
+              placeholder="Search pages, projects, content"
+              className="h-9 border-0 bg-transparent focus-visible:ring-0 px-0 text-sm placeholder:text-muted-foreground/60"
             />
             {searching && (
               <div className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin flex-shrink-0" />
@@ -254,46 +253,39 @@ export function GlobalSearch({ className }: GlobalSearchProps) {
           <div className="max-h-[60vh] overflow-y-auto p-2">
             {Object.entries(groupedResults).length > 0 ? (
               Object.entries(groupedResults).map(([category, items]) => (
-                <div key={category} className="mb-4 last:mb-0">
-                  <p className="text-xs font-medium text-muted-foreground px-3 py-1.5">{category}</p>
-                  <div className="space-y-0.5">
+                <div key={category} className="mb-3 last:mb-0">
+                  <p className="px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{category}</p>
+                  <div>
                     {items.map((item) => {
                       const flatIndex = allResults.indexOf(item);
                       const isSelected = flatIndex === selectedIndex;
                       const Icon = item.icon;
-                      
+
                       return (
-                        <motion.button
+                        <button
                           key={item.id}
                           onClick={() => handleSelect(item.path)}
                           onMouseEnter={() => setSelectedIndex(flatIndex)}
-                          initial={{ opacity: 0, y: 4 }}
-                          animate={{ opacity: 1, y: 0 }}
                           className={cn(
-                            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors",
-                            isSelected ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors duration-150",
+                            isSelected ? "bg-foreground/[0.05]" : "hover:bg-foreground/[0.03]"
                           )}
                         >
-                          <div className={cn(
-                            "p-2 rounded-lg",
-                            isSelected ? "bg-primary-foreground/20" : "bg-muted"
-                          )}>
-                            <Icon className="w-4 h-4" />
-                          </div>
+                          <Icon className={cn(
+                            "w-4 h-4 flex-shrink-0",
+                            isSelected ? "text-foreground" : "text-muted-foreground"
+                          )} />
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{item.label}</p>
-                            <p className={cn(
-                              "text-sm truncate",
-                              isSelected ? "text-primary-foreground/70" : "text-muted-foreground"
-                            )}>
+                            <p className="truncate text-[13px] font-[450] text-foreground">{item.label}</p>
+                            <p className="truncate text-[11.5px] text-muted-foreground">
                               {item.description}
                             </p>
                           </div>
                           <ArrowRight className={cn(
-                            "w-4 h-4 flex-shrink-0 transition-opacity",
+                            "w-3.5 h-3.5 flex-shrink-0 text-muted-foreground transition-opacity duration-150",
                             isSelected ? "opacity-100" : "opacity-0"
                           )} />
-                        </motion.button>
+                        </button>
                       );
                     })}
                   </div>
@@ -301,25 +293,25 @@ export function GlobalSearch({ className }: GlobalSearchProps) {
               ))
             ) : (
               <div className="text-center py-8">
-                <p className="text-muted-foreground">No results found</p>
-                <p className="text-sm text-muted-foreground/60 mt-1">Try searching for something else</p>
+                <p className="text-sm text-foreground">No results found</p>
+                <p className="text-[12.5px] text-muted-foreground mt-1">Try searching for something else</p>
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-between px-4 py-2.5 border-t border-border text-xs text-muted-foreground bg-muted/30">
+          <div className="flex items-center justify-between border-t border-border/60 bg-sunken px-4 py-2 text-[11px] text-muted-foreground">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-background rounded border border-border">↵</kbd>
+                <kbd className="rounded border border-border/60 bg-card px-1 py-px font-mono text-[10px]">↵</kbd>
                 select
               </span>
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-background rounded border border-border">↑↓</kbd>
+                <kbd className="rounded border border-border/60 bg-card px-1 py-px font-mono text-[10px]">↑↓</kbd>
                 navigate
               </span>
             </div>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-background rounded border border-border">esc</kbd>
+              <kbd className="rounded border border-border/60 bg-card px-1 py-px font-mono text-[10px]">esc</kbd>
               close
             </span>
           </div>

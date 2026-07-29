@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Plus, X } from 'lucide-react';
 import { QuickActions } from './QuickActions';
 import { ChatBot } from '@/components/ChatBot';
 
@@ -70,10 +69,10 @@ export function FloatingDock() {
 
   return (
     <motion.div
-      className="fixed right-0 bottom-6 z-40 flex flex-col items-end gap-3 pr-4"
+      className="fixed right-0 bottom-6 z-40 flex flex-col items-end pr-4"
       initial={{ x: 0 }}
       animate={{ x: isVisible ? 0 : 56 }}
-      transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
       onMouseEnter={() => {
         setRevealed(true);
         setIdle(false);
@@ -101,7 +100,8 @@ export function FloatingDock() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.7 }}
             exit={{ opacity: 0 }}
-            className="absolute -left-2 bottom-4 w-2 h-20 rounded-l-full bg-primary/30 cursor-pointer"
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute -left-2 bottom-4 h-20 w-2 cursor-pointer rounded-l-full bg-foreground/20"
             onClick={() => {
               setRevealed(true);
               setIdle(false);
@@ -111,19 +111,22 @@ export function FloatingDock() {
         )}
       </AnimatePresence>
 
-      {/* Chatbot button + window */}
-      <ChatBot
-        isEmbedded
-        isOpen={chatOpen}
-        onToggle={() => setChatOpen(prev => !prev)}
-      />
+      {/* Single quiet cluster: hairline surface holding both triggers */}
+      <div className="flex flex-col items-center gap-2 rounded-full border border-border/60 bg-card p-1.5">
+        {/* Chatbot button + window */}
+        <ChatBot
+          isEmbedded
+          isOpen={chatOpen}
+          onToggle={() => setChatOpen(prev => !prev)}
+        />
 
-      {/* Quick Actions button + menu */}
-      <QuickActions
-        isEmbedded
-        isOpen={quickActionsOpen}
-        onToggle={() => setQuickActionsOpen(prev => !prev)}
-      />
+        {/* Quick Actions button + menu */}
+        <QuickActions
+          isEmbedded
+          isOpen={quickActionsOpen}
+          onToggle={() => setQuickActionsOpen(prev => !prev)}
+        />
+      </div>
     </motion.div>
   );
 }

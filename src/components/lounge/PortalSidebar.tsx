@@ -865,7 +865,7 @@ export function PortalSidebar({
           {!collapsed &&
           <div className="space-y-0.5 mt-1">
               <button
-              onClick={() => createFolder('New Folder', '#6b7280')}
+              onClick={() => createFolder('New Folder', '#8a8a8a')}
               className="flex items-center gap-2.5 w-full px-3 py-2 text-[11px] text-muted-foreground/50 hover:text-muted-foreground rounded-lg hover:bg-foreground/[0.03] transition-all">
 
                 <FolderPlus className="w-3.5 h-3.5" />

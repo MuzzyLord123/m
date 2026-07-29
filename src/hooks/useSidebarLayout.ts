@@ -31,13 +31,14 @@ const DEFAULT_LAYOUT: SidebarLayoutData = { folders: [], itemOrder: [] };
 const SAVE_DEBOUNCE_MS = 2000;
 const LAYOUT_SYNC_EVENT = 'sidebar-layout-sync';
 
+// Night Shift default tones: neutral / ember / brass rotation
 export const DEFAULT_PRESET_FOLDERS = [
-  { name: 'Website', color: '#3b82f6', itemIds: ['website', 'ai-builder'] },
-  { name: 'Projects', color: '#22c55e', itemIds: ['products', 'apps', 'workflows', 'content', 'planner'] },
-  { name: 'Marketing', color: '#f97316', itemIds: ['seo', 'ads', 'social', 'calendar'] },
-  { name: 'Files', color: '#eab308', itemIds: ['assets', 'uploads'] },
-  { name: 'Manage', color: '#a855f7', itemIds: ['crm', 'team', 'billing', 'messages', 'tickets', 'mail', 'team-comms', 'notifications', 'settings'] },
-  { name: 'Subscriptions', color: '#ec4899', itemIds: ['website-designer', 'cad-studio', 'inventory', 'office', 'white-label', 'automations-pro'] },
+  { name: 'Website', color: '#8a8a8a', itemIds: ['website', 'ai-builder'] },
+  { name: 'Projects', color: '#C2410C', itemIds: ['products', 'apps', 'workflows', 'content', 'planner'] },
+  { name: 'Marketing', color: '#a16207', itemIds: ['seo', 'ads', 'social', 'calendar'] },
+  { name: 'Files', color: '#8a8a8a', itemIds: ['assets', 'uploads'] },
+  { name: 'Manage', color: '#C2410C', itemIds: ['crm', 'team', 'billing', 'messages', 'tickets', 'mail', 'team-comms', 'notifications', 'settings'] },
+  { name: 'Subscriptions', color: '#a16207', itemIds: ['website-designer', 'cad-studio', 'inventory', 'office', 'white-label', 'automations-pro'] },
 ];
 
 const SUBSCRIPTION_ITEM_IDS = ['website-designer', 'cad-studio', 'inventory', 'office', 'white-label', 'automations-pro'];
@@ -76,7 +77,7 @@ function migrateLayout(layout: SidebarLayoutData): { layout: SidebarLayoutData; 
       ...f,
       itemIds: f.itemIds.filter((id) => !SUBSCRIPTION_ITEM_IDS.includes(id)),
     })).filter((f) => f.itemIds.length > 0);
-    folders = [...folders, { id: folderId, name: 'Subscriptions', color: '#ec4899', itemIds: SUBSCRIPTION_ITEM_IDS, expanded: true }];
+    folders = [...folders, { id: folderId, name: 'Subscriptions', color: '#a16207', itemIds: SUBSCRIPTION_ITEM_IDS, expanded: true }];
     return { layout: { folders, itemOrder: cleanOrder }, changed: true };
   }
 
@@ -335,7 +336,7 @@ export function useSidebarLayout(userId: string | undefined) {
       const newOrder = prev.itemOrder.filter(i => i !== itemA && i !== itemB);
       newOrder.splice(insertAt >= 0 && insertAt < newOrder.length + 1 ? insertAt : newOrder.length, 0, id);
       return {
-        folders: [...folders, { id, name: 'New Folder', color: '#6b7280', itemIds: [itemA, itemB], expanded: true }],
+        folders: [...folders, { id, name: 'New Folder', color: '#8a8a8a', itemIds: [itemA, itemB], expanded: true }],
         itemOrder: newOrder,
       };
     });
