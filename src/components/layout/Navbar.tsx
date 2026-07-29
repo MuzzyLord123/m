@@ -539,14 +539,16 @@ function FullWidthMegaMenu({
           aria-label={`${menu.label} navigation menu`}
         >
           
-          {/* Menu Panel - Full width with subtle border */}
+          {/* Menu panel. Edge-to-edge below xl; at xl it becomes a floating card
+              sitting under the nav capsule and sharing its width, so the two
+              read as one object rather than a pill balanced on a slab. */}
           <div
-            className="relative bg-background border-b border-border/50 shadow-2xl"
+            className="nav-panel relative border-b border-border/50 shadow-2xl xl:mx-auto xl:mt-2 xl:max-w-[76rem] xl:rounded-3xl xl:border xl:border-foreground/10"
           >
             {/* Subtle top gradient line */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-            
-            <div className="container mx-auto px-6 lg:px-12 xl:px-20">
+            <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent xl:hidden" />
+
+            <div className="container mx-auto px-6 lg:px-12 xl:max-w-none xl:px-10">
               <div className="flex py-10">
                 {/* Main columns - 3 column grid */}
                 <div className="flex-1 grid grid-cols-3 gap-12 lg:gap-16">
@@ -899,13 +901,19 @@ export function Navbar() {
         animate={{ y: navHidden ? '-100%' : '0%' }}
         transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,border-color,box-shadow] duration-300 ${
+          // Below xl the bar still spans the full width — a floating capsule
+          // does not survive being squeezed to phone width, and the burger menu
+          // needs a solid edge to sit against.
           scrolled || activeDropdown
-            ? "bg-background/85 backdrop-blur-2xl border-b border-foreground/[0.06] shadow-sm" 
+            ? "bg-background/85 backdrop-blur-2xl border-b border-foreground/[0.06] shadow-sm xl:border-b-0 xl:bg-transparent xl:shadow-none xl:backdrop-blur-none"
             : "bg-transparent backdrop-blur-none"
         }`}
       >
-        <div className="container mx-auto px-4 sm:px-6 h-full">
-          <div className="relative flex items-center justify-between h-full">
+        <div className="container mx-auto h-full px-4 sm:px-6 xl:max-w-6xl xl:px-8">
+          {/* At xl the bar becomes a capsule floating over the page. Below that
+              it is a plain full-width row, so the rounding, glass and inset
+              padding are all gated behind the breakpoint. */}
+          <div className="relative flex h-full items-center justify-between xl:my-3 xl:h-[calc(100%-1.5rem)] xl:rounded-full xl:pl-6 xl:pr-2 nav-glass-xl">
             {/* Logo */}
             <Link to="/" className="group/logo flex items-center gap-2 shrink-0 z-10 relative">
               <span className="hidden sm:block absolute -inset-2 rounded-xl bg-foreground/[0.04] opacity-0 group-hover/logo:opacity-100 blur-md transition-opacity duration-500 pointer-events-none" />

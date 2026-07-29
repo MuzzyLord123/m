@@ -29,7 +29,11 @@ export function Layout({ children }: LayoutProps) {
 
       <Navbar />
 
-      <main id="main-content" className="flex-1 pt-20">
+      {/* The homepage drops the top padding so the hero runs underneath the
+          floating nav capsule — glass with nothing behind it is just a grey
+          box. HomeHero carries its own pt-24/28/32, which clears the capsule.
+          Every other page keeps the offset, since their heroes assume it. */}
+      <main id="main-content" className={isHomePage ? "flex-1" : "flex-1 pt-20"}>
         {children}
       </main>
 
