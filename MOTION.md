@@ -128,12 +128,14 @@ gradients, no blobs.
 
 ## 7. Perf gates (from MOTION-AUDIT.md)
 
-Production-build numbers may not regress. Measured after Phase 3: interior
-routes 55–60fps at 4× throttle; homepage post-hero segment 58.7fps (was ~4
-everywhere before the F1 fix); the hero-visible segment is bounded by live
-WebGL under throttle (~10–15fps at 4×, 60fps unthrottled) — that segment's
-cost was cut with antialias off, dpr ≤ 1.25, 96-segment sphere, 4-tap aniso
-and allocation-free frame callbacks, and "demand" frameloop was tried and
-reverted (OrbitControls invalidation makes it slower than viewport-gated
-always/never). CLS ≤ 0.01 per route, homepage LCP ≤ 1.5s. `transform`/`opacity`
+Production-build numbers may not regress. Measured after the poster-hero
+rebuild: homepage 44.4fps average / 47.3 through the hero / 60 past it at 4×
+throttle (the original baseline was 4.0 everywhere); interior routes
+55–60fps; CLS ≤ 0.01 per route; homepage LCP ≤ 1.3s. The decisive move was
+taking WebGL out of the first viewport entirely — the globe lives in Reach
+behind DeferredGlobe3D, so phones never fetch three.js unless the visitor
+scrolls to it. The globe's own render cost stays trimmed (antialias off,
+dpr ≤ 1.25, 96-segment sphere, aniso 4, allocation-free frame callbacks,
+viewport-gated frameloop with 320px hysteresis; "demand" mode measured
+slower and reverted). `transform`/`opacity`
 only; `will-change` only while animating; every entrance IO-triggered, once.

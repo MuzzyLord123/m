@@ -29,7 +29,8 @@ import { Marquee } from "@/components/motion/Marquee";
 import { StickySequence, type SequenceStep } from "@/components/motion/StickySequence";
 import { SplitText } from "@/components/motion/SplitText";
 import { WordReveal, Drift } from "@/components/motion/Scrub";
-import { OrbitDivider, CoordPlot } from "@/components/marketing/OrbitalMotif";
+import { OrbitDivider } from "@/components/marketing/OrbitalMotif";
+import { DeferredGlobe3D } from "@/components/DeferredGlobe3D";
 import { useHomepageHeader } from "@/hooks/useHomepageHeader";
 
 /**
@@ -328,11 +329,24 @@ export default function Index() {
                 </EditableField>
               </p>
               <p className="mono-label mt-8">Studio: Wales, UK · Remote by default</p>
-              {/* Orbital coordinate plot — in flow below the copy (absolute
-                  positioning collided with the display heading), drifting a
-                  touch slower than the text so the layer separation is felt. */}
-              <Drift travel={22} className="pointer-events-none mt-10 hidden max-w-[400px] lg:block">
-                <CoordPlot className="h-auto w-full" />
+
+              {/* The globe, home again — moved out of the hero and back to the
+                  section that is actually about place. At this size it earns
+                  its keep, and because it sits below the fold, DeferredGlobe3D
+                  means phones never fetch three.js unless the visitor scrolls
+                  here. Drift gives the wrapper a slow parallax against the
+                  copy; the component internals stay untouched. */}
+              <Drift travel={24} className="mx-auto mt-10 w-full max-w-[300px] sm:max-w-[360px] lg:mx-0">
+                <div className="relative aspect-square">
+                  <div
+                    className="pointer-events-none absolute inset-[8%] rounded-full blur-3xl"
+                    style={{ background: "hsl(var(--primary) / 0.15)" }}
+                  />
+                  <DeferredGlobe3D />
+                </div>
+                <p className="mono-label mt-4 text-center lg:text-left">
+                  52.13° N, 3.78° W · drag to spin
+                </p>
               </Drift>
             </Reveal>
 
