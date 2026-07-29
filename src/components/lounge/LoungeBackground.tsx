@@ -133,12 +133,12 @@ export function LoungeBackground() {
       const y1 = ch * (0.3 + Math.cos(t * 0.7) * 0.2);
       const gradient = ctx.createRadialGradient(x1, y1, 0, x1, y1, Math.max(cw, ch) * 0.6);
       if (dark) {
-        gradient.addColorStop(0, 'hsla(220, 15%, 15%, 0.15)');
-        gradient.addColorStop(0.5, 'hsla(260, 10%, 10%, 0.08)');
+        gradient.addColorStop(0, 'hsla(20, 20%, 12%, 0.15)');
+        gradient.addColorStop(0.5, 'hsla(30, 12%, 9%, 0.08)');
         gradient.addColorStop(1, 'hsla(0, 0%, 0%, 0)');
       } else {
-        gradient.addColorStop(0, 'hsla(220, 30%, 90%, 0.25)');
-        gradient.addColorStop(0.5, 'hsla(260, 20%, 85%, 0.12)');
+        gradient.addColorStop(0, 'hsla(36, 30%, 90%, 0.25)');
+        gradient.addColorStop(0.5, 'hsla(28, 22%, 87%, 0.12)');
         gradient.addColorStop(1, 'hsla(0, 0%, 100%, 0)');
       }
       ctx.fillStyle = gradient;
@@ -165,7 +165,8 @@ export function LoungeBackground() {
         const x = cw * (0.2 + i * 0.3 + Math.sin(t + i * 2) * 0.1);
         const y = ch * (0.3 + Math.cos(t * 0.5 + i) * 0.15);
         const r = 300 + Math.sin(t + i) * 100;
-        const hue = (200 + i * 40 + time * 0.1) % 360;
+        // Night Shift family only: ember, flame, brass — no hue cycling
+        const hue = [13, 22, 32][i];
         const gradient = ctx.createRadialGradient(x, y, 0, x, y, r);
         if (dark) {
           gradient.addColorStop(0, `hsla(${hue}, 40%, 20%, 0.06)`);

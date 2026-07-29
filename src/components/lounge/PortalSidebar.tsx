@@ -303,8 +303,8 @@ function SortableNavItem({
         "flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 w-full text-left relative z-10 select-none",
         collapsed ? "px-3 py-2 justify-center" : "px-3 py-2",
         isActive ?
-        "bg-brand/10 text-primary border-l-2 border-brand shadow-sm" :
-        "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+        "bg-foreground/[0.05] text-foreground border-l-2 border-primary" :
+        "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]",
         isDragging && "scale-105 shadow-xl shadow-brand/10 ring-2 ring-brand/20 rounded-lg"
       )}
       style={{ touchAction: dragEnabled ? 'none' : 'pan-y' }}>
@@ -312,7 +312,7 @@ function SortableNavItem({
         <div className="relative flex-shrink-0">
           <Icon className="w-[18px] h-[18px]" />
           {hasNotif && collapsed &&
-        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-card animate-pulse" />
+        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
         }
         </div>
         {!collapsed &&
@@ -329,7 +329,7 @@ function SortableNavItem({
               </Badge>
         }
             {item.path === '/lounge/settings' && show2FAWarning &&
-        <AlertTriangle className="w-3.5 h-3.5 ml-auto text-destructive animate-pulse" />
+        <AlertTriangle className="w-3.5 h-3.5 ml-auto text-destructive" />
         }
           </>
       }
@@ -624,13 +624,13 @@ export function PortalSidebar({
       className={cn(
         "flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 w-full text-left",
         collapsed ? "px-3 py-2 justify-center" : "px-3 py-2",
-        active ? "bg-brand/10 text-primary border-l-2 border-brand shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+        active ? "bg-foreground/[0.05] text-foreground border-l-2 border-primary" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
       )}>
 
         <div className="relative flex-shrink-0">
           <Icon className="w-[18px] h-[18px]" />
           {hasNotification(item.path) && collapsed &&
-        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-card animate-pulse" />
+        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
         }
         </div>
         {!collapsed &&
@@ -642,7 +642,7 @@ export function PortalSidebar({
               </Badge>
         }
             {item.path === '/lounge/settings' && show2FAWarning &&
-        <AlertTriangle className="w-3.5 h-3.5 ml-auto text-destructive animate-pulse" />
+        <AlertTriangle className="w-3.5 h-3.5 ml-auto text-destructive" />
         }
           </>
       }
@@ -683,16 +683,16 @@ export function PortalSidebar({
       className={cn(
         "flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 w-full text-left relative group/nav",
         collapsed ? "px-3 py-2 justify-center" : "px-3 py-2",
-        isActive && !hasItems ? "bg-brand/10 text-primary border-l-2 border-brand shadow-sm" :
+        isActive && !hasItems ? "bg-foreground/[0.05] text-foreground border-l-2 border-primary" :
         isActive && hasItems ? "text-primary" :
-        "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+        "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
       )}
       aria-expanded={hasItems ? isExpanded : undefined}>
 
         <div className="relative flex-shrink-0">
           <group.icon className={cn("w-[18px] h-[18px] transition-colors duration-200", isActive && !hasItems ? "text-primary-foreground" : "")} />
           {groupHasNotification && collapsed &&
-        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-card animate-pulse" />
+        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
         }
         </div>
         {!collapsed &&
@@ -703,7 +703,7 @@ export function PortalSidebar({
                 <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60" />
               </motion.div>
         }
-            {groupHasNotification && !hasItems && <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />}
+            {groupHasNotification && !hasItems && <span className="h-2 w-2 rounded-full bg-primary" />}
           </>
       }
       </motion.button>;
@@ -730,7 +730,7 @@ export function PortalSidebar({
                       whileTap={{ scale: 0.95 }}
                       className={cn(
                         "flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-150 relative",
-                        isPathActive(item.path) ? "bg-brand/10 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                        isPathActive(item.path) ? "bg-foreground/[0.05] text-primary" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                       )}>
 
                           <item.icon className="w-4 h-4" />
@@ -784,8 +784,8 @@ export function PortalSidebar({
                 "flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 w-full text-left",
                 collapsed ? "px-3 py-2 justify-center" : "px-3 py-2",
                 active ?
-                "bg-brand/10 text-primary border-l-2 border-brand shadow-sm" :
-                "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                "bg-foreground/[0.05] text-foreground border-l-2 border-primary" :
+                "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
               )}>
 
                 <Icon className="w-[18px] h-[18px]" />
@@ -805,7 +805,7 @@ export function PortalSidebar({
 
           {!collapsed &&
           <div className="relative mx-2 my-2">
-              <div className="h-px bg-border/30" />
+              <div className="h-px bg-border/60" />
             </div>
           }
 
@@ -866,17 +866,17 @@ export function PortalSidebar({
           <div className="space-y-0.5 mt-1">
               <button
               onClick={() => createFolder('New Folder', '#6b7280')}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-[11px] text-muted-foreground/50 hover:text-muted-foreground rounded-lg hover:bg-accent/30 transition-all">
+              className="flex items-center gap-2.5 w-full px-3 py-2 text-[11px] text-muted-foreground/50 hover:text-muted-foreground rounded-lg hover:bg-foreground/[0.03] transition-all">
 
                 <FolderPlus className="w-3.5 h-3.5" />
-                Create Folder
+                Create folder
               </button>
               <button
               onClick={() => {resetToPresets();}}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-[11px] text-muted-foreground/50 hover:text-muted-foreground rounded-lg hover:bg-accent/30 transition-all">
+              className="flex items-center gap-2.5 w-full px-3 py-2 text-[11px] text-muted-foreground/50 hover:text-muted-foreground rounded-lg hover:bg-foreground/[0.03] transition-all">
 
                 <Hammer className="w-3.5 h-3.5" />
-                Preset Folders
+                Preset folders
               </button>
             </div>
           }
@@ -906,7 +906,7 @@ export function PortalSidebar({
               onClick={() => navigate(item.path)}
               className={cn(
                 "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-150 shrink-0 relative",
-                active ? "bg-brand/10 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                active ? "bg-foreground/[0.05] text-primary" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
               )}>
 
               <Icon className="w-[18px] h-[18px]" />
@@ -927,13 +927,13 @@ export function PortalSidebar({
       )}>
         {/* Title */}
         <div className="flex items-center justify-center px-3 shrink-0 cursor-pointer" onClick={() => navigate('/lounge')}>
-          <span className="text-sm font-bold text-foreground tracking-tight whitespace-nowrap">Quooro Lounge</span>
+          <span className="font-display text-sm font-semibold tracking-[-0.02em] text-foreground whitespace-nowrap">Quooro Lounge</span>
         </div>
-        <div className="w-px h-8 bg-border/40 mx-1 shrink-0" />
+        <div className="w-px h-8 bg-border/60 mx-1 shrink-0" />
 
         {/* Pinned items */}
         {pinnedItems.map((item) => renderHorizontalItem(item))}
-        <div className="w-px h-6 bg-border/30 mx-0.5 shrink-0" />
+        <div className="w-px h-6 bg-border/60 mx-0.5 shrink-0" />
 
         {/* Folder-aware items */}
         {horizontalEntries.map((entryId) => {
@@ -956,7 +956,7 @@ export function PortalSidebar({
                     <TooltipContent side={position === 'top' ? 'bottom' : 'top'} sideOffset={8} className="font-medium text-xs">{folder.name}</TooltipContent>
                   </Tooltip>
                   {folderItems.map((fi) => renderHorizontalItem(fi))}
-                  <div className="w-px h-6 bg-border/30 mx-0.5 shrink-0" />
+                  <div className="w-px h-6 bg-border/60 mx-0.5 shrink-0" />
                 </div>);
 
             }
@@ -971,7 +971,7 @@ export function PortalSidebar({
                       onClick={() => toggleFolder(folder.id)}
                       className={cn(
                         "relative flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 shrink-0",
-                        folderHasActive ? "bg-primary/10 text-primary ring-1 ring-primary/30" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                        folderHasActive ? "bg-primary/10 text-primary ring-1 ring-primary/30" : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
                       )}>
 
                       <FolderOpen className="w-[18px] h-[18px]" style={{ color: folder.color }} />
@@ -1002,7 +1002,7 @@ export function PortalSidebar({
                     className="flex items-center gap-0.5 overflow-hidden">
 
                       {folderItems.map((fi) => renderHorizontalItem(fi))}
-                      <div className="w-px h-6 bg-border/30 mx-0.5 shrink-0" />
+                      <div className="w-px h-6 bg-border/60 mx-0.5 shrink-0" />
                     </motion.div>
                   }
                 </AnimatePresence>
@@ -1019,27 +1019,27 @@ export function PortalSidebar({
         {/* Account */}
         <Popover open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
           <PopoverTrigger asChild>
-            <button className="flex items-center justify-center p-1 rounded-lg hover:bg-accent/50 transition-all shrink-0">
-              <Avatar className="h-8 w-8 border-2 border-primary/25">
+            <button className="flex items-center justify-center p-1 rounded-lg hover:bg-foreground/[0.04] transition-all shrink-0">
+              <Avatar className="h-8 w-8 border border-border/60">
                 <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User'} />
-                <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-xs">{getInitials()}</AvatarFallback>
+                <AvatarFallback className="bg-primary/12 text-primary font-semibold text-xs">{getInitials()}</AvatarFallback>
               </Avatar>
             </button>
           </PopoverTrigger>
           <PopoverContent side={position === 'top' ? 'bottom' : 'top'} align="end" className="p-1.5 rounded-lg w-56" sideOffset={8}>
             <div className="space-y-0.5">
-              <div className="px-3 py-2.5 border-b border-border/40 mb-1.5">
+              <div className="px-3 py-2.5 border-b border-border/60 mb-1.5">
                 <p className="text-sm font-semibold truncate">{profile?.full_name || 'User'}</p>
                 <p className="text-[11px] text-muted-foreground truncate mt-0.5">{user?.email}</p>
               </div>
               <Button variant="ghost" size="sm" onClick={() => {setAccountMenuOpen(false);navigate('/lounge/settings');}} className="w-full justify-start text-muted-foreground hover:text-foreground text-[13px] h-9 rounded-md">
-                <Settings className="w-4 h-4 mr-2.5" />Account Settings
+                <Settings className="w-4 h-4 mr-2.5" />Account settings
               </Button>
-              <div className="h-px bg-border/40 my-1" />
+              <div className="h-px bg-border/60 my-1" />
               <AccountSwitcher portal="customer" onSwitch={() => setAccountMenuOpen(false)} />
-              <div className="h-px bg-border/40 my-1" />
+              <div className="h-px bg-border/60 my-1" />
               <Button variant="ghost" size="sm" onClick={() => {setAccountMenuOpen(false);onSignOut();}} className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-[13px] h-9 rounded-md">
-                <LogOut className="w-4 h-4 mr-2.5" />Sign Out
+                <LogOut className="w-4 h-4 mr-2.5" />Sign out
               </Button>
             </div>
           </PopoverContent>
@@ -1052,7 +1052,7 @@ export function PortalSidebar({
     <>
     <aside
       className={cn(
-        "flex flex-col border-border/30 bg-card transition-all duration-300",
+        "flex flex-col border-border/60 bg-sidebar transition-all duration-300",
         mobile
           ? "w-full h-dvh max-h-dvh overflow-hidden"
           : cn(
@@ -1071,7 +1071,7 @@ export function PortalSidebar({
         </motion.div>
       </div>
 
-      <div className="mx-4 h-px bg-border/40" />
+      <div className="mx-4 h-px bg-border/60" />
 
       {/* Navigation */}
       <nav
@@ -1088,7 +1088,7 @@ export function PortalSidebar({
 
       {/* Footer Controls */}
       <div className="mt-auto">
-        {!mobile && <div className="mx-4 h-px bg-border/40" />}
+        {!mobile && <div className="mx-4 h-px bg-border/60" />}
         {!mobile && (
           <div className={cn("transition-all duration-300", collapsed ? "p-2 space-y-0.5" : "px-3 py-1.5 space-y-0.5")}>
             <Button
@@ -1103,19 +1103,19 @@ export function PortalSidebar({
         )}
 
         {/* Account Section */}
-        <div className="mx-4 h-px bg-border/40" />
+        <div className="mx-4 h-px bg-border/60" />
         <div className={cn("transition-all duration-300", collapsed ? "p-2" : "p-2")}>
           <Popover open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
             <PopoverTrigger asChild>
               <motion.button
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                className={cn("flex items-center w-full rounded-lg hover:bg-accent/50 transition-all duration-200", collapsed ? "justify-center p-2" : "gap-3 p-2.5")}
+                className={cn("flex items-center w-full rounded-lg hover:bg-foreground/[0.04] transition-all duration-200", collapsed ? "justify-center p-2" : "gap-3 p-2.5")}
                 aria-label="Account menu">
 
-                <Avatar className={cn("border-2 border-primary/25 transition-all duration-300 ring-2 ring-primary/5", collapsed ? "h-8 w-8" : "h-10 w-10")}>
+                <Avatar className={cn("border border-border/60 transition-all duration-300", collapsed ? "h-8 w-8" : "h-10 w-10")}>
                   <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || 'User'} />
-                  <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-sm">{getInitials()}</AvatarFallback>
+                  <AvatarFallback className="bg-primary/12 text-primary font-semibold text-sm">{getInitials()}</AvatarFallback>
                 </Avatar>
                 {!collapsed &&
                 <>
@@ -1132,23 +1132,23 @@ export function PortalSidebar({
             </PopoverTrigger>
             <PopoverContent side="top" align={collapsed ? "center" : "start"} className={cn("p-1.5 rounded-lg", collapsed ? "w-56" : "w-[calc(272px-1.5rem)]")} sideOffset={8}>
               <div className="space-y-0.5">
-                <div className="px-3 py-2.5 border-b border-border/40 mb-1.5">
+                <div className="px-3 py-2.5 border-b border-border/60 mb-1.5">
                   <p className="text-sm font-semibold truncate">{profile?.full_name || 'User'}</p>
                   <p className="text-[11px] text-muted-foreground truncate mt-0.5">{user?.email}</p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => {setAccountMenuOpen(false);navigate('/lounge/settings');}} className="w-full justify-start text-muted-foreground hover:text-foreground text-[13px] h-9 rounded-md">
-                  <Settings className="w-4 h-4 mr-2.5" />Account Settings
+                  <Settings className="w-4 h-4 mr-2.5" />Account settings
                 </Button>
                 <div className="flex items-center justify-between px-3 py-1.5">
                   <span className="text-[13px] text-muted-foreground">Theme</span>
                   <ThemeToggle />
                 </div>
-                <div className="h-px bg-border/40 my-1" />
+                <div className="h-px bg-border/60 my-1" />
                 <AccountSwitcher portal="customer" onSwitch={() => setAccountMenuOpen(false)} />
-                <div className="h-px bg-border/40 my-1" />
+                <div className="h-px bg-border/60 my-1" />
                 
                 <Button variant="ghost" size="sm" onClick={() => {setAccountMenuOpen(false);onSignOut();}} className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-[13px] h-9 rounded-md">
-                  <LogOut className="w-4 h-4 mr-2.5" />Sign Out
+                  <LogOut className="w-4 h-4 mr-2.5" />Sign out
                 </Button>
               </div>
             </PopoverContent>

@@ -41,14 +41,14 @@ export function MobileBottomNav({ unreadCount, onMenuOpen }: MobileBottomNavProp
   return (
     <>
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/95 backdrop-blur-xl"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-background/95 backdrop-blur-md"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="flex items-center justify-around h-16 px-2">
           {/* Hamburger for more items */}
           <button
             onClick={() => { haptic(20); onMenuOpen?.(); }}
-            className="flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-xl transition-colors text-muted-foreground active:bg-accent/50"
+            className="flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-xl transition-colors text-muted-foreground active:bg-foreground/[0.05]"
             aria-label="Menu"
           >
             <Menu className="w-5 h-5" />
@@ -63,7 +63,7 @@ export function MobileBottomNav({ unreadCount, onMenuOpen }: MobileBottomNavProp
                 onClick={() => { haptic(15); navigate(item.path); }}
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-xl transition-colors relative touch-ripple min-w-[52px]",
-                  isActive ? "text-primary" : "text-muted-foreground active:bg-accent/50"
+                  isActive ? "text-primary" : "text-muted-foreground active:bg-foreground/[0.05]"
                 )}
                 aria-label={item.label}
               >

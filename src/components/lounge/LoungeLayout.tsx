@@ -30,6 +30,13 @@ import { IncomingCallOverlay } from '@/components/comms/IncomingCallOverlay';
 import { AnimatePresence } from 'framer-motion';
 import GreetingBanner from './GreetingBanner';
 import { MainSplash } from '@/components/splash/MainSplash';
+import {
+  TemperamentProvider,
+  CommandPalette,
+  ShortcutOverlay,
+  usePlatformKeys,
+  SkeletonLedger,
+} from '@/components/platform';
 
 function MobileHeaderLogoComponent() {
   const branding = useBranding();
@@ -62,6 +69,12 @@ export default function LoungeLayout() {
     return dismissedUntil ? Date.now() < Number(dismissedUntil) : false;
   });
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  usePlatformKeys({
+    onPalette: () => setPaletteOpen(true),
+    onShortcuts: () => setShortcutsOpen(true),
+  });
   const [showSplash, setShowSplash] = useState(() => {
     return !(location.state as any)?.skipSplash;
   });
@@ -211,6 +224,7 @@ export default function LoungeLayout() {
 
   return (
     <TooltipProvider>
+      <TemperamentProvider value="portal">
       <div className={cn(
         "min-h-screen bg-background workshop-ui",
         `lounge-font-${preferences.fontSize}`,
@@ -276,7 +290,7 @@ export default function LoungeLayout() {
           <EmailVerificationBanner />
 
           {/* Top Header Bar */}
-          <header className="sticky top-0 z-40 border-b border-border/30 bg-background/80 backdrop-blur-xl">
+          <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-md">
             <div className="flex h-14 items-center justify-between px-4 lg:px-6">
               <div className="flex items-center gap-3">
                 <MobileHeaderLogoComponent />
@@ -332,13 +346,11 @@ export default function LoungeLayout() {
             )}
           >
             <Suspense fallback={
-              <div className="flex-1 p-6 lg:p-8 space-y-4 animate-pulse">
-                <div className="h-8 w-48 bg-muted rounded-lg" />
-                <div className="h-4 w-72 bg-muted/60 rounded" />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                  <div className="h-32 bg-muted/40 rounded-xl" />
-                  <div className="h-32 bg-muted/40 rounded-xl" />
-                  <div className="h-32 bg-muted/40 rounded-xl" />
+              <div className="flex-1 p-5 lg:p-8" aria-hidden>
+                <span className="block h-7 w-52 animate-pulse rounded bg-foreground/[0.06]" />
+                <span className="mt-2 block h-4 w-72 animate-pulse rounded bg-foreground/[0.05]" />
+                <div className="mt-7 rounded-[10px] border border-border/60">
+                  <SkeletonLedger rows={5} />
                 </div>
               </div>
             }>
@@ -347,9 +359,12 @@ export default function LoungeLayout() {
             <GreetingBanner />
           </main>
 
-          {!isHorizontalSidebar && !isSmallScreen && (
-            <MobileBottomNav 
-              unreadCount={unreadCount} 
+          {/* Bottom bar on phones/tablets: primary destinations + the full
+              menu via More. (Previously only rendered on desktop, where its
+              own lg:hidden made it invisible — effectively dead.) */}
+          {!isHorizontalSidebar && isSmallScreen && (
+            <MobileBottomNav
+              unreadCount={unreadCount}
               show2FAWarning={show2FAWarning}
               onSignOut={handleSignOut}
               onMenuOpen={() => setMobileDrawerOpen(true)}
@@ -408,6 +423,10 @@ export default function LoungeLayout() {
 
       <FloatingDock />
 
+      {/* ⌘K jump-anywhere + ? shortcut overlay (client-side only) */}
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} role="user" />
+      <ShortcutOverlay open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+
       {/* Global incoming call overlay */}
       <AnimatePresence>
         {incomingCall && (
@@ -418,6 +437,7 @@ export default function LoungeLayout() {
           />
         )}
       </AnimatePresence>
+      </TemperamentProvider>
     </TooltipProvider>
   );
 }
