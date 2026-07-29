@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Calendar as CalendarIcon, Plus } from 'lucide-react';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
+import { MapPin, Plus } from 'lucide-react';
+import { PageHeader, SkeletonBlock } from '@/components/platform';
 import { useGoogleCalendarSync } from '@/hooks/useGoogleCalendarSync';
 import { GoogleCalendarSyncBar } from '@/components/calendar/GoogleCalendarSyncBar';
 import {
@@ -206,7 +206,7 @@ export default function LoungeCalendar() {
     <div className="flex h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)]" {...(isMobile ? swipeHandlers : {})}>
       {/* Mini calendar sidebar (desktop only) */}
       {sidebarOpen && (
-        <div className="hidden lg:flex w-56 flex-shrink-0 flex-col border-r border-border/60 bg-card/50 p-4 space-y-5">
+        <div className="hidden lg:flex w-56 flex-shrink-0 flex-col border-r border-border/60 bg-card p-4 space-y-5">
           <MiniCalendar
             currentDate={currentDate}
             selectedDate={currentDate}
@@ -216,7 +216,7 @@ export default function LoungeCalendar() {
 
           {/* Upcoming events sidebar */}
           <div>
-            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Upcoming</h4>
+            <h4 className="mb-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Upcoming</h4>
             <div className="space-y-1.5 max-h-60 overflow-y-auto">
               {events
                 .filter(e => new Date(e.start_time) >= new Date())
@@ -225,19 +225,19 @@ export default function LoungeCalendar() {
                 .map(event => (
                   <button
                     key={event.id}
-                    className="w-full text-left flex items-start gap-2 p-1.5 rounded-md hover:bg-accent/30 transition-colors group touch-target"
+                    className="w-full text-left flex items-start gap-2 p-1.5 rounded-md hover:bg-foreground/[0.03] transition-colors duration-150 group touch-target"
                     onClick={() => handleEventClickLegacy(event)}
                   >
                     <div className="w-1 h-full min-h-[24px] rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: event.color }} />
                     <div className="min-w-0 flex-1">
-                      <div className="text-[11px] font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                      <div className="text-[11px] font-medium text-foreground truncate">
                         {event.title}
                       </div>
-                      <div className="text-[9px] text-muted-foreground">
+                      <div className="font-mono text-[9.5px] tabular-nums text-muted-foreground">
                         {event.is_all_day
-                          ? new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                          : new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' · ' +
-                            new Date(event.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                          ? new Date(event.start_time).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
+                          : new Date(event.start_time).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }) + ' · ' +
+                            new Date(event.start_time).toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' })
                         }
                       </div>
                     </div>
@@ -245,15 +245,15 @@ export default function LoungeCalendar() {
                 ))
               }
               {events.filter(e => new Date(e.start_time) >= new Date()).length === 0 && (
-                <p className="text-[10px] text-muted-foreground/60 italic">No upcoming events</p>
+                <p className="text-[10px] text-muted-foreground/60">No upcoming events</p>
               )}
             </div>
           </div>
 
           {/* Keyboard shortcuts hint */}
-          <div className="mt-auto pt-3 border-t border-border/40">
-            <p className="text-[9px] text-muted-foreground/50 font-medium">
-              Shortcuts: <kbd className="bg-muted/50 px-1 rounded">N</kbd> New · <kbd className="bg-muted/50 px-1 rounded">T</kbd> Today · <kbd className="bg-muted/50 px-1 rounded">D</kbd> <kbd className="bg-muted/50 px-1 rounded">W</kbd> <kbd className="bg-muted/50 px-1 rounded">M</kbd> Views
+          <div className="mt-auto pt-3 border-t border-border/60">
+            <p className="font-mono text-[9px] text-muted-foreground/70">
+              <kbd className="rounded bg-foreground/[0.05] px-1">N</kbd> new · <kbd className="rounded bg-foreground/[0.05] px-1">T</kbd> today · <kbd className="rounded bg-foreground/[0.05] px-1">D</kbd> <kbd className="rounded bg-foreground/[0.05] px-1">W</kbd> <kbd className="rounded bg-foreground/[0.05] px-1">M</kbd> views
             </p>
           </div>
         </div>
@@ -264,10 +264,10 @@ export default function LoungeCalendar() {
         {/* Header */}
         <div className="px-4 lg:px-6 pt-3 lg:pt-5 space-y-2 lg:space-y-3">
            <div className="flex items-center justify-between">
-              <LoungePageHeader
+              <PageHeader
+                kicker="Portal"
                 title="Calendar"
-                description="Schedule and manage your events"
-                icon={CalendarIcon}
+                description="Schedule and manage your events."
               />
             </div>
             <GoogleCalendarSyncBar
@@ -290,13 +290,10 @@ export default function LoungeCalendar() {
         </div>
 
         {/* Calendar view */}
-        <div className="flex-1 min-h-0 overflow-hidden mx-2 lg:mx-6 border border-border/60 rounded-xl bg-card shadow-sm flex flex-col">
+        <div className="flex-1 min-h-0 overflow-hidden mx-2 lg:mx-6 border border-border/60 rounded-[10px] bg-card flex flex-col">
           {loading ? (
-            <div className="flex-1 flex items-center justify-center h-full">
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span className="text-xs text-muted-foreground">Loading events...</span>
-              </div>
+            <div className="flex-1 p-4" aria-hidden>
+              <SkeletonBlock className="h-full rounded-lg" />
             </div>
           ) : (
             <>
@@ -357,11 +354,14 @@ export default function LoungeCalendar() {
             {mobileEventSheet.description && (
               <p className="text-sm text-muted-foreground">{mobileEventSheet.description}</p>
             )}
-            <div className="text-xs text-muted-foreground">
-              {new Date(mobileEventSheet.start_time).toLocaleString()} — {new Date(mobileEventSheet.end_time).toLocaleString()}
+            <div className="text-xs tabular-nums text-muted-foreground">
+              {new Date(mobileEventSheet.start_time).toLocaleString('en-GB')} to {new Date(mobileEventSheet.end_time).toLocaleString('en-GB')}
             </div>
             {mobileEventSheet.location && (
-              <div className="text-xs text-muted-foreground">📍 {mobileEventSheet.location}</div>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3 shrink-0" />
+                {mobileEventSheet.location}
+              </div>
             )}
             <div className="flex gap-2 pt-2">
               <button

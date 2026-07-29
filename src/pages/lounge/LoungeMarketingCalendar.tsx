@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Calendar } from 'lucide-react';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import MarketingCalendar from '@/components/MarketingCalendar';
+import { PageHeader } from '@/components/platform';
 
 interface AdCampaign {
   id: string;
@@ -64,7 +62,7 @@ export default function LoungeMarketingCalendar() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       const [adsRes, socialRes, contentRes] = await Promise.all([
         supabase
           .from('ad_campaigns')
@@ -96,26 +94,22 @@ export default function LoungeMarketingCalendar() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
-      >
-        <LoungePageHeader
-          title="Marketing Calendar"
-          description="View all your ad campaigns, social posts, and content requests in one unified timeline"
-          icon={Calendar}
-        />
+    <div className="mx-auto max-w-[1200px] px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Marketing"
+        title="Marketing calendar"
+        description="Your ad campaigns, social posts and content requests, in one timeline."
+      />
 
-        {/* Calendar Component */}
+      {/* Calendar */}
+      <div className="mt-5">
         <MarketingCalendar
           adCampaigns={adCampaigns}
           socialPosts={socialPosts}
           contentRequests={contentRequests}
           loading={loading}
         />
-      </motion.div>
+      </div>
     </div>
   );
 }

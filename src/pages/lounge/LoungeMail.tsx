@@ -17,8 +17,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
@@ -31,6 +29,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { AvatarID, EmptyState, SkeletonForm, SkeletonLedger } from '@/components/platform';
 
 // --- Types ---
 interface EmailAccount {
@@ -77,13 +76,29 @@ const FOLDERS = [
   { id: 'trash', label: 'Trash', icon: Trash2 },
 ];
 
-const PROVIDER_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  gmail: { label: 'Gmail', color: '#EA4335', icon: '🔴' },
-  outlook: { label: 'Outlook', color: '#0078D4', icon: '🔵' },
-  yahoo: { label: 'Yahoo', color: '#6001D2', icon: '🟣' },
-  icloud: { label: 'iCloud', color: '#999', icon: '⚪' },
-  custom: { label: 'Custom IMAP', color: '#6366f1', icon: '⚙️' },
+const PROVIDER_CONFIG: Record<string, { label: string; initial: string }> = {
+  gmail: { label: 'Gmail', initial: 'G' },
+  outlook: { label: 'Outlook', initial: 'O' },
+  yahoo: { label: 'Yahoo', initial: 'Y' },
+  icloud: { label: 'iCloud', initial: 'iC' },
+  custom: { label: 'Custom IMAP', initial: 'IM' },
 };
+
+/** Neutral provider mark: initials in a quiet chip, no brand colours. */
+function ProviderMark({ provider, className }: { provider: string; className?: string }) {
+  const config = PROVIDER_CONFIG[provider] || PROVIDER_CONFIG.custom;
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'flex h-6 w-6 shrink-0 select-none items-center justify-center rounded-md bg-foreground/[0.05] font-mono text-[10px] font-semibold text-ink-2',
+        className,
+      )}
+    >
+      {config.initial}
+    </span>
+  );
+}
 
 function formatEmailDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -94,10 +109,6 @@ function formatEmailDate(dateStr: string): string {
   if (diffDays === 1) return 'Yesterday';
   if (diffDays < 7) return date.toLocaleDateString([], { weekday: 'short' });
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-}
-
-function getInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 }
 
 // ============ SETTINGS PANEL ============
@@ -205,23 +216,23 @@ function SettingsPanel({ open, onClose, accounts, onConnectAccount, onRemoveAcco
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="w-[95vw] max-w-lg">
         <DialogHeader>
-          <DialogTitle>Mail Settings</DialogTitle>
+          <DialogTitle>Mail settings</DialogTitle>
           <DialogDescription>Manage your connected email accounts and API credentials</DialogDescription>
         </DialogHeader>
 
         {/* Settings tabs */}
-        <div className="flex gap-1 bg-muted/50 rounded-lg p-1 mb-2">
+        <div className="flex gap-1 rounded-lg bg-sunken p-1 mb-2">
           <button
             onClick={() => setActiveSettingsTab('accounts')}
-            className={cn("flex-1 text-sm font-medium py-1.5 rounded-md transition-colors", activeSettingsTab === 'accounts' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+            className={cn("flex-1 text-sm font-medium py-1.5 rounded-md transition-colors duration-150", activeSettingsTab === 'accounts' ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground")}
           >
             Accounts
           </button>
           <button
             onClick={() => setActiveSettingsTab('credentials')}
-            className={cn("flex-1 text-sm font-medium py-1.5 rounded-md transition-colors", activeSettingsTab === 'credentials' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+            className={cn("flex-1 text-sm font-medium py-1.5 rounded-md transition-colors duration-150", activeSettingsTab === 'credentials' ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground")}
           >
-            API Credentials
+            API credentials
           </button>
         </div>
 
@@ -229,25 +240,27 @@ function SettingsPanel({ open, onClose, accounts, onConnectAccount, onRemoveAcco
           <div className="space-y-6 py-2">
             {/* Connected accounts */}
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3">Connected Accounts</h3>
+              <h3 className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Connected accounts</h3>
               {accounts.length === 0 ? (
-                <div className="text-center py-8 border border-dashed border-border rounded-lg">
-                  <MailIcon className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">No accounts connected yet</p>
-                  <p className="text-xs text-muted-foreground mt-1">Configure API credentials first, then connect an account</p>
+                <div className="rounded-[10px] border border-dashed border-border/60">
+                  <EmptyState
+                    compact
+                    title="No accounts connected yet"
+                    body="Configure API credentials first, then connect an account."
+                  />
                 </div>
               ) : (
                 <div className="space-y-2">
                   {accounts.map(acc => {
                     const config = PROVIDER_CONFIG[acc.provider];
                     return (
-                      <div key={acc.id} className="flex items-center gap-3 p-3 border border-border rounded-lg">
-                        <span className="text-lg">{config.icon}</span>
+                      <div key={acc.id} className="flex items-center gap-3 rounded-[10px] border border-border/60 p-3">
+                        <ProviderMark provider={acc.provider} />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{acc.email_address}</p>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-muted-foreground">{config.label}</span>
-                            {acc.status === 'active' && <CheckCircle2 className="h-3 w-3 text-green-500" />}
+                            {acc.status === 'active' && <CheckCircle2 className="h-3 w-3 text-ok" />}
                             {acc.status === 'error' && (
                               <Tooltip>
                                 <TooltipTrigger><AlertCircle className="h-3 w-3 text-destructive" /></TooltipTrigger>
@@ -274,7 +287,7 @@ function SettingsPanel({ open, onClose, accounts, onConnectAccount, onRemoveAcco
 
             {/* Add account */}
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3">Connect New Account</h3>
+              <h3 className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Connect a new account</h3>
               <div className="grid grid-cols-2 gap-2">
                 {(['gmail', 'outlook'] as const).map(provider => {
                   const config = PROVIDER_CONFIG[provider];
@@ -285,14 +298,14 @@ function SettingsPanel({ open, onClose, accounts, onConnectAccount, onRemoveAcco
                       className="h-auto py-3 flex flex-col items-center gap-1.5"
                       onClick={() => onConnectAccount(provider)}
                     >
-                      <span className="text-xl">{config.icon}</span>
+                      <ProviderMark provider={provider} />
                       <span className="text-xs font-medium">{config.label}</span>
                     </Button>
                   );
                 })}
               </div>
               <p className="text-[11px] text-muted-foreground mt-3">
-                Connect via OAuth — your password is never stored. Configure API credentials in the "API Credentials" tab first.
+                Connect via OAuth, so your password is never stored. Configure API credentials in the API credentials tab first.
               </p>
             </div>
           </div>
@@ -302,16 +315,14 @@ function SettingsPanel({ open, onClose, accounts, onConnectAccount, onRemoveAcco
           <ScrollArea className="max-h-[60vh]">
             <div className="space-y-6 py-2 pr-2">
               {loadingCreds ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
+                <SkeletonForm fields={2} className="py-2" />
               ) : (
                 <>
                   {/* Gmail credentials */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">🔴</span>
-                      <h3 className="text-sm font-semibold text-foreground">Gmail OAuth Credentials</h3>
+                      <ProviderMark provider="gmail" />
+                      <h3 className="text-sm font-semibold text-foreground">Gmail OAuth credentials</h3>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Create credentials at{' '}
@@ -348,7 +359,7 @@ function SettingsPanel({ open, onClose, accounts, onConnectAccount, onRemoveAcco
                         className="w-full"
                       >
                         {savingCreds === 'gmail' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        Save Gmail Credentials
+                        Save Gmail credentials
                       </Button>
                     </div>
                   </div>
@@ -358,8 +369,8 @@ function SettingsPanel({ open, onClose, accounts, onConnectAccount, onRemoveAcco
                   {/* Outlook credentials */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">🔵</span>
-                      <h3 className="text-sm font-semibold text-foreground">Outlook OAuth Credentials</h3>
+                      <ProviderMark provider="outlook" />
+                      <h3 className="text-sm font-semibold text-foreground">Outlook OAuth credentials</h3>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Register an app at{' '}
@@ -396,7 +407,7 @@ function SettingsPanel({ open, onClose, accounts, onConnectAccount, onRemoveAcco
                         className="w-full"
                       >
                         {savingCreds === 'outlook' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        Save Outlook Credentials
+                        Save Outlook credentials
                       </Button>
                     </div>
                   </div>
@@ -438,7 +449,7 @@ function ComposeModal({ onClose, accounts, onSend }: {
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 40, opacity: 0 }}
       className={cn(
-        "fixed z-[60] bg-card border border-border shadow-2xl flex flex-col",
+        "fixed z-[60] bg-card border border-border/60 shadow-lg flex flex-col",
         fullScreen
           ? "inset-2 sm:inset-4 rounded-xl"
           : minimized
@@ -446,8 +457,8 @@ function ComposeModal({ onClose, accounts, onSend }: {
             : "inset-0 sm:inset-auto sm:bottom-0 sm:right-4 sm:w-[560px] sm:h-[480px] sm:rounded-t-xl"
       )}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 bg-muted/80 rounded-t-xl cursor-pointer select-none shrink-0" onClick={() => minimized && setMinimized(false)}>
-        <span className="text-sm font-semibold text-foreground">New Message</span>
+      <div className="flex items-center justify-between px-4 py-2.5 bg-sunken rounded-t-xl cursor-pointer select-none shrink-0" onClick={() => minimized && setMinimized(false)}>
+        <span className="text-sm font-medium text-foreground">New message</span>
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setMinimized(!minimized); }}><Minus className="h-3.5 w-3.5" /></Button>
           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setFullScreen(!fullScreen); }}><Maximize2 className="h-3.5 w-3.5" /></Button>
@@ -747,12 +758,12 @@ export default function LoungeMail() {
         <Button
           onClick={() => { setComposeOpen(true); if (mobile) setMobileView('list'); }}
           className={cn(
-            "w-full gap-2 rounded-2xl shadow-md h-12 text-base font-semibold",
+            "w-full gap-2 rounded-lg h-10 text-sm font-medium",
             !mobile && sidebarCollapsed && "px-0 justify-center"
           )}
           disabled={accounts.length === 0}
         >
-          <Pen className="h-5 w-5" />
+          <Pen className="h-4 w-4" />
           {(mobile || !sidebarCollapsed) && <span>Compose</span>}
         </Button>
       </div>
@@ -767,8 +778,8 @@ export default function LoungeMail() {
                 key={f.id}
                 onClick={() => { setSelectedFolder(f.id); setSelectedEmail(null); if (mobile) setMobileView('list'); }}
                 className={cn(
-                  "flex items-center gap-3 w-full rounded-full px-3 py-2 text-sm font-medium transition-colors",
-                  active ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                  "flex items-center gap-3 w-full rounded-lg px-3 py-2 text-sm transition-colors duration-150",
+                  active ? "bg-primary/10 font-medium text-primary" : "text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground",
                   !mobile && sidebarCollapsed && "justify-center px-0"
                 )}
               >
@@ -777,7 +788,7 @@ export default function LoungeMail() {
                   <>
                     <span className="flex-1 text-left truncate">{f.label}</span>
                     {count > 0 && (
-                      <span className={cn("text-xs tabular-nums", active ? "text-primary font-bold" : "text-muted-foreground")}>
+                      <span className={cn("font-mono text-xs tabular-nums", active ? "text-primary" : "text-muted-foreground")}>
                         {count}
                       </span>
                     )}
@@ -791,7 +802,7 @@ export default function LoungeMail() {
           <>
             <Separator className="my-3" />
             <div className="px-3 pb-1 flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Accounts</span>
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Accounts</span>
               <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setSettingsOpen(true)}>
                 <Plus className="h-3.5 w-3.5" />
               </Button>
@@ -800,7 +811,7 @@ export default function LoungeMail() {
               {accounts.length === 0 ? (
                 <button
                   onClick={() => setSettingsOpen(true)}
-                  className="flex items-center gap-2 w-full rounded-lg px-3 py-3 text-xs text-muted-foreground hover:bg-accent/50 transition-colors border border-dashed border-border"
+                  className="flex items-center gap-2 w-full rounded-lg px-3 py-3 text-xs text-muted-foreground hover:bg-foreground/[0.03] transition-colors duration-150 border border-dashed border-border/60"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Connect an account</span>
@@ -810,20 +821,20 @@ export default function LoungeMail() {
                   <button
                     onClick={() => setSelectedAccount(null)}
                     className={cn(
-                      "flex items-center gap-2.5 w-full rounded-full px-3 py-1.5 text-sm transition-colors",
-                      !selectedAccount ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-accent/50"
+                      "flex items-center gap-2.5 w-full rounded-lg px-3 py-1.5 text-sm transition-colors duration-150",
+                      !selectedAccount ? "bg-primary/10 font-medium text-primary" : "text-muted-foreground hover:bg-foreground/[0.03]"
                     )}
                   >
                     <Globe className="h-3.5 w-3.5" />
-                    <span>All Accounts</span>
+                    <span>All accounts</span>
                   </button>
                   {accounts.map(a => (
                     <button
                       key={a.id}
                       onClick={() => setSelectedAccount(selectedAccount === a.id ? null : a.id)}
                       className={cn(
-                        "flex items-center gap-2.5 w-full rounded-full px-3 py-1.5 text-sm transition-colors",
-                        selectedAccount === a.id ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:bg-accent/50"
+                        "flex items-center gap-2.5 w-full rounded-lg px-3 py-1.5 text-sm transition-colors duration-150",
+                        selectedAccount === a.id ? "bg-primary/10 font-medium text-primary" : "text-muted-foreground hover:bg-foreground/[0.03]"
                       )}
                     >
                       <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: a.color }} />
@@ -867,7 +878,7 @@ export default function LoungeMail() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search mail"
-            className="pl-10 h-9 sm:h-10 rounded-full bg-accent/50 border-0 focus-visible:ring-1 focus-visible:bg-background text-sm"
+            className="pl-10 h-9 sm:h-10 rounded-xl border-border/60 bg-foreground/[0.03] text-sm shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
           />
           {searchQuery && (
             <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setSearchQuery('')}>
@@ -945,9 +956,7 @@ export default function LoungeMail() {
       {/* Email List */}
       <ScrollArea className="flex-1">
         {loading ? (
-          <div className="flex items-center justify-center py-32">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/40" />
-          </div>
+          <SkeletonLedger rows={8} />
         ) : (
           <div className="divide-y divide-border/50">
             {filteredEmails.map(email => {
@@ -960,16 +969,16 @@ export default function LoungeMail() {
                   key={email.id}
                   onClick={() => handleSelectEmail(email)}
                   className={cn(
-                    "flex items-start gap-2 px-3 py-2.5 cursor-pointer transition-colors group relative",
+                    "flex items-start gap-2 px-3 py-2.5 cursor-pointer transition-colors duration-150 group relative",
                     isSelected && "bg-primary/5 border-l-2 border-l-primary",
-                    !isSelected && "hover:bg-accent/30",
-                    !email.is_read && "bg-accent/20"
+                    !isSelected && "hover:bg-foreground/[0.025]",
+                    !email.is_read && "bg-foreground/[0.02]"
                   )}
                 >
                   <div className="flex items-center gap-1.5 pt-0.5 flex-shrink-0">
                     <Checkbox checked={isChecked} onCheckedChange={() => toggleSelect(email.id)} onClick={(e) => e.stopPropagation()} className="h-4 w-4" />
-                    <button onClick={(e) => toggleStar(email, e)} className="text-muted-foreground hover:text-yellow-500 transition-colors">
-                      <Star className={cn("h-4 w-4", email.is_starred && "fill-yellow-400 text-yellow-400")} />
+                    <button onClick={(e) => toggleStar(email, e)} className="text-muted-foreground hover:text-[hsl(var(--gold))] transition-colors duration-150">
+                      <Star className={cn("h-4 w-4", email.is_starred && "fill-[hsl(var(--gold))] text-[hsl(var(--gold))]")} />
                     </button>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -980,7 +989,7 @@ export default function LoungeMail() {
                       {account && (
                         <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: account.color }} />
                       )}
-                      <span className="ml-auto text-[11px] text-muted-foreground tabular-nums flex-shrink-0">
+                      <span className="ml-auto font-mono text-[10.5px] text-muted-foreground tabular-nums flex-shrink-0">
                         {formatEmailDate(email.date)}
                       </span>
                     </div>
@@ -999,20 +1008,15 @@ export default function LoungeMail() {
             })}
 
             {filteredEmails.length === 0 && !loading && (
-              <div className="flex flex-col items-center justify-center py-20 sm:py-32 text-center px-4">
-                <MailIcon className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/20 mb-4" />
-                <h3 className="text-sm sm:text-base font-semibold text-muted-foreground/50 mb-1">
-                  {accounts.length === 0 ? 'No accounts connected' : 'No emails'}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground/40 mb-4">
-                  {accounts.length === 0 ? 'Connect a Gmail or Outlook account to get started' : 'This folder is empty'}
-                </p>
-                {accounts.length === 0 && (
-                  <Button variant="outline" onClick={() => setSettingsOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" /> Connect Account
-                  </Button>
-                )}
-              </div>
+              <EmptyState
+                title={accounts.length === 0 ? 'No accounts connected' : 'No emails here'}
+                body={accounts.length === 0 ? 'Connect a Gmail or Outlook account to get started.' : 'This folder is empty.'}
+                action={
+                  accounts.length === 0
+                    ? { label: 'Connect account', onClick: () => setSettingsOpen(true) }
+                    : undefined
+                }
+              />
             )}
           </div>
         )}
@@ -1022,8 +1026,9 @@ export default function LoungeMail() {
       {isMobile && accounts.length > 0 && (
         <Button
           onClick={() => setComposeOpen(true)}
-          className="fixed bottom-20 right-4 z-40 h-14 w-14 rounded-full shadow-lg"
+          className="fixed bottom-20 right-4 z-40 h-14 w-14 rounded-full shadow-md"
           size="icon"
+          aria-label="Compose"
         >
           <Pen className="h-5 w-5" />
         </Button>
@@ -1035,21 +1040,17 @@ export default function LoungeMail() {
   const readingPaneContent = () => {
     if (!selectedEmail) {
       return (
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <MailIcon className="h-20 w-20 text-muted-foreground/15 mb-4" />
-          <h3 className="text-lg font-semibold text-muted-foreground/60 mb-1">Quooro Mail</h3>
-          <p className="text-sm text-muted-foreground/40">
-            {accounts.length === 0 ? 'Connect an account to get started' : 'Select an email to read'}
-          </p>
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <EmptyState
+            title="Quooro Mail"
+            body={accounts.length === 0 ? 'Connect an account to get started.' : 'Select an email to read.'}
+          />
         </div>
       );
     }
     return (
-      <motion.div
+      <div
         key={selectedEmail.id}
-        initial={{ opacity: 0, x: isMobile ? 0 : 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.15 }}
         className="flex-1 flex flex-col bg-background overflow-hidden"
       >
         <div className="flex items-center gap-1 px-3 sm:px-4 py-2 border-b border-border flex-shrink-0">
@@ -1076,11 +1077,11 @@ export default function LoungeMail() {
           <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
             <h1 className="text-lg sm:text-xl font-semibold text-foreground mb-4 sm:mb-6">{selectedEmail.subject || '(no subject)'}</h1>
             <div className="flex items-start gap-3 mb-4 sm:mb-6">
-              <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs sm:text-sm font-semibold">
-                  {getInitials(selectedEmail.from_name || selectedEmail.from_email)}
-                </AvatarFallback>
-              </Avatar>
+              <AvatarID
+                name={selectedEmail.from_name}
+                email={selectedEmail.from_email}
+                size="lg"
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-semibold">{selectedEmail.from_name || selectedEmail.from_email}</span>
@@ -1091,7 +1092,7 @@ export default function LoungeMail() {
                 </span>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-xs text-muted-foreground hidden sm:inline">{formatEmailDate(selectedEmail.date)}</span>
+                <span className="hidden font-mono text-[10.5px] tabular-nums text-muted-foreground sm:inline">{formatEmailDate(selectedEmail.date)}</span>
                 <Button variant="ghost" size="icon" className="h-7 w-7"><Reply className="h-4 w-4" /></Button>
               </div>
             </div>
@@ -1122,19 +1123,19 @@ export default function LoungeMail() {
               </div>
             )}
 
-            <div className="mt-6 sm:mt-8 border border-border rounded-xl p-3 sm:p-4">
+            <div className="mt-6 rounded-[10px] border border-border/60 p-3 sm:mt-8 sm:p-4">
               <div className="flex items-center gap-2">
                 <Reply className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
-                  Click here to <button className="text-primary font-medium hover:underline" onClick={() => setComposeOpen(true)}>Reply</button>,{' '}
-                  <button className="text-primary font-medium hover:underline" onClick={() => setComposeOpen(true)}>Reply All</button>, or{' '}
+                  <button className="text-primary font-medium hover:underline" onClick={() => setComposeOpen(true)}>Reply</button>,{' '}
+                  <button className="text-primary font-medium hover:underline" onClick={() => setComposeOpen(true)}>Reply all</button> or{' '}
                   <button className="text-primary font-medium hover:underline" onClick={() => setComposeOpen(true)}>Forward</button>
                 </span>
               </div>
             </div>
           </div>
         </ScrollArea>
-      </motion.div>
+      </div>
     );
   };
 
@@ -1169,12 +1170,11 @@ export default function LoungeMail() {
 
             {/* Reading Pane (desktop only shows inline) */}
             {selectedEmail ? readingPaneContent() : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center">
-                <MailIcon className="h-20 w-20 text-muted-foreground/15 mb-4" />
-                <h3 className="text-lg font-semibold text-muted-foreground/60 mb-1">Quooro Mail</h3>
-                <p className="text-sm text-muted-foreground/40">
-                  {accounts.length === 0 ? 'Connect an account to get started' : 'Select an email to read'}
-                </p>
+              <div className="flex-1 flex flex-col items-center justify-center">
+                <EmptyState
+                  title="Quooro Mail"
+                  body={accounts.length === 0 ? 'Connect an account to get started.' : 'Select an email to read.'}
+                />
               </div>
             )}
           </>

@@ -1,28 +1,32 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
-import { 
-  Megaphone, 
-  Play, 
-  Pause, 
-  CheckCircle, 
+import {
+  Play,
+  Pause,
+  CheckCircle,
   Clock,
   Target,
   Calendar,
-  DollarSign,
-  ExternalLink,
   Image,
   Video,
-  FileText
+  FileText,
+  ArrowUpRight,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import {
+  PageHeader,
+  Panel,
+  StatusBadge,
+  statusLabel,
+  DetailDrawer,
+  EmptyState,
+  Money,
+  RelativeTime,
+  SkeletonLedger,
+  type Tone,
+} from '@/components/platform';
 
 interface AdCampaign {
   id: string;
@@ -39,27 +43,19 @@ interface AdCampaign {
   created_at: string;
 }
 
-const platformConfig: Record<string, { label: string; color: string; bgColor: string }> = {
-  meta: { label: 'Meta', color: 'text-blue-600', bgColor: 'bg-blue-500/10 border-blue-500/20' },
-  tiktok: { label: 'TikTok', color: 'text-pink-600', bgColor: 'bg-pink-500/10 border-pink-500/20' },
-  google: { label: 'Google', color: 'text-red-600', bgColor: 'bg-red-500/10 border-red-500/20' },
-  linkedin: { label: 'LinkedIn', color: 'text-sky-600', bgColor: 'bg-sky-500/10 border-sky-500/20' },
-  twitter: { label: 'X / Twitter', color: 'text-foreground', bgColor: 'bg-muted border-border' },
+const PLATFORM_LABEL: Record<string, string> = {
+  meta: 'Meta',
+  tiktok: 'TikTok',
+  google: 'Google',
+  linkedin: 'LinkedIn',
+  twitter: 'X / Twitter',
 };
 
-const statusConfig: Record<string, { label: string; icon: typeof Play; color: string; bgColor: string }> = {
-  running: { label: 'Running', icon: Play, color: 'text-emerald-600', bgColor: 'bg-emerald-500/10 border-emerald-500/30' },
-  paused: { label: 'Paused', icon: Pause, color: 'text-amber-600', bgColor: 'bg-amber-500/10 border-amber-500/30' },
-  completed: { label: 'Completed', icon: CheckCircle, color: 'text-blue-600', bgColor: 'bg-blue-500/10 border-blue-500/30' },
-  scheduled: { label: 'Scheduled', icon: Clock, color: 'text-purple-600', bgColor: 'bg-purple-500/10 border-purple-500/30' },
-};
-
-const objectiveConfig: Record<string, { label: string; color: string }> = {
-  leads: { label: 'Leads', color: 'bg-green-500/20 text-green-600 border-green-500/30' },
-  traffic: { label: 'Traffic', color: 'bg-blue-500/20 text-blue-600 border-blue-500/30' },
-  sales: { label: 'Sales', color: 'bg-purple-500/20 text-purple-600 border-purple-500/30' },
-  awareness: { label: 'Awareness', color: 'bg-amber-500/20 text-amber-600 border-amber-500/30' },
-  engagement: { label: 'Engagement', color: 'bg-pink-500/20 text-pink-600 border-pink-500/30' },
+const STATUS_META: Record<string, { tone: Tone; icon: typeof Play }> = {
+  running: { tone: 'ok', icon: Play },
+  paused: { tone: 'attend', icon: Pause },
+  completed: { tone: 'neutral', icon: CheckCircle },
+  scheduled: { tone: 'attend', icon: Clock },
 };
 
 export default function LoungeAdManagement() {
@@ -91,329 +87,266 @@ export default function LoungeAdManagement() {
   };
 
   const getStatusInfo = (status: string) => {
-    return statusConfig[status] || statusConfig.running;
+    return STATUS_META[status] || STATUS_META.running;
   };
 
-  const getPlatformInfo = (platform: string) => {
-    return platformConfig[platform] || platformConfig.meta;
+  const getPlatformLabel = (platform: string) => {
+    return PLATFORM_LABEL[platform] || PLATFORM_LABEL.meta;
   };
+
+  const runningCount = campaigns.filter(c => c.status === 'running').length;
+  const pausedCount = campaigns.filter(c => c.status === 'paused').length;
+  const completedCount = campaigns.filter(c => c.status === 'completed').length;
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-96" />
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-64" />
-          ))}
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8" aria-hidden>
+        <span className="block h-6 w-44 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-4 w-72 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-7 rounded-[10px] border border-border/60">
+          <SkeletonLedger rows={5} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <LoungePageHeader
-        title="Ad Management"
-        description="View and track your advertising campaigns across platforms"
-        icon={Megaphone}
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Marketing"
+        title="Ad management"
+        description="Campaigns the studio runs for you, across every platform."
       />
 
-      {/* Stats Overview */}
+      {/* Summary strip */}
       {campaigns.length > 0 && (
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-emerald-500/10">
-                  <Play className="w-4 h-4 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{campaigns.filter(c => c.status === 'running').length}</p>
-                  <p className="text-xs text-muted-foreground">Running</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-amber-500/10">
-                  <Pause className="w-4 h-4 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{campaigns.filter(c => c.status === 'paused').length}</p>
-                  <p className="text-xs text-muted-foreground">Paused</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <CheckCircle className="w-4 h-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{campaigns.filter(c => c.status === 'completed').length}</p>
-                  <p className="text-xs text-muted-foreground">Completed</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Megaphone className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{campaigns.length}</p>
-                  <p className="text-xs text-muted-foreground">Total Campaigns</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-b border-border/60 pb-4">
+          <span className="font-mono text-[11px] tabular-nums text-ink-2">
+            {campaigns.length} {campaigns.length === 1 ? 'campaign' : 'campaigns'}
+          </span>
+          <StatusBadge tone="ok" label={`${runningCount} running`} />
+          <StatusBadge tone="attend" label={`${pausedCount} paused`} />
+          <StatusBadge tone="neutral" label={`${completedCount} completed`} />
         </div>
       )}
 
-      {/* Campaigns Grid */}
+      {/* Campaigns */}
       {campaigns.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="p-4 rounded-full bg-muted mb-4">
-              <Megaphone className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">No Active Campaigns</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              Your advertising campaigns will appear here once they're set up by your account manager.
-            </p>
-          </CardContent>
-        </Card>
+        <Panel className="mt-5">
+          <EmptyState
+            title="No campaigns yet"
+            body="Your advertising campaigns will appear here once your account manager sets them up."
+          />
+        </Panel>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {campaigns.map((campaign, index) => {
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {campaigns.map(campaign => {
             const statusInfo = getStatusInfo(campaign.status);
-            const platformInfo = getPlatformInfo(campaign.platform);
-            const StatusIcon = statusInfo.icon;
+            const platformLabel = getPlatformLabel(campaign.platform);
 
             return (
-              <motion.div
+              <button
                 key={campaign.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                type="button"
+                onClick={() => setSelectedCampaign(campaign)}
+                className="group flex flex-col overflow-hidden rounded-[10px] border border-border/60 bg-card text-left transition-colors duration-150 hover:border-primary/40 focus-visible:border-primary/60"
               >
-                <Card 
-                  className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
-                  onClick={() => setSelectedCampaign(campaign)}
-                >
-                  {/* Creative Preview */}
-                  {campaign.creative_url && (
-                    <div className="relative aspect-video bg-muted overflow-hidden rounded-t-lg">
-                      {campaign.creative_type === 'video' ? (
-                        <video 
-                          src={campaign.creative_url} 
-                          className="w-full h-full object-cover"
-                          muted
-                        />
-                      ) : (
-                        <img 
-                          src={campaign.creative_url} 
-                          alt={campaign.campaign_name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      )}
-                      <div className="absolute top-2 left-2">
-                        <Badge className={cn("border", platformInfo.bgColor, platformInfo.color)}>
-                          {platformInfo.label}
-                        </Badge>
-                      </div>
-                      <div className="absolute top-2 right-2">
-                        <Badge className={cn("border flex items-center gap-1", statusInfo.bgColor, statusInfo.color)}>
-                          <StatusIcon className="w-3 h-3" />
-                          {statusInfo.label}
-                        </Badge>
-                      </div>
-                    </div>
+                {/* Creative preview */}
+                {campaign.creative_url && (
+                  <div className="relative aspect-video overflow-hidden bg-sunken">
+                    {campaign.creative_type === 'video' ? (
+                      <video
+                        src={campaign.creative_url}
+                        className="h-full w-full object-cover"
+                        muted
+                      />
+                    ) : (
+                      <img
+                        src={campaign.creative_url}
+                        alt={campaign.campaign_name}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                )}
+
+                <div className="flex min-w-0 flex-1 flex-col gap-2.5 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                      {platformLabel}
+                    </span>
+                    <StatusBadge tone={statusInfo.tone} label={statusLabel(campaign.status)} />
+                  </div>
+
+                  <span className="line-clamp-1 text-[14px] font-medium text-foreground">
+                    {campaign.campaign_name}
+                  </span>
+
+                  {campaign.objective && (
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Target className="h-3 w-3" />
+                      {statusLabel(campaign.objective)}
+                    </span>
                   )}
 
-                  <CardHeader className={cn(!campaign.creative_url && "pb-2")}>
-                    {!campaign.creative_url && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge className={cn("border", platformInfo.bgColor, platformInfo.color)}>
-                          {platformInfo.label}
-                        </Badge>
-                        <Badge className={cn("border flex items-center gap-1", statusInfo.bgColor, statusInfo.color)}>
-                          <StatusIcon className="w-3 h-3" />
-                          {statusInfo.label}
-                        </Badge>
-                      </div>
-                    )}
-                    <CardTitle className="text-lg line-clamp-1">{campaign.campaign_name}</CardTitle>
-                    {campaign.objective && (
-                      <div className="flex items-center gap-2">
-                        <Target className="w-3.5 h-3.5 text-muted-foreground" />
-                        <Badge variant="outline" className={cn("text-xs", objectiveConfig[campaign.objective]?.color)}>
-                          {objectiveConfig[campaign.objective]?.label || campaign.objective}
-                        </Badge>
-                      </div>
-                    )}
-                  </CardHeader>
-
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      {campaign.start_date && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          <span>{format(new Date(campaign.start_date), 'MMM d, yyyy')}</span>
-                        </div>
-                      )}
-                      {campaign.monthly_budget && (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <DollarSign className="w-4 h-4" />
-                          <span>£{campaign.monthly_budget.toLocaleString()}/mo</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {campaign.notes && (
-                      <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 text-sm">
-                        <FileText className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                        <p className="text-muted-foreground line-clamp-2">{campaign.notes}</p>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                      <span className="text-xs text-muted-foreground">
-                        Updated {format(new Date(campaign.last_updated_at), 'MMM d, yyyy')}
+                  <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                    {campaign.start_date && (
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {format(new Date(campaign.start_date), 'd MMM yyyy')}
                       </span>
-                      <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                        View Details
-                        <ExternalLink className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                    )}
+                    {campaign.monthly_budget && (
+                      <span className="flex items-center gap-1">
+                        <Money whole {...{ value: campaign.monthly_budget }} />
+                        <span>/ month</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {campaign.notes && (
+                    <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                      {campaign.notes}
+                    </p>
+                  )}
+
+                  <div className="mt-auto flex items-center justify-between border-t border-border/60 pt-2.5">
+                    <span className="text-[11px] text-muted-foreground">
+                      Updated <RelativeTime date={campaign.last_updated_at} className="text-[11px]" />
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground transition-colors duration-150 group-hover:text-foreground">
+                      View details
+                      <ArrowUpRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </div>
+              </button>
             );
           })}
         </div>
       )}
 
-      {/* Campaign Detail Modal */}
-      {selectedCampaign && (
-        <div 
-          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setSelectedCampaign(null)}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-card border border-border rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+      {/* Campaign detail */}
+      <DetailDrawer
+        open={!!selectedCampaign}
+        onOpenChange={open => {
+          if (!open) setSelectedCampaign(null);
+        }}
+        kicker={selectedCampaign ? getPlatformLabel(selectedCampaign.platform) : undefined}
+        title={selectedCampaign?.campaign_name ?? ''}
+        description={
+          selectedCampaign ? (
+            <StatusBadge
+              tone={getStatusInfo(selectedCampaign.status).tone}
+              label={statusLabel(selectedCampaign.status)}
+            />
+          ) : undefined
+        }
+        footer={
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 rounded-lg px-3 text-xs"
+            onClick={() => setSelectedCampaign(null)}
           >
+            Close
+          </Button>
+        }
+      >
+        {selectedCampaign && (
+          <div className="space-y-4">
             {selectedCampaign.creative_url && (
-              <div className="relative aspect-video bg-muted">
+              <div className="overflow-hidden rounded-[10px] border border-border/60 bg-sunken">
                 {selectedCampaign.creative_type === 'video' ? (
-                  <video 
-                    src={selectedCampaign.creative_url} 
-                    className="w-full h-full object-contain"
+                  <video
+                    src={selectedCampaign.creative_url}
+                    className="aspect-video w-full object-contain"
                     controls
                   />
                 ) : (
-                  <img 
-                    src={selectedCampaign.creative_url} 
+                  <img
+                    src={selectedCampaign.creative_url}
                     alt={selectedCampaign.campaign_name}
-                    className="w-full h-full object-contain"
+                    className="aspect-video w-full object-contain"
                   />
                 )}
               </div>
             )}
-            
-            <div className="p-6 space-y-4">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <h2 className="text-xl font-bold">{selectedCampaign.campaign_name}</h2>
-                  <div className="flex items-center gap-2">
-                    <Badge className={cn("border", getPlatformInfo(selectedCampaign.platform).bgColor, getPlatformInfo(selectedCampaign.platform).color)}>
-                      {getPlatformInfo(selectedCampaign.platform).label}
-                    </Badge>
-                    <Badge className={cn("border flex items-center gap-1", getStatusInfo(selectedCampaign.status).bgColor, getStatusInfo(selectedCampaign.status).color)}>
-                      {(() => {
-                        const StatusIcon = getStatusInfo(selectedCampaign.status).icon;
-                        return <StatusIcon className="w-3 h-3" />;
-                      })()}
-                      {getStatusInfo(selectedCampaign.status).label}
-                    </Badge>
-                  </div>
-                </div>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedCampaign(null)}>
-                  ×
-                </Button>
-              </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                {selectedCampaign.objective && (
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <Target className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Objective</p>
-                      <p className="font-medium capitalize">{selectedCampaign.objective}</p>
-                    </div>
+            <dl className="grid gap-px overflow-hidden rounded-[10px] border border-border/60 bg-border/60 sm:grid-cols-2">
+              {selectedCampaign.objective && (
+                <div className="flex items-center gap-3 bg-card p-3">
+                  <Target className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0">
+                    <dt className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Objective
+                    </dt>
+                    <dd className="text-[13px] font-medium text-foreground">
+                      {statusLabel(selectedCampaign.objective)}
+                    </dd>
                   </div>
-                )}
-                {selectedCampaign.start_date && (
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <Calendar className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Start Date</p>
-                      <p className="font-medium">{format(new Date(selectedCampaign.start_date), 'MMMM d, yyyy')}</p>
-                    </div>
-                  </div>
-                )}
-                {selectedCampaign.monthly_budget && (
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <DollarSign className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Monthly Budget</p>
-                      <p className="font-medium">£{selectedCampaign.monthly_budget.toLocaleString()}</p>
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  {selectedCampaign.creative_type === 'video' ? (
-                    <Video className="w-5 h-5 text-muted-foreground" />
-                  ) : (
-                    <Image className="w-5 h-5 text-muted-foreground" />
-                  )}
-                  <div>
-                    <p className="text-xs text-muted-foreground">Creative Type</p>
-                    <p className="font-medium capitalize">{selectedCampaign.creative_type}</p>
-                  </div>
-                </div>
-              </div>
-
-              {selectedCampaign.notes && (
-                <div className="p-4 rounded-lg bg-muted/50 space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <FileText className="w-4 h-4" />
-                    Notes from your team
-                  </div>
-                  <p className="text-sm text-muted-foreground">{selectedCampaign.notes}</p>
                 </div>
               )}
-
-              <div className="flex items-center justify-between pt-4 border-t border-border/50 text-xs text-muted-foreground">
-                <span>Last updated: {format(new Date(selectedCampaign.last_updated_at), 'MMMM d, yyyy \'at\' h:mm a')}</span>
+              {selectedCampaign.start_date && (
+                <div className="flex items-center gap-3 bg-card p-3">
+                  <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0">
+                    <dt className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Start date
+                    </dt>
+                    <dd className="text-[13px] font-medium tabular-nums text-foreground">
+                      {format(new Date(selectedCampaign.start_date), 'd MMMM yyyy')}
+                    </dd>
+                  </div>
+                </div>
+              )}
+              {selectedCampaign.monthly_budget && (
+                <div className="flex items-center gap-3 bg-card p-3">
+                  <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0">
+                    <dt className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Monthly budget
+                    </dt>
+                    <dd className="text-[13px] font-medium text-foreground">
+                      <Money whole {...{ value: selectedCampaign.monthly_budget }} />
+                    </dd>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-3 bg-card p-3">
+                {selectedCampaign.creative_type === 'video' ? (
+                  <Video className="h-4 w-4 shrink-0 text-muted-foreground" />
+                ) : (
+                  <Image className="h-4 w-4 shrink-0 text-muted-foreground" />
+                )}
+                <div className="min-w-0">
+                  <dt className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Creative type
+                  </dt>
+                  <dd className="text-[13px] font-medium text-foreground">
+                    {statusLabel(selectedCampaign.creative_type)}
+                  </dd>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
+            </dl>
+
+            {selectedCampaign.notes && (
+              <div className="rounded-[10px] border border-border/60 p-4">
+                <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Notes from your team
+                </p>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+                  {selectedCampaign.notes}
+                </p>
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              Last updated {format(new Date(selectedCampaign.last_updated_at), 'd MMMM yyyy, HH:mm')}
+            </p>
+          </div>
+        )}
+      </DetailDrawer>
     </div>
   );
 }

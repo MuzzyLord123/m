@@ -1,18 +1,16 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  FileText, 
-  Globe, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  Search,
+  FileText,
+  Globe,
+  CheckCircle2,
+  AlertCircle,
   XCircle,
   Loader2,
   Info,
   ChevronDown,
   ChevronUp,
   Target,
-  Sparkles,
   ExternalLink,
   BarChart3,
   Link2,
@@ -23,26 +21,26 @@ import {
   FileCode,
   Hash,
   Type,
-  Smartphone,
-  Users,
-  MapPin,
-  Activity,
-  Bot,
-  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { analyzeSEO, type SEOAnalysisResult, type SEOCheck } from '@/lib/seoAnalyzer';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
+import {
+  PageHeader,
+  Panel,
+  PanelHeader,
+  StatusBadge,
+  FIELD,
+  FIELD_LABEL,
+  FIELD_HELP,
+} from '@/components/platform';
 
 interface PopularitySignals {
   totalPages: number;
@@ -88,11 +86,11 @@ interface AnalyticsData {
 function extractAnalytics(html: string, sourceUrl: string, metadata: any, links: string[], popularityOverrides?: Partial<PopularitySignals>): AnalyticsData {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
-  
+
   const title = doc.querySelector('title')?.textContent || metadata?.title || '';
   const descriptionEl = doc.querySelector('meta[name="description"]');
   const description = descriptionEl?.getAttribute('content') || metadata?.description || '';
-  
+
   const bodyText = doc.body?.textContent || '';
   const wordCount = bodyText.trim().split(/\s+/).filter(Boolean).length;
   const charCount = bodyText.trim().length;
@@ -293,9 +291,9 @@ export default function LoungeSEOChecker() {
 
   const handleAnalyze = async () => {
     const inputValue = inputType === 'content' ? content : url;
-    
+
     if (!inputValue.trim()) {
-      toast.error(inputType === 'content' ? 'Please enter content to analyze' : 'Please enter a URL to analyze');
+      toast.error(inputType === 'content' ? 'Enter some content to analyse first' : 'Enter a URL to analyse first');
       return;
     }
 
@@ -305,21 +303,21 @@ export default function LoungeSEOChecker() {
 
     try {
       if (inputType === 'url') {
-        toast.info('Fetching live page data...');
-        
+        toast.info('Fetching live page data');
+
         const { data: scrapeData, error: scrapeError } = await supabase.functions.invoke('seo-scrape', {
           body: { url: url.trim() },
         });
 
         if (scrapeError || !scrapeData?.success) {
-          toast.error(scrapeData?.error || scrapeError?.message || 'Failed to fetch URL. Please try again.');
+          toast.error(scrapeData?.error || scrapeError?.message || 'That URL could not be fetched. Check the address and try again.');
           setIsAnalyzing(false);
           return;
         }
 
         const html = scrapeData.html as string;
         if (!html || html.length < 50) {
-          toast.error('Could not retrieve meaningful content from this URL.');
+          toast.error('No meaningful content came back from this URL.');
           setIsAnalyzing(false);
           return;
         }
@@ -332,14 +330,14 @@ export default function LoungeSEOChecker() {
 
         const analysisResult = analyzeSEO(html, true, targetKeyword || undefined);
         setResult(analysisResult);
-        toast.success('Live analysis complete!');
+        toast.success('Live analysis complete');
       } else {
         const isHTML = content.includes('<') && (content.includes('</') || content.includes('/>'));
         const analysisResult = analyzeSEO(content, isHTML, targetKeyword || undefined);
         setResult(analysisResult);
       }
     } catch (error) {
-      toast.error('Failed to analyze content. Please try again.');
+      toast.error('The analysis did not finish. Try again in a moment.');
       console.error('Analysis error:', error);
     } finally {
       setIsAnalyzing(false);
@@ -348,7 +346,7 @@ export default function LoungeSEOChecker() {
 
   const handleAnalytics = async () => {
     if (!analyticsUrl.trim()) {
-      toast.error('Please enter a URL to analyze');
+      toast.error('Enter a URL to analyse first');
       return;
     }
 
@@ -356,7 +354,7 @@ export default function LoungeSEOChecker() {
     setAnalyticsData(null);
 
     try {
-      toast.info('Fetching page analytics...');
+      toast.info('Fetching page analytics');
 
       // Fetch scrape + map in parallel
       const [scrapeRes, mapRes] = await Promise.all([
@@ -368,13 +366,13 @@ export default function LoungeSEOChecker() {
       const scrapeError = scrapeRes.error;
 
       if (scrapeError || !scrapeData?.success) {
-        toast.error(scrapeData?.error || scrapeError?.message || 'Failed to fetch URL.');
+        toast.error(scrapeData?.error || scrapeError?.message || 'That URL could not be fetched.');
         return;
       }
 
       const html = scrapeData.html as string;
       if (!html || html.length < 50) {
-        toast.error('Could not retrieve meaningful content from this URL.');
+        toast.error('No meaningful content came back from this URL.');
         return;
       }
 
@@ -403,9 +401,9 @@ export default function LoungeSEOChecker() {
         hasRobotsTxt,
       });
       setAnalyticsData(data);
-      toast.success('Analytics loaded!');
+      toast.success('Analytics loaded');
     } catch (error) {
-      toast.error('Failed to fetch analytics.');
+      toast.error('The analytics fetch did not finish. Try again in a moment.');
       console.error('Analytics error:', error);
     } finally {
       setIsLoadingAnalytics(false);
@@ -422,37 +420,37 @@ export default function LoungeSEOChecker() {
     setExpandedChecks(newExpanded);
   };
 
-  const getScoreColor = (percentage: number) => {
-    if (percentage >= 80) return 'text-green-500';
-    if (percentage >= 60) return 'text-yellow-500';
-    return 'text-red-500';
+  const getScoreTone = (percentage: number) => {
+    if (percentage >= 80) return 'text-ok';
+    if (percentage >= 60) return 'text-attend';
+    return 'text-risk';
   };
 
-  const getScoreGradient = (percentage: number) => {
-    if (percentage >= 80) return 'from-green-500 to-emerald-400';
-    if (percentage >= 60) return 'from-yellow-500 to-amber-400';
-    return 'from-red-500 to-rose-400';
+  const getScoreBar = (percentage: number) => {
+    if (percentage >= 80) return 'bg-ok';
+    if (percentage >= 60) return 'bg-attend';
+    return 'bg-risk';
   };
 
   const getStatusIcon = (status: SEOCheck['status']) => {
     switch (status) {
       case 'good':
-        return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+        return <CheckCircle2 className="w-4 h-4 text-ok" />;
       case 'warning':
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+        return <AlertCircle className="w-4 h-4 text-attend" />;
       case 'error':
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <XCircle className="w-4 h-4 text-risk" />;
     }
   };
 
   const getStatusBadge = (status: SEOCheck['status']) => {
     switch (status) {
       case 'good':
-        return <Badge className="bg-green-500/10 text-green-500 border-green-500/20">Good</Badge>;
+        return <StatusBadge tone="ok" label="Good" />;
       case 'warning':
-        return <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Needs Work</Badge>;
+        return <StatusBadge tone="attend" label="Needs work" />;
       case 'error':
-        return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Missing</Badge>;
+        return <StatusBadge tone="risk" label="Missing" />;
     }
   };
 
@@ -463,37 +461,33 @@ export default function LoungeSEOChecker() {
   };
 
   const StatCard = ({ icon: Icon, label, value, sub, status }: { icon: any; label: string; value: string | number; sub?: string; status?: 'good' | 'warn' | 'bad' }) => (
-    <div className="p-4 rounded-lg border bg-card space-y-1">
+    <div className="space-y-1 rounded-[10px] border border-border/60 bg-card p-4">
       <div className="flex items-center gap-2 text-muted-foreground">
-        <Icon className="w-4 h-4" />
-        <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
+        <Icon className="h-3.5 w-3.5" />
+        <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em]">{label}</span>
       </div>
-      <p className={cn("text-2xl font-bold", status === 'good' && 'text-green-500', status === 'warn' && 'text-yellow-500', status === 'bad' && 'text-red-500')}>
+      <p className={cn('text-xl font-semibold tabular-nums', status === 'good' && 'text-ok', status === 'warn' && 'text-attend', status === 'bad' && 'text-risk')}>
         {value}
       </p>
-      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+      {sub && <p className="text-xs tabular-nums text-muted-foreground">{sub}</p>}
     </div>
   );
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-8"
-      >
-        <LoungePageHeader
-          title="SEO Checker"
-          description="Analyze your content for search engine optimization"
-          icon={Search}
-        />
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Tools"
+        title="SEO checker"
+        description="Analyse your content for search engine optimisation."
+      />
 
-        {/* Main Tabs: SEO / Analytics */}
+      {/* Main tabs: SEO / Analytics */}
+      <div className="mt-6">
         <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as 'seo' | 'analytics')}>
-          <TabsList className="grid w-full grid-cols-2 max-w-sm">
+          <TabsList className="grid w-full max-w-sm grid-cols-2">
             <TabsTrigger value="seo" className="gap-2">
               <Search className="w-4 h-4" />
-              SEO Audit
+              SEO audit
             </TabsTrigger>
             <TabsTrigger value="analytics" className="gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -501,22 +495,17 @@ export default function LoungeSEOChecker() {
             </TabsTrigger>
           </TabsList>
 
-          {/* SEO Tab */}
-          <TabsContent value="seo" className="space-y-6 mt-6">
-            {/* Input Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Content to Analyze</CardTitle>
-                <CardDescription>
-                  Paste your page content or HTML to get an SEO score
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {/* SEO tab */}
+          <TabsContent value="seo" className="space-y-5 mt-6">
+            {/* Input */}
+            <Panel>
+              <PanelHeader label="Content to analyse" />
+              <div className="space-y-4 p-4">
                 <Tabs value={inputType} onValueChange={(v) => setInputType(v as 'content' | 'url')}>
                   <TabsList className="grid w-full grid-cols-2 max-w-md">
                     <TabsTrigger value="content" className="gap-2">
                       <FileText className="w-4 h-4" />
-                      Paste Content
+                      Paste content
                     </TabsTrigger>
                     <TabsTrigger value="url" className="gap-2">
                       <Globe className="w-4 h-4" />
@@ -524,244 +513,216 @@ export default function LoungeSEOChecker() {
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="content" className="space-y-4 mt-4">
+                  <TabsContent value="content" className="space-y-2 mt-4">
+                    <span className={cn(FIELD_LABEL, 'block')}>Page content</span>
                     <Textarea
-                      placeholder="Paste your page content or HTML here..."
+                      placeholder="Paste your page content or HTML here"
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      className="min-h-[200px] font-mono text-sm"
+                      className="min-h-[200px] rounded-xl border-border/60 bg-foreground/[0.03] font-mono text-sm shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
                     />
-                    <p className="text-xs text-muted-foreground">
-                      <Info className="w-3 h-3 inline mr-1" />
-                      For best results, paste the full HTML of your page including title and meta tags
+                    <p className={FIELD_HELP}>
+                      For best results, paste the full HTML of your page including the title and meta tags.
                     </p>
                   </TabsContent>
 
-                  <TabsContent value="url" className="space-y-4 mt-4">
+                  <TabsContent value="url" className="space-y-2 mt-4">
+                    <span className={cn(FIELD_LABEL, 'block')}>Page URL</span>
                     <Input
                       type="url"
                       placeholder="https://example.com/page"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
+                      className={FIELD}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      <Globe className="w-3 h-3 inline mr-1" />
-                      We'll fetch the live page content and analyze the real HTML, meta tags, headings, links & images.
+                    <p className={FIELD_HELP}>
+                      We fetch the live page and analyse the real HTML, meta tags, headings, links and images.
                     </p>
                   </TabsContent>
                 </Tabs>
 
-                {/* Target Keyword */}
+                {/* Target keyword */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Target className="w-4 h-4 text-muted-foreground" />
-                    Target Keyword (optional)
-                  </label>
+                  <span className={cn(FIELD_LABEL, 'flex items-center gap-1.5')}>
+                    <Target className="h-3 w-3" />
+                    Target keyword (optional)
+                  </span>
                   <Input
-                    placeholder="e.g., web design services"
+                    placeholder="e.g. web design services"
                     value={targetKeyword}
                     onChange={(e) => setTargetKeyword(e.target.value)}
-                    className="max-w-md"
+                    className={cn(FIELD, 'max-w-md')}
                   />
                 </div>
 
-                <Button 
-                  onClick={handleAnalyze} 
+                <Button
+                  onClick={handleAnalyze}
                   disabled={isAnalyzing}
-                  size="lg"
                   className="gap-2"
                 >
                   {isAnalyzing ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Analyzing...
+                      Analysing
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4" />
-                      Analyze SEO
+                      <Search className="w-4 h-4" />
+                      Analyse SEO
                     </>
                   )}
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </Panel>
 
-            {/* SEO Results */}
-            <AnimatePresence mode="wait">
-              {result && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-6"
-                >
+            {/* SEO results */}
+            {result && (
+              <div className="space-y-5">
                   {scrapedMeta && (
-                    <Card className="border-primary/20 bg-primary/5">
-                      <CardContent className="py-4 flex items-center gap-3">
-                        <Globe className="w-5 h-5 text-primary flex-shrink-0" />
+                    <Panel>
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <Globe className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{scrapedMeta.title || 'Untitled Page'}</p>
-                          <a href={scrapedMeta.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
+                          <p className="text-sm font-medium truncate">{scrapedMeta.title || 'Untitled page'}</p>
+                          <a href={scrapedMeta.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors duration-150 flex items-center gap-1">
                             {scrapedMeta.sourceUrl}
                             <ExternalLink className="w-3 h-3" />
                           </a>
                         </div>
-                        <Badge className="bg-green-500/10 text-green-500 border-green-500/20 shrink-0">Live Data</Badge>
-                      </CardContent>
-                    </Card>
+                        <StatusBadge tone="ok" label="Live data" className="shrink-0" />
+                      </div>
+                    </Panel>
                   )}
 
-                  {/* Score Overview */}
-                  <Card className="overflow-hidden">
-                    <div className={cn("h-2 bg-gradient-to-r", getScoreGradient(result.percentage))} />
-                    <CardContent className="pt-6">
+                  {/* Score overview */}
+                  <Panel className="overflow-hidden">
+                    <div className={cn('h-0.5', getScoreBar(result.percentage))} />
+                    <div className="p-5">
                       <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="relative">
                           <svg className="w-32 h-32 transform -rotate-90">
-                            <circle cx="64" cy="64" r="56" stroke="currentColor" strokeWidth="8" fill="none" className="text-muted/20" />
-                            <circle cx="64" cy="64" r="56" stroke="currentColor" strokeWidth="8" fill="none" strokeDasharray={`${result.percentage * 3.52} 352`} strokeLinecap="round" className={getScoreColor(result.percentage)} />
+                            <circle cx="64" cy="64" r="56" stroke="currentColor" strokeWidth="6" fill="none" className="text-border/60" />
+                            <circle cx="64" cy="64" r="56" stroke="currentColor" strokeWidth="6" fill="none" strokeDasharray={`${result.percentage * 3.52} 352`} strokeLinecap="round" className={getScoreTone(result.percentage)} />
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={cn("text-4xl font-bold", getScoreColor(result.percentage))}>{result.percentage}</span>
-                            <span className="text-sm text-muted-foreground">/ 100</span>
+                            <span className={cn('text-3xl font-semibold tabular-nums', getScoreTone(result.percentage))}>{result.percentage}</span>
+                            <span className="font-mono text-[10px] tabular-nums text-muted-foreground">/ 100</span>
                           </div>
                         </div>
                         <div className="flex-1 text-center md:text-left">
-                          <h3 className="text-xl font-semibold mb-2">
-                            {result.percentage >= 80 ? 'Great SEO Score!' : result.percentage >= 60 ? 'Good, But Can Improve' : 'Needs Significant Work'}
+                          <h3 className="text-[15px] font-semibold mb-1.5">
+                            {result.percentage >= 80 ? 'A strong SEO score' : result.percentage >= 60 ? 'Good, with room to improve' : 'Needs significant work'}
                           </h3>
-                          <p className="text-muted-foreground mb-4">
-                            {result.percentage >= 80 ? 'Your content is well-optimized for search engines.' : result.percentage >= 60 ? 'Your content has a solid foundation but could use some improvements.' : 'There are several areas that need attention to improve search visibility.'}
+                          <p className="text-[13px] text-muted-foreground mb-4">
+                            {result.percentage >= 80 ? 'Your content is well optimised for search engines.' : result.percentage >= 60 ? 'Your content has a solid foundation but could use some improvements.' : 'Several areas need attention to improve search visibility.'}
                           </p>
-                          <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                            <Badge variant="outline" className="gap-1"><CheckCircle2 className="w-3 h-3 text-green-500" />{result.checks.filter(c => c.status === 'good').length} Good</Badge>
-                            <Badge variant="outline" className="gap-1"><AlertCircle className="w-3 h-3 text-yellow-500" />{result.checks.filter(c => c.status === 'warning').length} Warnings</Badge>
-                            <Badge variant="outline" className="gap-1"><XCircle className="w-3 h-3 text-red-500" />{result.checks.filter(c => c.status === 'error').length} Issues</Badge>
+                          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                            <StatusBadge tone="ok" label={`${result.checks.filter(c => c.status === 'good').length} good`} />
+                            <StatusBadge tone="attend" label={`${result.checks.filter(c => c.status === 'warning').length} warnings`} />
+                            <StatusBadge tone="risk" label={`${result.checks.filter(c => c.status === 'error').length} issues`} />
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Panel>
 
-                  {/* Detailed Checks */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Detailed Analysis</CardTitle>
-                      <CardDescription>Click on each item for more details</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
+                  {/* Detailed checks */}
+                  <Panel>
+                    <PanelHeader label="Detailed analysis">
+                      <span className="text-[11px] text-muted-foreground">Select an item for detail</span>
+                    </PanelHeader>
+                    <div>
                       {result.checks.map((check) => (
                         <Collapsible key={check.name} open={expandedChecks.has(check.name)} onOpenChange={() => toggleCheck(check.name)}>
                           <CollapsibleTrigger asChild>
-                            <motion.div
-                              whileHover={{ scale: 1.005 }}
-                              whileTap={{ scale: 0.995 }}
-                              className={cn(
-                                "flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-colors",
-                                check.status === 'good' && "border-green-500/20 bg-green-500/5 hover:bg-green-500/10",
-                                check.status === 'warning' && "border-yellow-500/20 bg-yellow-500/5 hover:bg-yellow-500/10",
-                                check.status === 'error' && "border-red-500/20 bg-red-500/5 hover:bg-red-500/10"
-                              )}
-                            >
+                            <div className="flex cursor-pointer items-center gap-3 border-t border-border/60 px-4 py-3 transition-colors duration-150 first:border-t-0 hover:bg-foreground/[0.025]">
                               {getStatusIcon(check.status)}
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-medium">{check.name}</span>
+                                <div className="flex items-center gap-2.5 flex-wrap">
+                                  <span className="text-[13px] font-medium">{check.name}</span>
                                   {getStatusBadge(check.status)}
                                 </div>
-                                <p className="text-sm text-muted-foreground truncate">{check.message}</p>
+                                <p className="text-xs text-muted-foreground truncate">{check.message}</p>
                               </div>
                               <div className="flex items-center gap-3">
-                                <span className="text-sm font-medium">{check.score}/{check.maxScore}</span>
+                                <span className="font-mono text-xs tabular-nums">{check.score}/{check.maxScore}</span>
                                 <Progress value={(check.score / check.maxScore) * 100} className="w-16 h-2" />
                                 {expandedChecks.has(check.name) ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                               </div>
-                            </motion.div>
+                            </div>
                           </CollapsibleTrigger>
                           <CollapsibleContent>
-                            <div className="mt-2 ml-9 p-4 rounded-lg bg-muted/30 border border-border/50">
-                              <p className="text-sm">{check.message}</p>
+                            <div className="border-t border-border/60 bg-sunken px-4 py-3 pl-11">
+                              <p className="text-[13px]">{check.message}</p>
                               {check.details && (
-                                <div className="mt-2 p-2 rounded bg-background/50 border border-border/30">
-                                  <p className="text-xs text-muted-foreground font-mono break-all">{check.details}</p>
-                                </div>
+                                <p className="mt-2 break-all font-mono text-xs text-muted-foreground">{check.details}</p>
                               )}
                             </div>
                           </CollapsibleContent>
                         </Collapsible>
                       ))}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Panel>
 
                   {/* Tips */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2"><Info className="w-5 h-5 text-primary" />SEO Tips</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2 text-sm text-muted-foreground">
-                        <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />Keep your title under 60 characters and include your main keyword</li>
-                        <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />Write a compelling meta description between 150-160 characters</li>
-                        <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />Use only one H1 tag per page and include your main topic</li>
-                        <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />Add descriptive alt text to all images for accessibility and SEO</li>
-                        <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />Aim for at least 500 words of quality content per page</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <Panel>
+                    <PanelHeader label="SEO tips" />
+                    <ul className="space-y-2.5 p-4 text-[13px] text-muted-foreground">
+                      <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-ok mt-0.5 flex-shrink-0" />Keep your title under 60 characters and include your main keyword</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-ok mt-0.5 flex-shrink-0" />Write a compelling meta description between 150 and 160 characters</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-ok mt-0.5 flex-shrink-0" />Use only one H1 tag per page and include your main topic</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-ok mt-0.5 flex-shrink-0" />Add descriptive alt text to all images for accessibility and SEO</li>
+                      <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-ok mt-0.5 flex-shrink-0" />Aim for at least 500 words of quality content per page</li>
+                    </ul>
+                  </Panel>
+              </div>
+            )}
           </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6 mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Page Analytics</CardTitle>
-                <CardDescription>Enter a URL to get a full breakdown of the page's content, structure, technologies, and metadata.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {/* Analytics tab */}
+          <TabsContent value="analytics" className="space-y-5 mt-6">
+            <Panel>
+              <PanelHeader label="Page analytics" />
+              <div className="space-y-3 p-4">
+                <p className="text-[13px] text-muted-foreground">
+                  Enter a URL for a full breakdown of the page's content, structure, technologies and metadata.
+                </p>
                 <div className="flex gap-2">
                   <Input
                     type="url"
                     placeholder="https://example.com"
                     value={analyticsUrl}
                     onChange={(e) => setAnalyticsUrl(e.target.value)}
-                    className="flex-1"
+                    className={cn(FIELD, 'flex-1')}
+                    aria-label="Page URL"
                     onKeyDown={(e) => e.key === 'Enter' && handleAnalytics()}
                   />
                   <Button onClick={handleAnalytics} disabled={isLoadingAnalytics} className="gap-2 shrink-0">
                     {isLoadingAnalytics ? <Loader2 className="w-4 h-4 animate-spin" /> : <BarChart3 className="w-4 h-4" />}
-                    {isLoadingAnalytics ? 'Loading...' : 'Analyze'}
+                    {isLoadingAnalytics ? 'Loading' : 'Analyse'}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Panel>
 
-            <AnimatePresence mode="wait">
-              {analyticsData && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-6"
-                >
-                  {/* Page Info */}
-                  <Card className="border-primary/20 bg-primary/5">
-                    <CardContent className="py-4 flex items-center gap-3">
-                      <Globe className="w-5 h-5 text-primary flex-shrink-0" />
+            {analyticsData && (
+              <div className="space-y-5">
+                  {/* Page info */}
+                  <Panel>
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <Globe className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{analyticsData.title || 'Untitled Page'}</p>
-                        <a href={analyticsData.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
+                        <p className="text-sm font-medium truncate">{analyticsData.title || 'Untitled page'}</p>
+                        <a href={analyticsData.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors duration-150 flex items-center gap-1">
                           {analyticsData.url}
                           <ExternalLink className="w-3 h-3" />
                         </a>
                       </div>
-                      <Badge className="bg-green-500/10 text-green-500 border-green-500/20 shrink-0">Live Data</Badge>
-                    </CardContent>
-                  </Card>
+                      <StatusBadge tone="ok" label="Live data" className="shrink-0" />
+                    </div>
+                  </Panel>
 
-                  {/* Overview Stats */}
+                  {/* Overview stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <StatCard icon={Type} label="Word Count" value={analyticsData.wordCount.toLocaleString()} sub={`${analyticsData.charCount.toLocaleString()} characters`} status={analyticsData.wordCount >= 500 ? 'good' : analyticsData.wordCount >= 200 ? 'warn' : 'bad'} />
                     <StatCard icon={Link2} label="Total Links" value={analyticsData.links.total} sub={`${analyticsData.links.internal} internal · ${analyticsData.links.external} external`} />
@@ -770,26 +731,24 @@ export default function LoungeSEOChecker() {
                   </div>
 
 
-                  {/* Technical Checks */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2"><Code2 className="w-5 h-5 text-primary" />Technical Overview</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Technical checks */}
+                  <Panel>
+                    <PanelHeader label="Technical overview" />
+                    <div className="p-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {[
-                          { label: 'Viewport Meta', ok: analyticsData.hasViewport },
-                          { label: 'Canonical Tag', ok: analyticsData.hasCanonical },
+                          { label: 'Viewport meta', ok: analyticsData.hasViewport },
+                          { label: 'Canonical tag', ok: analyticsData.hasCanonical },
                           { label: 'Favicon', ok: analyticsData.hasFavicon },
-                          { label: 'Structured Data', ok: analyticsData.hasStructuredData },
-                          { label: 'Language Attribute', ok: !!analyticsData.languageAttr },
+                          { label: 'Structured data', ok: analyticsData.hasStructuredData },
+                          { label: 'Language attribute', ok: !!analyticsData.languageAttr },
                           { label: 'Charset', ok: !!analyticsData.charset },
                           { label: 'Single H1', ok: analyticsData.h1Count === 1 },
-                          { label: 'Meta Description', ok: !!analyticsData.description },
+                          { label: 'Meta description', ok: !!analyticsData.description },
                         ].map(item => (
-                          <div key={item.label} className={cn("flex items-center gap-2 p-3 rounded-lg border", item.ok ? "border-green-500/20 bg-green-500/5" : "border-red-500/20 bg-red-500/5")}>
-                            {item.ok ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <XCircle className="w-4 h-4 text-red-500" />}
-                            <span className="text-sm font-medium">{item.label}</span>
+                          <div key={item.label} className="flex items-center gap-2 rounded-lg border border-border/60 p-2.5">
+                            {item.ok ? <CheckCircle2 className="w-4 h-4 text-ok" /> : <XCircle className="w-4 h-4 text-risk" />}
+                            <span className="text-[13px] font-medium">{item.label}</span>
                           </div>
                         ))}
                       </div>
@@ -802,131 +761,112 @@ export default function LoungeSEOChecker() {
                       {analyticsData.languageAttr && (
                         <p className="mt-1 text-xs text-muted-foreground"><span className="font-medium">Language:</span> {analyticsData.languageAttr}</p>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Panel>
 
                   {/* Technologies */}
                   {analyticsData.technologies.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2"><Code2 className="w-5 h-5 text-primary" />Technologies Detected</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                          {analyticsData.technologies.map(tech => (
-                            <Badge key={tech} variant="secondary" className="text-sm">{tech}</Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <Panel>
+                      <PanelHeader label="Technologies detected" />
+                      <div className="flex flex-wrap gap-2 p-4">
+                        {analyticsData.technologies.map(tech => (
+                          <span key={tech} className="rounded-md border border-border/60 bg-foreground/[0.03] px-2 py-0.5 text-xs text-foreground">{tech}</span>
+                        ))}
+                      </div>
+                    </Panel>
                   )}
 
-                  {/* Social / OG Tags */}
+                  {/* Social / OG tags */}
                   {analyticsData.socialTags.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2"><Share2 className="w-5 h-5 text-primary" />Social & Open Graph Tags</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {analyticsData.socialTags.map((tag, i) => (
-                            <div key={i} className="flex gap-3 p-2 rounded bg-muted/30 text-sm">
-                              <span className="font-mono text-xs text-muted-foreground shrink-0 w-40 truncate">{tag.property}</span>
-                              <span className="text-foreground break-all">{tag.content}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Headings Structure */}
-                  {analyticsData.headings.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2"><Hash className="w-5 h-5 text-primary" />Heading Structure</CardTitle>
-                        <CardDescription>{analyticsData.headings.length} headings found</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-1 max-h-64 overflow-y-auto">
-                          {analyticsData.headings.map((h, i) => (
-                            <div key={i} className="flex items-center gap-2 text-sm" style={{ paddingLeft: `${(parseInt(h.tag.replace('h', '')) - 1) * 16}px` }}>
-                              <Badge variant="outline" className="text-xs font-mono shrink-0">{h.tag}</Badge>
-                              <span className="truncate">{h.text}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Structured Data */}
-                  {analyticsData.structuredDataTypes.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2"><FileCode className="w-5 h-5 text-primary" />Structured Data (JSON-LD)</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                          {analyticsData.structuredDataTypes.map((type, i) => (
-                            <Badge key={i} variant="outline">{type}</Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Meta Tags */}
-                  {analyticsData.meta.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2"><Info className="w-5 h-5 text-primary" />Meta Tags</CardTitle>
-                        <CardDescription>{analyticsData.meta.length} meta tags found</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
-                          {analyticsData.meta.map((m, i) => (
-                            <div key={i} className="flex gap-3 p-2 rounded bg-muted/30 text-sm">
-                              <span className="font-mono text-xs text-muted-foreground shrink-0 w-40 truncate">{m.name}</span>
-                              <span className="text-foreground break-all">{m.content}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Page Composition */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2"><Clock className="w-5 h-5 text-primary" />Page Composition</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                        {[
-                          { label: 'Scripts', value: analyticsData.scriptCount },
-                          { label: 'Stylesheets', value: analyticsData.stylesheetCount },
-                          { label: 'Inline Styles', value: analyticsData.inlineStyleCount },
-                          { label: 'iFrames', value: analyticsData.iframeCount },
-                          { label: 'Forms', value: analyticsData.formCount },
-                          { label: 'H1 Tags', value: analyticsData.h1Count },
-                          { label: 'Images', value: analyticsData.images.total },
-                          { label: 'Links', value: analyticsData.links.total },
-                        ].map(item => (
-                          <div key={item.label} className="p-3 rounded-lg border bg-card">
-                            <p className="text-2xl font-bold">{item.value}</p>
-                            <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <Panel>
+                      <PanelHeader label="Social and Open Graph tags" />
+                      <div className="space-y-1.5 p-4">
+                        {analyticsData.socialTags.map((tag, i) => (
+                          <div key={i} className="flex gap-3 rounded-md bg-sunken p-2 text-sm">
+                            <span className="w-40 shrink-0 truncate font-mono text-xs text-muted-foreground">{tag.property}</span>
+                            <span className="break-all text-[13px] text-foreground">{tag.content}</span>
                           </div>
                         ))}
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    </Panel>
+                  )}
+
+                  {/* Heading structure */}
+                  {analyticsData.headings.length > 0 && (
+                    <Panel>
+                      <PanelHeader label="Heading structure">
+                        <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                          {analyticsData.headings.length} found
+                        </span>
+                      </PanelHeader>
+                      <div className="max-h-64 space-y-1 overflow-y-auto p-4">
+                        {analyticsData.headings.map((h, i) => (
+                          <div key={i} className="flex items-center gap-2 text-[13px]" style={{ paddingLeft: `${(parseInt(h.tag.replace('h', '')) - 1) * 16}px` }}>
+                            <span className="shrink-0 rounded border border-border/60 px-1 font-mono text-[10px] text-muted-foreground">{h.tag}</span>
+                            <span className="truncate">{h.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </Panel>
+                  )}
+
+                  {/* Structured data */}
+                  {analyticsData.structuredDataTypes.length > 0 && (
+                    <Panel>
+                      <PanelHeader label="Structured data (JSON-LD)" />
+                      <div className="flex flex-wrap gap-2 p-4">
+                        {analyticsData.structuredDataTypes.map((type, i) => (
+                          <span key={i} className="rounded-md border border-border/60 px-2 py-0.5 text-xs text-foreground">{type}</span>
+                        ))}
+                      </div>
+                    </Panel>
+                  )}
+
+                  {/* Meta tags */}
+                  {analyticsData.meta.length > 0 && (
+                    <Panel>
+                      <PanelHeader label="Meta tags">
+                        <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                          {analyticsData.meta.length} found
+                        </span>
+                      </PanelHeader>
+                      <div className="max-h-64 space-y-1.5 overflow-y-auto p-4">
+                        {analyticsData.meta.map((m, i) => (
+                          <div key={i} className="flex gap-3 rounded-md bg-sunken p-2 text-sm">
+                            <span className="w-40 shrink-0 truncate font-mono text-xs text-muted-foreground">{m.name}</span>
+                            <span className="break-all text-[13px] text-foreground">{m.content}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </Panel>
+                  )}
+
+                  {/* Page composition */}
+                  <Panel>
+                    <PanelHeader label="Page composition" />
+                    <div className="grid grid-cols-2 gap-2 p-4 text-center sm:grid-cols-4">
+                      {[
+                        { label: 'Scripts', value: analyticsData.scriptCount },
+                        { label: 'Stylesheets', value: analyticsData.stylesheetCount },
+                        { label: 'Inline styles', value: analyticsData.inlineStyleCount },
+                        { label: 'iFrames', value: analyticsData.iframeCount },
+                        { label: 'Forms', value: analyticsData.formCount },
+                        { label: 'H1 tags', value: analyticsData.h1Count },
+                        { label: 'Images', value: analyticsData.images.total },
+                        { label: 'Links', value: analyticsData.links.total },
+                      ].map(item => (
+                        <div key={item.label} className="rounded-lg border border-border/60 p-3">
+                          <p className="text-lg font-semibold tabular-nums">{item.value}</p>
+                          <p className="font-mono text-[9.5px] uppercase tracking-[0.13em] text-muted-foreground">{item.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </Panel>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
-      </motion.div>
+      </div>
     </div>
   );
 }
