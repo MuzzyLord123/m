@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileCheck, Plus, Upload, Clock, Star, Trash2, File, FileText, Search, LayoutTemplate } from 'lucide-react';
+import { ArrowLeft, FileCheck, Plus, Upload, Star, Trash2, File, FileText, LayoutTemplate } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { PDF_TEMPLATES, PDF_TEMPLATE_CATEGORIES, PDFTemplate } from '@/components/pdf/pdfTemplates';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
+import { PageHeader, EmptyState, RelativeTime, FIELD } from '@/components/platform';
 
 interface PDFItem {
   id: string;
@@ -47,7 +46,7 @@ export default function OfficePDFHome() {
         setFiles(data.map((f: any) => ({
           id: f.id,
           title: f.file_name,
-          size: f.file_size_bytes ? `${Math.round(f.file_size_bytes / 1024)} KB` : '—',
+          size: f.file_size_bytes ? `${Math.round(f.file_size_bytes / 1024)} KB` : '–',
           pages: (f.metadata as any)?.blockCount || 1,
           createdAt: new Date(f.created_at),
           isStarred: f.is_starred,
@@ -88,141 +87,123 @@ export default function OfficePDFHome() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
+      <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border/60 bg-card px-5">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
           <ArrowLeft className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Back to Office</span>
         </Button>
-        <div className="h-4 w-px bg-border/40" />
-        <FileCheck className="h-4 w-4 text-red-500" />
+        <div className="h-4 w-px bg-border/60" />
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
+          <FileCheck className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
+        </span>
         <span className="text-sm font-semibold tracking-tight">PDF Studio</span>
         <div className="flex-1" />
-        <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={openEditor}>
+        <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={openEditor}>
           <Upload className="h-3.5 w-3.5" /> Open PDF
         </Button>
-        <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => openCreator()}>
+        <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => openCreator()}>
           <Plus className="h-3.5 w-3.5" /> Create PDF
         </Button>
       </header>
 
       <div className="flex-1 overflow-auto">
-        <div className="max-w-5xl mx-auto px-6 sm:px-10">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-6">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">PDF Studio</h1>
-            <p className="text-sm text-muted-foreground/60 mt-1">Create, edit, annotate, and export professional PDF documents.</p>
-          </motion.div>
+        <div className="mx-auto max-w-5xl px-6 sm:px-10">
+          <PageHeader
+            className="pb-5 pt-7"
+            kicker="Quooro Office · PDF"
+            title="PDF Studio"
+            description="Create, edit, annotate and export PDF documents"
+          />
 
-          <div className="flex items-center gap-3 mb-6">
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search PDFs…" className="max-w-md h-10 rounded-xl bg-card/50 border-border/30 text-sm" />
+          <div className="mb-6 flex items-center gap-3">
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search PDFs" className={cn(FIELD, 'h-9 max-w-md text-sm')} />
           </div>
 
-          {/* Quick Actions */}
+          {/* Quick actions */}
           <section className="mb-8">
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
               {[
-                { label: 'Create New PDF', desc: 'Start from a template', icon: Plus, color: '#10b981', action: () => openCreator() },
-                { label: 'Upload & Edit PDF', desc: 'Open any PDF for annotation', icon: Upload, color: '#ef4444', action: openEditor },
-                { label: 'Merge PDFs', desc: 'Combine multiple documents', icon: File, color: '#f59e0b', action: openEditor },
-                { label: 'PDF to Text', desc: 'Extract text content', icon: FileText, color: '#3b82f6', action: openEditor },
-              ].map((action, i) => (
-                <motion.button key={action.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                { label: 'Create new PDF', desc: 'Start from a template', icon: Plus, action: () => openCreator() },
+                { label: 'Upload and edit', desc: 'Open any PDF for annotation', icon: Upload, action: openEditor },
+                { label: 'Merge PDFs', desc: 'Combine multiple documents', icon: File, action: openEditor },
+                { label: 'PDF to text', desc: 'Extract text content', icon: FileText, action: openEditor },
+              ].map((action) => (
+                <button key={action.label}
                   onClick={action.action}
-                  className="group flex items-center gap-4 p-5 rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all">
-                  <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${action.color}15` }}>
-                    <action.icon className="h-5 w-5" style={{ color: action.color }} />
-                  </div>
-                  <div className="text-left">
-                    <span className="text-[12px] font-semibold text-foreground block">{action.label}</span>
-                    <span className="text-[10px] text-muted-foreground/50">{action.desc}</span>
-                  </div>
-                </motion.button>
+                  className="flex items-center gap-3.5 rounded-[10px] border border-border/60 bg-card p-4 text-left transition-colors duration-150 hover:bg-foreground/[0.025]">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-foreground/[0.04]">
+                    <action.icon className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
+                  </span>
+                  <span>
+                    <span className="block text-[12px] font-medium text-foreground">{action.label}</span>
+                    <span className="text-[10.5px] text-muted-foreground">{action.desc}</span>
+                  </span>
+                </button>
               ))}
             </div>
           </section>
 
-          {/* Template Gallery */}
+          {/* Template gallery */}
           <section className="mb-10">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-primary/8 flex items-center justify-center">
-                  <LayoutTemplate className="h-4 w-4 text-primary/70" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-semibold text-foreground tracking-tight">Templates</h2>
-                  <p className="text-[10px] text-muted-foreground/50">Start from a professionally designed layout</p>
-                </div>
-              </div>
-              <span className="text-[10px] text-muted-foreground/40 font-medium">{filteredTemplates.length} templates</span>
+            <div className="mb-4 flex items-center gap-2.5">
+              <h2 className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                <LayoutTemplate className="h-3.5 w-3.5" /> Templates
+              </h2>
+              <div className="h-px flex-1 bg-border/60" />
+              <span className="font-mono text-[10px] tabular-nums text-muted-foreground/70">{filteredTemplates.length}</span>
             </div>
 
             {/* Category filters */}
-            <div className="flex flex-wrap gap-1.5 mb-5">
+            <div className="mb-4 flex flex-wrap gap-1.5">
               <button
                 onClick={() => setActiveCategory(null)}
-                className={cn("px-3.5 py-2 rounded-xl text-[11px] font-semibold transition-all",
+                className={cn('rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors duration-150',
                   !activeCategory
-                    ? "bg-foreground text-background shadow-md"
-                    : "bg-card/60 text-muted-foreground/60 hover:bg-card hover:text-foreground border border-border/20"
+                    ? 'bg-foreground text-background'
+                    : 'border border-border/60 bg-card text-muted-foreground hover:bg-foreground/[0.025] hover:text-foreground'
                 )}
               >All</button>
               {PDF_TEMPLATE_CATEGORIES.map(cat => (
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-                  className={cn("px-3.5 py-2 rounded-xl text-[11px] font-semibold transition-all",
+                  className={cn('rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors duration-150',
                     activeCategory === cat.id
-                      ? "bg-foreground text-background shadow-md"
-                      : "bg-card/60 text-muted-foreground/60 hover:bg-card hover:text-foreground border border-border/20"
+                      ? 'bg-foreground text-background'
+                      : 'border border-border/60 bg-card text-muted-foreground hover:bg-foreground/[0.025] hover:text-foreground'
                   )}
-                >{cat.icon} {cat.name}</button>
+                >{cat.name}</button>
               ))}
             </div>
 
             {/* Template grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {filteredTemplates.map((tmpl, i) => (
-                <motion.button
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredTemplates.map((tmpl) => (
+                <button
                   key={tmpl.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.02 }}
                   onClick={() => openCreator(tmpl)}
-                  className="group relative rounded-2xl bg-card/50 border border-border/15 hover:border-border/40 hover:shadow-xl transition-all text-left overflow-hidden"
+                  className="group overflow-hidden rounded-[10px] border border-border/60 bg-card text-left transition-colors duration-150 hover:border-border"
                 >
                   {/* Document preview mock */}
-                  <div className="relative h-28 sm:h-32 bg-gradient-to-br from-muted/20 to-muted/5 border-b border-border/10 p-4 overflow-hidden">
-                    {/* Mini page lines */}
-                    <div className="space-y-1.5 opacity-60">
-                      <div className="h-2 w-2/3 rounded-sm" style={{ backgroundColor: `${tmpl.color}30` }} />
-                      <div className="h-1 w-1/2 rounded-sm bg-foreground/6" />
-                      <div className="h-1 w-4/5 rounded-sm bg-foreground/5 mt-2" />
-                      <div className="h-1 w-3/5 rounded-sm bg-foreground/5" />
-                      <div className="h-1 w-2/3 rounded-sm bg-foreground/4" />
-                      <div className="h-1 w-1/2 rounded-sm bg-foreground/4" />
-                    </div>
-                    {/* Category color accent */}
-                    <div className="absolute top-0 right-0 w-16 h-16 rounded-bl-[2rem] opacity-[0.07]" style={{ backgroundColor: tmpl.color }} />
-                    {/* Icon overlay */}
-                    <div className="absolute bottom-3 right-3 text-2xl opacity-30 group-hover:opacity-50 transition-opacity">{tmpl.icon}</div>
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-center justify-center">
-                      <span className="text-[10px] font-semibold text-foreground opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm">
-                        Use Template →
-                      </span>
+                  <div className="relative h-28 overflow-hidden border-b border-border/60 bg-sunken/50 p-4 sm:h-32">
+                    <div className="space-y-1.5">
+                      <div className="h-2 w-2/3 rounded-sm bg-foreground/[0.10]" />
+                      <div className="h-1 w-1/2 rounded-sm bg-foreground/[0.06]" />
+                      <div className="mt-2 h-1 w-4/5 rounded-sm bg-foreground/[0.05]" />
+                      <div className="h-1 w-3/5 rounded-sm bg-foreground/[0.05]" />
+                      <div className="h-1 w-2/3 rounded-sm bg-foreground/[0.04]" />
+                      <div className="h-1 w-1/2 rounded-sm bg-foreground/[0.04]" />
                     </div>
                   </div>
                   {/* Card info */}
                   <div className="px-4 py-3">
-                    <h3 className="text-[12px] font-semibold text-foreground truncate leading-tight">{tmpl.name}</h3>
-                    <p className="text-[10px] text-muted-foreground/45 mt-1 line-clamp-1">{tmpl.description}</p>
-                    <div className="flex items-center gap-1.5 mt-2">
-                      <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tmpl.color }} />
-                      <span className="text-[9px] text-muted-foreground/40 font-medium">
-                        {PDF_TEMPLATE_CATEGORIES.find(c => c.id === tmpl.category)?.name}
-                      </span>
-                    </div>
+                    <h3 className="truncate text-[12px] font-medium leading-tight text-foreground">{tmpl.name}</h3>
+                    <p className="mt-1 line-clamp-1 text-[10.5px] text-muted-foreground">{tmpl.description}</p>
+                    <span className="mt-1.5 block font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground/70">
+                      {PDF_TEMPLATE_CATEGORIES.find(c => c.id === tmpl.category)?.name}
+                    </span>
                   </div>
-                </motion.button>
+                </button>
               ))}
             </div>
           </section>
@@ -230,8 +211,10 @@ export default function OfficePDFHome() {
           {/* Starred */}
           {starred.length > 0 && (
             <section className="mb-8">
-              <h2 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-4 flex items-center gap-1.5"><Star className="h-3 w-3" /> Starred</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <h2 className="mb-3 flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                <Star className="h-3 w-3 fill-gold text-gold" /> Starred
+              </h2>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
                 {starred.map(f => <PDFPreviewCard key={f.id} file={f} onOpen={() => f.sourceRoute ? navigate(f.sourceRoute) : openEditor()} onStar={() => toggleStar(f.id)} onDelete={() => deleteFile(f.id)} />)}
               </div>
             </section>
@@ -239,15 +222,28 @@ export default function OfficePDFHome() {
 
           {/* Recent */}
           <section className="pb-10">
-            <h2 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-4 flex items-center gap-1.5"><Clock className="h-3 w-3" /> Recent</h2>
+            <h2 className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Recent</h2>
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3].map(i => <div key={i} className="h-52 rounded-2xl bg-muted/20 animate-pulse" />)}
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3" aria-hidden>
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+                    <div className="aspect-[4/3] animate-pulse bg-foreground/[0.04]" />
+                    <div className="space-y-1.5 border-t border-border/60 p-3">
+                      <div className="h-2.5 w-3/4 animate-pulse rounded bg-foreground/[0.06]" />
+                      <div className="h-2 w-1/2 animate-pulse rounded bg-foreground/[0.06]" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : recent.length === 0 ? (
-              <p className="text-sm text-muted-foreground/40 py-8 text-center">No PDFs yet. Create one from a template or upload an existing PDF!</p>
+              <EmptyState
+                compact
+                title="No PDFs yet"
+                body="Create one from a template or open an existing PDF."
+                action={{ label: 'Create PDF', onClick: () => openCreator() }}
+              />
             ) : null}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
               {recent.map(f => <PDFPreviewCard key={f.id} file={f} onOpen={() => f.sourceRoute ? navigate(f.sourceRoute) : openEditor()} onStar={() => toggleStar(f.id)} onDelete={() => deleteFile(f.id)} />)}
             </div>
           </section>
@@ -269,84 +265,75 @@ function PDFPreviewCard({ file, onOpen, onStar, onDelete }: { file: PDFItem; onO
     : null;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="group rounded-2xl bg-card/60 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all cursor-pointer overflow-hidden"
+    <div
+      className="group cursor-pointer overflow-hidden rounded-[10px] border border-border/60 bg-card transition-colors duration-150 hover:border-border"
       onClick={onOpen}>
-      {/* Document Preview Area */}
-      <div className="relative aspect-[4/3] bg-muted/10 border-b border-border/10 p-4 flex flex-col overflow-hidden">
+      {/* Document preview area */}
+      <div className="relative flex aspect-[4/3] flex-col overflow-hidden border-b border-border/60 bg-sunken/50 p-4">
         {/* Mini document simulation */}
-        <div className="flex-1 flex flex-col gap-1.5 overflow-hidden">
+        <div className="flex flex-1 flex-col gap-1.5 overflow-hidden">
           {/* Title bar */}
-          <div className="h-3 w-3/4 rounded-sm bg-foreground/10" />
-          <div className="h-2 w-1/2 rounded-sm bg-foreground/6 mt-1" />
+          <div className="h-3 w-3/4 rounded-sm bg-foreground/[0.10]" />
+          <div className="mt-1 h-2 w-1/2 rounded-sm bg-foreground/[0.06]" />
 
           {isInvoice ? (
             /* Invoice preview */
-            <div className="mt-3 space-y-2 flex-1">
+            <div className="mt-3 flex-1 space-y-2">
               <div className="flex items-center justify-between">
-                <div className="h-2 w-16 rounded-sm bg-primary/15" />
-                <div className="h-2 w-12 rounded-sm bg-primary/15" />
+                <div className="h-2 w-16 rounded-sm bg-foreground/[0.08]" />
+                <div className="h-2 w-12 rounded-sm bg-foreground/[0.08]" />
               </div>
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="flex items-center justify-between gap-2">
-                  <div className="h-1.5 rounded-sm bg-foreground/6" style={{ width: `${40 + Math.random() * 30}%` }} />
-                  <div className="h-1.5 w-10 rounded-sm bg-foreground/8" />
+                  <div className="h-1.5 rounded-sm bg-foreground/[0.06]" style={{ width: `${40 + Math.random() * 30}%` }} />
+                  <div className="h-1.5 w-10 rounded-sm bg-foreground/[0.08]" />
                 </div>
               ))}
-              <div className="border-t border-border/20 pt-2 mt-auto flex justify-end">
-                <div className="h-2.5 w-20 rounded-sm bg-primary/20" />
+              <div className="mt-auto flex justify-end border-t border-border/60 pt-2">
+                <div className="h-2.5 w-20 rounded-sm bg-foreground/[0.10]" />
               </div>
             </div>
           ) : (
             /* PDF/Document preview */
-            <div className="mt-3 space-y-1.5 flex-1">
+            <div className="mt-3 flex-1 space-y-1.5">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="h-1.5 rounded-sm bg-foreground/6" style={{ width: `${50 + Math.random() * 45}%` }} />
+                <div key={i} className="h-1.5 rounded-sm bg-foreground/[0.06]" style={{ width: `${50 + Math.random() * 45}%` }} />
               ))}
-              <div className="h-1.5 w-1/3 rounded-sm bg-foreground/6 mt-3" />
+              <div className="mt-3 h-1.5 w-1/3 rounded-sm bg-foreground/[0.06]" />
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-1.5 rounded-sm bg-foreground/5" style={{ width: `${40 + Math.random() * 50}%` }} />
+                <div key={i} className="h-1.5 rounded-sm bg-foreground/[0.05]" style={{ width: `${40 + Math.random() * 50}%` }} />
               ))}
             </div>
           )}
         </div>
 
-        {/* Type badge */}
-        <div className="absolute top-2.5 right-2.5">
-          <span className={cn("text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md",
-            isInvoice ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
-          )}>
+        {/* Type label */}
+        <div className="absolute right-2.5 top-2.5">
+          <span className="font-mono text-[9px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
             {isInvoice ? 'Invoice' : 'PDF'}
           </span>
         </div>
-
-        {/* Hover actions */}
-        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
-          <Button size="sm" className="h-8 rounded-xl text-xs gap-1.5 shadow-lg">
-            <FileText className="h-3.5 w-3.5" /> Open
-          </Button>
-        </div>
       </div>
 
-      {/* Card Footer */}
+      {/* Card footer */}
       <div className="px-4 py-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h3 className="text-[13px] font-semibold text-foreground truncate">{file.title}</h3>
-            <p className="text-[10px] text-muted-foreground/50 mt-0.5">
-              {file.pages} page{file.pages !== 1 ? 's' : ''} · {file.size} · {formatDistanceToNow(file.createdAt, { addSuffix: true })}
+            <h3 className="truncate text-[13px] font-medium text-foreground">{file.title}</h3>
+            <p className="mt-0.5 font-mono text-[10px] tabular-nums text-muted-foreground">
+              {file.pages} page{file.pages !== 1 ? 's' : ''} · {file.size} · <RelativeTime date={file.createdAt} className="text-[10px]" />
             </p>
           </div>
-          <div className="flex gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={e => { e.stopPropagation(); onStar(); }} className="h-7 w-7 rounded-lg hover:bg-accent flex items-center justify-center">
-              <Star className={cn("h-3.5 w-3.5", file.isStarred ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground")} />
+          <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+            <button aria-label={file.isStarred ? 'Unstar' : 'Star'} onClick={e => { e.stopPropagation(); onStar(); }} className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors duration-150 hover:bg-foreground/[0.04]">
+              <Star className={cn('h-3.5 w-3.5', file.isStarred ? 'fill-gold text-gold' : 'text-muted-foreground')} />
             </button>
-            <button onClick={e => { e.stopPropagation(); onDelete(); }} className="h-7 w-7 rounded-lg hover:bg-destructive/20 flex items-center justify-center">
+            <button aria-label="Delete" onClick={e => { e.stopPropagation(); onDelete(); }} className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors duration-150 hover:bg-destructive/20">
               <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

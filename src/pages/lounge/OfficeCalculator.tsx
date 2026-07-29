@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calculator, Delete, RotateCcw, History, Copy, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -158,24 +157,26 @@ export default function OfficeCalculator() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      <header className="h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-3 sm:px-5 gap-2 sm:gap-3 shrink-0">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
+      <header className="h-[52px] border-b border-border/60 bg-card flex items-center px-3 sm:px-5 gap-2 sm:gap-3 shrink-0">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
           <ArrowLeft className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Back to Office</span>
         </Button>
-        <div className="h-4 w-px bg-border/40" />
-        <Calculator className="h-4 w-4 text-teal-500 shrink-0" />
+        <div className="h-4 w-px bg-border/60" />
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
+          <Calculator className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
+        </span>
         <span className="text-sm font-semibold tracking-tight">Calculator</span>
         <div className="flex-1" />
         {/* Mode toggle — hide labels on very small screens */}
-        <div className="flex items-center gap-0.5 bg-muted/50 p-0.5 rounded-xl shrink-0">
+        <div className="flex items-center gap-0.5 rounded-lg border border-border/60 bg-card p-0.5 shrink-0">
           {(['standard', 'scientific'] as const).map(m => (
-            <button key={m} onClick={() => setMode(m)} className={cn("px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium transition-all", mode === m ? "bg-background shadow-sm text-foreground" : "text-muted-foreground/60 hover:text-foreground")}>
+            <button key={m} onClick={() => setMode(m)} className={cn("px-2 sm:px-3 py-1.5 rounded-md text-[10px] sm:text-[11px] font-medium transition-colors duration-150", mode === m ? "bg-foreground/[0.05] text-foreground" : "text-muted-foreground hover:text-foreground")}>
               {m === 'standard' ? 'Std' : 'Sci'}
             </button>
           ))}
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl shrink-0" onClick={() => setShowHistory(!showHistory)}>
+        <Button variant="ghost" size="icon" aria-label="History" className="h-8 w-8 rounded-lg shrink-0" onClick={() => setShowHistory(!showHistory)}>
           <History className="h-3.5 w-3.5" />
         </Button>
       </header>
@@ -183,21 +184,21 @@ export default function OfficeCalculator() {
       <div className="flex-1 overflow-auto flex items-start sm:items-center justify-center p-4 sm:p-6">
         {/* Stack vertically on mobile, side by side on sm+ */}
         <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start w-full sm:w-auto">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[340px] rounded-3xl bg-card/60 border border-border/20 shadow-2xl overflow-hidden">
+          <div className="w-full max-w-[340px] rounded-[10px] bg-card border border-border/60 overflow-hidden">
             <div className="p-5 sm:p-6 pb-3">
               <div className="text-right">
-                <p className="text-[11px] text-muted-foreground/40 font-mono h-5 truncate">{expression || ' '}</p>
-                <p className={cn("font-mono font-semibold text-foreground transition-all", display.length > 12 ? "text-2xl" : display.length > 8 ? "text-3xl" : "text-4xl")}>
+                <p className="text-[11px] text-muted-foreground/60 font-mono tabular-nums h-5 truncate">{expression || ' '}</p>
+                <p className={cn("font-mono font-medium tabular-nums text-foreground", display.length > 12 ? "text-2xl" : display.length > 8 ? "text-3xl" : "text-4xl")}>
                   {display}
                 </p>
               </div>
               <div className="flex items-center justify-between mt-1">
                 <div className="flex items-center gap-1">
                   {hasMemory && (
-                    <span className="text-[8px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">M: {memory}</span>
+                    <span className="font-mono text-[8px] font-medium tabular-nums text-primary bg-primary/10 px-1.5 py-0.5 rounded">M {memory}</span>
                   )}
                 </div>
-                <button onClick={copyResult} className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground/60 flex items-center gap-1 transition-colors min-h-[32px] px-1">
+                <button onClick={copyResult} className="text-[10px] text-muted-foreground/60 hover:text-foreground flex items-center gap-1 transition-colors duration-150 min-h-[32px] px-1">
                   <Copy className="h-3 w-3" /> Copy
                 </button>
               </div>
@@ -212,7 +213,7 @@ export default function OfficeCalculator() {
                 { label: 'M−', fn: memorySub },
               ].map(m => (
                 <button key={m.label} onClick={m.fn}
-                  className="flex-1 h-10 sm:h-7 rounded-lg bg-muted/30 text-[11px] sm:text-[10px] font-semibold text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all active:scale-95">
+                  className="flex-1 h-10 sm:h-7 rounded-lg bg-foreground/[0.04] font-mono text-[11px] sm:text-[10px] font-medium text-muted-foreground hover:bg-foreground/[0.07] hover:text-foreground transition-colors duration-150 active:scale-95">
                   {m.label}
                 </button>
               ))}
@@ -222,7 +223,7 @@ export default function OfficeCalculator() {
               <div className="px-3 pb-2 grid grid-cols-4 gap-1.5">
                 {sciButtons.map(fn => (
                   <button key={fn} onClick={() => handleScientific(fn)}
-                    className="h-10 sm:h-9 rounded-xl bg-muted/40 text-[11px] font-mono font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all active:scale-95">
+                    className="h-10 sm:h-9 rounded-lg bg-foreground/[0.04] text-[11px] font-mono font-medium text-muted-foreground hover:bg-foreground/[0.07] hover:text-foreground transition-colors duration-150 active:scale-95">
                     {fn}
                   </button>
                 ))}
@@ -234,11 +235,11 @@ export default function OfficeCalculator() {
               {stdButtons.flat().map((btn, i) => (
                 <button key={btn + i} onClick={() => handleButton(btn)}
                   className={cn(
-                    "h-16 sm:h-14 rounded-2xl text-base font-semibold transition-all active:scale-95",
-                    isOp(btn) ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md" :
-                    isFunc(btn) ? "bg-muted/60 text-foreground hover:bg-muted/80" :
-                    btn === '⌫' ? "bg-muted/60 text-foreground hover:bg-muted/80" :
-                    "bg-card hover:bg-accent/50 text-foreground border border-border/15"
+                    "h-16 sm:h-14 rounded-[10px] font-mono text-base font-medium tabular-nums transition-colors duration-150 active:scale-95",
+                    isOp(btn) ? "bg-primary text-primary-foreground hover:bg-primary/90" :
+                    isFunc(btn) ? "bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.09]" :
+                    btn === '⌫' ? "bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.09]" :
+                    "bg-card hover:bg-foreground/[0.03] text-foreground border border-border/60"
                   )}>
                   {btn === '⌫' ? <Delete className="h-4 w-4 mx-auto" /> : btn}
                 </button>
@@ -246,36 +247,34 @@ export default function OfficeCalculator() {
             </div>
 
             <div className="px-4 pb-3 text-center hidden sm:block">
-              <p className="text-[8px] text-muted-foreground/30">Use keyboard: 0-9, +−*/=, Enter, Esc, Backspace</p>
+              <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-muted-foreground/60">Keyboard: 0-9 · + − * / = · Enter · Esc</p>
             </div>
-          </motion.div>
+          </div>
 
           {/* History panel — full width below on mobile, side panel on sm+ */}
-          <AnimatePresence>
-            {showHistory && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                className="w-full max-w-[340px] sm:w-[260px] sm:max-w-none rounded-3xl bg-card/60 border border-border/20 shadow-2xl p-4 overflow-auto max-h-80 sm:max-h-[520px]">
+          {showHistory && (
+              <div
+                className="w-full max-w-[340px] sm:w-[260px] sm:max-w-none rounded-[10px] bg-card border border-border/60 p-4 overflow-auto max-h-80 sm:max-h-[520px]">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-widest">History</span>
+                  <span className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">History</span>
                   <div className="flex items-center gap-2">
-                    <button onClick={clearHistory} className="text-[10px] text-muted-foreground/40 hover:text-foreground">Clear</button>
-                    <button onClick={() => setShowHistory(false)} className="sm:hidden h-6 w-6 rounded-lg bg-muted/30 flex items-center justify-center">
+                    <button onClick={clearHistory} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors duration-150">Clear</button>
+                    <button aria-label="Close history" onClick={() => setShowHistory(false)} className="sm:hidden h-6 w-6 rounded-lg bg-foreground/[0.04] flex items-center justify-center">
                       <X className="h-3 w-3" />
                     </button>
                   </div>
                 </div>
-                {history.length === 0 && <p className="text-[11px] text-muted-foreground/30 text-center py-8">No calculations yet</p>}
+                {history.length === 0 && <p className="text-[11px] text-muted-foreground text-center py-8">No calculations yet</p>}
                 <div className="space-y-2">
                   {history.map((h, i) => (
-                    <button key={h.id || i} onClick={() => { setDisplay(h.result); setPrevResult(h.result); }} className="w-full text-right p-3 rounded-xl hover:bg-accent/30 transition-colors min-h-[48px]">
-                      <p className="text-[10px] text-muted-foreground/40 font-mono truncate">{h.expression}</p>
-                      <p className="text-sm font-semibold text-foreground font-mono">{h.result}</p>
+                    <button key={h.id || i} onClick={() => { setDisplay(h.result); setPrevResult(h.result); }} className="w-full text-right p-3 rounded-lg hover:bg-foreground/[0.025] transition-colors duration-150 min-h-[48px]">
+                      <p className="text-[10px] text-muted-foreground/70 font-mono tabular-nums truncate">{h.expression}</p>
+                      <p className="text-sm font-medium text-foreground font-mono tabular-nums">{h.result}</p>
                     </button>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
       </div>
     </div>

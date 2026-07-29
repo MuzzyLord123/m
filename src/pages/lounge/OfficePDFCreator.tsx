@@ -26,14 +26,14 @@ const BLOCK_TYPES: { type: PDFBlock['type']; label: string; icon: any }[] = [
   { type: 'heading', label: 'Heading', icon: Type },
   { type: 'subtitle', label: 'Subtitle', icon: Type },
   { type: 'paragraph', label: 'Paragraph', icon: Type },
-  { type: 'list', label: 'Bullet List', icon: List },
+  { type: 'list', label: 'Bullet list', icon: List },
   { type: 'table', label: 'Table', icon: Table },
   { type: 'image', label: 'Image', icon: ImageIcon },
-  { type: 'menu-item', label: 'Menu Item', icon: Type },
-  { type: 'menu-item-image', label: 'Menu Item + Photo', icon: UtensilsCrossed },
+  { type: 'menu-item', label: 'Menu item', icon: Type },
+  { type: 'menu-item-image', label: 'Menu item with photo', icon: UtensilsCrossed },
   { type: 'step', label: 'Step', icon: BookOpen },
-  { type: 'callout', label: 'Callout Box', icon: AlertCircle },
-  { type: 'two-column', label: 'Two Columns', icon: Columns },
+  { type: 'callout', label: 'Callout box', icon: AlertCircle },
+  { type: 'two-column', label: 'Two columns', icon: Columns },
   { type: 'divider', label: 'Divider', icon: Minus },
   { type: 'spacer', label: 'Spacer', icon: Square },
 ];
@@ -448,7 +448,7 @@ export default function OfficePDFCreator() {
     });
 
     doc.save(`${docTitle.replace(/\s+/g, '-').toLowerCase()}.pdf`);
-    toast.success('PDF exported successfully!');
+    toast.success('PDF exported');
   }, [blocks, docTitle]);
 
   // ─── Block Editor Component ───
@@ -463,10 +463,10 @@ export default function OfficePDFCreator() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -6 }}
         className={cn(
-          "group relative border rounded-xl p-3 transition-all",
+          "group relative border rounded-[10px] p-3 transition-colors duration-150",
           isSelected
-            ? "border-primary/40 bg-primary/5 shadow-sm"
-            : "border-border/20 bg-card/30 hover:border-border/40"
+            ? "border-primary/50 bg-primary/[0.04]"
+            : "border-border/60 bg-card hover:border-border"
         )}
         onClick={() => setSelectedBlock(block.id)}
       >
@@ -480,14 +480,14 @@ export default function OfficePDFCreator() {
         </div>
 
         {/* Type badge */}
-        <div className="text-[9px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-1.5">{block.type.replace('-', ' ')}</div>
+        <div className="font-mono text-[9px] font-medium text-muted-foreground/70 uppercase tracking-[0.13em] mb-1.5">{block.type.replace('-', ' ')}</div>
 
         {/* Content */}
         {(block.type === 'divider') && (
           <div className="border-t border-border/40 my-2" />
         )}
         {block.type === 'spacer' && (
-          <div className="h-4 flex items-center justify-center text-[10px] text-muted-foreground/30">— spacer —</div>
+          <div className="h-4 flex items-center justify-center font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground/50">spacer</div>
         )}
 
         {['title', 'heading', 'subtitle', 'paragraph', 'header', 'footer'].includes(block.type) && (
@@ -532,7 +532,7 @@ export default function OfficePDFCreator() {
                 </button>
               </div>
             ) : (
-              <button onClick={(e) => { e.stopPropagation(); handleImageUpload(block.id, 'imageUrl'); }} className="w-full h-28 rounded-xl border-2 border-dashed border-border/30 flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-primary/5 transition-all">
+              <button onClick={(e) => { e.stopPropagation(); handleImageUpload(block.id, 'imageUrl'); }} className="w-full h-28 rounded-[10px] border border-dashed border-border/60 flex flex-col items-center justify-center gap-1.5 hover:border-border hover:bg-foreground/[0.02] transition-colors duration-150">
                 <ImageIcon className="h-6 w-6 text-muted-foreground/40" />
                 <span className="text-[10px] font-medium text-muted-foreground/50">Click to upload image</span>
               </button>
@@ -552,7 +552,7 @@ export default function OfficePDFCreator() {
                   </button>
                 </div>
               ) : (
-                <button onClick={(e) => { e.stopPropagation(); handleImageUpload(block.id, 'content3'); }} className="w-20 h-20 rounded-lg border-2 border-dashed border-border/30 flex flex-col items-center justify-center gap-1 hover:border-primary/40 hover:bg-primary/5 transition-all">
+                <button onClick={(e) => { e.stopPropagation(); handleImageUpload(block.id, 'content3'); }} className="w-20 h-20 rounded-lg border border-dashed border-border/60 flex flex-col items-center justify-center gap-1 hover:border-border hover:bg-foreground/[0.02] transition-colors duration-150">
                   <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
                   <span className="text-[8px] text-muted-foreground/40">Photo</span>
                 </button>
@@ -643,25 +643,27 @@ export default function OfficePDFCreator() {
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 min-h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex flex-wrap items-center px-3 sm:px-5 gap-2 sm:gap-3 py-2">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office/pdf-home', { state: { fromOfficeApp: true } })}>
+      <header className="shrink-0 min-h-[52px] border-b border-border/60 bg-card flex flex-wrap items-center px-3 sm:px-5 gap-2 sm:gap-3 py-2">
+        <Button variant="ghost" size="sm" aria-label="Back to PDF Studio" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office/pdf-home', { state: { fromOfficeApp: true } })}>
           <ArrowLeft className="h-3.5 w-3.5" />
         </Button>
-        <FileCheck className="h-4 w-4 text-red-500 hidden sm:block" />
+        <span className="hidden h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04] sm:flex">
+          <FileCheck className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
+        </span>
         <Input
           value={docTitle}
           onChange={e => setDocTitle(e.target.value)}
-          className="max-w-[140px] sm:max-w-[240px] h-8 text-sm font-semibold bg-transparent border-border/20 rounded-lg"
+          className="max-w-[140px] sm:max-w-[240px] h-8 text-sm font-medium bg-transparent border-border/60 rounded-lg"
         />
         <div className="flex-1" />
 
         <div className="flex items-center gap-1.5 flex-wrap">
-          <Button variant="ghost" size="sm" className={cn("h-8 gap-1.5 rounded-xl text-xs", previewMode && "bg-primary/10 text-primary")} onClick={() => setPreviewMode(!previewMode)}>
+          <Button variant="ghost" size="sm" className={cn("h-8 gap-1.5 rounded-lg text-xs", previewMode && "bg-primary/10 text-primary")} onClick={() => setPreviewMode(!previewMode)}>
             {previewMode ? <Edit3 className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             <span className="hidden sm:inline">{previewMode ? 'Edit' : 'Preview'}</span>
           </Button>
 
-          <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => openSaveDialog({
+          <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => openSaveDialog({
             fileName: docTitle,
             fileType: 'pdf',
             appSource: 'pdf-studio',
@@ -673,7 +675,7 @@ export default function OfficePDFCreator() {
             <FolderInput className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
           </Button>
 
-          <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={exportPDF}>
+          <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={exportPDF}>
             <Download className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Export PDF</span>
           </Button>
         </div>
@@ -686,7 +688,7 @@ export default function OfficePDFCreator() {
         <div className="max-w-3xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
           {previewMode ? (
             // ─── Preview Mode ───
-            <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-10 min-h-[400px] sm:min-h-[800px] border border-border/10">
+            <div className="bg-white rounded-[10px] p-4 sm:p-10 min-h-[400px] sm:min-h-[800px] border border-border/60">
               {blocks.map(block => (
                 <div key={block.id} className="mb-3">
                   {block.type === 'title' && <h1 className="text-2xl font-bold" style={{ textAlign: block.style?.align, color: block.style?.color }}>{block.content}</h1>}
@@ -762,12 +764,12 @@ export default function OfficePDFCreator() {
               {/* Add Block */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full h-10 rounded-xl border-dashed border-border/30 text-muted-foreground/50 hover:text-foreground hover:border-border/50 gap-2">
-                    <Plus className="h-4 w-4" /> Add Block
+                  <Button variant="outline" className="w-full h-10 rounded-[10px] border-dashed border-border/60 text-muted-foreground hover:text-foreground hover:border-border gap-2">
+                    <Plus className="h-4 w-4" /> Add block
                     <ChevronDown className="h-3 w-3 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" className="w-56">
+                <DropdownMenuContent align="center" className="w-56 rounded-[10px]">
                   {BLOCK_TYPES.map(bt => (
                     <DropdownMenuItem key={bt.type} onClick={() => addBlock(bt.type)} className="gap-2 text-xs">
                       <bt.icon className="h-3.5 w-3.5 text-muted-foreground" />

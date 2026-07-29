@@ -3,16 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Timer, Play, Pause, RotateCcw, Coffee, Brain, Zap, Check, Target, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 type SessionType = 'focus' | 'short-break' | 'long-break';
 const SESSION_CONFIG = {
-  'focus': { label: 'Focus', duration: 25, icon: Brain, color: '#ef4444' },
-  'short-break': { label: 'Short Break', duration: 5, icon: Coffee, color: '#22c55e' },
-  'long-break': { label: 'Long Break', duration: 15, icon: Zap, color: '#3b82f6' },
+  'focus': { label: 'Focus', duration: 25, icon: Brain },
+  'short-break': { label: 'Short break', duration: 5, icon: Coffee },
+  'long-break': { label: 'Long break', duration: 15, icon: Zap },
 };
 interface CompletedSession { id?: string; type: SessionType; completedAt: Date; duration: number; }
 function getDailyGoal(): number { try { return parseInt(localStorage.getItem('pomodoro_daily_goal') || '4'); } catch { return 4; } }
@@ -70,9 +69,9 @@ export default function OfficePomodoro() {
       if (sessionType === 'focus') {
         const newCount = pomodoroCount + 1;
         setPomodoroCount(newCount);
-        toast.success(`🍅 Pomodoro #${newCount} complete!`);
+        toast.success(`Pomodoro ${newCount} complete`);
         if (newCount % 4 === 0) switchSession('long-break'); else switchSession('short-break');
-      } else { toast.success('Break over! Time to focus.'); switchSession('focus'); }
+      } else { toast.success('Break over. Time to focus.'); switchSession('focus'); }
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [isRunning, timeLeft]);
@@ -94,25 +93,27 @@ export default function OfficePomodoro() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      <header className="h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-4 gap-3 shrink-0">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
+      <header className="h-[52px] border-b border-border/60 bg-card flex items-center px-4 gap-3 shrink-0">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
           <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Back to Office</span>
         </Button>
-        <div className="h-4 w-px bg-border/40" />
-        <Timer className="h-4 w-4 text-red-500 shrink-0" />
-        <span className="text-sm font-semibold tracking-tight">Pomodoro Timer</span>
+        <div className="h-4 w-px bg-border/60" />
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
+          <Timer className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
+        </span>
+        <span className="text-sm font-semibold tracking-tight">Pomodoro</span>
       </header>
 
       <div className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-auto">
         <div className="flex flex-col items-center gap-6 sm:gap-8 max-w-lg w-full">
           {/* Session Tabs — wrap on mobile */}
-          <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-2xl w-full sm:w-auto">
+          <div className="flex items-center gap-1 rounded-[10px] border border-border/60 bg-card p-1 w-full sm:w-auto">
             {(Object.keys(SESSION_CONFIG) as SessionType[]).map(type => {
               const cfg = SESSION_CONFIG[type];
               return (
                 <button key={type} onClick={() => switchSession(type)}
-                  className={cn("flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-[11px] sm:text-[12px] font-medium transition-all",
-                    sessionType === type ? "bg-background shadow-sm text-foreground" : "text-muted-foreground/60 hover:text-foreground")}>
+                  className={cn("flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-2 rounded-lg text-[11px] sm:text-[12px] font-medium transition-colors duration-150",
+                    sessionType === type ? "bg-foreground/[0.05] text-foreground" : "text-muted-foreground hover:text-foreground")}>
                   <cfg.icon className="h-3.5 w-3.5 shrink-0" />
                   <span className="hidden xs:inline sm:inline">{cfg.label}</span>
                 </button>
@@ -121,31 +122,30 @@ export default function OfficePomodoro() {
           </div>
 
           {/* Timer Circle — scale on mobile */}
-          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="relative w-56 h-56 sm:w-[280px] sm:h-[280px]">
+          <div className="relative w-56 h-56 sm:w-[280px] sm:h-[280px]">
             <svg viewBox="0 0 280 280" className="w-full h-full transform -rotate-90">
-              <circle cx="140" cy="140" r="120" fill="none" stroke="currentColor" strokeWidth="4" className="text-border/20" />
-              <circle cx="140" cy="140" r="120" fill="none" stroke={config.color} strokeWidth="6" strokeLinecap="round"
+              <circle cx="140" cy="140" r="120" fill="none" stroke="currentColor" strokeWidth="4" className="text-border/40" />
+              <circle cx="140" cy="140" r="120" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round"
                 strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-                className="transition-all duration-1000 ease-linear" />
+                className="text-primary transition-all duration-1000 ease-linear" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-5xl sm:text-6xl font-mono font-bold text-foreground tracking-tight">
+              <span className="text-5xl sm:text-6xl font-mono font-medium tabular-nums text-foreground tracking-tight">
                 {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
               </span>
-              <span className="text-[11px] font-medium text-muted-foreground/50 mt-1">{config.label}</span>
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mt-1.5">{config.label}</span>
             </div>
-          </motion.div>
+          </div>
 
           {/* Controls — larger tap targets */}
           <div className="flex items-center gap-3 sm:gap-3">
-            <Button variant="outline" size="icon" className="h-12 w-12 sm:h-12 sm:w-12 rounded-2xl" onClick={resetTimer}>
+            <Button variant="outline" size="icon" aria-label="Reset timer" className="h-12 w-12 sm:h-12 sm:w-12 rounded-[10px]" onClick={resetTimer}>
               <RotateCcw className="h-4 w-4" />
             </Button>
-            <Button size="lg" className="h-14 px-8 sm:px-10 rounded-2xl gap-2 text-sm font-semibold min-w-[140px]" onClick={toggleTimer}
-              style={{ background: config.color }}>
+            <Button size="lg" className="h-14 px-8 sm:px-10 rounded-[10px] gap-2 text-sm font-semibold min-w-[140px]" onClick={toggleTimer}>
               {isRunning ? <><Pause className="h-4 w-4" /> Pause</> : <><Play className="h-4 w-4" /> {timeLeft === totalSeconds ? 'Start' : 'Resume'}</>}
             </Button>
-            <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl" onClick={() => { if (sessionType === 'focus') switchSession('short-break'); else switchSession('focus'); }}>
+            <Button variant="outline" size="icon" aria-label="Switch session" className="h-12 w-12 rounded-[10px]" onClick={() => { if (sessionType === 'focus') switchSession('short-break'); else switchSession('focus'); }}>
               <Coffee className="h-4 w-4" />
             </Button>
           </div>
@@ -154,39 +154,38 @@ export default function OfficePomodoro() {
           <div className="w-full max-w-sm">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <Target className="h-3.5 w-3.5 text-primary" />
-                <span className="text-[11px] font-semibold text-foreground">Daily Goal</span>
+                <Target className="h-3.5 w-3.5 text-ink-2" />
+                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Daily goal</span>
               </div>
               <div className="flex items-center gap-1">
                 {[2, 4, 6, 8].map(g => (
                   <button key={g} onClick={() => updateGoal(g)}
-                    className={cn("px-2 py-1 rounded-md text-[9px] font-bold transition-colors min-h-[28px] min-w-[28px]",
-                      dailyGoal === g ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80")}>
+                    className={cn("px-2 py-1 rounded-md font-mono text-[9px] font-medium tabular-nums transition-colors duration-150 min-h-[28px] min-w-[28px]",
+                      dailyGoal === g ? "bg-primary text-primary-foreground" : "bg-foreground/[0.04] text-muted-foreground hover:bg-foreground/[0.07]")}>
                     {g}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="h-2.5 bg-muted/40 rounded-full overflow-hidden">
-              <motion.div className="h-full rounded-full transition-all duration-500" style={{ width: `${goalProgress}%`, background: goalProgress >= 100 ? '#22c55e' : config.color }} initial={{ width: 0 }} animate={{ width: `${goalProgress}%` }} />
+            <div className="h-1.5 bg-foreground/[0.06] rounded-full overflow-hidden">
+              <div className={cn("h-full rounded-full transition-all duration-500", goalProgress >= 100 ? "bg-ok" : "bg-primary")} style={{ width: `${goalProgress}%` }} />
             </div>
-            <p className="text-[10px] text-muted-foreground/50 mt-1 text-center">
+            <p className="font-mono text-[10px] tabular-nums text-muted-foreground mt-1.5 text-center">
               {todayPomodoroCount}/{dailyGoal} pomodoros today
-              {goalProgress >= 100 && <span className="text-emerald-500 font-semibold ml-1">🎉 Goal reached!</span>}
+              {goalProgress >= 100 && <span className="text-ok font-medium ml-1.5">Goal reached</span>}
             </p>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full max-w-sm">
+          <div className="grid grid-cols-3 gap-2.5 w-full max-w-sm">
             {[
-              { label: 'Pomodoros', value: pomodoroCount, icon: '🍅' },
-              { label: 'Focus Today', value: `${todayFocusMins}m`, icon: '⏱️' },
-              { label: 'Sessions', value: completedSessions.length, icon: '📊' },
+              { label: 'Pomodoros', value: pomodoroCount },
+              { label: 'Focus today', value: `${todayFocusMins}m` },
+              { label: 'Sessions', value: completedSessions.length },
             ].map(stat => (
-              <div key={stat.label} className="text-center p-3 sm:p-4 rounded-2xl bg-card/40 border border-border/15">
-                <span className="text-xl mb-1 block">{stat.icon}</span>
-                <span className="text-base sm:text-lg font-bold text-foreground block">{stat.value}</span>
-                <span className="text-[9px] sm:text-[10px] text-muted-foreground/50">{stat.label}</span>
+              <div key={stat.label} className="text-center p-3 rounded-[10px] bg-card border border-border/60">
+                <span className="font-mono text-base sm:text-lg font-medium tabular-nums text-foreground block">{stat.value}</span>
+                <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">{stat.label}</span>
               </div>
             ))}
           </div>
@@ -194,14 +193,14 @@ export default function OfficePomodoro() {
           {/* Weekly Chart */}
           <div className="w-full max-w-sm">
             <div className="flex items-center gap-1.5 mb-2">
-              <TrendingUp className="h-3.5 w-3.5 text-muted-foreground/50" />
-              <span className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest">This Week</span>
+              <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">This week</span>
             </div>
             <div className="flex items-end gap-1.5 h-16 px-1">
               {weeklyData.map((d, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full rounded-t-md transition-all" style={{ height: `${Math.max(3, (d.mins / weeklyMax) * 48)}px`, background: i === 6 ? config.color : `${config.color}44` }} title={`${d.day}: ${d.mins} min`} />
-                  <span className="text-[7px] font-bold text-muted-foreground/40">{d.day}</span>
+                  <div className={cn("w-full rounded-t-sm", i === 6 ? "bg-primary" : "bg-primary/25")} style={{ height: `${Math.max(3, (d.mins / weeklyMax) * 48)}px` }} title={`${d.day}: ${d.mins} min`} />
+                  <span className="font-mono text-[7px] font-medium uppercase text-muted-foreground/70">{d.day}</span>
                 </div>
               ))}
             </div>
@@ -209,13 +208,13 @@ export default function OfficePomodoro() {
 
           {completedSessions.length > 0 && (
             <div className="w-full max-w-sm pb-4">
-              <h3 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-2">Recent Sessions</h3>
+              <h3 className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em] mb-2">Recent sessions</h3>
               <div className="space-y-1.5">
                 {completedSessions.slice(0, 5).map((s, i) => (
-                  <div key={s.id || i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-card/30 border border-border/10">
-                    <Check className="h-3 w-3 shrink-0" style={{ color: SESSION_CONFIG[s.type].color }} />
-                    <span className="text-[11px] text-foreground font-medium flex-1">{SESSION_CONFIG[s.type].label}</span>
-                    <span className="text-[10px] text-muted-foreground/40">{s.duration}min</span>
+                  <div key={s.id || i} className="flex items-center gap-3 px-3 py-2 rounded-[10px] bg-card border border-border/60">
+                    <Check className="h-3 w-3 shrink-0 text-ok" />
+                    <span className="text-[11.5px] text-foreground font-medium flex-1">{SESSION_CONFIG[s.type].label}</span>
+                    <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{s.duration} min</span>
                   </div>
                 ))}
               </div>

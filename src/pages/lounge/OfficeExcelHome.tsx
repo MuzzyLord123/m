@@ -24,7 +24,6 @@ import {
   ChevronRight, Strikethrough, Grid3X3, Palette
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 const DEFAULT_COLS = 26;
@@ -682,51 +681,51 @@ export default function OfficeExcelHome() {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background" onKeyDown={handleKeyDown} tabIndex={0}>
       {/* Title Bar */}
-      <div className="flex items-center gap-2 px-3 h-11 bg-card/90 backdrop-blur-xl border-b border-border/30 shrink-0">
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => navigate('/lounge/office/sheets-home')}>
+      <div className="flex items-center gap-2 px-3 h-11 bg-card border-b border-border/60 shrink-0">
+        <Button variant="ghost" size="icon" aria-label="Back to Sheets" className="h-8 w-8 rounded-lg" onClick={() => navigate('/lounge/office/sheets-home')}>
           <ArrowLeft className="h-3.5 w-3.5" />
         </Button>
-        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-md shadow-emerald-600/25">
-          <Sheet className="h-4 w-4 text-white" />
+        <div className="h-8 w-8 rounded-lg bg-foreground/[0.04] flex items-center justify-center">
+          <Sheet className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
         </div>
         {editingFileName ? (
           <Input autoFocus value={fileName} onChange={e => setFileName(e.target.value)} onBlur={() => setEditingFileName(false)}
             onKeyDown={e => e.key === 'Enter' && setEditingFileName(false)}
-            className="h-7 w-56 text-xs font-semibold bg-secondary/40 border-border/40 rounded-lg" />
+            className="h-7 w-56 text-xs font-medium border-border/60 rounded-lg" />
         ) : (
-          <button onClick={() => setEditingFileName(true)} className="text-xs font-semibold text-foreground hover:text-primary transition-colors">
-            {fileName} <span className="text-muted-foreground/50">— Sheets</span>
+          <button onClick={() => setEditingFileName(true)} className="text-xs font-medium text-foreground transition-colors duration-150 hover:text-primary">
+            {fileName} <span className="font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">· Sheets</span>
           </button>
         )}
         <div className="flex-1" />
-        
+
         {/* Find & Replace */}
-        <Button variant="ghost" size="sm" className="h-8 text-[10px] gap-1.5 rounded-xl" onClick={() => setShowFindReplace(true)}>
+        <Button variant="ghost" size="sm" className="h-8 text-[11px] gap-1.5 rounded-lg" onClick={() => setShowFindReplace(true)}>
           <Search className="h-3 w-3" /><span className="hidden sm:inline"> Find</span>
         </Button>
-        <Button variant="ghost" size="sm" className="h-8 text-[10px] gap-1.5 rounded-xl" onClick={exportCSV}>
+        <Button variant="ghost" size="sm" className="h-8 text-[11px] gap-1.5 rounded-lg" onClick={exportCSV}>
           <Download className="h-3 w-3" /><span className="hidden sm:inline"> Export CSV</span>
         </Button>
       </div>
 
       {/* Enhanced Toolbar */}
-      <div className="flex items-center gap-0.5 px-3 h-10 bg-card/60 backdrop-blur-sm border-b border-border/20 shrink-0 overflow-x-auto">
+      <div className="flex items-center gap-0.5 px-3 h-10 bg-card border-b border-border/60 shrink-0 overflow-x-auto">
         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={undo} disabled={undoStack.length === 0} title="Undo (Ctrl+Z)"><Undo2 className="h-3 w-3" /></Button>
         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={redo} disabled={redoStack.length === 0} title="Redo (Ctrl+Y)"><Redo2 className="h-3 w-3" /></Button>
-        <div className="w-px h-5 bg-border/30 mx-1" />
+        <div className="w-px h-5 bg-border/60 mx-1" />
         
         {/* Font size */}
         <Select value={String(currentStyle.fontSize || 12)} onValueChange={v => toggleStyle('fontSize', parseInt(v))}>
-          <SelectTrigger className="h-7 w-14 text-[10px] border-border/30 rounded-lg bg-transparent">
+          <SelectTrigger className="h-7 w-14 text-[10px] border-border/60 rounded-lg bg-transparent">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="rounded-xl">
+          <SelectContent className="rounded-[10px]">
             {[8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36].map(s => (
               <SelectItem key={s} value={String(s)} className="text-[10px]">{s}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <div className="w-px h-5 bg-border/30 mx-1" />
+        <div className="w-px h-5 bg-border/60 mx-1" />
         
         {/* Text formatting */}
         <Button variant={currentStyle.bold ? 'secondary' : 'ghost'} size="icon" className="h-7 w-7 rounded-lg" onClick={() => toggleStyle('bold')} title="Bold (Ctrl+B)">
@@ -741,7 +740,7 @@ export default function OfficeExcelHome() {
         <Button variant={currentStyle.strikethrough ? 'secondary' : 'ghost'} size="icon" className="h-7 w-7 rounded-lg" onClick={() => toggleStyle('strikethrough')}>
           <Strikethrough className="h-3 w-3" />
         </Button>
-        <div className="w-px h-5 bg-border/30 mx-1" />
+        <div className="w-px h-5 bg-border/60 mx-1" />
         
         {/* Alignment */}
         <Button variant={currentStyle.align === 'left' || !currentStyle.align ? 'secondary' : 'ghost'} size="icon" className="h-7 w-7 rounded-lg" onClick={() => toggleStyle('align', 'left')}>
@@ -753,7 +752,7 @@ export default function OfficeExcelHome() {
         <Button variant={currentStyle.align === 'right' ? 'secondary' : 'ghost'} size="icon" className="h-7 w-7 rounded-lg" onClick={() => toggleStyle('align', 'right')}>
           <AlignRight className="h-3 w-3" />
         </Button>
-        <div className="w-px h-5 bg-border/30 mx-1" />
+        <div className="w-px h-5 bg-border/60 mx-1" />
         
         {/* Number formatting */}
         <Button variant={currentStyle.format === 'currency' ? 'secondary' : 'ghost'} size="icon" className="h-7 w-7 rounded-lg" onClick={() => toggleStyle('format', currentStyle.format === 'currency' ? 'text' : 'currency')} title="Currency">
@@ -765,7 +764,7 @@ export default function OfficeExcelHome() {
         <Button variant={currentStyle.format === 'number' ? 'secondary' : 'ghost'} size="icon" className="h-7 w-7 rounded-lg" onClick={() => toggleStyle('format', currentStyle.format === 'number' ? 'text' : 'number')} title="Number">
           <Hash className="h-3 w-3" />
         </Button>
-        <div className="w-px h-5 bg-border/30 mx-1" />
+        <div className="w-px h-5 bg-border/60 mx-1" />
         
         {/* Cell colors */}
         <Popover>
@@ -775,11 +774,11 @@ export default function OfficeExcelHome() {
               <div className="absolute bottom-0 left-1 right-1 h-[3px] rounded-full" style={{ background: currentStyle.bg || '#ffffff' }} />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-48 p-2 rounded-xl" side="bottom">
-            <p className="text-[9px] font-semibold text-muted-foreground mb-1.5">Fill Color</p>
+          <PopoverContent className="w-48 p-2 rounded-[10px]" side="bottom">
+            <p className="font-mono text-[9px] font-medium uppercase tracking-[0.13em] text-muted-foreground mb-1.5">Fill colour</p>
             <div className="grid grid-cols-5 gap-1">
               {CELL_COLORS.map(c => (
-                <button key={c} className={cn("h-6 w-6 rounded-md border border-border/30 hover:scale-110 transition-transform", currentStyle.bg === c && "ring-2 ring-primary ring-offset-1")}
+                <button key={c} className={cn("h-6 w-6 rounded-md border border-border/60 transition-shadow duration-150", currentStyle.bg === c && "ring-2 ring-primary ring-offset-1")}
                   style={{ background: c }} onClick={() => toggleStyle('bg', c)} />
               ))}
             </div>
@@ -794,28 +793,28 @@ export default function OfficeExcelHome() {
               <div className="absolute bottom-0 left-1 right-1 h-[3px] rounded-full" style={{ background: currentStyle.color || '#000000' }} />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-48 p-2 rounded-xl" side="bottom">
-            <p className="text-[9px] font-semibold text-muted-foreground mb-1.5">Text Color</p>
+          <PopoverContent className="w-48 p-2 rounded-[10px]" side="bottom">
+            <p className="font-mono text-[9px] font-medium uppercase tracking-[0.13em] text-muted-foreground mb-1.5">Text colour</p>
             <div className="grid grid-cols-5 gap-1">
               {BORDER_COLORS.map(c => (
-                <button key={c} className={cn("h-6 w-6 rounded-md border border-border/30 hover:scale-110 transition-transform", currentStyle.color === c && "ring-2 ring-primary ring-offset-1")}
+                <button key={c} className={cn("h-6 w-6 rounded-md border border-border/60 transition-shadow duration-150", currentStyle.color === c && "ring-2 ring-primary ring-offset-1")}
                   style={{ background: c }} onClick={() => toggleStyle('color', c)} />
               ))}
             </div>
             <Input type="color" value={currentStyle.color || '#000000'} onChange={(e) => toggleStyle('color', e.target.value)} className="mt-2 h-6 w-full rounded-lg cursor-pointer" />
           </PopoverContent>
         </Popover>
-        <div className="w-px h-5 bg-border/30 mx-1" />
+        <div className="w-px h-5 bg-border/60 mx-1" />
 
         {/* Borders */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title="Borders"><Grid3X3 className="h-3 w-3" /></Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="rounded-xl w-36">
-            <DropdownMenuItem onClick={() => addBorders('all')} className="text-xs gap-2"><Grid3X3 className="h-3 w-3" /> All Borders</DropdownMenuItem>
+          <DropdownMenuContent className="rounded-[10px] w-36">
+            <DropdownMenuItem onClick={() => addBorders('all')} className="text-xs gap-2"><Grid3X3 className="h-3 w-3" /> All borders</DropdownMenuItem>
             <DropdownMenuItem onClick={() => addBorders('outside')} className="text-xs gap-2"><Table2 className="h-3 w-3" /> Outside</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => addBorders('none')} className="text-xs gap-2"><X className="h-3 w-3" /> No Borders</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => addBorders('none')} className="text-xs gap-2"><X className="h-3 w-3" /> No borders</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -824,8 +823,8 @@ export default function OfficeExcelHome() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title="Merge"><Merge className="h-3 w-3" /></Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="rounded-xl w-36">
-            <DropdownMenuItem onClick={mergeCells} className="text-xs gap-2"><Merge className="h-3 w-3" /> Merge Cells</DropdownMenuItem>
+          <DropdownMenuContent className="rounded-[10px] w-36">
+            <DropdownMenuItem onClick={mergeCells} className="text-xs gap-2"><Merge className="h-3 w-3" /> Merge cells</DropdownMenuItem>
             <DropdownMenuItem onClick={unmergeCells} className="text-xs gap-2"><Columns className="h-3 w-3" /> Unmerge</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -834,14 +833,14 @@ export default function OfficeExcelHome() {
         <Button variant={currentStyle.wrapText ? 'secondary' : 'ghost'} size="icon" className="h-7 w-7 rounded-lg" onClick={() => toggleStyle('wrapText')} title="Wrap text">
           <WrapText className="h-3 w-3" />
         </Button>
-        <div className="w-px h-5 bg-border/30 mx-1" />
+        <div className="w-px h-5 bg-border/60 mx-1" />
 
         {/* Sort */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 rounded-lg"><SortAsc className="h-3 w-3" /> Sort <ChevronDown className="h-2.5 w-2.5 opacity-40" /></Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="rounded-xl w-40">
+          <DropdownMenuContent className="rounded-[10px] w-40">
             <DropdownMenuItem onClick={() => { const ref = parseCellRef(selectedCell); if (ref) sortColumn(ref[1], true); }} className="text-xs gap-2"><SortAsc className="h-3 w-3" /> Sort A → Z</DropdownMenuItem>
             <DropdownMenuItem onClick={() => { const ref = parseCellRef(selectedCell); if (ref) sortColumn(ref[1], false); }} className="text-xs gap-2"><SortDesc className="h-3 w-3" /> Sort Z → A</DropdownMenuItem>
           </DropdownMenuContent>
@@ -849,7 +848,7 @@ export default function OfficeExcelHome() {
 
         {/* Conditional Formatting */}
         <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 rounded-lg" onClick={() => setShowCondFormat(true)}>
-          <Palette className="h-3 w-3" /> Cond. Format
+          <Palette className="h-3 w-3" /> Conditional format
         </Button>
 
         {/* Freeze */}
@@ -857,9 +856,9 @@ export default function OfficeExcelHome() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 rounded-lg"><Lock className="h-3 w-3" /> Freeze <ChevronDown className="h-2.5 w-2.5 opacity-40" /></Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="rounded-xl w-44">
+          <DropdownMenuContent className="rounded-[10px] w-44">
             <DropdownMenuItem onClick={freezePanes} className="text-xs gap-2"><Lock className="h-3 w-3" /> Freeze at {selectedCell}</DropdownMenuItem>
-            <DropdownMenuItem onClick={unfreezePanes} className="text-xs gap-2"><Unlock className="h-3 w-3" /> Unfreeze All</DropdownMenuItem>
+            <DropdownMenuItem onClick={unfreezePanes} className="text-xs gap-2"><Unlock className="h-3 w-3" /> Unfreeze all</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -870,12 +869,12 @@ export default function OfficeExcelHome() {
       </div>
 
       {/* Formula Bar */}
-      <div className="flex items-center gap-2 px-3 h-9 bg-card/40 border-b border-border/20 shrink-0">
-        <div className="w-20 h-7 rounded-lg bg-secondary/60 border border-border/30 flex items-center justify-center">
-          <span className="text-[10px] font-mono font-bold text-foreground">{selectedCell}</span>
+      <div className="flex items-center gap-2 px-3 h-9 bg-card border-b border-border/60 shrink-0">
+        <div className="w-20 h-7 rounded-lg bg-sunken border border-border/60 flex items-center justify-center">
+          <span className="text-[10px] font-mono font-medium tabular-nums text-foreground">{selectedCell}</span>
         </div>
-        <div className="w-px h-5 bg-border/30" />
-        <FunctionSquare className="h-3.5 w-3.5 text-emerald-500/60 shrink-0" />
+        <div className="w-px h-5 bg-border/60" />
+        <FunctionSquare className="h-3.5 w-3.5 text-ink-2 shrink-0" />
         <Input
           ref={formulaInputRef}
           value={formulaBar}
@@ -890,13 +889,13 @@ export default function OfficeExcelHome() {
         <table className="border-collapse w-max">
           <thead className="sticky top-0 z-10">
             <tr>
-              <th className="w-12 h-7 bg-muted/90 backdrop-blur-sm border border-border/30 text-[9px] font-semibold text-muted-foreground sticky left-0 z-20" />
+              <th className="w-12 h-7 bg-sunken border border-border/30 font-mono text-[9px] font-medium text-muted-foreground sticky left-0 z-20" />
               {COL_LETTERS.map((letter, ci) => (
-                <th key={letter} className="w-28 h-7 bg-muted/90 backdrop-blur-sm border border-border/30 text-[9px] font-bold text-muted-foreground text-center select-none group cursor-pointer hover:bg-accent/30"
+                <th key={letter} className="w-28 h-7 bg-sunken border border-border/30 font-mono text-[9px] font-medium text-muted-foreground text-center select-none group cursor-pointer hover:bg-accent/30"
                   onClick={() => { setSelectedCell(getCellId(0, ci)); }}>
                   <div className="flex items-center justify-center gap-0.5">
                     {letter}
-                    {sheet.sortColumn === ci && (sheet.sortAsc ? <SortAsc className="h-2 w-2 text-emerald-500" /> : <SortDesc className="h-2 w-2 text-emerald-500" />)}
+                    {sheet.sortColumn === ci && (sheet.sortAsc ? <SortAsc className="h-2 w-2 text-primary" /> : <SortDesc className="h-2 w-2 text-primary" />)}
                   </div>
                 </th>
               ))}
@@ -905,8 +904,8 @@ export default function OfficeExcelHome() {
           <tbody>
             {Array.from({ length: DEFAULT_ROWS }, (_, r) => (
               <tr key={r}>
-                <td className={cn("w-12 h-7 bg-muted/70 border border-border/30 text-[9px] font-semibold text-muted-foreground text-center sticky left-0 z-10 select-none cursor-pointer hover:bg-accent/30",
-                  r < sheet.frozenRows && "bg-blue-50 dark:bg-blue-950/20")}
+                <td className={cn("w-12 h-7 bg-sunken border border-border/30 font-mono text-[9px] font-medium tabular-nums text-muted-foreground text-center sticky left-0 z-10 select-none cursor-pointer hover:bg-accent/30",
+                  r < sheet.frozenRows && "bg-primary/[0.06]")}
                   onClick={() => setSelectedCell(getCellId(r, 0))}>
                   {r + 1}
                 </td>
@@ -945,10 +944,10 @@ export default function OfficeExcelHome() {
                       rowSpan={rowSpan}
                       className={cn(
                         "w-28 h-7 text-[11px] px-1.5 cursor-cell relative transition-colors",
-                        isSelected && "ring-2 ring-emerald-500 ring-inset z-10 bg-emerald-500/5",
-                        inRange && !isSelected && "bg-emerald-500/10",
+                        isSelected && "ring-2 ring-primary ring-inset z-10 bg-primary/[0.05]",
+                        inRange && !isSelected && "bg-primary/[0.08]",
                         !isSelected && !inRange && "hover:bg-accent/10",
-                        isFrozen && "bg-blue-50/50 dark:bg-blue-950/10",
+                        isFrozen && "bg-primary/[0.03]",
                         cellStyle.borderTop && "border-t-2",
                         cellStyle.borderBottom && "border-b-2",
                         cellStyle.borderLeft && "border-l-2",
@@ -977,7 +976,7 @@ export default function OfficeExcelHome() {
                             if (e.key === 'Escape') setEditingCell(null);
                             if (e.key === 'Tab') { e.preventDefault(); commitEdit(); const ref = parseCellRef(cellId); if (ref) { setSelectedCell(getCellId(ref[0], Math.min(DEFAULT_COLS - 1, ref[1] + 1))); } }
                           }}
-                          className="absolute inset-0 px-1.5 text-[11px] bg-card border-2 border-emerald-500 outline-none font-mono rounded-sm"
+                          className="absolute inset-0 px-1.5 text-[11px] bg-card border-2 border-primary outline-none font-mono rounded-sm"
                         />
                       ) : (
                         <span className={cn(
@@ -1001,9 +1000,9 @@ export default function OfficeExcelHome() {
       </div>
 
       {/* Sheet Tabs + Status Bar */}
-      <div className="flex items-center border-t border-border/30 bg-card/80 backdrop-blur-sm shrink-0">
+      <div className="flex items-center border-t border-border/60 bg-card shrink-0">
         <div className="flex items-center gap-0 flex-1 overflow-x-auto">
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-none shrink-0 border-r border-border/20" onClick={addSheet}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-none shrink-0 border-r border-border/60" onClick={addSheet}>
             <Plus className="h-3 w-3" />
           </Button>
           {sheets.map((s, i) => (
@@ -1012,11 +1011,11 @@ export default function OfficeExcelHome() {
                 <Input autoFocus value={sheetNameValue} onChange={e => setSheetNameValue(e.target.value)}
                   onBlur={() => renameSheet(i, sheetNameValue)}
                   onKeyDown={e => { if (e.key === 'Enter') renameSheet(i, sheetNameValue); if (e.key === 'Escape') setEditingSheetName(null); }}
-                  className="h-7 w-24 text-[10px] rounded-none border-x border-border/20 bg-transparent" />
+                  className="h-7 w-24 text-[10px] rounded-none border-x border-border/60 bg-transparent" />
               ) : (
                 <button onClick={() => setActiveSheetIdx(i)}
                   onDoubleClick={() => { setEditingSheetName(s.id); setSheetNameValue(s.name); }}
-                  className={cn("h-8 px-4 text-[10px] font-semibold border-r border-border/20 transition-all flex items-center gap-1.5",
+                  className={cn("h-8 px-4 text-[10px] font-medium border-r border-border/60 transition-colors duration-150 flex items-center gap-1.5",
                     i === activeSheetIdx ? "bg-background text-foreground border-t-2" : "text-muted-foreground hover:text-foreground hover:bg-accent/30"
                   )} style={i === activeSheetIdx ? { borderTopColor: s.color } : undefined}>
                   <div className="h-2 w-2 rounded-full" style={{ background: s.color }} />
@@ -1033,25 +1032,24 @@ export default function OfficeExcelHome() {
           ))}
         </div>
 
-        <div className="flex items-center gap-4 px-4 h-8 text-[9px] text-muted-foreground shrink-0 border-l border-border/20">
-          <span className="font-medium">Cells: {cellCount}</span>
-          <span>Selected: {selectedCell}</span>
+        <div className="flex items-center gap-4 px-4 h-8 font-mono text-[9px] tabular-nums text-muted-foreground shrink-0 border-l border-border/60">
+          <span>Cells {cellCount}</span>
+          <span>Cell {selectedCell}</span>
           {selectionStats && (
             <>
-              <span className="text-emerald-500 font-semibold">Σ {selectionStats.sum.toLocaleString()}</span>
-              <span className="text-blue-500">Avg: {selectionStats.avg.toFixed(2)}</span>
-              <span className="text-orange-500">Count: {selectionStats.count}</span>
+              <span className="text-foreground">Sum {selectionStats.sum.toLocaleString()}</span>
+              <span>Avg {selectionStats.avg.toFixed(2)}</span>
+              <span>Count {selectionStats.count}</span>
             </>
           )}
-          {sheet.frozenRows > 0 && <span className="text-blue-500">Frozen: R{sheet.frozenRows} C{sheet.frozenCols}</span>}
-          <span className="text-[8px] text-muted-foreground/50">50+ formulas</span>
+          {sheet.frozenRows > 0 && <span>Frozen R{sheet.frozenRows} C{sheet.frozenCols}</span>}
         </div>
       </div>
 
       {/* Find & Replace Dialog */}
       <Dialog open={showFindReplace} onOpenChange={setShowFindReplace}>
-        <DialogContent className="sm:max-w-md rounded-xl">
-          <DialogHeader><DialogTitle className="text-sm font-semibold flex items-center gap-2"><Search className="h-4 w-4 text-emerald-500" /> Find & Replace</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-md rounded-[10px]">
+          <DialogHeader><DialogTitle className="text-sm font-semibold flex items-center gap-2"><Search className="h-4 w-4 text-ink-2" /> Find and replace</DialogTitle></DialogHeader>
           <div className="space-y-3 mt-2">
             <div className="space-y-1.5">
               <Label className="text-[10px]">Find</Label>
@@ -1063,32 +1061,32 @@ export default function OfficeExcelHome() {
             </div>
           </div>
           <DialogFooter className="mt-3">
-            <Button variant="ghost" size="sm" onClick={handleFind} className="text-xs rounded-lg">Find Next</Button>
-            <Button size="sm" onClick={handleReplaceAll} className="text-xs rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600">Replace All</Button>
+            <Button variant="ghost" size="sm" onClick={handleFind} className="text-xs rounded-lg">Find next</Button>
+            <Button size="sm" onClick={handleReplaceAll} className="text-xs rounded-lg">Replace all</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Conditional Formatting Dialog */}
       <Dialog open={showCondFormat} onOpenChange={setShowCondFormat}>
-        <DialogContent className="sm:max-w-md rounded-xl">
-          <DialogHeader><DialogTitle className="text-sm font-semibold flex items-center gap-2"><Palette className="h-4 w-4 text-emerald-500" /> Conditional Formatting</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-md rounded-[10px]">
+          <DialogHeader><DialogTitle className="text-sm font-semibold flex items-center gap-2"><Palette className="h-4 w-4 text-ink-2" /> Conditional formatting</DialogTitle></DialogHeader>
           <CondFormatPanel sheet={sheet} updateSheet={updateSheet} selectedCell={selectedCell} onClose={() => setShowCondFormat(false)} />
         </DialogContent>
       </Dialog>
 
       {/* Formula Helper Dialog */}
       <Dialog open={showFormulaHelper} onOpenChange={setShowFormulaHelper}>
-        <DialogContent className="sm:max-w-lg rounded-xl">
-          <DialogHeader><DialogTitle className="text-sm font-semibold flex items-center gap-2"><Sigma className="h-4 w-4 text-emerald-500" /> Formula Reference</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-lg rounded-[10px]">
+          <DialogHeader><DialogTitle className="text-sm font-semibold flex items-center gap-2"><Sigma className="h-4 w-4 text-ink-2" /> Formula reference</DialogTitle></DialogHeader>
           <div className="max-h-80 overflow-y-auto space-y-3 mt-2">
             {FORMULA_CATEGORIES.map(cat => (
               <div key={cat.name}>
-                <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{cat.name}</h3>
+                <h3 className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-[0.13em] mb-1.5">{cat.name}</h3>
                 <div className="flex flex-wrap gap-1">
                   {cat.formulas.map(f => (
                     <button key={f} onClick={() => { setFormulaBar(`=${f}(`); setShowFormulaHelper(false); formulaInputRef.current?.focus(); }}
-                      className="px-2 py-1 text-[10px] font-mono bg-secondary/60 border border-border/30 rounded-md hover:bg-accent/30 hover:border-emerald-500/30 transition-colors cursor-pointer">
+                      className="px-2 py-1 text-[10px] font-mono bg-foreground/[0.04] border border-border/60 rounded-md hover:bg-accent/30 transition-colors cursor-pointer">
                       {f}
                     </button>
                   ))}
@@ -1124,10 +1122,10 @@ function CondFormatPanel({ sheet, updateSheet, selectedCell, onClose }: { sheet:
   return (
     <div className="space-y-3 mt-2">
       <div className="space-y-1.5">
-        <Label className="text-[10px]">Condition Type</Label>
+        <Label className="text-[10px]">Condition type</Label>
         <Select value={type} onValueChange={(v: any) => setType(v)}>
           <SelectTrigger className="h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
-          <SelectContent className="rounded-xl">
+          <SelectContent className="rounded-[10px]">
             <SelectItem value="greater" className="text-xs">Greater than</SelectItem>
             <SelectItem value="less" className="text-xs">Less than</SelectItem>
             <SelectItem value="equal" className="text-xs">Equal to</SelectItem>
@@ -1146,12 +1144,12 @@ function CondFormatPanel({ sheet, updateSheet, selectedCell, onClose }: { sheet:
       )}
       <div className="flex gap-2">
         <div className="space-y-1"><Label className="text-[10px]">Background</Label><Input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="h-8 w-16 rounded-lg cursor-pointer" /></div>
-        <div className="space-y-1"><Label className="text-[10px]">Text Color</Label><Input type="color" value={textColor || '#000000'} onChange={e => setTextColor(e.target.value)} className="h-8 w-16 rounded-lg cursor-pointer" /></div>
+        <div className="space-y-1"><Label className="text-[10px]">Text colour</Label><Input type="color" value={textColor || '#000000'} onChange={e => setTextColor(e.target.value)} className="h-8 w-16 rounded-lg cursor-pointer" /></div>
       </div>
       
       {sheet.conditionalFormats.length > 0 && (
-        <div className="pt-2 border-t border-border/20">
-          <p className="text-[9px] font-bold text-muted-foreground uppercase mb-1">Active Rules</p>
+        <div className="pt-2 border-t border-border/60">
+          <p className="font-mono text-[9px] font-medium text-muted-foreground uppercase tracking-[0.13em] mb-1">Active rules</p>
           {sheet.conditionalFormats.map(cf => (
             <div key={cf.id} className="flex items-center gap-2 text-[10px] py-1">
               <div className="h-3 w-3 rounded-sm" style={{ background: cf.bgColor }} />
@@ -1164,7 +1162,7 @@ function CondFormatPanel({ sheet, updateSheet, selectedCell, onClose }: { sheet:
       
       <DialogFooter>
         <Button variant="ghost" size="sm" onClick={onClose} className="text-xs rounded-lg">Cancel</Button>
-        <Button size="sm" onClick={addRule} className="text-xs rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600">Add Rule</Button>
+        <Button size="sm" onClick={addRule} className="text-xs rounded-lg">Add rule</Button>
       </DialogFooter>
     </div>
   );

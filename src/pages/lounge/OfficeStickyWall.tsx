@@ -4,7 +4,6 @@ import { ArrowLeft, StickyNote, Plus, Trash2, Palette, GripVertical, Save } from
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -194,11 +193,13 @@ export default function OfficeStickyWall() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col touch-none" onMouseMove={handlePointerMove} onMouseUp={handlePointerUp} onTouchMove={handlePointerMove} onTouchEnd={handlePointerUp}>
-      <header className="h-auto min-h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex flex-wrap items-center px-3 sm:px-5 gap-2 sm:gap-3 py-2 shrink-0">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office/sticky-wall-home', { state: { fromOfficeApp: true } })}>
+      <header className="h-auto min-h-[52px] border-b border-border/60 bg-card flex flex-wrap items-center px-3 sm:px-5 gap-2 sm:gap-3 py-2 shrink-0">
+        <Button variant="ghost" size="sm" aria-label="Back to sticky walls" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office/sticky-wall-home', { state: { fromOfficeApp: true } })}>
           <ArrowLeft className="h-3.5 w-3.5" />
         </Button>
-        <StickyNote className="h-4 w-4 text-yellow-500" />
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
+          <StickyNote className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
+        </span>
         {editingName ? (
           <Input
             autoFocus
@@ -206,41 +207,39 @@ export default function OfficeStickyWall() {
             onChange={e => setWallName(e.target.value)}
             onBlur={() => setEditingName(false)}
             onKeyDown={e => { if (e.key === 'Enter') setEditingName(false); }}
-            className="h-7 w-32 sm:w-48 text-sm font-semibold bg-card/60 border-border/20 rounded-lg"
+            className="h-7 w-32 sm:w-48 text-sm font-medium border-border/60 rounded-lg"
           />
         ) : (
-          <button onClick={() => setEditingName(true)} className="text-sm font-semibold tracking-tight hover:text-primary transition-colors truncate max-w-[120px] sm:max-w-none">
+          <button onClick={() => setEditingName(true)} className="text-sm font-medium tracking-tight hover:text-primary transition-colors duration-150 truncate max-w-[120px] sm:max-w-none">
             {wallName}
           </button>
         )}
         <div className="flex-1" />
-        <span className="text-[10px] text-muted-foreground/40 hidden sm:inline">{notes.length} notes</span>
-        <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => saveWall(true)} disabled={saving}>
-          <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{saving ? 'Saving…' : 'Save'}</span>
+        <span className="font-mono text-[10px] tabular-nums text-muted-foreground hidden sm:inline">{notes.length} notes</span>
+        <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => saveWall(true)} disabled={saving}>
+          <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{saving ? 'Saving' : 'Save'}</span>
         </Button>
-        <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-xl text-xs hidden sm:flex" onClick={handleSaveToFiles}>
+        <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs hidden sm:flex" onClick={handleSaveToFiles}>
           Save to Files
         </Button>
-        <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={addNote}>
-          <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Add Note</span>
+        <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={addNote}>
+          <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Add note</span>
         </Button>
       </header>
 
       {/* Canvas */}
-      <div className="flex-1 relative overflow-hidden" style={{ background: 'repeating-conic-gradient(hsl(var(--muted)) 0% 25%, transparent 0% 50%) 50% / 40px 40px' }}>
+      <div className="flex-1 relative overflow-hidden bg-sunken" style={{ backgroundImage: 'radial-gradient(hsl(var(--border) / 0.5) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
         {notes.map(note => {
           const style = getNoteStyle(note.color);
           return (
-            <motion.div
+            <div
               key={note.id}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
               className="absolute group select-none"
               style={{ left: note.x, top: note.y, width: note.width, zIndex: note.zIndex, cursor: editId === note.id ? 'text' : 'grab' }}
               onMouseDown={e => handlePointerDown(e, note.id)}
               onTouchStart={e => handlePointerDown(e, note.id)}
             >
-              <div className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden" style={{ background: style.bg, borderLeft: `4px solid ${style.border}` }}>
+              <div className="rounded-[10px] shadow-sm overflow-hidden" style={{ background: style.bg, borderLeft: `3px solid ${style.border}` }}>
                 {/* Header */}
                 <div className="flex items-center justify-between px-3 pt-2 pb-1">
                   <GripVertical className="h-3.5 w-3.5 opacity-30 cursor-grab" style={{ color: style.text }} />
@@ -259,7 +258,7 @@ export default function OfficeStickyWall() {
                   <div className="flex gap-1 px-3 pb-2" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
                     {NOTE_COLORS.map(c => (
                       <button key={c.bg} onClick={() => changeColor(note.id, c.bg)}
-                        className={cn("h-7 w-7 rounded-full border-2 transition-all", note.color === c.bg ? "border-gray-600 scale-110" : "border-transparent")}
+                        className={cn("h-7 w-7 rounded-full transition-shadow duration-150", note.color === c.bg ? "ring-2 ring-foreground/60 ring-offset-1" : "")}
                         style={{ background: c.bg }} />
                     ))}
                   </div>
@@ -286,7 +285,7 @@ export default function OfficeStickyWall() {
                   )}
                 </div>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>

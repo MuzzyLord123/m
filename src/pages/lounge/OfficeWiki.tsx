@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { EmptyState, SkeletonLedger } from '@/components/platform';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -15,7 +16,6 @@ interface WikiPage {
 }
 
 const CATEGORIES = ['All', 'Processes', 'Engineering', 'Design', 'Marketing', 'Onboarding', 'Policies'];
-const CAT_COLORS: Record<string, string> = { Processes: '#3b82f6', Engineering: '#10b981', Design: '#8b5cf6', Marketing: '#ec4899', Onboarding: '#f59e0b', Policies: '#06b6d4' };
 
 export default function OfficeWiki() {
   const navigate = useNavigate();
@@ -98,34 +98,34 @@ export default function OfficeWiki() {
   if (selectedPage && currentPage) {
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-        <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3">
-          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => { setSelectedPage(null); setEditing(false); }}>
+        <header className="shrink-0 h-[52px] border-b border-border/60 bg-card flex items-center px-5 gap-3">
+          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => { setSelectedPage(null); setEditing(false); }}>
             <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Back</span>
           </Button>
-          <div className="h-4 w-px bg-border/40" />
+          <div className="h-4 w-px bg-border/60" />
           <span className="text-sm font-semibold tracking-tight truncate">{currentPage.title}</span>
           <div className="flex-1" />
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl text-destructive" onClick={() => deletePage(currentPage.id)}>
+          <Button variant="ghost" size="icon" aria-label="Delete page" className="h-8 w-8 rounded-lg text-destructive" onClick={() => deletePage(currentPage.id)}>
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
           {editing ? (
-            <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={saveEdit}><Check className="h-3 w-3" /> Save</Button>
+            <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={saveEdit}><Check className="h-3 w-3" /> Save</Button>
           ) : (
-            <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={startEdit}><Edit2 className="h-3 w-3" /> Edit</Button>
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={startEdit}><Edit2 className="h-3 w-3" /> Edit</Button>
           )}
         </header>
         <div className="flex-1 overflow-auto">
           <div className="max-w-3xl mx-auto px-6 sm:px-10 py-8">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${CAT_COLORS[currentPage.category] || '#666'}15`, color: CAT_COLORS[currentPage.category] || '#666' }}>
+              <span className="font-mono text-[9px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
                 {currentPage.category}
               </span>
-              {currentPage.tags.map(tag => <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground/50">{tag}</span>)}
-              <span className="text-[10px] text-muted-foreground/40 ml-auto">Edited by {currentPage.lastEditedBy}</span>
+              {currentPage.tags.map(tag => <span key={tag} className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-foreground/[0.04] text-muted-foreground">{tag}</span>)}
+              <span className="text-[10px] text-muted-foreground ml-auto">Edited by {currentPage.lastEditedBy}</span>
             </div>
             {editing ? (
               <textarea value={editContent} onChange={e => setEditContent(e.target.value)}
-                className="w-full min-h-[500px] bg-card/30 border border-border/20 rounded-2xl p-6 text-sm font-mono text-foreground resize-none outline-none focus:border-border/40" />
+                className="w-full min-h-[500px] bg-card border border-border/60 rounded-[10px] p-6 text-sm font-mono text-foreground resize-none outline-none focus:border-border" />
             ) : (
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 {currentPage.content.split('\n').map((line, i) => {
@@ -147,61 +147,66 @@ export default function OfficeWiki() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
+      <header className="shrink-0 h-[52px] border-b border-border/60 bg-card flex items-center px-5 gap-3">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
           <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Back to Office</span>
         </Button>
-        <div className="h-4 w-px bg-border/40" />
-        <BookOpen className="h-4 w-4 text-violet-500" />
-        <span className="text-sm font-semibold tracking-tight">Knowledge Base</span>
+        <div className="h-4 w-px bg-border/60" />
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
+          <BookOpen className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
+        </span>
+        <span className="text-sm font-semibold tracking-tight">Knowledge base</span>
         <div className="flex-1" />
-        <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => setShowCreate(true)}>
-          <Plus className="h-3.5 w-3.5" /> New Page
+        <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setShowCreate(true)}>
+          <Plus className="h-3.5 w-3.5" /> New page
         </Button>
       </header>
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-5xl mx-auto px-6 sm:px-10">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-4">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Knowledge Base</h1>
-            <p className="text-sm text-muted-foreground/60 mt-1">Internal documentation, SOPs, and team wiki.</p>
-          </motion.div>
+          <div className="pt-7 pb-4">
+            <span className="mb-1 block font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Quooro Office · Wiki</span>
+            <h1 className="text-[17px] font-semibold tracking-[-0.015em] text-foreground">Knowledge base</h1>
+            <p className="text-[13px] text-muted-foreground mt-0.5">Internal documentation, SOPs and team wiki.</p>
+          </div>
 
           <div className="flex items-center gap-3 mb-4">
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search articles…" className="w-full sm:max-w-xs h-9 rounded-xl bg-card/50 border-border/30 text-sm" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search articles" className="w-full sm:max-w-xs h-9 rounded-lg border-border/60 bg-card text-sm" />
           </div>
 
           <div className="flex items-center gap-1.5 mb-6 overflow-x-auto scrollbar-none">
             {CATEGORIES.map(cat => (
               <button key={cat} onClick={() => setActiveCategory(cat)}
-                className={cn("px-3 py-1.5 rounded-xl text-[11px] font-medium whitespace-nowrap transition-all",
-                  activeCategory === cat ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted/40 text-muted-foreground/60 hover:text-foreground")}>
+                className={cn("px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-colors duration-150",
+                  activeCategory === cat ? "bg-foreground text-background" : "border border-border/60 bg-card text-muted-foreground hover:text-foreground")}>
                 {cat}
               </button>
             ))}
           </div>
 
           {loading ? (
-            <div className="py-16 text-center text-muted-foreground/40 text-sm">Loading…</div>
+            <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonLedger rows={4} /></div>
           ) : (
             <>
               {/* Starred */}
               {filtered.filter(p => p.isStarred).length > 0 && (
                 <section className="mb-6">
-                  <h2 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Star className="h-3 w-3" /> Pinned</h2>
+                  <h2 className="mb-2.5 flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground"><Star className="h-3 w-3 fill-gold text-gold" /> Pinned</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {filtered.filter(p => p.isStarred).map(page => (
-                      <motion.button key={page.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setSelectedPage(page.id)}
-                        className="group p-5 rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all text-left">
+                      <button key={page.id} onClick={() => setSelectedPage(page.id)}
+                        className="group p-4 rounded-[10px] bg-card border border-border/60 hover:border-border transition-colors duration-150 text-left">
                         <div className="flex items-center gap-2 mb-2">
-                          <FileText className="h-4 w-4" style={{ color: CAT_COLORS[page.category] || '#666' }} />
-                          <span className="text-[12px] font-semibold text-foreground truncate">{page.title}</span>
-                          <button onClick={e => { e.stopPropagation(); toggleStar(page.id); }} className="ml-auto">
-                            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
+                            <FileText className="h-3.5 w-3.5 text-ink-2" />
+                          </span>
+                          <span className="text-[12.5px] font-medium text-foreground truncate">{page.title}</span>
+                          <button aria-label="Unpin" onClick={e => { e.stopPropagation(); toggleStar(page.id); }} className="ml-auto">
+                            <Star className="h-3.5 w-3.5 fill-gold text-gold" />
                           </button>
                         </div>
-                        <span className="text-[10px] text-muted-foreground/40 line-clamp-2">{page.content.slice(0, 100)}…</span>
-                      </motion.button>
+                        <span className="text-[10.5px] text-muted-foreground line-clamp-2">{page.content.slice(0, 100)}</span>
+                      </button>
                     ))}
                   </div>
                 </section>
@@ -209,28 +214,34 @@ export default function OfficeWiki() {
 
               {/* All articles */}
               <section className="pb-10">
-                <h2 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-3">All Articles</h2>
+                <h2 className="mb-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">All articles</h2>
                 {filtered.length === 0 ? (
-                  <div className="py-16 text-center">
-                    <BookOpen className="h-10 w-10 text-muted-foreground/15 mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground/40">No wiki pages yet</p>
-                    <p className="text-xs text-muted-foreground/30 mt-1">Click "New Page" to create your first article</p>
-                  </div>
+                  <EmptyState
+                    title="No wiki pages yet"
+                    body="Write your first article to start the knowledge base."
+                    action={{ label: 'New page', onClick: () => setShowCreate(true) }}
+                  />
                 ) : (
-                  <div className="space-y-2">
-                    {filtered.map(page => (
-                      <motion.button key={page.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setSelectedPage(page.id)}
-                        className="w-full group flex items-center gap-4 p-4 rounded-xl bg-card/40 border border-border/15 hover:border-border/30 hover:shadow-md transition-all text-left">
-                        <FileText className="h-5 w-5 shrink-0" style={{ color: CAT_COLORS[page.category] || '#666' }} />
+                  <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+                    {filtered.map((page, i) => (
+                      <button key={page.id} onClick={() => setSelectedPage(page.id)}
+                        className={cn(
+                          'w-full group flex h-11 items-center gap-3 px-4 hover:bg-foreground/[0.025] transition-colors duration-150 text-left',
+                          i > 0 && 'border-t border-border/60',
+                        )}>
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
+                          <FileText className="h-3.5 w-3.5 text-ink-2" />
+                        </span>
                         <div className="flex-1 min-w-0">
-                          <span className="text-[12px] font-semibold text-foreground block truncate">{page.title}</span>
-                          <span className="text-[10px] text-muted-foreground/45">{page.category} · Updated {page.updatedAt.toLocaleDateString()}</span>
+                          <span className="text-[13px] font-[450] text-foreground block truncate">{page.title}</span>
                         </div>
-                        <button onClick={e => { e.stopPropagation(); toggleStar(page.id); }} className="shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                          <Star className={cn("h-3.5 w-3.5", page.isStarred ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30")} />
+                        <span className="hidden sm:inline shrink-0 font-mono text-[9px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{page.category}</span>
+                        <span className="shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">{page.updatedAt.toLocaleDateString()}</span>
+                        <button aria-label={page.isStarred ? 'Unpin' : 'Pin'} onClick={e => { e.stopPropagation(); toggleStar(page.id); }} className="shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-150">
+                          <Star className={cn('h-3.5 w-3.5', page.isStarred ? 'fill-gold text-gold' : 'text-muted-foreground/40')} />
                         </button>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground/20 group-hover:text-muted-foreground/40 shrink-0" />
-                      </motion.button>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 shrink-0" />
+                      </button>
                     ))}
                   </div>
                 )}
@@ -244,18 +255,18 @@ export default function OfficeWiki() {
       <AnimatePresence>
         {showCreate && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 z-[60] backdrop-blur-sm" onClick={() => setShowCreate(false)} />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 z-[60]" onClick={() => setShowCreate(false)} />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="fixed inset-0 z-[61] flex items-center justify-center p-4">
-              <div className="bg-background rounded-2xl border border-border/30 shadow-2xl max-w-md w-full p-6 space-y-4">
-                <h2 className="text-lg font-bold text-foreground">New Wiki Page</h2>
-                <Input placeholder="Page title" value={newTitle} onChange={e => setNewTitle(e.target.value)} className="h-10 rounded-xl" />
-                <select value={newCategory} onChange={e => setNewCategory(e.target.value)} className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm">
+              <div className="bg-popover rounded-[10px] border border-border/60 shadow-md max-w-md w-full p-6 space-y-4">
+                <h2 className="text-[15px] font-semibold text-foreground">New wiki page</h2>
+                <Input placeholder="Page title" value={newTitle} onChange={e => setNewTitle(e.target.value)} className="h-10 rounded-lg border-border/60" />
+                <select value={newCategory} onChange={e => setNewCategory(e.target.value)} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
                   {CATEGORIES.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
                 <div className="flex gap-2">
-                  <Button className="flex-1 h-10 rounded-xl" onClick={createPage}>Create</Button>
-                  <Button variant="ghost" className="h-10 rounded-xl" onClick={() => setShowCreate(false)}>Cancel</Button>
+                  <Button className="flex-1 h-10 rounded-lg" onClick={createPage}>Create</Button>
+                  <Button variant="ghost" className="h-10 rounded-lg" onClick={() => setShowCreate(false)}>Cancel</Button>
                 </div>
               </div>
             </motion.div>

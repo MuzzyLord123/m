@@ -5,23 +5,22 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Cloud, ArrowLeft, Search, Upload, FolderPlus, Grid3X3, List,
-  FileText, Sheet, Presentation, BookOpen, Image, File, MoreHorizontal,
-  Trash2, Download, Star, StarOff, Clock, HardDrive, Users, Trash,
-  SortAsc, SortDesc, ChevronDown, Plus, Edit3, ExternalLink,
-  LayoutGrid, Filter, Hash, Layers, FolderOpen, Sparkles, Activity,
-  ShieldCheck, PenTool, Globe, FileCode, Palette, Frame, ClipboardList,
-  BarChart3, FolderInput, Receipt, Menu, X
+  Cloud, ArrowLeft, Search, List,
+  FileText, Sheet, Presentation, BookOpen, File, MoreHorizontal,
+  Trash2, Star, StarOff, Clock, HardDrive,
+  SortAsc, SortDesc, ChevronDown, Plus, ExternalLink,
+  LayoutGrid, ShieldCheck, PenTool, Globe, FileCode, Palette, Frame, ClipboardList,
+  BarChart3, Receipt, Menu, X
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatDistanceToNow, format } from 'date-fns';
 import VaultContent from '@/components/vault/VaultContent';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { PageHeader, EmptyState, RelativeTime, SkeletonLedger, FIELD } from '@/components/platform';
 
 // Unified file type across all Quooro apps
 interface UnifiedFile {
@@ -42,20 +41,20 @@ interface UnifiedFile {
   platformFileId?: string;
 }
 
-const APP_META: Record<string, { icon: any; label: string; color: string; bg: string; gradient: string; openLabel: string }> = {
-  docs:           { icon: FileText,       label: 'Docs',       color: 'text-blue-500',    bg: 'bg-blue-500/10',    gradient: 'from-blue-500 to-indigo-600',    openLabel: 'Open in Docs' },
-  sheets:         { icon: Sheet,          label: 'Sheets',     color: 'text-emerald-500', bg: 'bg-emerald-500/10', gradient: 'from-emerald-500 to-teal-600',    openLabel: 'Open in Sheets' },
-  slides:         { icon: Presentation,   label: 'Slides',     color: 'text-orange-500',  bg: 'bg-orange-500/10',  gradient: 'from-orange-500 to-rose-600',    openLabel: 'Open in Slides' },
-  notes:          { icon: BookOpen,       label: 'Notes',      color: 'text-violet-500',  bg: 'bg-violet-500/10',  gradient: 'from-violet-500 to-purple-600',  openLabel: 'Open in Notes' },
-  files:          { icon: File,           label: 'Files',      color: 'text-muted-foreground', bg: 'bg-muted/50', gradient: 'from-slate-400 to-slate-500',     openLabel: 'Open' },
-  workshop:       { icon: Globe,          label: 'Workshop',   color: 'text-sky-500',     bg: 'bg-sky-500/10',     gradient: 'from-sky-500 to-blue-600',       openLabel: 'Open in Workshop' },
-  'cad-studio':   { icon: PenTool,        label: 'CAD',        color: 'text-cyan-500',    bg: 'bg-cyan-500/10',    gradient: 'from-cyan-500 to-teal-600',      openLabel: 'Open in CAD Studio' },
-  'pdf-studio':   { icon: FileCode,       label: 'PDF',        color: 'text-red-500',     bg: 'bg-red-500/10',     gradient: 'from-red-500 to-rose-600',       openLabel: 'Open in PDF Studio' },
-  'design-studio':{ icon: Palette,        label: 'Design',     color: 'text-pink-500',    bg: 'bg-pink-500/10',    gradient: 'from-pink-500 to-fuchsia-600',   openLabel: 'Open in Design Studio' },
-  whiteboard:     { icon: Frame,          label: 'Whiteboard', color: 'text-amber-500',   bg: 'bg-amber-500/10',   gradient: 'from-amber-500 to-orange-600',   openLabel: 'Open in Whiteboard' },
-  polls:          { icon: BarChart3,      label: 'Polls',      color: 'text-indigo-500',  bg: 'bg-indigo-500/10',  gradient: 'from-indigo-500 to-violet-600',  openLabel: 'Open in Polls' },
-  tasks:          { icon: ClipboardList,  label: 'Tasks',      color: 'text-teal-500',    bg: 'bg-teal-500/10',    gradient: 'from-teal-500 to-emerald-600',   openLabel: 'Open in Tasks' },
-  invoices:       { icon: Receipt,        label: 'Invoices',   color: 'text-green-500',   bg: 'bg-green-500/10',   gradient: 'from-green-500 to-emerald-600',  openLabel: 'Open in Invoices' },
+const APP_META: Record<string, { icon: any; label: string; openLabel: string }> = {
+  docs:           { icon: FileText,       label: 'Docs',       openLabel: 'Open in Docs' },
+  sheets:         { icon: Sheet,          label: 'Sheets',     openLabel: 'Open in Sheets' },
+  slides:         { icon: Presentation,   label: 'Slides',     openLabel: 'Open in Slides' },
+  notes:          { icon: BookOpen,       label: 'Notes',      openLabel: 'Open in Notes' },
+  files:          { icon: File,           label: 'Files',      openLabel: 'Open' },
+  workshop:       { icon: Globe,          label: 'Workshop',   openLabel: 'Open in Workshop' },
+  'cad-studio':   { icon: PenTool,        label: 'CAD',        openLabel: 'Open in CAD Studio' },
+  'pdf-studio':   { icon: FileCode,       label: 'PDF',        openLabel: 'Open in PDF Studio' },
+  'design-studio':{ icon: Palette,        label: 'Design',     openLabel: 'Open in Design Studio' },
+  whiteboard:     { icon: Frame,          label: 'Whiteboard', openLabel: 'Open in Whiteboard' },
+  polls:          { icon: BarChart3,      label: 'Polls',      openLabel: 'Open in Polls' },
+  tasks:          { icon: ClipboardList,  label: 'Tasks',      openLabel: 'Open in Tasks' },
+  invoices:       { icon: Receipt,        label: 'Invoices',   openLabel: 'Open in Invoices' },
 };
 
 const NAV_ITEMS = [
@@ -67,11 +66,11 @@ const NAV_ITEMS = [
   { id: 'slides',    label: 'Presentations',   icon: Presentation },
   { id: 'notes',     label: 'Notebooks',       icon: BookOpen },
   { id: 'workshop',  label: 'Websites',        icon: Globe },
-  { id: 'cad-studio',label: 'CAD Projects',    icon: PenTool },
+  { id: 'cad-studio',label: 'CAD projects',    icon: PenTool },
   { id: 'pdf-studio',label: 'PDFs',            icon: FileCode },
   { id: 'design-studio', label: 'Designs',     icon: Palette },
   { id: 'invoices',  label: 'Invoices',        icon: Receipt },
-  { id: 'vault',     label: 'Secure Vault',    icon: ShieldCheck },
+  { id: 'vault',     label: 'Secure vault',    icon: ShieldCheck },
 ];
 
 // Demo data
@@ -246,25 +245,25 @@ export default function OfficeOneDrive() {
   };
 
   const sidebarContent = (
-    <div className={cn("flex flex-col bg-card/20 backdrop-blur-sm overflow-auto", isMobile ? "flex-1" : "w-52 border-r border-border/20 shrink-0 p-2 space-y-0.5")}>
+    <div className={cn('flex flex-col bg-card overflow-auto', isMobile ? 'flex-1' : 'w-52 border-r border-border/60 shrink-0 p-2 space-y-0.5')}>
       {isMobile && (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border/20">
-          <span className="text-sm font-bold">Categories</span>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => setShowSidebar(false)}><X className="h-4 w-4" /></Button>
+        <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
+          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Categories</span>
+          <Button variant="ghost" size="icon" aria-label="Close" className="h-8 w-8 rounded-lg" onClick={() => setShowSidebar(false)}><X className="h-4 w-4" /></Button>
         </div>
       )}
-      <div className={cn(isMobile ? "p-2 space-y-0.5" : "")}>
+      <div className={cn(isMobile ? 'p-2 space-y-0.5' : '')}>
         {NAV_ITEMS.map(item => {
           if (item.id === 'vault') {
             return (
               <button key={item.id} onClick={() => handleNavClick('vault')}
                 className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all",
-                  activeNav === 'vault' ? "bg-accent/60 shadow-sm" : "hover:bg-accent/30",
-                  isMobile && "py-3"
+                  'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors duration-150',
+                  activeNav === 'vault' ? 'bg-foreground/[0.05]' : 'hover:bg-foreground/[0.025]',
+                  isMobile && 'py-3'
                 )}>
-                <item.icon className={cn("h-4 w-4", activeNav === 'vault' ? 'text-foreground' : 'text-muted-foreground')} />
-                <span className={cn("text-xs font-medium flex-1", activeNav === 'vault' ? 'text-foreground' : 'text-muted-foreground')}>{item.label}</span>
+                <item.icon className={cn('h-4 w-4', activeNav === 'vault' ? 'text-foreground' : 'text-muted-foreground')} strokeWidth={1.7} />
+                <span className={cn('text-xs font-medium flex-1', activeNav === 'vault' ? 'text-foreground' : 'text-muted-foreground')}>{item.label}</span>
               </button>
             );
           }
@@ -275,24 +274,24 @@ export default function OfficeOneDrive() {
           return (
             <button key={item.id} onClick={() => handleNavClick(item.id)}
               className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all",
-                activeNav === item.id ? "bg-accent/60 shadow-sm" : "hover:bg-accent/30",
-                isMobile && "py-3"
+                'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors duration-150',
+                activeNav === item.id ? 'bg-foreground/[0.05]' : 'hover:bg-foreground/[0.025]',
+                isMobile && 'py-3'
               )}>
-              <item.icon className={cn("h-4 w-4", activeNav === item.id ? 'text-foreground' : 'text-muted-foreground')} />
-              <span className={cn("text-xs font-medium flex-1", activeNav === item.id ? 'text-foreground' : 'text-muted-foreground')}>{item.label}</span>
-              {count > 0 && <span className="text-[10px] text-muted-foreground/60 tabular-nums bg-muted/50 px-1.5 py-0.5 rounded-md">{count}</span>}
+              <item.icon className={cn('h-4 w-4', activeNav === item.id ? 'text-foreground' : 'text-muted-foreground')} strokeWidth={1.7} />
+              <span className={cn('text-xs font-medium flex-1', activeNav === item.id ? 'text-foreground' : 'text-muted-foreground')}>{item.label}</span>
+              {count > 0 && <span className="font-mono text-[10px] tabular-nums text-muted-foreground/70">{count}</span>}
             </button>
           );
         })}
 
         {/* Storage */}
-        <div className="pt-6 px-3">
-          <div className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-wider mb-2">Storage</div>
-          <div className="h-1.5 rounded-full bg-secondary/60 overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-500" style={{ width: `${Math.min(100, (stats.total / 50) * 100)}%` }} />
+        <div className="px-3 pt-6">
+          <div className="mb-2 font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Storage</div>
+          <div className="h-1 overflow-hidden rounded-full bg-foreground/[0.06]">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, (stats.total / 50) * 100)}%` }} />
           </div>
-          <span className="text-[9px] text-muted-foreground/50 mt-1 block">{stats.total} files</span>
+          <span className="mt-1.5 block font-mono text-[9px] tabular-nums text-muted-foreground">{stats.total} files</span>
         </div>
       </div>
     </div>
@@ -300,85 +299,70 @@ export default function OfficeOneDrive() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
-      {/* Hero Header */}
-      <div className="relative overflow-hidden shrink-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-600/8 via-cyan-500/5 to-transparent" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-
-        <div className="relative px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-4">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-                <ArrowLeft className="h-4 w-4" />
+      {/* Header */}
+      <div className="shrink-0 border-b border-border/60">
+        <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-4">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <Button variant="ghost" size="icon" aria-label="Back to Office" className="mt-0.5 h-8 w-8 shrink-0 rounded-lg text-muted-foreground hover:text-foreground" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            {isMobile && (
+              <Button variant="ghost" size="icon" aria-label="Categories" className="mt-0.5 h-8 w-8 shrink-0 rounded-lg" onClick={() => setShowSidebar(true)}>
+                <Menu className="h-4 w-4" />
               </Button>
-              {isMobile && (
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={() => setShowSidebar(true)}>
-                  <Menu className="h-4 w-4" />
-                </Button>
-              )}
-              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-[14px] bg-gradient-to-br from-sky-500 to-cyan-700 flex items-center justify-center shadow-lg shadow-sky-500/25">
-                <Cloud className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-base sm:text-lg font-bold text-foreground tracking-tight">Files</h1>
-                <p className="text-[10px] text-muted-foreground hidden sm:block">All your work across the entire platform</p>
-              </div>
-            </div>
-
-            {/* Quick Create */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" className="h-8 text-xs gap-1.5 rounded-xl shadow-sm font-semibold bg-gradient-to-r from-sky-500 to-cyan-600 hover:from-sky-600 hover:to-cyan-700 text-white border-0">
-                  <Plus className="h-3.5 w-3.5" /> {!isMobile && 'New'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="rounded-xl w-48" align="end">
-                {['docs', 'sheets', 'slides', 'notes'].map(key => {
-                  const m = getMeta(key);
-                  return (
-                    <DropdownMenuItem key={key} onClick={() => quickCreate(key)} className="text-xs gap-2.5">
-                      <div className={cn("h-5 w-5 rounded-md flex items-center justify-center", m.bg)}>
-                        <m.icon className={cn("h-3 w-3", m.color)} />
-                      </div>
-                      New {m.label.replace(/s$/, '')}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            )}
+            <PageHeader
+              className="min-w-0 flex-1"
+              kicker="Quooro Office · Files"
+              title="Files"
+              description="All your work across the platform"
+              actions={
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs">
+                      <Plus className="h-3.5 w-3.5" /> New
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-48 rounded-[10px]" align="end">
+                    {['docs', 'sheets', 'slides', 'notes'].map(key => {
+                      const m = getMeta(key);
+                      return (
+                        <DropdownMenuItem key={key} onClick={() => quickCreate(key)} className="gap-2.5 text-xs">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-md bg-foreground/[0.04]">
+                            <m.icon className="h-3 w-3 text-ink-2" />
+                          </span>
+                          New {m.label.replace(/s$/, '')}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              }
+            />
           </div>
 
-          {/* Stats — scrollable on mobile */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
-            {[
-              { label: 'Total', value: stats.total, icon: Layers, color: 'text-sky-500' },
-              { label: 'Docs', value: stats.docs, icon: FileText, color: 'text-blue-500' },
-              { label: 'Websites', value: stats.websites, icon: Globe, color: 'text-sky-500' },
-              { label: 'CAD', value: stats.cad, icon: PenTool, color: 'text-cyan-500' },
-              { label: 'Starred', value: stats.starred, icon: Star, color: 'text-amber-500' },
-            ].map(s => (
-              <motion.div key={s.label} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/70 backdrop-blur-sm border border-border/20 shrink-0">
-                <s.icon className={cn("h-3 w-3", s.color)} />
-                <span className="text-[10px] font-semibold text-foreground tabular-nums">{s.value}</span>
-                <span className="text-[9px] text-muted-foreground">{s.label}</span>
-              </motion.div>
-            ))}
+          {/* Fact line */}
+          <div className="mt-3 flex items-center gap-x-4 gap-y-1 overflow-x-auto scrollbar-none font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">
+            <span className="shrink-0 tabular-nums">{stats.total} files</span>
+            <span className="shrink-0 tabular-nums">{stats.docs} docs</span>
+            <span className="shrink-0 tabular-nums">{stats.websites} websites</span>
+            <span className="shrink-0 tabular-nums">{stats.cad} CAD</span>
+            <span className="shrink-0 tabular-nums">{stats.starred} starred</span>
           </div>
 
-          {/* Mobile: active category pill + nav label */}
+          {/* Mobile: active category */}
           {isMobile && (
-            <button onClick={() => setShowSidebar(true)} className="mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/40 border border-border/20 w-full">
-              {(() => { const navItem = NAV_ITEMS.find(n => n.id === activeNav); return navItem ? <navItem.icon className="h-3.5 w-3.5 text-foreground" /> : null; })()}
-              <span className="text-xs font-semibold text-foreground">{NAV_ITEMS.find(n => n.id === activeNav)?.label || 'All files'}</span>
-              <ChevronDown className="h-3 w-3 text-muted-foreground ml-auto" />
+            <button onClick={() => setShowSidebar(true)} className="mt-2.5 flex w-full items-center gap-2 rounded-[10px] border border-border/60 bg-card px-3 py-2 transition-colors duration-150 hover:bg-foreground/[0.025]">
+              {(() => { const navItem = NAV_ITEMS.find(n => n.id === activeNav); return navItem ? <navItem.icon className="h-3.5 w-3.5 text-ink-2" /> : null; })()}
+              <span className="text-xs font-medium text-foreground">{NAV_ITEMS.find(n => n.id === activeNav)?.label || 'All files'}</span>
+              <ChevronDown className="ml-auto h-3 w-3 text-muted-foreground" />
             </button>
           )}
         </div>
       </div>
 
       {/* Main area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         {/* Desktop sidebar */}
         {!isMobile && sidebarContent}
 
@@ -387,10 +371,10 @@ export default function OfficeOneDrive() {
           {isMobile && showSidebar && (
             <>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm" onClick={() => setShowSidebar(false)} />
+                className="fixed inset-0 z-40 bg-background/60" onClick={() => setShowSidebar(false)} />
               <motion.div initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
-                transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-                className="fixed inset-y-0 left-0 z-50 w-[280px] bg-card border-r border-border flex flex-col shadow-2xl">
+                transition={{ type: 'spring', bounce: 0, duration: 0.25 }}
+                className="fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-border bg-card">
                 {sidebarContent}
               </motion.div>
             </>
@@ -403,115 +387,110 @@ export default function OfficeOneDrive() {
             <VaultContent />
           </div>
         ) : (
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden">
           {/* Search & controls */}
-          <div className="px-4 sm:px-6 py-2.5 flex items-center gap-2">
+          <div className="flex items-center gap-2 px-4 py-2.5 sm:px-6">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
-              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search all files…"
-                className="pl-9 h-9 text-xs bg-card/60 border-border/30 rounded-xl" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search all files"
+                className={cn(FIELD, 'h-9 pl-9 text-xs')} />
             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-9 text-[10px] gap-1 rounded-xl shrink-0">
+                <Button variant="ghost" size="sm" className="h-9 shrink-0 gap-1 rounded-lg text-[11px]">
                   {sortAsc ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />}
                   {!isMobile && 'Sort'} <ChevronDown className="h-2.5 w-2.5 opacity-40" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="rounded-xl w-44">
+              <DropdownMenuContent className="w-44 rounded-[10px]">
                 {[
-                  { field: 'modified' as SortField, label: 'Last Modified' },
-                  { field: 'created' as SortField, label: 'Date Created' },
+                  { field: 'modified' as SortField, label: 'Last modified' },
+                  { field: 'created' as SortField, label: 'Date created' },
                   { field: 'name' as SortField, label: 'Name' },
-                  { field: 'app' as SortField, label: 'App Type' },
+                  { field: 'app' as SortField, label: 'App type' },
                 ].map(s => (
                   <DropdownMenuItem key={s.field} onClick={() => { if (sortField === s.field) setSortAsc(!sortAsc); else { setSortField(s.field); setSortAsc(false); } }}
-                    className={cn("text-xs", sortField === s.field && "font-semibold")}>
+                    className={cn('text-xs', sortField === s.field && 'font-semibold')}>
                     {s.label} {sortField === s.field && (sortAsc ? '↑' : '↓')}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <div className="flex items-center gap-0.5 bg-secondary/40 rounded-xl p-0.5 border border-border/20 shrink-0">
-              <button onClick={() => setViewMode('grid')} className={cn("h-7 w-7 rounded-lg flex items-center justify-center transition-all", viewMode === 'grid' ? "bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+            <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-border/60 bg-card p-0.5">
+              <button aria-label="Grid view" onClick={() => setViewMode('grid')} className={cn('flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150', viewMode === 'grid' ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground hover:text-foreground')}>
                 <LayoutGrid className="h-3.5 w-3.5" />
               </button>
-              <button onClick={() => setViewMode('list')} className={cn("h-7 w-7 rounded-lg flex items-center justify-center transition-all", viewMode === 'list' ? "bg-card shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+              <button aria-label="List view" onClick={() => setViewMode('list')} className={cn('flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150', viewMode === 'list' ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground hover:text-foreground')}>
                 <List className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
 
           {/* File list */}
-          <div className="flex-1 overflow-auto px-4 sm:px-6 pb-6">
+          <div className="flex-1 overflow-auto px-4 pb-6 sm:px-6">
             {loading ? (
-              <div className="space-y-2">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="h-12 rounded-xl bg-secondary/20 animate-pulse" />
-                ))}
+              <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+                <SkeletonLedger rows={5} />
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="h-16 w-16 rounded-2xl bg-sky-500/10 flex items-center justify-center mb-4">
-                  <FolderOpen className="h-8 w-8 text-sky-500/40" />
-                </div>
-                <h3 className="text-sm font-semibold text-foreground mb-1">No files found</h3>
-                <p className="text-xs text-muted-foreground mb-4">Save work from any app to see it here</p>
-              </div>
+              <EmptyState
+                title="No files found"
+                body="Save work from any app to see it here."
+              />
             ) : viewMode === 'list' ? (
-              <div className="rounded-xl border border-border/30 overflow-hidden bg-card/40 backdrop-blur-sm">
+              <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
                 {/* Header row — hide extra cols on mobile */}
-                <div className="flex items-center gap-3 px-4 py-2 bg-muted/30 border-b border-border/20">
-                  <span className="flex-1 text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider">Name</span>
-                  <span className="w-20 text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider text-center hidden sm:block">Source</span>
-                  <span className="w-20 text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider text-right hidden md:block">Details</span>
-                  <span className="w-24 text-[9px] font-bold text-muted-foreground/60 uppercase tracking-wider text-right hidden sm:block">Modified</span>
+                <div className="flex items-center gap-3 border-b border-border/60 bg-sunken px-4 py-2">
+                  <span className="flex-1 font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">Name</span>
+                  <span className="hidden w-20 text-center font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground sm:block">Source</span>
+                  <span className="hidden w-20 text-right font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground md:block">Details</span>
+                  <span className="hidden w-24 text-right font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground sm:block">Modified</span>
                   <span className="w-8 sm:w-28" />
                 </div>
                 {filtered.map((file, i) => {
                   const meta = getMeta(file.app);
                   return (
-                    <motion.div key={file.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.015 }}
+                    <div key={file.id}
                       onClick={() => openFile(file)}
                       className={cn(
-                        "flex items-center gap-3 px-4 py-3 hover:bg-accent/40 cursor-pointer group transition-all",
-                        i > 0 && "border-t border-border/15"
+                        'group flex h-11 cursor-pointer items-center gap-3 px-4 transition-colors duration-150 hover:bg-foreground/[0.025]',
+                        i > 0 && 'border-t border-border/60'
                       )}>
-                      <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105", meta.bg)}>
-                        <meta.icon className={cn("h-4 w-4", meta.color)} />
-                      </div>
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
+                        <meta.icon className="h-3.5 w-3.5 text-ink-2" />
+                      </span>
 
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-semibold text-foreground truncate block">{file.name}</span>
+                      <div className="min-w-0 flex-1">
+                        <span className="block truncate text-[13px] font-[450] text-foreground">{file.name}</span>
                         {/* Mobile: show source + time inline */}
                         {isMobile && (
-                          <span className="text-[10px] text-muted-foreground/50 mt-0.5 block">
-                            {meta.label} · {formatDistanceToNow(file.modified, { addSuffix: true })}
+                          <span className="mt-0.5 block font-mono text-[10px] text-muted-foreground">
+                            {meta.label} · <RelativeTime date={file.modified} className="text-[10px]" />
                           </span>
                         )}
                         {!isMobile && file.folderPath && file.folderPath !== '/' && (
-                          <span className="text-[9px] text-muted-foreground/40">{file.folderPath}</span>
+                          <span className="font-mono text-[9px] text-muted-foreground/60">{file.folderPath}</span>
                         )}
                       </div>
 
-                      <div className="w-20 justify-center hidden sm:flex">
-                        <span className={cn("text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md", meta.bg, meta.color)}>
+                      <div className="hidden w-20 justify-center sm:flex">
+                        <span className="font-mono text-[9px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
                           {meta.label}
                         </span>
                       </div>
 
-                      <span className="w-20 text-[10px] text-muted-foreground/60 text-right hidden md:block">{file.meta || '—'}</span>
-                      <span className="w-24 text-[10px] text-muted-foreground/60 text-right hidden sm:block">
-                        {formatDistanceToNow(file.modified, { addSuffix: true })}
+                      <span className="hidden w-20 text-right font-mono text-[10px] tabular-nums text-muted-foreground md:block">{file.meta || '–'}</span>
+                      <span className="hidden w-24 text-right sm:block">
+                        <RelativeTime date={file.modified} />
                       </span>
 
                       {/* Actions */}
-                      <div className={cn("flex items-center justify-end gap-0.5 shrink-0", isMobile ? "w-8" : "w-28 opacity-0 group-hover:opacity-100 transition-opacity")}>
+                      <div className={cn('flex shrink-0 items-center justify-end gap-0.5', isMobile ? 'w-8' : 'w-28 opacity-0 transition-opacity duration-150 group-hover:opacity-100')}>
                         {!isMobile && (
                           <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md" onClick={e => { e.stopPropagation(); toggleStar(file); }}>
-                            {file.starred ? <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> : <StarOff className="h-3 w-3 text-muted-foreground/40" />}
+                            {file.starred ? <Star className="h-3.5 w-3.5 fill-gold text-gold" /> : <StarOff className="h-3 w-3 text-muted-foreground/40" />}
                           </Button>
                         )}
                         <DropdownMenu>
@@ -520,103 +499,94 @@ export default function OfficeOneDrive() {
                               <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="rounded-xl w-52" align="end">
+                          <DropdownMenuContent className="w-52 rounded-[10px]" align="end">
                             {file.route && (
-                              <DropdownMenuItem onClick={() => openFile(file)} className="text-xs gap-2.5 font-medium">
+                              <DropdownMenuItem onClick={() => openFile(file)} className="gap-2.5 text-xs font-medium">
                                 <ExternalLink className="h-3.5 w-3.5" />
                                 {meta.openLabel}
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => toggleStar(file)} className="text-xs gap-2.5">
+                            <DropdownMenuItem onClick={() => toggleStar(file)} className="gap-2.5 text-xs">
                               {file.starred ? <StarOff className="h-3.5 w-3.5" /> : <Star className="h-3.5 w-3.5" />}
                               {file.starred ? 'Remove star' : 'Add star'}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => moveToVault(file)} className="text-xs gap-2.5">
+                            <DropdownMenuItem onClick={() => moveToVault(file)} className="gap-2.5 text-xs">
                               <ShieldCheck className="h-3.5 w-3.5" />
-                              Move to Vault
+                              Move to vault
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {file.isPlatformFile && (
-                              <DropdownMenuItem onClick={() => trashFile(file)} className="text-xs gap-2.5 text-destructive">
+                              <DropdownMenuItem onClick={() => trashFile(file)} className="gap-2.5 text-xs text-destructive">
                                 <Trash2 className="h-3.5 w-3.5" />
-                                Move to Trash
+                                Move to trash
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>
             ) : (
               /* Grid View */
-              <div className={cn("grid gap-3", isMobile ? "grid-cols-2" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5")}>
-                {filtered.map((file, i) => {
+              <div className={cn('grid gap-2.5', isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5')}>
+                {filtered.map((file) => {
                   const meta = getMeta(file.app);
                   return (
-                    <motion.div key={file.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.025 }}
+                    <div key={file.id}
                       onClick={() => openFile(file)}
-                      className="group cursor-pointer rounded-xl border border-border/30 bg-card/50 overflow-hidden hover:shadow-xl hover:-translate-y-0.5 hover:border-border/40 transition-all">
-                      <div className={cn("aspect-[4/3] flex items-center justify-center relative overflow-hidden", meta.bg.replace('/10', '/5'))}>
-                        <div className={cn("h-12 w-12 rounded-2xl bg-card/60 backdrop-blur-sm border border-border/20 flex items-center justify-center group-hover:scale-110 transition-transform", meta.bg)}>
-                          <meta.icon className={cn("h-6 w-6", meta.color)} />
-                        </div>
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 bg-white/90 text-black text-[10px] font-semibold px-3 py-1.5 rounded-lg shadow-lg">
-                            <Edit3 className="h-3 w-3" /> {meta.openLabel}
-                          </div>
-                        </div>
+                      className="group cursor-pointer overflow-hidden rounded-[10px] border border-border/60 bg-card transition-colors duration-150 hover:border-border">
+                      <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-sunken/50">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-foreground/[0.04]">
+                          <meta.icon className="h-5 w-5 text-ink-2" strokeWidth={1.7} />
+                        </span>
                         {file.starred && (
-                          <div className="absolute top-2 right-2">
-                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 drop-shadow-sm" />
+                          <div className="absolute right-2 top-2">
+                            <Star className="h-3.5 w-3.5 fill-gold text-gold" />
                           </div>
                         )}
-                        <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute left-2 top-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md bg-black/40 hover:bg-black/60 text-white" onClick={e => e.stopPropagation()}>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md border border-border/60 bg-card" onClick={e => e.stopPropagation()}>
                                 <MoreHorizontal className="h-3.5 w-3.5" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="rounded-xl w-52">
+                            <DropdownMenuContent className="w-52 rounded-[10px]">
                               {file.route && (
-                                <DropdownMenuItem onClick={() => openFile(file)} className="text-xs gap-2.5 font-medium">
+                                <DropdownMenuItem onClick={() => openFile(file)} className="gap-2.5 text-xs font-medium">
                                   <ExternalLink className="h-3.5 w-3.5" /> {meta.openLabel}
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => toggleStar(file)} className="text-xs gap-2.5">
+                              <DropdownMenuItem onClick={() => toggleStar(file)} className="gap-2.5 text-xs">
                                 {file.starred ? <StarOff className="h-3.5 w-3.5" /> : <Star className="h-3.5 w-3.5" />}
                                 {file.starred ? 'Remove star' : 'Add star'}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => moveToVault(file)} className="text-xs gap-2.5">
-                                <ShieldCheck className="h-3.5 w-3.5" /> Move to Vault
+                              <DropdownMenuItem onClick={() => moveToVault(file)} className="gap-2.5 text-xs">
+                                <ShieldCheck className="h-3.5 w-3.5" /> Move to vault
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               {file.isPlatformFile && (
-                                <DropdownMenuItem onClick={() => trashFile(file)} className="text-xs gap-2.5 text-destructive">
-                                  <Trash2 className="h-3.5 w-3.5" /> Move to Trash
+                                <DropdownMenuItem onClick={() => trashFile(file)} className="gap-2.5 text-xs text-destructive">
+                                  <Trash2 className="h-3.5 w-3.5" /> Move to trash
                                 </DropdownMenuItem>
                               )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
                       </div>
-                      <div className="p-3 border-t border-border/20">
-                        <h3 className="text-[11px] font-semibold text-foreground truncate">{file.name}</h3>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className={cn("text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md", meta.bg, meta.color)}>
-                            {meta.label}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground/50">{file.meta}</span>
+                      <div className="border-t border-border/60 p-3">
+                        <h3 className="truncate text-[12px] font-medium text-foreground">{file.name}</h3>
+                        <div className="mt-1 flex items-center justify-between font-mono text-[9px] text-muted-foreground">
+                          <span className="uppercase tracking-[0.13em]">{meta.label}</span>
+                          <span className="tabular-nums">{file.meta}</span>
                         </div>
-                        <span className="text-[9px] text-muted-foreground/40 mt-1 block">
-                          {formatDistanceToNow(file.modified, { addSuffix: true })}
-                        </span>
+                        <RelativeTime date={file.modified} className="mt-1 block text-[9px]" />
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>

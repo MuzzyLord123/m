@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, PenLine, Plus, Grid3X3, Clock, Star, Trash2, MoreHorizontal, Layers, Lightbulb, Users, GitBranch, BarChart3 } from 'lucide-react';
+import { ArrowLeft, PenLine, Plus, Star, Trash2, Layers, Lightbulb, Users, GitBranch, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { PageHeader, EmptyState, FIELD } from '@/components/platform';
 
 interface WhiteboardItem {
   id: string;
@@ -16,12 +16,12 @@ interface WhiteboardItem {
 }
 
 const TEMPLATES = [
-  { id: 'blank', label: 'Blank Canvas', desc: 'Start fresh', icon: PenLine, color: '#ec4899' },
-  { id: 'brainstorm', label: 'Brainstorm', desc: 'Mind mapping', icon: Lightbulb, color: '#f59e0b' },
-  { id: 'flowchart', label: 'Flowchart', desc: 'Process diagrams', icon: GitBranch, color: '#3b82f6' },
-  { id: 'wireframe', label: 'Wireframe', desc: 'UI layouts', icon: Layers, color: '#8b5cf6' },
-  { id: 'retrospective', label: 'Retrospective', desc: 'Team review', icon: Users, color: '#10b981' },
-  { id: 'kanban', label: 'Kanban Board', desc: 'Visual workflow', icon: BarChart3, color: '#06b6d4' },
+  { id: 'blank', label: 'Blank canvas', desc: 'Start fresh', icon: PenLine },
+  { id: 'brainstorm', label: 'Brainstorm', desc: 'Mind mapping', icon: Lightbulb },
+  { id: 'flowchart', label: 'Flowchart', desc: 'Process diagrams', icon: GitBranch },
+  { id: 'wireframe', label: 'Wireframe', desc: 'UI layouts', icon: Layers },
+  { id: 'retrospective', label: 'Retrospective', desc: 'Team review', icon: Users },
+  { id: 'kanban', label: 'Kanban board', desc: 'Visual workflow', icon: BarChart3 },
 ];
 
 export default function OfficeWhiteboardHome() {
@@ -56,45 +56,52 @@ export default function OfficeWhiteboardHome() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
+      <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border/60 bg-card px-5">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
           <ArrowLeft className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Back to Office</span>
         </Button>
-        <div className="h-4 w-px bg-border/40" />
-        <PenLine className="h-4 w-4 text-pink-500" />
+        <div className="h-4 w-px bg-border/60" />
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
+          <PenLine className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
+        </span>
         <span className="text-sm font-semibold tracking-tight">Whiteboard</span>
         <div className="flex-1" />
-        <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => createBoard('blank')}>
-          <Plus className="h-3.5 w-3.5" /> New Board
+        <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => createBoard('blank')}>
+          <Plus className="h-3.5 w-3.5" /> New board
         </Button>
       </header>
 
       <div className="flex-1 overflow-auto">
-        <div className="max-w-5xl mx-auto px-6 sm:px-10">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-6">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Whiteboards</h1>
-            <p className="text-sm text-muted-foreground/60 mt-1">Sketch, brainstorm, and collaborate visually.</p>
-          </motion.div>
+        <div className="mx-auto max-w-5xl px-6 sm:px-10">
+          <PageHeader
+            className="pb-5 pt-7"
+            kicker="Quooro Office · Whiteboard"
+            title="Whiteboards"
+            description="Sketch, brainstorm and collaborate visually"
+          />
 
-          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search whiteboards…" className="max-w-md h-10 rounded-xl bg-card/50 border-border/30 mb-6 text-sm" />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search whiteboards" className={cn(FIELD, 'mb-6 h-9 max-w-md text-sm')} />
 
           {/* Templates */}
           <section className="mb-8">
-            <h2 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-4">Templates</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-              {TEMPLATES.map((tpl, i) => (
-                <motion.button key={tpl.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+            <div className="mb-3.5 flex items-center gap-2.5">
+              <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Templates</h2>
+              <div className="h-px flex-1 bg-border/60" />
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
+              {TEMPLATES.map((tpl) => (
+                <button key={tpl.id}
                   onClick={() => createBoard(tpl.id)}
-                  className="group flex flex-col items-center gap-2.5 p-5 rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all duration-300">
-                  <div className="h-11 w-11 rounded-xl flex items-center justify-center" style={{ background: `${tpl.color}15` }}>
-                    <tpl.icon className="h-5 w-5" style={{ color: tpl.color }} />
-                  </div>
-                  <div className="text-center">
-                    <span className="text-[12px] font-semibold text-foreground block">{tpl.label}</span>
-                    <span className="text-[10px] text-muted-foreground/50">{tpl.desc}</span>
-                  </div>
-                </motion.button>
+                  className="flex flex-col items-start gap-2.5 rounded-[10px] border border-border/60 bg-card p-3.5 text-left transition-colors duration-150 hover:bg-foreground/[0.025]">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.04]">
+                    <tpl.icon className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
+                  </span>
+                  <span>
+                    <span className="block text-[11.5px] font-medium leading-tight text-foreground">{tpl.label}</span>
+                    <span className="mt-0.5 block text-[10.5px] leading-tight text-muted-foreground">{tpl.desc}</span>
+                  </span>
+                </button>
               ))}
             </div>
           </section>
@@ -102,8 +109,10 @@ export default function OfficeWhiteboardHome() {
           {/* Starred */}
           {starred.length > 0 && (
             <section className="mb-6">
-              <h2 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Star className="h-3 w-3" /> Starred</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <h2 className="mb-2.5 flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                <Star className="h-3 w-3 fill-gold text-gold" /> Starred
+              </h2>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
                 {starred.map(b => (
                   <BoardCard key={b.id} board={b} onOpen={() => navigate('/lounge/office/whiteboard', { state: { fromOfficeApp: true } })} onStar={() => toggleStar(b.id)} onDelete={() => deleteBoard(b.id)} />
                 ))}
@@ -113,9 +122,16 @@ export default function OfficeWhiteboardHome() {
 
           {/* Recent */}
           <section className="pb-10">
-            <h2 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Clock className="h-3 w-3" /> Recent</h2>
-            {recent.length === 0 && <p className="text-sm text-muted-foreground/40 py-8 text-center">No whiteboards yet. Create one above!</p>}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            <h2 className="mb-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Recent</h2>
+            {recent.length === 0 && (
+              <EmptyState
+                compact
+                title="No whiteboards yet"
+                body="Start from a blank canvas or pick a template."
+                action={{ label: 'New board', onClick: () => createBoard('blank') }}
+              />
+            )}
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
               {recent.map(b => (
                 <BoardCard key={b.id} board={b} onOpen={() => navigate('/lounge/office/whiteboard', { state: { fromOfficeApp: true } })} onStar={() => toggleStar(b.id)} onDelete={() => deleteBoard(b.id)} />
               ))}
@@ -129,22 +145,26 @@ export default function OfficeWhiteboardHome() {
 
 function BoardCard({ board, onOpen, onStar, onDelete }: { board: WhiteboardItem; onOpen: () => void; onStar: () => void; onDelete: () => void }) {
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-      className="group relative flex flex-col rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all cursor-pointer overflow-hidden"
+    <div
+      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-[10px] border border-border/60 bg-card transition-colors duration-150 hover:border-border"
       onClick={onOpen}>
-      <div className="h-28 bg-muted/30 flex items-center justify-center text-4xl">{board.preview}</div>
-      <div className="p-3.5">
-        <span className="text-[12px] font-semibold text-foreground block truncate">{board.title}</span>
-        <span className="text-[10px] text-muted-foreground/45">{board.createdAt.toLocaleDateString()}</span>
+      <div className="flex h-28 items-center justify-center bg-sunken/50">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-foreground/[0.04]">
+          <PenLine className="h-[18px] w-[18px] text-ink-2" strokeWidth={1.7} />
+        </span>
       </div>
-      <div className="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-        <button onClick={e => { e.stopPropagation(); onStar(); }} className="h-7 w-7 rounded-lg bg-background/80 backdrop-blur flex items-center justify-center hover:bg-accent">
-          <Star className={cn("h-3.5 w-3.5", board.isStarred ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground")} />
+      <div className="border-t border-border/60 p-3">
+        <span className="block truncate text-[12px] font-medium text-foreground">{board.title}</span>
+        <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{board.createdAt.toLocaleDateString()}</span>
+      </div>
+      <div className="absolute right-2 top-2 flex gap-1 opacity-100 transition-opacity duration-150 sm:opacity-0 sm:group-hover:opacity-100">
+        <button aria-label={board.isStarred ? 'Unstar' : 'Star'} onClick={e => { e.stopPropagation(); onStar(); }} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/60 bg-card transition-colors duration-150 hover:bg-foreground/[0.04]">
+          <Star className={cn('h-3.5 w-3.5', board.isStarred ? 'fill-gold text-gold' : 'text-muted-foreground')} />
         </button>
-        <button onClick={e => { e.stopPropagation(); onDelete(); }} className="h-7 w-7 rounded-lg bg-background/80 backdrop-blur flex items-center justify-center hover:bg-destructive/20">
+        <button aria-label="Delete" onClick={e => { e.stopPropagation(); onDelete(); }} className="flex h-7 w-7 items-center justify-center rounded-lg border border-border/60 bg-card transition-colors duration-150 hover:bg-destructive/20">
           <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 }

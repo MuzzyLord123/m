@@ -17,13 +17,11 @@ import {
 import {
   FileText, Plus, Search, Star, StarOff, Trash2, MoreHorizontal,
   Grid3X3, List, SortAsc, SortDesc, Pencil, Copy, ArrowLeft,
-  FileSignature, FileBarChart, Mail, StickyNote, Users, Briefcase,
-  Clock, LetterText, Sparkles, FolderOpen, Check
+  FileSignature, FileBarChart, Mail, StickyNote, Users, Briefcase, Check
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow, format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
+import { PageHeader, EmptyState, RelativeTime, FIELD } from '@/components/platform';
 
 interface OfficeDocument {
   id: string;
@@ -36,13 +34,13 @@ interface OfficeDocument {
 }
 
 const TEMPLATES = [
-  { id: 'blank', label: 'Blank Document', description: 'Start with a clean slate', icon: FileText, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', gradient: 'from-blue-500/8 to-blue-600/3' },
-  { id: 'report', label: 'Business Report', description: 'Professional report layout', icon: FileBarChart, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', gradient: 'from-emerald-500/8 to-emerald-600/3' },
-  { id: 'proposal', label: 'Project Proposal', description: 'Win new business', icon: Briefcase, color: 'text-violet-500', bg: 'bg-violet-500/10', border: 'border-violet-500/20', gradient: 'from-violet-500/8 to-violet-600/3' },
-  { id: 'letter', label: 'Formal Letter', description: 'Professional correspondence', icon: Mail, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', gradient: 'from-amber-500/8 to-amber-600/3' },
-  { id: 'memo', label: 'Internal Memo', description: 'Team communications', icon: StickyNote, color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20', gradient: 'from-rose-500/8 to-rose-600/3' },
-  { id: 'meeting', label: 'Meeting Notes', description: 'Capture key decisions', icon: Users, color: 'text-cyan-500', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20', gradient: 'from-cyan-500/8 to-cyan-600/3' },
-  { id: 'contract', label: 'Contract Draft', description: 'Legal document template', icon: FileSignature, color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20', gradient: 'from-orange-500/8 to-orange-600/3' },
+  { id: 'blank', label: 'Blank document', description: 'Start from nothing', icon: FileText },
+  { id: 'report', label: 'Business report', description: 'Professional report layout', icon: FileBarChart },
+  { id: 'proposal', label: 'Project proposal', description: 'Win new business', icon: Briefcase },
+  { id: 'letter', label: 'Formal letter', description: 'Professional correspondence', icon: Mail },
+  { id: 'memo', label: 'Internal memo', description: 'Team communications', icon: StickyNote },
+  { id: 'meeting', label: 'Meeting notes', description: 'Capture key decisions', icon: Users },
+  { id: 'contract', label: 'Contract draft', description: 'Legal document template', icon: FileSignature },
 ];
 
 type SortBy = 'updated' | 'created' | 'title' | 'words';
@@ -163,218 +161,180 @@ export default function OfficeWordHome() {
 
   return (
     <div className="h-full flex flex-col overflow-auto bg-background">
-      {/* Hero Header */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/8 via-indigo-500/5 to-transparent" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
-        
-        <div className="relative px-4 sm:px-8 pt-5 sm:pt-7 pb-4 sm:pb-6">
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-3.5">
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-card/80" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div className="h-11 w-11 rounded-[14px] bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-blue-600/25">
-                  <FileText className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">Documents</h1>
-                  <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">Create, edit, and manage your documents</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button onClick={() => createDocument('blank')} className="gap-2 h-9 rounded-xl text-xs shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all">
-                  <Plus className="h-3.5 w-3.5" /><span className="hidden sm:inline"> New Document</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* Stats Row */}
-            <div className="flex flex-wrap items-center gap-2">
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card/70 backdrop-blur-sm border border-border/30">
-                <FolderOpen className="h-3.5 w-3.5 text-blue-500" />
-                <span className="text-[11px] font-semibold text-foreground">{documents.length}</span>
-                <span className="text-[10px] text-muted-foreground">documents</span>
-              </motion.div>
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 }}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card/70 backdrop-blur-sm border border-border/30">
-                <LetterText className="h-3.5 w-3.5 text-emerald-500" />
-                <span className="text-[11px] font-semibold text-foreground">{totalWords.toLocaleString()}</span>
-                <span className="text-[10px] text-muted-foreground">total words</span>
-              </motion.div>
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card/70 backdrop-blur-sm border border-border/30">
-                <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                <span className="text-[11px] font-semibold text-foreground">{starred.length}</span>
-                <span className="text-[10px] text-muted-foreground">starred</span>
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Templates Section */}
-      <div className="px-4 sm:px-8 pb-4 sm:pb-5">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-3.5 w-3.5 text-primary/60" />
-          <h2 className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-[0.14em]">Start from template</h2>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2">
-          {TEMPLATES.map((t, i) => {
-            const Icon = t.icon;
-            return (
-              <motion.button 
-                key={t.id} 
-                initial={{ opacity: 0, y: 6 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                transition={{ delay: i * 0.035 }}
-                onClick={() => createDocument(t.id)}
-                className={cn(
-                  "flex flex-col items-center gap-2.5 p-4 rounded-xl border bg-gradient-to-b hover:shadow-lg transition-all duration-250 hover:-translate-y-1 group cursor-pointer",
-                  t.border, t.gradient
-                )}
-              >
-                <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110", t.bg)}>
-                  <Icon className={cn("h-5 w-5", t.color)} />
-                </div>
-                <div className="text-center">
-                  <span className="text-[10px] font-semibold text-foreground block leading-tight">{t.label}</span>
-                  <span className="text-[8px] text-muted-foreground/60 leading-tight mt-0.5 block">{t.description}</span>
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Batch Action Bar */}
-      <AnimatePresence>
-        {selectedIds.size > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="px-4 sm:px-8 pb-2"
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-8">
+        {/* Header */}
+        <div className="flex items-start gap-3 pt-5 sm:pt-7">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Back to Office"
+            className="mt-0.5 h-8 w-8 shrink-0 rounded-lg text-muted-foreground hover:text-foreground"
+            onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}
           >
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary/5 border border-primary/20 overflow-x-auto">
-              <span className="text-[11px] font-semibold text-primary">{selectedIds.size} selected</span>
-              <div className="flex-1" />
-              <Button variant="ghost" size="sm" className="h-7 text-[10px] rounded-lg gap-1" onClick={selectAll}>
-                {selectedIds.size === filtered.length ? 'Deselect All' : 'Select All'}
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <PageHeader
+            className="min-w-0 flex-1"
+            kicker="Quooro Office · Docs"
+            title="Documents"
+            description="Write, edit and manage your documents"
+            actions={
+              <Button className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => createDocument('blank')}>
+                <Plus className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">New document</span>
               </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-[10px] rounded-lg gap-1" onClick={() => batchStar(true)}>
+            }
+          />
+        </div>
+
+        {/* Fact line */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-3 font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">
+          <span className="tabular-nums">{documents.length} documents</span>
+          <span className="tabular-nums">{totalWords.toLocaleString()} words</span>
+          <span className="tabular-nums">{starred.length} starred</span>
+        </div>
+
+        {/* Templates */}
+        <section className="pb-6 pt-6">
+          <div className="mb-3 flex items-center gap-2.5">
+            <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Start from a template</h2>
+            <div className="h-px flex-1 bg-border/60" />
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
+            {TEMPLATES.map((t) => {
+              const Icon = t.icon;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => createDocument(t.id)}
+                  className="flex flex-col items-start gap-2.5 rounded-[10px] border border-border/60 bg-card p-3.5 text-left transition-colors duration-150 hover:bg-foreground/[0.025]"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.04]">
+                    <Icon className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
+                  </span>
+                  <span>
+                    <span className="block text-[11.5px] font-medium leading-tight text-foreground">{t.label}</span>
+                    <span className="mt-0.5 block text-[10.5px] leading-tight text-muted-foreground">{t.description}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Batch action bar */}
+        {selectedIds.size > 0 && (
+          <div className="pb-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto rounded-[10px] border border-border/60 bg-card px-3 py-1.5">
+              <span className="shrink-0 font-mono text-[10.5px] tabular-nums text-ink-2">{selectedIds.size} selected</span>
+              <div className="flex-1" />
+              <Button variant="ghost" size="sm" className="h-7 shrink-0 rounded-lg text-[11px]" onClick={selectAll}>
+                {selectedIds.size === filtered.length ? 'Deselect all' : 'Select all'}
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 shrink-0 gap-1 rounded-lg text-[11px]" onClick={() => batchStar(true)}>
                 <Star className="h-3 w-3" /> Star
               </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-[10px] rounded-lg gap-1" onClick={() => batchStar(false)}>
+              <Button variant="ghost" size="sm" className="h-7 shrink-0 gap-1 rounded-lg text-[11px]" onClick={() => batchStar(false)}>
                 <StarOff className="h-3 w-3" /> Unstar
               </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-[10px] rounded-lg gap-1 text-destructive hover:text-destructive" onClick={batchDelete}>
+              <Button variant="ghost" size="sm" className="h-7 shrink-0 gap-1 rounded-lg text-[11px] text-risk hover:text-risk" onClick={batchDelete}>
                 <Trash2 className="h-3 w-3" /> Delete
               </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-[10px] rounded-lg" onClick={() => setSelectedIds(new Set())}>
+              <Button variant="ghost" size="sm" className="h-7 shrink-0 rounded-lg text-[11px]" onClick={() => setSelectedIds(new Set())}>
                 Cancel
               </Button>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
 
-      {/* Search & Controls */}
-      <div className="px-4 sm:px-8 pb-3">
-        <div className="flex items-center gap-2.5">
+        {/* Search and controls */}
+        <div className="flex items-center gap-2 pb-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
-            <Input 
-              value={search} 
-              onChange={(e) => setSearch(e.target.value)} 
-              placeholder="Search documents…" 
-              className="pl-9 h-8 text-xs bg-card/60 border-border/40 rounded-xl focus:ring-blue-500/20" 
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search documents"
+              className={cn(FIELD, 'h-8 pl-9 text-xs')}
             />
           </div>
           <Select value={sortBy} onValueChange={v => setSortBy(v as SortBy)}>
-            <SelectTrigger className="h-8 w-[130px] text-[10px] border-border/40 rounded-xl bg-card/60">
+            <SelectTrigger className="h-8 w-[130px] rounded-lg border-border/60 bg-card text-[11px]">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="updated" className="text-[10px]">Last modified</SelectItem>
-              <SelectItem value="created" className="text-[10px]">Date created</SelectItem>
-              <SelectItem value="title" className="text-[10px]">Title</SelectItem>
-              <SelectItem value="words" className="text-[10px]">Word count</SelectItem>
+            <SelectContent className="rounded-[10px]">
+              <SelectItem value="updated" className="text-xs">Last modified</SelectItem>
+              <SelectItem value="created" className="text-xs">Date created</SelectItem>
+              <SelectItem value="title" className="text-xs">Title</SelectItem>
+              <SelectItem value="words" className="text-xs">Word count</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => setSortDir(d => d === 'desc' ? 'asc' : 'desc')}>
+          <Button variant="ghost" size="icon" aria-label="Reverse sort order" className="h-8 w-8 rounded-lg" onClick={() => setSortDir(d => d === 'desc' ? 'asc' : 'desc')}>
             {sortDir === 'desc' ? <SortDesc className="h-3.5 w-3.5" /> : <SortAsc className="h-3.5 w-3.5" />}
           </Button>
-          <div className="flex items-center gap-0.5 border border-border/40 rounded-xl p-0.5 bg-card/40">
-            <Button variant={viewMode === 'grid' ? 'secondary' : 'ghost'} size="icon" className="h-7 w-7 rounded-lg" onClick={() => setViewMode('grid')}>
+          <div className="flex items-center gap-0.5 rounded-lg border border-border/60 bg-card p-0.5">
+            <Button variant={viewMode === 'grid' ? 'secondary' : 'ghost'} size="icon" aria-label="Grid view" className="h-7 w-7 rounded-md" onClick={() => setViewMode('grid')}>
               <Grid3X3 className="h-3.5 w-3.5" />
             </Button>
-            <Button variant={viewMode === 'list' ? 'secondary' : 'ghost'} size="icon" className="h-7 w-7 rounded-lg" onClick={() => setViewMode('list')}>
+            <Button variant={viewMode === 'list' ? 'secondary' : 'ghost'} size="icon" aria-label="List view" className="h-7 w-7 rounded-md" onClick={() => setViewMode('list')}>
               <List className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
-      </div>
 
-      {/* Documents */}
-      <div className="px-4 sm:px-8 pb-6 sm:pb-8 flex-1">
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="rounded-xl overflow-hidden">
-                <div className="aspect-[3/4] bg-secondary/20 animate-pulse rounded-xl" />
-                <div className="pt-2.5 space-y-1.5">
-                  <div className="h-3 w-3/4 bg-secondary/20 rounded animate-pulse" />
-                  <div className="h-2 w-1/2 bg-secondary/15 rounded animate-pulse" />
+        {/* Documents */}
+        <div className="flex-1 pb-6 sm:pb-8">
+          {loading ? (
+            <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" aria-hidden>
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                <div key={i} className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+                  <div className="aspect-[3/4] animate-pulse bg-foreground/[0.04]" />
+                  <div className="space-y-1.5 border-t border-border/60 p-3">
+                    <div className="h-2.5 w-3/4 animate-pulse rounded bg-foreground/[0.06]" />
+                    <div className="h-2 w-1/2 animate-pulse rounded bg-foreground/[0.06]" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 flex items-center justify-center mb-5 border border-blue-500/10">
-              <FileText className="h-10 w-10 text-blue-500/30" />
+              ))}
             </div>
-            <h3 className="text-base font-semibold text-foreground mb-1.5">No documents yet</h3>
-            <p className="text-xs text-muted-foreground mb-5 max-w-xs">Create your first document to get started with writing, reports, and more</p>
-            <Button onClick={() => createDocument('blank')} className="gap-2 rounded-xl h-9 text-xs shadow-md">
-              <Plus className="h-3.5 w-3.5" /> Create Document
-            </Button>
-          </motion.div>
-        ) : (
-          <div className="space-y-6">
-            {starred.length > 0 && (
-              <div>
-                <h2 className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3 flex items-center gap-1.5">
-                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> Starred
-                </h2>
-                <DocGrid docs={starred} viewMode={viewMode} onOpen={id => navigate(`/lounge/office/word/${id}`)} onStar={toggleStar} onDelete={setDeleteId} onDuplicate={duplicateDocument} selectedIds={selectedIds} onToggleSelect={toggleSelect} />
-              </div>
-            )}
-            <div>
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              title={search.trim() ? 'No matching documents' : 'No documents yet'}
+              body={search.trim() ? 'Try a different search.' : 'Create your first document to start writing.'}
+              action={search.trim() ? undefined : { label: 'New document', onClick: () => createDocument('blank') }}
+            />
+          ) : (
+            <div className="space-y-7">
               {starred.length > 0 && (
-                <h2 className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3 flex items-center gap-1.5">
-                  <Clock className="h-3 w-3 text-muted-foreground/50" /> Recent
-                </h2>
+                <div>
+                  <h2 className="mb-2.5 flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                    <Star className="h-3 w-3 fill-gold text-gold" /> Starred
+                  </h2>
+                  <DocGrid docs={starred} viewMode={viewMode} onOpen={id => navigate(`/lounge/office/word/${id}`)} onStar={toggleStar} onDelete={setDeleteId} onDuplicate={duplicateDocument} selectedIds={selectedIds} onToggleSelect={toggleSelect} />
+                </div>
               )}
-              <DocGrid docs={recent} viewMode={viewMode} onOpen={id => navigate(`/lounge/office/word/${id}`)} onStar={toggleStar} onDelete={setDeleteId} onDuplicate={duplicateDocument} selectedIds={selectedIds} onToggleSelect={toggleSelect} />
+              <div>
+                {starred.length > 0 && (
+                  <h2 className="mb-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                    Recent
+                  </h2>
+                )}
+                <DocGrid docs={recent} viewMode={viewMode} onOpen={id => navigate(`/lounge/office/word/${id}`)} onStar={toggleStar} onDelete={setDeleteId} onDuplicate={duplicateDocument} selectedIds={selectedIds} onToggleSelect={toggleSelect} />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="rounded-2xl max-w-sm">
+        <AlertDialogContent className="max-w-sm rounded-[10px]">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-sm">Delete this document?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">This action cannot be undone. The document will be permanently removed.</AlertDialogDescription>
+            <AlertDialogDescription className="text-xs">This cannot be undone. The document will be permanently removed.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl h-8 text-xs">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={deleteDocument} className="bg-destructive text-destructive-foreground rounded-xl h-8 text-xs">Delete</AlertDialogAction>
+            <AlertDialogCancel className="h-8 rounded-lg text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteDocument} className="h-8 rounded-lg bg-destructive text-destructive-foreground text-xs">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -394,41 +354,41 @@ function DocGrid({ docs, viewMode, onOpen, onStar, onDelete, onDuplicate, select
 }) {
   if (viewMode === 'list') {
     return (
-      <div className="rounded-xl border border-border/40 overflow-hidden bg-card/50 backdrop-blur-sm">
+      <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
         {docs.map((doc, i) => (
-          <motion.div 
-            key={doc.id} 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            transition={{ delay: i * 0.02 }}
-            onClick={() => onOpen(doc.id)} 
+          <div
+            key={doc.id}
+            onClick={() => onOpen(doc.id)}
             className={cn(
-              "flex items-center gap-3.5 px-4 py-3 hover:bg-accent/40 cursor-pointer group transition-all duration-150",
-              i > 0 && "border-t border-border/20",
-              selectedIds.has(doc.id) && "bg-primary/5"
+              'group flex h-10 cursor-pointer items-center gap-3 px-3.5 transition-colors duration-150 hover:bg-foreground/[0.025]',
+              i > 0 && 'border-t border-border/60',
+              selectedIds.has(doc.id) && 'bg-primary/[0.05]',
             )}
           >
             <button
+              type="button"
+              aria-label="Select document"
               onClick={(e) => { e.stopPropagation(); onToggleSelect(doc.id); }}
               className={cn(
-                "h-4 w-4 rounded border-2 shrink-0 flex items-center justify-center transition-all",
-                selectedIds.has(doc.id) ? "bg-primary border-primary" : "border-border/40 opacity-0 group-hover:opacity-100"
+                'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors duration-150',
+                selectedIds.has(doc.id) ? 'border-primary bg-primary' : 'border-border opacity-0 group-hover:opacity-100'
               )}
             >
               {selectedIds.has(doc.id) && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
             </button>
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/10 flex items-center justify-center shrink-0 border border-blue-500/10">
-              <FileText className="h-4 w-4 text-blue-500" />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
+              <FileText className="h-3.5 w-3.5 text-ink-2" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <span className="block truncate text-[13px] font-[450] text-foreground">{doc.title}</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-xs font-semibold truncate text-foreground block">{doc.title}</span>
-              <span className="text-[9px] text-muted-foreground/60">
-                {doc.word_count.toLocaleString()} words · Edited {formatDistanceToNow(new Date(doc.updated_at), { addSuffix: true })}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+            <span className="hidden shrink-0 font-mono text-[10.5px] tabular-nums text-muted-foreground sm:inline">
+              {doc.word_count.toLocaleString()} words
+            </span>
+            <RelativeTime date={doc.updated_at} className="shrink-0" />
+            <div className="flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100" onClick={e => e.stopPropagation()}>
               <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => onStar(doc.id, doc.is_starred)}>
-                {doc.is_starred ? <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> : <StarOff className="h-3.5 w-3.5" />}
+                {doc.is_starred ? <Star className="h-3.5 w-3.5 fill-gold text-gold" /> : <StarOff className="h-3.5 w-3.5" />}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -436,80 +396,73 @@ function DocGrid({ docs, viewMode, onOpen, onStar, onDelete, onDuplicate, select
                     <MoreHorizontal className="h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-xl w-40">
-                  <DropdownMenuItem onClick={() => onOpen(doc.id)} className="text-xs"><Pencil className="h-3 w-3 mr-2" /> Open</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onDuplicate(doc)} className="text-xs"><Copy className="h-3 w-3 mr-2" /> Duplicate</DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-40 rounded-[10px]">
+                  <DropdownMenuItem onClick={() => onOpen(doc.id)} className="text-xs"><Pencil className="mr-2 h-3 w-3" /> Open</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDuplicate(doc)} className="text-xs"><Copy className="mr-2 h-3 w-3" /> Duplicate</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onDelete(doc.id)} className="text-xs text-destructive focus:text-destructive"><Trash2 className="h-3 w-3 mr-2" /> Delete</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDelete(doc.id)} className="text-xs text-destructive focus:text-destructive"><Trash2 className="mr-2 h-3 w-3" /> Delete</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-      {docs.map((doc, i) => (
-        <motion.div 
-          key={doc.id} 
-          initial={{ opacity: 0, y: 6 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ delay: i * 0.03 }}
-          onClick={() => onOpen(doc.id)} 
-          className="group cursor-pointer rounded-xl border border-border/40 bg-card/60 overflow-hidden hover:shadow-xl hover:border-border/60 hover:-translate-y-1 transition-all duration-250"
+    <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {docs.map((doc) => (
+        <div
+          key={doc.id}
+          onClick={() => onOpen(doc.id)}
+          className="group cursor-pointer overflow-hidden rounded-[10px] border border-border/60 bg-card transition-colors duration-150 hover:border-border"
         >
-          {/* Document Preview */}
-          <div className="aspect-[3/4] bg-gradient-to-b from-card via-card to-secondary/15 relative p-5 flex flex-col">
-            {/* Mock content lines */}
-            <div className="space-y-2 flex-1">
-              <div className="h-3 w-2/3 rounded-sm bg-foreground/8" />
-              <div className="h-1.5 w-full rounded-sm bg-foreground/5 mt-3" />
-              <div className="h-1.5 w-full rounded-sm bg-foreground/5" />
-              <div className="h-1.5 w-4/5 rounded-sm bg-foreground/5" />
-              <div className="h-1.5 w-full rounded-sm bg-foreground/5 mt-3" />
-              <div className="h-1.5 w-full rounded-sm bg-foreground/5" />
-              <div className="h-1.5 w-3/4 rounded-sm bg-foreground/5" />
-              <div className="h-1.5 w-full rounded-sm bg-foreground/5 mt-3" />
-              <div className="h-1.5 w-5/6 rounded-sm bg-foreground/5" />
+          {/* Page preview */}
+          <div className="relative flex aspect-[3/4] flex-col bg-sunken/50 p-5">
+            <div className="flex-1 space-y-2">
+              <div className="h-3 w-2/3 rounded-sm bg-foreground/[0.08]" />
+              <div className="mt-3 h-1.5 w-full rounded-sm bg-foreground/[0.05]" />
+              <div className="h-1.5 w-full rounded-sm bg-foreground/[0.05]" />
+              <div className="h-1.5 w-4/5 rounded-sm bg-foreground/[0.05]" />
+              <div className="mt-3 h-1.5 w-full rounded-sm bg-foreground/[0.05]" />
+              <div className="h-1.5 w-full rounded-sm bg-foreground/[0.05]" />
+              <div className="h-1.5 w-3/4 rounded-sm bg-foreground/[0.05]" />
+              <div className="mt-3 h-1.5 w-full rounded-sm bg-foreground/[0.05]" />
+              <div className="h-1.5 w-5/6 rounded-sm bg-foreground/[0.05]" />
             </div>
-            
+
             {/* Hover actions */}
-            <div className="absolute top-2.5 right-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200" onClick={e => e.stopPropagation()}>
-              <Button variant="secondary" size="icon" className="h-7 w-7 rounded-lg bg-card/95 shadow-md border border-border/40 backdrop-blur-sm" onClick={() => onStar(doc.id, doc.is_starred)}>
-                {doc.is_starred ? <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> : <StarOff className="h-3.5 w-3.5" />}
+            <div className="absolute right-2.5 top-2.5 flex gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100" onClick={e => e.stopPropagation()}>
+              <Button variant="secondary" size="icon" className="h-7 w-7 rounded-lg border border-border/60 bg-card" onClick={() => onStar(doc.id, doc.is_starred)}>
+                {doc.is_starred ? <Star className="h-3.5 w-3.5 fill-gold text-gold" /> : <StarOff className="h-3.5 w-3.5" />}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" size="icon" className="h-7 w-7 rounded-lg bg-card/95 shadow-md border border-border/40 backdrop-blur-sm">
+                  <Button variant="secondary" size="icon" className="h-7 w-7 rounded-lg border border-border/60 bg-card">
                     <MoreHorizontal className="h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-xl w-40">
-                  <DropdownMenuItem onClick={() => onOpen(doc.id)} className="text-xs"><Pencil className="h-3 w-3 mr-2" /> Open</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onDuplicate(doc)} className="text-xs"><Copy className="h-3 w-3 mr-2" /> Duplicate</DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-40 rounded-[10px]">
+                  <DropdownMenuItem onClick={() => onOpen(doc.id)} className="text-xs"><Pencil className="mr-2 h-3 w-3" /> Open</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDuplicate(doc)} className="text-xs"><Copy className="mr-2 h-3 w-3" /> Duplicate</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onDelete(doc.id)} className="text-xs text-destructive focus:text-destructive"><Trash2 className="h-3 w-3 mr-2" /> Delete</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDelete(doc.id)} className="text-xs text-destructive focus:text-destructive"><Trash2 className="mr-2 h-3 w-3" /> Delete</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-
-            {/* Blue accent line */}
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500/0 via-blue-500/40 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
-          
-          {/* Doc Info */}
-          <div className="p-3 border-t border-border/20">
-            <span className="text-[11px] font-semibold text-foreground block truncate leading-tight">{doc.title}</span>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="text-[9px] text-muted-foreground/50">{doc.word_count.toLocaleString()} words</span>
-              <span className="text-[9px] text-muted-foreground/30">·</span>
-              <span className="text-[9px] text-muted-foreground/50">{formatDistanceToNow(new Date(doc.updated_at), { addSuffix: true })}</span>
+
+          {/* Caption */}
+          <div className="border-t border-border/60 p-3">
+            <span className="block truncate text-[12px] font-medium leading-tight text-foreground">{doc.title}</span>
+            <div className="mt-1 flex items-center gap-1.5 font-mono text-[10px] tabular-nums text-muted-foreground">
+              <span>{doc.word_count.toLocaleString()} words</span>
+              <span aria-hidden>·</span>
+              <RelativeTime date={doc.updated_at} className="font-mono text-[10px]" />
             </div>
           </div>
-        </motion.div>
+        </div>
       ))}
     </div>
   );

@@ -271,17 +271,17 @@ export default function OfficePowerPointHome() {
   if (showGrid) {
     return (
       <div className="h-full flex flex-col overflow-hidden bg-background">
-        <div className="flex items-center gap-2 px-4 h-12 bg-card/90 backdrop-blur-xl border-b border-border/20 shrink-0">
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => setShowGrid(false)}>
+        <div className="flex items-center gap-2 px-4 h-12 bg-card border-b border-border/60 shrink-0">
+          <Button variant="ghost" size="icon" aria-label="Back to editor" className="h-8 w-8 rounded-lg" onClick={() => setShowGrid(false)}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-orange-500 to-rose-600 flex items-center justify-center shadow-lg shadow-orange-500/25">
-            <Presentation className="h-4 w-4 text-white" />
+          <div className="h-8 w-8 rounded-lg bg-foreground/[0.04] flex items-center justify-center">
+            <Presentation className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
           </div>
-          <span className="text-sm font-semibold text-foreground">Slide Overview</span>
-          <span className="text-xs text-muted-foreground ml-1">— {slides.length} slides</span>
+          <span className="text-sm font-semibold tracking-tight text-foreground">Slide overview</span>
+          <span className="font-mono text-[10px] tabular-nums text-muted-foreground ml-1">{slides.length} slides</span>
           <div className="flex-1" />
-          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-xl" onClick={() => setShowGrid(false)}>
+          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg" onClick={() => setShowGrid(false)}>
             <X className="h-3.5 w-3.5 mr-1" /> Close
           </Button>
         </div>
@@ -289,36 +289,31 @@ export default function OfficePowerPointHome() {
         <div className="flex-1 overflow-auto p-6">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {slides.map((s, i) => (
-              <motion.button
+              <button
                 key={s.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.02 }}
                 onClick={() => { setCurrentSlide(i); setShowGrid(false); }}
                 className={cn(
-                  "rounded-xl overflow-hidden border-2 transition-all hover:shadow-xl hover:-translate-y-1 group text-left",
-                  i === currentSlide ? "border-orange-500 shadow-lg shadow-orange-500/20" : "border-border/30 hover:border-border/60"
+                  "rounded-[10px] overflow-hidden border transition-colors duration-150 group text-left",
+                  i === currentSlide ? "border-primary" : "border-border/60 hover:border-border"
                 )}
               >
                 <ScaledSlide slide={s} className="aspect-video w-full" />
-                <div className="px-3 py-2 bg-card/90 border-t border-border/10 flex items-center justify-between">
-                  <span className="text-[10px] font-semibold text-foreground">Slide {i + 1}</span>
+                <div className="px-3 py-2 bg-card border-t border-border/60 flex items-center justify-between">
+                  <span className="font-mono text-[10px] font-medium tabular-nums text-foreground">Slide {i + 1}</span>
                   <div className="hidden sm:flex items-center gap-1.5">
                     {s.notes && <FileText className="h-3 w-3 text-muted-foreground/40" />}
-                    <span className="text-[9px] text-muted-foreground/40">{s.transition || 'fade'}</span>
+                    <span className="text-[9px] text-muted-foreground/60">{s.transition || 'fade'}</span>
                   </div>
                 </div>
-              </motion.button>
+              </button>
             ))}
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+            <button
               onClick={() => { addSlide('blank'); setShowGrid(false); }}
-              className="aspect-video rounded-xl border-2 border-dashed border-border/30 hover:border-border/60 flex flex-col items-center justify-center gap-2 transition-all hover:bg-card/40"
+              className="aspect-video rounded-[10px] border border-dashed border-border/60 hover:border-border flex flex-col items-center justify-center gap-2 transition-colors duration-150 hover:bg-foreground/[0.02]"
             >
-              <Plus className="h-6 w-6 text-muted-foreground/30" />
-              <span className="text-[10px] text-muted-foreground/40 font-medium">Add Slide</span>
-            </motion.button>
+              <Plus className="h-6 w-6 text-muted-foreground/40" />
+              <span className="text-[10px] text-muted-foreground font-medium">Add slide</span>
+            </button>
           </div>
         </div>
       </div>
@@ -328,12 +323,12 @@ export default function OfficePowerPointHome() {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Title Bar */}
-      <div className="flex items-center gap-2 px-3 h-11 bg-card/90 backdrop-blur-xl border-b border-border/20 shrink-0 select-none">
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => navigate('/lounge/office/powerpoint-home')}>
+      <div className="flex items-center gap-2 px-3 h-11 bg-card border-b border-border/60 shrink-0 select-none">
+        <Button variant="ghost" size="icon" aria-label="Back to Slides" className="h-8 w-8 rounded-lg" onClick={() => navigate('/lounge/office/powerpoint-home')}>
           <ArrowLeft className="h-3.5 w-3.5" />
         </Button>
-        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-orange-500 to-rose-600 flex items-center justify-center shadow-lg shadow-orange-500/25">
-          <Presentation className="h-4 w-4 text-white" />
+        <div className="h-8 w-8 rounded-lg bg-foreground/[0.04] flex items-center justify-center">
+          <Presentation className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
         </div>
 
         {isEditingTitle ? (
@@ -343,24 +338,24 @@ export default function OfficePowerPointHome() {
             onBlur={() => setIsEditingTitle(false)}
             onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
             autoFocus
-            className="h-7 text-xs font-medium w-64 rounded-lg bg-secondary/60 border-border/40"
+            className="h-7 text-xs font-medium w-64 rounded-lg border-border/60"
           />
         ) : (
-          <button onClick={() => setIsEditingTitle(true)} className="text-xs font-semibold text-foreground hover:bg-secondary/60 transition-colors truncate max-w-sm px-2 py-1 rounded-lg">
+          <button onClick={() => setIsEditingTitle(true)} className="text-xs font-medium text-foreground hover:bg-foreground/[0.04] transition-colors duration-150 truncate max-w-sm px-2 py-1 rounded-lg">
             {title}
           </button>
         )}
-        <span className="text-[10px] text-muted-foreground">— Slides</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">· Slides</span>
         <div className="flex-1" />
 
         {/* Transition picker */}
         <div className="hidden sm:flex items-center gap-1.5">
-          <span className="text-[10px] text-muted-foreground">Transition:</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">Transition</span>
           <Select value={slide?.transition || 'fade'} onValueChange={(v) => updateSlideTransition(v as Slide['transition'])}>
-            <SelectTrigger className="h-6 w-20 text-[10px] rounded-lg border-border/30">
+            <SelectTrigger className="h-6 w-20 text-[10px] rounded-lg border-border/60">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
+            <SelectContent className="rounded-[10px]">
               {['none', 'fade', 'slide', 'zoom', 'flip', 'blur'].map(t => (
                 <SelectItem key={t} value={t} className="text-xs capitalize">{t}</SelectItem>
               ))}
@@ -368,7 +363,7 @@ export default function OfficePowerPointHome() {
           </Select>
         </div>
 
-        <span className="hidden sm:block text-[10px] text-muted-foreground tabular-nums ml-3">Slide {currentSlide + 1} of {slides.length}</span>
+        <span className="hidden sm:block font-mono text-[10px] text-muted-foreground tabular-nums ml-3">Slide {currentSlide + 1} of {slides.length}</span>
       </div>
 
       {/* Toolbar */}
@@ -404,7 +399,7 @@ export default function OfficePowerPointHome() {
       {/* Main Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Thumbnail Sidebar */}
-        <div className="hidden md:flex md:flex-col w-52 border-r border-border/20 bg-card/30 backdrop-blur-sm overflow-y-auto shrink-0 p-2 space-y-1.5">
+        <div className="hidden md:flex md:flex-col w-52 border-r border-border/60 bg-card overflow-y-auto shrink-0 p-2 space-y-1.5">
           <Reorder.Group axis="y" values={slides} onReorder={handleReorder} className="space-y-1.5">
             {slides.map((s, i) => (
               <Reorder.Item key={s.id} value={s}>
@@ -412,16 +407,16 @@ export default function OfficePowerPointHome() {
                   <button
                     onClick={() => { setCurrentSlide(i); setSelectedElement(null); }}
                     className={cn(
-                      "w-full rounded-xl overflow-hidden border-2 transition-all relative",
+                      "w-full rounded-[10px] overflow-hidden border transition-colors duration-150 relative",
                       i === currentSlide
-                        ? "border-orange-500 shadow-lg shadow-orange-500/15"
-                        : "border-border/20 hover:border-border/50"
+                        ? "border-primary"
+                        : "border-border/60 hover:border-border"
                     )}
                   >
                     <ScaledSlide slide={s} className="aspect-video w-full" />
                   </button>
                   <div className="absolute bottom-1.5 left-2 flex items-center gap-1">
-                    <span className="text-[8px] font-bold text-foreground/50 bg-card/80 backdrop-blur-sm px-1.5 py-0.5 rounded-md">
+                    <span className="font-mono text-[8px] font-medium tabular-nums text-foreground/60 bg-card/90 px-1.5 py-0.5 rounded-md">
                       {i + 1}
                     </span>
                     {s.notes && <FileText className="h-2.5 w-2.5 text-muted-foreground/40" />}
@@ -429,12 +424,12 @@ export default function OfficePowerPointHome() {
                   {/* Quick actions on hover */}
                   <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5">
                     <button onClick={(e) => { e.stopPropagation(); const dup: Slide = { ...s, id: uid(), elements: s.elements.map(e => ({ ...e, id: uid() })) }; const ns = [...slides]; ns.splice(i + 1, 0, dup); updateSlides(ns); }}
-                      className="h-5 w-5 rounded-md bg-card/90 backdrop-blur-sm border border-border/30 flex items-center justify-center hover:bg-card">
+                      className="h-5 w-5 rounded-md bg-card border border-border/60 flex items-center justify-center hover:bg-foreground/[0.04]">
                       <Copy className="h-2.5 w-2.5 text-muted-foreground" />
                     </button>
                     {slides.length > 1 && (
                       <button onClick={(e) => { e.stopPropagation(); const ns = slides.filter((_, j) => j !== i); updateSlides(ns); if (currentSlide >= ns.length) setCurrentSlide(ns.length - 1); }}
-                        className="h-5 w-5 rounded-md bg-card/90 backdrop-blur-sm border border-border/30 flex items-center justify-center hover:bg-destructive/20">
+                        className="h-5 w-5 rounded-md bg-card border border-border/60 flex items-center justify-center hover:bg-destructive/20">
                         <Trash2 className="h-2.5 w-2.5 text-destructive" />
                       </button>
                     )}
@@ -446,7 +441,7 @@ export default function OfficePowerPointHome() {
 
           <button
             onClick={() => addSlide('blank')}
-            className="w-full aspect-video rounded-xl border-2 border-dashed border-border/20 hover:border-border/50 flex items-center justify-center transition-all hover:bg-card/40"
+            className="w-full aspect-video rounded-[10px] border border-dashed border-border/60 hover:border-border flex items-center justify-center transition-colors duration-150 hover:bg-foreground/[0.02]"
           >
             <Plus className="h-5 w-5 text-muted-foreground/30" />
           </button>
@@ -478,10 +473,10 @@ export default function OfficePowerPointHome() {
                 animate={{ height: 160, opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="shrink-0 border-t border-border/20 bg-card/60 backdrop-blur-sm overflow-hidden"
+                className="shrink-0 border-t border-border/60 bg-card overflow-hidden"
               >
-                <div className="flex items-center justify-between px-4 h-8 border-b border-border/10">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Speaker Notes</span>
+                <div className="flex items-center justify-between px-4 h-8 border-b border-border/60">
+                  <span className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Speaker notes</span>
                   <Button variant="ghost" size="icon" className="h-5 w-5 rounded-md" onClick={() => setShowNotes(false)}>
                     <ChevronDown className="h-3 w-3" />
                   </Button>
@@ -489,7 +484,7 @@ export default function OfficePowerPointHome() {
                 <Textarea
                   value={slide.notes}
                   onChange={(e) => updateNotes(e.target.value)}
-                  placeholder="Add presenter notes for this slide…"
+                  placeholder="Add presenter notes for this slide"
                   className="h-[128px] border-none bg-transparent resize-none text-xs text-muted-foreground focus:ring-0 focus-visible:ring-0 px-4 py-2"
                 />
               </motion.div>
@@ -554,17 +549,17 @@ function SlideImageDialog({ open, onOpenChange, onInsert }: {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <DialogContent className="sm:max-w-lg rounded-xl">
+      <DialogContent className="sm:max-w-lg rounded-[10px]">
         <DialogHeader>
           <DialogTitle className="text-sm font-semibold flex items-center gap-2">
-            <ImagePlus className="h-4 w-4 text-orange-500" />
-            Insert Image to Slide
+            <ImagePlus className="h-4 w-4 text-ink-2" />
+            Insert image
           </DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="upload" className="mt-1">
           <TabsList className="grid w-full grid-cols-2 h-8 rounded-lg">
             <TabsTrigger value="upload" className="text-[11px] rounded-md gap-1.5">
-              <Upload className="h-3 w-3" /> From Computer
+              <Upload className="h-3 w-3" /> From computer
             </TabsTrigger>
             <TabsTrigger value="url" className="text-[11px] rounded-md gap-1.5">
               <Link2 className="h-3 w-3" /> From URL
@@ -577,20 +572,20 @@ function SlideImageDialog({ open, onOpenChange, onInsert }: {
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               className={cn(
-                "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200",
-                dragOver ? "border-orange-500 bg-orange-500/5 scale-[1.01]" : "border-border/40 hover:border-orange-500/40 hover:bg-muted/30",
-                preview && "border-orange-500/30 bg-orange-500/5"
+                "border border-dashed rounded-[10px] p-6 text-center cursor-pointer transition-colors duration-150",
+                dragOver ? "border-primary bg-primary/[0.04]" : "border-border/60 hover:border-border hover:bg-foreground/[0.02]",
+                preview && "border-primary/40 bg-primary/[0.03]"
               )}
             >
               {preview ? (
                 <div className="space-y-3">
-                  <img src={preview} alt="Preview" className="max-h-40 mx-auto rounded-lg shadow-md" />
+                  <img src={preview} alt="Preview" className="max-h-40 mx-auto rounded-lg border border-border/60" />
                   <p className="text-[10px] text-muted-foreground">Click or drag to replace</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <div className="h-10 w-10 mx-auto rounded-xl bg-orange-500/10 flex items-center justify-center">
-                    <FileUp className="h-5 w-5 text-orange-500" />
+                  <div className="h-10 w-10 mx-auto rounded-[10px] bg-foreground/[0.04] flex items-center justify-center">
+                    <FileUp className="h-5 w-5 text-ink-2" />
                   </div>
                   <p className="text-xs font-medium text-foreground">Drop an image here or click to browse</p>
                   <p className="text-[10px] text-muted-foreground">PNG, JPG, GIF, WebP, SVG up to 10MB</p>
@@ -610,7 +605,7 @@ function SlideImageDialog({ open, onOpenChange, onInsert }: {
               />
             </div>
             {url && (
-              <div className="rounded-lg overflow-hidden border border-border/30 bg-muted/20 p-2">
+              <div className="rounded-lg overflow-hidden border border-border/60 bg-sunken/50 p-2">
                 <img src={url} alt="Preview" className="max-h-32 mx-auto rounded-md" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               </div>
             )}
@@ -618,7 +613,7 @@ function SlideImageDialog({ open, onOpenChange, onInsert }: {
         </Tabs>
         <DialogFooter className="mt-2">
           <Button variant="ghost" onClick={() => { reset(); onOpenChange(false); }} className="rounded-lg text-xs">Cancel</Button>
-          <Button onClick={handleInsert} disabled={!preview && !url} className="rounded-lg text-xs gap-1.5 bg-gradient-to-r from-orange-500 to-rose-600 hover:from-orange-600 hover:to-rose-700">
+          <Button onClick={handleInsert} disabled={!preview && !url} className="rounded-lg text-xs gap-1.5">
             <ImageIcon className="h-3 w-3" /> Insert
           </Button>
         </DialogFooter>

@@ -4,7 +4,6 @@ import { ArrowLeft, BarChart3, Plus, Trash2, Check, Users, ArrowRight, Send, Has
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCommChannels } from '@/hooks/useCommChannels';
+import { EmptyState, SkeletonLedger, StatusBadge } from '@/components/platform';
 
 interface PollOption { id: string; text: string; votes: number; voters: string[]; }
 interface Poll { id: string; question: string; options: PollOption[]; createdAt: Date; isActive: boolean; totalVotes: number; sharedTo?: { type: 'channel' | 'contact'; name: string }[]; }
@@ -121,7 +121,7 @@ export default function OfficePolls() {
     };
     setPolls(prev => [poll, ...prev]);
     setNewQuestion(''); setNewOptions(['', '', '']); setView('list');
-    toast.success('Poll created!');
+    toast.success('Poll created');
   };
 
   const vote = async (pollId: string, optionId: string) => {
@@ -142,7 +142,7 @@ export default function OfficePolls() {
       options: p.options.map(o => o.id === optionId ? { ...o, votes: o.votes + 1, voters: [...o.voters, voterName] } : o),
     } : p));
     setVotedPolls(prev => new Set(prev).add(pollId));
-    toast.success('Vote recorded!');
+    toast.success('Vote recorded');
   };
 
   const closePoll = async (id: string) => {
@@ -242,51 +242,56 @@ export default function OfficePolls() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      <header className="h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-3 sm:px-5 gap-3 shrink-0 flex-wrap">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => {
+      <header className="h-[52px] border-b border-border/60 bg-card flex items-center px-3 sm:px-5 gap-3 shrink-0 flex-wrap">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => {
           if (view !== 'list') { setView('list'); setSelectedPoll(null); }
           else navigate('/lounge/office', { state: { fromOfficeApp: true } });
         }}>
           <ArrowLeft className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">{view !== 'list' ? 'Back' : 'Back to Office'}</span>
         </Button>
-        <div className="h-4 w-px bg-border/40" />
-        <BarChart3 className="h-4 w-4 text-indigo-500" />
-        <span className="text-sm font-semibold tracking-tight">Polls & Voting</span>
+        <div className="h-4 w-px bg-border/60" />
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
+          <BarChart3 className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
+        </span>
+        <span className="text-sm font-semibold tracking-tight">Polls</span>
         <div className="flex-1" />
         {view === 'list' && (
-          <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => setView('create')}>
-            <Plus className="h-3.5 w-3.5" /> New Poll
+          <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setView('create')}>
+            <Plus className="h-3.5 w-3.5" /> New poll
           </Button>
         )}
       </header>
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-2xl mx-auto px-4 sm:px-8 py-6 sm:py-8">
-          <AnimatePresence mode="wait">
+          <>
             {view === 'list' && (
-              <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <h1 className="text-2xl font-bold text-foreground tracking-tight mb-1">Polls</h1>
-                <p className="text-sm text-muted-foreground/60 mb-6">Create polls, gather feedback, and share to channels or contacts.</p>
+              <div key="list">
+                <span className="mb-1 block font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Quooro Office · Polls</span>
+                <h1 className="text-[17px] font-semibold tracking-[-0.015em] text-foreground mb-0.5">Polls</h1>
+                <p className="text-[13px] text-muted-foreground mb-6">Create polls, gather feedback and share to channels or contacts.</p>
                 {loading ? (
-                  <p className="text-sm text-muted-foreground/40 py-12 text-center">Loading…</p>
+                  <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonLedger rows={4} /></div>
                 ) : polls.length === 0 ? (
-                  <p className="text-sm text-muted-foreground/40 py-12 text-center">No polls yet. Create one!</p>
+                  <EmptyState
+                    title="No polls yet"
+                    body="Ask a question and share it with your team."
+                    action={{ label: 'New poll', onClick: () => setView('create') }}
+                  />
                 ) : (
                   <div className="space-y-3">
                     {polls.map(poll => (
-                      <motion.div key={poll.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="group p-5 rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all">
+                      <div key={poll.id}
+                        className="group p-4 rounded-[10px] bg-card border border-border/60 hover:border-border transition-colors duration-150">
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-2">
                           <div className="cursor-pointer flex-1" onClick={() => { setSelectedPoll(poll.id); setView('results'); }}>
-                            <h3 className="text-[13px] font-semibold text-foreground">{poll.question}</h3>
+                            <h3 className="text-[13px] font-medium text-foreground">{poll.question}</h3>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", poll.isActive ? "bg-green-500/10 text-green-600" : "bg-muted text-muted-foreground/50")}>
-                                {poll.isActive ? 'Active' : 'Closed'}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground/40 flex items-center gap-1"><Users className="h-3 w-3" />{poll.totalVotes} votes</span>
+                              <StatusBadge tone={poll.isActive ? 'ok' : 'neutral'} label={poll.isActive ? 'Active' : 'Closed'} className="text-[10px]" />
+                              <span className="font-mono text-[10px] tabular-nums text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" />{poll.totalVotes} votes</span>
                               {poll.sharedTo && poll.sharedTo.length > 0 && (
-                                <span className="text-[10px] text-primary/60 flex items-center gap-1">
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                                   <Send className="h-2.5 w-2.5" /> Shared to {poll.sharedTo.length} {poll.sharedTo.length === 1 ? 'place' : 'places'}
                                 </span>
                               )}
@@ -294,11 +299,11 @@ export default function OfficePolls() {
                           </div>
                           <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0 mt-2 sm:mt-0">
                             <button onClick={() => openShareDialog(poll.id)}
-                              className="h-7 px-2.5 rounded-lg hover:bg-primary/10 flex items-center gap-1.5 text-[10px] font-medium text-primary transition-colors">
+                              className="h-7 px-2.5 rounded-lg hover:bg-primary/10 flex items-center gap-1.5 text-[10px] font-medium text-primary transition-colors duration-150">
                               <Send className="h-3 w-3" /> Share
                             </button>
-                            {poll.isActive && <button onClick={e => { e.stopPropagation(); closePoll(poll.id); }} className="h-7 px-2 rounded-lg hover:bg-accent text-[10px] text-muted-foreground">Close</button>}
-                            <button onClick={e => { e.stopPropagation(); deletePoll(poll.id); }} className="h-7 w-7 rounded-lg hover:bg-destructive/20 flex items-center justify-center">
+                            {poll.isActive && <button onClick={e => { e.stopPropagation(); closePoll(poll.id); }} className="h-7 px-2 rounded-lg hover:bg-foreground/[0.04] text-[10px] text-muted-foreground transition-colors duration-150">Close</button>}
+                            <button aria-label="Delete poll" onClick={e => { e.stopPropagation(); deletePoll(poll.id); }} className="h-7 w-7 rounded-lg hover:bg-destructive/20 flex items-center justify-center transition-colors duration-150">
                               <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                             </button>
                           </div>
@@ -307,63 +312,63 @@ export default function OfficePolls() {
                           {poll.options.map(opt => {
                             const pct = poll.totalVotes > 0 ? (opt.votes / poll.totalVotes) * 100 : 0;
                             return (
-                              <div key={opt.id} className="relative h-8 rounded-lg bg-muted/30 overflow-hidden">
-                                <div className="absolute inset-y-0 left-0 bg-primary/10 rounded-lg transition-all" style={{ width: `${pct}%` }} />
+                              <div key={opt.id} className="relative h-8 rounded-lg bg-foreground/[0.03] overflow-hidden">
+                                <div className="absolute inset-y-0 left-0 bg-primary/10 rounded-lg" style={{ width: `${pct}%` }} />
                                 <div className="relative flex items-center justify-between px-3 h-full">
-                                  <span className="text-[11px] font-medium text-foreground">{opt.text}</span>
-                                  <span className="text-[10px] text-muted-foreground/60 font-mono">{Math.round(pct)}%</span>
+                                  <span className="text-[11.5px] font-medium text-foreground">{opt.text}</span>
+                                  <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{Math.round(pct)}%</span>
                                 </div>
                               </div>
                             );
                           })}
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 )}
-              </motion.div>
+              </div>
             )}
 
             {view === 'create' && (
-              <motion.div key="create" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <h1 className="text-2xl font-bold text-foreground tracking-tight mb-6">Create Poll</h1>
+              <div key="create">
+                <h1 className="text-[17px] font-semibold tracking-[-0.015em] text-foreground mb-6">Create poll</h1>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-widest mb-2 block">Question</label>
-                    <Input value={newQuestion} onChange={e => setNewQuestion(e.target.value)} placeholder="What would you like to ask?" className="h-12 rounded-xl text-sm" />
+                    <label className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em] mb-2 block">Question</label>
+                    <Input value={newQuestion} onChange={e => setNewQuestion(e.target.value)} placeholder="What would you like to ask?" className="h-11 rounded-lg border-border/60 text-sm" />
                   </div>
                   <div>
-                    <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-widest mb-2 block">Options</label>
+                    <label className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em] mb-2 block">Options</label>
                     <div className="space-y-2">
                       {newOptions.map((opt, i) => (
                         <div key={i} className="flex items-center gap-2">
                           <Input value={opt} onChange={e => { const next = [...newOptions]; next[i] = e.target.value; setNewOptions(next); }}
-                            placeholder={`Option ${i + 1}`} className="h-10 rounded-xl text-sm" />
-                          {newOptions.length > 2 && <button onClick={() => setNewOptions(prev => prev.filter((_, j) => j !== i))} className="h-8 w-8 rounded-lg hover:bg-destructive/20 flex items-center justify-center shrink-0">
+                            placeholder={`Option ${i + 1}`} className="h-10 rounded-lg border-border/60 text-sm" />
+                          {newOptions.length > 2 && <button aria-label="Remove option" onClick={() => setNewOptions(prev => prev.filter((_, j) => j !== i))} className="h-8 w-8 rounded-lg hover:bg-destructive/20 flex items-center justify-center shrink-0 transition-colors duration-150">
                             <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                           </button>}
                         </div>
                       ))}
                     </div>
                     {newOptions.length < 6 && (
-                      <Button variant="outline" size="sm" className="mt-2 h-8 gap-1.5 rounded-xl text-xs" onClick={() => setNewOptions(prev => [...prev, ''])}>
-                        <Plus className="h-3 w-3" /> Add Option
+                      <Button variant="outline" size="sm" className="mt-2 h-8 gap-1.5 rounded-lg text-xs" onClick={() => setNewOptions(prev => [...prev, ''])}>
+                        <Plus className="h-3 w-3" /> Add option
                       </Button>
                     )}
                   </div>
-                  <Button className="h-10 gap-2 rounded-xl" onClick={createPoll}>Create Poll <ArrowRight className="h-3.5 w-3.5" /></Button>
+                  <Button className="h-10 gap-2 rounded-lg" onClick={createPoll}>Create poll <ArrowRight className="h-3.5 w-3.5" /></Button>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {view === 'results' && viewPoll && (
-              <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <div key="results">
                 <div className="flex items-start justify-between mb-6">
                   <div>
-                    <h1 className="text-xl font-bold text-foreground tracking-tight mb-1">{viewPoll.question}</h1>
-                    <p className="text-[11px] text-muted-foreground/50">{viewPoll.totalVotes} votes · {viewPoll.isActive ? 'Active' : 'Closed'}</p>
+                    <h1 className="text-[17px] font-semibold tracking-[-0.015em] text-foreground mb-1">{viewPoll.question}</h1>
+                    <p className="font-mono text-[10.5px] tabular-nums text-muted-foreground">{viewPoll.totalVotes} votes · {viewPoll.isActive ? 'Active' : 'Closed'}</p>
                   </div>
-                  <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => openShareDialog(viewPoll.id)}>
+                  <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => openShareDialog(viewPoll.id)}>
                     <Send className="h-3 w-3" /> Share
                   </Button>
                 </div>
@@ -371,7 +376,7 @@ export default function OfficePolls() {
                 {viewPoll.sharedTo && viewPoll.sharedTo.length > 0 && (
                   <div className="mb-4 flex flex-wrap gap-1.5">
                     {viewPoll.sharedTo.map((s, i) => (
-                      <span key={i} className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-full bg-primary/5 text-primary/70 font-medium">
+                      <span key={i} className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-foreground/[0.04] text-muted-foreground font-medium">
                         {s.type === 'channel' ? <Hash className="h-2.5 w-2.5" /> : <User className="h-2.5 w-2.5" />}
                         {s.name}
                       </span>
@@ -387,43 +392,43 @@ export default function OfficePolls() {
                       <div key={opt.id}>
                         <button disabled={hasVoted || !viewPoll.isActive}
                           onClick={() => vote(viewPoll.id, opt.id)}
-                          className={cn("w-full relative h-14 rounded-2xl border overflow-hidden transition-all text-left",
-                            hasVoted || !viewPoll.isActive ? "border-border/20 cursor-default" : "border-border/30 hover:border-primary/40 hover:shadow-md cursor-pointer")}>
-                          <div className="absolute inset-y-0 left-0 bg-primary/10 rounded-2xl transition-all duration-500" style={{ width: `${pct}%` }} />
+                          className={cn("w-full relative h-12 rounded-[10px] border overflow-hidden transition-colors duration-150 text-left",
+                            hasVoted || !viewPoll.isActive ? "border-border/60 cursor-default" : "border-border/60 hover:border-primary/50 cursor-pointer")}>
+                          <div className="absolute inset-y-0 left-0 bg-primary/10 rounded-[10px] transition-all duration-500" style={{ width: `${pct}%` }} />
                           <div className="relative flex items-center justify-between px-5 h-full">
                             <span className="text-[13px] font-medium text-foreground">{opt.text}</span>
-                            <span className="text-[12px] text-muted-foreground/60 font-mono font-semibold">{Math.round(pct)}% ({opt.votes})</span>
+                            <span className="text-[11px] text-muted-foreground font-mono tabular-nums font-medium">{Math.round(pct)}% ({opt.votes})</span>
                           </div>
                         </button>
                         {opt.voters.length > 0 && (
                           <div className="mt-1 ml-2 flex flex-wrap gap-1">
                             {opt.voters.slice(0, 5).map((name, i) => (
-                              <span key={i} className="text-[9px] text-muted-foreground/40">{name}</span>
+                              <span key={i} className="text-[9px] text-muted-foreground/70">{name}</span>
                             ))}
-                            {opt.voters.length > 5 && <span className="text-[9px] text-muted-foreground/30">+{opt.voters.length - 5} more</span>}
+                            {opt.voters.length > 5 && <span className="text-[9px] text-muted-foreground/60">+{opt.voters.length - 5} more</span>}
                           </div>
                         )}
                       </div>
                     );
                   })}
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </>
         </div>
       </div>
 
       {/* Share Dialog */}
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-        <DialogContent className="w-[calc(100vw-32px)] max-w-md rounded-2xl">
+        <DialogContent className="w-[calc(100vw-32px)] max-w-md rounded-[10px]">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold">Share Poll</DialogTitle>
-            {sharePoll && <p className="text-[11px] text-muted-foreground/60 mt-1">"{sharePoll.question}"</p>}
+            <DialogTitle className="text-base font-semibold">Share poll</DialogTitle>
+            {sharePoll && <p className="text-[11px] text-muted-foreground mt-1">"{sharePoll.question}"</p>}
           </DialogHeader>
           <div className="space-y-3">
-            <Input value={shareSearch} onChange={e => setShareSearch(e.target.value)} placeholder="Search…" className="h-9 rounded-xl text-sm" />
+            <Input value={shareSearch} onChange={e => setShareSearch(e.target.value)} placeholder="Search" className="h-9 rounded-lg border-border/60 text-sm" />
             <Tabs value={shareTab} onValueChange={v => setShareTab(v as 'channels' | 'contacts')}>
-              <TabsList className="w-full rounded-xl h-9">
+              <TabsList className="w-full rounded-lg h-9">
                 <TabsTrigger value="channels" className="flex-1 text-xs rounded-lg">Channels</TabsTrigger>
                 <TabsTrigger value="contacts" className="flex-1 text-xs rounded-lg">Contacts</TabsTrigger>
               </TabsList>
@@ -433,10 +438,10 @@ export default function OfficePolls() {
                     {filteredChannels.map(ch => (
                       <button key={ch.id} disabled={sending === ch.id}
                         onClick={() => sendPollToChannel(ch.id, ch.name)}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent/50 transition-colors text-left">
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-foreground/[0.025] transition-colors duration-150 text-left">
                         {channelIcon(ch.channel_type)}
                         <span className="text-[12px] font-medium text-foreground flex-1">{ch.name}</span>
-                        {sending === ch.id ? <span className="text-[10px] text-primary animate-pulse">Sending…</span> : <Send className="h-3 w-3 text-muted-foreground/30" />}
+                        {sending === ch.id ? <span className="font-mono text-[10px] text-primary">Sending</span> : <Send className="h-3 w-3 text-muted-foreground/40" />}
                       </button>
                     ))}
                   </div>
@@ -445,17 +450,17 @@ export default function OfficePolls() {
               <TabsContent value="contacts">
                 <ScrollArea className="h-[250px]">
                   <div className="space-y-1 p-1">
-                    {contactsLoading ? <p className="text-[11px] text-muted-foreground/40 text-center py-6">Loading…</p> :
+                    {contactsLoading ? <SkeletonLedger rows={3} /> :
                       filteredContacts.map(c => (
                         <button key={c.user_id} disabled={sending === c.user_id}
                           onClick={() => sendPollToContact(c)}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent/50 transition-colors text-left">
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-foreground/[0.025] transition-colors duration-150 text-left">
                           <Avatar className="h-7 w-7">
                             <AvatarImage src={c.avatar_url || ''} />
                             <AvatarFallback className="text-[10px]">{getInitials(c.full_name)}</AvatarFallback>
                           </Avatar>
                           <span className="text-[12px] font-medium text-foreground flex-1">{c.full_name}</span>
-                          {sending === c.user_id ? <span className="text-[10px] text-primary animate-pulse">Sending…</span> : <Send className="h-3 w-3 text-muted-foreground/30" />}
+                          {sending === c.user_id ? <span className="font-mono text-[10px] text-primary">Sending</span> : <Send className="h-3 w-3 text-muted-foreground/40" />}
                         </button>
                       ))}
                   </div>
