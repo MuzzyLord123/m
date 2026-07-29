@@ -171,10 +171,10 @@ export function QuickActions({ isEmbedded, isOpen: externalOpen, onToggle }: Qui
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          "w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-colors",
+          "w-11 h-11 rounded-full border border-border/60 flex items-center justify-center transition-colors duration-150",
           open 
             ? "bg-muted text-foreground" 
-            : "bg-primary text-primary-foreground"
+            : "bg-card text-ink-2 hover:text-foreground"
         )}
         aria-label={open ? "Close quick actions" : "Open quick actions"}
         aria-expanded={open}

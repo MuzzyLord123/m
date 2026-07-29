@@ -628,7 +628,7 @@ export function ChatBot({ isEmbedded, isOpen: externalOpen, onToggle }: ChatBotP
   if (isEmbedded && isLounge) {
     return (
       <>
-        <motion.button onClick={toggleOpen} className="w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center"
+        <motion.button onClick={toggleOpen} className="w-11 h-11 rounded-full border border-border/60 bg-card text-ink-2 hover:text-foreground transition-colors duration-150 flex items-center justify-center"
           whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
           <AnimatePresence mode="wait">
             {isOpen ? (
@@ -638,7 +638,7 @@ export function ChatBot({ isEmbedded, isOpen: externalOpen, onToggle }: ChatBotP
             ) : (
               <motion.div key="open" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }} className="relative">
                 <MessageCircle className="w-6 h-6" />
-                <motion.div className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-primary bg-emerald-500" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-card bg-ok" />
               </motion.div>
             )}
           </AnimatePresence>
