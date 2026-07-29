@@ -62,6 +62,13 @@ export default {
           DEFAULT: "hsl(var(--gold))",
           foreground: "hsl(var(--gold-foreground))",
         },
+        /* App-semantic layer (platform surfaces) — see PLATFORM-DIRECTION.md */
+        sunken: "hsl(var(--surface-sunken))",
+        "ink-2": "hsl(var(--text-secondary))",
+        "ink-4": "hsl(var(--text-disabled))",
+        ok: "hsl(var(--ok))",
+        attend: "hsl(var(--attend))",
+        risk: "hsl(var(--risk))",
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
         info: "hsl(var(--info))",

@@ -41,7 +41,7 @@ import { useUIPreferences } from '@/hooks/useUIPreferences';
 import quooroLogo from '@/assets/quooro-logo.png';
 
 // --- Team Nav item registry ---
-interface TeamNavItemDef {
+export interface TeamNavItemDef {
   id: string;
   label: string;
   icon: React.ComponentType<{className?: string;}>;
@@ -49,7 +49,7 @@ interface TeamNavItemDef {
   path: string; // needed by SidebarFolderComponent
 }
 
-const ALL_TEAM_NAV_ITEMS: TeamNavItemDef[] = [
+export const ALL_TEAM_NAV_ITEMS: TeamNavItemDef[] = [
 { id: 'command-center', label: 'Command Center', icon: BarChart3, tab: 'command-center', path: '/dashboard?tab=command-center' },
 { id: 'executive', label: 'Executive Dashboard', icon: Crown, tab: 'executive', path: '/executive' },
 { id: 'enquiries', label: 'Enquiries', icon: Mail, tab: 'enquiries', path: '/dashboard?tab=enquiries' },

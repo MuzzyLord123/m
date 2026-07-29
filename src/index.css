@@ -274,6 +274,32 @@
 }
 
 @layer base {
+  /* ── App-semantic layer (platform surfaces only) ──────────────────────
+     Extends the Night Shift tokens for product UI. See
+     PLATFORM-DIRECTION.md §3. The ember accent stays reserved for the one
+     primary action per view, focus, selection and live rail positions;
+     these are the quiet tiers everything else sits on. */
+  :root {
+    --surface-sunken: 45 14% 92%;      /* wells, table heads (light)   */
+    --text-secondary: 220 8% 30%;      /* between ink and muted        */
+    --text-disabled: 220 6% 60%;
+
+    /* Muted enterprise semantics: dot + label, never fills.
+       Measured ≥ 4.5:1 on --background in each mode. */
+    --ok: 142 45% 28%;                 /* delivered, live, paid        */
+    --attend: 30 75% 30%;              /* awaiting client, review due  */
+    --risk: 0 55% 38%;                 /* overdue, failed, blocked     */
+  }
+  .dark {
+    --surface-sunken: 240 5% 4%;
+    --text-secondary: 60 5% 72%;
+    --text-disabled: 240 4% 38%;
+
+    --ok: 142 35% 58%;
+    --attend: 38 55% 58%;
+    --risk: 0 60% 66%;
+  }
+
   * {
     @apply border-border;
   }

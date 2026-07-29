@@ -108,14 +108,14 @@ function SidebarBrandedCollapsed() {
 }
 
 // --- Nav item registry ---
-interface NavItemDef {
+export interface NavItemDef {
   id: string;
   label: string;
   icon: React.ComponentType<{className?: string;}>;
   path: string;
 }
 
-const ALL_NAV_ITEMS: NavItemDef[] = [
+export const ALL_NAV_ITEMS: NavItemDef[] = [
 { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/lounge' },
 { id: 'ai-assistant', label: 'Quooro AI', icon: Sparkles, path: '/lounge/ai' },
 { id: 'website', label: 'Website', icon: Globe, path: '/lounge/website' },
