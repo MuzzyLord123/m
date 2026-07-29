@@ -73,29 +73,30 @@ export default function Ecommerce() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-4xl mx-auto"
+            className="max-w-4xl"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
             >
               <ShoppingBag className="w-4 h-4" />
               E-commerce Services
             </motion.div>
 
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6 leading-tight">
               Sell online with a store{" "}
               <span className="text-gradient-primary">that just works</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl">
               From subscription websites to fully custom online stores — we design, build, and manage
               e-commerce experiences that convert, without the technical headaches.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button variant="premium" size="lg" asChild>
                 <Link to="/get-started">
                   Start selling online <ArrowRight className="w-5 h-5 ml-2" />

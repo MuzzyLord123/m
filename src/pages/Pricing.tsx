@@ -148,7 +148,7 @@ export default function Pricing() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-3xl mx-auto"
+            className="max-w-3xl"
           >
             <motion.h1 
               className="heading-xl mb-6"
@@ -168,7 +168,7 @@ export default function Pricing() {
               Transparent pricing that works for startups, SMEs, and enterprises alike.
             </motion.p>
             <motion.div 
-              className="flex flex-wrap justify-center gap-6 mt-8"
+              className="flex flex-wrap gap-6 mt-8"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}

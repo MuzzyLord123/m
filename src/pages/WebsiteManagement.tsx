@@ -79,21 +79,22 @@ export default function WebsiteManagement() {
     <div className="min-h-screen bg-background">
       <section className="relative py-24 md:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-4xl"
           >
             <Badge variant="outline" className="mb-6 px-4 py-2">
               <Settings className="w-4 h-4 mr-2" />
               Optional Service
             </Badge>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
               Website Management & <span className="text-gradient">Maintenance</span>
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl">
               Our Website Management service ensures your site remains secure, fast, functional, 
               and up to date long after launch. This service is optional, but strongly recommended 
               for all websites hosted with us.

@@ -82,7 +82,7 @@ export default function WorkshopLanding() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="text-center max-w-4xl mx-auto"
+            className="max-w-4xl"
           >
             <motion.div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8"
@@ -105,7 +105,7 @@ export default function WorkshopLanding() {
             </motion.h1>
 
             <motion.p
-              className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
+              className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -115,7 +115,7 @@ export default function WorkshopLanding() {
             </motion.p>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+              className="flex flex-col sm:flex-row gap-4 mb-16"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
@@ -136,7 +136,7 @@ export default function WorkshopLanding() {
 
             {/* Hero feature pills */}
             <motion.div
-              className="flex flex-wrap justify-center gap-3"
+              className="flex flex-wrap gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}

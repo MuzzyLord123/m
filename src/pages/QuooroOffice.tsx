@@ -107,12 +107,12 @@ export default function QuooroOffice() {
       <section className="relative min-h-[60vh] lg:min-h-[70vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="container-tight relative z-10 py-16 sm:py-20 lg:py-32">
-          <div className="max-w-4xl mx-auto text-center px-4">
+          <div className="max-w-4xl px-4">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-subtle text-sm text-primary mb-6"
+              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
             >
               <Layers className="w-4 h-4" />
               Productivity Suite
@@ -131,7 +131,7 @@ export default function QuooroOffice() {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed"
+              className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mb-8 leading-relaxed"
             >
               An enterprise-grade productivity hub with 25+ tools — Docs, Sheets, Invoices, HR, Tasks, Wiki, and more —
               all built into one seamless platform. No more juggling apps.
@@ -141,7 +141,7 @@ export default function QuooroOffice() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4"
             >
               <Button variant="premium" size="xl" asChild className="w-full sm:w-auto">
                 <Link to="/get-started">

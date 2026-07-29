@@ -129,18 +129,19 @@ export default function SubscriptionWebsites() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-4xl mx-auto"
+            className="max-w-4xl"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
             >
               <CreditCard className="w-4 h-4" />
               No Upfront Costs
             </motion.div>
             
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6 leading-tight">
               Subscription{" "}
               <span className="text-gradient-primary">Websites</span>
@@ -150,12 +151,12 @@ export default function SubscriptionWebsites() {
               Get Online Without the Upfront Cost
             </p>
             
-            <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
+            <p className="text-lg text-muted-foreground mb-8 max-w-3xl">
               Launch a fully functional website on a low monthly plan, with the option to purchase 
               and fully own it later. Complete transparency — no hidden fees, no long-term traps.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button variant="premium" size="lg" asChild>
                 <Link to="/get-started">
                   Get Started Today
@@ -406,7 +407,7 @@ export default function SubscriptionWebsites() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                 <Handshake className="w-4 h-4" />
                 Fair Ownership
               </div>

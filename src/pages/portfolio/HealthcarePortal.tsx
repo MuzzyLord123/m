@@ -34,7 +34,7 @@ const badges = [
 export default function HealthcarePortal() {
   return (
     <Layout>
-      <div className="bg-muted/50 border-b border-border/50 py-2 px-4 text-center text-sm">
+      <div className="bg-muted/50 border-b border-border/50 py-2 px-4 text-sm">
         <span className="text-muted-foreground">This is a Quooro showcase project — </span>
         <Link to="/portfolio" className="text-primary hover:underline font-medium">Back to Portfolio</Link>
         <Badge variant="secondary" className="ml-2 text-xs">Custom Elite</Badge>
@@ -42,18 +42,19 @@ export default function HealthcarePortal() {
 
       {/* Hero */}
       <section style={{ background: "linear-gradient(135deg, hsl(170 40% 95%), hsl(200 40% 92%))" }}>
-        <div className="container-tight py-24 md:py-32 text-center">
+        <div className="container-tight py-24 md:py-32">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="w-14 h-14 rounded-2xl mx-auto mb-6 flex items-center justify-center" style={{ background: "hsl(170 50% 40%)" }}>
               <Heart className="w-7 h-7 text-white" />
             </div>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="font-display text-5xl md:text-7xl font-bold mb-6" style={{ color: "hsl(200 40% 20%)" }}>
               Your Health,<br />Our Priority
             </h1>
-            <p className="text-lg max-w-xl mx-auto mb-8" style={{ color: "hsl(200 20% 45%)" }}>
+            <p className="text-lg max-w-xl mb-8" style={{ color: "hsl(200 20% 45%)" }}>
               Access appointments, records, and telehealth — all in one secure patient portal.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button size="xl" className="rounded-xl font-bold" style={{ background: "hsl(170 50% 40%)", color: "white" }}>
                 Patient Portal
               </Button>

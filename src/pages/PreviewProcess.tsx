@@ -91,12 +91,13 @@ export default function PreviewProcess() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-3xl mx-auto"
+            className="max-w-3xl"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-pill mb-6">
+            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <Clock className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">Our Process</span>
             </div>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="heading-xl mb-6">
               How We Build Your <span className="text-gradient">Preview</span>
             </h1>
@@ -134,7 +135,7 @@ export default function PreviewProcess() {
                 >
                   <div className={`flex-1 ${index % 2 === 0 ? "lg:text-right" : "lg:text-left"}`}>
                     <div className="p-6 rounded-2xl border border-border bg-background">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold mb-4">
+                      <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                         {step.day}
                       </div>
                       <h3 className="font-display font-bold text-xl mb-3">{step.title}</h3>

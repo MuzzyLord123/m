@@ -35,7 +35,7 @@ const fadeUp = {
 export default function FashionEcommerce() {
   return (
     <Layout>
-      <div className="bg-muted/50 border-b border-border/30 py-2 px-4 text-center text-sm">
+      <div className="bg-muted/50 border-b border-border/30 py-2 px-4 text-sm">
         <span className="text-muted-foreground">This is a Quooro showcase project — </span>
         <Link to="/portfolio" className="text-brand hover:underline font-medium">Back to Portfolio</Link>
         <Badge variant="secondary" className="ml-2 text-xs">Professional</Badge>
@@ -43,7 +43,7 @@ export default function FashionEcommerce() {
 
       {/* Hero */}
       <section className="bg-foreground dark:bg-background">
-        <div className="container-tight py-28 md:py-40 text-center">
+        <div className="container-tight py-28 md:py-40">
           <motion.div initial="hidden" animate="visible" variants={stagger}>
             <motion.p variants={fadeUp} className="text-xs tracking-[0.3em] uppercase mb-6 text-muted-foreground">
               Aurelia — Spring/Summer 2026

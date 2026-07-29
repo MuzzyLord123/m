@@ -240,7 +240,7 @@ export default function Packages() {
           <motion.div
             initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-4xl mx-auto"
+            className="max-w-4xl"
           >
             <motion.h1 
               className="heading-xl mb-6"
@@ -261,7 +261,7 @@ export default function Packages() {
               <span className="text-xs sm:text-sm font-medium text-primary">Free preview included with every package</span>
             </motion.div>
             <motion.p 
-              className="body-lg mb-4 max-w-prose mx-auto"
+              className="body-lg mb-4 max-w-prose"
               initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -272,7 +272,7 @@ export default function Packages() {
             
             {/* Trust Signals */}
             <motion.div 
-              className="flex flex-wrap justify-center gap-3 md:gap-4 mt-8"
+              className="flex flex-wrap gap-3 md:gap-4 mt-8"
               initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}

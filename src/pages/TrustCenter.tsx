@@ -142,12 +142,13 @@ export default function TrustCenter() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-center max-w-3xl mx-auto"
+              className="max-w-3xl"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-pill text-primary mb-6">
+              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                 <Shield className="w-4 h-4" />
                 <span className="text-sm font-medium">Enterprise-Grade Security</span>
               </div>
+              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground mb-6">
                 Trust Center
               </h1>

@@ -127,12 +127,13 @@ export default function PreviewFAQ() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-3xl mx-auto"
+            className="max-w-3xl"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-pill mb-6">
+            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <HelpCircle className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">Preview FAQ</span>
             </div>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="heading-xl mb-6">
               Frequently Asked <span className="text-gradient">Questions</span>
             </h1>

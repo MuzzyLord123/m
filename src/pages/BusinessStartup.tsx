@@ -65,12 +65,12 @@ export default function BusinessStartup() {
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-4xl"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -82,16 +82,17 @@ export default function BusinessStartup() {
               Business Start-Up Support
             </motion.div>
             
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
               Free Strategy Calls for{" "}
               <span className="text-gradient">New & Early-Stage</span> Businesses
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl">
               Start your business the right way — without costly mistakes.
             </p>
             
-            <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground mb-12 max-w-2xl">
               Launching a business can feel overwhelming. Choosing the wrong platform, missing essential setup steps, or spending money in the wrong places can cost you months of progress.
             </p>
 
@@ -99,7 +100,7 @@ export default function BusinessStartup() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              className="flex flex-col sm:flex-row gap-4"
             >
               <Button size="lg" asChild className="text-lg px-8 py-6">
                 <Link to="/get-started">

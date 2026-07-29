@@ -113,7 +113,7 @@ export default function Support() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
+            className="mb-16"
           >
             <motion.span 
               initial={{ opacity: 0, scale: 0.9 }}
@@ -123,10 +123,11 @@ export default function Support() {
             >
               Customer Support
             </motion.span>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-6">
               How Can We <span className="text-gradient">Help You?</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl">
               Get answers instantly with our AI assistant, browse FAQs, or speak directly with our team
             </p>
           </motion.div>
@@ -138,7 +139,7 @@ export default function Support() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="glass-card p-8 text-center hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
+              className="glass-card p-8 hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
             >
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
                 <Bot className="w-8 h-8 text-primary" />
@@ -160,7 +161,7 @@ export default function Support() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="glass-card p-8 text-center hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
+              className="glass-card p-8 hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
             >
               <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-6">
                 <Phone className="w-8 h-8 text-green-500" />
@@ -171,7 +172,7 @@ export default function Support() {
               <p className="text-muted-foreground mb-4">
                 Speak to a real person for complex questions or to discuss your project in detail.
               </p>
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-6">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
                 <Clock className="w-4 h-4" />
                 <span>Available 5PM - 9PM Daily</span>
               </div>
@@ -188,7 +189,7 @@ export default function Support() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="glass-card p-8 text-center hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
+              className="glass-card p-8 hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
             >
               <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-6">
                 <Calendar className="w-8 h-8 text-blue-500" />
@@ -215,8 +216,8 @@ export default function Support() {
             transition={{ delay: 0.4 }}
             className="mb-20"
           >
-            <div className="text-center mb-10">
-              <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
                 <HelpCircle className="w-6 h-6 text-primary" />
                 <h2 className="text-3xl font-display font-bold text-foreground">
                   Frequently Asked Questions
@@ -227,7 +228,7 @@ export default function Support() {
               </p>
             </div>
 
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl">
               <Accordion type="single" collapsible className="space-y-4">
                 {faqs.map((faq, index) => (
                   <AccordionItem 
@@ -246,7 +247,7 @@ export default function Support() {
               </Accordion>
             </div>
 
-            <div className="text-center mt-8">
+            <div className="mt-8">
               <p className="text-muted-foreground mb-4">
                 Can't find what you're looking for?
               </p>
@@ -264,8 +265,8 @@ export default function Support() {
             transition={{ delay: 0.45 }}
             className="mb-20"
           >
-            <div className="text-center mb-10">
-              <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
                 <Shield className="w-6 h-6 text-primary" />
                 <h2 className="text-3xl font-display font-bold text-foreground">
                   Security & Data Protection
@@ -276,7 +277,7 @@ export default function Support() {
               </p>
             </div>
 
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl">
               <Accordion type="single" collapsible className="space-y-4">
                 <AccordionItem 
                   value="privacy-policy"
@@ -435,9 +436,9 @@ export default function Support() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
             id="callback-form"
-            className="max-w-2xl mx-auto"
+            className="max-w-2xl"
           >
-            <div className="text-center mb-10">
+            <div className="mb-10">
               <h2 className="text-3xl font-display font-bold text-foreground mb-4">
                 Request a Callback
               </h2>
@@ -447,7 +448,7 @@ export default function Support() {
             </div>
 
             {submitted ? (
-              <div className="glass-card p-12 text-center">
+              <div className="glass-card p-12">
                 <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-6">
                   <CheckCircle className="w-10 h-10 text-green-500" />
                 </div>
@@ -534,7 +535,7 @@ export default function Support() {
                   {isSubmitting ? "Submitting..." : "Request Callback"}
                 </Button>
 
-                <p className="text-sm text-muted-foreground text-center">
+                <p className="text-sm text-muted-foreground">
                   Need immediate help? Call us at{" "}
                   <a href="tel:07739346789" className="text-primary hover:underline">
                     07739 346789

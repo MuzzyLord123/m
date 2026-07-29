@@ -153,13 +153,13 @@ export default function ClientPortal() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-4xl mx-auto"
+            className="max-w-4xl"
           >
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-pill mb-6"
+              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
             >
               <Database className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-foreground/80">Digital Operations Platform</span>
@@ -175,7 +175,7 @@ export default function ClientPortal() {
             </motion.h1>
             
             <motion.p 
-              className="body-lg mb-4 max-w-3xl mx-auto"
+              className="body-lg mb-4 max-w-3xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -185,7 +185,7 @@ export default function ClientPortal() {
             </motion.p>
 
             <motion.p 
-              className="text-muted-foreground mb-8 max-w-2xl mx-auto"
+              className="text-muted-foreground mb-8 max-w-2xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
@@ -195,7 +195,7 @@ export default function ClientPortal() {
             </motion.p>
 
             <motion.div 
-              className="flex flex-wrap gap-4 justify-center"
+              className="flex flex-wrap gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -263,7 +263,7 @@ export default function ClientPortal() {
       <section className="section-padding liquid-glass">
         <div className="container-tight">
           <ScrollSection direction="up" className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-pill mb-4">
+            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <Shield className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Enterprise Security</span>
             </div>
@@ -315,7 +315,7 @@ export default function ClientPortal() {
       <section className="section-padding">
         <div className="container-tight">
           <ScrollSection direction="up" className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-pill mb-4">
+            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <Users className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">For Clients</span>
             </div>
@@ -351,7 +351,7 @@ export default function ClientPortal() {
         <div className="container-tight">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <ScrollSection direction="left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-pill mb-4">
+              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                 <Building2 className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">Internal Operations</span>
               </div>
@@ -473,7 +473,7 @@ export default function ClientPortal() {
       <section className="section-padding">
         <div className="container-tight">
           <ScrollSection direction="up" className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-pill mb-4">
+            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <PoundSterling className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Transparent Pricing</span>
             </div>

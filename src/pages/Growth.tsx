@@ -47,10 +47,11 @@ export default function Growth() {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-pill mb-6">
+              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                 <Zap className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-primary">Most Popular</span>
               </div>
+              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
               <h1 className="heading-xl mb-6">
                 Business <span className="text-gradient">Site</span>
               </h1>

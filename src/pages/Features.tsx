@@ -7,8 +7,6 @@ import {
   Palette, Code, Database, Shield, Globe, Headphones,
   CheckCircle, X, ArrowRight
 } from "lucide-react";
-import { ParallaxBackground } from "@/components/ParallaxImage";
-import codeTransform from "@/assets/code-transform.webp";
 
 const allFeatures = [
   {
@@ -97,21 +95,15 @@ export default function Features() {
   return (
     <Layout>
       {/* Hero with Parallax Image */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <ParallaxBackground
-          src={codeTransform}
-          alt="Web development visualization"
-          parallaxSpeed={0.25}
-          overlayClassName="bg-gradient-to-b from-background via-background/90 to-background"
-        />
+      <section className="relative overflow-hidden border-b border-border/60 pb-16 pt-24 sm:pb-20 sm:pt-28">
         <div className="container-tight relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-3xl mx-auto"
+            className="max-w-3xl"
           >
             <motion.div 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-pill mb-6"
+              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}

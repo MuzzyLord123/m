@@ -172,21 +172,22 @@ export default function ServiceLevelAgreement() {
     <div className="min-h-screen bg-background">
       <section className="relative py-24 md:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="container px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-4xl"
           >
             <Badge variant="outline" className="mb-6 px-4 py-2">
               <Shield className="w-4 h-4 mr-2" />
               Service Commitment
             </Badge>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
               Service Level <span className="text-gradient">Agreement</span>
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl">
               Our commitment to reliability, responsiveness, and quality service. 
               Clear expectations and guaranteed performance for all management plans.
             </p>

@@ -116,11 +116,12 @@ export default function AppsDashboards() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-2xl mx-auto text-center"
+            className="max-w-2xl"
           >
             <span className="text-primary text-sm font-semibold tracking-wider uppercase mb-4 block">
               Beyond Websites
             </span>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="heading-xl mb-6">
               Custom Apps Built for{" "}
               <span className="text-gradient">How You Work</span>
@@ -129,7 +130,7 @@ export default function AppsDashboards() {
               We design and build custom web applications, dashboards, databases, and internal systems 
               for businesses of all sizes — from simple tools to enterprise-level platforms.
             </p>
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap gap-4">
               <Button variant="premium" size="xl" asChild>
                 <Link to="/get-started">
                   Start Your Project <ArrowRight className="w-5 h-5" />

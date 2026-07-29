@@ -28,7 +28,7 @@ const testimonials = [
 export default function FreelancerPortfolio() {
   return (
     <Layout>
-      <div className="bg-muted/50 border-b border-border/50 py-2 px-4 text-center text-sm">
+      <div className="bg-muted/50 border-b border-border/50 py-2 px-4 text-sm">
         <span className="text-muted-foreground">This is a Quooro showcase project — </span>
         <Link to="/portfolio" className="text-primary hover:underline font-medium">Back to Portfolio</Link>
         <Badge variant="secondary" className="ml-2 text-xs">Starter</Badge>
@@ -39,6 +39,7 @@ export default function FreelancerPortfolio() {
         <div className="container-tight py-24 md:py-32">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
             <p className="text-sm font-medium text-muted-foreground mb-4">Maya Chen — Product & Brand Designer</p>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="font-display text-5xl md:text-7xl font-bold mb-6 text-foreground">
               Design That<br />Speaks
             </h1>

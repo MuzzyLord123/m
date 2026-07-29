@@ -132,29 +132,30 @@ export default function AssetStorage() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
           
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="container px-4 sm:px-6 lg:px-8 relative">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-4xl mx-auto text-center"
+              className="max-w-4xl"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8">
+              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                 <Shield className="w-4 h-4" />
                 Enterprise-Grade Security
               </div>
               
+              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
                 Secure Asset &{' '}
                 <span className="text-gradient">File Storage</span>
               </h1>
               
-              <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+              <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl">
                 Store, organize, and access your project files with military-grade encryption. 
                 Your assets are protected by the same security standards trusted by Fortune 500 companies.
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
                 <Button asChild size="lg" className="gap-2 shadow-lg shadow-primary/25">
                   <Link to="/lounge/assets">
                     <Cloud className="w-5 h-5" />
@@ -251,7 +252,7 @@ export default function AssetStorage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
+                <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                   <Folder className="w-4 h-4" />
                   Powerful Organization
                 </div>
@@ -371,7 +372,7 @@ export default function AssetStorage() {
         <ScrollSection className="py-24 bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
+              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                 <Shield className="w-4 h-4" />
                 Compliance & Certifications
               </div>

@@ -14,6 +14,8 @@ Real assets Quooro needs to supply. Nothing on this list may be invented.
 | Client logo marquee | `ClientLogoMarquee.tsx` (unreferenced) | **Deleted.** No real client logos exist to put in it. |
 | "SOC-2 aligned practices" | `HOME_WHY_DEFAULTS` → Enterprise Security card | **Replaced** with "AES-256 encryption at rest, 2FA, and role-based access on every account" — true, and verifiable against the schema. SOC 2 is an audited attestation the studio does not hold. |
 | "Serving Clients **Worldwide** — from local businesses to global enterprises… 24/7 support across time zones" | `home_global_reach` header + the Worldwide card | **Rewritten** as "One studio. Any postcode." The section now describes what the work covers, not who has bought it. |
+| Six invented portfolio outcomes: "+150% online orders", "+200% leads", "+£50K monthly sales", "10K+ active users", "500K patients served", "+300% inquiries", under the line "Real results from real clients" | `/portfolio` | **Rewritten.** The page is now "Reference Builds", explicitly labelled as design studies rather than client projects, and each entry describes what the build demonstrates instead of an outcome that never happened. |
+| Four social icons linking to `href="#"` | `Footer.tsx` | **Deleted.** Buttons shaped like profiles that go nowhere. Restore them when there are real accounts to link. |
 | Homepage bottom CTA "View Our Work" → `/portfolio` | `Index.tsx` CTA | **Repointed** to `/features` ("See what's included"). `/portfolio` still exists and is still linked from the nav and footer, but the homepage no longer sends buyers there expecting a client roster. Resolve properly under P1. |
 
 Owner confirmed these were not real customers. They are gone rather than

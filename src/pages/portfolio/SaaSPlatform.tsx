@@ -32,7 +32,7 @@ const integrations = ["Slack", "GitHub", "Jira", "Figma", "Notion", "Salesforce"
 export default function SaaSPlatform() {
   return (
     <Layout>
-      <div className="bg-muted/50 border-b border-border/50 py-2 px-4 text-center text-sm">
+      <div className="bg-muted/50 border-b border-border/50 py-2 px-4 text-sm">
         <span className="text-muted-foreground">This is a Quooro showcase project — </span>
         <Link to="/portfolio" className="text-primary hover:underline font-medium">Back to Portfolio</Link>
         <Badge variant="secondary" className="ml-2 text-xs">Enterprise</Badge>
@@ -40,16 +40,17 @@ export default function SaaSPlatform() {
 
       {/* Hero */}
       <section style={{ background: "linear-gradient(135deg, hsl(250 40% 8%), hsl(250 50% 15%))" }}>
-        <div className="container-tight py-24 md:py-36 text-center">
+        <div className="container-tight py-24 md:py-36">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Badge className="mb-6" style={{ background: "hsl(250 80% 65%)", color: "white" }}>FlowStack</Badge>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="font-display text-5xl md:text-7xl font-bold mb-6 text-white">
               Scale Your<br />Workflow
             </h1>
-            <p className="text-lg max-w-xl mx-auto mb-8" style={{ color: "hsl(250 20% 70%)" }}>
+            <p className="text-lg max-w-xl mb-8" style={{ color: "hsl(250 20% 70%)" }}>
               The all-in-one platform to automate, collaborate, and grow — trusted by 10,000+ teams worldwide.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button size="xl" className="rounded-lg font-bold" style={{ background: "hsl(250 80% 65%)", color: "white" }}>
                 Start Free Trial
               </Button>

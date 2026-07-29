@@ -154,7 +154,7 @@ export default function WorkshopGuide() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-3xl mx-auto"
+            className="max-w-3xl"
           >
             <motion.div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6"
@@ -165,6 +165,7 @@ export default function WorkshopGuide() {
               <BookOpen className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Workshop Guide</span>
             </motion.div>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
               Learn the <span className="text-gradient">Workshop</span>
             </h1>

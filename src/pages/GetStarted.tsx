@@ -434,7 +434,7 @@ export default function GetStarted() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="p-12 md:p-16 rounded-3xl bg-gradient-card border border-primary/30 text-center"
+              className="p-12 md:p-16 rounded-3xl bg-gradient-card border border-primary/30"
             >
               <motion.div
                 initial={{ scale: 0 }}
@@ -447,10 +447,10 @@ export default function GetStarted() {
               <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
                 Thank You, {formData.firstName}!
               </h2>
-              <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
+              <p className="text-lg text-muted-foreground mb-8 max-w-md">
                 We've received your enquiry and will be in touch within 24 hours to discuss your project.
               </p>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm">
+              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                 <Mail className="w-4 h-4" />
                 Check your inbox for a confirmation email
               </div>
@@ -516,11 +516,12 @@ export default function GetStarted() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="text-center mb-10"
+                className="mb-10"
               >
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6">
                   <CurrentIcon className="w-8 h-8 text-primary" />
                 </div>
+                <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
                 <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
                   {stepTitles[step - 1].title}
                 </h1>

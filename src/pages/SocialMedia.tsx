@@ -71,10 +71,10 @@ export default function SocialMedia() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
-            className="text-center max-w-3xl mx-auto mb-8"
+            className="max-w-3xl mb-8"
           >
             <motion.div 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-pill mb-6"
+              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
@@ -102,7 +102,7 @@ export default function SocialMedia() {
 
           {/* Trust Signals */}
           <motion.div 
-            className="flex flex-wrap justify-center gap-6 mb-16 text-sm text-muted-foreground"
+            className="flex flex-wrap gap-6 mb-16 text-sm text-muted-foreground"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}

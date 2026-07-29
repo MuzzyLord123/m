@@ -282,9 +282,9 @@ export default function Handover() {
             initial="hidden"
             animate="visible"
             variants={stagger}
-            className="text-center max-w-4xl mx-auto"
+            className="max-w-4xl"
           >
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-pill mb-6">
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <Package className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Complete Project Handover</span>
             </motion.div>
@@ -299,7 +299,7 @@ export default function Handover() {
               Your digital assets are truly yours.
             </motion.p>
 
-            <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-4">
+            <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
               <Button variant="premium" size="lg" asChild>
                 <Link to="/get-started">
                   Start Your Project <ArrowRight className="w-5 h-5" />
@@ -655,7 +655,7 @@ export default function Handover() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass-pill mb-6">
+              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
                 <Github className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">Preferred Method</span>
               </div>

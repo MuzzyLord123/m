@@ -43,7 +43,7 @@ const fadeUp = {
 export default function ConsultingFirm() {
   return (
     <Layout>
-      <div className="bg-muted/50 border-b border-border/30 py-2 px-4 text-center text-sm">
+      <div className="bg-muted/50 border-b border-border/30 py-2 px-4 text-sm">
         <span className="text-muted-foreground">This is a Quooro showcase project — </span>
         <Link to="/portfolio" className="text-brand hover:underline font-medium">Back to Portfolio</Link>
         <Badge variant="secondary" className="ml-2 text-xs">Growth</Badge>
@@ -52,7 +52,7 @@ export default function ConsultingFirm() {
       {/* Hero */}
       <section className="bg-foreground dark:bg-background relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--brand)/0.15),transparent_70%)]" />
-        <div className="container-tight py-24 md:py-32 text-center relative z-10">
+        <div className="container-tight py-24 md:py-32 relative z-10">
           <motion.div initial="hidden" animate="visible" variants={stagger}>
             <motion.div variants={fadeUp}>
               <Badge className="mb-6 text-xs bg-brand text-brand-foreground">Pinnacle Consulting Group</Badge>
@@ -60,7 +60,7 @@ export default function ConsultingFirm() {
             <motion.h1 variants={fadeUp} className="font-display text-5xl md:text-7xl font-bold mb-6 text-background dark:text-foreground leading-[0.95] tracking-tight">
               Strategic Growth,<br />Measurable Results
             </motion.h1>
-            <motion.p variants={fadeUp} className="text-lg md:text-xl max-w-xl mx-auto mb-8 text-muted-foreground">
+            <motion.p variants={fadeUp} className="text-lg md:text-xl max-w-xl mb-8 text-muted-foreground">
               We partner with ambitious businesses to unlock their full potential through data-driven strategy and expert guidance.
             </motion.p>
             <motion.div variants={fadeUp}>

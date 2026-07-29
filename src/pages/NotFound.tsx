@@ -42,9 +42,9 @@ const NotFound = () => {
 
   return (
     <Layout>
-      <section className="min-h-[70vh] flex items-center justify-center py-20">
+      <section className="min-h-[70vh] flex items-center py-20">
         <div className="container-tight">
-          <div className="max-w-2xl mx-auto text-center">
+          <div className="max-w-2xl">
             {/* Animated 404 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -70,7 +70,7 @@ const NotFound = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto"
+              className="text-muted-foreground text-sm sm:text-base mb-8 max-w-md"
             >
               The page you're looking for doesn't exist or may have moved.
               {location.pathname !== "/" && (
@@ -91,7 +91,7 @@ const NotFound = () => {
                 <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wider font-semibold">
                   Were you looking for?
                 </p>
-                <div className="flex flex-wrap gap-2 justify-center">
+                <div className="flex flex-wrap gap-2">
                   {suggestions.map((s) => (
                     <Button key={s.href} variant="outline" size="sm" asChild className="rounded-full">
                       <Link to={s.href}>

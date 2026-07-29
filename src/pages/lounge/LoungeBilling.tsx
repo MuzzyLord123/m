@@ -734,7 +734,7 @@ const LoungeBilling = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8 text-center"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
+            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <CreditCard className="h-4 w-4" />
               <span className="text-sm font-medium">Secure Checkout</span>
             </div>

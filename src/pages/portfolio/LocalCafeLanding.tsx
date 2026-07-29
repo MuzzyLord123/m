@@ -24,7 +24,7 @@ export default function LocalCafeLanding() {
   return (
     <Layout>
       {/* Showcase Banner */}
-      <div className="bg-muted/50 border-b border-border/50 py-2 px-4 text-center text-sm">
+      <div className="bg-muted/50 border-b border-border/50 py-2 px-4 text-sm">
         <span className="text-muted-foreground">This is a Quooro showcase project — </span>
         <Link to="/portfolio" className="text-primary hover:underline font-medium">Back to Portfolio</Link>
         <Badge variant="secondary" className="ml-2 text-xs">Starter</Badge>
@@ -32,16 +32,17 @@ export default function LocalCafeLanding() {
 
       {/* Hero */}
       <section className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(30 60% 96%), hsl(25 50% 90%))" }}>
-        <div className="container-tight py-24 md:py-32 text-center">
+        <div className="container-tight py-24 md:py-32">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <span className="text-6xl mb-6 block">☕</span>
+            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
             <h1 className="font-display text-5xl md:text-7xl font-bold mb-6" style={{ color: "hsl(25 40% 25%)" }}>
               Freshly Brewed,<br />Locally Loved
             </h1>
-            <p className="text-lg md:text-xl max-w-xl mx-auto mb-8" style={{ color: "hsl(25 30% 40%)" }}>
+            <p className="text-lg md:text-xl max-w-xl mb-8" style={{ color: "hsl(25 30% 40%)" }}>
               Artisan coffee & homemade food in the heart of the neighbourhood. Every cup tells a story.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button size="xl" className="rounded-full font-bold" style={{ background: "hsl(25 60% 40%)", color: "white" }}>
                 View Our Menu
               </Button>
