@@ -424,10 +424,10 @@ export default function UnifiedSignIn() {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:px-8"
+        className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-8 lg:py-6"
       >
         <div className="w-full max-w-md">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-5 flex items-center justify-between">
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
@@ -438,22 +438,22 @@ export default function UnifiedSignIn() {
           <span className="mono-label lg:hidden">52.13° N · 3.78° W</span>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           {/* Masthead */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <motion.img 
               src={quooroLogo} 
               alt="Quooro" 
-              className="h-9 w-auto dark:brightness-0 dark:invert"
+              className="h-7 w-auto dark:brightness-0 dark:invert"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
             />
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-1">
               <span className="h-px w-8 bg-primary" />
               <p className="mono-label">Sign in to your account</p>
             </div>
-            <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Welcome back</h1>
+            <h1 className="font-display text-3xl font-semibold tracking-[-0.02em]">Welcome back</h1>
           </div>
 
           {/* Portal Selection Tabs */}
@@ -498,7 +498,7 @@ export default function UnifiedSignIn() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
               className={cn(
-                "text-xs rounded-lg p-3 text-center border",
+                "text-xs rounded-xl p-3 text-center border",
                 selectedPortal === 'team'
                   ? "text-warning bg-warning/10 border-warning/30"
                   : selectedPortal === 'accountant'
@@ -582,7 +582,7 @@ export default function UnifiedSignIn() {
                       </p>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="forgot-email">Email</Label>
+                        <Label htmlFor="forgot-email" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Email</Label>
                       <div className="relative">
                           <Input
                             id="forgot-email"
@@ -595,7 +595,7 @@ export default function UnifiedSignIn() {
                               touched: forgotEmail.touched 
                             })}
                             onBlur={() => setForgotEmail(prev => ({ ...prev, error: validateEmail(prev.value), touched: true }))}
-                            className={cn("pr-10", forgotEmail.error && forgotEmail.touched && "border-destructive")}
+                            className={cn("pr-10 h-11 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]", forgotEmail.error && forgotEmail.touched && "border-destructive")}
                             disabled={loading}
                           />
                           <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -614,7 +614,7 @@ export default function UnifiedSignIn() {
                         </AnimatePresence>
                       </div>
 
-                      <Button type="submit" className="w-full" disabled={loading}>
+                      <Button type="submit" className="w-full h-11 rounded-xl" disabled={loading}>
                         {loading ? (
                           <span className="flex items-center gap-2">
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -701,7 +701,7 @@ export default function UnifiedSignIn() {
 
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="email">{selectedPortal === 'accountant' ? 'Login ID' : 'Email'}</Label>
+                      <Label htmlFor="email" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{selectedPortal === 'accountant' ? 'Login ID' : 'Email'}</Label>
                       <div className="relative">
                         <Input
                           ref={emailRef}
@@ -712,7 +712,7 @@ export default function UnifiedSignIn() {
                           onChange={handleEmailChange}
                           onBlur={handleEmailBlur}
                           className={cn(
-                            "pr-10 transition-all duration-200",
+                            "pr-10 h-11 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]",
                             email.error && email.touched && "border-destructive focus-visible:ring-destructive",
                             hasSavedEmail && "pr-16"
                           )}
@@ -749,7 +749,7 @@ export default function UnifiedSignIn() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Password</Label>
                       <div className="relative">
                         <Input
                           ref={passwordRef}
@@ -760,7 +760,7 @@ export default function UnifiedSignIn() {
                           onChange={handlePasswordChange}
                           onBlur={handlePasswordBlur}
                           className={cn(
-                            "pr-10 transition-all duration-200",
+                            "pr-10 h-11 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]",
                             password.error && password.touched && "border-destructive focus-visible:ring-destructive"
                           )}
                           disabled={loading || checkingAuth}
@@ -812,7 +812,7 @@ export default function UnifiedSignIn() {
 
                     <Button 
                       type="submit" 
-                      className="w-full h-11" 
+                      className="w-full h-11 rounded-xl" 
                       disabled={loading || checkingAuth}
                     >
                       {loading || checkingAuth ? (

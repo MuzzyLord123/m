@@ -77,3 +77,15 @@ Verified empty at the end of Phase 2.
 renamed or removed). `Pricing.tsx` was imported but never routed; the admin
 visual editor already linked to `/pricing`, which 404'd. No payloads, forms,
 or backend surfaces touched.
+
+## Recorded exception addendum — 2026-07-29 (2)
+
+Second presentation-only pass on the auth surfaces at the owner's explicit
+request ("make sign-in and sign-up enterprise level… all on one page, no
+scroll"): UnifiedSignIn.tsx and CustomerLogin.tsx restyled (field surfaces,
+labels, account-type selector, layout compression), plus
+PasswordStrengthIndicator.tsx compacted to a single line. Verified by
+sorted-diff of all logic-bearing lines against HEAD: the only differences
+are className strings and one removed marketing microcopy paragraph. All
+handlers, ids, values, validation, autoComplete and supabase calls are
+byte-identical.

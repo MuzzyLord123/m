@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, ArrowLeft, UserPlus, Building2, Phone, Mail, User, Check, Loader2, Users, Crown, Hash } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, UserPlus, Building2, Phone, Mail, User, Check, Loader2, Users, Hash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -308,10 +308,10 @@ export default function CustomerLogin() {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:px-8"
+        className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-8 lg:py-4"
       >
-        <div className="w-full max-w-md">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="w-full max-w-xl">
+        <div className="mb-4 flex items-center justify-between">
           <Link 
             to="/sign-in" 
             className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
@@ -322,18 +322,18 @@ export default function CustomerLogin() {
           <span className="mono-label lg:hidden">52.13° N · 3.78° W</span>
         </div>
 
-        <div className="space-y-6">
-          <div className="space-y-3">
+        <div className="space-y-4 [@media(max-height:820px)]:space-y-3">
+          <div className="space-y-1.5">
             <img 
               src={quooroLogo} 
               alt="Quooro" 
-              className="h-9 w-auto dark:brightness-0 dark:invert"
+              className="h-6 w-auto dark:brightness-0 dark:invert"
             />
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-1 [@media(max-height:820px)]:hidden">
               <span className="h-px w-8 bg-primary" />
               <p className="mono-label">Join Quooro Lounge</p>
             </div>
-            <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Create account</h1>
+            <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] sm:text-3xl lg:text-2xl xl:text-3xl">Create account</h1>
           </div>
 
           {/* Google Sign Up */}
@@ -341,35 +341,33 @@ export default function CustomerLogin() {
           
           <SocialAuthDivider text="or sign up with email" />
 
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-3.5 [@media(max-height:820px)]:space-y-2.5">
             {/* Account Type Selection */}
-            <div className="space-y-3">
-              <Label>Account Type *</Label>
+            <div className="space-y-2">
+              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Account type</Label>
               <RadioGroup 
                 value={accountType} 
                 onValueChange={(v) => setAccountType(v as AccountType)}
-                className="grid grid-cols-2 gap-3"
+                className="grid grid-cols-2 gap-2"
               >
                 <div>
                   <RadioGroupItem value="primary" id="primary" className="sr-only peer" />
                   <Label
                     htmlFor="primary"
-                    className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-transparent p-4 hover:bg-foreground/[0.03] peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all duration-300"
+                    className="flex h-12 cursor-pointer flex-col items-start justify-center gap-0.5 rounded-xl border border-border/60 px-4 transition-all duration-300 hover:bg-foreground/[0.03] peer-data-[state=checked]:border-primary/60 peer-data-[state=checked]:bg-primary/[0.05] peer-data-[state=checked]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.35)]"
                   >
-                    <Crown className="h-6 w-6 text-primary" />
-                    <span className="font-semibold text-sm">Primary Account</span>
-                    <span className="text-xs text-muted-foreground text-center">Create your own team</span>
+                    <span className="text-sm font-medium tracking-tight">Primary workspace</span>
+                    <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Create your own team</span>
                   </Label>
                 </div>
                 <div>
                   <RadioGroupItem value="team_member" id="team_member" className="sr-only peer" />
                   <Label
                     htmlFor="team_member"
-                    className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-transparent p-4 hover:bg-foreground/[0.03] peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all duration-300"
+                    className="flex h-12 cursor-pointer flex-col items-start justify-center gap-0.5 rounded-xl border border-border/60 px-4 transition-all duration-300 hover:bg-foreground/[0.03] peer-data-[state=checked]:border-primary/60 peer-data-[state=checked]:bg-primary/[0.05] peer-data-[state=checked]:shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.35)]"
                   >
-                    <Users className="h-6 w-6 text-muted-foreground" />
-                    <span className="font-semibold text-sm">Team Member</span>
-                    <span className="text-xs text-muted-foreground text-center">Join an existing team</span>
+                    <span className="text-sm font-medium tracking-tight">Team member</span>
+                    <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Join with a team code</span>
                   </Label>
                 </div>
               </RadioGroup>
@@ -384,7 +382,7 @@ export default function CustomerLogin() {
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-2 overflow-hidden"
                 >
-                  <Label htmlFor="team-code">Team Code *</Label>
+                  <Label htmlFor="team-code" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Team code</Label>
                   <div className="relative">
                     <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
@@ -393,7 +391,7 @@ export default function CustomerLogin() {
                       placeholder="ABCD1234"
                       value={teamCode}
                       onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-                      className={`pl-10 font-mono tracking-wider uppercase ${
+                      className={`pl-10 h-10 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05] font-mono tracking-wider uppercase ${
                         teamCodeValid === true ? 'border-[hsl(var(--success))] focus-visible:ring-[hsl(var(--success))]' : 
                         teamCodeValid === false ? 'border-destructive focus-visible:ring-destructive' : ''
                       }`}
@@ -418,8 +416,9 @@ export default function CustomerLogin() {
               )}
             </AnimatePresence>
 
-            <div className="space-y-2">
-              <Label htmlFor="full-name">Full Name *</Label>
+            <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
+            <div className={`space-y-2 ${accountType === 'primary' ? '' : 'sm:col-span-2'}`}>
+              <Label htmlFor="full-name" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Full name</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -428,7 +427,7 @@ export default function CustomerLogin() {
                   placeholder="John Smith"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-10 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
                   required
                 />
               </div>
@@ -436,7 +435,7 @@ export default function CustomerLogin() {
             
             {accountType === 'primary' && (
               <div className="space-y-2">
-                <Label htmlFor="company">Company Name</Label>
+                <Label htmlFor="company" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Company</Label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -445,7 +444,7 @@ export default function CustomerLogin() {
                     placeholder="Your Company Ltd"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-10 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
                   />
                 </div>
               </div>
@@ -453,12 +452,12 @@ export default function CustomerLogin() {
 
             {/* Industry Selector */}
             <div className="space-y-2">
-              <Label>Industry / Business Type *</Label>
+              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Industry</Label>
               <IndustryCombobox value={industry} onChange={setIndustry} />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Phone</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -467,13 +466,13 @@ export default function CustomerLogin() {
                   placeholder="+44 7123 456789"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-10 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="signup-email">Email *</Label>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="signup-email" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -482,14 +481,14 @@ export default function CustomerLogin() {
                   placeholder="you@example.com"
                   value={signupEmail}
                   onChange={(e) => setSignupEmail(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-10 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="signup-password">Password *</Label>
+              <Label htmlFor="signup-password" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Password</Label>
               <div className="relative">
                 <Input
                   id="signup-password"
@@ -497,6 +496,7 @@ export default function CustomerLogin() {
                   placeholder="••••••••"
                   value={signupPassword}
                   onChange={(e) => setSignupPassword(e.target.value)}
+                  className="h-10 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
                   required
                 />
                 <button
@@ -507,11 +507,11 @@ export default function CustomerLogin() {
                   {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <PasswordStrengthIndicator password={signupPassword} className="mt-2" />
+              <PasswordStrengthIndicator password={signupPassword} className="mt-1.5" />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password *</Label>
+              <Label htmlFor="confirm-password" className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Confirm password</Label>
               <div className="relative">
                 <Input
                   id="confirm-password"
@@ -519,14 +519,16 @@ export default function CustomerLogin() {
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="h-10 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
                   required
                 />
               </div>
             </div>
+            </div>
 
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full h-11 rounded-xl" 
               disabled={signupLoading || (accountType === 'team_member' && teamCodeValid !== true)}
             >
               {signupLoading ? (
@@ -542,16 +544,10 @@ export default function CustomerLogin() {
               )}
             </Button>
             
-            <p className="text-xs text-muted-foreground text-center">
-              {accountType === 'primary' 
-                ? 'Create your account to access your exclusive project dashboard and manage your team.'
-                : 'Join your team to collaborate on projects and view shared resources.'
-              }
-            </p>
           </form>
           
           {/* Sign in link */}
-          <div className="text-center pt-2 border-t border-border">
+          <div className="border-t border-border/60 pt-3 text-center [@media(max-height:820px)]:hidden">
             <p className="text-sm text-muted-foreground">
               Already have an account?{' '}
               <Link to="/sign-in" className="text-primary hover:underline font-medium">
