@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quooro — natural graphics motif samples</title>
+<style>
+  /* Rendered in the real system palette. Dark = Night Shift, light = paper. */
+  :root {
+    --bg: #0B0B0C; --ink: #EDEDEA; --muted: #9C9C94; --ember: #E8613C; --hair: #232326;
+  }
+  .light {
+    --bg: #F4F3EF; --ink: #14161A; --muted: #5C6066; --ember: #C2410C; --hair: #DDDACF;
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: ui-monospace, monospace; padding: 48px; }
+  .panel { border: 1px solid var(--hair); padding: 32px; margin-bottom: 40px; }
+  .label { font-size: 10px; letter-spacing: .28em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .label b { color: var(--ember); font-weight: 500; }
+  .name { font-size: 20px; letter-spacing: -.02em; font-family: system-ui, sans-serif; font-weight: 600; margin-bottom: 20px; }
+  svg { display: block; width: 100%; height: auto; }
+  text { font-family: ui-monospace, monospace; letter-spacing: .2em; }
+</style>
+</head>
+<body>
+
+<!-- ── A · ORBITAL LINEWORK — the lead concept ─────────────────────────── -->
+<div class="panel">
+  <p class="label"><b>A — lead</b> · orbital linework · extends the globe into a graphic language</p>
+  <p class="name">Meridians, orbits, plotted coordinates</p>
+  <svg viewBox="0 0 800 300" fill="none" aria-hidden="true">
+    <!-- planet limb, mostly off-canvas -->
+    <circle cx="150" cy="420" r="290" stroke="var(--ink)" stroke-opacity=".16" stroke-width="1"/>
+    <circle cx="150" cy="420" r="330" stroke="var(--ink)" stroke-opacity=".08" stroke-width="1"/>
+    <!-- meridian arcs on the limb -->
+    <path d="M 60 156 Q 150 120 262 176" stroke="var(--ink)" stroke-opacity=".14" stroke-width="1" stroke-dasharray="3 5"/>
+    <path d="M 20 210 Q 148 158 300 234" stroke="var(--ink)" stroke-opacity=".12" stroke-width="1" stroke-dasharray="3 5"/>
+    <!-- orbital ellipses -->
+    <ellipse cx="430" cy="170" rx="330" ry="92" stroke="var(--ink)" stroke-opacity=".18" stroke-width="1" transform="rotate(-8 430 170)"/>
+    <ellipse cx="430" cy="170" rx="252" ry="60" stroke="var(--ink)" stroke-opacity=".12" stroke-width="1" transform="rotate(-14 430 170)"/>
+    <!-- route arc between two plotted points -->
+    <path d="M 262 176 Q 470 40 706 128" stroke="var(--ember)" stroke-opacity=".8" stroke-width="1.2"/>
+    <!-- plotted points -->
+    <circle cx="262" cy="176" r="3.5" fill="var(--ember)"/>
+    <circle cx="262" cy="176" r="8" stroke="var(--ember)" stroke-opacity=".4" stroke-width="1"/>
+    <circle cx="706" cy="128" r="3" fill="none" stroke="var(--ink)" stroke-opacity=".5" stroke-width="1.2"/>
+    <circle cx="536" cy="236" r="2.5" fill="var(--ink)" fill-opacity=".4"/>
+    <circle cx="150" cy="130" r="2.5" fill="var(--ink)" fill-opacity=".35"/>
+    <!-- leader + coordinate label -->
+    <path d="M 262 176 L 306 60 L 366 60" stroke="var(--ink)" stroke-opacity=".35" stroke-width="1"/>
+    <text x="376" y="64" font-size="10" fill="var(--muted)">52.13&#176; N, 3.78&#176; W &#8212; THE STUDIO</text>
+    <text x="676" y="160" font-size="10" fill="var(--muted)" opacity=".7">ARC/01</text>
+  </svg>
+</div>
+
+<!-- ── B · CARTOGRAPHIC CONTOURS ───────────────────────────────────────── -->
+<div class="panel">
+  <p class="label"><b>B — alt</b> · cartographic contours · Wales as a place, not a sphere</p>
+  <p class="name">Contour rings around a fixed point</p>
+  <svg viewBox="0 0 800 300" fill="none" aria-hidden="true">
+    <g stroke="var(--ink)" stroke-width="1">
+      <path d="M 330 150 C 330 128 356 116 392 118 C 436 120 462 138 460 158 C 458 180 424 194 386 192 C 352 190 330 172 330 150 Z" stroke-opacity=".3"/>
+      <path d="M 296 150 C 296 114 340 92 396 96 C 462 100 500 128 496 160 C 492 194 438 216 380 212 C 328 208 296 182 296 150 Z" stroke-opacity=".22"/>
+      <path d="M 258 152 C 258 100 326 66 402 72 C 490 78 542 118 536 162 C 530 210 456 240 372 234 C 300 228 258 196 258 152 Z" stroke-opacity=".15"/>
+      <path d="M 216 154 C 216 84 310 38 408 46 C 520 54 588 108 580 164 C 570 226 476 266 366 258 C 272 250 216 210 216 154 Z" stroke-opacity=".1"/>
+      <path d="M 172 156 C 172 66 292 8 414 18 C 552 28 636 96 626 166 C 614 242 498 292 360 282 C 244 272 172 226 172 156 Z" stroke-opacity=".06"/>
+    </g>
+    <circle cx="394" cy="154" r="3.5" fill="var(--ember)"/>
+    <circle cx="394" cy="154" r="9" stroke="var(--ember)" stroke-opacity=".4" stroke-width="1"/>
+    <path d="M 394 154 L 452 84 L 512 84" stroke="var(--ink)" stroke-opacity=".35" stroke-width="1"/>
+    <text x="522" y="88" font-size="10" fill="var(--muted)">ELEV. STUDIO / CYMRU</text>
+    <g stroke="var(--ink)" stroke-opacity=".3">
+      <path d="M 40 20 v 12 M 34 26 h 12"/><path d="M 760 20 v 12 M 754 26 h 12"/>
+      <path d="M 40 268 v 12 M 34 274 h 12"/><path d="M 760 268 v 12 M 754 274 h 12"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ── C · DRAFTING PLOT ───────────────────────────────────────────────── -->
+<div class="panel">
+  <p class="label"><b>C — alt</b> · drafting plot · extends the existing hero grid</p>
+  <p class="name">Grid, route, dimension marks</p>
+  <svg viewBox="0 0 800 300" fill="none" aria-hidden="true">
+    <defs>
+      <pattern id="g" width="48" height="48" patternUnits="userSpaceOnUse">
+        <path d="M 48 0 L 0 0 0 48" stroke="var(--ink)" stroke-opacity=".07" stroke-width="1" fill="none"/>
+      </pattern>
+    </defs>
+    <rect width="800" height="300" fill="url(#g)"/>
+    <g stroke="var(--ink)" stroke-opacity=".35">
+      <path d="M 144 42 v 12 M 138 48 h 12"/><path d="M 432 90 v 12 M 426 96 h 12"/><path d="M 672 186 v 12 M 666 192 h 12"/>
+    </g>
+    <path d="M 96 240 L 240 144 L 432 192 L 576 96 L 720 120" stroke="var(--ink)" stroke-opacity=".3" stroke-width="1.2"/>
+    <circle cx="96" cy="240" r="2.5" fill="var(--ink)" fill-opacity=".5"/>
+    <circle cx="240" cy="144" r="2.5" fill="var(--ink)" fill-opacity=".5"/>
+    <circle cx="432" cy="192" r="2.5" fill="var(--ink)" fill-opacity=".5"/>
+    <circle cx="576" cy="96" r="3.5" fill="var(--ember)"/>
+    <circle cx="576" cy="96" r="8" stroke="var(--ember)" stroke-opacity=".4" stroke-width="1"/>
+    <circle cx="720" cy="120" r="2.5" fill="var(--ink)" fill-opacity=".5"/>
+    <path d="M 96 270 H 720" stroke="var(--ink)" stroke-opacity=".25" stroke-width="1"/>
+    <path d="M 96 265 v 10 M 720 265 v 10" stroke="var(--ink)" stroke-opacity=".25"/>
+    <text x="380" y="264" font-size="10" fill="var(--muted)">SPAN/2026</text>
+    <text x="596" y="86" font-size="10" fill="var(--muted)">N.04</text>
+    <text x="40" y="46" font-size="56" fill="var(--ink)" fill-opacity=".06" style="letter-spacing:-.02em" font-family="system-ui">03</text>
+  </svg>
+</div>
+
+</body>
+</html>
