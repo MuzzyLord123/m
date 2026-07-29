@@ -256,9 +256,16 @@ function GlobeLoader() {
   );
 }
 
+/* Hysteresis for the frameloop gate. With the default 50px margin the render
+   loop cut out while the globe's last slice was still on screen, so a scrolling
+   visitor could watch the spin freeze at the hero boundary. 320px means the
+   freeze always happens well off-screen. Hoisted so the observer is created
+   once, not per render. */
+const FRAMELOOP_VIEWPORT: IntersectionObserverInit = { threshold: 0, rootMargin: "320px" };
+
 export function Globe3D() {
   const isMenuOpen = useMobileMenuOpen();
-  const [containerRef, isInViewport] = useInViewport<HTMLDivElement>();
+  const [containerRef, isInViewport] = useInViewport<HTMLDivElement>(FRAMELOOP_VIEWPORT);
   
   // Pause globe when not in viewport to save battery
   const isPaused = !isInViewport;
