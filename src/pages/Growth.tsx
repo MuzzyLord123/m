@@ -1,9 +1,18 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Check, FileText, BarChart, Rss, Settings, Users, ArrowRight, Shield, Zap, Palette } from "lucide-react";
+import { FileText, BarChart, Rss, Settings, Users, ArrowRight, Palette } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { Matrix, MatrixCell, LadderRow } from "@/components/marketing/Matrix";
+import { TierScale, TierRail, SpecLedger } from "@/components/marketing/TierSeries";
+import { Reveal, RevealGroup } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
+
+/**
+ * Tier 02 — the Business site. Same specification-document architecture as
+ * the rest of the series; this chapter's distinctive section is the page
+ * structure ladder (what 2–5 pages actually means).
+ */
 
 const features = [
   { icon: FileText, title: "2-5 Pages", description: "Home, About, Services, Contact & more" },
@@ -40,182 +49,162 @@ const pageStructure = [
 export default function Growth() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
-        eyebrow="Packages"
-        index="22"
-        crumbs={[{ label: "Home", href: "/" }, { label: "Business site" }]}
+        eyebrow="Website tiers"
+        index="02"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Packages", href: "/packages" }, { label: "Business" }]}
         title="The Business"
         highlight="site"
         body="For businesses ready to look established — more pages, more structure, and a CMS you can run yourself."
         actions={
           <>
-            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
-              <Link to="/get-started">
-                Get started
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Get started
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
             <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
               <span className="link-underline">View packages</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </>
         }
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "2–5", label: "Pages" },
+              { value: "1–2 wks", label: "Delivery" },
+              { value: "100%", label: "Code ownership" },
+            ]}
+          />
+        }
       />
 
-      {/* Trust Signals */}
-      <section className="py-8 border-y border-border/60">
-        <div className="container-tight">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Shield className="w-4 h-4 text-primary" />
-              <span>No hidden fees</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Check className="w-4 h-4 text-primary" />
-              <span>UK-based support</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Zap className="w-4 h-4 text-primary" />
-              <span>1-2 week delivery</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TierScale current="02" />
 
-      {/* Features */}
+      {/* Capabilities */}
       <section className="section-padding">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              Built for <span className="text-gradient">Credibility</span>
-            </h2>
-            <p className="body-md max-w-2xl">
-              Everything you need to look professional and win more business.
-            </p>
-          </motion.div>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">What it carries</span>
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Built for
+                <span className="block text-primary">credibility.</span>
+              </h2>
+              <p className="max-w-sm text-sm font-light text-muted-foreground">
+                Everything you need to look professional and win more business.
+              </p>
+            </div>
+          </Reveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 border-b border-r border-border/60 transition-colors duration-300 hover:bg-foreground/[0.02]"
-              >
-                <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
-                  <feature.icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-display font-semibold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">{feature.description}</p>
-              </motion.div>
+          <Matrix cols={3}>
+            {features.map((feature, i) => (
+              <MatrixCell key={feature.title} icon={feature.icon} index={i} title={feature.title}>
+                {feature.description}
+              </MatrixCell>
             ))}
-          </div>
+          </Matrix>
         </div>
       </section>
 
-      {/* Complete List */}
-      <section className="section-padding">
+      {/* Page structure — this chapter's signature section */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <div className="grid lg:grid-cols-2 gap-12">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="p-8 border border-border/60 bg-background"
-            >
-              <h2 className="heading-md mb-8">
-                Everything <span className="text-gradient">Included</span>
-              </h2>
-              <ul className="space-y-4">
-                {included.map((item) => (
-                  <li key={item} className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="heading-md mb-8">
-                Why <span className="text-gradient">Business Site?</span>
-              </h2>
-              <div className="space-y-6">
-                <p className="text-muted-foreground">
-                  The Business Site is perfect for local businesses that need more than a simple 
-                  one-pager but don't need complex e-commerce or custom apps.
-                </p>
-                <ul className="space-y-3">
-                  {[
-                    "Look as professional as the big competitors",
-                    "Update content yourself with the CMS",
-                    "Get found on Google with proper SEO",
-                    "Convert more visitors into enquiries",
-                    "Works perfectly on mobile and desktop",
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3">
-                      <ArrowRight className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span className="text-muted-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="p-6 border border-primary/30 bg-background">
-                  <h4 className="font-display font-semibold mb-2">Need More?</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    If you need 6-10 pages, a blog, or lead capture automation, 
-                    our Growth Site package has you covered.
-                  </p>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/professional">View Growth Site</Link>
-                  </Button>
-                </div>
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">The blueprint</span>
               </div>
-            </motion.div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                What 2–5 pages
+                <span className="block text-primary">actually means.</span>
+              </h2>
+              <p className="mt-6 max-w-sm text-[15px] font-light leading-relaxed text-muted-foreground">
+                A typical Business site structure — shaped to how your customers actually buy, not
+                a fixed template.
+              </p>
+            </Reveal>
+            <RevealGroup className="lg:col-span-8">
+              {pageStructure.map((page, i) => (
+                <LadderRow key={page.name} index={i} title={page.name}>
+                  {page.desc}
+                </LadderRow>
+              ))}
+            </RevealGroup>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-padding">
+      {/* Spec ledger */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="border-t border-border/60 pt-12"
-          >
-            <h2 className="heading-md mb-4">
-              Ready to Look <span className="text-gradient">Professional?</span>
-            </h2>
-            <p className="body-lg mb-8 max-w-2xl">
-              Get a website that makes you look as good as your work. 
-              Bespoke design, no templates, no fuss.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Button variant="premium" size="xl" asChild>
-                <Link to="/get-started">Request a Quote <ArrowRight className="w-4 h-4" /></Link>
-              </Button>
-              <Button variant="outline" size="xl" asChild>
-                <Link to="/portfolio">View Examples</Link>
-              </Button>
+          <Reveal className="mb-8">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">The specification</span>
             </div>
-          </motion.div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Everything included.
+              </h2>
+              <span className="mono-label hidden sm:block">12 line items</span>
+            </div>
+          </Reveal>
+          <SpecLedger items={included} />
+
+          <Reveal className="mt-10 max-w-xl border border-primary/30 p-6">
+            <span className="mono-label text-primary">Need more?</span>
+            <p className="mt-3 text-sm font-light leading-relaxed text-muted-foreground">
+              If you need 6–10 pages, a blog, or lead capture automation, the Growth site has you
+              covered.
+            </p>
+            <Button variant="outline" size="sm" asChild className="mt-5">
+              <Link to="/professional">View Growth site</Link>
+            </Button>
+          </Reveal>
         </div>
       </section>
+
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Ready to look
+                <span className="block text-primary">professional?</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                Get a website that makes you look as good as your work. Bespoke design, no
+                templates, no fuss.
+              </p>
+            </div>
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+              <Magnetic className="inline-block">
+                <Button variant="premium" size="xl" asChild className="group">
+                  <Link to="/get-started">
+                    Request a quote
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              </Magnetic>
+              <Link to="/portfolio" className="link-underline self-center text-sm text-muted-foreground transition-colors hover:text-foreground">
+                View examples
+              </Link>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <TierRail current="02" />
     </Layout>
   );
 }

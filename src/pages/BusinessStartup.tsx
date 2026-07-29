@@ -306,7 +306,7 @@ export default function BusinessStartup() {
                   </h3>
                 </div>
 
-                <p className="text-lg text-muted-foreground text-center mb-8">
+                <p className="text-lg text-muted-foreground mb-8">
                   Once the strategy is clear, you're free to:
                 </p>
 

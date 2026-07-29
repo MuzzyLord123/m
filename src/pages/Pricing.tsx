@@ -35,7 +35,7 @@ const packages = [
   },
   {
     name: "Growth",
-    timeline: "2–3 weeks",
+    timeline: "2–4 weeks",
     description: "Businesses ready to scale",
     href: "/professional",
     cta: "Book a call",

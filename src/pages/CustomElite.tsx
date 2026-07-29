@@ -1,12 +1,21 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Check, Crown, Infinity, Users, Rocket, Brain, Shield, Sparkles, ArrowRight } from "lucide-react";
+import { Crown, Infinity as InfinityIcon, Users, Rocket, Brain, Shield, Sparkles, ArrowRight } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { TierScale, TierRail } from "@/components/marketing/TierSeries";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Tier 05 — Custom Elite, the top of the ladder. Same specification-document
+ * architecture as the series, with one difference: the accent from here on
+ * is brass, not ember. One material change to mark the flagship — not a
+ * different design language.
+ */
+
 const capabilities = [
-  { icon: Infinity, title: "Unlimited Scope", description: "No restrictions on site size or complexity" },
+  { icon: InfinityIcon, title: "Unlimited Scope", description: "No restrictions on site size or complexity" },
   { icon: Brain, title: "Custom Applications", description: "Web apps, SaaS platforms, portals" },
   { icon: Users, title: "Dedicated Team", description: "Your own development team throughout" },
   { icon: Rocket, title: "Bespoke Functionality", description: "Features built specifically for you" },
@@ -14,192 +23,219 @@ const capabilities = [
   { icon: Sparkles, title: "Ongoing Support", description: "Long-term development partnership" },
 ];
 
-const projectTypes = [
-  "Complex or large-scale websites",
-  "Web apps & custom functionality",
-  "SaaS platforms and portals",
-  "CRM, booking, or API integrations",
-  "Multi-location or high-traffic platforms",
-  "Long-term development & support",
+const process = [
+  { title: "Discovery Call", desc: "Understand your requirements and vision" },
+  { title: "Technical Proposal", desc: "Architecture, timeline, and pricing" },
+  { title: "Team Assembly", desc: "Dedicated team assigned to your project" },
+  { title: "Agile Development", desc: "Iterative building with regular reviews" },
+  { title: "Launch & Support", desc: "Deployment and ongoing partnership" },
+];
+
+const benefits = [
+  "Dedicated project manager",
+  "Direct access to development team",
+  "Priority support",
+  "Flexible timeline and scope",
+  "Complete IP ownership",
+  "Source code and documentation",
+  "Training and knowledge transfer",
+  "Ongoing maintenance options",
 ];
 
 export default function CustomElite() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
-        eyebrow="Packages"
-        index="25"
-        crumbs={[{ label: "Home", href: "/" }, { label: "Custom Elite" }]}
+        eyebrow="Website tiers"
+        index="05"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Packages", href: "/packages" }, { label: "Custom Elite" }]}
         title="Custom"
         highlight="Elite"
         body="Fully bespoke systems for one-of-a-kind requirements — designed and engineered from a blank page."
         actions={
           <>
-            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
-              <Link to="/get-started">
-                Get started
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="gold" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Start the conversation
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
             <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
               <span className="link-underline">View packages</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </>
         }
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "∞", label: "Scope" },
+              { value: "Yours", label: "Dedicated team" },
+              { value: "100%", label: "IP ownership" },
+            ]}
+          />
+        }
       />
 
-      {/* Trust Signals */}
-      <section className="py-8 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-primary/[0.04] to-primary/[0.02]" />
-        <div className="container-tight">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-gold" />
-              <span>No hidden fees</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-gold" />
-              <span>UK-based team</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Crown className="w-4 h-4 text-gold" />
-              <span>Full code ownership</span>
-            </div>
-          </div>
+      <TierScale current="05" />
+
+      {/* Flagship strip */}
+      <div className="border-b border-border/60">
+        <div className="container-tight flex items-center justify-between py-4">
+          <span className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.24em] text-gold">
+            <Crown className="h-3.5 w-3.5" strokeWidth={1.5} />
+            The flagship tier
+          </span>
+          <span className="mono-label hidden sm:block">Accent from here: brass</span>
         </div>
-      </section>
+      </div>
 
-      {/* Capabilities */}
-      <section className="section-padding bg-card">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              Unlimited <span className="text-gradient-gold">Capabilities</span>
-            </h2>
-            <p className="body-md max-w-2xl">
-              We build exactly what your organisation needs, with no limitations.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {capabilities.map((item, index) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl border border-gold/30 bg-background hover:border-gold/50 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center mb-4">
-                  <item.icon className="w-6 h-6 text-gold" />
-                </div>
-                <h3 className="font-display font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-muted-foreground text-sm">{item.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Process */}
+      {/* Capabilities — brass matrix */}
       <section className="section-padding">
         <div className="container-tight">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="heading-md mb-6">
-                How It <span className="text-gradient-gold">Works</span>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-gold" />
+              <span className="eyebrow">No limitations</span>
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Unlimited
+                <span className="block text-gold">capabilities.</span>
               </h2>
-              <p className="body-md mb-8">
-                Every Custom Elite project starts with a conversation to understand 
-                your vision and requirements.
+              <p className="max-w-sm text-sm font-light text-muted-foreground">
+                We build exactly what your organisation needs, with no limitations.
               </p>
-              <div className="space-y-6">
-                {[
-                  { step: "1", title: "Discovery Call", desc: "Understand your requirements and vision" },
-                  { step: "2", title: "Technical Proposal", desc: "Architecture, timeline, and pricing" },
-                  { step: "3", title: "Team Assembly", desc: "Dedicated team assigned to your project" },
-                  { step: "4", title: "Agile Development", desc: "Iterative building with regular reviews" },
-                  { step: "5", title: "Launch & Support", desc: "Deployment and ongoing partnership" },
-                ].map((item) => (
-                  <div key={item.step} className="flex gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-gold flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-bold text-gold-foreground">{item.step}</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            </div>
+          </Reveal>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="p-8 rounded-3xl bg-gradient-card border border-border"
-            >
-              <h3 className="font-display font-bold text-xl mb-6">Elite Benefits:</h3>
-              <ul className="space-y-4">
-                {[
-                  "Dedicated project manager",
-                  "Direct access to development team",
-                  "Priority support",
-                  "Flexible timeline and scope",
-                  "Complete IP ownership",
-                  "Source code and documentation",
-                  "Training and knowledge transfer",
-                  "Ongoing maintenance options",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-gold flex-shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
+          <RevealGroup className="grid grid-cols-1 border-l border-t border-border/60 sm:grid-cols-2 lg:grid-cols-3">
+            {capabilities.map((item, i) => (
+              <RevealItem
+                key={item.title}
+                className="group relative overflow-hidden border-b border-r border-border/60 p-7 transition-colors duration-500 hover:bg-foreground/[0.02] sm:p-8"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-gold transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100 motion-reduce:transition-none"
+                />
+                <div className="mb-7 flex items-center justify-between">
+                  <item.icon className="h-5 w-5 text-gold" strokeWidth={1.5} />
+                  <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <h3 className="font-display text-base font-semibold tracking-tight sm:text-lg">{item.title}</h3>
+                <div className="mt-2 text-sm font-light leading-relaxed text-muted-foreground">
+                  {item.description}
+                </div>
+              </RevealItem>
+            ))}
+          </RevealGroup>
+        </div>
+      </section>
+
+      {/* Process + elite benefits */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-6">
+              <Reveal className="mb-8">
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="h-px w-8 bg-gold" />
+                  <span className="eyebrow">Five stages</span>
+                </div>
+                <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                  How it works.
+                </h2>
+                <p className="mt-6 max-w-sm text-[15px] font-light leading-relaxed text-muted-foreground">
+                  Every Custom Elite project starts with a conversation to understand your vision
+                  and requirements.
+                </p>
+              </Reveal>
+              <RevealGroup>
+                {process.map((item, i) => (
+                  <RevealItem
+                    key={item.title}
+                    className="grid grid-cols-[auto_1fr] gap-5 border-t border-border/60 py-6 last:border-b"
+                  >
+                    <span className="font-mono text-[11px] tabular-nums text-[hsl(30_85%_30%)] dark:text-gold">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span>
+                      <span className="block font-display text-lg font-semibold tracking-tight sm:text-xl">
+                        {item.title}
+                      </span>
+                      <span className="mt-1.5 block text-sm font-light leading-relaxed text-muted-foreground">
+                        {item.desc}
+                      </span>
+                    </span>
+                  </RevealItem>
                 ))}
-              </ul>
-            </motion.div>
+              </RevealGroup>
+            </div>
+
+            <div className="lg:col-span-6">
+              <Reveal className="mb-8">
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="h-px w-8 bg-gold" />
+                  <span className="eyebrow">The retainer</span>
+                </div>
+                <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                  Elite benefits.
+                </h2>
+              </Reveal>
+              <RevealGroup stagger={0.03}>
+                {benefits.map((item, i) => (
+                  <RevealItem
+                    key={item}
+                    className="flex items-baseline gap-4 border-b border-border/60 py-3.5"
+                  >
+                    <span className="font-mono text-[11px] tabular-nums text-[hsl(30_85%_30%)] dark:text-gold">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-sm font-light leading-relaxed text-foreground/85">{item}</span>
+                  </RevealItem>
+                ))}
+              </RevealGroup>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-padding bg-card">
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-12 rounded-3xl border-2 border-gold/30 bg-gradient-card glow-gold text-center"
-          >
-            <Crown className="w-16 h-16 text-gold mx-auto mb-6" />
-            <h2 className="heading-md mb-4">
-              Let's Build Something <span className="text-gradient-gold">Extraordinary</span>
-            </h2>
-            <p className="body-lg mb-8 max-w-2xl">
-              Get in touch to discuss your vision and receive a custom proposal 
-              tailored to your organisation's needs.
-            </p>
-            <Button variant="gold" size="xl" asChild>
-              <Link to="/get-started">
-                Contact Us to Discuss <ArrowRight className="w-5 h-5" />
-              </Link>
-            </Button>
-          </motion.div>
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="mb-5 flex items-center gap-3">
+                <Crown className="h-4 w-4 text-gold" strokeWidth={1.5} />
+                <span className="eyebrow">Tier 05</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Let&rsquo;s build something
+                <span className="block text-gold">extraordinary.</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                Get in touch to discuss your vision and receive a custom proposal tailored to your
+                organisation&rsquo;s needs.
+              </p>
+            </div>
+            <Magnetic className="inline-block">
+              <Button variant="gold" size="xl" asChild className="group">
+                <Link to="/get-started">
+                  Contact us to discuss
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
+          </Reveal>
         </div>
       </section>
+
+      <TierRail current="05" />
     </Layout>
   );
 }

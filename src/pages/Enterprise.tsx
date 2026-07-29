@@ -1,9 +1,17 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Check, Database, Lock, Users, Globe, Code, Settings, Shield, Headphones, ArrowRight } from "lucide-react";
+import { Database, Lock, Users, Globe, Code, Headphones, ArrowRight } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { Matrix, MatrixCell, LadderRow } from "@/components/marketing/Matrix";
+import { TierScale, TierRail } from "@/components/marketing/TierSeries";
+import { Reveal, RevealGroup } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
+
+/**
+ * Tier 04 — Enterprise. This chapter's signature is the staged-delivery
+ * process ladder: complex builds sold as a sequence, not a promise.
+ */
 
 const capabilities = [
   { icon: Database, title: "Custom Databases", description: "Tailored database architecture for your needs" },
@@ -23,161 +31,152 @@ const projectTypes = [
   "Long-term development & support",
 ];
 
+const stages = [
+  { title: "Discovery", desc: "We discuss your requirements and goals" },
+  { title: "Proposal", desc: "You receive a tailored quote and timeline" },
+  { title: "Build", desc: "We develop your custom solution" },
+  { title: "Launch", desc: "Your platform goes live with full support" },
+];
+
 export default function Enterprise() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
-        eyebrow="Packages"
-        index="24"
-        crumbs={[{ label: "Home", href: "/" }, { label: "Enterprise" }]}
+        eyebrow="Website tiers"
+        index="04"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Packages", href: "/packages" }, { label: "Enterprise" }]}
         title="Enterprise"
         highlight="builds"
         body="Complex platforms, integrations and multi-site estates — scoped properly and delivered in stages."
         actions={
           <>
-            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
-              <Link to="/get-started">
-                Get started
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Get started
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
             <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
               <span className="link-underline">View packages</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </>
         }
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "∞", label: "Pages & sections" },
+              { value: "4–12 wks", label: "Typical delivery" },
+              { value: "100%", label: "IP ownership" },
+            ]}
+          />
+        }
       />
 
-      {/* Trust Signals */}
-      <section className="py-8 border-y border-border/60">
-        <div className="container-tight">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Shield className="w-4 h-4 text-primary" />
-              <span>No hidden fees</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Check className="w-4 h-4 text-primary" />
-              <span>UK-based team</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Lock className="w-4 h-4 text-primary" />
-              <span>Full code ownership</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TierScale current="04" />
 
       {/* Capabilities */}
       <section className="section-padding">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              What We Can <span className="text-gradient">Build</span>
-            </h2>
-            <p className="body-md max-w-2xl">
-              From custom web applications to enterprise platforms — 
-              we build solutions tailored to your specific needs.
-            </p>
-          </motion.div>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">What we can build</span>
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Platforms, not
+                <span className="block text-primary">just pages.</span>
+              </h2>
+              <p className="max-w-sm text-sm font-light text-muted-foreground">
+                From custom web applications to enterprise platforms — built to your specific
+                needs.
+              </p>
+            </div>
+          </Reveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
-            {capabilities.map((item, index) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 border-b border-r border-border/60 transition-colors duration-300 hover:bg-foreground/[0.02]"
-              >
-                <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
-                  <item.icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-display font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-muted-foreground text-sm">{item.description}</p>
-              </motion.div>
+          <Matrix cols={3}>
+            {capabilities.map((item, i) => (
+              <MatrixCell key={item.title} icon={item.icon} index={i} title={item.title}>
+                {item.description}
+              </MatrixCell>
             ))}
+          </Matrix>
+        </div>
+      </section>
+
+      {/* Project types + staged delivery */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-6">
+              <Reveal className="mb-8">
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="h-px w-8 bg-primary" />
+                  <span className="eyebrow">The territory</span>
+                </div>
+                <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                  Typical projects.
+                </h2>
+              </Reveal>
+              <RevealGroup>
+                {projectTypes.map((item, i) => (
+                  <LadderRow key={item} index={i} title={item} />
+                ))}
+              </RevealGroup>
+            </div>
+
+            <div className="lg:col-span-6">
+              <Reveal className="mb-8">
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="h-px w-8 bg-primary" />
+                  <span className="eyebrow">Delivered in stages</span>
+                </div>
+                <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                  How it works.
+                </h2>
+              </Reveal>
+              <RevealGroup>
+                {stages.map((item, i) => (
+                  <LadderRow key={item.title} index={i} title={item.title}>
+                    {item.desc}
+                  </LadderRow>
+                ))}
+              </RevealGroup>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Process */}
-      <section className="section-padding">
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              How It <span className="text-gradient">Works</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-4 gap-0 border-l border-t border-border/60">
-            {[
-              { step: "1", title: "Discovery", desc: "We discuss your requirements and goals" },
-              { step: "2", title: "Proposal", desc: "You receive a tailored quote and timeline" },
-              { step: "3", title: "Build", desc: "We develop your custom solution" },
-              { step: "4", title: "Launch", desc: "Your platform goes live with full support" },
-            ].map((item, index) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="relative"
-              >
-                <div className="p-6 border-b border-r border-border/60 text-center">
-                  <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center mx-auto mb-4">
-                    <span className="text-lg font-bold text-primary-foreground">{item.step}</span>
-                  </div>
-                  <h3 className="font-display font-semibold text-lg mb-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
-                </div>
-                {index < 3 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-border" />
-                )}
-              </motion.div>
-            ))}
-          </div>
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Let&rsquo;s discuss
+                <span className="block text-primary">your project.</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                Every enterprise project is unique. Get in touch to discuss your requirements and
+                receive a tailored proposal.
+              </p>
+            </div>
+            <Magnetic className="inline-block">
+              <Button variant="premium" size="xl" asChild className="group">
+                <Link to="/get-started">
+                  Contact us
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
+          </Reveal>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-padding">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-8 md:p-12 border border-primary/30 bg-background text-center"
-          >
-            <h2 className="heading-md mb-4">
-              Let's Discuss Your <span className="text-gradient">Project</span>
-            </h2>
-            <p className="body-lg mb-8 max-w-2xl">
-              Every enterprise project is unique. Get in touch to discuss your requirements 
-              and receive a tailored proposal.
-            </p>
-            <Button variant="premium" size="xl" asChild>
-              <Link to="/get-started">
-                Contact Us for More Information <ArrowRight className="w-5 h-5" />
-              </Link>
-            </Button>
-          </motion.div>
-        </div>
-      </section>
+      <TierRail current="04" />
     </Layout>
   );
 }

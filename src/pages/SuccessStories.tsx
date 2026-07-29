@@ -1,297 +1,167 @@
-import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { ArrowRight, ArrowUpRight, Eye, FileCheck, Banknote, KeyRound } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { PageHero } from "@/components/marketing/PageHero";
+import { Matrix, MatrixCell, LadderRow } from "@/components/marketing/Matrix";
+import { Reveal, RevealGroup } from "@/components/motion/Reveal";
+import { WordReveal } from "@/components/motion/Scrub";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Star, TrendingUp, Users, ArrowUpRight, Quote, ArrowRight } from "lucide-react";
-import { ParallaxBackground } from "@/components/ParallaxImage";
-import heroWorkspace from "@/assets/hero-workspace.jpg";
 
-const stories = [
+/**
+ * This page used to carry six invented clients — "TechStart Solutions",
+ * "Hartley Legal", "Artisan Coffee Co." — with fabricated quotes, invented
+ * people, stock Unsplash photos, and a stats band ("500+ projects", "98%
+ * satisfaction") describing a track record that doesn't exist. All of it is
+ * gone; see PLACEHOLDERS.md P9.
+ *
+ * What replaced it is the only honest version of a success page a young
+ * studio can publish: the promises a client can verify before paying,
+ * the journey every project actually follows, and a plain invitation to be
+ * an early client. When real stories exist, they belong here.
+ */
+
+const checkable = [
   {
-    client: "TechStart Solutions",
-    industry: "Tech Consultancy",
-    tier: "Enterprise",
-    image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=400&fit=crop",
-    quote: "Quooro transformed our online presence completely. The design is clean, professional, and exactly what we needed to stand out.",
-    author: "James C.",
-    role: "Director",
-    results: [
-      { metric: "Design Quality", value: "Excellent" },
-      { metric: "Client Feedback", value: "Very Positive" },
-      { metric: "Page Load", value: "Under 2s" },
-    ],
+    icon: Eye,
+    title: "The preview is real",
+    desc: "Before any payment, you receive a working preview of your actual site — not a mood board. Judge us on it.",
   },
   {
-    client: "Bloom & Grow Florists",
-    industry: "E-commerce",
-    tier: "Professional",
-    image: "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600&h=400&fit=crop",
-    quote: "From a basic website to a full e-commerce platform — the transformation was incredible. Our customers love shopping with us online now.",
-    author: "Sarah M.",
-    role: "Owner",
-    results: [
-      { metric: "Customer Experience", value: "Improved" },
-      { metric: "Easy to Manage", value: "Yes" },
-      { metric: "Mobile Friendly", value: "100%" },
-    ],
+    icon: Banknote,
+    title: "The pricing is published",
+    desc: "Every tier and service has its scope in writing on this site. Compare us line by line against any quote.",
   },
   {
-    client: "Urban Fitness Studio",
-    industry: "Health & Fitness",
-    tier: "Growth",
-    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=400&fit=crop",
-    quote: "The booking system they integrated is seamless. Our members love the user experience, and it's made our admin so much easier.",
-    author: "Mike T.",
-    role: "Founder",
-    results: [
-      { metric: "Booking System", value: "Works Great" },
-      { metric: "Member Feedback", value: "Positive" },
-      { metric: "Time Saved", value: "Hours/week" },
-    ],
+    icon: KeyRound,
+    title: "The ownership is total",
+    desc: "Code, design, content, accounts — contractually yours. No licensing fees, no lock-in, resale rights included.",
   },
   {
-    client: "Hartley Legal",
-    industry: "Legal Services",
-    tier: "Professional",
-    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&h=400&fit=crop",
-    quote: "Professional, modern, and exactly what we needed. The site positions us perfectly in the market and clients find us easily.",
-    author: "Amanda H.",
-    role: "Managing Partner",
-    results: [
-      { metric: "Professional Look", value: "Achieved" },
-      { metric: "Easy Navigation", value: "Yes" },
-      { metric: "Client Trust", value: "Increased" },
-    ],
-  },
-  {
-    client: "Artisan Coffee Co.",
-    industry: "Hospitality",
-    tier: "Starter",
-    image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=400&fit=crop",
-    quote: "Started with a simple site and it delivered beyond expectations. Perfect for getting our brand online quickly and professionally.",
-    author: "Tom R.",
-    role: "Owner",
-    results: [
-      { metric: "Brand Presence", value: "Established" },
-      { metric: "Local Visibility", value: "Improved" },
-      { metric: "Delivery Time", value: "5 days" },
-    ],
-  },
-  {
-    client: "NextGen Accounting",
-    industry: "Financial Services",
-    tier: "Enterprise",
-    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=400&fit=crop",
-    quote: "The custom client portal has made our processes so much smoother. Secure, efficient, and our clients appreciate the transparency.",
-    author: "David P.",
-    role: "Director",
-    results: [
-      { metric: "Client Satisfaction", value: "High" },
-      { metric: "Secure Portal", value: "Yes" },
-      { metric: "Easy to Use", value: "Very" },
-    ],
+    icon: FileCheck,
+    title: "The work is inspectable",
+    desc: "Our reference builds are public and labelled honestly as studies — showing exactly how each tier is put together.",
   },
 ];
 
-const testimonials = [
-  {
-    quote: "Best investment we've made in years. The ROI was visible within the first month.",
-    author: "Rebecca Stone",
-    company: "Stone Properties",
-    rating: 5,
-  },
-  {
-    quote: "They didn't just build a website, they built us a business asset.",
-    author: "Marcus Lee",
-    company: "Lee Innovations",
-    rating: 5,
-  },
-  {
-    quote: "Responsive, professional, and truly understood our vision from day one.",
-    author: "Emily Carter",
-    company: "Carter Design Studio",
-    rating: 5,
-  },
+const journey = [
+  { title: "You tell us what the business needs", desc: "A short enquiry — no calls you didn't ask for, no obligation." },
+  { title: "We build your preview free", desc: "A working version of your actual site, usually within a week." },
+  { title: "You decide with the evidence in hand", desc: "Love it and we finish it. Don't, and you owe nothing." },
+  { title: "We build, you review, it ships", desc: "Clear timelines by tier — days for a Starter, staged delivery for platforms." },
+  { title: "Everything transfers to you", desc: "Source code, accounts, training. The site is an asset you own outright." },
 ];
 
 export default function SuccessStories() {
   return (
     <Layout>
-      {/* Hero with Parallax Premium Image */}
       <PageHero
-        eyebrow="Company"
+        eyebrow="On the record"
         index="47"
         crumbs={[{ label: "Home", href: "/" }, { label: "Success stories" }]}
-        title="Success"
-        highlight="stories"
-        body="What working with the studio looks like in practice."
+        title="Judged on evidence,"
+        highlight="not testimonials."
+        body="We're a young studio, and we won't invent a wall of glowing clients to look older. Here's what you can actually check — before you pay anything."
       />
 
-      {/* Stats Banner */}
-      <section className="py-12 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-primary/[0.05] to-primary/[0.02]" />
-        <div className="container-tight relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { value: "500+", label: "Projects Completed", color: "from-blue-500 to-indigo-500" },
-              { value: "98%", label: "Client Satisfaction", color: "from-purple-500 to-pink-500" },
-              { value: "250%", label: "Avg. Traffic Growth", color: "from-teal-500 to-emerald-500" },
-              { value: "4.9/5", label: "Average Rating", color: "from-amber-500 to-orange-500" },
-            ].map((stat, i) => (
-              <motion.div 
-                key={stat.label} 
-                className="text-center"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <div className={`text-3xl font-display font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
+      {/* The honest statement */}
+      <section className="section-padding">
+        <div className="container-tight">
+          <WordReveal
+            text="Most agency success pages are unverifiable. Ours is short on names and long on things you can test yourself — a free preview, published pricing, and ownership in writing."
+            className="max-w-4xl font-display text-2xl font-semibold leading-snug tracking-[-0.02em] sm:text-3xl lg:text-4xl"
+          />
         </div>
       </section>
 
-      {/* Case Studies */}
-      <section className="py-20">
+      {/* What you can check */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              Featured Case Studies
-            </h2>
-            <p className="text-muted-foreground max-w-2xl">
-              Detailed success stories from clients across all our service tiers.
-            </p>
-          </motion.div>
-
-          <div className="grid lg:grid-cols-2 gap-0 border-l border-t border-border/60">
-            {stories.map((story, index) => (
-              <motion.div
-                key={story.client}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="border-b border-r border-border/60 overflow-hidden group hover:shadow-premium transition-all duration-300"
-              >
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={story.image}
-                    alt={story.client}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-                  <div className="absolute bottom-4 left-4 flex gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground">
-                      {story.tier}
-                    </span>
-                    <span className="px-3 py-1 rounded-full text-xs font-medium glass">
-                      {story.industry}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-display font-semibold mb-3">{story.client}</h3>
-                  <blockquote className="text-muted-foreground mb-4 italic">
-                    "{story.quote}"
-                  </blockquote>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{story.author}</div>
-                      <div className="text-sm text-muted-foreground">{story.role}</div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
-                    {story.results.map((result) => (
-                      <div key={result.metric} className="text-center">
-                        <div className="text-lg font-display font-bold text-primary">{result.value}</div>
-                        <div className="text-xs text-muted-foreground">{result.metric}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Testimonials */}
-      <section className="py-20 bg-card/50">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="text-3xl font-display font-bold mb-4">What Clients Say</h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-0 border-l border-t border-border/60">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.author}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="border-b border-r border-border/60 p-6"
-              >
-                <Quote className="w-8 h-8 text-primary/30 mb-4" />
-                <p className="text-muted-foreground mb-4">"{testimonial.quote}"</p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">{testimonial.author}</div>
-                    <div className="text-sm text-muted-foreground">{testimonial.company}</div>
-                  </div>
-                  <div className="flex gap-1">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="border border-border/60 bg-background p-12 text-center"
-          >
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              Ready to Be Our Next Success Story?
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mb-8">
-              Join hundreds of businesses that have transformed their digital presence with Quooro.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="premium" size="lg" asChild>
-                <Link to="/get-started">Start Your Project <ArrowRight className="w-4 h-4" /></Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild>
-                <Link to="/portfolio">View Portfolio</Link>
-              </Button>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">Verifiable now</span>
             </div>
-          </motion.div>
+            <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+              Four claims you can
+              <span className="block text-primary">check today.</span>
+            </h2>
+          </Reveal>
+
+          <Matrix cols={4}>
+            {checkable.map((item, i) => (
+              <MatrixCell key={item.title} icon={item.icon} index={i} title={item.title}>
+                {item.desc}
+              </MatrixCell>
+            ))}
+          </Matrix>
+        </div>
+      </section>
+
+      {/* The journey every project follows */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">Every project</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                The story your project
+                <span className="block text-primary">will follow.</span>
+              </h2>
+              <p className="mt-6 max-w-sm text-[15px] font-light leading-relaxed text-muted-foreground">
+                Five chapters, in this order, every time. The only variable is how far up the
+                tier ladder you go.
+              </p>
+              <Link
+                to="/portfolio"
+                className="group mt-8 inline-flex items-center gap-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground"
+              >
+                <span className="link-underline">See the reference builds</span>
+                <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+            </Reveal>
+            <RevealGroup className="lg:col-span-8">
+              {journey.map((step, i) => (
+                <LadderRow key={step.title} index={i} title={step.title}>
+                  {step.desc}
+                </LadderRow>
+              ))}
+            </RevealGroup>
+          </div>
+        </div>
+      </section>
+
+      {/* Early client close */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                The first stories here
+                <span className="block text-primary">will be real ones.</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                Early clients get the studio&rsquo;s full attention — and when your results are
+                worth telling, this page is where they&rsquo;ll live, with your permission.
+              </p>
+            </div>
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+              <Magnetic className="inline-block">
+                <Button variant="premium" size="xl" asChild className="group">
+                  <Link to="/get-started">
+                    Start with a free preview
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              </Magnetic>
+              <Link to="/preview-guarantee" className="link-underline self-center text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Read the guarantee
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
     </Layout>

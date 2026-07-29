@@ -1,9 +1,17 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Check, FileText, TrendingUp, Rss, Settings, Zap, Search, ArrowRight, Shield } from "lucide-react";
+import { FileText, TrendingUp, Rss, Settings, Zap, Search, ArrowRight } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { Matrix, MatrixCell } from "@/components/marketing/Matrix";
+import { TierScale, TierRail, SpecLedger } from "@/components/marketing/TierSeries";
+import { Reveal } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
+
+/**
+ * Tier 03 — the Growth site. This chapter's signature is the fifteen-line
+ * specification: the longest ledger in the series, set full-width.
+ */
 
 const features = [
   { icon: FileText, title: "6-10 Pages", description: "Comprehensive site with room to grow" },
@@ -35,190 +43,133 @@ const included = [
 export default function Professional() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
-        eyebrow="Packages"
-        index="23"
-        crumbs={[{ label: "Home", href: "/" }, { label: "Growth site" }]}
+        eyebrow="Website tiers"
+        index="03"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Packages", href: "/packages" }, { label: "Growth" }]}
         title="The Growth"
         highlight="site"
         body="Custom design and deeper integrations for businesses whose website has to carry real weight."
         actions={
           <>
-            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
-              <Link to="/get-started">
-                Get started
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Get started
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
             <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
               <span className="link-underline">View packages</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </>
         }
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "6–10", label: "Pages" },
+              { value: "2–4 wks", label: "Delivery" },
+              { value: "60 days", label: "Post-launch support" },
+            ]}
+          />
+        }
       />
 
-      {/* Trust Signals */}
-      <section className="py-8 border-y border-border/60">
+      <TierScale current="03" />
+
+      {/* Capabilities */}
+      <section className="section-padding">
         <div className="container-tight">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Shield className="w-4 h-4 text-primary" />
-              <span>No hidden fees</span>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">What it carries</span>
             </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Check className="w-4 h-4 text-primary" />
-              <span>UK-based support</span>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Built for
+                <span className="block text-primary">growth.</span>
+              </h2>
+              <p className="max-w-sm text-sm font-light text-muted-foreground">
+                Everything you need to scale your online presence and capture more leads.
+              </p>
             </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Zap className="w-4 h-4 text-primary" />
-              <span>Built to convert</span>
-            </div>
-          </div>
+          </Reveal>
+
+          <Matrix cols={3}>
+            {features.map((feature, i) => (
+              <MatrixCell key={feature.title} icon={feature.icon} index={i} title={feature.title}>
+                {feature.description}
+              </MatrixCell>
+            ))}
+          </Matrix>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="section-padding">
+      {/* The fifteen-line specification */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              Built for <span className="text-gradient">Growth</span>
-            </h2>
-            <p className="body-md max-w-2xl">
-              Everything you need to scale your online presence and capture more leads.
+          <Reveal className="mb-8">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">The specification</span>
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Everything included.
+              </h2>
+              <span className="mono-label hidden sm:block">15 line items — the longest in the series</span>
+            </div>
+          </Reveal>
+          <SpecLedger items={included} />
+
+          <Reveal className="mt-10 max-w-xl border border-primary/30 p-6">
+            <span className="mono-label text-primary">Beyond ten pages?</span>
+            <p className="mt-3 text-sm font-light leading-relaxed text-muted-foreground">
+              Custom platforms, web apps and integrations live in the Enterprise tier — scoped
+              properly and delivered in stages.
             </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 border-b border-r border-border/60 transition-colors duration-300 hover:bg-foreground/[0.02]"
-              >
-                <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
-                  <feature.icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-display font-semibold text-lg mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">{feature.description}</p>
-              </motion.div>
-            ))}
-          </div>
+            <Button variant="outline" size="sm" asChild className="mt-5">
+              <Link to="/enterprise">View Enterprise</Link>
+            </Button>
+          </Reveal>
         </div>
       </section>
 
-      {/* Full Feature List */}
-      <section className="section-padding">
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              Everything <span className="text-gradient">Included</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {included.map((item, index) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.03 }}
-                className="flex items-center gap-3 p-3 rounded-lg border border-border/60 bg-background"
-              >
-                <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                <span className="text-sm">{item}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Need More Section */}
-      <section className="section-padding">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="border-t border-border/60 pt-12"
-          >
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <h2 className="heading-md mb-4">
-                  Need Something <span className="text-gradient">More Complex?</span>
-                </h2>
-                <p className="body-md mb-6">
-                  For web apps, e-commerce, custom integrations, or enterprise-scale platforms, 
-                  we offer custom solutions tailored to your specific needs.
-                </p>
-                <ul className="space-y-3">
-                  {[
-                    "Web apps & custom functionality",
-                    "E-commerce & booking systems",
-                    "CRM & API integrations",
-                    "Multi-location platforms",
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-sm">
-                      <ArrowRight className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span className="text-muted-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="text-center lg:text-right">
-                <p className="text-sm text-muted-foreground mb-4">Custom pricing — tailored to your business</p>
-                <Button variant="outline" size="lg" asChild>
-                  <Link to="/get-started">Contact Us to Discuss</Link>
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Ready to
+                <span className="block text-primary">scale?</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                A website built to capture leads and carry real traffic — with the structure to
+                keep growing.
+              </p>
+            </div>
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+              <Magnetic className="inline-block">
+                <Button variant="premium" size="xl" asChild className="group">
+                  <Link to="/get-started">
+                    Book a strategy call
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
                 </Button>
-              </div>
+              </Magnetic>
+              <Link to="/portfolio" className="link-underline self-center text-sm text-muted-foreground transition-colors hover:text-foreground">
+                View examples
+              </Link>
             </div>
-          </motion.div>
+          </Reveal>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-padding">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="border-t border-border/60 pt-12"
-          >
-            <h2 className="heading-md mb-4">
-              Ready to <span className="text-gradient">Scale?</span>
-            </h2>
-            <p className="body-lg mb-8 max-w-2xl">
-              Get a website built for growth with lead capture, content hub, 
-              and everything you need to scale.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Button variant="premium" size="xl" asChild>
-                <Link to="/get-started">Book a Strategy Call <ArrowRight className="w-4 h-4" /></Link>
-              </Button>
-              <Button variant="outline" size="xl" asChild>
-                <Link to="/portfolio">View Examples</Link>
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <TierRail current="03" />
     </Layout>
   );
 }

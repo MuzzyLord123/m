@@ -203,7 +203,7 @@ export default function Ownership() {
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left p-4 font-display">Feature</th>
-                  <th className="text-center p-4 font-display text-primary">Echelon Sites</th>
+                  <th className="text-center p-4 font-display text-primary">Quooro</th>
                   <th className="text-center p-4 font-display text-muted-foreground">Typical Agency</th>
                   <th className="text-center p-4 font-display text-muted-foreground">Template Builders</th>
                 </tr>

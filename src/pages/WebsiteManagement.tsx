@@ -1,450 +1,366 @@
-import { motion } from "framer-motion";
-import { Shield, Zap, Settings, CheckCircle, AlertTriangle, Server, CreditCard, ArrowRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
 import { Link } from "react-router-dom";
+import { Shield, CheckCircle, AlertTriangle, Server, CreditCard, Zap, ArrowRight } from "lucide-react";
+import { Layout } from "@/components/layout/Layout";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import {
+  ServiceStrip,
+  ServiceRail,
+  ServicePlans,
+  SeriesHeading,
+  type ServicePlan,
+} from "@/components/marketing/ServiceSeries";
+import { SpecLedger } from "@/components/marketing/TierSeries";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-};
+/**
+ * Service 06 — website management. The most contract-like page on the site:
+ * what management includes, what hosting actually costs (Netlify, at cost,
+ * no markup), and what happens if you host it yourself. Set as a
+ * specification document — the honesty is the selling point, so the design
+ * job is to make the terms easy to read.
+ */
 
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-};
+const managementIncludes = [
+  "Ongoing website maintenance & monitoring",
+  "Bug fixes and error resolution",
+  "Performance checks and optimisation",
+  "Security updates and dependency updates",
+  "Content edits (text changes, layout tweaks, CTA updates)",
+  "Image and photo uploads",
+  "Menu updates (for static or eCommerce sites)",
+  "Ensuring the website runs smoothly at all times",
+];
+
+const plans: ServicePlan[] = [
+  {
+    name: "Starter Management",
+    price: "Tailored — per month",
+    features: [
+      "Small websites & static sites",
+      "Minor edits and updates",
+      "Bug fixes",
+      "Performance monitoring",
+    ],
+  },
+  {
+    name: "Business Management",
+    price: "Tailored — per month",
+    popular: true,
+    features: [
+      "Growing businesses & service sites",
+      "Regular content changes",
+      "Image uploads & layout edits",
+      "Priority bug fixes",
+      "Ongoing maintenance",
+    ],
+  },
+  {
+    name: "eCommerce Management",
+    price: "Tailored — per month",
+    features: [
+      "Product uploads & changes",
+      "Menu updates",
+      "Pricing changes",
+      "Image uploads",
+      "Performance & stability monitoring",
+      "Recommended for businesses with frequent updates",
+    ],
+  },
+];
+
+const hostingCosts = [
+  { type: "Small / Static Sites", cost: "Based on usage" },
+  { type: "Business Sites", cost: "Based on usage" },
+  { type: "Larger / High-Traffic Sites", cost: "Based on usage" },
+];
+
+const summary = [
+  "You can host yourself or with us",
+  "Hosting is charged at cost (no markup)",
+  "Individual edits available at competitive rates",
+  "Management plans are the most cost-effective option long-term",
+  "Custom Elite plans include full technical oversight",
+];
 
 export default function WebsiteManagement() {
-  const managementIncludes = [
-    "Ongoing website maintenance & monitoring",
-    "Bug fixes and error resolution",
-    "Performance checks and optimisation",
-    "Security updates and dependency updates",
-    "Content edits (text changes, layout tweaks, CTA updates)",
-    "Image and photo uploads",
-    "Menu updates (for static or eCommerce sites)",
-    "Ensuring the website runs smoothly at all times"
-  ];
-
-  const managementPlans = [
-    {
-      name: "Starter Management",
-      price: "Tailored Pricing",
-      period: "per month",
-      features: [
-        "Small websites & static sites",
-        "Minor edits and updates",
-        "Bug fixes",
-        "Performance monitoring"
-      ],
-      recommended: false
-    },
-    {
-      name: "Business Management",
-      price: "Tailored Pricing",
-      period: "per month",
-      features: [
-        "Growing businesses & service sites",
-        "Regular content changes",
-        "Image uploads & layout edits",
-        "Priority bug fixes",
-        "Ongoing maintenance"
-      ],
-      recommended: true
-    },
-    {
-      name: "eCommerce Management",
-      price: "Tailored Pricing",
-      period: "per month",
-      features: [
-        "Product uploads & changes",
-        "Menu updates",
-        "Pricing changes",
-        "Image uploads",
-        "Performance & stability monitoring",
-        "Recommended for businesses with frequent updates"
-      ],
-      recommended: false
-    }
-  ];
-
-  const hostingCosts = [
-    { type: "Small / Static Sites", cost: "Based on usage" },
-    { type: "Business Sites", cost: "Based on usage" },
-    { type: "Larger / High-Traffic Sites", cost: "Based on usage" }
-  ];
-
   return (
     <Layout>
-    <div className="min-h-screen bg-background">
       <PageHero
-        eyebrow="Development"
-        index="15"
-        crumbs={[{ label: "Home", href: "/" }, { label: "Website management" }]}
+        eyebrow="The practice"
+        index="06"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Services" }, { label: "Website management" }]}
         title="Sites kept"
         highlight="running"
         body="Updates, monitoring, backups and fixes handled quietly — the part of ownership nobody wants to do alone."
         actions={
           <>
-            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
-              <Link to="/get-started">
-                Get started
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Get started
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
             <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
               <span className="link-underline">View packages</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </>
         }
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "08", label: "Things handled" },
+              { value: "03", label: "Monthly plans" },
+              { value: "£0", label: "Hosting markup" },
+            ]}
+          />
+        }
       />
 
-      {/* Why Management Matters */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto"
-          >
-            <motion.div variants={fadeUp} className="mb-12">
-              <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-              <h2 className="text-3xl font-display font-bold mb-4">Why Management Matters</h2>
-              <p className="text-lg text-muted-foreground">
-                Websites are not "set and forget" assets — updates, fixes, and changes are inevitable. 
-                Ongoing management prevents small issues from becoming costly problems.
-              </p>
-            </motion.div>
+      <ServiceStrip current="06" />
 
-            <motion.div variants={fadeUp}>
-              <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-primary" />
-                    What Website Management Includes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {managementIncludes.map((item, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="mt-6 text-muted-foreground border-t border-border/50 pt-6">
-                    This allows you to focus on running your business while we handle the technical side.
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
+      {/* Why + what's included */}
+      <section className="section-padding">
+        <div className="container-tight">
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">Why it matters</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Websites aren&rsquo;t
+                <span className="block text-primary">set and forget.</span>
+              </h2>
+              <p className="mt-6 max-w-sm text-[15px] font-light leading-relaxed text-muted-foreground">
+                Updates, fixes, and changes are inevitable. Ongoing management prevents small
+                issues from becoming costly problems — and lets you focus on running your business
+                while we handle the technical side.
+              </p>
+            </Reveal>
+            <div className="lg:col-span-8">
+              <SpecLedger items={managementIncludes} />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Pricing Plans */}
-      <section className="py-16 md:py-24 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.15)' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
-        <div className="container mx-auto px-4">
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            <motion.div variants={fadeUp} className="mb-12">
-              <h2 className="text-3xl font-display font-bold mb-4">Website Management Pricing</h2>
-            </motion.div>
+      {/* Plans */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <SeriesHeading
+            eyebrow="The plans"
+            title="Management"
+            accent="pricing."
+            standfirst="Priced to the size of the site and how often it changes."
+          />
+          <ServicePlans plans={plans} cta="Get a quote" />
 
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {managementPlans.map((plan, index) => (
-                <motion.div key={index} variants={fadeUp}>
-                  <Card className={`h-full relative ${plan.recommended ? 'border-primary shadow-lg shadow-primary/10' : 'border-border/50'}`}>
-                    {plan.recommended && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <Badge className="bg-primary text-primary-foreground">Recommended</Badge>
-                      </div>
-                    )}
-                    <CardHeader className="text-center pt-8">
-                      <CardTitle className="text-xl">{plan.name}</CardTitle>
-                      <div className="mt-4">
-                        <span className="text-4xl font-bold">{plan.price}</span>
-                        <span className="text-muted-foreground ml-2">{plan.period}</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-3">
-                        {plan.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-1" />
-                            <span className="text-sm text-muted-foreground">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+          {/* Custom Elite management — brass, matching the flagship tier */}
+          <Reveal className="mt-8 border border-gold/30 p-7 sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.24em] text-gold">
+                <Shield className="h-4 w-4" strokeWidth={1.5} />
+                Custom Elite website management
+              </span>
+              <span className="mono-label">Custom pricing</span>
+            </div>
+            <p className="mt-4 max-w-2xl text-sm font-light leading-relaxed text-muted-foreground">
+              Available under Custom Elite in Web Services. Includes everything above, plus:
+            </p>
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+              {["Advanced troubleshooting", "Ongoing optimisation", "Priority support", "Full technical oversight"].map((item) => (
+                <div key={item} className="flex items-center gap-2.5 text-sm font-light text-muted-foreground">
+                  <CheckCircle className="h-3.5 w-3.5 text-gold" strokeWidth={2} />
+                  {item}
+                </div>
               ))}
             </div>
-
-            {/* Custom Elite */}
-            <motion.div variants={fadeUp} className="mt-8 max-w-3xl mx-auto">
-              <Card className="border-gold/30 bg-gradient-to-br from-gold/5 to-transparent">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-gold" />
-                      Custom Elite Website Management
-                    </CardTitle>
-                    <Badge variant="outline" className="border-gold/50 text-gold">Custom Pricing</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Available under Custom Elite in Web Services. Includes everything above, plus:
-                  </p>
-                  <div className="grid md:grid-cols-2 gap-3">
-                    {["Advanced troubleshooting", "Ongoing optimisation", "Priority support", "Full technical oversight"].map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-gold" />
-                        <span className="text-sm">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="mt-4 text-sm text-muted-foreground italic">
-                    Ideal for complex or high-traffic websites. Price based on website size and complexity.
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
+            <p className="mt-4 text-xs font-light italic text-muted-foreground">
+              Ideal for complex or high-traffic websites. Price based on website size and
+              complexity.
+            </p>
+          </Reveal>
         </div>
       </section>
 
-      {/* Hosting Section */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto"
-          >
-            <motion.div variants={fadeUp} className="mb-12">
-              <Server className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h2 className="text-3xl font-display font-bold mb-4">Hosting With Us (Netlify)</h2>
-              <p className="text-lg text-muted-foreground">
-                We host websites using Netlify, a reliable and scalable hosting platform.
+      {/* Hosting at cost */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-5">
+              <div className="mb-5 flex items-center gap-3">
+                <Server className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                <span className="eyebrow">Hosting with us</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Charged at cost.
+                <span className="block text-primary">No markup, ever.</span>
+              </h2>
+              <p className="mt-6 max-w-sm text-[15px] font-light leading-relaxed text-muted-foreground">
+                We host websites using Netlify, a reliable and scalable hosting platform — and we
+                only charge exactly what Netlify charges us.{" "}
+                <strong className="font-medium text-foreground">We do not profit from hosting.</strong>
               </p>
-            </motion.div>
-
-            <motion.div variants={fadeUp}>
-              <Card className="border-primary/20 mb-8">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-lg mb-6">
-                    <AlertTriangle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold">Important:</p>
-                      <p className="text-muted-foreground">
-                        We only charge exactly what Netlify charges us. <strong>We do not profit from hosting.</strong>
-                      </p>
-                    </div>
+            </Reveal>
+            <Reveal className="lg:col-span-7">
+              <div className="border-t border-border/60">
+                {hostingCosts.map((item) => (
+                  <div
+                    key={item.type}
+                    className="flex items-baseline justify-between gap-6 border-b border-border/60 py-4"
+                  >
+                    <span className="text-sm font-light text-foreground/85">{item.type}</span>
+                    <span className="mono-label">{item.cost}</span>
                   </div>
-
-                  <h3 className="font-semibold mb-4">Typical Netlify Hosting Costs</h3>
-                  <div className="space-y-3">
-                    {hostingCosts.map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
-                        <span className="text-muted-foreground">{item.type}</span>
-                        <span className="font-semibold">{item.cost}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="mt-4 text-sm text-muted-foreground">
-                    Hosting costs depend on traffic, bandwidth, and site complexity.
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
+                ))}
+              </div>
+              <p className="mt-4 text-xs font-light text-muted-foreground">
+                Hosting costs depend on traffic, bandwidth, and site complexity.
+              </p>
+            </Reveal>
+          </div>
         </div>
       </section>
 
-      {/* Self-Hosting Section */}
-      <section className="py-16 md:py-24 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.15)' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
-        <div className="container mx-auto px-4">
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto"
-          >
-            <motion.div variants={fadeUp} className="mb-12">
-              <h2 className="text-3xl font-display font-bold mb-4">If You Host the Website Yourself</h2>
-              <p className="text-lg text-muted-foreground">
-                You are free to host your website independently.
+      {/* Self-hosting terms + one-off pricing */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <SeriesHeading
+            eyebrow="Hosting it yourself"
+            title="You're free to"
+            accent="take it anywhere."
+            standfirst="Full ownership means exactly that. Here's what changes when the site leaves our hosting."
+          />
+
+          <RevealGroup className="grid grid-cols-1 border-l border-t border-border/60 md:grid-cols-2">
+            <RevealItem className="border-b border-r border-border/60 p-7 sm:p-8">
+              <div className="mb-6 flex items-center justify-between">
+                <AlertTriangle className="h-5 w-5 text-gold" strokeWidth={1.5} />
+                <span className="font-mono text-[11px] tabular-nums text-muted-foreground">01</span>
+              </div>
+              <h3 className="font-display text-base font-semibold tracking-tight sm:text-lg">
+                Once the site leaves our hosting
+              </h3>
+              <ul className="mt-4 space-y-3">
+                <li className="flex items-start gap-2.5 text-sm font-light text-muted-foreground">
+                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" />
+                  We do not provide ongoing edits or updates
+                </li>
+                <li className="flex items-start gap-2.5 text-sm font-light text-muted-foreground">
+                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" />
+                  The website is considered complete and delivered
+                </li>
+              </ul>
+            </RevealItem>
+
+            <RevealItem className="border-b border-r border-border/60 p-7 sm:p-8">
+              <div className="mb-6 flex items-center justify-between">
+                <CreditCard className="h-5 w-5 text-primary" strokeWidth={1.5} />
+                <span className="font-mono text-[11px] tabular-nums text-muted-foreground">02</span>
+              </div>
+              <h3 className="font-display text-base font-semibold tracking-tight sm:text-lg">
+                One-off edit pricing
+              </h3>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                No management plan
               </p>
-            </motion.div>
+              <p className="mt-4 text-sm font-light leading-relaxed text-muted-foreground">
+                Includes one dedicated edit session where multiple changes can be made. Contact us
+                for a personalized quote based on your specific needs. Pricing reflects the time
+                required for manual code edits and deployment.
+              </p>
+            </RevealItem>
 
-            <motion.div variants={fadeUp} className="mb-8">
-              <Card className="border-amber-500/30 bg-amber-500/5">
-                <CardContent className="pt-6">
-                  <p className="text-muted-foreground mb-4">
-                    Once the site leaves our hosting and management:
+            <RevealItem className="border-b border-r border-border/60 p-7 sm:p-8 md:col-span-2">
+              <div className="mb-6 flex items-center justify-between">
+                <Zap className="h-5 w-5 text-destructive" strokeWidth={1.5} />
+                <span className="font-mono text-[11px] tabular-nums text-muted-foreground">03</span>
+              </div>
+              <h3 className="font-display text-base font-semibold tracking-tight sm:text-lg">
+                Fixes without a management plan
+              </h3>
+              <div className="mt-4 grid gap-6 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm font-medium">Small code fix</p>
+                  <p className="mt-1 text-sm font-light text-muted-foreground">
+                    Quote on request — e.g. broken contact form, layout issue, minor bug.
                   </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-1" />
-                      <span className="text-muted-foreground">We do not provide ongoing edits or updates</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-1" />
-                      <span className="text-muted-foreground">The website is considered complete and delivered</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* One-Off Edit Pricing */}
-            <motion.div variants={fadeUp} className="grid md:grid-cols-2 gap-6 mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-primary" />
-                    One-Off Edit Pricing
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">(No Management Plan)</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold mb-2">Pricing customized for your requirements</div>
-                  <p className="text-sm text-muted-foreground">
-                    Includes one dedicated edit session where multiple changes can be made. 
-                    Contact us for a personalized quote based on your specific needs.
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[hsl(0_72%_38%)] dark:text-[hsl(0_90%_70%)]">Emergency / priority fix</p>
+                  <p className="mt-1 text-sm font-light text-muted-foreground">
+                    Quote on request. Applies if the site is down or requires urgent attention —
+                    charged at a premium due to priority scheduling.
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2 italic">
-                    Pricing reflects the time required for manual code edits and deployment.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-destructive" />
-                    Fixes Without a Management Plan
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <div className="font-semibold">Small Code Fix</div>
-                    <div className="text-muted-foreground">Quote on request</div>
-                    <p className="text-sm text-muted-foreground">(e.g. broken contact form, layout issue, minor bug)</p>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-destructive">Emergency / Priority Fix</div>
-                    <div className="text-muted-foreground">Quote on request</div>
-                    <p className="text-sm text-muted-foreground">Applies if the site is down or requires urgent attention. Charged at a premium due to priority scheduling.</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
+                </div>
+              </div>
+            </RevealItem>
+          </RevealGroup>
         </div>
       </section>
 
       {/* Recommendation */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto"
-          >
-            <Card className="border-primary bg-gradient-to-br from-primary/10 to-transparent">
-              <CardHeader>
-                <CardTitle className="text-2xl flex items-center gap-2">
-                  <Shield className="w-6 h-6 text-primary" />
-                  Our Recommendation
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-lg text-muted-foreground mb-6">
-                  If your website is hosted with us, we strongly recommend a Website Management & Maintenance plan.
-                </p>
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <SeriesHeading
+            eyebrow="Our recommendation"
+            title="If we host it,"
+            accent="let us manage it."
+            standfirst="A management plan is the most cost-effective way to keep a site healthy long-term."
+          />
 
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="font-semibold text-destructive mb-3">Without management:</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-1" />
-                        <span className="text-muted-foreground">Edits become costly over time</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-1" />
-                        <span className="text-muted-foreground">Emergency fixes are significantly more expensive</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-1" />
-                        <span className="text-muted-foreground">Small issues can impact performance and conversions</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-primary mb-3">With management:</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-1" />
-                        <span className="text-muted-foreground">Predictable monthly cost</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-1" />
-                        <span className="text-muted-foreground">Faster updates</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-1" />
-                        <span className="text-muted-foreground">Ongoing peace of mind</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Summary */}
-            <div className="mt-12 text-center">
-              <h3 className="text-xl font-display font-bold mb-6">Summary</h3>
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <Reveal className="grid gap-0 border-l border-t border-border/60 md:grid-cols-2">
+            <div className="border-b border-r border-border/60 p-7 sm:p-8">
+              <p className="mono-label mb-5 text-[hsl(0_72%_38%)] dark:text-[hsl(0_90%_70%)]">Without management</p>
+              <ul className="space-y-3">
                 {[
-                  "You can host yourself or with us",
-                  "Hosting is charged at cost (no markup)",
-                  "Individual edits available at competitive rates",
-                  "Management plans are the most cost-effective option long-term",
-                  "Custom Elite plans include full technical oversight"
-                ].map((item, idx) => (
-                  <div key={idx} className="p-4 rounded-lg bg-muted/50 border border-border/50">
-                    <p className="text-sm text-muted-foreground">{item}</p>
-                  </div>
+                  "Edits become costly over time",
+                  "Emergency fixes are significantly more expensive",
+                  "Small issues can impact performance and conversions",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm font-light text-muted-foreground">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" strokeWidth={2} />
+                    {item}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
-          </motion.div>
+            <div className="border-b border-r border-border/60 p-7 sm:p-8">
+              <p className="mono-label mb-5 text-primary">With management</p>
+              <ul className="space-y-3">
+                {["Predictable monthly cost", "Faster updates", "Ongoing peace of mind"].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm font-light text-muted-foreground">
+                    <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+
+          {/* Summary strip */}
+          <RevealGroup className="mt-10 border-t border-border/60">
+            {summary.map((item, i) => (
+              <RevealItem
+                key={item}
+                className="flex items-baseline gap-4 border-b border-border/60 py-3.5"
+              >
+                <span className="font-mono text-[11px] tabular-nums text-primary">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="text-sm font-light leading-relaxed text-foreground/85">{item}</span>
+              </RevealItem>
+            ))}
+          </RevealGroup>
         </div>
       </section>
-    </div>
+
+      <ServiceRail current="06" />
     </Layout>
   );
 }

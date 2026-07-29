@@ -1,17 +1,28 @@
-import { motion } from "framer-motion";
-import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Clock, Calendar, ArrowRight, Rocket, Shield, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Layout } from "@/components/layout/Layout";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
+import { Button } from "@/components/ui/button";
+
+/**
+ * The schedules page, drawn as schedules. Each tier is a chapter with a
+ * phase rail — a hairline with ember waypoints, horizontal on desktop and a
+ * ladder on phones — instead of the old rounded cards with off-palette
+ * green/blue/purple gradient rockets. Durations align with the tier series
+ * (3–5 days / 1–2 weeks / 2–4 weeks / scoped), and the tier links are now
+ * explicit — the old string-derived routes pointed at pages that don't
+ * exist (e.g. "/business").
+ */
 
 const timelines = [
   {
+    no: "01",
     tier: "Starter Site",
-    price: "Custom Pricing",
-    duration: "Days, not weeks",
-    pages: "1-2 Pages",
-    color: "from-green-500 to-emerald-500",
+    route: "/starter",
+    duration: "3–5 days",
+    pages: "1–2 pages",
     phases: [
       { name: "Chat", duration: "Day 1", description: "Tell us about your business and requirements" },
       { name: "Design & Build", duration: "Day 2-4", description: "Custom design and responsive build" },
@@ -19,11 +30,11 @@ const timelines = [
     ],
   },
   {
+    no: "02",
     tier: "Business Site",
-    price: "Custom Pricing",
-    duration: "1-2 Weeks",
-    pages: "2-5 Pages",
-    color: "from-primary to-cyan-400",
+    route: "/growth",
+    duration: "1–2 weeks",
+    pages: "2–5 pages",
     phases: [
       { name: "Discovery", duration: "Day 1-2", description: "In-depth consultation and content planning" },
       { name: "Design Phase", duration: "Day 3-6", description: "Custom design mockups and approval" },
@@ -32,24 +43,24 @@ const timelines = [
     ],
   },
   {
+    no: "03",
     tier: "Growth Site",
-    price: "Custom Pricing",
-    duration: "2-3 Weeks",
-    pages: "6-10 Pages",
-    color: "from-blue-500 to-cyan-500",
+    route: "/professional",
+    duration: "2–4 weeks",
+    pages: "6–10 pages",
     phases: [
       { name: "Strategy", duration: "Week 1", description: "Requirements, content strategy, UX planning" },
       { name: "Design", duration: "Week 2", description: "Custom design system, all page mockups" },
       { name: "Development", duration: "Week 2-3", description: "Advanced features, blog, lead capture" },
-      { name: "Launch", duration: "Week 3", description: "Performance optimisation, testing, training" },
+      { name: "Launch", duration: "Week 3-4", description: "Performance optimisation, testing, training" },
     ],
   },
   {
+    no: "04",
     tier: "Enterprise & Custom",
-    price: "Custom Pricing",
-    duration: "Tailored to you",
+    route: "/enterprise",
+    duration: "Scoped per build",
     pages: "Unlimited",
-    color: "from-purple-500 to-pink-500",
     phases: [
       { name: "Discovery", duration: "Variable", description: "Requirements, architecture, planning" },
       { name: "Proposal", duration: "Variable", description: "Custom quote and timeline" },
@@ -59,124 +70,129 @@ const timelines = [
   },
 ];
 
+/** A tier's schedule: hairline rail with ember waypoints. */
+function PhaseRail({ phases }: { phases: (typeof timelines)[number]["phases"] }) {
+  const cols = phases.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4";
+  return (
+    <RevealGroup className={`grid grid-cols-1 gap-y-6 lg:gap-y-0 ${cols}`} stagger={0.08}>
+      {phases.map((phase, i) => (
+        <RevealItem key={phase.name} className="relative lg:pr-8">
+          {/* the rail segment + node (desktop) */}
+          <span className="relative mb-4 hidden h-px w-full bg-border lg:block" aria-hidden>
+            <span className="absolute left-0 top-1/2 h-2 w-2 -translate-y-1/2 bg-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.15)]" />
+            {i === phases.length - 1 && (
+              <span className="absolute right-0 top-1/2 h-1.5 w-1.5 -translate-y-1/2 border border-border bg-background" />
+            )}
+          </span>
+          {/* mobile: ladder node */}
+          <div className="flex gap-4 lg:block">
+            <span className="mt-1 flex h-2 w-2 shrink-0 bg-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.15)] lg:hidden" aria-hidden />
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+                {phase.duration}
+              </p>
+              <h4 className="mt-1.5 font-display text-base font-semibold tracking-tight sm:text-lg">
+                {phase.name}
+              </h4>
+              <p className="mt-1 max-w-[26ch] text-sm font-light leading-relaxed text-muted-foreground">
+                {phase.description}
+              </p>
+            </div>
+          </div>
+        </RevealItem>
+      ))}
+    </RevealGroup>
+  );
+}
+
 export default function Timelines() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
-        eyebrow="Company"
+        eyebrow="The schedule"
         index="31"
         crumbs={[{ label: "Home", href: "/" }, { label: "Timelines" }]}
         title="Know exactly when"
         highlight="to expect it"
         body="Honest delivery windows for every tier — what happens in each week and what we need from you."
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "04", label: "Schedules" },
+              { value: "3–5 days", label: "Fastest tier" },
+              { value: "£0", label: "Until you approve" },
+            ]}
+          />
+        }
       />
 
-      {/* Trust Signals */}
-      <section className="py-8 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-primary/[0.04] to-primary/[0.02]" />
-        <div className="container-tight relative z-10">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Shield className="w-4 h-4 text-primary" />
-              <span>No hidden fees</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Check className="w-4 h-4 text-primary" />
-              <span>UK-based support</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Clock className="w-4 h-4 text-primary" />
-              <span>Clear timelines</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* All Timelines */}
-      <section className="py-20">
+      {/* The four schedules */}
+      <section className="section-padding">
         <div className="container-tight">
-          <div className="space-y-12">
-            {timelines.map((timeline, index) => (
-              <motion.div
-                key={timeline.tier}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="border border-border/60 bg-background p-8 group hover:border-primary/50 transition-all"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${timeline.color} flex items-center justify-center`}>
-                      <Rocket className="w-8 h-8 text-white" />
+          <div className="space-y-0">
+            {timelines.map((timeline) => (
+              <Reveal key={timeline.tier} className="border-t border-border/60 py-12 first:border-t-0 first:pt-0 sm:py-14">
+                <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className="font-mono text-[11px] tabular-nums text-primary">
+                        {timeline.no}
+                      </span>
+                      <span className="h-px w-8 bg-primary" />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                        {timeline.pages}
+                      </span>
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-display font-bold">{timeline.tier}</h3>
-                      <p className="text-muted-foreground">{timeline.pages} • {timeline.price}</p>
-                    </div>
+                    <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
+                      {timeline.tier}
+                    </h2>
                   </div>
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-full glass">
-                    <Calendar className="w-5 h-5 text-primary" />
-                    <span className="font-display font-semibold text-lg">{timeline.duration}</span>
-                  </div>
-                </div>
-
-                <div className="relative">
-                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
-                  <div className="space-y-6">
-                    {timeline.phases.map((phase) => (
-                      <div key={phase.name} className="relative pl-12">
-                        <div className="absolute left-2 top-1 w-4 h-4 rounded-full bg-primary" />
-                        <div className="glass p-4 rounded-xl">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
-                            <h4 className="font-display font-semibold">{phase.name}</h4>
-                            <span className="text-sm text-primary font-medium">{phase.duration}</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{phase.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-6 border-t border-border flex justify-end">
-                  <Button variant="outline" asChild>
-                    <Link to={timeline.tier === "Enterprise & Custom" ? "/enterprise" : `/${timeline.tier.toLowerCase().replace(' site', '').replace(' ', '-')}`}>
-                      View {timeline.tier} Details
+                  <div className="flex items-center gap-5">
+                    <span className="mono-label text-primary">{timeline.duration}</span>
+                    <Link
+                      to={timeline.route}
+                      className="link-underline hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:block"
+                    >
+                      View tier
                     </Link>
-                  </Button>
+                  </div>
                 </div>
-              </motion.div>
+
+                <PhaseRail phases={timeline.phases} />
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-card/50">
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="border border-border/60 bg-background p-12 text-center"
-          >
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              Ready to Get Started?
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mb-8">
-              Choose your package and let's get your project on the timeline.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="premium" size="lg" asChild>
-                <Link to="/get-started">Get Started <ArrowRight className="w-4 h-4" /></Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild>
-                <Link to="/packages">Compare Packages</Link>
-              </Button>
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                The clock starts
+                <span className="block text-primary">when you say go.</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                Every schedule begins with a free preview — you see the design before a single
+                payment.
+              </p>
             </div>
-          </motion.div>
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+              <Magnetic className="inline-block">
+                <Button variant="premium" size="xl" asChild className="group">
+                  <Link to="/get-started">
+                    Start your project
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              </Magnetic>
+              <Link to="/preview-process" className="link-underline self-center text-sm text-muted-foreground transition-colors hover:text-foreground">
+                How the preview works
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
     </Layout>

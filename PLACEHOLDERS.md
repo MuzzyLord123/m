@@ -108,3 +108,26 @@ contracting entity while the brand everywhere else is Quooro. Left untouched —
 a legal name is not a design decision. `[PLACEHOLDER: owner to confirm the
 registered company name and whether Terms should read "Quooro (a trading name
 of …)" ]`
+
+### P8. Fabricated service statistics (removed 2026-07-29)
+
+The SEO page led with "250% Average Traffic Increase / Top 3 Ranking
+Positions / 400+ Keywords Ranked / 95% Client Retention" and the Account
+Management page with "100% Response Rate / <2hrs Response Time / 500+ Brands
+Protected". No client record supports any of these. All removed. "24/7
+monitoring" survives only as a commitment inside the Enterprise plan copy.
+`[PLACEHOLDER: real, checkable service outcomes if/when the studio has them]`
+
+### P9. Fabricated client stories (removed 2026-07-29)
+
+Success Stories carried six invented clients (TechStart Solutions, Bloom &
+Grow Florists, Urban Fitness Studio, Hartley Legal, Artisan Coffee Co.,
+NextGen Accounting) with fabricated quotes, invented named people, stock
+Unsplash photos, three named "testimonials", and a stats band (500+
+projects / 98% satisfaction / 250% traffic growth / 4.9/5). Preview Stories
+carried six more (Sarah M., James T., Emily C., Marcus W., Rebecca F.,
+David P.) plus conversion stats (94% convert / 67% upgrade / 100%
+recommend / 4.9/5). All removed. Success Stories now leads with verifiable
+claims and the real project journey; Preview Stories tells three
+second-person scenario walkthroughs explicitly framed as hypothetical.
+`[PLACEHOLDER: real client stories, with written permission, as they happen]`

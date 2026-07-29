@@ -1,9 +1,18 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Check, Clock, Smartphone, Mail, Search, Shield, ArrowRight, Zap, MapPin, Phone } from "lucide-react";
+import { Smartphone, Mail, Search, ArrowRight, Zap, MapPin, Phone } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { Matrix, MatrixCell, LadderRow } from "@/components/marketing/Matrix";
+import { TierScale, TierRail, SpecLedger } from "@/components/marketing/TierSeries";
+import { Reveal, RevealGroup } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
+
+/**
+ * Tier 01 of the series. The page is a specification document: scale diagram,
+ * capability matrix, numbered spec ledger, process ladder, then the series
+ * rail on to Business. No floating cards anywhere.
+ */
 
 const features = [
   { icon: Smartphone, title: "Mobile-First Design", description: "Perfect display on all devices and screen sizes" },
@@ -36,213 +45,191 @@ const perfectFor = [
   "Event announcements",
 ];
 
+const process = [
+  { title: "Chat", desc: "Tell us about your business and what you need" },
+  { title: "Design", desc: "We create your custom site design" },
+  { title: "Review", desc: "You provide feedback and we refine" },
+  { title: "Launch", desc: "Your site goes live in days" },
+];
+
 export default function Starter() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
-        eyebrow="Packages"
-        index="21"
-        crumbs={[{ label: "Home", href: "/" }, { label: "Starter site" }]}
+        eyebrow="Website tiers"
+        index="01"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Packages", href: "/packages" }, { label: "Starter" }]}
         title="The Starter"
         highlight="site"
         body="A fast, focused site that gets a local business found and contacted — live in days, not months."
         actions={
           <>
-            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
-              <Link to="/get-started">
-                Get started
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Get started
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
             <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
               <span className="link-underline">View packages</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </>
         }
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "1–2", label: "Pages" },
+              { value: "3–5 days", label: "Delivery" },
+              { value: "100%", label: "Code ownership" },
+            ]}
+          />
+        }
       />
 
-      {/* Trust Signals */}
-      <section className="py-8 border-y border-border/60">
-        <div className="container-tight">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Shield className="w-4 h-4 text-primary" />
-              <span>No hidden fees</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Check className="w-4 h-4 text-primary" />
-              <span>UK-based support</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Zap className="w-4 h-4 text-primary" />
-              <span>Built to convert</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Where this tier sits */}
+      <TierScale current="01" />
 
-      {/* Features Grid */}
+      {/* Capabilities */}
       <section className="section-padding">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              Everything You Need to <span className="text-gradient">Get Found</span>
-            </h2>
-            <p className="body-md max-w-2xl">
-              A professional web presence that works as hard as you do.
-            </p>
-          </motion.div>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">What it carries</span>
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Everything you need
+                <span className="block text-primary">to get found.</span>
+              </h2>
+              <p className="max-w-sm text-sm font-light text-muted-foreground">
+                A professional web presence that works as hard as you do.
+              </p>
+            </div>
+          </Reveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 border-b border-r border-border/60 transition-colors duration-300 hover:bg-foreground/[0.02]"
-              >
-                <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
-                  <feature.icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-display font-semibold text-lg mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">{feature.description}</p>
-              </motion.div>
+          <Matrix cols={3}>
+            {features.map((feature, i) => (
+              <MatrixCell key={feature.title} icon={feature.icon} index={i} title={feature.title}>
+                {feature.description}
+              </MatrixCell>
             ))}
-          </div>
+          </Matrix>
         </div>
       </section>
 
-      {/* Full Feature List */}
-      <section className="section-padding">
+      {/* The spec ledger + who it's for */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <div className="grid lg:grid-cols-2 gap-12">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="p-8 border border-border/60 bg-background"
-            >
-              <h2 className="heading-md mb-8">
-                Complete <span className="text-gradient">Package</span>
-              </h2>
-              <ul className="space-y-4">
-                {included.map((item) => (
-                  <li key={item} className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-7">
+              <Reveal className="mb-8">
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="h-px w-8 bg-primary" />
+                  <span className="eyebrow">The specification</span>
+                </div>
+                <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                  Complete package.
+                </h2>
+              </Reveal>
+              <SpecLedger items={included} />
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="heading-md mb-8">
-                Perfect <span className="text-gradient">For</span>
-              </h2>
-              <ul className="space-y-4 mb-8">
-                {perfectFor.map((item) => (
-                  <li key={item} className="flex items-center gap-3">
-                    <ArrowRight className="w-5 h-5 text-primary flex-shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
+            <div className="lg:col-span-5">
+              <Reveal className="mb-8">
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="h-px w-8 bg-primary" />
+                  <span className="eyebrow">Built for</span>
+                </div>
+                <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                  Perfect for.
+                </h2>
+              </Reveal>
+              <RevealGroup>
+                {perfectFor.map((item, i) => (
+                  <LadderRow key={item} index={i} title={item} />
                 ))}
-              </ul>
+              </RevealGroup>
 
-              <div className="p-6 border border-primary/30 bg-background">
-                <h4 className="font-display font-semibold mb-2">Need More Pages?</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Growing business? Our Business Site package includes up to 5 pages 
-                  with CMS access for easy updates.
+              <Reveal className="mt-10 border border-primary/30 p-6">
+                <span className="mono-label text-primary">Need more pages?</span>
+                <p className="mt-3 text-sm font-light leading-relaxed text-muted-foreground">
+                  Growing business? The Business site includes up to 5 pages with CMS access for
+                  easy updates.
                 </p>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/growth">View Business Site</Link>
+                <Button variant="outline" size="sm" asChild className="mt-5">
+                  <Link to="/growth">View Business site</Link>
                 </Button>
-              </div>
-            </motion.div>
+              </Reveal>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Process */}
-      <section className="section-padding">
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              Simple <span className="text-gradient">Process</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-4 gap-0 border-l border-t border-border/60">
-            {[
-              { step: "1", title: "Chat", desc: "Tell us about your business and what you need" },
-              { step: "2", title: "Design", desc: "We create your custom site design" },
-              { step: "3", title: "Review", desc: "You provide feedback and we refine" },
-              { step: "4", title: "Launch", desc: "Your site goes live in days" },
-            ].map((item, index) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 border-b border-r border-border/60"
-              >
-                <div className="mb-5 flex h-12 w-12 items-center justify-center border border-primary bg-primary">
-                  <span className="text-2xl font-display font-bold text-primary-foreground">{item.step}</span>
-                </div>
-                <h3 className="font-display font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
-              </motion.div>
-            ))}
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">Four steps</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Simple
+                <span className="block text-primary">process.</span>
+              </h2>
+              <p className="mt-6 max-w-sm text-[15px] font-light leading-relaxed text-muted-foreground">
+                From first chat to live site in days — you see the design before you pay a penny.
+              </p>
+            </Reveal>
+            <RevealGroup className="lg:col-span-8">
+              {process.map((item, i) => (
+                <LadderRow key={item.title} index={i} title={item.title}>
+                  {item.desc}
+                </LadderRow>
+              ))}
+            </RevealGroup>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-padding">
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="border-t border-border/60 pt-12"
-          >
-            <h2 className="heading-md mb-4">
-              Ready to Get <span className="text-gradient">Online?</span>
-            </h2>
-            <p className="body-lg mb-8 max-w-2xl">
-              Get a professional website that works as hard as you do. 
-              No hidden fees, UK-based support.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Button variant="premium" size="xl" asChild>
-                <Link to="/get-started">Get Started <ArrowRight className="w-4 h-4" /></Link>
-              </Button>
-              <Button variant="outline" size="xl" asChild>
-                <Link to="/portfolio">View Examples</Link>
-              </Button>
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Ready to get
+                <span className="block text-primary">online?</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                A professional website that works as hard as you do. No hidden fees, UK-based
+                support.
+              </p>
             </div>
-          </motion.div>
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+              <Magnetic className="inline-block">
+                <Button variant="premium" size="xl" asChild className="group">
+                  <Link to="/get-started">
+                    Get started
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              </Magnetic>
+              <Link to="/portfolio" className="link-underline self-center text-sm text-muted-foreground transition-colors hover:text-foreground">
+                View examples
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
+
+      {/* Series navigation */}
+      <TierRail current="01" />
     </Layout>
   );
 }

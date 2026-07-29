@@ -25,7 +25,7 @@ const faqCategories = [
       },
       {
         q: "Why do you offer free previews?",
-        a: "We're confident in our quality. Free previews demonstrate our capabilities and build trust. 94% of our preview clients convert to purchases because they can see exactly what they're getting."
+        a: "We're confident in our quality. Free previews demonstrate our capabilities and build trust — when you can see exactly what you're getting, the decision makes itself."
       },
       {
         q: "How long does a free preview take?",

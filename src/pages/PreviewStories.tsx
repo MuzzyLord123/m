@@ -1,274 +1,168 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Star, Quote, TrendingUp, Eye, Cake, Scale, ShoppingBag, Rocket, Dumbbell, Camera } from "lucide-react";
+import { ArrowRight, Hammer, ShoppingBag, Rocket, Eye } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { PageHero } from "@/components/marketing/PageHero";
+import { LadderRow } from "@/components/marketing/Matrix";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
 
-const clientStories = [
-  {
-    name: "Sarah M.",
-    business: "Artisan Bakery",
-    icon: Cake,
-    tier: "Starter → Professional",
-    previewType: "Free Preview",
-    journey: "Started with a free Starter preview for a simple 2-page site. Loved the quality so much, upgraded to Professional for the full package.",
-    quote: "The free preview was my 'aha' moment. Seeing my bakery brought to life professionally — with no commitment — made the decision easy.",
-    result: "Completely satisfied with the design",
-    rating: 5
-  },
-  {
-    name: "James T.",
-    business: "Legal Consulting",
-    icon: Scale,
-    tier: "Growth",
-    previewType: "Free Preview",
-    journey: "Needed a professional 5-page site for his law practice. The free preview demonstrated exactly what he'd receive.",
-    quote: "As a lawyer, I appreciate transparency. The preview process showed me exactly what I was paying for — no surprises, no hidden costs.",
-    result: "Professional look we wanted",
-    rating: 5
-  },
-  {
-    name: "Emily C.",
-    business: "Fashion Boutique",
-    icon: ShoppingBag,
-    tier: "Professional",
-    previewType: "Fast-Track Preview",
-    journey: "Required a full e-commerce site quickly for seasonal launch. Paid for Fast-Track preview and was impressed by the speed.",
-    quote: "The preview fee was credited to my final purchase. I essentially got to test-drive my entire store before committing.",
-    result: "Beautiful online store",
-    rating: 5
-  },
-  {
-    name: "Marcus W.",
-    business: "Tech Consultancy",
-    icon: Rocket,
-    tier: "Enterprise",
-    previewType: "Fast-Track Preview",
-    journey: "Needed a professional multi-page platform. The Fast-Track preview demonstrated all key functionality.",
-    quote: "Seeing our requirements brought to life in just 7 days convinced our team. The preview process was worth every penny.",
-    result: "Exactly what we envisioned",
-    rating: 5
-  },
-  {
-    name: "Rebecca F.",
-    business: "Fitness Studio",
-    icon: Dumbbell,
-    tier: "Starter",
-    previewType: "Free Preview",
-    journey: "Solo fitness instructor needing a simple booking page. Free preview delivered exactly what was promised.",
-    quote: "I was skeptical of 'free' — but they delivered a beautiful preview in one week. Now I have a professional site I'm proud of.",
-    result: "Modern and clean design",
-    rating: 5
-  },
-  {
-    name: "David P.",
-    business: "Photography Studio",
-    icon: Camera,
-    tier: "Growth → Enterprise",
-    previewType: "Free Preview",
-    journey: "Started with Growth preview for portfolio site. Loved it so much, upgraded for more features.",
-    quote: "The free preview process built complete trust. When we needed to scale, there was no question who we'd work with.",
-    result: "Stunning portfolio showcase",
-    rating: 5
-  }
-];
+/**
+ * Formerly six invented clients ("Sarah M., Artisan Bakery"…) with fabricated
+ * quotes, five-star ratings and a conversion stats band ("94% convert",
+ * "4.9/5") — none of it real. Removed; see PLACEHOLDERS.md P9.
+ *
+ * The honest replacement: the preview journey told in second person — three
+ * walkthroughs for three kinds of buyer, each explicitly hypothetical
+ * ("if you run…"), because a scenario about *you* is honest where an
+ * invented testimonial is not.
+ */
 
-const stats = [
-  { value: "94%", label: "Convert to Purchase" },
-  { value: "67%", label: "Upgrade Tier" },
-  { value: "100%", label: "Would Recommend" },
-  { value: "4.9/5", label: "Average Rating" }
+const scenarios = [
+  {
+    icon: Hammer,
+    kicker: "If you run a local trade",
+    title: "The two-page test drive",
+    tier: "Starter tier",
+    steps: [
+      "You send the enquiry on a Tuesday — business name, what you do, the area you cover.",
+      "By the weekend there's a working preview: your services, your patch, a click-to-call that works.",
+      "You show it to two customers. They find the number faster than on the old Facebook page.",
+      "You approve it. It's live within days, and the code is yours.",
+    ],
+  },
+  {
+    icon: ShoppingBag,
+    kicker: "If you're launching a shop",
+    title: "The catalogue, proven first",
+    tier: "Professional tier",
+    steps: [
+      "You need variants, baskets and payments — the things template builders make painful.",
+      "The preview arrives with your real products in it, checkout flow clickable end to end.",
+      "You test it on your phone, your partner's phone, and the tablet at the counter.",
+      "Only when the flow convinces you does the build — and the bill — begin.",
+    ],
+  },
+  {
+    icon: Rocket,
+    kicker: "If you need a platform",
+    title: "The scoped rehearsal",
+    tier: "Enterprise tier",
+    steps: [
+      "Complex builds start with discovery, not a template — requirements, architecture, stages.",
+      "The preview demonstrates the key journeys: the portal login, the dashboard, the workflow.",
+      "Your team pokes at it and writes the awkward questions. We answer them in the proposal.",
+      "You commit to a staged plan where each stage ships something you can use.",
+    ],
+  },
 ];
 
 export default function PreviewStories() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
         eyebrow="Previews"
         index="45"
         crumbs={[{ label: "Home", href: "/" }, { label: "Preview stories" }]}
-        title="Preview"
-        highlight="stories"
-        body="How the preview-first process works for the people who use it."
+        title="How a preview"
+        highlight="plays out"
+        body="Three honest walkthroughs — one for each kind of buyer — of what happens between your enquiry and your decision. No invented clients, no borrowed quotes."
         actions={
           <>
-            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
-              <Link to="/get-started">
-                Get started
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
-            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
-              <span className="link-underline">View packages</span>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Get started
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
+            <Link to="/preview-process" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">The 7-day process</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </>
         }
       />
 
-      {/* Stats */}
-      <section className="py-12 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-primary/[0.05] to-primary/[0.02]" />
-        <div className="container-tight relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center group"
-              >
-                <div className="text-3xl md:text-4xl font-display font-bold text-gradient mb-2 transition-transform duration-300 group-hover:scale-110">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Client Stories */}
+      {/* The three walkthroughs */}
       <section className="section-padding">
         <div className="container-tight">
-          <div className="grid md:grid-cols-2 gap-8">
-            {clientStories.map((story, index) => (
-              <motion.div
-                key={story.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl border border-border bg-card"
+          <div className="space-y-0">
+            {scenarios.map((scenario, sIndex) => (
+              <Reveal
+                key={scenario.title}
+                className="border-t border-border/60 py-12 first:border-t-0 first:pt-0 sm:py-14"
               >
-                {/* Header */}
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <story.icon className="w-6 h-6 text-primary" />
+                <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+                  <div className="lg:col-span-4">
+                    <div className="mb-4 flex items-center gap-3">
+                      <span className="font-mono text-[11px] tabular-nums text-primary">
+                        {String(sIndex + 1).padStart(2, "0")}
+                      </span>
+                      <span className="h-px w-8 bg-primary" />
+                      <scenario.icon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                    </div>
+                    <p className="eyebrow mb-3">{scenario.kicker}</p>
+                    <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
+                      {scenario.title}
+                    </h2>
+                    <p className="mono-label mt-4 text-primary">{scenario.tier}</p>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-display font-bold text-lg">{story.name}</h3>
-                    <p className="text-sm text-muted-foreground">{story.business}</p>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                    story.previewType === "Free Preview"
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-primary/20 text-primary"
-                  }`}>
-                    {story.previewType}
-                  </span>
-                </div>
-
-                {/* Journey Badge */}
-                <div className="flex items-center gap-2 mb-4">
-                  <Eye className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium">{story.tier}</span>
-                </div>
-
-                {/* Journey Description */}
-                <p className="text-sm text-muted-foreground mb-4">{story.journey}</p>
-
-                {/* Quote */}
-                <div className="relative p-4 rounded-xl bg-muted/30 mb-4">
-                  <Quote className="absolute top-2 left-2 w-4 h-4 text-primary/30" />
-                  <p className="text-sm italic pl-4">{story.quote}</p>
-                </div>
-
-                {/* Result */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-bold text-primary">{story.result}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {[...Array(story.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-gold fill-gold" />
+                  <RevealGroup className="lg:col-span-8" stagger={0.06}>
+                    {scenario.steps.map((step, i) => (
+                      <RevealItem
+                        key={step}
+                        className="flex items-baseline gap-4 border-b border-border/60 py-4"
+                      >
+                        <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="text-sm font-light leading-relaxed text-foreground/85">
+                          {step}
+                        </span>
+                      </RevealItem>
                     ))}
-                  </div>
+                  </RevealGroup>
                 </div>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Upgrade Journey */}
-      <section className="section-padding bg-card">
+      {/* The constant */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              The <span className="text-gradient">Upgrade Journey</span>
-            </h2>
-            <p className="body-lg max-w-2xl mx-auto">
-              67% of our preview clients upgrade to a higher tier after seeing the quality we deliver.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "1",
-                title: "Start with Free Preview",
-                description: "Get a Starter or Growth tier preview completely free. See our quality with zero risk."
-              },
-              {
-                step: "2",
-                title: "Love What You See",
-                description: "Experience the professional quality and attention to detail we bring to every project."
-              },
-              {
-                step: "3",
-                title: "Scale With Confidence",
-                description: "Upgrade to a higher tier knowing exactly what level of quality to expect."
-              }
-            ].map((item, index) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-primary-foreground">
-                  {item.step}
-                </div>
-                <h3 className="font-display font-bold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="section-padding">
-        <div className="container-tight">
-          <h2 className="heading-md mb-6">
-            Write Your <span className="text-gradient">Success Story</span>
-          </h2>
-          <p className="body-lg max-w-2xl mx-auto mb-8">
-            Join hundreds of businesses who started with a preview and never looked back.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button variant="premium" size="xl" asChild>
-              <Link to="/get-started">
-                Get Your Free Preview <ArrowRight className="w-5 h-5" />
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="mb-5 flex items-center gap-3">
+                <Eye className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                <span className="eyebrow">The constant</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Whatever the tier —
+                <span className="block text-primary">you see it before you pay.</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                The preview is the pitch. If it doesn&rsquo;t convince you, you owe nothing and
+                keep your evenings.
+              </p>
+            </div>
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+              <Magnetic className="inline-block">
+                <Button variant="premium" size="xl" asChild className="group">
+                  <Link to="/get-started">
+                    Request your preview
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              </Magnetic>
+              <Link to="/preview-guarantee" className="link-underline self-center text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Read the guarantee
               </Link>
-            </Button>
-            <Button variant="outline" size="xl" asChild>
-              <Link to="/preview-portfolio">View Preview Portfolio</Link>
-            </Button>
-          </div>
+            </div>
+          </Reveal>
         </div>
       </section>
     </Layout>
