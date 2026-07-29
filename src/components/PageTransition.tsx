@@ -5,10 +5,12 @@ interface PageTransitionProps {
   children: ReactNode;
 }
 
+// Opacity/transform only — the old version animated a full-page blur() on
+// every route change, which forces a repaint of the entire page (audit F3).
 const variants = {
-  initial: { opacity: 0, y: 12, filter: "blur(6px)" },
-  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  exit: { opacity: 0, y: -8, filter: "blur(4px)" },
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -6 },
 };
 
 export function PageTransition({ children }: PageTransitionProps) {
@@ -20,8 +22,8 @@ export function PageTransition({ children }: PageTransitionProps) {
       animate="animate"
       exit="exit"
       transition={{
-        duration: 0.4,
-        ease: [0.25, 0.46, 0.45, 0.94],
+        duration: 0.35,
+        ease: [0.16, 1, 0.3, 1],
       }}
     >
       {children}

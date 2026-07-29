@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { motion, useScroll, useSpring, useTransform, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { HOME_PROCESS_DEFAULTS, type HomeProcessContent } from "@/lib/siteContentSchemas";
@@ -23,15 +22,7 @@ import { EASE_OUT, VIEWPORT } from "@/lib/motion";
  */
 export function ProcessSection() {
   const { data } = useSiteContent<HomeProcessContent>("home_process", HOME_PROCESS_DEFAULTS);
-  const trackRef = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
-
-  const { scrollYProgress } = useScroll({
-    target: trackRef,
-    offset: ["start 75%", "end 60%"],
-  });
-  const spine = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 0.5 });
-  const spineHeight = useTransform(spine, (v) => `${Math.max(0, Math.min(1, v)) * 100}%`);
 
   return (
     <section className="section-padding relative border-t border-border/60">
@@ -62,12 +53,19 @@ export function ProcessSection() {
           }
         />
 
-        <div ref={trackRef} className="relative pl-8 sm:pl-16">
-          {/* Spine. The track is always there; the accent fills it on scroll. */}
+        <div className="relative pl-8 sm:pl-16">
+          {/* Spine. Was scroll-scrubbed via an animated CSS height — a layout
+              property, banned by the vocabulary (audit F2). Now a Line Draw:
+              the accent draws down the track once, on entry, as a scaleY
+              transform. Same statement, compositor-only, and it frees the
+              scroll-scrub budget for the hero. */}
           <div className="absolute bottom-0 left-0 top-0 w-px bg-border sm:left-2">
             <motion.div
-              className="absolute inset-x-0 top-0 bg-primary"
-              style={{ height: reduce ? "100%" : spineHeight }}
+              className="absolute inset-x-0 top-0 h-full bg-primary origin-top"
+              initial={reduce ? { scaleY: 1 } : { scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+              transition={{ duration: 1.4, ease: [0.65, 0, 0.35, 1] }}
             />
           </div>
 

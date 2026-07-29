@@ -28,6 +28,8 @@ import { Magnetic } from "@/components/motion/Magnetic";
 import { Marquee } from "@/components/motion/Marquee";
 import { StickySequence, type SequenceStep } from "@/components/motion/StickySequence";
 import { SplitText } from "@/components/motion/SplitText";
+import { WordReveal, Drift } from "@/components/motion/Scrub";
+import { OrbitDivider, CoordPlot } from "@/components/marketing/OrbitalMotif";
 import { useHomepageHeader } from "@/hooks/useHomepageHeader";
 
 /**
@@ -220,6 +222,7 @@ export default function Index() {
           Now a split header over a hover index. */}
       <section id="section-what-we-do" className="section-padding relative">
         <div className="container-tight">
+          <OrbitDivider className="mb-10 h-auto w-full sm:mb-14" />
           <SectionHeading
             className="mb-14 sm:mb-20"
             eyebrow={
@@ -303,8 +306,8 @@ export default function Index() {
       <section id="section-global-reach" className="relative overflow-hidden border-y border-border/60 bg-background">
         <div className="section-padding container-tight">
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-            <Reveal className="lg:col-span-5">
-              <span className="eyebrow">
+            <Reveal className="relative lg:col-span-5">
+              <span className="eyebrow relative">
                 <EditableField sectionKey="home_global_reach" field="eyebrow" value={hGlobal.eyebrow} label="Eyebrow">
                   {hGlobal.eyebrow}
                 </EditableField>
@@ -325,6 +328,12 @@ export default function Index() {
                 </EditableField>
               </p>
               <p className="mono-label mt-8">Studio: Wales, UK · Remote by default</p>
+              {/* Orbital coordinate plot — in flow below the copy (absolute
+                  positioning collided with the display heading), drifting a
+                  touch slower than the text so the layer separation is felt. */}
+              <Drift travel={22} className="pointer-events-none mt-10 hidden max-w-[400px] lg:block">
+                <CoordPlot className="h-auto w-full" />
+              </Drift>
             </Reveal>
 
             <RevealGroup className="lg:col-span-7">
@@ -509,8 +518,9 @@ export default function Index() {
         />
         <div className="container-tight relative z-10">
           <p className="mono-label mb-8">Infrastructure that scales</p>
-          <SplitText
-            as="p"
+          {/* Scrub 2 of 2: each word's opacity rides the scroll, so the
+              sentence arrives at reading pace. */}
+          <WordReveal
             className="display-xl max-w-5xl"
             text="Built to hold up under load, and to keep making sense as the business changes shape around it."
           />

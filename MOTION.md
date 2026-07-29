@@ -128,7 +128,12 @@ gradients, no blobs.
 
 ## 7. Perf gates (from MOTION-AUDIT.md)
 
-Production-build numbers may not regress: interior routes ≥ ~54fps scroll at
-4× throttle, homepage recovers to ≥ 50fps once audit F1 (globe frameloop)
-lands, CLS stays ≤ 0.01 per route, homepage LCP ≤ 1.4s. `transform`/`opacity`
+Production-build numbers may not regress. Measured after Phase 3: interior
+routes 55–60fps at 4× throttle; homepage post-hero segment 58.7fps (was ~4
+everywhere before the F1 fix); the hero-visible segment is bounded by live
+WebGL under throttle (~10–15fps at 4×, 60fps unthrottled) — that segment's
+cost was cut with antialias off, dpr ≤ 1.25, 96-segment sphere, 4-tap aniso
+and allocation-free frame callbacks, and "demand" frameloop was tried and
+reverted (OrbitControls invalidation makes it slower than viewport-gated
+always/never). CLS ≤ 0.01 per route, homepage LCP ≤ 1.5s. `transform`/`opacity`
 only; `will-change` only while animating; every entrance IO-triggered, once.

@@ -44,7 +44,7 @@ export function Marquee({
 
   return (
     <div
-      className={`group relative flex overflow-hidden ${className}`}
+      className={`marquee-host group relative flex overflow-hidden ${className}`}
       style={{
         maskImage: "linear-gradient(90deg, transparent, black 8%, black 92%, transparent)",
         WebkitMaskImage: "linear-gradient(90deg, transparent, black 8%, black 92%, transparent)",

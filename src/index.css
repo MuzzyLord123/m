@@ -74,6 +74,12 @@
   to   { transform: translate3d(-50%, 0, 0); }
 }
 
+/* Vocabulary rule: the ticker pauses under the pointer. */
+.group\:marquee:hover [style*="marquee-scroll"],
+.marquee-host:hover [style*="marquee-scroll"] {
+  animation-play-state: paused !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [style*="marquee-scroll"] { animation: none !important; }
 }
@@ -88,6 +94,11 @@
 
 @layer base {
   :root {
+    /* Motion tokens — mirror of src/lib/motion.ts. CSS-side animations must
+       use these rather than inventing curves. */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-smooth: cubic-bezier(0.65, 0, 0.35, 1);
+
     /* NIGHT SHIFT - light mode.
        Not an inversion of dark. A genuine paper-and-ink counterpart: warm
        off-white stock, cool near-black ink, and the ember accent DARKENED to
@@ -711,6 +722,45 @@
 
     body.perf-no-blur .nav-glass-xl { background: hsl(var(--card) / 0.94); }
   }
+
+  /* ── Instrument glass ───────────────────────────────────────────────────
+     The site's second and final glass surface family, alongside the nav
+     capsule. Same optical recipe (blur + saturation, top light line, warm
+     elevation ramp in light mode) so every pane on the site reads as the same
+     material.
+
+     BUDGET: at most two glass panes in any viewport, and only ever over
+     content worth refracting — the ember bloom, the orbital linework, the
+     globe. Never on dense lists (that is the soup the overhaul removed), and
+     the mobile hero keeps only small panes. */
+  .glass-panel {
+    background: hsl(var(--card) / 0.55);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    border: 1px solid hsl(var(--foreground) / 0.12);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.55),
+      0 0 2px hsl(30 15% 15% / 0.12),
+      0 -2px 5px hsl(30 15% 15% / 0.08),
+      0 1px 2px hsl(30 15% 15% / 0.12),
+      0 6px 14px hsl(30 15% 15% / 0.11),
+      0 18px 40px hsl(30 15% 15% / 0.10);
+  }
+
+  .dark .glass-panel {
+    background: hsl(var(--foreground) / 0.06);
+    border-color: hsl(var(--foreground) / 0.12);
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.1),
+      0 2px 6px hsl(0 0% 0% / 0.35),
+      0 14px 40px hsl(0 0% 0% / 0.45);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-panel, .dark .glass-panel { background: hsl(var(--card) / 0.94); }
+  }
+
+  body.perf-no-blur .glass-panel { background: hsl(var(--card) / 0.94); }
 
   /* Dropdown panel.
      Deliberately NOT the same glass as the capsule. The capsule is small and

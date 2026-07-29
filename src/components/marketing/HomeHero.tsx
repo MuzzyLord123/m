@@ -4,6 +4,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeferredGlobe3D } from "@/components/DeferredGlobe3D";
+import { HeroScrub } from "@/components/motion/Scrub";
+import { OrbitHeroRings } from "@/components/marketing/OrbitalMotif";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { HOME_HERO_DEFAULTS, type HomeHeroContent } from "@/lib/siteContentSchemas";
 import { EditableField } from "@/components/marketing/EditableField";
@@ -263,13 +265,16 @@ export function HomeHero() {
             transition={{ duration: 1.1, delay: 0.2, ease: EASE }}
             className="lg:col-span-5"
           >
-            <div className="mx-auto w-full max-w-[340px] sm:max-w-[420px] lg:max-w-none">
+            <HeroScrub className="mx-auto w-full max-w-[340px] sm:max-w-[420px] lg:max-w-none">
               <div className="relative aspect-square">
                 {/* Ember bloom sitting behind the sphere, not around the section. */}
                 <div
                   className="pointer-events-none absolute inset-[8%] rounded-full blur-3xl"
                   style={{ background: "hsl(var(--primary) / 0.16)" }}
                 />
+                {/* Orbital linework framing the sphere — drawn on load, behind
+                    the canvas, oversized so the arcs swing past the box. */}
+                <OrbitHeroRings className="pointer-events-none absolute -inset-[12%] h-auto w-[124%]" />
                 <DeferredGlobe3D />
               </div>
 
@@ -280,34 +285,47 @@ export function HomeHero() {
                   <span> · drag to spin</span>
                 </p>
               </div>
-            </div>
+            </HeroScrub>
           </motion.div>
         </div>
 
-        {/* ── Numbers ───────────────────────────────────────────────── */}
-        <motion.dl
+        {/* ── Numbers — one glass instrument panel ─────────────────────
+            The pane floats over its own ember wash so the glass has something
+            to refract at every width (the reference failure mode is glass over
+            flat background, which reads as a grey box). This is the hero's one
+            glass surface; the nav capsule above it is the other. */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
-          className="mt-16 grid grid-cols-2 border-t border-border/60 sm:mt-20 sm:grid-cols-4"
+          className="relative mt-16 sm:mt-20"
         >
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="border-b border-border/60 px-1 py-6 sm:border-b-0 sm:border-r sm:last:border-r-0 sm:px-6 sm:py-7 sm:first:pl-0"
-            >
-              <dt className="sr-only">{stat.label}</dt>
-              <dd>
-                <span className="block font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                  {stat.value}
-                </span>
-                <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  {stat.label}
-                </span>
-              </dd>
-            </div>
-          ))}
-        </motion.dl>
+          <div
+            className="pointer-events-none absolute -inset-x-8 -inset-y-10"
+            style={{
+              background:
+                "radial-gradient(ellipse 55% 90% at 22% 100%, hsl(var(--primary) / 0.14) 0%, transparent 65%)",
+            }}
+          />
+          <dl className="glass-panel relative grid grid-cols-2 rounded-3xl px-2 py-1 sm:grid-cols-4 sm:px-4">
+            {stats.map((stat, i) => (
+              <div
+                key={stat.label}
+                className={`px-4 py-5 sm:px-6 sm:py-7 ${i % 2 === 1 ? "border-l border-border/60" : ""} ${i >= 2 ? "border-t border-border/60 sm:border-t-0" : ""} ${i >= 1 ? "sm:border-l sm:border-border/60" : "sm:border-l-0"}`}
+              >
+                <dt className="sr-only">{stat.label}</dt>
+                <dd>
+                  <span className="block font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                    {stat.value}
+                  </span>
+                  <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {stat.label}
+                  </span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </motion.div>
       </div>
     </section>
   );
