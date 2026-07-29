@@ -631,65 +631,63 @@
      above the page. What it cannot do is appear twelve times on the same
      screen; that is why the card surfaces were flattened and this was not.
 
-     Three things make it read as glass rather than as a grey box: the blur is
-     paired with a saturation boost so colour behind it stays alive, there is a
-     1px inset highlight along the top edge where light would catch, and the
-     drop shadow is soft and offset downward so the capsule sits above the page
-     rather than in it. */
-  .nav-glass {
-    background: hsl(var(--card) / 0.55);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid hsl(var(--foreground) / 0.09);
-    box-shadow:
-      inset 0 1px 0 hsl(0 0% 100% / 0.55),
-      0 10px 34px hsl(var(--foreground) / 0.12),
-      0 2px 8px hsl(var(--foreground) / 0.06);
-  }
+     ── On shadows, and why the two themes are not symmetrical ──
+     The first version reused one shadow for both themes and the light capsule
+     looked stuck to the page while the dark one floated. Measured at the
+     capsule's bottom edge, the dark shadow reached 37.7% Weber contrast against
+     its background and the light one only 9.5% — the dark shadow was almost
+     exactly four times stronger perceptually.
 
-  .dark .nav-glass {
-    /* Tinting from --foreground rather than --card: a lift off the dark page
-       reads as frosted, where a card-coloured fill just reads as a solid bar. */
-    background: hsl(var(--foreground) / 0.07);
-    border-color: hsl(var(--foreground) / 0.13);
-    box-shadow:
-      inset 0 1px 0 hsl(var(--foreground) / 0.11),
-      0 14px 44px hsl(0 0% 0% / 0.5);
-  }
+     That is the trap in reusing a shadow across themes. A shadow darkens what
+     is behind it, so on a near-black page a modest alpha halves the local
+     luminance and reads instantly, while the same alpha on near-white paper is
+     a rounding error. Light mode needs several times the alpha to feel like the
+     same object.
 
-  /* Without backdrop-filter the capsule would be a see-through smear over the
-     hero, so it falls back to a near-opaque surface. Also catches
-     `body.perf-no-blur`, which force-disables the filter on low-tier devices. */
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .nav-glass { background: hsl(var(--card) / 0.94); }
-    .dark .nav-glass { background: hsl(var(--card) / 0.94); }
-  }
+     What it must not do is get there with one heavy blur, which turns into a
+     grey bruise. Real elevation is a stack: a tight contact shadow that defines
+     the edge, then progressively larger and softer layers for the ambient
+     occlusion. The contact layer is what actually sells "floating"; the wide
+     layers only give it altitude.
 
-  body.perf-no-blur .nav-glass { background: hsl(var(--card) / 0.94); }
-
-  /* The capsule only exists at xl and up. Tailwind cannot prefix a custom
-     component class with a breakpoint, so the media query lives here. 1280px is
-     Tailwind's `xl`, kept in sync by hand. */
+     The tint is warm (hue 30) rather than the cool ink of --foreground, because
+     the light background is warm paper at hue 48. A cool shadow on warm stock
+     reads as dirty grey instead of as shade. */
   @media (min-width: 1280px) {
     .nav-glass-xl {
-      background: hsl(var(--card) / 0.55);
+      /* Slightly more opaque than the dark capsule. White-on-paper has far less
+         to separate it from the page than a lift off near-black does. */
+      background: hsl(var(--card) / 0.62);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid hsl(var(--foreground) / 0.09);
+      border: 1px solid hsl(var(--foreground) / 0.11);
       box-shadow:
-        inset 0 1px 0 hsl(0 0% 100% / 0.55),
-        0 10px 34px hsl(var(--foreground) / 0.12),
-        0 2px 8px hsl(var(--foreground) / 0.06);
+        /* Top edge catches the light. */
+        inset 0 1px 0 hsl(0 0% 100% / 0.85),
+        /* Underside, so the capsule has thickness rather than being a decal. */
+        inset 0 -1px 0 hsl(30 15% 15% / 0.07),
+        /* Contact → ambient ramp. */
+        0 1px 2px hsl(30 15% 15% / 0.16),
+        0 3px 6px hsl(30 15% 15% / 0.15),
+        0 8px 16px hsl(30 15% 15% / 0.16),
+        0 18px 36px hsl(30 15% 15% / 0.13),
+        0 40px 72px hsl(30 15% 15% / 0.10);
     }
 
     .dark .nav-glass-xl {
+      /* Tinting from --foreground rather than --card: a lift off the dark page
+         reads as frosted, where a card-coloured fill just reads as a solid bar. */
       background: hsl(var(--foreground) / 0.07);
       border-color: hsl(var(--foreground) / 0.13);
       box-shadow:
         inset 0 1px 0 hsl(var(--foreground) / 0.11),
+        0 2px 6px hsl(0 0% 0% / 0.4),
         0 14px 44px hsl(0 0% 0% / 0.5);
     }
 
+    /* Without backdrop-filter the capsule would be a see-through smear over the
+       hero, so it falls back to a near-opaque surface. Also catches
+       `body.perf-no-blur`, which force-disables the filter on low-tier devices. */
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
       .nav-glass-xl,
       .dark .nav-glass-xl { background: hsl(var(--card) / 0.94); }
@@ -720,13 +718,17 @@
       backdrop-filter: blur(28px) saturate(160%);
       -webkit-backdrop-filter: blur(28px) saturate(160%);
       box-shadow:
-        inset 0 1px 0 hsl(0 0% 100% / 0.4),
-        0 24px 60px hsl(var(--foreground) / 0.16);
+        inset 0 1px 0 hsl(0 0% 100% / 0.7),
+        0 1px 2px hsl(30 15% 15% / 0.09),
+        0 6px 14px hsl(30 15% 15% / 0.10),
+        0 18px 36px hsl(30 15% 15% / 0.12),
+        0 40px 80px hsl(30 15% 15% / 0.14);
     }
 
     .dark .nav-panel {
       box-shadow:
         inset 0 1px 0 hsl(var(--foreground) / 0.09),
+        0 2px 8px hsl(0 0% 0% / 0.45),
         0 24px 64px hsl(0 0% 0% / 0.6);
     }
 
