@@ -1,43 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { motion } from 'framer-motion';
-import { SubscriptionPaywall } from '@/components/lounge/SubscriptionPaywall';
 import {
-  Globe,
   CheckCircle,
-  Clock,
-  Shield,
-  Server,
   ExternalLink,
-  Calendar,
   Download,
   History,
-  AlertCircle,
-  FileCode,
   RefreshCw,
   Plus,
   Palette,
   Code,
   Eye,
   Rocket,
-  FolderOpen,
-  BarChart3
 } from 'lucide-react';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { SkeletonLoading } from '@/components/lounge/SkeletonLoading';
+import {
+  PageHeader, Panel, PanelHeader, StatusBadge, EmptyState, SkeletonLedger,
+  FIELD, FIELD_LABEL,
+} from '@/components/platform';
 
 interface UserProfile {
   full_name: string | null;
@@ -71,39 +58,14 @@ interface ChangeRequest {
   created_at: string;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const SSL_STATUS_CONFIG = {
-  active: { label: 'Active', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: CheckCircle },
-  pending: { label: 'Pending', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: Clock },
-  expired: { label: 'Expired', color: 'bg-destructive/10 text-destructive border-destructive/20', icon: AlertCircle },
-};
-
-const WEBSITE_STATUS_CONFIG = {
-  live: { label: 'Live', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
-  design: { label: 'In Design', color: 'bg-purple-500/10 text-purple-600 border-purple-500/20' },
-  development: { label: 'In Development', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
-  review: { label: 'In Review', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
-  not_published: { label: 'Not Published', color: 'bg-muted text-muted-foreground border-border' },
-};
-
 const statusSteps = [
-  { key: 'design', label: 'Design', icon: Palette, description: 'Creating the visual design and user experience' },
-  { key: 'development', label: 'Development', icon: Code, description: 'Building your website with clean code' },
+  { key: 'design', label: 'Design', icon: Palette, description: 'Shaping the visual design and user experience' },
+  { key: 'development', label: 'Development', icon: Code, description: 'Building your website' },
   { key: 'review', label: 'Review', icon: Eye, description: 'Ready for your feedback and approval' },
   { key: 'live', label: 'Live', icon: Rocket, description: 'Your website is live and accessible' },
 ];
+
+type Tab = 'overview' | 'files' | 'timeline' | 'analytics';
 
 function LoungeWebsiteManagementInner() {
   const { user } = useAuth();
@@ -114,6 +76,7 @@ function LoungeWebsiteManagementInner() {
   const [submitting, setSubmitting] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [changeForm, setChangeForm] = useState({ title: '', description: '' });
+  const [tab, setTab] = useState<Tab>('overview');
 
   useEffect(() => {
     if (user) {
@@ -139,10 +102,10 @@ function LoungeWebsiteManagementInner() {
       ]);
 
       if (profileRes.error) throw profileRes.error;
-      
+
       const rawProfile = profileRes.data;
       let profileData: UserProfile | null = null;
-      
+
       if (rawProfile) {
         let versionHistory: VersionEntry[] | null = null;
         if (typeof rawProfile.version_history === 'string') {
@@ -150,18 +113,18 @@ function LoungeWebsiteManagementInner() {
         } else if (Array.isArray(rawProfile.version_history)) {
           versionHistory = rawProfile.version_history as unknown as VersionEntry[];
         }
-        
+
         profileData = {
           ...rawProfile,
           version_history: versionHistory,
         } as UserProfile;
       }
-      
+
       setProfile(profileData);
       setChangeRequests((requestsRes.data as ChangeRequest[]) || []);
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Failed to load website information');
+      toast.error('Your website details did not load. Refresh to try again.');
     } finally {
       setLoading(false);
     }
@@ -169,7 +132,7 @@ function LoungeWebsiteManagementInner() {
 
   const handleSubmitChangeRequest = async () => {
     if (!changeForm.title.trim()) {
-      toast.error('Please enter a title for your request');
+      toast.error('Add a title so the studio knows what to change');
       return;
     }
 
@@ -184,13 +147,13 @@ function LoungeWebsiteManagementInner() {
 
       if (error) throw error;
 
-      toast.success('Change request submitted successfully');
+      toast.success('Change request sent to the studio');
       setDialogOpen(false);
       setChangeForm({ title: '', description: '' });
       fetchData();
     } catch (error) {
       console.error('Error submitting change request:', error);
-      toast.error('Failed to submit change request');
+      toast.error('Your request did not send. Try again.');
     } finally {
       setSubmitting(false);
     }
@@ -198,7 +161,7 @@ function LoungeWebsiteManagementInner() {
 
   const handleDownloadFiles = async () => {
     if (!profile?.site_files_url) {
-      toast.error('No site files available for download');
+      toast.error('Site files are not available yet');
       return;
     }
 
@@ -208,7 +171,7 @@ function LoungeWebsiteManagementInner() {
       toast.success('Download started');
     } catch (error) {
       console.error('Error downloading files:', error);
-      toast.error('Failed to download files');
+      toast.error('The download did not start. Try again.');
     } finally {
       setDownloading(false);
     }
@@ -216,444 +179,307 @@ function LoungeWebsiteManagementInner() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        <SkeletonLoading variant="detail" />
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8" aria-hidden>
+        <span className="block h-5 w-40 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-3.5 w-64 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-[10px] border border-border/60"><SkeletonLedger rows={4} /></div>
+          <div className="rounded-[10px] border border-border/60"><SkeletonLedger rows={4} /></div>
+        </div>
       </div>
     );
   }
 
-  const sslStatusKey = profile?.ssl_status as keyof typeof SSL_STATUS_CONFIG;
-  const sslConfig = SSL_STATUS_CONFIG[sslStatusKey] ?? SSL_STATUS_CONFIG.pending;
-  const SslIcon = sslConfig.icon;
-  
-  const websiteStatusKey = profile?.website_status as keyof typeof WEBSITE_STATUS_CONFIG;
-  const statusConfig = WEBSITE_STATUS_CONFIG[websiteStatusKey] ?? WEBSITE_STATUS_CONFIG.not_published;
   const versionHistory = (profile?.version_history as VersionEntry[]) || [];
+  const currentStepIndex = statusSteps.findIndex(s => s.key === (profile?.website_status || 'design'));
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'files', label: 'Files' },
+    { key: 'timeline', label: 'Timeline' },
+    { key: 'analytics', label: 'Analytics' },
+  ];
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="space-y-6 sm:space-y-8"
-      >
-        <LoungePageHeader
-          title="Website Management"
-          description="View your website details, status, and request changes"
-          icon={Globe}
-          actions={
-            <Button className="gap-2" onClick={() => setDialogOpen(true)}>
-              <Plus className="w-4 h-4" />
-              Request Change
-            </Button>
-          }
-        />
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Client portal"
+        title="Website"
+        description="Your website's status, domain and files"
+        actions={
+          <Button className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setDialogOpen(true)}>
+            <Plus className="h-3.5 w-3.5" />
+            Request a change
+          </Button>
+        }
+      />
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Request Website Change</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>Change Title *</Label>
-                  <Input
-                    placeholder="e.g., Update homepage hero section"
-                    value={changeForm.title}
-                    onChange={(e) => setChangeForm(prev => ({ ...prev, title: e.target.value }))}
-                  />
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request a website change</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Title</Label>
+              <Input
+                className={FIELD}
+                placeholder="e.g. Update the homepage hero section"
+                value={changeForm.title}
+                onChange={(e) => setChangeForm(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Description</Label>
+              <Textarea
+                placeholder="Describe the changes you'd like"
+                value={changeForm.description}
+                onChange={(e) => setChangeForm(prev => ({ ...prev, description: e.target.value }))}
+                className="min-h-[100px] rounded-xl border-border/60 bg-foreground/[0.03] text-[14px] shadow-none focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button className="h-8 rounded-lg px-3 text-xs" onClick={handleSubmitChangeRequest} disabled={submitting}>
+                {submitting ? (
+                  <>
+                    <RefreshCw className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    Sending
+                  </>
+                ) : (
+                  'Send request'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tab row */}
+      <div className="mt-5 flex items-center gap-1 border-b border-border/60">
+        {tabs.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={cn(
+              'relative -mb-px border-b-2 px-3 py-2 text-[13px] transition-colors duration-150',
+              tab === t.key
+                ? 'border-primary font-medium text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'overview' && (
+        <div className="space-y-4 pt-5">
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* Site facts */}
+            <Panel>
+              <PanelHeader label="Your site" />
+              <dl>
+                <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">Status</dt>
+                  <dd><StatusBadge status={profile?.website_status || 'not_published'} /></dd>
                 </div>
-                <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Textarea
-                    placeholder="Describe the changes you'd like..."
-                    value={changeForm.description}
-                    onChange={(e) => setChangeForm(prev => ({ ...prev, description: e.target.value }))}
-                    className="min-h-[100px]"
-                  />
+                <div className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">SSL certificate</dt>
+                  <dd><StatusBadge status={profile?.ssl_status || 'pending'} /></dd>
                 </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                  <Button onClick={handleSubmitChangeRequest} disabled={submitting}>
-                    {submitting ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      'Submit Request'
-                    )}
-                  </Button>
+                <div className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">Hosting</dt>
+                  <dd className="truncate text-[13px] text-foreground">{profile?.hosting_provider || 'Quooro Cloud'}</dd>
                 </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+                <div className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">Last updated</dt>
+                  <dd className="font-mono text-xs tabular-nums text-foreground">
+                    {profile?.last_updated_at
+                      ? format(new Date(profile.last_updated_at), 'd MMM yyyy')
+                      : 'Not available'}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">Domain</dt>
+                  <dd className="truncate font-mono text-xs text-foreground">
+                    {profile?.domain_name || 'No custom domain yet'}
+                  </dd>
+                </div>
+                {profile?.preview_url && (
+                  <div className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5">
+                    <dt className="text-[13px] text-muted-foreground">Preview</dt>
+                    <dd className="flex min-w-0 items-center gap-2">
+                      <span className="truncate font-mono text-xs text-foreground">{profile.preview_url}</span>
+                      <button
+                        type="button"
+                        aria-label="Open preview"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.04] hover:text-foreground"
+                        onClick={() => {
+                          let url = profile.preview_url!;
+                          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'https://' + url;
+                          }
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                        }}
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </button>
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </Panel>
 
-        {/* Tabbed Interface */}
-        <motion.div variants={itemVariants}>
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-6">
-              <TabsTrigger value="overview" className="gap-2">
-                <Eye className="w-4 h-4 hidden sm:block" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="files" className="gap-2">
-                <FolderOpen className="w-4 h-4 hidden sm:block" />
-                Files
-              </TabsTrigger>
-              <TabsTrigger value="timeline" className="gap-2">
-                <History className="w-4 h-4 hidden sm:block" />
-                Timeline
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-2">
-                <BarChart3 className="w-4 h-4 hidden sm:block" />
-                Analytics
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
-              {/* Status Overview Cards */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <Globe className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">Status</p>
-                        <Badge className={cn("mt-1", statusConfig.color)}>
-                          {statusConfig.label}
-                        </Badge>
-                      </div>
+            {/* Recent change requests */}
+            <Panel>
+              <PanelHeader label="Recent change requests" />
+              {changeRequests.length > 0 ? (
+                <div>
+                  {changeRequests.map((request) => (
+                    <div key={request.id} className="flex items-center gap-3 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13px] font-[450] text-foreground">{request.title}</span>
+                        <span className="block font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                          {format(new Date(request.created_at), 'd MMM yyyy')}
+                        </span>
+                      </span>
+                      <StatusBadge status={request.status} />
                     </div>
-                  </CardContent>
-                </Card>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  compact
+                  title="No change requests yet"
+                  body="When you ask for a change, it appears here with its progress."
+                  action={{ label: 'Request a change', onClick: () => setDialogOpen(true) }}
+                />
+              )}
+            </Panel>
+          </div>
+        </div>
+      )}
 
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-emerald-500/10">
-                        <Shield className="w-5 h-5 text-emerald-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">SSL Certificate</p>
-                        <Badge className={cn("mt-1 gap-1", sslConfig.color)}>
-                          <SslIcon className="w-3 h-3" />
-                          {sslConfig.label}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+      {tab === 'files' && (
+        <div className="space-y-4 pt-5">
+          <Panel>
+            <PanelHeader label="Export site files" />
+            <div className="space-y-4 p-4">
+              <p className="text-[13px] text-muted-foreground">
+                Download your website's source files: HTML, CSS, JavaScript, images and assets.
+              </p>
+              <Button
+                className="h-8 gap-1.5 rounded-lg px-3 text-xs"
+                onClick={handleDownloadFiles}
+                disabled={!profile?.site_files_url || downloading}
+              >
+                {downloading ? (
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    Preparing download
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-3.5 w-3.5" />
+                    Download site files
+                  </>
+                )}
+              </Button>
+              {!profile?.site_files_url && (
+                <p className="text-xs text-muted-foreground">
+                  Site files are not available yet. Message the studio if you need them sooner.
+                </p>
+              )}
+            </div>
+          </Panel>
+        </div>
+      )}
 
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-blue-500/10">
-                        <Server className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">Hosting</p>
-                        <p className="font-medium truncate">{profile?.hosting_provider || 'Quooro Cloud'}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+      {tab === 'timeline' && (
+        <div className="space-y-4 pt-5">
+          <Panel>
+            <PanelHeader label="Project timeline" />
+            <div className="p-4">
+              <div className="space-y-0">
+                {statusSteps.map((step, index) => {
+                  const isCompleted = index < currentStepIndex;
+                  const isCurrent = index === currentStepIndex;
+                  const StepIcon = step.icon;
 
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-purple-500/10">
-                        <Calendar className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">Last Updated</p>
-                        <p className="font-medium">
-                          {profile?.last_updated_at 
-                            ? format(new Date(profile.last_updated_at), 'MMM d, yyyy')
-                            : 'Not available'}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Domain & Preview */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Globe className="w-5 h-5 text-primary" />
-                      Domain Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Domain Name</p>
-                      <p className="font-mono text-sm bg-muted px-3 py-2 rounded-lg">
-                        {profile?.domain_name || 'No custom domain configured'}
-                      </p>
-                    </div>
-                    {profile?.preview_url && (
-                      <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">Preview URL</p>
-                        <div className="flex items-center gap-2">
-                          <p className="font-mono text-sm bg-muted px-3 py-2 rounded-lg flex-1 truncate">
-                            {profile.preview_url}
-                          </p>
-                          <Button 
-                            variant="outline" 
-                            size="icon"
-                            onClick={() => {
-                              let url = profile.preview_url!;
-                              if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                                url = 'https://' + url;
-                              }
-                              window.open(url, '_blank', 'noopener,noreferrer');
-                            }}
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Recent Change Requests */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <RefreshCw className="w-5 h-5 text-primary" />
-                      Recent Change Requests
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {changeRequests.length > 0 ? (
-                      <ScrollArea className="h-[200px]">
-                        <div className="space-y-3 pr-4">
-                          {changeRequests.map((request) => (
-                            <div key={request.id} className="p-3 rounded-lg border bg-muted/30">
-                              <div className="flex items-center justify-between mb-1">
-                                <p className="font-medium text-sm truncate flex-1">{request.title}</p>
-                                <Badge 
-                                  variant="outline" 
-                                  className={cn(
-                                    "ml-2",
-                                    request.status === 'delivered' && 'bg-emerald-500/10 text-emerald-600',
-                                    request.status === 'in_progress' && 'bg-blue-500/10 text-blue-600',
-                                    request.status === 'pending' && 'bg-amber-500/10 text-amber-600'
-                                  )}
-                                >
-                                  {request.status === 'in_progress' ? 'In Progress' : 
-                                   request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                                </Badge>
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(request.created_at), 'MMM d, yyyy')}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-8 text-center">
-                        <RefreshCw className="w-10 h-10 text-muted-foreground/50 mb-3" />
-                        <p className="text-sm text-muted-foreground">No change requests yet</p>
-                        <Button variant="link" size="sm" onClick={() => setDialogOpen(true)}>
-                          Submit your first request
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            {/* Files Tab */}
-            <TabsContent value="files" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileCode className="w-5 h-5 text-primary" />
-                    Export Site Files
-                  </CardTitle>
-                  <CardDescription>
-                    Download your website's source files including HTML, CSS, JS, and assets
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 rounded-lg bg-muted/50 space-y-2">
-                      <p className="text-sm font-medium">Included in export:</p>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        <li>• HTML source files</li>
-                        <li>• CSS stylesheets</li>
-                        <li>• JavaScript files</li>
-                        <li>• Images and assets</li>
-                      </ul>
-                    </div>
-                    <Button 
-                      className="w-full gap-2" 
-                      onClick={handleDownloadFiles}
-                      disabled={!profile?.site_files_url || downloading}
-                    >
-                      {downloading ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                          Preparing Download...
-                        </>
-                      ) : (
-                        <>
-                          <Download className="w-4 h-4" />
-                          Download Site Files
-                        </>
+                  return (
+                    <div key={step.key} className="relative">
+                      {index < statusSteps.length - 1 && (
+                        <span aria-hidden className="absolute left-[13px] top-9 h-8 w-px bg-border" />
                       )}
-                    </Button>
-                    {!profile?.site_files_url && (
-                      <p className="text-xs text-muted-foreground text-center">
-                        Site files are not yet available. Contact support for assistance.
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Timeline Tab */}
-            <TabsContent value="timeline" className="space-y-6">
-              {/* Project Timeline */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="w-5 h-5 text-primary" />
-                    Project Timeline
-                  </CardTitle>
-                  <CardDescription>
-                    Your website is currently in the <strong className="text-foreground">{statusSteps[statusSteps.findIndex(s => s.key === (profile?.website_status || 'design'))]?.label}</strong> phase
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-0">
-                    {statusSteps.map((step, index) => {
-                      const currentStepIndex = statusSteps.findIndex(s => s.key === (profile?.website_status || 'design'));
-                      const isCompleted = index < currentStepIndex;
-                      const isCurrent = index === currentStepIndex;
-                      const isPending = index > currentStepIndex;
-                      const StepIcon = step.icon;
-
-                      return (
-                        <motion.div
-                          key={step.key}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="relative"
-                        >
-                          {index < statusSteps.length - 1 && (
-                            <div className={`absolute left-5 top-12 w-0.5 h-16 ${isCompleted ? 'bg-primary' : 'bg-border'}`} />
+                      <div className="flex items-start gap-3 py-2">
+                        <span
+                          className={cn(
+                            'z-10 flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full border',
+                            isCompleted && 'border-transparent bg-foreground/[0.08] text-foreground',
+                            isCurrent && 'border-transparent bg-primary text-primary-foreground shadow-[0_0_0_4px_hsl(var(--primary)/0.15)]',
+                            !isCompleted && !isCurrent && 'border-border bg-background text-muted-foreground',
                           )}
-                          
-                          <div className={`flex items-start gap-4 p-4 rounded-xl transition-all ${isCurrent ? 'bg-primary/5 border border-primary/20' : ''}`}>
-                            <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                              isCompleted 
-                                ? 'bg-primary text-primary-foreground' 
-                                : isCurrent 
-                                  ? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
-                                  : 'bg-muted text-muted-foreground'
-                            }`}>
-                              {isCompleted ? <CheckCircle className="w-5 h-5" /> : <StepIcon className="w-5 h-5" />}
-                            </div>
-
-                            <div className="flex-1 min-w-0 pt-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className={`font-semibold ${isPending ? 'text-muted-foreground' : 'text-foreground'}`}>
-                                  {step.label}
-                                </h3>
-                                {isCurrent && <Badge className="bg-primary/20 text-primary border-0">Current</Badge>}
-                                {isCompleted && <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Completed</Badge>}
-                              </div>
-                              <p className={`text-sm mt-1 ${isPending ? 'text-muted-foreground/60' : 'text-muted-foreground'}`}>
-                                {step.description}
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Version History */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <History className="w-5 h-5 text-primary" />
-                    Version History
-                  </CardTitle>
-                  <CardDescription>
-                    Track changes and updates to your website
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {versionHistory.length > 0 ? (
-                    <ScrollArea className="h-[250px]">
-                      <div className="space-y-3 pr-4">
-                        {versionHistory.map((entry, index) => (
-                          <div key={index} className="p-3 rounded-lg border bg-muted/30">
-                            <div className="flex items-center justify-between mb-1">
-                              <Badge variant="outline">{entry.version}</Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(entry.date), 'MMM d, yyyy')}
-                              </span>
-                            </div>
-                            <p className="text-sm">{entry.changes}</p>
-                          </div>
-                        ))}
+                        >
+                          {isCompleted ? <CheckCircle className="h-3.5 w-3.5" /> : <StepIcon className="h-3.5 w-3.5" />}
+                        </span>
+                        <span className="min-w-0 pt-0.5">
+                          <span className="flex items-center gap-2">
+                            <span className={cn('text-[13px] font-[550]', isCompleted || isCurrent ? 'text-foreground' : 'text-muted-foreground')}>
+                              {step.label}
+                            </span>
+                            {isCurrent && <StatusBadge tone="accent" label="Now" />}
+                            {isCompleted && <StatusBadge tone="ok" label="Done" />}
+                          </span>
+                          <span className="block text-xs text-muted-foreground">{step.description}</span>
+                        </span>
                       </div>
-                    </ScrollArea>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <History className="w-10 h-10 text-muted-foreground/50 mb-3" />
-                      <p className="text-sm text-muted-foreground">No version history yet</p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                  );
+                })}
+              </div>
+            </div>
+          </Panel>
 
-            {/* Analytics Tab */}
-            <TabsContent value="analytics" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                    Website Analytics
-                  </CardTitle>
-                  <CardDescription>
-                    Performance metrics and visitor insights
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <BarChart3 className="w-16 h-16 text-muted-foreground/30 mb-4" />
-                    <h3 className="font-semibold text-lg mb-2">Analytics Coming Soon</h3>
-                    <p className="text-muted-foreground max-w-md">
-                      We're building detailed analytics to help you understand your website's performance. 
-                      Check back soon for visitor insights, page views, and more.
-                    </p>
+          <Panel>
+            <PanelHeader label="Version history" />
+            {versionHistory.length > 0 ? (
+              <div>
+                {versionHistory.map((entry, index) => (
+                  <div key={index} className="flex items-start gap-3 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+                    <History className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[13px] text-foreground">{entry.changes}</span>
+                      <span className="block font-mono text-[10.5px] tabular-nums text-muted-foreground">{entry.version}</span>
+                    </span>
+                    <span className="font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                      {format(new Date(entry.date), 'd MMM yyyy')}
+                    </span>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-      </motion.div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                compact
+                title="No versions yet"
+                body="Each site update is recorded here once it ships."
+              />
+            )}
+          </Panel>
+        </div>
+      )}
+
+      {tab === 'analytics' && (
+        <div className="pt-5">
+          <Panel>
+            <PanelHeader label="Website analytics" />
+            <EmptyState
+              title="Analytics are on the way"
+              body="We're building visitor insights, page views and performance metrics. They'll appear here once ready."
+            />
+          </Panel>
+        </div>
+      )}
     </div>
   );
 }

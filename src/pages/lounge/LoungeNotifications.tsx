@@ -1,26 +1,25 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Bell, CheckCheck, Trash2, Filter, CreditCard, Upload,
+  CheckCheck, Trash2, CreditCard, Upload,
   FolderCheck, Clock, Rocket, Settings2, Search, X, BellRing
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useNotifications, type Notification } from '@/hooks/useNotifications';
-import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
+import { format, isToday, isYesterday } from 'date-fns';
+import {
+  PageHeader, Panel, StatusBadge, EmptyState, SkeletonLedger, FIELD,
+} from '@/components/platform';
 
-const typeConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; label: string; color: string }> = {
-  project_update: { icon: Rocket, label: 'Project Updates', color: 'text-blue-400 bg-blue-400/10 border-blue-400/20' },
-  payment: { icon: CreditCard, label: 'Payments', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' },
-  file_upload: { icon: Upload, label: 'File Uploads', color: 'text-violet-400 bg-violet-400/10 border-violet-400/20' },
-  approval_needed: { icon: FolderCheck, label: 'Approvals', color: 'text-amber-400 bg-amber-400/10 border-amber-400/20' },
-  deadline: { icon: Clock, label: 'Deadlines', color: 'text-red-400 bg-red-400/10 border-red-400/20' },
-  system: { icon: Settings2, label: 'System', color: 'text-muted-foreground bg-muted border-border' },
+const typeConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; label: string }> = {
+  project_update: { icon: Rocket, label: 'Project updates' },
+  payment: { icon: CreditCard, label: 'Payments' },
+  file_upload: { icon: Upload, label: 'File uploads' },
+  approval_needed: { icon: FolderCheck, label: 'Approvals' },
+  deadline: { icon: Clock, label: 'Deadlines' },
+  system: { icon: Settings2, label: 'System' },
 };
 
 function groupByDate(notifications: Notification[]) {
@@ -75,86 +74,77 @@ export default function LoungeNotifications() {
   }, [notifications]);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      <LoungePageHeader
-        title="Notification Center"
-        description="All your system events in one place"
-        icon={Bell}
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Client portal"
+        title="Notifications"
+        description="Everything that happened on your account, in one place"
       />
 
-      {/* Push notification permission banner */}
+      {/* Push notification permission */}
       {pushPermission !== 'granted' && typeof Notification !== 'undefined' && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-primary/5"
-        >
-          <BellRing className="w-5 h-5 text-primary shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-medium">Enable desktop notifications</p>
-            <p className="text-[11px] text-muted-foreground">Get alerts even when this tab isn't focused</p>
+        <div className="mt-5 flex items-center gap-3 rounded-[10px] border border-border/60 bg-card p-3">
+          <BellRing className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-medium">Desktop notifications are off</p>
+            <p className="text-[11.5px] text-muted-foreground">Turn them on to get alerts when this tab is not focused</p>
           </div>
-          <Button size="sm" className="h-7 text-[11px] rounded-lg" onClick={requestPushPermission}>
-            Enable
+          <Button size="sm" className="h-7 rounded-lg text-[11px]" onClick={requestPushPermission}>
+            Turn on
           </Button>
-        </motion.div>
+        </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      {/* Type filter chips */}
+      <div className="mt-5 flex flex-wrap gap-2">
         {Object.entries(typeConfig).map(([key, cfg]) => {
-          const Icon = cfg.icon;
           const count = typeCounts[key] || 0;
           const isActive = typeFilter === key;
           return (
-            <motion.button
+            <button
               key={key}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => setTypeFilter(isActive ? null : key)}
               className={cn(
-                'flex items-center gap-2.5 p-3 rounded-xl border transition-all',
+                'inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors duration-150',
                 isActive
-                  ? 'border-primary/50 bg-primary/5 ring-1 ring-primary/20'
-                  : 'border-border/50 bg-card hover:border-border'
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border/60 text-muted-foreground hover:border-primary/50 hover:text-foreground',
               )}
             >
-              <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', cfg.color)}>
-                <Icon className="w-4 h-4" />
-              </div>
-              <div className="text-left">
-                <p className="text-[11px] text-muted-foreground">{cfg.label}</p>
-                <p className="text-sm font-semibold">{count}</p>
-              </div>
-            </motion.button>
+              {cfg.label}
+              <span className={cn('font-mono text-[10px] tabular-nums', isActive ? 'text-primary-foreground/80' : 'text-muted-foreground')}>
+                {count}
+              </span>
+            </button>
           );
         })}
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[200px] max-w-sm flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search notifications..."
+            placeholder="Search notifications"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 text-sm rounded-lg"
+            className={cn(FIELD, 'h-9 pl-9 text-sm')}
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-              <X className="w-3.5 h-3.5 text-muted-foreground" />
+            <button onClick={() => setSearch('')} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2">
+              <X className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           )}
         </div>
 
-        <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
+        <div className="flex items-center gap-1 rounded-lg border border-border/60 p-0.5">
           {(['all', 'unread', 'read'] as const).map(f => (
             <button
               key={f}
               onClick={() => setReadFilter(f)}
               className={cn(
-                'px-3 py-1.5 text-[11px] font-medium rounded-md transition-colors capitalize',
-                readFilter === f ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'
+                'rounded-md px-3 py-1.5 text-[11px] font-medium capitalize transition-colors duration-150',
+                readFilter === f ? 'bg-foreground/[0.06] text-foreground' : 'text-muted-foreground hover:text-foreground'
               )}
             >
               {f} {f === 'unread' && unreadCount > 0 && `(${unreadCount})`}
@@ -162,27 +152,16 @@ export default function LoungeNotifications() {
           ))}
         </div>
 
-        {typeFilter && (
-          <Badge
-            variant="secondary"
-            className="flex items-center gap-1 cursor-pointer"
-            onClick={() => setTypeFilter(null)}
-          >
-            {typeConfig[typeFilter]?.label}
-            <X className="w-3 h-3" />
-          </Badge>
-        )}
-
         <div className="ml-auto flex items-center gap-2">
           {unreadCount > 0 && (
-            <Button variant="outline" size="sm" className="h-8 text-[11px]" onClick={markAllAsRead}>
-              <CheckCheck className="w-3.5 h-3.5 mr-1" />
+            <Button variant="outline" size="sm" className="h-8 rounded-lg text-[11px]" onClick={markAllAsRead}>
+              <CheckCheck className="mr-1 h-3.5 w-3.5" />
               Mark all read
             </Button>
           )}
           {notifications.length > 0 && (
-            <Button variant="ghost" size="sm" className="h-8 text-[11px] text-destructive hover:text-destructive" onClick={clearAll}>
-              <Trash2 className="w-3.5 h-3.5 mr-1" />
+            <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[11px] text-risk hover:text-risk" onClick={clearAll}>
+              <Trash2 className="mr-1 h-3.5 w-3.5" />
               Clear all
             </Button>
           )}
@@ -190,99 +169,90 @@ export default function LoungeNotifications() {
       </div>
 
       {/* Notification list */}
-      {loading ? (
-        <div className="py-20 text-center text-muted-foreground text-sm">Loading notifications...</div>
-      ) : filtered.length === 0 ? (
-        <div className="py-20 text-center">
-          <Bell className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3" />
-          <p className="text-muted-foreground text-sm">
-            {notifications.length === 0 ? 'No notifications yet' : 'No matching notifications'}
-          </p>
-          <p className="text-muted-foreground/60 text-xs mt-1">
-            {notifications.length === 0
-              ? "You'll see project updates, payments, and more here"
-              : 'Try adjusting your filters'}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {Object.entries(grouped).map(([dateLabel, items]) => (
-            <div key={dateLabel}>
-              <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                {dateLabel}
-              </h3>
-              <div className="space-y-1">
-                <AnimatePresence>
+      <div className="mt-5">
+        {loading ? (
+          <div className="rounded-[10px] border border-border/60">
+            <SkeletonLedger rows={6} />
+          </div>
+        ) : filtered.length === 0 ? (
+          <Panel>
+            <EmptyState
+              title={notifications.length === 0 ? 'Nothing to report' : 'No matching notifications'}
+              body={
+                notifications.length === 0
+                  ? 'Project updates, payments and approvals will appear here as they happen.'
+                  : 'Adjust your search or filters to find what you need.'
+              }
+            />
+          </Panel>
+        ) : (
+          <div className="space-y-6">
+            {Object.entries(grouped).map(([dateLabel, items]) => (
+              <div key={dateLabel}>
+                <h3 className="mb-2 px-1 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                  {dateLabel}
+                </h3>
+                <Panel>
                   {items.map((notif) => {
                     const cfg = typeConfig[notif.type] || typeConfig.system;
                     const Icon = cfg.icon;
                     return (
-                      <motion.div
+                      <div
                         key={notif.id}
-                        layout
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: -30, height: 0 }}
                         className={cn(
-                          'group flex items-start gap-3 px-4 py-3.5 rounded-xl cursor-pointer transition-all border',
-                          notif.is_read
-                            ? 'opacity-50 hover:opacity-80 border-transparent hover:border-border/30 hover:bg-accent/20'
-                            : 'border-border/30 bg-card hover:bg-accent/30 shadow-sm'
+                          'group flex w-full cursor-pointer items-start gap-3 border-t border-border/60 px-4 py-3 text-left transition-colors duration-150 first:border-t-0 hover:bg-foreground/[0.025]',
+                          notif.is_read && 'opacity-60 hover:opacity-90',
                         )}
                         onClick={() => {
                           if (!notif.is_read) markAsRead(notif.id);
                           if (notif.link) navigate(notif.link);
                         }}
                       >
-                        <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', cfg.color)}>
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className={cn('text-[13px] leading-snug', !notif.is_read && 'font-semibold')}>
+                        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04] text-muted-foreground">
+                          <Icon className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-start justify-between gap-2">
+                            <span className={cn('text-[13px] leading-snug', !notif.is_read && 'font-[550]')}>
                               {notif.title}
-                            </p>
-                            <span className="text-[10px] text-muted-foreground/50 shrink-0 mt-0.5">
+                            </span>
+                            <span className="mt-0.5 shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">
                               {format(new Date(notif.created_at), 'HH:mm')}
                             </span>
-                          </div>
-                          <p className="text-[12px] text-muted-foreground mt-0.5">{notif.message}</p>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded border', cfg.color)}>
-                              {cfg.label}
-                            </span>
-                            {!notif.is_read && (
-                              <span className="text-[10px] text-primary font-medium">● New</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                          </span>
+                          <span className="mt-0.5 block text-[12px] text-muted-foreground">{notif.message}</span>
+                          <span className="mt-1.5 flex items-center gap-3">
+                            <span className="text-[10.5px] text-muted-foreground">{cfg.label}</span>
+                            {!notif.is_read && <StatusBadge tone="accent" label="New" className="text-[10.5px]" />}
+                          </span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
                           {!notif.is_read && (
                             <button
                               onClick={(e) => { e.stopPropagation(); markAsRead(notif.id); }}
-                              className="p-1.5 hover:bg-primary/10 rounded-md"
+                              className="rounded-md p-1.5 transition-colors duration-150 hover:bg-foreground/[0.05]"
                               title="Mark as read"
                             >
-                              <CheckCheck className="w-3.5 h-3.5 text-primary" />
+                              <CheckCheck className="h-3.5 w-3.5 text-muted-foreground" />
                             </button>
                           )}
                           <button
                             onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }}
-                            className="p-1.5 hover:bg-destructive/10 rounded-md"
+                            className="rounded-md p-1.5 transition-colors duration-150 hover:bg-foreground/[0.05]"
                             title="Delete"
                           >
-                            <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
+                            <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-risk" />
                           </button>
-                        </div>
-                      </motion.div>
+                        </span>
+                      </div>
                     );
                   })}
-                </AnimatePresence>
+                </Panel>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

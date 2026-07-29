@@ -1,17 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
-import { MessageSquare, Send, Check, CheckCheck, Mail, Phone, ArrowRight, Plus, Copy } from 'lucide-react';
+import { MessageSquare, Send, Check, CheckCheck, Mail, Phone, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { TypingIndicator } from '@/components/ui/TypingIndicator';
+import { PageHeader, Panel, AvatarID, EmptyState } from '@/components/platform';
 
 interface Message {
   id: string;
@@ -22,18 +19,7 @@ interface Message {
   created_at: string;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
+const TEAM_NAME = 'Quooro Team';
 
 export default function LoungeMessages() {
   const { user } = useAuth();
@@ -43,7 +29,7 @@ export default function LoungeMessages() {
   const [sending, setSending] = useState(false);
   const [adminId, setAdminId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   const { handleTyping, stopTyping, isUserTyping } = useTypingIndicator(user?.id, adminId);
   const adminIsTyping = adminId ? isUserTyping(adminId) : false;
 
@@ -152,12 +138,12 @@ export default function LoungeMessages() {
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('Failed to send message');
+      toast.error('Your message did not send. Try again.');
     } finally {
       setSending(false);
     }
   };
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewMessage(e.target.value);
     handleTyping();
@@ -174,7 +160,7 @@ export default function LoungeMessages() {
     const date = new Date(dateStr);
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) {
       return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     } else if (diffDays === 1) {
@@ -188,9 +174,19 @@ export default function LoungeMessages() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8" aria-hidden>
+        <span className="block h-5 w-32 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-3.5 w-56 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-6 rounded-[10px] border border-border/60 bg-card p-4">
+          <div className="flex items-center gap-3 border-b border-border/60 pb-4">
+            <span className="block h-9 w-9 animate-pulse rounded-full bg-foreground/[0.06]" />
+            <span className="block h-3.5 w-28 animate-pulse rounded bg-foreground/[0.06]" />
+          </div>
+          <div className="space-y-3 py-6">
+            <span className="block h-9 w-1/2 animate-pulse rounded-xl bg-foreground/[0.05]" />
+            <span className="ml-auto block h-9 w-2/5 animate-pulse rounded-xl bg-foreground/[0.06]" />
+            <span className="block h-9 w-2/5 animate-pulse rounded-xl bg-foreground/[0.05]" />
+          </div>
         </div>
       </div>
     );
@@ -199,242 +195,189 @@ export default function LoungeMessages() {
   // If no admin exists yet, still show chat UI with contact form
   if (!adminId) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-6"
-        >
-          <LoungePageHeader
-            title="Messages"
-            description="Chat directly with your development team."
-            icon={MessageSquare}
-          />
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+        <PageHeader
+          kicker="Client portal"
+          title="Messages"
+          description="Chat directly with the studio"
+        />
 
-          {/* Chat Container */}
-          <motion.div variants={itemVariants}>
-            <Card className="overflow-hidden">
-              <div className="h-[500px] flex flex-col">
-                {/* Chat Header */}
-                <div className="p-4 border-b border-border flex items-center gap-3 bg-muted/30">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      QT
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="font-medium">Quooro Team</h3>
-                    <p className="text-sm text-muted-foreground">Development Support</p>
-                  </div>
-                </div>
-
-                {/* Empty State with Start Chat CTA */}
-                <ScrollArea className="flex-1 p-4">
-                  <div className="flex flex-col items-center justify-center h-full py-12 text-center">
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                      <MessageSquare className="w-8 h-8 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">Start a Conversation</h3>
-                    <p className="text-muted-foreground max-w-md mb-6">
-                      Have a question or need help with your project? Send us a message below and our team will get back to you shortly.
-                    </p>
-                  </div>
-                </ScrollArea>
-
-                {/* Contact Form */}
-                <div className="p-4 border-t border-border space-y-3">
-                  <p className="text-sm text-muted-foreground text-center">
-                    Send us a message to start chatting
-                  </p>
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <a 
-                      href="mailto:support@quooro.com" 
-                      className="flex items-center justify-center gap-2 p-3 rounded-lg border border-border hover:border-primary/30 hover:bg-muted/50 transition-colors"
-                    >
-                      <Mail className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium">support@quooro.com</span>
-                    </a>
-                    <a 
-                      href="tel:+44" 
-                      className="flex items-center justify-center gap-2 p-3 rounded-lg border border-border hover:border-primary/30 hover:bg-muted/50 transition-colors"
-                    >
-                      <Phone className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium">Call Us</span>
-                    </a>
-                  </div>
+        <div className="mt-6">
+          <Panel className="overflow-hidden">
+            <div className="flex h-[500px] flex-col">
+              {/* Chat header */}
+              <div className="flex items-center gap-3 border-b border-border/60 bg-sunken p-4">
+                <AvatarID name={TEAM_NAME} size="lg" />
+                <div>
+                  <h3 className="text-[13.5px] font-[550]">Quooro team</h3>
+                  <p className="text-[12px] text-muted-foreground">Development support</p>
                 </div>
               </div>
-            </Card>
-          </motion.div>
 
-          {/* Alternative Contact */}
-          <motion.div
-            variants={itemVariants}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/10"
-          >
-            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent" />
-            <div className="relative p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-center sm:text-left">
-                <h3 className="text-lg sm:text-xl font-semibold">Need immediate assistance?</h3>
-                <p className="text-sm text-muted-foreground">
-                  Email us at support@quooro.com for urgent requests.
+              {/* Empty state */}
+              <ScrollArea className="flex-1 p-4">
+                <EmptyState
+                  title="Start a conversation"
+                  body="Have a question or need help with your project? Send a message and the team will get back to you shortly."
+                />
+              </ScrollArea>
+
+              {/* Contact options */}
+              <div className="space-y-3 border-t border-border/60 p-4">
+                <p className="text-center text-sm text-muted-foreground">
+                  Send us a message to start chatting
                 </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <a
+                    href="mailto:support@quooro.com"
+                    className="flex items-center justify-center gap-2 rounded-lg border border-border/60 p-3 transition-colors duration-150 hover:border-primary/40 hover:bg-foreground/[0.02]"
+                  >
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">support@quooro.com</span>
+                  </a>
+                  <a
+                    href="tel:+44"
+                    className="flex items-center justify-center gap-2 rounded-lg border border-border/60 p-3 transition-colors duration-150 hover:border-primary/40 hover:bg-foreground/[0.02]"
+                  >
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Call us</span>
+                  </a>
+                </div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </Panel>
+
+          {/* Alternative contact */}
+          <div className="mt-4 rounded-[10px] border border-border/60 bg-card p-4">
+            <p className="text-sm text-muted-foreground">
+              Need something urgently? Email <a href="mailto:support@quooro.com" className="text-foreground underline decoration-border underline-offset-2 transition-colors duration-150 hover:decoration-foreground">support@quooro.com</a> and we'll prioritise it.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="space-y-6"
-      >
-        <LoungePageHeader
-          title="Messages"
-          description="Chat directly with your development team."
-          icon={MessageSquare}
-        />
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Client portal"
+        title="Messages"
+        description="Chat directly with the studio"
+      />
 
-        {/* Chat Container */}
-        <motion.div variants={itemVariants}>
-          <Card className="overflow-hidden">
-            <div className="h-[500px] flex flex-col">
-              {/* Chat Header */}
-              <div className="p-4 border-b border-border flex items-center gap-3 bg-muted/30">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    QT
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-medium">Quooro Team</h3>
-                  <div className="flex items-center gap-2">
-                    {adminIsTyping ? (
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <span>typing</span>
-                        <TypingIndicator />
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Development Support</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages.length === 0 ? (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p className="font-medium">No messages yet</p>
-                      <p className="text-sm mb-4">Start a conversation with our development team</p>
-                      <Button onClick={() => document.getElementById('message-input')?.focus()} className="gap-2">
-                        <Plus className="w-4 h-4" />
-                        Start Chat
-                      </Button>
+      <div className="mt-6">
+        <Panel className="overflow-hidden">
+          <div className="flex h-[500px] flex-col">
+            {/* Chat header */}
+            <div className="flex items-center gap-3 border-b border-border/60 bg-sunken p-4">
+              <AvatarID name={TEAM_NAME} size="lg" />
+              <div>
+                <h3 className="text-[13.5px] font-[550]">Quooro team</h3>
+                <div className="flex items-center gap-2">
+                  {adminIsTyping ? (
+                    <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                      <span>typing</span>
+                      <TypingIndicator />
                     </div>
                   ) : (
-                    <AnimatePresence initial={false}>
-                      {messages.map((message) => {
-                        const isMe = message.sender_id === user?.id;
-                        return (
-                          <motion.div
-                            key={message.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div className="group/msg relative">
-                              <div
-                                className={`max-w-full rounded-2xl px-4 py-2.5 ${
-                                  isMe
-                                    ? 'bg-primary text-primary-foreground rounded-br-md'
-                                    : 'bg-muted rounded-bl-md'
-                                }`}
-                              >
-                                <p className="text-sm whitespace-pre-wrap break-words">
-                                  {message.content}
-                                </p>
-                                <div className={`flex items-center gap-1 mt-1 ${isMe ? 'justify-end' : ''}`}>
-                                  <span className={`text-[10px] ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                                    {formatTime(message.created_at)}
-                                  </span>
-                                  {isMe && (
-                                    message.is_read ? (
-                                      <CheckCheck className="w-3 h-3 text-primary-foreground/70" />
-                                    ) : (
-                                      <Check className="w-3 h-3 text-primary-foreground/70" />
-                                    )
-                                  )}
-                                </div>
-                              </div>
-                              <button
-                                onClick={() => { navigator.clipboard.writeText(message.content); toast.success('Copied to clipboard'); }}
-                                className="absolute -bottom-3 right-1 opacity-0 group-hover/msg:opacity-100 transition-opacity h-6 w-6 rounded-md bg-card border border-border flex items-center justify-center shadow-sm hover:bg-muted"
-                                title="Copy text"
-                              >
-                                <Copy className="w-3 h-3 text-muted-foreground" />
-                              </button>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </AnimatePresence>
+                    <p className="text-[12px] text-muted-foreground">Development support</p>
                   )}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-
-              {/* Message Input - Always visible */}
-              <div className="p-4 border-t border-border">
-                <div className="flex gap-2">
-                  <Textarea
-                    id="message-input"
-                    placeholder="Type a message to start chatting..."
-                    value={newMessage}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyPress}
-                    className="min-h-[44px] max-h-32 resize-none"
-                    rows={1}
-                  />
-                  <Button 
-                    onClick={sendMessage} 
-                    disabled={!newMessage.trim() || sending}
-                    size="icon"
-                    className="shrink-0"
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
                 </div>
               </div>
             </div>
-          </Card>
-        </motion.div>
 
-        {/* Alternative Contact */}
-        <motion.div
-          variants={itemVariants}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/10"
-        >
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent" />
-          <div className="relative p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-center sm:text-left">
-              <h3 className="text-lg sm:text-xl font-semibold">Need immediate assistance?</h3>
-              <p className="text-sm text-muted-foreground">
-                Email us at support@quooro.com for urgent requests.
-              </p>
+            {/* Messages */}
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {messages.length === 0 ? (
+                  <EmptyState
+                    compact
+                    title="No messages yet"
+                    body="Start a conversation with the studio using the box below."
+                    action={{ label: 'Write a message', onClick: () => document.getElementById('message-input')?.focus() }}
+                  />
+                ) : (
+                  messages.map((message) => {
+                    const isMe = message.sender_id === user?.id;
+                    return (
+                      <div
+                        key={message.id}
+                        className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className="group/msg relative">
+                          <div
+                            className={`max-w-full px-4 py-2.5 ${
+                              isMe
+                                ? 'rounded-xl rounded-br-md bg-primary text-primary-foreground'
+                                : 'rounded-xl rounded-bl-md border border-border/60 bg-foreground/[0.03]'
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap break-words text-sm">
+                              {message.content}
+                            </p>
+                            <div className={`mt-1 flex items-center gap-1 ${isMe ? 'justify-end' : ''}`}>
+                              <span className={`font-mono text-[10px] tabular-nums ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                                {formatTime(message.created_at)}
+                              </span>
+                              {isMe && (
+                                message.is_read ? (
+                                  <CheckCheck className="h-3 w-3 text-primary-foreground/70" />
+                                ) : (
+                                  <Check className="h-3 w-3 text-primary-foreground/70" />
+                                )
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(message.content); toast.success('Copied to clipboard'); }}
+                            className="absolute -bottom-3 right-1 flex h-6 w-6 items-center justify-center rounded-md border border-border bg-card opacity-0 transition-opacity duration-150 hover:bg-foreground/[0.04] group-hover/msg:opacity-100"
+                            title="Copy text"
+                          >
+                            <Copy className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+
+            {/* Message input */}
+            <div className="border-t border-border/60 p-4">
+              <div className="flex gap-2">
+                <Textarea
+                  id="message-input"
+                  placeholder="Type a message"
+                  value={newMessage}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyPress}
+                  className="max-h-32 min-h-[44px] resize-none rounded-xl border-border/60 bg-foreground/[0.03] text-[14px] shadow-none focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
+                  rows={1}
+                />
+                <Button
+                  onClick={sendMessage}
+                  disabled={!newMessage.trim() || sending}
+                  size="icon"
+                  aria-label="Send message"
+                  className="shrink-0 rounded-lg"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </Panel>
+
+        {/* Alternative contact */}
+        <div className="mt-4 rounded-[10px] border border-border/60 bg-card p-4">
+          <p className="text-sm text-muted-foreground">
+            Need something urgently? Email <a href="mailto:support@quooro.com" className="text-foreground underline decoration-border underline-offset-2 transition-colors duration-150 hover:decoration-foreground">support@quooro.com</a> and we'll prioritise it.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

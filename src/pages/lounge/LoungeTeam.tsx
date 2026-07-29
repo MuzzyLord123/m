@@ -1,51 +1,40 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Users, 
-  Users as UsersIcon,
-  Copy, 
-  Check, 
-  Crown, 
-  Shield, 
+import {
+  Copy,
+  Check,
+  Crown,
   UserPlus,
   Settings,
   Trash2,
   Eye,
   EyeOff,
-  AlertCircle,
   Loader2,
-  Building2,
-  RefreshCw,
   Mail,
-  User,
-  Phone,
-  MessageSquare,
   Hash,
   Bell,
   BellOff,
   Volume2,
   VolumeX,
-  LinkIcon,
 } from 'lucide-react';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
 import DiscordRoleManager from '@/components/roles/DiscordRoleManager';
+import { cn } from '@/lib/utils';
+import {
+  PageHeader, Panel, PanelHeader, StatusBadge, AvatarID, SkeletonLedger,
+  FIELD, FIELD_LABEL,
+} from '@/components/platform';
 
 interface TeamMember {
   id: string;
@@ -69,19 +58,27 @@ interface Team {
   primary_account_id: string;
 }
 
-const roleColors: Record<string, string> = {
-  owner: 'bg-primary text-primary-foreground',
-  financial: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-  project: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  member: 'bg-muted text-muted-foreground',
-};
-
 const roleDescriptions: Record<string, string> = {
   owner: 'Full access to all features and billing',
   financial: 'Access to billing, invoices, and financial data',
   project: 'Access to project management and content',
   member: 'View-only access to basic information',
 };
+
+function RoleChip({ role }: { role: string }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em]',
+        role === 'owner'
+          ? 'border-primary/40 text-primary'
+          : 'border-border/60 text-muted-foreground',
+      )}
+    >
+      {role}
+    </span>
+  );
+}
 
 export default function LoungeTeam() {
   const { user } = useAuth();
@@ -90,16 +87,16 @@ export default function LoungeTeam() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
-  
+
   // Member management
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [newRole, setNewRole] = useState('');
-  
+
   // Remove member
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
-  
+
   // Full member settings
   const [showMemberSettings, setShowMemberSettings] = useState(false);
   const [memberChannels, setMemberChannels] = useState<any[]>([]);
@@ -115,7 +112,7 @@ export default function LoungeTeam() {
   const [createMemberRole, setCreateMemberRole] = useState('member');
   const [showPassword, setShowPassword] = useState(false);
   const [creatingMember, setCreatingMember] = useState(false);
-  
+
   // Create team state
   const [creatingTeam, setCreatingTeam] = useState(false);
   const [teamName, setTeamName] = useState('');
@@ -188,7 +185,7 @@ export default function LoungeTeam() {
       setMembers(membersWithProfiles);
     } catch (error) {
       console.error('Error fetching members:', error);
-      toast.error('Failed to load team members');
+      toast.error('Team members did not load. Refresh to try again.');
     }
   };
 
@@ -196,14 +193,14 @@ export default function LoungeTeam() {
     if (team?.team_code) {
       navigator.clipboard.writeText(team.team_code);
       setCopied(true);
-      toast.success('Team code copied!');
+      toast.success('Team code copied');
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const createTeam = async () => {
     if (!user) return;
-    
+
     setCreatingTeam(true);
     try {
       // Get user's profile for name/company
@@ -212,11 +209,11 @@ export default function LoungeTeam() {
         .select('full_name, company')
         .eq('user_id', user.id)
         .single();
-      
+
       // Generate team code
       const { data: teamCodeData } = await supabase.rpc('generate_team_code');
       const generatedTeamName = teamName.trim() || profile?.company || `${profile?.full_name || 'My'}'s Team`;
-      
+
       // Create the team
       const { data: newTeam, error: teamError } = await supabase
         .from('client_teams')
@@ -227,9 +224,9 @@ export default function LoungeTeam() {
         })
         .select()
         .single();
-      
+
       if (teamError) throw teamError;
-      
+
       // Add user as owner in team_memberships
       const { error: memberError } = await supabase
         .from('team_memberships')
@@ -239,17 +236,17 @@ export default function LoungeTeam() {
           member_role: 'owner',
           display_name: profile?.full_name || 'Owner'
         });
-      
+
       if (memberError) throw memberError;
-      
-      toast.success('Team created successfully!');
+
+      toast.success('Team created');
       setTeam(newTeam);
       setIsOwner(true);
       setTeamName('');
       await fetchMembers(newTeam.id);
     } catch (error) {
       console.error('Error creating team:', error);
-      toast.error('Failed to create team. Please try again.');
+      toast.error('The team was not created. Try again.');
     } finally {
       setCreatingTeam(false);
     }
@@ -265,7 +262,7 @@ export default function LoungeTeam() {
         .eq('id', selectedMember.id);
 
       if (error) throw error;
-      
+
       toast.success('Member role updated');
       setShowRoleDialog(false);
       setSelectedMember(null);
@@ -273,7 +270,7 @@ export default function LoungeTeam() {
       fetchMembers(team.id);
     } catch (error) {
       console.error('Error updating role:', error);
-      toast.error('Failed to update role');
+      toast.error('The role did not update. Try again.');
     }
   };
 
@@ -287,14 +284,14 @@ export default function LoungeTeam() {
         .eq('id', memberToRemove.id);
 
       if (error) throw error;
-      
+
       toast.success('Member removed from team');
       setShowRemoveDialog(false);
       setMemberToRemove(null);
       fetchMembers(team.id);
     } catch (error) {
       console.error('Error removing member:', error);
-      toast.error('Failed to remove member');
+      toast.error('The member was not removed. Try again.');
     }
   };
 
@@ -310,10 +307,10 @@ export default function LoungeTeam() {
     }
 
     setCreatingMember(true);
-    
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         toast.error('You must be logged in to create team members');
         return;
@@ -338,7 +335,7 @@ export default function LoungeTeam() {
         throw new Error(response.data.error);
       }
 
-      toast.success(`Team member ${createMemberEmail} created successfully!`);
+      toast.success(`Team member ${createMemberEmail} created`);
       setShowCreateDialog(false);
       setCreateMemberEmail('');
       setCreateMemberPassword('');
@@ -348,15 +345,10 @@ export default function LoungeTeam() {
       fetchMembers(team.id);
     } catch (error) {
       console.error('Error creating team member:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to create team member');
+      toast.error(error instanceof Error ? error.message : 'The account was not created. Try again.');
     } finally {
       setCreatingMember(false);
     }
-  };
-
-  const getInitials = (name: string | null | undefined) => {
-    if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   // Fetch member's comm channels when settings dialog opens
@@ -380,7 +372,7 @@ export default function LoungeTeam() {
       { channel_id: channelId, user_id: selectedMember.user_id, role: 'member' },
       { onConflict: 'channel_id,user_id' }
     );
-    if (error) toast.error('Failed to add to channel');
+    if (error) toast.error('Could not add to the channel. Try again.');
     else {
       toast.success('Added to channel');
       const { data } = await supabase.from('comm_channel_members').select('channel_id, role, is_muted, notification_preference').eq('user_id', selectedMember.user_id);
@@ -391,7 +383,7 @@ export default function LoungeTeam() {
   const removeMemberFromChannel = async (channelId: string) => {
     if (!selectedMember) return;
     const { error } = await supabase.from('comm_channel_members').delete().eq('channel_id', channelId).eq('user_id', selectedMember.user_id);
-    if (error) toast.error('Failed to remove from channel');
+    if (error) toast.error('Could not remove from the channel. Try again.');
     else {
       toast.success('Removed from channel');
       setMemberChannels(prev => prev.filter(m => m.channel_id !== channelId));
@@ -406,114 +398,109 @@ export default function LoungeTeam() {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8" aria-hidden>
+        <span className="block h-5 w-28 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-3.5 w-64 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-6 rounded-[10px] border border-border/60">
+          <SkeletonLedger rows={4} />
+        </div>
       </div>
     );
   }
 
   if (!team) {
     return (
-      <div className="p-6">
-        <Card className="max-w-2xl mx-auto">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Building2 className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle className="text-xl font-display">Create Your Team</CardTitle>
-            <CardDescription>
-              Set up your team to invite members and manage access to your account
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="teamName">Team Name (optional)</Label>
+      <div className="mx-auto max-w-[880px] px-5 py-7 lg:px-8">
+        <Panel className="mx-auto max-w-2xl">
+          <div className="flex flex-col items-center px-6 pb-6 pt-12 text-center">
+            <span aria-hidden className="mb-4 block h-px w-8 bg-primary" />
+            <h1 className="font-display text-lg font-semibold tracking-[-0.02em] text-foreground">Create your team</h1>
+            <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted-foreground">
+              Set up a team to invite members and manage access to your account.
+            </p>
+          </div>
+          <div className="space-y-4 px-6 pb-8 sm:px-16">
+            <div className="space-y-1.5">
+              <Label htmlFor="teamName" className={FIELD_LABEL}>Team name (optional)</Label>
               <Input
                 id="teamName"
-                placeholder="e.g., My Company"
+                className={FIELD}
+                placeholder="e.g. My Company"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                If left blank, we'll use your company name or create one for you
+                Leave blank and we'll use your company name or create one for you
               </p>
             </div>
-            <Button 
-              className="w-full" 
+            <Button
+              className="h-9 w-full rounded-lg text-xs"
               onClick={createTeam}
               disabled={creatingTeam}
             >
               {creatingTeam ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating Team...
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  Creating team
                 </>
               ) : (
                 <>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Create Team
+                  <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                  Create team
                 </>
               )}
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </Panel>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <LoungePageHeader
-        title="Team Management"
-        description={isOwner 
-          ? 'Manage your team members, roles, and permissions'
-          : 'View your team members and their roles'
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Client portal"
+        title="Team"
+        description={isOwner
+          ? 'Manage your team members, roles and permissions'
+          : 'Your team members and their roles'
         }
-        icon={UsersIcon}
       />
 
+      <div className="mt-5 space-y-6">
       {isOwner ? (
         <Tabs defaultValue="members" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
-            <TabsTrigger value="members" className="gap-2">
-              <Users className="h-4 w-4" />
+          <TabsList className="h-9 w-full max-w-md justify-start gap-1 rounded-none border-b border-border/60 bg-transparent p-0">
+            <TabsTrigger value="members" className="rounded-none border-b-2 border-transparent px-3 text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
               Members
             </TabsTrigger>
-            <TabsTrigger value="roles" className="gap-2">
-              <Shield className="h-4 w-4" />
-              Roles & Permissions
+            <TabsTrigger value="roles" className="rounded-none border-b-2 border-transparent px-3 text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+              Roles and permissions
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="members" className="space-y-6 mt-6">
-      {/* Team Code Card (Owner Only) */}
+          <TabsContent value="members" className="mt-6 space-y-4">
+      {/* Add members (owner only) */}
       {isOwner && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5 text-primary" />
-              Add Team Members
-            </CardTitle>
-            <CardDescription>
-              Share your team code or create accounts directly for your team
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Panel>
+          <PanelHeader label="Add team members" />
+          <div className="p-4">
             <Tabs defaultValue="code" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="code">Share Code</TabsTrigger>
-                <TabsTrigger value="create">Create Account</TabsTrigger>
+              <TabsList className="grid h-9 w-full max-w-xs grid-cols-2 rounded-lg">
+                <TabsTrigger value="code" className="rounded-md text-xs">Share code</TabsTrigger>
+                <TabsTrigger value="create" className="rounded-md text-xs">Create account</TabsTrigger>
               </TabsList>
               <TabsContent value="code" className="space-y-3 pt-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex-1 relative">
+                  <div className="relative flex-1">
                     <Input
                       value={team.team_code}
                       readOnly
-                      className="font-mono text-lg tracking-widest pr-12"
+                      className={cn(FIELD, 'pr-12 font-mono text-[15px] tracking-widest')}
                     />
                     <Button
                       variant="ghost"
                       size="sm"
+                      aria-label="Copy team code"
                       className="absolute right-1 top-1/2 -translate-y-1/2"
                       onClick={copyTeamCode}
                     >
@@ -525,176 +512,132 @@ export default function LoungeTeam() {
                     </Button>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Team members can use this code when signing up to automatically join your team.
+                <p className="text-[13px] text-muted-foreground">
+                  Team members can use this code when signing up to join your team automatically.
                 </p>
               </TabsContent>
               <TabsContent value="create" className="space-y-3 pt-4">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-[13px] text-muted-foreground">
                   Create login credentials for a new team member directly.
                 </p>
-                <Button onClick={() => setShowCreateDialog(true)}>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Create Team Member Account
+                <Button className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setShowCreateDialog(true)}>
+                  <UserPlus className="h-3.5 w-3.5" />
+                  Create member account
                 </Button>
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
+          </div>
+        </Panel>
       )}
 
-      {/* Team Members */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Team Members
-              </CardTitle>
-              <CardDescription>
-                {members.length} member{members.length !== 1 ? 's' : ''} in your team
-              </CardDescription>
-            </div>
-            {/* Team avatar stack */}
-            <div className="flex -space-x-3">
-              {members.slice(0, 5).map((member) => (
-                <Avatar 
-                  key={member.id} 
-                  className="border-2 border-background h-10 w-10"
-                >
-                  <AvatarImage src={member.profile?.avatar_url || ''} />
-                  <AvatarFallback className="text-xs">
-                    {getInitials(member.display_name || member.profile?.full_name)}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {members.length > 5 && (
-                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-background">
-                  +{members.length - 5}
-                </div>
-              )}
-            </div>
+      {/* Team members */}
+      <Panel>
+        <PanelHeader label={`${members.length} ${members.length !== 1 ? 'members' : 'member'}`}>
+          <div className="flex -space-x-2">
+            {members.slice(0, 5).map((member) => (
+              <AvatarID
+                key={member.id}
+                name={member.display_name || member.profile?.full_name}
+                email={member.profile?.email}
+                src={member.profile?.avatar_url}
+                size="md"
+                className="ring-2 ring-card"
+              />
+            ))}
+            {members.length > 5 && (
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground/[0.06] font-mono text-[10px] tabular-nums ring-2 ring-card">
+                +{members.length - 5}
+              </span>
+            )}
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <AnimatePresence>
-            {members.map((member, index) => {
-              const isSelf = member.user_id === user?.id;
-              const isPrimaryOwner = member.user_id === team.primary_account_id;
-              
-              return (
-                <motion.div
-                  key={member.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={member.profile?.avatar_url || ''} />
-                        <AvatarFallback>
-                          {getInitials(member.display_name || member.profile?.full_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {isPrimaryOwner && (
-                        <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                          <Crown className="h-3 w-3 text-primary-foreground" />
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-medium flex items-center gap-2">
-                        {member.display_name || member.profile?.full_name || 'Unknown'}
-                        {isSelf && (
-                          <Badge variant="secondary" className="text-xs">You</Badge>
-                        )}
-                      </p>
-                      <p className="text-sm text-muted-foreground flex items-center gap-2">
-                        <Mail className="h-3 w-3" />
-                        {member.profile?.email}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {/* 2FA Status */}
-                    {member.profile?.two_factor_enabled ? (
-                      <Badge variant="outline" className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30">
-                        <Shield className="h-3 w-3 mr-1" />
-                        2FA
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30">
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                        No 2FA
-                      </Badge>
-                    )}
-                    
-                    {/* Role Badge */}
-                    <Badge 
-                      variant="outline" 
-                      className={roleColors[member.member_role] || roleColors.member}
-                    >
-                      {member.member_role}
-                    </Badge>
-                    
-                    {/* Actions (Owner Only, can't edit self or primary owner) */}
-                    {isOwner && !isSelf && !isPrimaryOwner && (
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedMember(member);
-                            setShowMemberSettings(true);
-                          }}
-                          title="Full settings"
-                        >
-                          <Settings className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setMemberToRemove(member);
-                            setShowRemoveDialog(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </CardContent>
-      </Card>
+        </PanelHeader>
+        <div>
+          {members.map((member) => {
+            const isSelf = member.user_id === user?.id;
+            const isPrimaryOwner = member.user_id === team.primary_account_id;
 
-      {/* Role Descriptions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Role Permissions</CardTitle>
-        </CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-4">
-          {Object.entries(roleDescriptions).map(([role, description]) => (
-            <div key={role} className="p-3 rounded-lg border">
-              <Badge 
-                variant="outline" 
-                className={`mb-2 ${roleColors[role]}`}
+            return (
+              <div
+                key={member.id}
+                className="flex flex-col justify-between gap-3 border-t border-border/60 px-4 py-3 transition-colors duration-150 first:border-t-0 hover:bg-foreground/[0.02] sm:flex-row sm:items-center"
               >
-                {role}
-              </Badge>
-              <p className="text-sm text-muted-foreground">{description}</p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <AvatarID
+                    name={member.display_name || member.profile?.full_name}
+                    email={member.profile?.email}
+                    src={member.profile?.avatar_url}
+                    size="lg"
+                  />
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-2 text-[13px] font-[550] text-foreground">
+                      <span className="truncate">{member.display_name || member.profile?.full_name || 'Unknown'}</span>
+                      {isPrimaryOwner && <Crown aria-label="Primary account holder" className="h-3 w-3 shrink-0 text-muted-foreground" />}
+                      {isSelf && <span className="shrink-0 rounded-full border border-border/60 px-1.5 text-[10px] text-muted-foreground">You</span>}
+                    </p>
+                    <p className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+                      <Mail className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{member.profile?.email}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* 2FA status */}
+                  {member.profile?.two_factor_enabled ? (
+                    <StatusBadge tone="ok" label="2FA on" />
+                  ) : (
+                    <StatusBadge tone="attend" label="No 2FA" />
+                  )}
+
+                  {/* Role */}
+                  <RoleChip role={member.member_role} />
+
+                  {/* Actions (owner only; can't edit self or primary owner) */}
+                  {isOwner && !isSelf && !isPrimaryOwner && (
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedMember(member);
+                          setShowMemberSettings(true);
+                        }}
+                        title="Member settings"
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label="Remove member"
+                        onClick={() => {
+                          setMemberToRemove(member);
+                          setShowRemoveDialog(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Panel>
+
+      {/* Role permissions */}
+      <Panel>
+        <PanelHeader label="Role permissions" />
+        <div>
+          {Object.entries(roleDescriptions).map(([role, description]) => (
+            <div key={role} className="flex items-center gap-4 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+              <span className="w-24 shrink-0"><RoleChip role={role} /></span>
+              <p className="text-[13px] text-muted-foreground">{description}</p>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
           </TabsContent>
           <TabsContent value="roles" className="mt-6">
@@ -709,293 +652,270 @@ export default function LoungeTeam() {
 
       {/* Non-owner members list (shown outside tabs when not owner) */}
       {!isOwner && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Team Members
-                </CardTitle>
-                <CardDescription>
-                  {members.length} member{members.length !== 1 ? 's' : ''} in your team
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <Panel>
+          <PanelHeader label={`${members.length} ${members.length !== 1 ? 'members' : 'member'}`} />
+          <div>
             {members.map((member) => {
               const isSelf = member.user_id === user?.id;
               const isPrimaryOwner = member.user_id === team.primary_account_id;
               return (
-                <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={member.profile?.avatar_url || ''} />
-                      <AvatarFallback>{getInitials(member.display_name || member.profile?.full_name)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium flex items-center gap-2">
-                        {member.display_name || member.profile?.full_name || 'Unknown'}
-                        {isSelf && <Badge variant="secondary" className="text-xs">You</Badge>}
+                <div key={member.id} className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-3 first:border-t-0">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <AvatarID
+                      name={member.display_name || member.profile?.full_name}
+                      email={member.profile?.email}
+                      src={member.profile?.avatar_url}
+                      size="lg"
+                    />
+                    <div className="min-w-0">
+                      <p className="flex items-center gap-2 text-[13px] font-[550] text-foreground">
+                        <span className="truncate">{member.display_name || member.profile?.full_name || 'Unknown'}</span>
+                        {isPrimaryOwner && <Crown aria-label="Primary account holder" className="h-3 w-3 shrink-0 text-muted-foreground" />}
+                        {isSelf && <span className="shrink-0 rounded-full border border-border/60 px-1.5 text-[10px] text-muted-foreground">You</span>}
                       </p>
-                      <p className="text-sm text-muted-foreground">{member.profile?.email}</p>
+                      <p className="truncate text-[11.5px] text-muted-foreground">{member.profile?.email}</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className={roleColors[member.member_role] || roleColors.member}>
-                    {member.member_role}
-                  </Badge>
+                  <RoleChip role={member.member_role} />
                 </div>
               );
             })}
-          </CardContent>
-        </Card>
+          </div>
+        </Panel>
       )}
+      </div>
 
-      {/* Update Role Dialog */}
+      {/* Update role dialog */}
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Member Role</DialogTitle>
+            <DialogTitle>Update member role</DialogTitle>
             <DialogDescription>
               Change the role for {selectedMember?.display_name || selectedMember?.profile?.full_name}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>Role</Label>
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Role</Label>
               <Select value={newRole} onValueChange={setNewRole}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
+                <SelectTrigger className={FIELD}>
+                  <SelectValue placeholder="Choose a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="financial">Financial Access</SelectItem>
-                  <SelectItem value="project">Project Access</SelectItem>
-                  <SelectItem value="member">View Only</SelectItem>
+                  <SelectItem value="financial">Financial access</SelectItem>
+                  <SelectItem value="project">Project access</SelectItem>
+                  <SelectItem value="member">View only</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                {newRole && roleDescriptions[newRole]}
-              </AlertDescription>
-            </Alert>
+            {newRole && (
+              <p className="rounded-lg border border-border/60 bg-foreground/[0.02] p-3 text-[13px] text-muted-foreground">
+                {roleDescriptions[newRole]}
+              </p>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowRoleDialog(false)}>
+            <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowRoleDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={updateMemberRole}>Update Role</Button>
+            <Button className="h-8 rounded-lg px-3 text-xs" onClick={updateMemberRole}>Update role</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Remove Member Dialog */}
+      {/* Remove member dialog */}
       <Dialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove Team Member</DialogTitle>
+            <DialogTitle>Remove team member</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove {memberToRemove?.display_name || memberToRemove?.profile?.full_name} from the team?
+              Remove {memberToRemove?.display_name || memberToRemove?.profile?.full_name} from the team?
             </DialogDescription>
           </DialogHeader>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              This action cannot be undone. The member will lose access to all team resources.
-            </AlertDescription>
-          </Alert>
+          <p className="rounded-lg border border-border/60 bg-foreground/[0.02] p-3 text-[13px] text-muted-foreground">
+            This cannot be undone. The member loses access to all team resources.
+          </p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowRemoveDialog(false)}>
+            <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowRemoveDialog(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={removeMember}>
-              Remove Member
+            <Button variant="destructive" className="h-8 rounded-lg px-3 text-xs" onClick={removeMember}>
+              Remove member
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Create Member Dialog */}
+      {/* Create member dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Create Team Member Account</DialogTitle>
+            <DialogTitle>Create member account</DialogTitle>
             <DialogDescription>
               Create login credentials for a new team member
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="member-name">Full Name *</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="member-name"
-                  placeholder="John Smith"
-                  value={createMemberName}
-                  onChange={(e) => setCreateMemberName(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="member-name" className={FIELD_LABEL}>Full name</Label>
+              <Input
+                id="member-name"
+                placeholder="John Smith"
+                value={createMemberName}
+                onChange={(e) => setCreateMemberName(e.target.value)}
+                className={FIELD}
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="member-email">Email *</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="member-email"
-                  type="email"
-                  placeholder="member@example.com"
-                  value={createMemberEmail}
-                  onChange={(e) => setCreateMemberEmail(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="member-email" className={FIELD_LABEL}>Email</Label>
+              <Input
+                id="member-email"
+                type="email"
+                placeholder="member@example.com"
+                value={createMemberEmail}
+                onChange={(e) => setCreateMemberEmail(e.target.value)}
+                className={FIELD}
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="member-phone">Phone</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="member-phone"
-                  type="tel"
-                  placeholder="+44 7123 456789"
-                  value={createMemberPhone}
-                  onChange={(e) => setCreateMemberPhone(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="member-phone" className={FIELD_LABEL}>Phone</Label>
+              <Input
+                id="member-phone"
+                type="tel"
+                placeholder="+44 7123 456789"
+                value={createMemberPhone}
+                onChange={(e) => setCreateMemberPhone(e.target.value)}
+                className={FIELD}
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="member-password">Password *</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="member-password" className={FIELD_LABEL}>Password</Label>
               <div className="relative">
                 <Input
                   id="member-password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder="At least 6 characters"
                   value={createMemberPassword}
                   onChange={(e) => setCreateMemberPassword(e.target.value)}
+                  className={cn(FIELD, 'pr-10')}
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-150 hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
             </div>
-            <div className="space-y-2">
-              <Label>Role</Label>
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Role</Label>
               <Select value={createMemberRole} onValueChange={setCreateMemberRole}>
-                <SelectTrigger>
+                <SelectTrigger className={FIELD}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="financial">Financial Access</SelectItem>
-                  <SelectItem value="project">Project Access</SelectItem>
-                  <SelectItem value="member">View Only</SelectItem>
+                  <SelectItem value="financial">Financial access</SelectItem>
+                  <SelectItem value="project">Project access</SelectItem>
+                  <SelectItem value="member">View only</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+            <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowCreateDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={createTeamMember} disabled={creatingMember}>
+            <Button className="h-8 rounded-lg px-3 text-xs" onClick={createTeamMember} disabled={creatingMember}>
               {creatingMember ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Creating...
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Creating
                 </span>
               ) : (
-                'Create Account'
+                'Create account'
               )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* ═══ Full Member Settings Dialog ═══ */}
+      {/* Member settings dialog */}
       <Dialog open={showMemberSettings} onOpenChange={v => { if (!v) setShowMemberSettings(false); }}>
-        <DialogContent className="sm:max-w-[560px] max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden sm:max-w-[560px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={selectedMember?.profile?.avatar_url || ''} />
-                <AvatarFallback>{getInitials(selectedMember?.display_name || selectedMember?.profile?.full_name)}</AvatarFallback>
-              </Avatar>
+              <AvatarID
+                name={selectedMember?.display_name || selectedMember?.profile?.full_name}
+                email={selectedMember?.profile?.email}
+                src={selectedMember?.profile?.avatar_url}
+                size="lg"
+              />
               <div>
-                <p className="text-base">{selectedMember?.display_name || selectedMember?.profile?.full_name || 'Member'}</p>
-                <p className="text-xs text-muted-foreground font-normal">{selectedMember?.profile?.email}</p>
+                <p className="text-[15px]">{selectedMember?.display_name || selectedMember?.profile?.full_name || 'Member'}</p>
+                <p className="text-xs font-normal text-muted-foreground">{selectedMember?.profile?.email}</p>
               </div>
             </DialogTitle>
           </DialogHeader>
 
           <Tabs defaultValue="role" className="flex-1 overflow-hidden">
-            <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="role" className="text-xs">Role & Access</TabsTrigger>
-              <TabsTrigger value="channels" className="text-xs">Channels</TabsTrigger>
-              <TabsTrigger value="notifications" className="text-xs">Notifications</TabsTrigger>
+            <TabsList className="grid h-9 w-full grid-cols-3 rounded-lg">
+              <TabsTrigger value="role" className="rounded-md text-xs">Role and access</TabsTrigger>
+              <TabsTrigger value="channels" className="rounded-md text-xs">Channels</TabsTrigger>
+              <TabsTrigger value="notifications" className="rounded-md text-xs">Notifications</TabsTrigger>
             </TabsList>
 
-            <ScrollArea className="h-[400px] mt-4">
-              {/* Role Tab */}
-              <TabsContent value="role" className="space-y-5 px-1 m-0">
+            <ScrollArea className="mt-4 h-[400px]">
+              {/* Role tab */}
+              <TabsContent value="role" className="m-0 space-y-5 px-1">
                 <div className="space-y-3">
-                  <Label className="text-sm font-semibold">Team Role</Label>
+                  <Label className={FIELD_LABEL}>Team role</Label>
                   <Select value={newRole || selectedMember?.member_role || 'member'} onValueChange={setNewRole}>
-                    <SelectTrigger><SelectValue placeholder="Select role" /></SelectTrigger>
+                    <SelectTrigger className={FIELD}><SelectValue placeholder="Choose a role" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="financial">Financial Access</SelectItem>
-                      <SelectItem value="project">Project Access</SelectItem>
-                      <SelectItem value="member">View Only</SelectItem>
+                      <SelectItem value="financial">Financial access</SelectItem>
+                      <SelectItem value="project">Project access</SelectItem>
+                      <SelectItem value="member">View only</SelectItem>
                     </SelectContent>
                   </Select>
                   {(newRole || selectedMember?.member_role) && (
-                    <Alert>
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription className="text-xs">
-                        {roleDescriptions[newRole || selectedMember?.member_role || 'member']}
-                      </AlertDescription>
-                    </Alert>
+                    <p className="rounded-lg border border-border/60 bg-foreground/[0.02] p-3 text-xs text-muted-foreground">
+                      {roleDescriptions[newRole || selectedMember?.member_role || 'member']}
+                    </p>
                   )}
                   <Button
                     size="sm"
+                    className="h-8 rounded-lg px-3 text-xs"
                     onClick={async () => {
                       if (!selectedMember || !newRole) return;
                       const { error } = await supabase.from('team_memberships').update({ member_role: newRole }).eq('id', selectedMember.id);
-                      if (error) toast.error('Failed to update role');
+                      if (error) toast.error('The role did not update. Try again.');
                       else { toast.success('Role updated'); if (team) fetchMembers(team.id); }
                     }}
                     disabled={!newRole || newRole === selectedMember?.member_role}
                   >
-                    Save Role
+                    Save role
                   </Button>
                 </div>
 
                 <Separator />
 
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Security</Label>
-                  <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <Label className={FIELD_LABEL}>Security</Label>
+                  <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
                     <div>
-                      <p className="text-sm">Two-Factor Authentication</p>
+                      <p className="text-sm">Two-factor authentication</p>
                       <p className="text-xs text-muted-foreground">
                         {selectedMember?.profile?.two_factor_enabled ? 'Enabled' : 'Not enabled'}
                       </p>
                     </div>
-                    <Badge variant={selectedMember?.profile?.two_factor_enabled ? 'default' : 'outline'} className={selectedMember?.profile?.two_factor_enabled ? '' : 'text-amber-600'}>
-                      {selectedMember?.profile?.two_factor_enabled ? (
-                        <><Shield className="h-3 w-3 mr-1" /> Active</>
-                      ) : (
-                        <><AlertCircle className="h-3 w-3 mr-1" /> Inactive</>
-                      )}
-                    </Badge>
+                    {selectedMember?.profile?.two_factor_enabled ? (
+                      <StatusBadge tone="ok" label="Active" />
+                    ) : (
+                      <StatusBadge tone="attend" label="Inactive" />
+                    )}
                   </div>
                 </div>
 
@@ -1005,41 +925,41 @@ export default function LoungeTeam() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="w-full"
+                    className="h-8 w-full rounded-lg text-xs"
                     onClick={() => {
                       setShowMemberSettings(false);
                       setMemberToRemove(selectedMember);
                       setShowRemoveDialog(true);
                     }}
                   >
-                    <Trash2 className="h-3.5 w-3.5 mr-2" /> Remove from Team
+                    <Trash2 className="mr-2 h-3.5 w-3.5" /> Remove from team
                   </Button>
                 </div>
               </TabsContent>
 
-              {/* Channels Tab */}
-              <TabsContent value="channels" className="space-y-4 px-1 m-0">
+              {/* Channels tab */}
+              <TabsContent value="channels" className="m-0 space-y-4 px-1">
                 {memberCommsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  <div className="space-y-2 py-2" aria-hidden>
+                    {[1, 2, 3].map(i => (
+                      <span key={i} className="block h-12 animate-pulse rounded-lg bg-foreground/[0.04]" />
+                    ))}
                   </div>
                 ) : (
                   <>
                     <div>
-                      <p className="text-sm font-semibold mb-3">Joined Channels</p>
+                      <p className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Joined channels</p>
                       {memberChannels.length === 0 ? (
-                        <p className="text-xs text-muted-foreground py-4 text-center">Not in any channels yet</p>
+                        <p className="py-4 text-center text-xs text-muted-foreground">Not in any channels yet</p>
                       ) : (
                         <div className="space-y-1.5">
                           {memberChannels.map(mc => {
                             const ch = allChannels.find(c => c.id === mc.channel_id);
                             if (!ch) return null;
                             return (
-                              <div key={mc.channel_id} className="flex items-center justify-between p-2.5 rounded-lg border hover:bg-muted/30 transition-colors">
+                              <div key={mc.channel_id} className="flex items-center justify-between rounded-lg border border-border/60 p-2.5 transition-colors duration-150 hover:bg-foreground/[0.02]">
                                 <div className="flex items-center gap-2.5">
-                                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <Hash className="w-3.5 h-3.5 text-primary" />
-                                  </div>
+                                  <Hash className="h-3.5 w-3.5 text-muted-foreground" />
                                   <div>
                                     <p className="text-sm font-medium">{ch.name}</p>
                                     <p className="text-[10px] text-muted-foreground">{mc.role} · {ch.channel_type}</p>
@@ -1054,7 +974,7 @@ export default function LoungeTeam() {
                                         className="h-7 w-7"
                                         onClick={() => toggleMemberMute(mc.channel_id, mc.is_muted)}
                                       >
-                                        {mc.is_muted ? <VolumeX className="w-3.5 h-3.5 text-muted-foreground" /> : <Volume2 className="w-3.5 h-3.5" />}
+                                        {mc.is_muted ? <VolumeX className="h-3.5 w-3.5 text-muted-foreground" /> : <Volume2 className="h-3.5 w-3.5" />}
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>{mc.is_muted ? 'Unmute' : 'Mute'}</TooltipContent>
@@ -1062,10 +982,11 @@ export default function LoungeTeam() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
+                                    aria-label="Remove from channel"
                                     className="h-7 w-7 text-destructive hover:text-destructive"
                                     onClick={() => removeMemberFromChannel(mc.channel_id)}
                                   >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
                                 </div>
                               </div>
@@ -1078,33 +999,31 @@ export default function LoungeTeam() {
                     <Separator />
 
                     <div>
-                      <p className="text-sm font-semibold mb-3">Available Channels</p>
+                      <p className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Available channels</p>
                       <div className="space-y-1.5">
                         {allChannels
                           .filter(ch => !memberChannels.some(mc => mc.channel_id === ch.id))
                           .map(ch => (
-                            <div key={ch.id} className="flex items-center justify-between p-2.5 rounded-lg border border-dashed hover:bg-muted/30 transition-colors">
+                            <div key={ch.id} className="flex items-center justify-between rounded-lg border border-dashed border-border/60 p-2.5 transition-colors duration-150 hover:bg-foreground/[0.02]">
                               <div className="flex items-center gap-2.5">
-                                <div className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center">
-                                  <Hash className="w-3.5 h-3.5 text-muted-foreground" />
-                                </div>
+                                <Hash className="h-3.5 w-3.5 text-muted-foreground" />
                                 <div>
                                   <p className="text-sm">{ch.name}</p>
                                   <div className="flex items-center gap-2">
                                     <span className="text-[10px] text-muted-foreground">{ch.channel_type}</span>
                                     {ch.join_code && (
-                                      <span className="text-[9px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{ch.join_code}</span>
+                                      <span className="rounded bg-foreground/[0.05] px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground">{ch.join_code}</span>
                                     )}
                                   </div>
                                 </div>
                               </div>
-                              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => addMemberToChannel(ch.id)}>
-                                <UserPlus className="w-3 h-3 mr-1" /> Add
+                              <Button size="sm" variant="outline" className="h-7 rounded-lg text-xs" onClick={() => addMemberToChannel(ch.id)}>
+                                <UserPlus className="mr-1 h-3 w-3" /> Add
                               </Button>
                             </div>
                           ))}
                         {allChannels.filter(ch => !memberChannels.some(mc => mc.channel_id === ch.id)).length === 0 && (
-                          <p className="text-xs text-muted-foreground text-center py-4">Member is in all channels</p>
+                          <p className="py-4 text-center text-xs text-muted-foreground">Member is in all channels</p>
                         )}
                       </div>
                     </div>
@@ -1112,8 +1031,8 @@ export default function LoungeTeam() {
                 )}
               </TabsContent>
 
-              {/* Notifications Tab */}
-              <TabsContent value="notifications" className="space-y-5 px-1 m-0">
+              {/* Notifications tab */}
+              <TabsContent value="notifications" className="m-0 space-y-5 px-1">
                 <p className="text-xs text-muted-foreground">
                   Manage notification preferences for this team member across all their channels.
                 </p>
@@ -1121,14 +1040,14 @@ export default function LoungeTeam() {
                   const ch = allChannels.find(c => c.id === mc.channel_id);
                   if (!ch) return null;
                   return (
-                    <div key={mc.channel_id} className="flex items-center justify-between p-3 rounded-lg border">
+                    <div key={mc.channel_id} className="flex items-center justify-between rounded-lg border border-border/60 p-3">
                       <div className="flex items-center gap-2">
-                        <Hash className="w-3.5 h-3.5 text-primary" />
+                        <Hash className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className="text-sm font-medium">{ch.name}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5">
-                          {mc.is_muted ? <BellOff className="w-3.5 h-3.5 text-muted-foreground" /> : <Bell className="w-3.5 h-3.5" />}
+                          {mc.is_muted ? <BellOff className="h-3.5 w-3.5 text-muted-foreground" /> : <Bell className="h-3.5 w-3.5" />}
                           <Switch
                             checked={!mc.is_muted}
                             onCheckedChange={() => toggleMemberMute(mc.channel_id, mc.is_muted)}
@@ -1139,14 +1058,14 @@ export default function LoungeTeam() {
                   );
                 })}
                 {memberChannels.length === 0 && (
-                  <p className="text-xs text-muted-foreground text-center py-8">No channels to configure</p>
+                  <p className="py-8 text-center text-xs text-muted-foreground">No channels to configure</p>
                 )}
               </TabsContent>
             </ScrollArea>
           </Tabs>
 
-          <DialogFooter className="pt-2 border-t border-border mt-2">
-            <Button variant="outline" size="sm" onClick={() => setShowMemberSettings(false)}>Close</Button>
+          <DialogFooter className="mt-2 border-t border-border/60 pt-2">
+            <Button variant="outline" size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowMemberSettings(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FileText, Plus, Upload, X, Clock, Loader2, CheckCircle, FileImage, Link as LinkIcon, ExternalLink, Calendar as CalendarIcon, AlertTriangle, Flag } from 'lucide-react';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { FileText, Plus, Upload, X, Loader2, FileImage, Link as LinkIcon, ExternalLink, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +13,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import {
+  PageHeader, Panel, PanelHeader, StatusBadge, EmptyState, SkeletonLedger,
+  FIELD, FIELD_LABEL,
+} from '@/components/platform';
 
 interface ContentRequest {
   id: string;
@@ -41,24 +38,18 @@ interface ContentRequest {
 }
 
 const REQUEST_TYPES = [
-  { value: 'blog', label: 'Blog Post', icon: '📝' },
-  { value: 'social_post', label: 'Social Post', icon: '📱' },
-  { value: 'ad_copy', label: 'Ad Copy', icon: '📢' },
-  { value: 'website_section', label: 'Website Section', icon: '🌐' },
+  { value: 'blog', label: 'Blog post' },
+  { value: 'social_post', label: 'Social post' },
+  { value: 'ad_copy', label: 'Ad copy' },
+  { value: 'website_section', label: 'Website section' },
 ];
 
-const STATUS_CONFIG = {
-  pending: { label: 'Pending', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: Clock },
-  in_progress: { label: 'In Progress', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: Loader2 },
-  delivered: { label: 'Delivered', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: CheckCircle },
-};
-
-const PRIORITY_CONFIG = {
-  low: { label: 'Low', color: 'bg-slate-500/10 text-slate-600 border-slate-500/20' },
-  normal: { label: 'Normal', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
-  high: { label: 'High', color: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
-  urgent: { label: 'Urgent', color: 'bg-destructive/10 text-destructive border-destructive/20' },
-};
+const STATUS_TABS = [
+  { key: 'all', label: 'All' },
+  { key: 'pending', label: 'Pending' },
+  { key: 'in_progress', label: 'In progress' },
+  { key: 'delivered', label: 'Delivered' },
+] as const;
 
 export default function LoungeContentRequests() {
   const { user } = useAuth();
@@ -68,6 +59,7 @@ export default function LoungeContentRequests() {
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [tab, setTab] = useState<(typeof STATUS_TABS)[number]['key']>('all');
   const [formData, setFormData] = useState({
     request_type: '' as string,
     title: '',
@@ -95,7 +87,7 @@ export default function LoungeContentRequests() {
       setRequests((data as ContentRequest[]) || []);
     } catch (error) {
       console.error('Error fetching requests:', error);
-      toast.error('Failed to load content requests');
+      toast.error('Your content requests did not load. Refresh to try again.');
     } finally {
       setLoading(false);
     }
@@ -135,11 +127,11 @@ export default function LoungeContentRequests() {
 
   const uploadFiles = async (): Promise<string[]> => {
     const uploadedUrls: string[] = [];
-    
+
     for (const file of selectedFiles) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
+
       const { error: uploadError } = await supabase.storage
         .from('content-requests')
         .upload(fileName, file);
@@ -155,20 +147,20 @@ export default function LoungeContentRequests() {
 
       uploadedUrls.push(publicUrl);
     }
-    
+
     return uploadedUrls;
   };
 
   const handleSubmit = async () => {
     if (!formData.request_type || !formData.title.trim()) {
-      toast.error('Please select a request type and enter a title');
+      toast.error('Choose a content type and add a title');
       return;
     }
 
     setSubmitting(true);
     try {
       let fileUrls: string[] = [];
-      
+
       if (selectedFiles.length > 0) {
         setUploading(true);
         fileUrls = await uploadFiles();
@@ -190,14 +182,14 @@ export default function LoungeContentRequests() {
 
       if (error) throw error;
 
-      toast.success('Content request submitted successfully!');
+      toast.success('Content request sent to the studio');
       setDialogOpen(false);
       setFormData({ request_type: '', title: '', description: '', reference_urls: [''], scheduled_date: null, priority: 'normal' });
       setSelectedFiles([]);
       fetchRequests();
     } catch (error) {
       console.error('Error submitting request:', error);
-      toast.error('Failed to submit request');
+      toast.error('Your request did not send. Try again.');
     } finally {
       setSubmitting(false);
       setUploading(false);
@@ -214,401 +206,360 @@ export default function LoungeContentRequests() {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-4 w-96" />
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8" aria-hidden>
+        <span className="block h-5 w-44 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-3.5 w-72 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-6 rounded-[10px] border border-border/60">
+          <SkeletonLedger rows={5} />
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-32" />
-          ))}
-        </div>
-        <Skeleton className="h-64" />
       </div>
     );
   }
 
+  const visible = tab === 'all' ? requests : getRequestsByStatus(tab);
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      <LoungePageHeader
-        title="Content Requests"
-        description="Request new content from our team"
-        icon={FileText}
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Client portal"
+        title="Content requests"
+        description="Ask the studio for new content and follow each piece to delivery"
         actions={
-          <Button className="gap-2" onClick={() => setDialogOpen(true)}>
-            <Plus className="w-4 h-4" />
-            Request Content
+          <Button className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setDialogOpen(true)}>
+            <Plus className="h-3.5 w-3.5" />
+            New request
           </Button>
         }
       />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>New Content Request</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label>Content Type *</Label>
+        <DialogContent className="max-h-[90vh] w-[95vw] max-w-lg overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>New content request</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Content type</Label>
+              <Select
+                value={formData.request_type}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, request_type: value }))}
+              >
+                <SelectTrigger className={FIELD}>
+                  <SelectValue placeholder="Choose a content type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {REQUEST_TYPES.map(type => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Title</Label>
+              <Input
+                className={FIELD}
+                placeholder="A short title for your request"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className={FIELD_LABEL}>Scheduled date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn('w-full justify-start text-left font-normal', FIELD, !formData.scheduled_date && 'text-muted-foreground')}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.scheduled_date ? format(formData.scheduled_date, 'PPP') : 'Pick a date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.scheduled_date || undefined}
+                      onSelect={(date) => setFormData(prev => ({ ...prev, scheduled_date: date || null }))}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className={FIELD_LABEL}>Priority</Label>
                 <Select
-                  value={formData.request_type}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, request_type: value }))}
+                  value={formData.priority}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value }))}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select content type" />
+                  <SelectTrigger className={FIELD}>
+                    <SelectValue placeholder="Choose a priority" />
                   </SelectTrigger>
                   <SelectContent>
-                    {REQUEST_TYPES.map(type => (
-                      <SelectItem key={type.value} value={type.value}>
-                        <span className="flex items-center gap-2">
-                          <span>{type.icon}</span>
-                          <span>{type.label}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+            </div>
 
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Description</Label>
+              <Textarea
+                placeholder="Describe what you need in detail"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                className="min-h-[100px] rounded-xl border-border/60 bg-foreground/[0.03] text-[14px] shadow-none focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Reference URLs</Label>
               <div className="space-y-2">
-                <Label>Title *</Label>
-                <Input
-                  placeholder="Brief title for your request"
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                />
-              </div>
-
-              {/* Date and Priority */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Scheduled Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !formData.scheduled_date && "text-muted-foreground")}>
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.scheduled_date ? format(formData.scheduled_date, 'PPP') : 'Pick a date'}
+                {formData.reference_urls.map((url, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      className={FIELD}
+                      placeholder="https://example.com/inspiration"
+                      value={url}
+                      onChange={(e) => updateUrl(index, e.target.value)}
+                    />
+                    {formData.reference_urls.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeUrl(index)}
+                      >
+                        <X className="h-4 w-4" />
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={formData.scheduled_date || undefined}
-                        onSelect={(date) => setFormData(prev => ({ ...prev, scheduled_date: date || null }))}
-                        initialFocus
-                        className="p-3 pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Priority</Label>
-                  <Select
-                    value={formData.priority}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">🟢 Low</SelectItem>
-                      <SelectItem value="normal">🔵 Normal</SelectItem>
-                      <SelectItem value="high">🟠 High</SelectItem>
-                      <SelectItem value="urgent">🔴 Urgent</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea
-                  placeholder="Describe what you need in detail..."
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="min-h-[100px]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Reference URLs</Label>
-                <div className="space-y-2">
-                  {formData.reference_urls.map((url, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        placeholder="https://example.com/inspiration"
-                        value={url}
-                        onChange={(e) => updateUrl(index, e.target.value)}
-                      />
-                      {formData.reference_urls.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeUrl(index)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addUrlField}
-                    className="gap-2"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Add URL
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Reference Files</Label>
-                <div
-                  className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-all"
-                  onClick={() => document.getElementById('reference-upload')?.click()}
-                >
-                  <input
-                    id="reference-upload"
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileChange}
-                    accept="image/*,.pdf,.doc,.docx"
-                  />
-                  <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Click to upload reference files
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Images, PDFs, Documents
-                  </p>
-                </div>
-                {selectedFiles.length > 0 && (
-                  <div className="space-y-2 mt-2">
-                    {selectedFiles.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-lg">
-                        <div className="flex items-center gap-2 truncate">
-                          <FileImage className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm truncate">{file.name}</span>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => removeFile(index)}
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    ))}
+                    )}
                   </div>
-                )}
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSubmit} disabled={submitting}>
-                  {uploading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Uploading...
-                    </>
-                  ) : submitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    'Submit Request'
-                  )}
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addUrlField}
+                  className="h-8 gap-1.5 rounded-lg px-3 text-xs"
+                >
+                  <Plus className="h-3 w-3" />
+                  Add URL
                 </Button>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
 
-      {/* Status Summary */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {Object.entries(STATUS_CONFIG).map(([status, config]) => {
-          const StatusIcon = config.icon;
-          const count = getRequestsByStatus(status).length;
-          return (
-            <Card key={status}>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={cn("p-2 rounded-lg", config.color)}>
-                      <StatusIcon className={cn("w-4 h-4", status === 'in_progress' && 'animate-spin')} />
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Reference files</Label>
+              <div
+                className="cursor-pointer rounded-[10px] border border-dashed border-border p-4 text-center transition-colors duration-150 hover:border-primary/50 hover:bg-foreground/[0.02]"
+                onClick={() => document.getElementById('reference-upload')?.click()}
+              >
+                <input
+                  id="reference-upload"
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileChange}
+                  accept="image/*,.pdf,.doc,.docx"
+                />
+                <Upload className="mx-auto mb-2 h-5 w-5 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Click to upload reference files
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Images, PDFs and documents
+                </p>
+              </div>
+              {selectedFiles.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between rounded-lg border border-border/60 bg-foreground/[0.02] p-2">
+                      <div className="flex items-center gap-2 truncate">
+                        <FileImage className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                        <span className="truncate text-sm">{file.name}</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => removeFile(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold">{count}</p>
-                      <p className="text-sm text-muted-foreground">{config.label}</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => setDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button className="h-8 rounded-lg px-3 text-xs" onClick={handleSubmit} disabled={submitting}>
+                {uploading ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    Uploading
+                  </>
+                ) : submitting ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    Sending
+                  </>
+                ) : (
+                  'Send request'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Status filter */}
+      <div className="mt-5 flex items-center gap-1 border-b border-border/60">
+        {STATUS_TABS.map(t => {
+          const count = t.key === 'all' ? requests.length : getRequestsByStatus(t.key).length;
+          return (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={cn(
+                'relative -mb-px border-b-2 px-3 py-2 text-[13px] transition-colors duration-150',
+                tab === t.key
+                  ? 'border-primary font-medium text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {t.label}
+              <span className="ml-1.5 font-mono text-[10.5px] tabular-nums text-muted-foreground">{count}</span>
+            </button>
           );
         })}
       </div>
 
-      {/* Requests List */}
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">All ({requests.length})</TabsTrigger>
-          <TabsTrigger value="pending">Pending ({getRequestsByStatus('pending').length})</TabsTrigger>
-          <TabsTrigger value="in_progress">In Progress ({getRequestsByStatus('in_progress').length})</TabsTrigger>
-          <TabsTrigger value="delivered">Delivered ({getRequestsByStatus('delivered').length})</TabsTrigger>
-        </TabsList>
+      <div className="pt-5">
+        {visible.length === 0 ? (
+          <Panel>
+            <EmptyState
+              title={tab === 'all' ? 'No requests yet' : 'Nothing here'}
+              body={
+                tab === 'all'
+                  ? 'Ask the studio for a blog post, social content, ad copy or a new website section.'
+                  : 'No requests match this filter right now.'
+              }
+              action={tab === 'all' ? { label: 'New request', onClick: () => setDialogOpen(true) } : undefined}
+            />
+          </Panel>
+        ) : (
+          <Panel>
+            <PanelHeader label={`${visible.length} ${visible.length === 1 ? 'request' : 'requests'}`} />
+            <div>
+              {visible.map((request) => {
+                const typeInfo = getTypeInfo(request.request_type);
+                return (
+                  <div key={request.id} className="border-t border-border/60 px-4 py-3 first:border-t-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-[550] text-foreground">{request.title}</p>
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11.5px] text-muted-foreground">
+                          <span>{typeInfo.label}</span>
+                          <span aria-hidden>·</span>
+                          <span className="font-mono text-[10.5px] tabular-nums">
+                            {format(new Date(request.created_at), 'd MMM yyyy')}
+                          </span>
+                        </p>
+                      </div>
+                      <StatusBadge status={request.status} className="shrink-0" />
+                    </div>
 
-        {['all', 'pending', 'in_progress', 'delivered'].map(tab => (
-          <TabsContent key={tab} value={tab} className="space-y-4">
-            {(tab === 'all' ? requests : getRequestsByStatus(tab)).length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <FileText className="w-12 h-12 text-muted-foreground/50 mb-4" />
-                  <h3 className="font-medium text-lg mb-1">No requests found</h3>
-                  <p className="text-muted-foreground text-sm">
-                    {tab === 'all' ? 'Submit your first content request to get started' : `No ${STATUS_CONFIG[tab as keyof typeof STATUS_CONFIG]?.label.toLowerCase()} requests`}
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <ScrollArea className="h-[500px]">
-                <div className="space-y-4 pr-4">
-                  {(tab === 'all' ? requests : getRequestsByStatus(tab)).map((request, index) => {
-                    const typeInfo = getTypeInfo(request.request_type);
-                    const statusConfig = STATUS_CONFIG[request.status];
-                    const StatusIcon = statusConfig.icon;
+                    {request.description && (
+                      <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{request.description}</p>
+                    )}
 
-                    return (
-                      <motion.div
-                        key={request.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <Card>
-                          <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex items-start gap-3">
-                                <span className="text-2xl">{typeInfo.icon}</span>
-                                <div>
-                                  <CardTitle className="text-lg">{request.title}</CardTitle>
-                                  <CardDescription className="flex items-center gap-2 mt-1">
-                                    <Badge variant="outline" className="text-xs">
-                                      {typeInfo.label}
-                                    </Badge>
-                                    <span className="text-xs">
-                                      {format(new Date(request.created_at), 'MMM d, yyyy')}
-                                    </span>
-                                  </CardDescription>
-                                </div>
-                              </div>
-                              <Badge className={cn("gap-1", statusConfig.color)}>
-                                <StatusIcon className={cn("w-3 h-3", request.status === 'in_progress' && 'animate-spin')} />
-                                {statusConfig.label}
-                              </Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="space-y-3">
-                            {request.description && (
-                              <p className="text-sm text-muted-foreground">{request.description}</p>
-                            )}
+                    {request.reference_urls && request.reference_urls.length > 0 && (
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">References</span>
+                        {request.reference_urls.map((url, i) => (
+                          <a
+                            key={i}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-muted-foreground underline decoration-border underline-offset-2 transition-colors duration-150 hover:text-foreground"
+                          >
+                            <LinkIcon className="h-3 w-3" />
+                            Link {i + 1}
+                            <ExternalLink className="h-2.5 w-2.5" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
 
-                            {request.reference_urls && request.reference_urls.length > 0 && (
-                              <div className="space-y-1">
-                                <p className="text-xs font-medium text-muted-foreground">References:</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {request.reference_urls.map((url, i) => (
-                                    <a
-                                      key={i}
-                                      href={url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                                    >
-                                      <LinkIcon className="w-3 h-3" />
-                                      Link {i + 1}
-                                      <ExternalLink className="w-2.5 h-2.5" />
-                                    </a>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                    {request.reference_files && request.reference_files.length > 0 && (
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Attached</span>
+                        {request.reference_files.map((file, i) => (
+                          <a
+                            key={i}
+                            href={file}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-muted-foreground underline decoration-border underline-offset-2 transition-colors duration-150 hover:text-foreground"
+                          >
+                            <FileImage className="h-3 w-3" />
+                            File {i + 1}
+                            <ExternalLink className="h-2.5 w-2.5" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
 
-                            {request.reference_files && request.reference_files.length > 0 && (
-                              <div className="space-y-1">
-                                <p className="text-xs font-medium text-muted-foreground">Attached Files:</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {request.reference_files.map((file, i) => (
-                                    <a
-                                      key={i}
-                                      href={file}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                                    >
-                                      <FileImage className="w-3 h-3" />
-                                      File {i + 1}
-                                      <ExternalLink className="w-2.5 h-2.5" />
-                                    </a>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                    {request.assigned_to && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Assigned to <span className="font-medium text-foreground">{request.assigned_to}</span>
+                      </p>
+                    )}
 
-                            {request.assigned_to && (
-                              <p className="text-xs text-muted-foreground">
-                                Assigned to: <span className="font-medium">{request.assigned_to}</span>
-                              </p>
-                            )}
-
-                            {request.status === 'delivered' && (
-                              <div className="mt-4 p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
-                                <p className="text-sm font-medium text-emerald-600 mb-2">✅ Content Delivered</p>
-                                {request.delivered_content && (
-                                  <p className="text-sm text-muted-foreground">{request.delivered_content}</p>
-                                )}
-                                {request.delivered_files && request.delivered_files.length > 0 && (
-                                  <div className="flex flex-wrap gap-2 mt-2">
-                                    {request.delivered_files.map((file, i) => (
-                                      <a
-                                        key={i}
-                                        href={file}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline"
-                                      >
-                                        <FileImage className="w-3 h-3" />
-                                        Download {i + 1}
-                                        <ExternalLink className="w-2.5 h-2.5" />
-                                      </a>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+                    {request.status === 'delivered' && (
+                      <div className="mt-3 rounded-lg border border-border/60 bg-foreground/[0.02] p-3">
+                        <StatusBadge tone="ok" label="Content delivered" />
+                        {request.delivered_content && (
+                          <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{request.delivered_content}</p>
+                        )}
+                        {request.delivered_files && request.delivered_files.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-3">
+                            {request.delivered_files.map((file, i) => (
+                              <a
+                                key={i}
+                                href={file}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-muted-foreground underline decoration-border underline-offset-2 transition-colors duration-150 hover:text-foreground"
+                              >
+                                <FileImage className="h-3 w-3" />
+                                Download {i + 1}
+                                <ExternalLink className="h-2.5 w-2.5" />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </Panel>
+        )}
+      </div>
     </div>
   );
 }

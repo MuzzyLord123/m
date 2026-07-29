@@ -1,23 +1,16 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Ticket,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
   ChevronRight,
-  Sparkles,
   MessageSquare,
   Search,
-  Filter,
   X,
   Plus,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -38,7 +31,11 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
+import {
+  PageHeader, Panel, PanelHeader, StatusBadge, StatusDot, statusTone, SkeletonLedger,
+  FIELD, FIELD_LABEL,
+  type Tone,
+} from '@/components/platform';
 
 interface SupportTicket {
   id: string;
@@ -52,18 +49,11 @@ interface SupportTicket {
   ai_conversation_id: string | null;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; icon: typeof Clock; color: string; bg: string }> = {
-  open: { label: 'Open', icon: AlertCircle, color: 'text-amber-500', bg: 'bg-amber-500/10 border-amber-500/20' },
-  in_progress: { label: 'In Progress', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10 border-blue-500/20' },
-  resolved: { label: 'Resolved', icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-  closed: { label: 'Closed', icon: CheckCircle2, color: 'text-muted-foreground', bg: 'bg-muted border-border' },
-};
-
-const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: 'Low', color: 'bg-muted text-muted-foreground' },
-  standard: { label: 'Standard', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
-  high: { label: 'High', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-  urgent: { label: 'Urgent', color: 'bg-red-500/10 text-red-600 dark:text-red-400' },
+const PRIORITY_TONE: Record<string, { tone: Tone; label: string }> = {
+  low: { tone: 'neutral', label: 'Low' },
+  standard: { tone: 'neutral', label: 'Standard' },
+  high: { tone: 'attend', label: 'High' },
+  urgent: { tone: 'risk', label: 'Urgent' },
 };
 
 export default function LoungeTickets() {
@@ -105,12 +95,7 @@ export default function LoungeTickets() {
     return matchesSearch && matchesStatus;
   });
 
-  const stats = {
-    total: tickets.length,
-    open: tickets.filter(t => t.status === 'open').length,
-    in_progress: tickets.filter(t => t.status === 'in_progress').length,
-    resolved: tickets.filter(t => t.status === 'resolved' || t.status === 'closed').length,
-  };
+  const openCount = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
 
   const openDetail = (ticket: SupportTicket) => {
     setSelectedTicket(ticket);
@@ -123,7 +108,7 @@ export default function LoungeTickets() {
     try {
       // Get admin for messaging
       const { data: adminId } = await supabase.rpc('get_primary_admin_id');
-      
+
       // Send message to support
       if (adminId) {
         await supabase.from('messages').insert({
@@ -135,7 +120,7 @@ export default function LoungeTickets() {
 
       // Generate reference
       const { data: refId } = await supabase.rpc('generate_ticket_reference');
-      
+
       const { data: ticket, error } = await supabase.from('support_tickets').insert({
         user_id: user.id,
         reference_id: refId || `REQ-${Date.now().toString().slice(-5)}`,
@@ -150,15 +135,15 @@ export default function LoungeTickets() {
       if (ticket) {
         setTickets(prev => [ticket as SupportTicket, ...prev]);
       }
-      
+
       setNewSubject('');
       setNewMessage('');
       setNewPriority('standard');
       setCreateOpen(false);
-      toast.success('Ticket created successfully');
+      toast.success('Ticket created');
     } catch (err) {
       console.error('Create ticket error:', err);
-      toast.error('Failed to create ticket');
+      toast.error('Your ticket was not created. Try again.');
     } finally {
       setCreating(false);
     }
@@ -166,274 +151,185 @@ export default function LoungeTickets() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <motion.div
-          className="flex flex-col items-center gap-4"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Ticket className="w-6 h-6 text-primary animate-pulse" />
-          </div>
-          <p className="text-sm text-muted-foreground">Loading tickets...</p>
-        </motion.div>
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8" aria-hidden>
+        <span className="block h-5 w-32 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-3.5 w-56 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-6 rounded-[10px] border border-border/60">
+          <SkeletonLedger rows={5} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8">
-      <LoungePageHeader
-        title="Support Tickets"
-        description="Track and manage your support requests"
-        icon={Ticket}
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Client portal"
+        title="Support tickets"
+        description="Track your support requests and their progress"
         actions={
-          <Button onClick={() => setCreateOpen(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Create Ticket</span>
+          <Button onClick={() => setCreateOpen(true)} className="h-8 gap-1.5 rounded-lg px-3 text-xs">
+            <Plus className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">New ticket</span>
           </Button>
         }
       />
 
-      {/* Stats Cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 sm:grid-cols-4 gap-3"
-      >
-        {[
-          { label: 'Total', value: stats.total, icon: Ticket, color: 'text-foreground' },
-          { label: 'Open', value: stats.open, icon: AlertCircle, color: 'text-amber-500' },
-          { label: 'In Progress', value: stats.in_progress, icon: Clock, color: 'text-blue-500' },
-          { label: 'Resolved', value: stats.resolved, icon: CheckCircle2, color: 'text-emerald-500' },
-        ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.05 }}
-            className="rounded-2xl border border-border/50 bg-card p-4 space-y-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                {stat.label}
-              </span>
-              <stat.icon className={cn('w-4 h-4', stat.color)} />
-            </div>
-            <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Search & Filter Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="flex flex-col sm:flex-row gap-3"
-      >
+      {/* Search and filter */}
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by reference ID, subject, or message..."
+            placeholder="Search by reference, subject or message"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="pl-10 h-11 rounded-xl border-border/50"
+            className={cn(FIELD, 'pl-10')}
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-150 hover:text-foreground"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-44 h-11 rounded-xl border-border/50">
-            <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
+          <SelectTrigger className={cn(FIELD, 'w-full sm:w-44')}>
             <SelectValue placeholder="Filter status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="open">Open</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="in_progress">In progress</SelectItem>
             <SelectItem value="resolved">Resolved</SelectItem>
             <SelectItem value="closed">Closed</SelectItem>
           </SelectContent>
         </Select>
-      </motion.div>
+      </div>
 
-      {/* Ticket List */}
-      {filteredTickets.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="flex flex-col items-center justify-center py-20 text-center space-y-4"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center">
-            <Ticket className="w-8 h-8 text-muted-foreground" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">
-              {tickets.length === 0 ? 'No support tickets yet' : 'No matching tickets'}
-            </h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
-              {tickets.length === 0
-                ? 'When you request support through Quooro AI, your tickets will appear here with unique reference IDs.'
-                : 'Try adjusting your search or filter to find what you\'re looking for.'}
-            </p>
-          </div>
-          {tickets.length === 0 && (
-            <Button
-              onClick={() => navigate('/lounge/ai')}
-              className="gap-2 rounded-xl"
-            >
-              <Sparkles className="w-4 h-4" />
-              Open Quooro AI
-            </Button>
-          )}
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="space-y-2"
-        >
-          {filteredTickets.map((ticket, i) => {
-            const statusConf = STATUS_CONFIG[ticket.status] || STATUS_CONFIG.open;
-            const priorityConf = PRIORITY_CONFIG[ticket.priority] || PRIORITY_CONFIG.standard;
-            const StatusIcon = statusConf.icon;
-
-            return (
-              <motion.button
-                key={ticket.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * i }}
-                onClick={() => openDetail(ticket)}
-                className="w-full text-left group"
-              >
-                <div className="flex items-center gap-4 p-4 rounded-2xl border border-border/50 bg-card hover:border-primary/30 hover:bg-card/80 transition-all">
-                  {/* Status Icon */}
-                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border', statusConf.bg)}>
-                    <StatusIcon className={cn('w-5 h-5', statusConf.color)} />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-mono font-semibold text-primary">
-                        {ticket.reference_id}
+      {/* Ticket list */}
+      <div className="mt-5">
+        {filteredTickets.length === 0 ? (
+          <Panel>
+            <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+              <span aria-hidden className="mb-4 block h-px w-8 bg-primary" />
+              <p className="font-display text-lg font-semibold tracking-[-0.02em] text-foreground">
+                {tickets.length === 0 ? 'No support tickets yet' : 'No matching tickets'}
+              </p>
+              <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted-foreground">
+                {tickets.length === 0
+                  ? 'When you request support, your tickets appear here with unique reference IDs.'
+                  : 'Adjust your search or filter to find the ticket you need.'}
+              </p>
+              {tickets.length === 0 && (
+                <Button
+                  size="sm"
+                  className="mt-4 h-8 rounded-lg px-3 text-xs"
+                  onClick={() => navigate('/lounge/ai')}
+                >
+                  Open Quooro AI
+                </Button>
+              )}
+            </div>
+          </Panel>
+        ) : (
+          <Panel>
+            <PanelHeader label={`${filteredTickets.length} ${filteredTickets.length === 1 ? 'ticket' : 'tickets'} · ${openCount} open`} />
+            <div>
+              {filteredTickets.map((ticket) => {
+                const priority = PRIORITY_TONE[ticket.priority] || PRIORITY_TONE.standard;
+                return (
+                  <button
+                    type="button"
+                    key={ticket.id}
+                    onClick={() => openDetail(ticket)}
+                    className="group flex w-full items-center gap-3 border-t border-border/60 px-4 py-2.5 text-left transition-colors duration-150 first:border-t-0 hover:bg-foreground/[0.025] focus-visible:bg-foreground/[0.03]"
+                  >
+                    <StatusDot tone={statusTone(ticket.status)} />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-x-2">
+                        <span className="font-mono text-[10.5px] tabular-nums text-muted-foreground">{ticket.reference_id}</span>
+                        {(ticket.priority === 'high' || ticket.priority === 'urgent') && (
+                          <StatusBadge tone={priority.tone} label={priority.label} className="text-[10.5px]" />
+                        )}
                       </span>
-                      <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-medium border', priorityConf.color)}>
-                        {priorityConf.label}
-                      </Badge>
-                    </div>
-                    <p className="text-sm font-medium truncate">{ticket.subject}</p>
-                    <p className="text-xs text-muted-foreground truncate">{ticket.message}</p>
-                  </div>
-
-                  {/* Meta */}
-                  <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
-                    <Badge variant="outline" className={cn('text-[10px] px-2 py-0.5 border', statusConf.bg, statusConf.color)}>
-                      {statusConf.label}
-                    </Badge>
-                    <span className="text-[10px] text-muted-foreground">
-                      {format(new Date(ticket.created_at), 'dd MMM yyyy, HH:mm')}
+                      <span className="block truncate text-[13px] font-[450] text-foreground">{ticket.subject}</span>
+                      <span className="block truncate text-[11.5px] text-muted-foreground">{ticket.message}</span>
                     </span>
-                  </div>
+                    <span className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
+                      <StatusBadge status={ticket.status} />
+                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                        {format(new Date(ticket.created_at), 'd MMM yyyy, HH:mm')}
+                      </span>
+                    </span>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-colors duration-150 group-hover:text-foreground" />
+                  </button>
+                );
+              })}
+            </div>
+          </Panel>
+        )}
+      </div>
 
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                </div>
-              </motion.button>
-            );
-          })}
-        </motion.div>
-      )}
-
-      {/* Ticket Detail Dialog */}
+      {/* Ticket detail dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-lg rounded-2xl">
+        <DialogContent className="max-w-lg">
           {selectedTicket && (() => {
-            const statusConf = STATUS_CONFIG[selectedTicket.status] || STATUS_CONFIG.open;
-            const priorityConf = PRIORITY_CONFIG[selectedTicket.priority] || PRIORITY_CONFIG.standard;
-            const StatusIcon = statusConf.icon;
+            const priority = PRIORITY_TONE[selectedTicket.priority] || PRIORITY_TONE.standard;
             return (
               <>
                 <DialogHeader>
-                  <div className="flex items-center gap-3">
-                    <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center border', statusConf.bg)}>
-                      <StatusIcon className={cn('w-5 h-5', statusConf.color)} />
-                    </div>
-                    <div>
-                      <DialogTitle className="text-lg">{selectedTicket.reference_id}</DialogTitle>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(selectedTicket.created_at), 'dd MMMM yyyy, HH:mm')}
-                      </p>
-                    </div>
-                  </div>
+                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                    {selectedTicket.reference_id}
+                  </span>
+                  <DialogTitle className="text-[15px]">{selectedTicket.subject}</DialogTitle>
+                  <p className="font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                    {format(new Date(selectedTicket.created_at), 'd MMMM yyyy, HH:mm')}
+                  </p>
                 </DialogHeader>
 
-                <div className="space-y-5 mt-2">
-                  {/* Status & Priority */}
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={cn('border', statusConf.bg, statusConf.color)}>
-                      {statusConf.label}
-                    </Badge>
-                    <Badge variant="outline" className={cn('border', priorityConf.color)}>
-                      {priorityConf.label} Priority
-                    </Badge>
+                <div className="mt-2 space-y-5">
+                  <div className="flex items-center gap-4">
+                    <StatusBadge status={selectedTicket.status} />
+                    <StatusBadge tone={priority.tone} label={`${priority.label} priority`} />
                   </div>
 
-                  {/* Subject */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Subject
-                    </label>
-                    <p className="text-sm font-medium">{selectedTicket.subject}</p>
-                  </div>
-
-                  {/* Message */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Message Sent
-                    </label>
-                    <div className="rounded-xl bg-muted/50 border border-border/50 p-4">
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{selectedTicket.message}</p>
+                    <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                      Message sent
+                    </span>
+                    <div className="rounded-[10px] border border-border/60 bg-foreground/[0.02] p-4">
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedTicket.message}</p>
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                  <div className="flex flex-col gap-2 pt-2 sm:flex-row">
                     {selectedTicket.ai_conversation_id && (
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-2 rounded-xl flex-1"
+                        className="h-8 flex-1 gap-1.5 rounded-lg text-xs"
                         onClick={() => {
                           setDetailOpen(false);
                           navigate('/lounge/ai');
                         }}
                       >
-                        <Sparkles className="w-4 h-4" />
-                        View AI Conversation
+                        View AI conversation
                       </Button>
                     )}
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-2 rounded-xl flex-1"
+                      className="h-8 flex-1 gap-1.5 rounded-lg text-xs"
                       onClick={() => {
                         setDetailOpen(false);
                         navigate('/lounge/messages');
                       }}
                     >
-                      <MessageSquare className="w-4 h-4" />
-                      View Messages
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      View messages
                     </Button>
                   </div>
                 </div>
@@ -443,40 +339,35 @@ export default function LoungeTickets() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Ticket Dialog */}
+      {/* Create ticket dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-lg rounded-2xl">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Plus className="w-5 h-5 text-primary" />
-              </div>
-              <DialogTitle className="text-lg">Create Support Ticket</DialogTitle>
-            </div>
+            <DialogTitle>New support ticket</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 mt-2">
-            <div className="space-y-2">
-              <Label className="text-xs font-medium">Subject</Label>
+          <div className="mt-2 space-y-4">
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Subject</Label>
               <Input
-                placeholder="Brief description of your issue"
+                placeholder="A short description of the issue"
                 value={newSubject}
                 onChange={e => setNewSubject(e.target.value)}
-                className="rounded-xl"
+                className={FIELD}
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-medium">Message</Label>
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Message</Label>
               <Textarea
-                placeholder="Describe your issue in detail..."
+                placeholder="Describe the issue in detail"
                 value={newMessage}
                 onChange={e => setNewMessage(e.target.value)}
-                className="rounded-xl min-h-[120px] resize-none"
+                className="min-h-[120px] resize-none rounded-xl border-border/60 bg-foreground/[0.03] text-[14px] shadow-none focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]"
               />
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-medium">Priority</Label>
+            <div className="space-y-1.5">
+              <Label className={FIELD_LABEL}>Priority</Label>
               <Select value={newPriority} onValueChange={setNewPriority}>
-                <SelectTrigger className="rounded-xl">
+                <SelectTrigger className={FIELD}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -490,18 +381,18 @@ export default function LoungeTickets() {
             <div className="flex gap-2 pt-2">
               <Button
                 variant="outline"
-                className="flex-1 rounded-xl"
+                className="h-8 flex-1 rounded-lg text-xs"
                 onClick={() => setCreateOpen(false)}
               >
                 Cancel
               </Button>
               <Button
-                className="flex-1 rounded-xl gap-2"
+                className="h-8 flex-1 gap-1.5 rounded-lg text-xs"
                 onClick={handleCreateTicket}
                 disabled={!newSubject.trim() || !newMessage.trim() || creating}
               >
-                {creating ? <Clock className="w-4 h-4 animate-spin" /> : <Ticket className="w-4 h-4" />}
-                Create Ticket
+                {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Ticket className="h-3.5 w-3.5" />}
+                Create ticket
               </Button>
             </div>
           </div>

@@ -1,17 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CreditCard, 
-  Sparkles,
+import {
+  CreditCard,
   Globe,
   Megaphone,
   Share2,
@@ -19,12 +14,8 @@ import {
   Palette,
   HeadphonesIcon,
   Check,
-  ChevronRight,
   Loader2,
   ShoppingCart,
-  Receipt,
-  Clock,
-  ArrowRight,
   FileText,
   Download,
   Eye,
@@ -32,11 +23,7 @@ import {
   Paintbrush,
   Boxes,
   PenTool,
-  Star,
-  Zap,
   X,
-  ExternalLink,
-  CheckCircle2,
   Settings
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -47,9 +34,12 @@ import BillingDetailsForm from '@/components/billing/BillingDetailsForm';
 import OrderSummary from '@/components/billing/OrderSummary';
 import CartModal from '@/components/billing/CartModal';
 import { useClientPricing } from '@/hooks/useClientPricing';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
+import {
+  PageHeader, Panel, PanelHeader, StatusBadge, EmptyState, Money, SkeletonLedger,
+} from '@/components/platform';
+import { cn } from '@/lib/utils';
 
-// ─── Subscription Plans ───────────────────────────────────────────────────────
+// ─── Subscription plans ───────────────────────────────────────────────────────
 interface SubPlan {
   id: string;
   name: string;
@@ -57,7 +47,6 @@ interface SubPlan {
   productId: string;
   monthlyPrice: number;
   tagline: string;
-  gradient: string;
   badge?: string;
   features: string[];
   tools: { icon: React.ComponentType<{ className?: string }>; label: string }[];
@@ -70,8 +59,7 @@ const SUBSCRIPTION_PLANS: SubPlan[] = [
     priceId: 'price_1T2fm9RsdRM0b4Fv9eIY9AAa',
     productId: 'prod_U0hAY0tdooMWQQ',
     monthlyPrice: 49.99,
-    tagline: 'Build and manage your website with AI superpowers',
-    gradient: 'from-blue-600/15 via-violet-600/8 to-transparent',
+    tagline: 'Build and manage your website with AI assistance',
     features: [
       'Visual drag-and-drop website editor',
       'AI-powered page generation from a prompt',
@@ -90,8 +78,7 @@ const SUBSCRIPTION_PLANS: SubPlan[] = [
     productId: 'prod_U0hDSJBwQWaFO6',
     monthlyPrice: 99.99,
     tagline: 'Design sites and run your stock operations',
-    gradient: 'from-emerald-600/15 via-teal-600/8 to-transparent',
-    badge: 'Most Popular',
+    badge: 'Most popular',
     features: [
       'Everything in Professional',
       'Real-time stock level tracking',
@@ -110,8 +97,7 @@ const SUBSCRIPTION_PLANS: SubPlan[] = [
     priceId: 'price_1T2fp1RsdRM0b4FvPQ19nd9c',
     productId: 'prod_U0hD5Vzv4N2F8H',
     monthlyPrice: 149.99,
-    tagline: 'The complete Quooro toolkit — build, stock & design',
-    gradient: 'from-orange-600/15 via-amber-600/8 to-transparent',
+    tagline: 'The complete Quooro toolkit: build, stock and design',
     features: [
       'Everything in Growth',
       'Professional 2D/3D CAD drafting canvas',
@@ -322,15 +308,15 @@ const LoungeBilling = () => {
   const [activeSubIds, setActiveSubIds] = useState<Set<string>>(new Set());
   const [checkoutLoadingId, setCheckoutLoadingId] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
-  
+
   // Fetch client-specific pricing
-  const { 
-    pricing: customPricing, 
+  const {
+    pricing: customPricing,
     pricingByType,
-    invoices: customInvoices, 
+    invoices: customInvoices,
     contracts,
     teamInfo,
-    loading: pricingLoading, 
+    loading: pricingLoading,
     canViewBilling,
     recurringTotal,
     oneTimeTotal
@@ -338,12 +324,12 @@ const LoungeBilling = () => {
 
   // Hide all speculative pricing until an admin has assigned pricing for this team
   const hidePrices = !pricingLoading && (!customPricing || customPricing.length === 0);
-  
+
   // Checkout selections
   const [selectedWebsite, setSelectedWebsite] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState('starter');
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
-  
+
   // Auto-save debounce ref
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasInitializedRef = useRef(false);
@@ -379,7 +365,7 @@ const LoungeBilling = () => {
       if (error) throw new Error(error.message);
       if (data?.url) window.open(data.url, '_blank');
     } catch {
-      toast.error('Failed to start checkout. Please try again.');
+      toast.error('Checkout did not start. Try again.');
     } finally {
       setCheckoutLoadingId(null);
     }
@@ -394,7 +380,7 @@ const LoungeBilling = () => {
       if (error) throw new Error(error.message);
       if (data?.url) window.open(data.url, '_blank');
     } catch {
-      toast.error('Could not open subscription portal. Please contact support.');
+      toast.error('The subscription portal did not open. Message the studio if it keeps happening.');
     } finally {
       setPortalLoading(false);
     }
@@ -416,7 +402,7 @@ const LoungeBilling = () => {
         .maybeSingle();
 
       if (error) throw error;
-      
+
       if (data) {
         const billingData = {
           ...data,
@@ -425,11 +411,11 @@ const LoungeBilling = () => {
           one_off_charges: (data.one_off_charges as { name: string; price: number; date: string; paid: boolean }[]) || []
         };
         setBilling(billingData);
-        
+
         // Set initial selections based on current billing
         const plan = PLANS.find(p => p.name === data.plan_name);
         if (plan) setSelectedPlan(plan.id);
-        
+
         const activeAddons = new Set(
           billingData.add_ons.filter(a => a.active).map(a => {
             const addon = AVAILABLE_ADDONS.find(aa => aa.name === a.name);
@@ -440,7 +426,7 @@ const LoungeBilling = () => {
       }
     } catch (error) {
       console.error('Error fetching billing:', error);
-      toast.error('Failed to load billing information');
+      toast.error('Your billing details did not load. Refresh to try again.');
     } finally {
       setLoading(false);
     }
@@ -449,7 +435,7 @@ const LoungeBilling = () => {
   // Auto-save to cart when selections change
   const autoSaveToCart = useCallback(async () => {
     if (!user || !hasInitializedRef.current) return;
-    
+
     const plan = PLANS.find(p => p.id === selectedPlan)!;
     const addons = Array.from(selectedAddons).map(id => {
       const addon = AVAILABLE_ADDONS.find(a => a.id === id)!;
@@ -459,7 +445,7 @@ const LoungeBilling = () => {
     // Add website as one-off charge if selected
     const existingCharges = billing?.one_off_charges || [];
     let oneOffCharges = [...existingCharges];
-    
+
     if (selectedWebsite) {
       const websitePkg = WEBSITE_PACKAGES.find(p => p.id === selectedWebsite);
       if (websitePkg) {
@@ -510,15 +496,15 @@ const LoungeBilling = () => {
   // Debounced auto-save effect
   useEffect(() => {
     if (!hasInitializedRef.current) return;
-    
+
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
-    
+
     autoSaveTimeoutRef.current = setTimeout(() => {
       autoSaveToCart();
     }, 1500); // 1.5 second debounce
-    
+
     return () => {
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
@@ -551,13 +537,13 @@ const LoungeBilling = () => {
 
   const handlePayNow = async () => {
     setProcessing(true);
-    toast.info('Stripe payment integration coming soon! Contact support to process your payment.');
+    toast.info('Card payment is coming soon. Message the studio to arrange payment.');
     setTimeout(() => setProcessing(false), 2000);
   };
 
   const handleSaveForLater = async () => {
     if (!user) return;
-    
+
     setProcessing(true);
     try {
       const plan = PLANS.find(p => p.id === selectedPlan)!;
@@ -569,7 +555,7 @@ const LoungeBilling = () => {
       // Add website as one-off charge if selected
       const existingCharges = billing?.one_off_charges || [];
       let oneOffCharges = [...existingCharges];
-      
+
       if (selectedWebsite) {
         const websitePkg = WEBSITE_PACKAGES.find(p => p.id === selectedWebsite);
         if (websitePkg) {
@@ -615,11 +601,11 @@ const LoungeBilling = () => {
         if (error) throw error;
       }
 
-      toast.success('Selections saved! Complete payment when ready.');
+      toast.success('Selections saved. Complete payment when you are ready.');
       fetchBilling();
     } catch (error) {
       console.error('Error saving:', error);
-      toast.error('Failed to save selections');
+      toast.error('Your selections did not save. Try again.');
     } finally {
       setProcessing(false);
     }
@@ -628,15 +614,15 @@ const LoungeBilling = () => {
   // Calculate totals
   const selectedWebsitePkg = WEBSITE_PACKAGES.find(p => p.id === selectedWebsite);
   const websitePrice = selectedWebsitePkg?.price || 0;
-  
+
   const selectedPlanData = PLANS.find(p => p.id === selectedPlan);
   const planPrice = selectedPlanData?.price || 0;
-  
+
   const addonsTotal = Array.from(selectedAddons).reduce((sum, id) => {
     const addon = AVAILABLE_ADDONS.find(a => a.id === id);
     return sum + (addon?.price || 0);
   }, 0);
-  
+
   const pendingCharges = billing?.one_off_charges.filter(c => !c.paid) || [];
   const oneOffTotal = pendingCharges.reduce((sum, c) => sum + c.price, 0);
 
@@ -675,10 +661,10 @@ const LoungeBilling = () => {
     }))
   ];
 
-  const paymentStatus = billing?.payment_status === 'paid' 
-    ? 'paid' 
-    : billing?.payment_status === 'pending' 
-      ? 'waiting' 
+  const paymentStatus = billing?.payment_status === 'paid'
+    ? 'paid'
+    : billing?.payment_status === 'pending'
+      ? 'waiting'
       : 'none';
 
   // Build order items for summary
@@ -717,57 +703,50 @@ const LoungeBilling = () => {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-6 lg:p-8 flex items-center justify-center min-h-[600px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8" aria-hidden>
+        <span className="block h-5 w-40 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-3.5 w-72 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
+          <div className="rounded-[10px] border border-border/60"><SkeletonLedger rows={6} /></div>
+          <div className="rounded-[10px] border border-border/60"><SkeletonLedger rows={4} /></div>
+        </div>
       </div>
     );
   }
 
-  // Checkout Step - Billing Details Form
+  // Checkout step: billing details form
   if (checkoutStep === 'billing') {
     return (
-      <div className="p-4 md:p-6 lg:p-8 min-h-screen">
-        <div>
-          {/* Header */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8 text-center"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <CreditCard className="h-4 w-4" />
-              <span className="text-sm font-medium">Secure Checkout</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">Complete Your Order</h1>
-            <p className="text-muted-foreground">
-              Enter your billing details to complete the purchase
-            </p>
-          </motion.div>
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+        <PageHeader
+          kicker="Secure checkout"
+          title="Complete your order"
+          description="Enter your billing details to complete the purchase"
+        />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Billing Form */}
-            <div className="lg:col-span-2">
-              <BillingDetailsForm
-                onBack={() => setCheckoutStep('selection')}
-                onSubmit={async (details) => {
-                  setProcessing(true);
-                  // Save and process payment
-                  await handleSaveForLater();
-                  toast.info('Stripe payment integration coming soon! Your order has been saved.');
-                  setCheckoutStep('selection');
-                  setProcessing(false);
-                }}
-                isLoading={processing}
-                initialData={{
-                  email: user?.email || ''
-                }}
-              />
-            </div>
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Billing form */}
+          <div className="lg:col-span-2">
+            <BillingDetailsForm
+              onBack={() => setCheckoutStep('selection')}
+              onSubmit={async (details) => {
+                setProcessing(true);
+                // Save and process payment
+                await handleSaveForLater();
+                toast.info('Card payment is coming soon. Your order has been saved.');
+                setCheckoutStep('selection');
+                setProcessing(false);
+              }}
+              isLoading={processing}
+              initialData={{
+                email: user?.email || ''
+              }}
+            />
+          </div>
 
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <OrderSummary items={orderItems} />
-            </div>
+          {/* Order summary */}
+          <div className="lg:col-span-1">
+            <OrderSummary items={orderItems} />
           </div>
         </div>
       </div>
@@ -775,9 +754,9 @@ const LoungeBilling = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 min-h-screen">
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
       <div>
-        {/* Cart Modal */}
+        {/* Cart modal */}
         <CartModal
           items={checkoutItems}
           isOpen={cartModalOpen}
@@ -806,61 +785,54 @@ const LoungeBilling = () => {
         />
 
         {/* Header */}
-        <LoungePageHeader
-          title="Plan & Billing"
-          description="Select a website, choose your management plan, and add any extras"
-          icon={CreditCard}
+        <PageHeader
+          kicker="Client portal"
+          title="Plan and billing"
+          description="Your pricing, subscriptions, invoices and payment history"
           actions={
             <Button
               variant="outline"
               size="sm"
-              className="relative gap-2"
+              className="relative h-8 gap-1.5 rounded-lg px-3 text-xs"
               onClick={() => setCartModalOpen(true)}
             >
-              <ShoppingCart className="h-4 w-4" />
-              <span className="hidden sm:inline">View Cart</span>
+              <ShoppingCart className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">View cart</span>
               {checkoutItems.length > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                <span className="font-mono text-[10.5px] tabular-nums text-muted-foreground">
                   {checkoutItems.length}
-                </Badge>
+                </span>
               )}
             </Button>
           }
         />
 
-        {/* Status Banner */}
+        {/* Payment pending banner */}
         {billing?.payment_status === 'pending' && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-between"
-          >
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-border/60 bg-card p-4">
             <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-amber-500" />
-              <div>
-                <p className="font-medium text-amber-700 dark:text-amber-300">Payment Awaiting</p>
-                <p className="text-sm text-amber-600 dark:text-amber-400">
-                  Complete your payment to activate all services
-                </p>
-              </div>
+              <StatusBadge tone="attend" label="Payment awaiting" />
+              <p className="text-[13px] text-muted-foreground">
+                Complete your payment to activate all services
+              </p>
             </div>
-            <Button 
-              className="gap-2" 
+            <Button
+              className="h-8 gap-1.5 rounded-lg px-3 text-xs"
               onClick={() => setCheckoutStep('billing')}
               disabled={processing}
             >
-              <CreditCard className="h-4 w-4" />
-              Proceed to Checkout
+              <CreditCard className="h-3.5 w-3.5" />
+              Proceed to checkout
             </Button>
-          </motion.div>
+          </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Checkout Summary - Now at TOP on mobile, RIGHT on desktop */}
+        <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Main content */}
+          <div className="space-y-6 lg:col-span-2">
+            {/* Checkout summary: top on mobile, right on desktop */}
             <div className="lg:hidden">
-              <CheckoutSummary 
+              <CheckoutSummary
                 items={checkoutItems}
                 paymentStatus={paymentStatus}
                 onPayNow={() => setCheckoutStep('billing')}
@@ -873,114 +845,94 @@ const LoungeBilling = () => {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-5 h-10">
-                <TabsTrigger value="my-pricing" className="gap-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <CreditCard className="h-4 w-4" />
-                  <span className="hidden sm:inline">My Pricing</span>
+              <TabsList className="h-9 w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-border/60 bg-transparent p-0">
+                <TabsTrigger value="my-pricing" className="rounded-none border-b-2 border-transparent px-3 text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+                  My pricing
                 </TabsTrigger>
-                <TabsTrigger value="subscriptions" className="gap-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <Star className="h-4 w-4" />
-                  <span className="hidden sm:inline">Subscriptions</span>
+                <TabsTrigger value="subscriptions" className="rounded-none border-b-2 border-transparent px-3 text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+                  Subscriptions
                 </TabsTrigger>
-                <TabsTrigger value="checkout" className="gap-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <ShoppingCart className="h-4 w-4" />
-                  <span className="hidden sm:inline">Checkout</span>
+                <TabsTrigger value="checkout" className="rounded-none border-b-2 border-transparent px-3 text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+                  Checkout
                 </TabsTrigger>
-                <TabsTrigger value="invoices" className="gap-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <FileText className="h-4 w-4" />
-                  <span className="hidden sm:inline">Invoices</span>
+                <TabsTrigger value="invoices" className="rounded-none border-b-2 border-transparent px-3 text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+                  Invoices
                 </TabsTrigger>
-                <TabsTrigger value="history" className="gap-2 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <Receipt className="h-4 w-4" />
-                  <span className="hidden sm:inline">History</span>
+                <TabsTrigger value="history" className="rounded-none border-b-2 border-transparent px-3 text-[13px] data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">
+                  History
                 </TabsTrigger>
               </TabsList>
 
 
-              {/* ── Subscriptions Tab ─────────────────────────────────── */}
-              <TabsContent value="subscriptions" className="space-y-6">
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              {/* ── Subscriptions tab ─────────────────────────────────── */}
+              <TabsContent value="subscriptions" className="space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h2 className="text-xl font-bold tracking-tight">Platform Subscriptions</h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      Unlock powerful tools — each plan includes a free first month.
+                    <h2 className="text-[15px] font-semibold tracking-[-0.01em]">Platform subscriptions</h2>
+                    <p className="mt-0.5 text-[13px] text-muted-foreground">
+                      Each plan includes a free first month. Cancel any time.
                     </p>
                   </div>
                   {activeSubIds.size > 0 && (
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-2 shrink-0"
+                      className="h-8 shrink-0 gap-1.5 rounded-lg px-3 text-xs"
                       onClick={handleManageSubscriptions}
                       disabled={portalLoading}
                     >
-                      {portalLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Settings className="h-4 w-4" />}
-                      Manage / Cancel Subscriptions
+                      {portalLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Settings className="h-3.5 w-3.5" />}
+                      Manage subscriptions
                     </Button>
                   )}
                 </div>
 
-                {/* Free trial callout */}
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/8 border border-primary/20">
-                  <div className="h-9 w-9 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center shrink-0">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">First month free on all plans</p>
-                    <p className="text-xs text-muted-foreground">No credit card charged until your trial ends. Cancel anytime with one click.</p>
-                  </div>
+                {/* Free trial note */}
+                <div className="rounded-[10px] border border-border/60 bg-card p-4">
+                  <p className="text-sm font-medium text-foreground">First month free on all plans</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">Nothing is charged until your trial ends. Cancel any time from the billing portal.</p>
                 </div>
 
                 {/* Plan cards */}
                 {subLoading ? (
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-4" aria-hidden>
                     {[...Array(3)].map((_, i) => (
-                      <div key={i} className="h-64 rounded-2xl bg-muted/30 animate-pulse" />
+                      <div key={i} className="h-56 animate-pulse rounded-[10px] border border-border/60 bg-foreground/[0.03]" />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-5">
-                    {SUBSCRIPTION_PLANS.map((plan, idx) => {
+                  <div className="grid grid-cols-1 gap-4">
+                    {SUBSCRIPTION_PLANS.map((plan) => {
                       const isActive = activeSubIds.has(plan.productId);
                       const isLoadingThis = checkoutLoadingId === plan.id;
                       return (
-                        <motion.div
+                        <div
                           key={plan.id}
-                          initial={{ opacity: 0, y: 16 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.08, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                          className={`relative rounded-2xl border overflow-hidden transition-all duration-200 ${
-                            isActive
-                              ? 'border-primary/40 shadow-lg shadow-primary/10'
-                              : 'border-border/50 hover:border-border'
-                          }`}
+                          className={cn(
+                            'overflow-hidden rounded-[10px] border transition-colors duration-150',
+                            isActive ? 'border-primary/40' : 'border-border/60 hover:border-border',
+                          )}
                         >
-                          {/* Hero gradient */}
-                          <div className={`bg-gradient-to-br ${plan.gradient} px-6 pt-6 pb-5 border-b border-border/30`}>
+                          <div className="border-b border-border/60 bg-sunken px-5 pb-4 pt-5">
                             <div className="flex items-start justify-between gap-4">
                               <div className="space-y-1.5">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg font-bold tracking-tight">{plan.name}</span>
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <span className="text-[15px] font-semibold tracking-[-0.01em]">{plan.name}</span>
                                   {plan.badge && (
-                                    <Badge className="bg-primary/15 text-primary border-primary/25 text-[11px] font-semibold px-2 py-0.5">
-                                      {plan.badge}
-                                    </Badge>
+                                    <StatusBadge tone="accent" label={plan.badge} />
                                   )}
                                   {isActive && (
-                                    <Badge className="bg-emerald-500/15 text-emerald-500 border-emerald-500/25 text-[11px] font-semibold px-2 py-0.5 gap-1">
-                                      <CheckCircle2 className="h-3 w-3" /> Active
-                                    </Badge>
+                                    <StatusBadge tone="ok" label="Active" />
                                   )}
                                 </div>
-                                <p className="text-sm text-muted-foreground max-w-sm">{plan.tagline}</p>
-                                {/* Tool badges */}
-                                <div className="flex items-center gap-2 pt-1 flex-wrap">
+                                <p className="max-w-sm text-[13px] text-muted-foreground">{plan.tagline}</p>
+                                {/* Tool chips */}
+                                <div className="flex flex-wrap items-center gap-2 pt-1">
                                   {plan.tools.map((t) => {
                                     const TIcon = t.icon;
                                     return (
-                                      <span key={t.label} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background/60 border border-border/50 text-[12px] font-medium text-foreground/80">
-                                        <TIcon className="h-3.5 w-3.5 text-primary" />
+                                      <span key={t.label} className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-2.5 py-1 text-[12px] font-medium text-muted-foreground">
+                                        <TIcon className="h-3.5 w-3.5" />
                                         {t.label}
                                       </span>
                                     );
@@ -988,64 +940,60 @@ const LoungeBilling = () => {
                                 </div>
                               </div>
                               {/* Pricing */}
-                              <div className="text-right shrink-0">
-                                <div className="text-xs text-muted-foreground line-through mb-0.5">
-                                  £{plan.monthlyPrice.toFixed(2)}/mo
+                              <div className="shrink-0 text-right">
+                                <div className="mb-0.5 text-xs text-muted-foreground line-through">
+                                  <Money value={plan.monthlyPrice} />/mo
                                 </div>
-                                <div className="text-2xl font-extrabold tracking-tight text-foreground">Free</div>
+                                <div className="text-xl font-semibold tracking-tight text-foreground">Free</div>
                                 <div className="text-xs text-muted-foreground">first month</div>
-                                <div className="text-xs text-muted-foreground mt-1">then £{plan.monthlyPrice.toFixed(2)}/mo</div>
+                                <div className="mt-1 text-xs tabular-nums text-muted-foreground">then <Money value={plan.monthlyPrice} />/mo</div>
                               </div>
                             </div>
                           </div>
 
                           {/* Features + CTA */}
-                          <div className="px-6 py-5 bg-card flex flex-col sm:flex-row gap-5 sm:items-center">
-                            <ul className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
+                          <div className="flex flex-col gap-5 bg-card px-5 py-4 sm:flex-row sm:items-center">
+                            <ul className="grid flex-1 grid-cols-1 gap-x-4 gap-y-1.5 sm:grid-cols-2">
                               {plan.features.map((f) => (
-                                <li key={f} className="flex items-start gap-2 text-sm text-foreground/75">
-                                  <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                                <li key={f} className="flex items-start gap-2 text-[13px] text-muted-foreground">
+                                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/50" />
                                   {f}
                                 </li>
                               ))}
                             </ul>
-                            <div className="shrink-0 flex flex-col gap-2 min-w-[160px]">
+                            <div className="flex min-w-[160px] shrink-0 flex-col gap-2">
                               {isActive ? (
                                 <>
-                                  <div className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-sm font-semibold">
-                                    <CheckCircle2 className="h-4 w-4" /> Subscribed
+                                  <div className="flex items-center justify-center rounded-lg border border-border/60 px-4 py-2">
+                                    <StatusBadge tone="ok" label="Subscribed" />
                                   </div>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="w-full gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
+                                    className="h-8 w-full gap-1.5 rounded-lg text-xs text-destructive hover:text-destructive"
                                     onClick={handleManageSubscriptions}
                                     disabled={portalLoading}
                                   >
                                     {portalLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
-                                    Cancel Plan
+                                    Cancel plan
                                   </Button>
                                 </>
                               ) : (
                                 <Button
-                                  className="w-full gap-2 font-semibold"
+                                  className="h-8 w-full gap-1.5 rounded-lg text-xs"
                                   onClick={() => handleSubCheckout(plan)}
                                   disabled={isLoadingThis}
                                 >
                                   {isLoadingThis ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                   ) : (
-                                    <>
-                                      <Sparkles className="h-4 w-4" />
-                                      Start Free Month
-                                      <ArrowRight className="h-4 w-4" />
-                                    </>
+                                    'Start free month'
                                   )}
                                 </Button>
                               )}
                             </div>
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
@@ -1053,286 +1001,187 @@ const LoungeBilling = () => {
 
                 {/* Cancel note */}
                 <p className="text-center text-xs text-muted-foreground">
-                  Subscriptions are billed monthly after the free trial. Cancel anytime via{' '}
-                  <button onClick={handleManageSubscriptions} className="underline underline-offset-2 hover:text-foreground transition-colors font-medium">
+                  Subscriptions are billed monthly after the free trial. Cancel any time via{' '}
+                  <button onClick={handleManageSubscriptions} className="font-medium underline underline-offset-2 transition-colors duration-150 hover:text-foreground">
                     the billing portal
-                  </button>{' '}
-                  — no hidden fees.
+                  </button>. No hidden fees.
                 </p>
               </TabsContent>
 
-              {/* My Pricing Tab - Client-specific pricing */}
-              <TabsContent value="my-pricing" className="space-y-6">
+              {/* My pricing tab: client-specific pricing */}
+              <TabsContent value="my-pricing" className="space-y-4">
                 {pricingLoading ? (
-
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <div className="rounded-[10px] border border-border/60" aria-hidden>
+                    <SkeletonLedger rows={5} />
                   </div>
                 ) : !canViewBilling ? (
-                  <Card className="border-amber-500/30 bg-amber-500/5">
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                      <Lock className="h-12 w-12 text-amber-500 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">Billing Access Restricted</h3>
-                      <p className="text-muted-foreground max-w-md">
-                        You don't have permission to view billing information. Contact your account owner for access.
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <Panel>
+                    <EmptyState
+                      title="Billing access is restricted"
+                      body="You don't have permission to view billing information. Ask your account owner for access."
+                    />
+                  </Panel>
                 ) : customPricing.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                      <CreditCard className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No Custom Pricing Yet</h3>
-                      <p className="text-muted-foreground max-w-md">
-                        Your custom pricing will appear here once it's been set up by our team. 
-                        Browse our standard packages in the Checkout tab.
-                      </p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4 gap-2"
-                        onClick={() => setActiveTab('checkout')}
-                      >
-                        <ShoppingCart className="h-4 w-4" />
-                        View Standard Packages
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  <Panel>
+                    <EmptyState
+                      title="No custom pricing yet"
+                      body="Your pricing appears here once the studio has set it up. In the meantime, browse the standard packages."
+                      action={{ label: 'View standard packages', onClick: () => setActiveTab('checkout') }}
+                    />
+                  </Panel>
                 ) : (
                   <>
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                        <CardContent className="pt-6">
-                          <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-xl bg-primary/20">
-                              <CreditCard className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">Monthly Recurring</p>
-                              <p className="text-2xl font-bold">£{recurringTotal.toLocaleString()}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-xl bg-muted">
-                              <Receipt className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">One-time Charges</p>
-                              <p className="text-2xl font-bold">£{oneTimeTotal.toLocaleString()}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-xl bg-muted">
-                              <FileText className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">Active Services</p>
-                              <p className="text-2xl font-bold">{customPricing.length}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
+                    {/* Totals */}
+                    <Panel>
+                      <div className="grid grid-cols-3 divide-x divide-border/60">
+                        <div className="px-4 py-3">
+                          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Monthly recurring</p>
+                          <p className="mt-1 text-lg font-semibold tabular-nums"><Money value={recurringTotal} whole /></p>
+                        </div>
+                        <div className="px-4 py-3">
+                          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">One-time charges</p>
+                          <p className="mt-1 text-lg font-semibold tabular-nums"><Money value={oneTimeTotal} whole /></p>
+                        </div>
+                        <div className="px-4 py-3">
+                          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Active services</p>
+                          <p className="mt-1 text-lg font-semibold tabular-nums">{customPricing.length}</p>
+                        </div>
+                      </div>
+                    </Panel>
 
-                    {/* Pricing by Category */}
+                    {/* Pricing by category */}
                     {Object.entries(pricingByType).map(([type, items]) => (
-                      <Card key={type}>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 capitalize">
-                            {type === 'website' && <Globe className="h-5 w-5" />}
-                            {type === 'addon' && <Sparkles className="h-5 w-5" />}
-                            {type === 'social' && <Share2 className="h-5 w-5" />}
-                            {type === 'ads' && <Megaphone className="h-5 w-5" />}
-                            {type === 'seo' && <Search className="h-5 w-5" />}
-                            {!['website', 'addon', 'social', 'ads', 'seo'].includes(type) && <CreditCard className="h-5 w-5" />}
-                            {type.replace(/_/g, ' ')} Services
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            {items.map((item) => (
-                              <div 
-                                key={item.id}
-                                className="flex items-center justify-between p-4 bg-muted/30 rounded-lg"
-                              >
-                                <div>
-                                  <p className="font-medium">{item.service_name}</p>
-                                  {item.description && (
-                                    <p className="text-sm text-muted-foreground">{item.description}</p>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-3">
-                                  <div className="text-right">
-                                    <span className="text-lg font-bold">£{item.negotiated_price.toLocaleString()}</span>
-                                    {item.is_recurring && (
-                                      <span className="text-sm text-muted-foreground">/{item.billing_frequency || 'mo'}</span>
-                                    )}
-                                  </div>
-                                  <Badge className={item.is_recurring 
-                                    ? 'bg-primary/10 text-primary border-primary/20' 
-                                    : 'bg-muted text-muted-foreground'
-                                  }>
-                                    {item.is_recurring ? 'Recurring' : 'One-time'}
-                                  </Badge>
-                                </div>
+                      <Panel key={type}>
+                        <PanelHeader label={`${type.replace(/_/g, ' ')} services`} />
+                        <div>
+                          {items.map((item) => (
+                            <div
+                              key={item.id}
+                              className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5 first:border-t-0"
+                            >
+                              <div className="min-w-0">
+                                <p className="truncate text-[13px] font-[450] text-foreground">{item.service_name}</p>
+                                {item.description && (
+                                  <p className="truncate text-[11.5px] text-muted-foreground">{item.description}</p>
+                                )}
                               </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
+                              <div className="flex shrink-0 items-center gap-3">
+                                <span className="text-[13px] font-[550] tabular-nums">
+                                  <Money value={item.negotiated_price} whole />
+                                  {item.is_recurring && (
+                                    <span className="text-xs font-normal text-muted-foreground">/{item.billing_frequency || 'mo'}</span>
+                                  )}
+                                </span>
+                                <StatusBadge
+                                  tone={item.is_recurring ? 'accent' : 'neutral'}
+                                  label={item.is_recurring ? 'Recurring' : 'One-time'}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </Panel>
                     ))}
 
-                    {/* Contracts Section */}
+                    {/* Contracts */}
                     {contracts.length > 0 && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <FileText className="h-5 w-5" />
-                            Contracts & Documents
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            {contracts.map((contract) => (
-                              <div 
-                                key={contract.id}
-                                className="flex items-center justify-between p-4 bg-muted/30 rounded-lg"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 rounded-lg bg-muted">
-                                    <FileText className="h-4 w-4" />
-                                  </div>
-                                  <div>
-                                    <p className="font-medium">{contract.title}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                      {contract.signed_at 
-                                        ? `Signed ${format(new Date(contract.signed_at), 'dd MMM yyyy')}`
-                                        : contract.status
-                                      }
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge className={
-                                    contract.status === 'signed' ? 'bg-green-500/10 text-green-500' :
-                                    contract.status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
-                                    'bg-muted text-muted-foreground'
-                                  }>
-                                    {contract.status}
-                                  </Badge>
-                                  {contract.document_url && (
-                                    <Button variant="ghost" size="sm" asChild>
-                                      <a href={contract.document_url} target="_blank" rel="noopener noreferrer">
-                                        <Eye className="h-4 w-4" />
-                                      </a>
-                                    </Button>
-                                  )}
+                      <Panel>
+                        <PanelHeader label="Contracts and documents" />
+                        <div>
+                          {contracts.map((contract) => (
+                            <div
+                              key={contract.id}
+                              className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5 first:border-t-0"
+                            >
+                              <div className="flex min-w-0 items-center gap-3">
+                                <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                <div className="min-w-0">
+                                  <p className="truncate text-[13px] font-[450] text-foreground">{contract.title}</p>
+                                  <p className="text-[11.5px] text-muted-foreground">
+                                    {contract.signed_at
+                                      ? `Signed ${format(new Date(contract.signed_at), 'd MMM yyyy')}`
+                                      : contract.status
+                                    }
+                                  </p>
                                 </div>
                               </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
+                              <div className="flex shrink-0 items-center gap-2">
+                                <StatusBadge status={contract.status} />
+                                {contract.document_url && (
+                                  <Button variant="ghost" size="sm" asChild>
+                                    <a href={contract.document_url} target="_blank" rel="noopener noreferrer" aria-label="View contract">
+                                      <Eye className="h-4 w-4" />
+                                    </a>
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </Panel>
                     )}
                   </>
                 )}
               </TabsContent>
 
-              {/* Invoices Tab */}
-              <TabsContent value="invoices" className="space-y-6">
+              {/* Invoices tab */}
+              <TabsContent value="invoices" className="space-y-4">
                 {pricingLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <div className="rounded-[10px] border border-border/60" aria-hidden>
+                    <SkeletonLedger rows={4} />
                   </div>
                 ) : !canViewBilling ? (
-                  <Card className="border-amber-500/30 bg-amber-500/5">
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                      <Lock className="h-12 w-12 text-amber-500 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">Invoice Access Restricted</h3>
-                      <p className="text-muted-foreground max-w-md">
-                        You don't have permission to view invoices. Contact your account owner for access.
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <Panel>
+                    <EmptyState
+                      title="Invoice access is restricted"
+                      body="You don't have permission to view invoices. Ask your account owner for access."
+                    />
+                  </Panel>
                 ) : customInvoices.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                      <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No Invoices Yet</h3>
-                      <p className="text-muted-foreground max-w-md">
-                        Your invoices will appear here once they've been generated.
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <Panel>
+                    <EmptyState
+                      title="No invoices yet"
+                      body="Your invoices appear here once they've been generated."
+                    />
+                  </Panel>
                 ) : (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        Invoices
-                      </CardTitle>
-                      <CardDescription>
-                        View and download your invoices
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {customInvoices.map((invoice) => (
-                          <div 
-                            key={invoice.id}
-                            className="flex items-center justify-between p-4 bg-muted/30 rounded-lg"
-                          >
-                            <div>
-                              <p className="font-medium">{invoice.invoice_number}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {format(new Date(invoice.created_at), 'dd MMM yyyy')}
-                                {invoice.due_date && ` • Due ${format(new Date(invoice.due_date), 'dd MMM yyyy')}`}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className="font-semibold">£{invoice.total_amount.toLocaleString()}</span>
-                              <Badge className={
-                                invoice.status === 'paid' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                invoice.status === 'overdue' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                                'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                              }>
-                                {invoice.status || 'Pending'}
-                              </Badge>
-                              <Button variant="ghost" size="sm">
-                                <Download className="h-4 w-4" />
-                              </Button>
-                            </div>
+                  <Panel>
+                    <PanelHeader label="Invoices" />
+                    <div>
+                      {customInvoices.map((invoice) => (
+                        <div
+                          key={invoice.id}
+                          className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5 first:border-t-0"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate font-mono text-xs text-foreground">{invoice.invoice_number}</p>
+                            <p className="font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                              {format(new Date(invoice.created_at), 'd MMM yyyy')}
+                              {invoice.due_date && ` · due ${format(new Date(invoice.due_date), 'd MMM yyyy')}`}
+                            </p>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                          <div className="flex shrink-0 items-center gap-3">
+                            <span className="text-[13px] font-[550] tabular-nums"><Money value={invoice.total_amount} whole /></span>
+                            <StatusBadge status={invoice.status || 'pending'} />
+                            <Button variant="ghost" size="sm" aria-label="Download invoice">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Panel>
                 )}
               </TabsContent>
 
-              {/* Checkout Tab */}
+              {/* Checkout tab */}
               <TabsContent value="checkout" className="space-y-6">
-                {/* Website Selection */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <Globe className="h-4 w-4 text-primary" />
-                    <h2 className="text-lg font-semibold">1. Choose Your Website</h2>
+                {/* Website selection */}
+                <div>
+                  <div className="mb-3 flex items-center gap-2">
+                    <h2 className="text-[13.5px] font-[550] tracking-[-0.01em]">1. Choose your website</h2>
                     {selectedWebsite && (
-                      <Badge className="ml-auto bg-primary/10 text-primary text-xs">Selected</Badge>
+                      <StatusBadge tone="accent" label="Selected" className="ml-auto" />
                     )}
                   </div>
                   <WebsitePackageSelector
@@ -1341,70 +1190,54 @@ const LoungeBilling = () => {
                     onSelectPackage={setSelectedWebsite}
                   />
                   {!selectedWebsite && (
-                    <p className="text-xs text-muted-foreground mt-2 text-center">
-                      Skip if you already have a website with us
+                    <p className="mt-2 text-center text-xs text-muted-foreground">
+                      Skip this step if you already have a website with us
                     </p>
                   )}
-                </motion.div>
+                </div>
 
-                {/* Plan Selection */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <h2 className="text-lg font-semibold">2. Select Management Plan</h2>
-                    <Badge className="ml-auto bg-primary/10 text-primary text-xs">{selectedPlanData?.name}</Badge>
+                {/* Plan selection */}
+                <div>
+                  <div className="mb-3 flex items-center gap-2">
+                    <h2 className="text-[13.5px] font-[550] tracking-[-0.01em]">2. Select a management plan</h2>
+                    <StatusBadge tone="neutral" label={selectedPlanData?.name ?? ''} className="ml-auto" />
                   </div>
                   <PlanSelector
                     plans={PLANS}
                     selectedPlan={selectedPlan}
                     onSelectPlan={setSelectedPlan}
                   />
-                </motion.div>
+                </div>
 
                 {/* Add-ons */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <h2 className="text-lg font-semibold">3. Add Extras</h2>
+                <div>
+                  <div className="mb-3 flex items-center gap-2">
+                    <h2 className="text-[13.5px] font-[550] tracking-[-0.01em]">3. Add extras</h2>
                     {selectedAddons.size > 0 && (
-                      <Badge className="ml-auto bg-primary/10 text-primary text-xs">
-                        {selectedAddons.size} selected
-                      </Badge>
+                      <StatusBadge tone="accent" label={`${selectedAddons.size} selected`} className="ml-auto" />
                     )}
                   </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                    {AVAILABLE_ADDONS.map((addon, index) => {
+
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+                    {AVAILABLE_ADDONS.map((addon) => {
                       const Icon = addon.icon;
                       const isActive = selectedAddons.has(addon.id);
-                      
+
                       return (
-                        <motion.div
+                        <div
                           key={addon.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3 + index * 0.05 }}
-                          className={`
-                            relative rounded-xl border-2 p-3 transition-all duration-300 cursor-pointer
-                            ${isActive 
-                              ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' 
-                              : 'border-border/50 hover:border-border hover:bg-muted/30'
-                            }
-                          `}
+                          role="button"
+                          tabIndex={0}
+                          className={cn(
+                            'cursor-pointer rounded-[10px] border p-3 transition-colors duration-150',
+                            isActive
+                              ? 'border-primary bg-primary/[0.04]'
+                              : 'border-border/60 hover:border-border hover:bg-foreground/[0.02]',
+                          )}
                           onClick={() => toggleAddon(addon.id)}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className={`p-1.5 rounded-lg ${isActive ? 'bg-primary/20' : 'bg-muted'}`}>
-                              <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
-                            </div>
+                          <div className="mb-2 flex items-center justify-between">
+                            <Icon className={cn('h-4 w-4', isActive ? 'text-primary' : 'text-muted-foreground')} />
                             <Switch
                               checked={isActive}
                               onCheckedChange={() => toggleAddon(addon.id)}
@@ -1412,132 +1245,109 @@ const LoungeBilling = () => {
                               className="scale-75"
                             />
                           </div>
-                          
-                          <h3 className="font-semibold text-sm mb-0.5 truncate">{addon.name}</h3>
+
+                          <h3 className="mb-0.5 truncate text-[13px] font-[550]">{addon.name}</h3>
                           <div className="flex items-baseline gap-0.5">
                             {hidePrices ? (
-                              <span className="text-sm font-semibold text-muted-foreground">Custom Quote</span>
+                              <span className="text-sm font-[550] text-muted-foreground">Custom quote</span>
                             ) : (
                               <>
-                                <span className="text-lg font-bold">£{addon.price}</span>
-                                <span className="text-muted-foreground text-xs">/mo</span>
+                                <span className="text-[15px] font-semibold tabular-nums"><Money value={addon.price} whole /></span>
+                                <span className="text-xs text-muted-foreground">/mo</span>
                               </>
                             )}
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
-                </motion.div>
+                </div>
               </TabsContent>
 
-              {/* Website Tab - Full Package View */}
-              <TabsContent value="website" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Globe className="h-5 w-5" />
-                      Website Packages
-                    </CardTitle>
-                    <CardDescription>
-                      Choose the perfect website package for your business. All packages include responsive design, SEO basics, and SSL.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+              {/* Website tab: full package view */}
+              <TabsContent value="website" className="space-y-4">
+                <Panel>
+                  <PanelHeader label="Website packages" />
+                  <div className="p-4">
+                    <p className="mb-4 text-[13px] text-muted-foreground">
+                      Choose the website package that fits your business. Every package includes responsive design, SEO basics and SSL.
+                    </p>
                     <WebsitePackageSelector
                       packages={WEBSITE_PACKAGES}
                       selectedPackage={selectedWebsite}
                       onSelectPackage={setSelectedWebsite}
                     />
-                  </CardContent>
-                </Card>
+                  </div>
+                </Panel>
               </TabsContent>
 
-              {/* History Tab */}
-              <TabsContent value="history" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Receipt className="h-5 w-5" />
-                      Payment History
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {billing?.one_off_charges && billing.one_off_charges.length > 0 ? (
-                      <div className="space-y-3">
-                        {billing.one_off_charges.map((charge, index) => (
-                          <div 
-                            key={index}
-                            className="flex items-center justify-between p-4 bg-muted/30 rounded-lg"
-                          >
-                            <div>
-                              <p className="font-medium">{charge.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {format(new Date(charge.date), 'dd MMM yyyy')}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className="font-semibold">£{charge.price.toLocaleString()}</span>
-                              <Badge className={charge.paid 
-                                ? 'bg-green-500/10 text-green-500 border-green-500/20' 
-                                : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                              }>
-                                {charge.paid ? 'Paid' : 'Pending'}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Receipt className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                        <p>No payment history yet</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Current Subscription */}
-                {billing && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Current Subscription</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                        <div>
-                          <p className="font-medium">{billing.plan_name} Plan</p>
-                          <p className="text-sm text-muted-foreground">Monthly subscription</p>
-                        </div>
-                        <span className="font-semibold">£{billing.plan_price}/mo</span>
-                      </div>
-                      
-                      {billing.add_ons.filter(a => a.active).map((addon, index) => (
-                        <div 
+              {/* History tab */}
+              <TabsContent value="history" className="space-y-4">
+                <Panel>
+                  <PanelHeader label="Payment history" />
+                  {billing?.one_off_charges && billing.one_off_charges.length > 0 ? (
+                    <div>
+                      {billing.one_off_charges.map((charge, index) => (
+                        <div
                           key={index}
-                          className="flex items-center justify-between p-4 bg-muted/30 rounded-lg"
+                          className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5 first:border-t-0"
                         >
-                          <div>
-                            <p className="font-medium">{addon.name}</p>
-                            <p className="text-sm text-muted-foreground">Monthly add-on</p>
+                          <div className="min-w-0">
+                            <p className="truncate text-[13px] font-[450] text-foreground">{charge.name}</p>
+                            <p className="font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                              {format(new Date(charge.date), 'd MMM yyyy')}
+                            </p>
                           </div>
-                          <span className="font-semibold">£{addon.price}/mo</span>
+                          <div className="flex shrink-0 items-center gap-3">
+                            <span className="text-[13px] font-[550] tabular-nums"><Money value={charge.price} whole /></span>
+                            <StatusBadge tone={charge.paid ? 'ok' : 'attend'} label={charge.paid ? 'Paid' : 'Pending'} />
+                          </div>
                         </div>
                       ))}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  ) : (
+                    <EmptyState
+                      compact
+                      title="No payment history yet"
+                      body="Charges appear here as they're raised and paid."
+                    />
+                  )}
+                </Panel>
+
+                {/* Current subscription */}
+                {billing && (
+                  <Panel>
+                    <PanelHeader label="Current subscription" />
+                    <div>
+                      <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+                        <div>
+                          <p className="text-[13px] font-[450] text-foreground">{billing.plan_name} plan</p>
+                          <p className="text-[11.5px] text-muted-foreground">Monthly subscription</p>
+                        </div>
+                        <span className="text-[13px] font-[550] tabular-nums"><Money value={billing.plan_price} whole />/mo</span>
+                      </div>
+
+                      {billing.add_ons.filter(a => a.active).map((addon, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-2.5"
+                        >
+                          <div>
+                            <p className="text-[13px] font-[450] text-foreground">{addon.name}</p>
+                            <p className="text-[11.5px] text-muted-foreground">Monthly add-on</p>
+                          </div>
+                          <span className="text-[13px] font-[550] tabular-nums"><Money value={addon.price} whole />/mo</span>
+                        </div>
+                      ))}
+                    </div>
+                  </Panel>
                 )}
               </TabsContent>
             </Tabs>
           </div>
 
-          {/* Checkout Summary Sidebar */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="lg:col-span-1"
-          >
+          {/* Checkout summary sidebar */}
+          <div className="lg:col-span-1">
             <CheckoutSummary
               items={checkoutItems}
               paymentStatus={paymentStatus}
@@ -1549,21 +1359,16 @@ const LoungeBilling = () => {
               hidePrices={hidePrices}
             />
 
-            {/* Help Card */}
-            <Card className="mt-4 bg-muted/30 border-dashed">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <HeadphonesIcon className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">
-                    Need help choosing? Contact our team for personalized recommendations.
-                  </p>
-                  <Button variant="link" className="mt-2">
-                    Book a consultation
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Help note */}
+            <div className="mt-4 rounded-[10px] border border-dashed border-border/60 p-4 text-center">
+              <p className="text-[13px] text-muted-foreground">
+                Not sure what to choose? The studio can recommend the right setup for you.
+              </p>
+              <Button variant="link" className="mt-1 h-auto p-0 text-[13px]">
+                Book a consultation
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
