@@ -37,7 +37,7 @@ const PlanSelector = ({ plans, selectedPlan, onSelectPlan }: PlanSelectorProps) 
           )}
         >
           {plan.popular && (
-            <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-[10px] px-1.5 py-0 gap-0.5">
+            <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] px-1.5 py-0 gap-0.5">
               <Sparkles className="h-2.5 w-2.5" />
               Popular
             </Badge>

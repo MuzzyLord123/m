@@ -53,7 +53,7 @@ const PaymentSummary = ({
         );
       case 'paid':
         return (
-          <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
+          <Badge className="border-ok/30 bg-transparent text-ok">
             <CheckCircle2 className="h-3 w-3 mr-1" />
             Paid
           </Badge>
@@ -65,7 +65,7 @@ const PaymentSummary = ({
 
   return (
     <Card className="sticky top-4 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+      
       
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
@@ -172,7 +172,7 @@ const PaymentSummary = ({
         {paymentStatus === 'waiting' && grandTotal > 0 && (
           <Button 
             size="lg" 
-            className="w-full gap-2 h-14 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg shadow-primary/25"
+            className="w-full gap-2 h-11 text-sm font-medium"
             onClick={onPayNow}
             disabled={isLoading}
           >
@@ -191,7 +191,7 @@ const PaymentSummary = ({
         )}
 
         {paymentStatus === 'paid' && (
-          <div className="flex items-center justify-center gap-2 py-4 text-green-500">
+          <div className="flex items-center justify-center gap-2 border-t border-border/60 py-3 text-ok">
             <CheckCircle2 className="h-5 w-5" />
             <span className="font-medium">Payment Complete</span>
           </div>
