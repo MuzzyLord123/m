@@ -14,6 +14,7 @@ import { checkPasswordRequirements } from '@/lib/validation';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { SocialAuthDivider } from '@/components/auth/SocialAuthDivider';
 import { IndustryCombobox } from '@/components/ui/IndustryCombobox';
+import { AuthBrandPanel } from '@/components/auth/AuthBrandPanel';
 
 type AccountType = 'primary' | 'team_member';
 
@@ -296,42 +297,43 @@ export default function CustomerLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand/[0.04] via-transparent to-brand/[0.06]" />
-      <div 
-        className="absolute inset-0 opacity-[0.015] dark:opacity-[0.025]"
-        style={{
-          backgroundImage: `linear-gradient(hsl(var(--brand) / 0.2) 1px, transparent 1px),
-                            linear-gradient(90deg, hsl(var(--brand) / 0.2) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px'
-        }}
+    <div className="relative min-h-screen bg-background lg:grid lg:grid-cols-[1.1fr_1fr]">
+      {/* Brand panel — identical to the sign-in page's, shared component. */}
+      <AuthBrandPanel
+        headline={['Your studio', 'account.']}
+        body="One account for your projects, previews, files and billing — with your whole team under the same roof."
       />
-      <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-brand/[0.06] rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-brand/[0.04] rounded-full blur-[100px]" />
-      
+
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md relative z-10"
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:px-8"
       >
-        <Link 
-          to="/sign-in" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-150 mb-6 text-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to sign in options
-        </Link>
-        
-        <div className="glass-strong rounded-2xl p-8 sm:p-10 space-y-6">
-          <div className="text-center space-y-3">
+        <div className="w-full max-w-md">
+        <div className="mb-8 flex items-center justify-between">
+          <Link 
+            to="/sign-in" 
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to sign in
+          </Link>
+          <span className="mono-label lg:hidden">52.13° N · 3.78° W</span>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-3">
             <img 
               src={quooroLogo} 
               alt="Quooro" 
-              className="h-14 sm:h-16 w-auto mx-auto mb-4 dark:brightness-0 dark:invert"
+              className="h-9 w-auto dark:brightness-0 dark:invert"
             />
-            <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">Create Account</h1>
-            <p className="text-sm text-muted-foreground">Join Quooro Lounge today</p>
+            <div className="flex items-center gap-3 pt-2">
+              <span className="h-px w-8 bg-primary" />
+              <p className="mono-label">Join Quooro Lounge</p>
+            </div>
+            <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Create account</h1>
           </div>
 
           {/* Google Sign Up */}
@@ -352,7 +354,7 @@ export default function CustomerLogin() {
                   <RadioGroupItem value="primary" id="primary" className="sr-only peer" />
                   <Label
                     htmlFor="primary"
-                    className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
+                    className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-transparent p-4 hover:bg-foreground/[0.03] peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all duration-300"
                   >
                     <Crown className="h-6 w-6 text-primary" />
                     <span className="font-semibold text-sm">Primary Account</span>
@@ -363,7 +365,7 @@ export default function CustomerLogin() {
                   <RadioGroupItem value="team_member" id="team_member" className="sr-only peer" />
                   <Label
                     htmlFor="team_member"
-                    className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all"
+                    className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-transparent p-4 hover:bg-foreground/[0.03] peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 [&:has([data-state=checked])]:border-primary cursor-pointer transition-all duration-300"
                   >
                     <Users className="h-6 w-6 text-muted-foreground" />
                     <span className="font-semibold text-sm">Team Member</span>
@@ -392,7 +394,7 @@ export default function CustomerLogin() {
                       value={teamCode}
                       onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
                       className={`pl-10 font-mono tracking-wider uppercase ${
-                        teamCodeValid === true ? 'border-green-500 focus-visible:ring-green-500' : 
+                        teamCodeValid === true ? 'border-[hsl(var(--success))] focus-visible:ring-[hsl(var(--success))]' : 
                         teamCodeValid === false ? 'border-destructive focus-visible:ring-destructive' : ''
                       }`}
                       maxLength={8}
@@ -402,7 +404,7 @@ export default function CustomerLogin() {
                         <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                       )}
                       {!checkingTeamCode && teamCodeValid === true && (
-                        <Check className="w-4 h-4 text-green-500" />
+                        <Check className="w-4 h-4 text-[hsl(var(--success))]" />
                       )}
                       {!checkingTeamCode && teamCodeValid === false && (
                         <span className="text-xs text-destructive">Invalid</span>
@@ -557,6 +559,7 @@ export default function CustomerLogin() {
               </Link>
             </p>
           </div>
+        </div>
         </div>
       </motion.div>
     </div>
