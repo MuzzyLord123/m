@@ -17,8 +17,14 @@ export function Layout({ children }: LayoutProps) {
   const isHomePage = normalizedPath === "/";
   useMarketingPageTracker();
 
+  // The wrapper uses `overflow-x-clip`, not `overflow-x-hidden`.
+  // `overflow-x: hidden` forces the computed `overflow-y` to `auto`, which turns
+  // this div into a scroll container and silently kills `position: sticky` for
+  // everything inside it — which is what stopped the pinned platform section on
+  // the homepage from pinning. `overflow-x: clip` trims the same overflow without
+  // creating the container.
   return (
-    <div className="min-h-screen flex flex-col bg-background relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-background relative overflow-x-clip">
       <SkipToContent />
 
       <Navbar />

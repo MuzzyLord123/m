@@ -67,6 +67,17 @@
   filter: blur(0);
 }
 
+/* Seamless ticker. The track is duplicated once, so -50% lands exactly on the
+   start of the copy — any other distance shows a seam once per cycle. */
+@keyframes marquee-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="marquee-scroll"] { animation: none !important; }
+}
+
 /* Stagger delay utilities */
 .stagger-1 { transition-delay: 0.05s; }
 .stagger-2 { transition-delay: 0.1s; }
@@ -408,119 +419,73 @@
     box-shadow: var(--shadow-gold);
   }
 
-  /* Apple Liquid Glass Effects - works in light and dark mode */
+  /* ── Surfaces ──────────────────────────────────────────────────────────
+     These four class names appear in 40 component files, so they are kept —
+     only what they draw has changed.
+
+     They used to be true glassmorphism: 24px backdrop blur, 180% saturation, a
+     three-stop diagonal gradient, an inset top highlight, a 32px ambient shadow
+     and a -2px hover lift. That treatment is the single most recognisable
+     "generated in 2024" signal there is, it costs a full-surface backdrop filter
+     on every card, and stacked twelve to a page it turns the whole layout to
+     soup because nothing has a definite edge.
+
+     Replaced with flat surfaces separated by hairlines. The card is a shade off
+     the page, the border does the work, and hover changes the border rather than
+     levitating the box. This is what the expensive sites do, and it is also
+     cheaper to paint.
+     ------------------------------------------------------------------------ */
+
   .liquid-glass {
     @apply relative;
-    background: linear-gradient(
-      135deg,
-      hsl(var(--card) / 0.75) 0%,
-      hsl(var(--card) / 0.55) 50%,
-      hsl(var(--card) / 0.75) 100%
-    );
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid hsl(var(--foreground) / 0.06);
-    box-shadow: 
-      0 4px 30px hsl(var(--foreground) / 0.04),
-      inset 0 1px 0 hsl(var(--foreground) / 0.04);
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
   }
 
-  .liquid-glass::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: linear-gradient(
-      180deg,
-      hsl(var(--foreground) / 0.03) 0%,
-      transparent 100%
-    );
-    pointer-events: none;
-  }
-
-  /* Liquid glass pill for active nav items */
+  /* Active nav item. A tint and a hairline, not a lit capsule. */
   .liquid-glass-pill {
     @apply relative;
-    background: linear-gradient(
-      135deg,
-      hsl(var(--brand) / 0.12) 0%,
-      hsl(var(--brand) / 0.06) 50%,
-      hsl(var(--brand) / 0.12) 100%
-    );
-    backdrop-filter: blur(12px) saturate(150%);
-    -webkit-backdrop-filter: blur(12px) saturate(150%);
-    border: 1px solid hsl(var(--brand) / 0.2);
-    box-shadow: 
-      0 2px 12px hsl(var(--brand) / 0.12),
-      inset 0 1px 0 hsl(var(--foreground) / 0.06);
+    background: hsl(var(--primary) / 0.1);
+    border: 1px solid hsl(var(--primary) / 0.22);
   }
 
-  .liquid-glass-pill::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-    background: linear-gradient(
-      180deg,
-      hsl(var(--foreground) / 0.04) 0%,
-      transparent 100%
-    );
-    border-radius: inherit;
-    pointer-events: none;
-  }
-
-  /* Subtle liquid glass for hover states */
   .liquid-glass-subtle {
-    background: hsl(var(--foreground) / 0.03);
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
-    border: 1px solid hsl(var(--foreground) / 0.04);
+    background: hsl(var(--foreground) / 0.025);
+    border: 1px solid hsl(var(--border) / 0.7);
   }
 
-  /* Premium liquid glass card */
   .liquid-glass-card {
     @apply relative overflow-hidden rounded-xl;
-    background: linear-gradient(
-      145deg,
-      hsl(var(--card) / 0.85) 0%,
-      hsl(var(--card) / 0.65) 100%
-    );
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid hsl(var(--foreground) / 0.06);
-    box-shadow: 
-      0 8px 32px hsl(var(--foreground) / 0.06),
-      0 2px 8px hsl(var(--foreground) / 0.03),
-      inset 0 1px 0 hsl(var(--foreground) / 0.04);
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-
-  .liquid-glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(
-      180deg,
-      hsl(var(--foreground) / 0.03) 0%,
-      transparent 100%
-    );
-    pointer-events: none;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    transition:
+      border-color 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+      background-color 0.35s cubic-bezier(0.65, 0, 0.35, 1);
   }
 
   .liquid-glass-card:hover {
-    border-color: hsl(var(--brand) / 0.2);
-    box-shadow: 
-      0 16px 48px hsl(var(--brand) / 0.1),
-      0 4px 16px hsl(var(--foreground) / 0.05),
-      inset 0 1px 0 hsl(var(--foreground) / 0.06);
-    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.45);
+    background: hsl(var(--card));
+  }
+
+  /* The accent hairline that rides the top edge of a card on hover. Applied by
+     the class rather than by a <div> in every component. */
+  .liquid-glass-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: hsl(var(--primary));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .liquid-glass-card:hover::after {
+    transform: scaleX(1);
   }
 
   /* Solid dropdown with glass effect - prevents transparency issues */
@@ -638,24 +603,74 @@
     @apply text-sm sm:text-base md:text-lg text-foreground/65 leading-relaxed font-light;
   }
 
-  /* Editorial eyebrow — nardo grey uppercase kicker used above section headings */
+  /* Section kicker.
+     Was flanked by a hairline on BOTH sides and used inside a centred stack —
+     the symmetrical "— LABEL —" is a decorative frame, and once it appears above
+     six centred headings in a row the whole page reads as one repeated template.
+     Now a single leading rule in the accent, which reads as an index marker and
+     works left-aligned, which is where section headings now live. */
   .eyebrow {
-    @apply inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.22em] mb-4;
+    @apply inline-flex items-center gap-3 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.28em] mb-5;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
     color: hsl(var(--muted-foreground));
   }
   .eyebrow::before {
     content: "";
     display: inline-block;
-    width: 1.5rem;
+    width: 2rem;
     height: 1px;
-    background: linear-gradient(90deg, transparent, hsl(var(--muted-foreground) / 0.6));
+    flex: none;
+    background: hsl(var(--primary));
   }
-  .eyebrow::after {
+
+  /* Hairline used as a structural divider between rows. */
+  .rule {
+    @apply h-px w-full bg-border;
+  }
+
+  /* Small mono caption: coordinates, counts, metadata. */
+  .mono-label {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    @apply text-[10px] uppercase tracking-[0.2em] text-muted-foreground;
+  }
+
+  /* Editorial display size for a heading inside a narrow column (5 of 12).
+     display-xl overflows there — its clamp maximum is set for full width. */
+  .display-lg {
+    @apply font-display font-semibold;
+    font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+  }
+
+  /* Editorial display size, above heading-xl. For one full-width statement per page. */
+  .display-xl {
+    @apply font-display font-semibold;
+    font-size: clamp(2.6rem, 8vw, 6.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+  }
+
+  /* Text link whose underline draws in from the left on hover. */
+  .link-underline {
+    @apply relative inline-block;
+  }
+  .link-underline::after {
     content: "";
-    display: inline-block;
-    width: 1.5rem;
+    position: absolute;
+    left: 0;
+    bottom: -2px;
     height: 1px;
-    background: linear-gradient(90deg, hsl(var(--muted-foreground) / 0.6), transparent);
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .link-underline:hover::after,
+  a:hover > .link-underline::after,
+  a:focus-visible > .link-underline::after {
+    transform: scaleX(1);
   }
 
 

@@ -1,6 +1,18 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Linkedin, Twitter, Instagram, Facebook } from "lucide-react";
+import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import quooroLogo from "@/assets/quooro-logo.png";
+
+/**
+ * Site footer.
+ *
+ * The previous one was an eight-column link dump with a paragraph of boilerplate
+ * and four social icons pointing at `href="#"` — buttons that look like profiles
+ * and go nowhere. Those are removed rather than restyled; see PLACEHOLDERS.md.
+ *
+ * This version opens with the studio's position stated once at display size,
+ * then drops into a hairline-ruled directory with mono column headers. The
+ * contact details get their own row rather than being crushed into a strip.
+ */
 
 const footerLinks = {
   services: [
@@ -56,154 +68,115 @@ const footerLinks = {
   ],
 };
 
+const columns: { heading: string; links: { name: string; href: string }[] }[] = [
+  { heading: "Web services", links: footerLinks.services },
+  { heading: "Marketing", links: footerLinks.marketing },
+  { heading: "Company", links: footerLinks.company },
+  { heading: "Previews", links: footerLinks.previews },
+  { heading: "Support", links: footerLinks.support },
+  { heading: "Legal", links: footerLinks.legal },
+];
+
 export function Footer() {
   return (
-    <footer className="bg-card border-t border-border/30">
-      <div className="container-tight section-padding">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-6 sm:gap-8 lg:gap-6">
-          {/* Brand */}
-          <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-            <Link to="/" className="inline-block mb-4 sm:mb-6">
-              <img 
-                src={quooroLogo} 
-                alt="Quooro" 
-                className="h-8 sm:h-10 md:h-12 w-auto dark:brightness-0 dark:invert"
+    <footer className="border-t border-border bg-background">
+      {/* ── Sign-off line ──────────────────────────────────────────────── */}
+      <div className="container-tight border-b border-border/60 py-16 sm:py-20">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-8">
+            <p className="mono-label mb-6">Wales, United Kingdom</p>
+            <p className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.035em] sm:text-4xl lg:text-5xl">
+              A studio that designs, builds and quietly runs the systems a
+              business depends on.
+            </p>
+          </div>
+          <div className="flex items-end lg:col-span-4">
+            <Link
+              to="/get-started"
+              className="group inline-flex items-center gap-3 text-base font-medium text-foreground transition-colors hover:text-primary"
+            >
+              <span className="link-underline">Start a project</span>
+              <ArrowUpRight
+                className="h-5 w-5 text-primary transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                strokeWidth={1.6}
               />
             </Link>
-            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-sm">
-              Quooro is a digital operations hub that designs, builds, and manages websites, apps, dashboards, and internal systems — delivered through one secure platform.
-            </p>
-            <div className="flex gap-2 sm:gap-3">
-              {[
-                { icon: Twitter, href: "#", label: "Twitter" },
-                { icon: Linkedin, href: "#", label: "LinkedIn" },
-                { icon: Instagram, href: "#", label: "Instagram" },
-                { icon: Facebook, href: "#", label: "Facebook" },
-              ].map((social, index) => (
-                <a 
-                  key={index}
-                  href={social.href}
-                  aria-label={social.label}
-                  className="group w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent/50 flex items-center justify-center text-muted-foreground transition-all duration-200 hover:text-brand hover:bg-brand/10 hover:-translate-y-1"
-                >
-                  <social.icon className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:scale-110" />
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Services */}
-          <div className="col-span-1">
-            <h4 className="font-display font-semibold text-foreground text-sm sm:text-base mb-3 sm:mb-4 tracking-tight">Web Services</h4>
-            <ul className="space-y-2 sm:space-y-3">
-              {footerLinks.services.map((link) => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-xs sm:text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Marketing */}
-          <div className="col-span-1">
-            <h4 className="font-display font-semibold text-foreground text-sm sm:text-base mb-3 sm:mb-4">Marketing</h4>
-            <ul className="space-y-2 sm:space-y-3">
-              {footerLinks.marketing.map((link) => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-xs sm:text-sm text-muted-foreground transition-colors duration-300 hover:text-primary">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div className="col-span-1">
-            <h4 className="font-display font-semibold text-foreground text-sm sm:text-base mb-3 sm:mb-4">Company</h4>
-            <ul className="space-y-2 sm:space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-xs sm:text-sm text-muted-foreground transition-colors duration-300 hover:text-primary">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Previews */}
-          <div className="col-span-1">
-            <h4 className="font-display font-semibold text-foreground text-sm sm:text-base mb-3 sm:mb-4">Previews</h4>
-            <ul className="space-y-2 sm:space-y-3">
-              {footerLinks.previews.map((link) => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-xs sm:text-sm text-muted-foreground transition-colors duration-300 hover:text-primary">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div className="col-span-1">
-            <h4 className="font-display font-semibold text-foreground text-sm sm:text-base mb-3 sm:mb-4">Support</h4>
-            <ul className="space-y-2 sm:space-y-3">
-              {footerLinks.support.map((link) => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-xs sm:text-sm text-muted-foreground transition-colors duration-300 hover:text-primary">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div className="col-span-1">
-            <h4 className="font-display font-semibold text-foreground text-sm sm:text-base mb-3 sm:mb-4">Legal</h4>
-            <ul className="space-y-2 sm:space-y-3">
-              {footerLinks.legal.map((link) => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-xs sm:text-sm text-muted-foreground transition-colors duration-300 hover:text-primary">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
+      </div>
 
-        {/* Contact Bar */}
-        <div className="mt-10 sm:mt-16 pt-6 sm:pt-8 border-t border-border/30 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
-          <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 text-center">
-            <a href="mailto:Support@quooro.com" className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground transition-colors duration-300 hover:text-primary">
-              <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
-              Support@quooro.com
-            </a>
-            <a href="tel:+447739346789" className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground transition-colors duration-300 hover:text-primary">
-              <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
-              07739 346789
-            </a>
-            <span className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-              <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
+      {/* ── Directory ──────────────────────────────────────────────────── */}
+      <div className="container-tight py-14 sm:py-16">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
+          {columns.map((col) => (
+            <nav key={col.heading} aria-label={col.heading}>
+              <h4 className="mono-label mb-5 border-b border-border/60 pb-3">{col.heading}</h4>
+              <ul className="space-y-2.5">
+                {col.links.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      to={link.href}
+                      className="text-[13px] font-light text-muted-foreground transition-colors duration-200 hover:text-foreground"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Contact ────────────────────────────────────────────────────── */}
+      <div className="container-tight border-t border-border/60 py-10">
+        <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-3">
+          <div>
+            <dt className="mono-label mb-2">Email</dt>
+            <dd>
+              <a
+                href="mailto:Support@quooro.com"
+                className="group inline-flex items-center gap-2 text-sm text-foreground/85 transition-colors hover:text-primary"
+              >
+                <Mail className="h-3.5 w-3.5 text-primary" strokeWidth={1.6} />
+                <span className="link-underline">Support@quooro.com</span>
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt className="mono-label mb-2">Telephone</dt>
+            <dd>
+              <a
+                href="tel:+447739346789"
+                className="group inline-flex items-center gap-2 text-sm text-foreground/85 transition-colors hover:text-primary"
+              >
+                <Phone className="h-3.5 w-3.5 text-primary" strokeWidth={1.6} />
+                <span className="link-underline">07739 346789</span>
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt className="mono-label mb-2">Studio</dt>
+            <dd className="inline-flex items-center gap-2 text-sm text-foreground/85">
+              <MapPin className="h-3.5 w-3.5 text-primary" strokeWidth={1.6} />
               Wales, United Kingdom
-            </span>
+            </dd>
           </div>
-          <div className="text-xs sm:text-sm text-muted-foreground text-center md:text-right">
-            <p>© 2025 Quooro Ltd. All rights reserved.</p>
-          </div>
-        </div>
+        </dl>
+      </div>
 
-        {/* Business Identity - Legal Imprint */}
-        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-border/20">
-          <div className="text-center text-[10px] sm:text-xs text-muted-foreground space-y-1">
-            <p><strong>Quooro Ltd</strong> - Registered in England and Wales</p>
-          </div>
-        </div>
+      {/* ── Imprint ────────────────────────────────────────────────────── */}
+      <div className="container-tight flex flex-col gap-4 border-t border-border/60 py-8 sm:flex-row sm:items-center sm:justify-between">
+        <Link to="/" aria-label="Quooro home" className="inline-block">
+          <img
+            src={quooroLogo}
+            alt="Quooro"
+            className="h-7 w-auto dark:brightness-0 dark:invert sm:h-8"
+          />
+        </Link>
+        <p className="mono-label normal-case tracking-normal">
+          Quooro Ltd · Registered in England and Wales · © 2025
+        </p>
       </div>
     </footer>
   );

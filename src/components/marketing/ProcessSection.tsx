@@ -1,185 +1,132 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Check } from "lucide-react";
 import { useRef } from "react";
+import { motion, useScroll, useSpring, useTransform, useReducedMotion } from "framer-motion";
+import { Check } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { HOME_PROCESS_DEFAULTS, type HomeProcessContent } from "@/lib/siteContentSchemas";
 import { EditableField } from "@/components/marketing/EditableField";
 import { getIcon } from "@/lib/marketingIcons";
+import { SectionHeading } from "@/components/marketing/SectionHeading";
+import { Reveal } from "@/components/motion/Reveal";
+import { EASE_OUT, VIEWPORT } from "@/lib/motion";
 
-const STEP_CHIP = "from-primary/16 to-primary/[0.06] border border-primary/25";
-
-
-
+/**
+ * The process, as a numbered ladder with a scroll-drawn spine.
+ *
+ * The previous version was a zig-zag timeline of glass cards alternating left
+ * and right of a centre line, with white numerals on near-invisible chips (1.1:1
+ * in light mode — effectively blank). Alternating cards is the stock "process"
+ * component; it reads as a template because it is one, and it collapses to a
+ * plain stack on mobile anyway, so the arrangement only existed at one width.
+ *
+ * This is a single left-aligned column. The spine fills as you scroll, which
+ * gives the section a sense of progress the zig-zag only implied.
+ */
 export function ProcessSection() {
   const { data } = useSiteContent<HomeProcessContent>("home_process", HOME_PROCESS_DEFAULTS);
-  const processSteps = data.steps.map(s => ({ ...s, accent: STEP_CHIP }));
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
+  const trackRef = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
 
-  const lineHeight = useTransform(scrollYProgress, [0.1, 0.85], ["0%", "100%"]);
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: ["start 75%", "end 60%"],
+  });
+  const spine = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 0.5 });
+  const spineHeight = useTransform(spine, (v) => `${Math.max(0, Math.min(1, v)) * 100}%`);
 
   return (
-    <section ref={sectionRef} className="section-padding overflow-hidden relative">
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        background: 'radial-gradient(ellipse 60% 40% at 50% 50%, hsl(var(--primary) / 0.03) 0%, transparent 70%)',
-      }} />
+    <section className="section-padding relative border-t border-border/60">
+      <div className="container-tight">
+        <SectionHeading
+          className="mb-14 sm:mb-20"
+          eyebrow={
+            <EditableField sectionKey="home_process" field="eyebrow" value={data.eyebrow} label="Eyebrow">
+              {data.eyebrow}
+            </EditableField>
+          }
+          title={
+            <span className="block">
+              <EditableField sectionKey="home_process" field="title" value={data.title} label="Title">
+                {data.title}
+              </EditableField>{" "}
+              <span className="text-gradient">
+                <EditableField sectionKey="home_process" field="titleHighlight" value={data.titleHighlight} label="Title highlight">
+                  {data.titleHighlight}
+                </EditableField>
+              </span>
+            </span>
+          }
+          body={
+            <EditableField sectionKey="home_process" field="subtitle" value={data.subtitle} label="Subtitle" kind="textarea">
+              {data.subtitle}
+            </EditableField>
+          }
+        />
 
-      <div className="container-tight relative z-10">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-8 sm:mb-12 md:mb-20"
-        >
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-primary text-xs sm:text-sm font-semibold tracking-wider uppercase mb-3 block"
-          >
-            <EditableField sectionKey="home_process" field="eyebrow" value={data.eyebrow} label="Eyebrow">{data.eyebrow}</EditableField>
-          </motion.span>
-          <h2 className="heading-lg mb-3 sm:mb-4">
-            <EditableField sectionKey="home_process" field="title" value={data.title} label="Title">{data.title}</EditableField>{" "}
-            <span className="text-gradient"><EditableField sectionKey="home_process" field="titleHighlight" value={data.titleHighlight} label="Title highlight">{data.titleHighlight}</EditableField></span>
-          </h2>
-          <p className="body-lg max-w-2xl mx-auto">
-            <EditableField sectionKey="home_process" field="subtitle" value={data.subtitle} label="Subtitle" kind="textarea">{data.subtitle}</EditableField>
-          </p>
-        </motion.div>
-
-        {/* Process Steps with animated timeline */}
-        <div className="relative">
-          {/* Animated vertical line — desktop only */}
-          <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2">
-            <div className="w-full h-full bg-border/20" />
+        <div ref={trackRef} className="relative pl-8 sm:pl-16">
+          {/* Spine. The track is always there; the accent fills it on scroll. */}
+          <div className="absolute bottom-0 left-0 top-0 w-px bg-border sm:left-2">
             <motion.div
-              className="absolute top-0 left-0 w-full bg-gradient-to-b from-primary via-primary to-primary/30"
-              style={{ height: lineHeight }}
+              className="absolute inset-x-0 top-0 bg-primary"
+              style={{ height: reduce ? "100%" : spineHeight }}
             />
           </div>
 
-          <div className="space-y-6 sm:space-y-8 lg:space-y-0">
-            {processSteps.map((step, index) => { const StepIcon = getIcon(step.icon); return (
+          {data.steps.map((step) => {
+            const StepIcon = getIcon(step.icon);
+            return (
               <motion.div
                 key={step.step}
-                initial={{ opacity: 0, y: 40 }}
+                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{
-                  duration: 0.7,
-                  delay: 0.1,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className={`relative lg:grid lg:grid-cols-2 lg:gap-12 xl:gap-20 ${
-                  index % 2 === 0 ? "" : "lg:direction-rtl"
-                }`}
+                viewport={VIEWPORT}
+                transition={{ duration: 0.65, ease: EASE_OUT }}
+                className="relative border-b border-border/60 py-10 last:border-b-0 sm:py-14"
               >
-                {/* Timeline node — desktop */}
-                <div className="hidden lg:flex absolute left-1/2 top-8 -translate-x-1/2 z-10">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    whileInView={{ scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
-                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.accent} flex items-center justify-center text-primary font-semibold shadow-lg`}
-                    style={{
-                      boxShadow: `0 8px 32px hsl(var(--primary) / 0.2), 0 0 0 4px hsl(var(--background))`,
-                    }}
-                  >
-                    <span className="text-lg font-display">{step.step}</span>
-                  </motion.div>
-                </div>
+                {/* Node sitting on the spine. */}
+                <span
+                  aria-hidden
+                  className="absolute left-[-2.19rem] top-[3.1rem] h-1.5 w-1.5 rounded-full bg-primary sm:left-[-3.69rem] sm:top-[4.15rem]"
+                />
 
-                {/* Content card */}
-                <div
-                  className={`lg:py-8 ${
-                    index % 2 === 0 ? "lg:pr-12 xl:pr-20 lg:text-right" : "lg:col-start-2 lg:pl-12 xl:pl-20 lg:text-left"
-                  }`}
-                  style={{ direction: "ltr" }}
-                >
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.3 }}
-                    className="liquid-glass-card p-5 sm:p-6 lg:p-8 rounded-2xl border border-border/50 hover:border-primary/20 transition-all duration-500 group relative overflow-hidden"
-                  >
-                    {/* Gradient accent bar */}
-                    <div className="absolute top-0 left-0 right-0 h-px bg-primary/30 group-hover:bg-primary/70 transition-colors duration-500" />
-
-                    {/* Hover glow */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${step.accent} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500 pointer-events-none`} />
-
-                    {/* Mobile step number */}
-                    <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 lg:hidden">
-                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${step.accent} flex items-center justify-center text-primary font-semibold text-sm`}>
+                <div className="grid gap-6 lg:grid-cols-12 lg:gap-12">
+                  <div className="lg:col-span-5">
+                    <div className="mb-4 flex items-center gap-4">
+                      <span className="font-mono text-[11px] tabular-nums tracking-[0.2em] text-primary">
                         {step.step}
-                      </div>
-                      <h3 className="font-display font-bold text-lg sm:text-xl">{step.title}</h3>
+                      </span>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-border">
+                        <StepIcon className="h-4 w-4 text-primary" strokeWidth={1.6} />
+                      </span>
                     </div>
+                    <h3 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+                      {step.title}
+                    </h3>
+                  </div>
 
-                    {/* Desktop header */}
-                    <div className={`hidden lg:flex items-center gap-4 mb-5 ${
-                      index % 2 === 0 ? "justify-end" : "justify-start"
-                    }`}>
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${step.accent} bg-opacity-10 flex items-center justify-center text-primary ${
-                        index % 2 === 0 ? "order-2" : ""
-                      }`}
-                        style={{ backgroundColor: 'hsl(var(--primary) / 0.08)' }}
-                      >
-                        <StepIcon className="w-6 h-6" />
-                      </div>
-                      <h3 className="font-display font-bold text-xl xl:text-2xl">{step.title}</h3>
-                    </div>
-
-                    <p className="text-sm sm:text-base text-muted-foreground mb-5 sm:mb-6 leading-relaxed">
+                  <div className="lg:col-span-7">
+                    <p className="max-w-xl text-sm font-light leading-relaxed text-muted-foreground sm:text-[15px]">
                       {step.description}
                     </p>
-
-                    {/* Details — pill tags */}
-                    <div className={`flex flex-wrap gap-2 ${
-                      index % 2 === 0 ? "lg:justify-end" : "lg:justify-start"
-                    }`}>
+                    <ul className="mt-6 grid gap-x-8 gap-y-2.5 sm:grid-cols-2">
                       {step.details.map((detail) => (
-                        <span
-                          key={detail}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors duration-300"
-                          style={{
-                            backgroundColor: 'hsl(var(--muted) / 0.5)',
-                            border: '1px solid hsl(var(--border) / 0.3)',
-                          }}
-                        >
-                          <Check className="w-3 h-3 text-primary flex-shrink-0" />
-                          <span className="text-muted-foreground">{detail}</span>
-                        </span>
+                        <li key={detail} className="flex items-start gap-2.5">
+                          <Check className="mt-[3px] h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2.2} />
+                          <span className="text-sm font-light text-muted-foreground">{detail}</span>
+                        </li>
                       ))}
-                    </div>
-                  </motion.div>
+                    </ul>
+                  </div>
                 </div>
-
-                {/* Empty column for alternating layout */}
-                {index % 2 === 0 ? <div className="hidden lg:block" /> : null}
               </motion.div>
-            );})}
-          </div>
-
-          {/* Terminal node */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5, type: "spring" }}
-            className="hidden lg:flex justify-center mt-8"
-          >
-            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-primary to-primary/60 shadow-lg"
-              style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.3)' }}
-            />
-          </motion.div>
+            );
+          })}
         </div>
+
+        <Reveal className="mt-12">
+          <p className="mono-label">
+            {data.steps.length} stages · every one signed off before the next begins
+          </p>
+        </Reveal>
       </div>
     </section>
   );
