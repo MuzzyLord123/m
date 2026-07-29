@@ -660,13 +660,29 @@
       background: hsl(var(--card) / 0.62);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid hsl(var(--foreground) / 0.11);
+      border: 1px solid hsl(var(--foreground) / 0.14);
+      /* Measured before this rev: 27.8% Weber below the capsule but only 4.1%
+         above it — every layer was offset downward, so the silhouette existed
+         on its lower half only and the top rim dissolved into the paper. The
+         0.85-alpha white inset highlight made it worse: a white rim on white
+         stock erases the very boundary the border is trying to draw.
+
+         The upward layers below are deliberately ~2/3 the strength of the
+         downward ones, not equal. That matches the dark theme's natural ratio
+         (24% above / 45% below), which is the one the owner described as
+         "crisp": an even halo all round reads as a glow, not an object under
+         light. */
       box-shadow:
-        /* Top edge catches the light. */
-        inset 0 1px 0 hsl(0 0% 100% / 0.85),
+        /* Top edge catches the light — toned down so it defines, not bleaches. */
+        inset 0 1px 0 hsl(0 0% 100% / 0.6),
         /* Underside, so the capsule has thickness rather than being a decal. */
         inset 0 -1px 0 hsl(30 15% 15% / 0.07),
-        /* Contact → ambient ramp. */
+        /* All-round contact — this is what closes the silhouette at the top. */
+        0 0 2px hsl(30 15% 15% / 0.16),
+        /* Upward near + ambient. */
+        0 -2px 5px hsl(30 15% 15% / 0.13),
+        0 -8px 20px hsl(30 15% 15% / 0.08),
+        /* Downward contact → ambient ramp. */
         0 1px 2px hsl(30 15% 15% / 0.16),
         0 3px 6px hsl(30 15% 15% / 0.15),
         0 8px 16px hsl(30 15% 15% / 0.16),
@@ -718,7 +734,9 @@
       backdrop-filter: blur(28px) saturate(160%);
       -webkit-backdrop-filter: blur(28px) saturate(160%);
       box-shadow:
-        inset 0 1px 0 hsl(0 0% 100% / 0.7),
+        inset 0 1px 0 hsl(0 0% 100% / 0.6),
+        0 0 2px hsl(30 15% 15% / 0.12),
+        0 -2px 8px hsl(30 15% 15% / 0.06),
         0 1px 2px hsl(30 15% 15% / 0.09),
         0 6px 14px hsl(30 15% 15% / 0.10),
         0 18px 36px hsl(30 15% 15% / 0.12),
