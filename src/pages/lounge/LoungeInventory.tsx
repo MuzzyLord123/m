@@ -1,22 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  Package, AlertTriangle, TrendingUp, DollarSign, MapPin,
-  ClipboardList, BarChart3, RefreshCw, Boxes, ArrowLeft,
-  Search, Plus, X, Edit3, Trash2, Check, Loader2,
+  Package, AlertTriangle, TrendingUp, DollarSign,
+  RefreshCw, Boxes, ArrowLeft,
+  Search, Plus, X, Edit3, Trash2, Check,
   Shuffle, Clock, Hash, SlidersHorizontal, Minus,
-  Copy, MoreHorizontal, Pencil, FolderOpen,
+  Copy, MoreHorizontal, Pencil,
   LayoutGrid, List, ArrowUpDown, Building2, ChevronLeft,
 } from 'lucide-react';
 import { SubscriptionPaywall } from '@/components/lounge/SubscriptionPaywall';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
 import { InventorySplash } from '@/components/splash/InventorySplash';
 import { ExitSplash } from '@/components/splash/ExitSplash';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -31,6 +28,11 @@ import {
 import { toast } from 'sonner';
 import { format, formatDistanceToNow } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  PageHeader, StatusBadge, ConfirmDialog, EmptyState, SkeletonLedger,
+  type Tone,
+} from '@/components/platform';
+import { cn } from '@/lib/utils';
 
 /* ─── Types ─── */
 interface Company {
@@ -88,13 +90,24 @@ interface StockMovement {
 type ViewMode = 'grid' | 'list';
 type SortOption = 'updated' | 'created' | 'name';
 
-const STOCK_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  ok: { label: 'In Stock', color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
-  low: { label: 'Low Stock', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' },
-  zero: { label: 'Out of Stock', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
+/* Stock status resolves to the platform's status vocabulary — no hex maps. */
+const STOCK_STATUS: Record<string, { label: string; tone: Tone }> = {
+  ok: { label: 'In stock', tone: 'ok' },
+  low: { label: 'Low stock', tone: 'attend' },
+  zero: { label: 'Out of stock', tone: 'risk' },
 };
 
+const TONE_TEXT: Record<string, string> = { ok: 'text-ok', attend: 'text-attend', risk: 'text-risk' };
+const TONE_BG: Record<string, string> = { ok: 'bg-ok/10', attend: 'bg-attend/10', risk: 'bg-risk/10' };
+const TONE_DOT: Record<string, string> = { ok: 'bg-ok', attend: 'bg-attend', risk: 'bg-risk' };
+
 const UNITS = ['pieces', 'kg', 'g', 'liters', 'ml', 'boxes', 'pairs', 'sets', 'meters', 'feet'];
+
+/* Shared field recipe at the instrument's compact scale */
+const FIELD_SM =
+  'w-full h-8 rounded-md border border-border/60 bg-foreground/[0.03] px-2.5 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-primary/60 placeholder:text-muted-foreground/60';
+const LABEL_SM =
+  'font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-1';
 
 function generateSKU(): string {
   return 'SKU-' + Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -173,7 +186,7 @@ function LoungeInventoryInner() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   DASHBOARD VIEW — Company cards (like website designer)
+   DASHBOARD VIEW — Company cards
    ═══════════════════════════════════════════════════════ */
 function InventoryDashboard({ userId, onOpenCompany }: { userId: string; onOpenCompany: (id: string) => void }) {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -275,67 +288,74 @@ function InventoryDashboard({ userId, onOpenCompany }: { userId: string; onOpenC
   const filtered = sorted.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
-    <div className="min-h-[80vh] p-4 md:p-6 lg:p-8 space-y-6">
-      <LoungePageHeader
-        title="Inventory Dashboard"
+    <div className="mx-auto min-h-[80vh] max-w-[1280px] space-y-5 px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Inventory"
+        title="Inventory"
         description={`${companies.length} ${companies.length === 1 ? 'company' : 'companies'}`}
-        icon={Package}
-        badge="Pro"
         actions={
           <Button
             onClick={() => setShowNewDialog(true)}
             size="sm"
-            className="text-xs h-8 px-4"
+            className="h-8 rounded-lg px-3 text-xs"
           >
-            <Plus className="w-3.5 h-3.5 mr-1.5" /> New Company
+            <Plus className="mr-1.5 h-3.5 w-3.5" /> New company
           </Button>
         }
       />
 
       {/* ─── Controls ─── */}
       {companies.length > 0 && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="relative flex-1 min-w-[160px] max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#555]" />
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[160px] max-w-sm flex-1">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search companies…"
+                placeholder="Search companies"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-[#141414] border border-[#2a2a2a] rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder:text-[#555] focus:outline-none focus:border-[#444] transition-colors"
+                className="w-full rounded-lg border border-border/60 bg-foreground/[0.03] py-2 pl-9 pr-3 text-xs text-foreground outline-none transition-colors duration-150 placeholder:text-muted-foreground/60 focus:border-primary/60"
               />
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowDeleteAllDialog(true)}
-              className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive text-xs h-8 px-3"
+              className="h-8 px-3 text-xs text-risk hover:text-risk"
             >
-              <Trash2 className="w-3 h-3 mr-1.5" /> Delete All
+              <Trash2 className="mr-1.5 h-3 w-3" /> Delete all
             </Button>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-[#1a1a1a] border border-[#2a2a2a] rounded-md overflow-hidden">
-              <button onClick={() => setViewMode('grid')} className={`p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-[#555] hover:text-[#888]'}`}>
-                <LayoutGrid className="w-3.5 h-3.5" />
+            <div className="flex items-center overflow-hidden rounded-md border border-border/60">
+              <button
+                onClick={() => setViewMode('grid')}
+                aria-label="Grid view"
+                className={cn('p-1.5 transition-colors duration-150', viewMode === 'grid' ? 'bg-foreground/[0.06] text-foreground' : 'text-muted-foreground hover:text-foreground')}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
               </button>
-              <button onClick={() => setViewMode('list')} className={`p-1.5 transition-colors ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-[#555] hover:text-[#888]'}`}>
-                <List className="w-3.5 h-3.5" />
+              <button
+                onClick={() => setViewMode('list')}
+                aria-label="List view"
+                className={cn('p-1.5 transition-colors duration-150', viewMode === 'list' ? 'bg-foreground/[0.06] text-foreground' : 'text-muted-foreground hover:text-foreground')}
+              >
+                <List className="h-3.5 w-3.5" />
               </button>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] text-[#777] hover:text-white bg-[#1a1a1a] border border-[#2a2a2a] rounded-md transition-colors">
-                  <ArrowUpDown className="w-3 h-3" />
+                <button className="flex items-center gap-1.5 rounded-md border border-border/60 px-2.5 py-1.5 text-[11px] text-muted-foreground transition-colors duration-150 hover:text-foreground">
+                  <ArrowUpDown className="h-3 w-3" />
                   <span className="hidden sm:inline">{sortBy === 'updated' ? 'Last edited' : sortBy === 'created' ? 'Date created' : 'Name'}</span>
                   <span className="sm:hidden">Sort</span>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-[#2a2a2a] min-w-[140px]">
-                <DropdownMenuItem onClick={() => setSortBy('updated')} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">Last edited</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('created')} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">Date created</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('name')} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">Name</DropdownMenuItem>
+              <DropdownMenuContent align="end" className="min-w-[140px]">
+                <DropdownMenuItem onClick={() => setSortBy('updated')} className="text-xs">Last edited</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('created')} className="text-xs">Date created</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('name')} className="text-xs">Name</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -344,218 +364,182 @@ function InventoryDashboard({ userId, onOpenCompany }: { userId: string; onOpenC
 
       {/* ─── Company Cards ─── */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-6 h-6 border-2 border-[#333] border-t-white/70 rounded-full animate-spin" />
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-hidden>
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+              <div className="aspect-[16/10] animate-pulse bg-foreground/[0.04]" />
+              <div className="space-y-2 p-3.5">
+                <div className="h-3.5 w-2/3 animate-pulse rounded bg-foreground/[0.06]" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-foreground/[0.05]" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : companies.length === 0 ? (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-24 space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#161616] border border-[#2a2a2a] flex items-center justify-center">
-            <FolderOpen className="w-6 h-6 text-[#555]" />
-          </div>
-          <div className="text-center space-y-1">
-            <p className="text-white/80 text-sm font-medium">No companies yet</p>
-            <p className="text-[#666] text-xs">Add a company to start managing inventory</p>
-          </div>
-          <Button onClick={() => setShowNewDialog(true)} className="bg-white text-black hover:bg-white/90 font-medium text-xs h-8 px-4">
-            <Plus className="w-3.5 h-3.5 mr-1" /> Add Company
-          </Button>
-        </motion.div>
+        <EmptyState
+          title="No companies yet"
+          body="Add a company to start managing its inventory."
+          action={{ label: 'Add company', onClick: () => setShowNewDialog(true) }}
+        />
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-[#666] text-xs">No companies match "{searchQuery}"</p>
-        </div>
+        <EmptyState
+          compact
+          title="No companies match your search"
+          body={`Nothing found for "${searchQuery}".`}
+        />
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((company, i) => (
-              <CompanyCard key={company.id} company={company} index={i} onOpen={() => onOpenCompany(company.id)} onDelete={() => handleDelete(company.id)} />
-            ))}
-          </AnimatePresence>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((company) => (
+            <CompanyCard key={company.id} company={company} onOpen={() => onOpenCompany(company.id)} onDelete={() => handleDelete(company.id)} />
+          ))}
         </div>
       ) : (
-        <div className="space-y-1">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((company, i) => (
-              <CompanyListItem key={company.id} company={company} index={i} onOpen={() => onOpenCompany(company.id)} onDelete={() => handleDelete(company.id)} />
-            ))}
-          </AnimatePresence>
+        <div className="rounded-[10px] border border-border/60 bg-card">
+          {filtered.map((company) => (
+            <CompanyListItem key={company.id} company={company} onOpen={() => onOpenCompany(company.id)} onDelete={() => handleDelete(company.id)} />
+          ))}
         </div>
       )}
 
       {/* ─── New Company Dialog ─── */}
       <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
-        <DialogContent className="bg-[#161616] border-[#2a2a2a] text-white max-w-md">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white text-base">New Company</DialogTitle>
+            <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">New company</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-[#aaa] text-xs">Company Name *</Label>
+              <Label className={LABEL_SM}>Company name</Label>
               <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Warehouse London" autoFocus
-                className="bg-[#111] border-[#2a2a2a] text-white placeholder:text-[#555] text-sm h-9 focus:border-[#444]" />
+                className="h-9 text-sm" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[#aaa] text-xs">Address</Label>
+              <Label className={LABEL_SM}>Address</Label>
               <Input value={newAddress} onChange={e => setNewAddress(e.target.value)} placeholder="123 Main St, London"
-                className="bg-[#111] border-[#2a2a2a] text-white placeholder:text-[#555] text-sm h-9 focus:border-[#444]" />
+                className="h-9 text-sm" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[#aaa] text-xs">Description</Label>
+              <Label className={LABEL_SM}>Description</Label>
               <Textarea value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Optional description…" rows={2}
-                className="bg-[#111] border-[#2a2a2a] text-white placeholder:text-[#555] text-sm focus:border-[#444] resize-none" />
+                className="resize-none text-sm" />
             </div>
           </div>
           <DialogFooter className="pt-4">
-            <Button variant="ghost" onClick={() => setShowNewDialog(false)} className="text-[#888] hover:text-white hover:bg-white/5 text-xs">Cancel</Button>
-            <Button onClick={handleCreate} disabled={creating || !newName.trim()} className="bg-white text-black hover:bg-white/90 font-medium text-xs h-9 px-5">
-              {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Plus className="w-3.5 h-3.5 mr-1" />}
-              Create Company
+            <Button variant="outline" size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowNewDialog(false)}>Cancel</Button>
+            <Button size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={handleCreate} disabled={creating || !newName.trim()}>
+              {creating ? 'Creating' : 'Create company'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* ─── Delete All Dialog ─── */}
-      <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
-        <DialogContent className="bg-[#161616] border-[#2a2a2a] text-white max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="text-white text-base">Delete All Companies?</DialogTitle>
-          </DialogHeader>
-          <p className="text-[#888] text-xs">This will permanently delete all companies and their associated products. This action cannot be undone.</p>
-          <DialogFooter className="pt-4">
-            <Button variant="ghost" onClick={() => setShowDeleteAllDialog(false)} className="text-[#888] hover:text-white text-xs">Cancel</Button>
-            <Button onClick={handleDeleteAll} disabled={deletingAll} variant="destructive" className="text-xs">
-              {deletingAll ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Trash2 className="w-3 h-3 mr-1" />} Delete All
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={showDeleteAllDialog}
+        onOpenChange={setShowDeleteAllDialog}
+        title="Delete all companies?"
+        consequence="This permanently deletes every company and its products. It cannot be undone."
+        confirmLabel="Delete all"
+        onConfirm={handleDeleteAll}
+        loading={deletingAll}
+      />
     </div>
   );
 }
 
 /* ─── Company Card (Grid) ─── */
-function CompanyCard({ company, index, onOpen, onDelete }: { company: Company; index: number; onOpen: () => void; onDelete: () => void }) {
-  const statusColor = (company.low_stock_count || 0) > 0 ? '#fbbf24' : '#34d399';
+function CompanyCard({ company, onOpen, onDelete }: { company: Company; onOpen: () => void; onDelete: () => void }) {
+  const lowStock = (company.low_stock_count || 0) > 0;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} transition={{ delay: index * 0.03, duration: 0.2 }}>
-      <div className="group relative bg-[#141414] border border-[#222] rounded-xl overflow-hidden hover:border-[#3a3a3a] transition-all duration-200">
-        {/* Thumbnail area */}
-        <div className="relative aspect-[16/10] bg-[#0e0e0e] overflow-hidden">
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#111] to-[#0a0a0a]">
-            <div className="flex flex-col items-center gap-3">
-              <Building2 className="w-8 h-8 text-white/10" />
-              <div className="grid grid-cols-3 gap-1 opacity-20">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className={`${i < 3 ? 'w-8 h-5' : 'w-8 h-4'} bg-white/30 rounded-sm`} />
-                ))}
-              </div>
+    <div className="group relative overflow-hidden rounded-[10px] border border-border/60 bg-card transition-colors duration-150 hover:border-border">
+      {/* Thumbnail area */}
+      <button type="button" onClick={onOpen} aria-label={`Open ${company.name}`} className="relative block aspect-[16/10] w-full overflow-hidden bg-sunken">
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <Building2 className="h-8 w-8 text-foreground/10" />
+            <div className="grid grid-cols-3 gap-1 opacity-20">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className={`${i < 3 ? 'w-8 h-5' : 'w-8 h-4'} rounded-sm bg-foreground/30`} />
+              ))}
             </div>
           </div>
-
-          {/* Hover overlay */}
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
-            <Button onClick={(e) => { e.stopPropagation(); onOpen(); }} className="bg-white text-black hover:bg-white/90 font-medium text-xs h-8 px-4 shadow-xl">
-              <Pencil className="w-3 h-3 mr-1.5" /> View Inventory
-            </Button>
-          </div>
-
-          {/* Stats overlay */}
-          <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
-            <Badge className="bg-black/50 backdrop-blur-sm text-white/70 border-white/10 text-[10px] font-normal px-2 py-0 h-5">
-              {company.product_count || 0} SKUs
-            </Badge>
-            {(company.low_stock_count || 0) > 0 && (
-              <Badge className="bg-amber-500/20 backdrop-blur-sm text-amber-400 border-amber-500/20 text-[10px] font-normal px-2 py-0 h-5">
-                {company.low_stock_count} low
-              </Badge>
-            )}
-          </div>
-
-          {/* More menu */}
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                <button className="w-7 h-7 rounded-md bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-black/70 transition-colors">
-                  <MoreHorizontal className="w-3.5 h-3.5 text-white/70" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-[#2a2a2a] min-w-[140px]">
-                <DropdownMenuItem onClick={e => { e.stopPropagation(); onOpen(); }} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">
-                  <Pencil className="w-3 h-3 mr-2" /> Open
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#2a2a2a]" />
-                <DropdownMenuItem onClick={e => { e.stopPropagation(); onDelete(); }} className="text-red-400 text-xs focus:bg-red-500/10 focus:text-red-400">
-                  <Trash2 className="w-3 h-3 mr-2" /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
 
-        {/* Info */}
-        <div className="p-3.5 space-y-1.5">
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-white text-[13px] font-medium truncate leading-tight">{company.name}</p>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                <button className="shrink-0 text-[#555] hover:text-[#999] transition-colors">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#1a1a1a] border-[#2a2a2a] min-w-[140px]">
-                <DropdownMenuItem onClick={e => { e.stopPropagation(); onOpen(); }} className="text-white/80 text-xs focus:bg-white/5 focus:text-white">
-                  <Pencil className="w-3 h-3 mr-2" /> Open
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#2a2a2a]" />
-                <DropdownMenuItem onClick={e => { e.stopPropagation(); onDelete(); }} className="text-red-400 text-xs focus:bg-red-500/10 focus:text-red-400">
-                  <Trash2 className="w-3 h-3 mr-2" /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
-            <span className="text-[#555] text-[11px] flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {timeAgo(company.updated_at)}
+        {/* Stats overlay */}
+        <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
+          <span className="rounded-md border border-border/60 bg-card/95 px-2 py-0.5 text-[10px] tabular-nums text-muted-foreground">
+            {company.product_count || 0} SKUs
+          </span>
+          {lowStock && (
+            <span className="rounded-md border border-border/60 bg-card/95 px-2 py-0.5 text-[10px] tabular-nums text-attend">
+              {company.low_stock_count} low
             </span>
-            {company.address && (
-              <>
-                <span className="text-[#444] text-[11px]">·</span>
-                <span className="text-[#555] text-[11px] truncate">{company.address}</span>
-              </>
-            )}
-          </div>
+          )}
+        </div>
+      </button>
+
+      {/* More menu */}
+      <div className="absolute right-2 top-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
+            <button aria-label="Company actions" className="flex h-7 w-7 items-center justify-center rounded-md border border-border/60 bg-card/95 transition-colors duration-150 hover:bg-card">
+              <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[140px]">
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onOpen(); }} className="text-xs">
+              <Pencil className="mr-2 h-3 w-3" /> Open
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onDelete(); }} className="text-xs text-destructive focus:text-destructive">
+              <Trash2 className="mr-2 h-3 w-3" /> Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Info */}
+      <div className="space-y-1.5 p-3.5">
+        <p className="truncate text-[13px] font-medium leading-tight text-foreground">{company.name}</p>
+        <div className="flex items-center gap-2">
+          <span aria-hidden className={cn('h-1.5 w-1.5 rounded-full', lowStock ? 'bg-attend' : 'bg-ok')} />
+          <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            {timeAgo(company.updated_at)}
+          </span>
+          {company.address && (
+            <>
+              <span className="text-[11px] text-muted-foreground/60">·</span>
+              <span className="truncate text-[11px] text-muted-foreground">{company.address}</span>
+            </>
+          )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 /* ─── Company List Item ─── */
-function CompanyListItem({ company, index, onOpen, onDelete }: { company: Company; index: number; onOpen: () => void; onDelete: () => void }) {
+function CompanyListItem({ company, onOpen, onDelete }: { company: Company; onOpen: () => void; onDelete: () => void }) {
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ delay: index * 0.02 }}>
-      <div onClick={onOpen} className="group flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-white/[0.03] border border-transparent hover:border-[#2a2a2a] cursor-pointer transition-all">
-        <div className="w-10 h-10 rounded-lg bg-[#111] border border-[#222] flex items-center justify-center shrink-0">
-          <Building2 className="w-4 h-4 text-[#333]" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-white text-[13px] font-medium truncate">{company.name}</p>
-          <p className="text-[#555] text-[11px]">{company.product_count || 0} products · Edited {timeAgo(company.updated_at)}</p>
-        </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="h-7 px-2 text-[#888] hover:text-white hover:bg-white/5">
-            <Pencil className="w-3 h-3" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onDelete(); }} className="h-7 px-2 text-red-400/60 hover:text-red-400 hover:bg-red-500/10">
-            <Trash2 className="w-3 h-3" />
-          </Button>
-        </div>
+    <div onClick={onOpen} className="group flex cursor-pointer items-center gap-4 border-t border-border/60 px-4 py-3 transition-colors duration-150 first:border-t-0 hover:bg-foreground/[0.025]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+        <Building2 className="h-4 w-4 text-muted-foreground/60" />
       </div>
-    </motion.div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[13px] font-medium text-foreground">{company.name}</p>
+        <p className="text-[11px] text-muted-foreground">{company.product_count || 0} products · Edited {timeAgo(company.updated_at)}</p>
+      </div>
+      <div className="flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="h-7 px-2 text-muted-foreground hover:text-foreground" aria-label="Open company">
+          <Pencil className="h-3 w-3" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onDelete(); }} className="h-7 px-2 text-risk/70 hover:text-risk" aria-label="Delete company">
+          <Trash2 className="h-3 w-3" />
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -734,11 +718,11 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
 
   const getInitials = (p: Product) => p.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
 
-  const statPills = [
-    { label: 'SKUs', value: String(stats.totalSkus), color: '#60a5fa' },
-    { label: 'Value', value: formatCurrency(stats.totalValue), color: '#34d399' },
-    { label: 'Low', value: String(stats.lowStockCount), color: '#fbbf24', urgent: stats.lowStockCount > 0 },
-    { label: 'Out', value: String(stats.zeroStockCount), color: '#ef4444', urgent: stats.zeroStockCount > 0 },
+  const statPills: { label: string; value: string; tone: Tone }[] = [
+    { label: 'SKUs', value: String(stats.totalSkus), tone: 'neutral' },
+    { label: 'Value', value: formatCurrency(stats.totalValue), tone: 'ok' },
+    { label: 'Low', value: String(stats.lowStockCount), tone: stats.lowStockCount > 0 ? 'attend' : 'neutral' },
+    { label: 'Out', value: String(stats.zeroStockCount), tone: stats.zeroStockCount > 0 ? 'risk' : 'neutral' },
   ];
 
   // Mobile: tap product goes to detail
@@ -754,40 +738,51 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
     else onBack();
   };
 
+  const statPill = (s: { label: string; value: string; tone: Tone }) => (
+    <div key={s.label} className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-sunken px-2 py-0.5">
+      <span aria-hidden className={cn('h-1.5 w-1.5 rounded-full', s.tone === 'neutral' ? 'bg-muted-foreground/50' : TONE_DOT[s.tone])} />
+      <span className="font-mono text-[9px] font-medium uppercase tracking-[0.1em] text-muted-foreground">{s.label}</span>
+      <span className={cn('text-[10px] font-semibold tabular-nums', s.tone === 'neutral' ? 'text-foreground' : TONE_TEXT[s.tone])}>{s.value}</span>
+    </div>
+  );
+
   /* ─── Shared: Product List Items ─── */
   const renderProductList = () => (
-    <div className="flex-1 overflow-y-auto scrollbar-hide">
+    <div className="scrollbar-hide flex-1 overflow-y-auto">
       {loading ? (
-        <div className="flex items-center justify-center h-32"><Loader2 className="h-4 w-4 animate-spin text-[#555]" /></div>
+        <SkeletonLedger rows={6} />
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-32 text-[#555]">
-          <Package className="h-5 w-5 mb-1.5" />
+        <div className="flex h-32 flex-col items-center justify-center text-muted-foreground">
+          <Package className="mb-1.5 h-5 w-5" />
           <span className="text-[10px]">No products found</span>
           {products.length === 0 && (
-            <button onClick={() => setShowAddModal(true)} className="mt-2 text-[10px] text-[#0073E6] hover:underline">Add your first product</button>
+            <button onClick={() => setShowAddModal(true)} className="mt-2 text-[10px] text-primary hover:underline">Add your first product</button>
           )}
         </div>
       ) : (
         filtered.map(p => {
           const status = getStockStatus(p.totalQty || 0, p.reorder_level);
-          const sc = STOCK_STATUS_CONFIG[status];
+          const sc = STOCK_STATUS[status];
           return (
             <button key={p.id} onClick={() => handleSelectProduct(p.id)}
-              className={`w-full text-left px-3 py-2.5 transition-colors border-b ${selectedId === p.id ? 'bg-[#1e1e1e] border-[#333]' : 'border-[#1a1a1a] hover:bg-[#1a1a1a]'}`}>
+              className={cn(
+                'w-full border-b border-border/60 px-3 py-2.5 text-left transition-colors duration-150',
+                selectedId === p.id ? 'bg-foreground/[0.05]' : 'hover:bg-foreground/[0.025]',
+              )}>
               <div className="flex items-start gap-2.5">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5" style={{ backgroundColor: sc.bg, color: sc.color }}>
+                <div className={cn('mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-semibold', TONE_BG[sc.tone], TONE_TEXT[sc.tone])}>
                   {getInitials(p)}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-medium text-[#ddd] truncate">{p.name}</span>
-                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: sc.color }} title={sc.label} />
+                    <span className="truncate text-[11px] font-medium text-foreground">{p.name}</span>
+                    <span aria-hidden className={cn('h-1.5 w-1.5 shrink-0 rounded-full', TONE_DOT[sc.tone])} title={sc.label} />
                   </div>
-                  <span className="text-[9px] text-[#666] truncate block">{p.sku}</span>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[9px] font-bold tabular-nums" style={{ color: sc.color }}>{p.totalQty ?? 0} {p.unit}</span>
-                    {p.category_name && <span className="text-[8px] text-[#555]">{p.category_name}</span>}
-                    <span className="text-[8px] text-[#444] ml-auto tabular-nums">{formatDistanceToNow(new Date(p.updated_at), { addSuffix: true })}</span>
+                  <span className="block truncate font-mono text-[9px] text-muted-foreground">{p.sku}</span>
+                  <div className="mt-0.5 flex items-center gap-2">
+                    <span className={cn('text-[9px] font-semibold tabular-nums', TONE_TEXT[sc.tone])}>{p.totalQty ?? 0} {p.unit}</span>
+                    {p.category_name && <span className="text-[8px] text-muted-foreground">{p.category_name}</span>}
+                    <span className="ml-auto text-[8px] tabular-nums text-muted-foreground/70">{formatDistanceToNow(new Date(p.updated_at), { addSuffix: true })}</span>
                   </div>
                 </div>
               </div>
@@ -801,55 +796,52 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
   /* ─── Shared: Product Detail Content ─── */
   const renderProductDetail = () => {
     if (!selected) return (
-      <div className="flex flex-col items-center justify-center h-full text-[#555]">
-        <Package className="h-10 w-10 mb-3 text-[#333]" />
-        <span className="text-[13px] font-medium text-[#555]">Select a product</span>
-        <span className="text-[10px] text-[#444] mt-1">Choose from the list to view details</span>
+      <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+        <Package className="mb-3 h-10 w-10 text-muted-foreground/40" />
+        <span className="text-[13px] font-medium">Select a product</span>
+        <span className="mt-1 text-[10px] text-muted-foreground/70">Choose from the list to view details</span>
       </div>
     );
+    const selTone = STOCK_STATUS[getStockStatus(selected.totalQty || 0, selected.reorder_level)];
     return (
-      <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
+      <div className="space-y-4 p-4 sm:space-y-5 sm:p-5">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-3 min-w-0 flex-1">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xs sm:text-sm font-bold shrink-0"
-              style={{ backgroundColor: STOCK_STATUS_CONFIG[getStockStatus(selected.totalQty || 0, selected.reorder_level)].bg, color: STOCK_STATUS_CONFIG[getStockStatus(selected.totalQty || 0, selected.reorder_level)].color }}>
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-xs font-semibold sm:h-12 sm:w-12 sm:text-sm', TONE_BG[selTone.tone], TONE_TEXT[selTone.tone])}>
               {getInitials(selected)}
             </div>
             <div className="min-w-0 flex-1">
               {editing ? (
                 <input value={editForm.name || ''} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
-                  className="bg-[#1e1e1e] border border-[#333] rounded px-2 py-1 text-[13px] sm:text-[14px] font-semibold text-white outline-none focus:border-[#0073E6] w-full" />
+                  className="w-full rounded border border-border/60 bg-foreground/[0.03] px-2 py-1 text-[13px] font-semibold text-foreground outline-none transition-colors duration-150 focus:border-primary/60 sm:text-[14px]" />
               ) : (
-                <h2 className="text-[14px] sm:text-[16px] font-semibold text-white truncate">{selected.name}</h2>
+                <h2 className="truncate text-[14px] font-semibold text-foreground sm:text-[16px]">{selected.name}</h2>
               )}
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <span className="text-[9px] font-medium border px-1.5 py-0 rounded"
-                  style={{ backgroundColor: STOCK_STATUS_CONFIG[getStockStatus(selected.totalQty || 0, selected.reorder_level)].bg, color: STOCK_STATUS_CONFIG[getStockStatus(selected.totalQty || 0, selected.reorder_level)].color, borderColor: `${STOCK_STATUS_CONFIG[getStockStatus(selected.totalQty || 0, selected.reorder_level)].color}30` }}>
-                  {STOCK_STATUS_CONFIG[getStockStatus(selected.totalQty || 0, selected.reorder_level)].label}
-                </span>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <StatusBadge tone={selTone.tone} label={selTone.label} className="text-[10px]" />
                 <button onClick={() => { navigator.clipboard.writeText(selected.sku); toast.success('SKU copied'); }}
-                  className="flex items-center gap-1 text-[9px] text-[#666] hover:text-[#aaa] transition-colors">
+                  className="flex items-center gap-1 font-mono text-[9px] text-muted-foreground transition-colors duration-150 hover:text-foreground">
                   <Hash className="h-2.5 w-2.5" />{selected.sku} <Copy className="h-2.5 w-2.5" />
                 </button>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex shrink-0 items-center gap-1">
             {editing ? (
               <>
-                <button onClick={saveEdit} disabled={saving} className="h-7 px-3 rounded-md text-[10px] font-medium bg-[#0073E6] text-white hover:bg-[#005bb5] flex items-center gap-1 disabled:opacity-50">
-                  {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Save
+                <button onClick={saveEdit} disabled={saving} className="flex h-7 items-center gap-1 rounded-md bg-primary px-3 text-[10px] font-medium text-primary-foreground transition-[filter] duration-150 hover:brightness-105 disabled:opacity-50">
+                  <Check className="h-3 w-3" /> {saving ? 'Saving' : 'Save'}
                 </button>
-                <button onClick={() => setEditing(false)} className="h-7 px-2.5 rounded-md text-[10px] font-medium text-[#888] hover:bg-[#333]">Cancel</button>
+                <button onClick={() => setEditing(false)} className="h-7 rounded-md px-2.5 text-[10px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.06]">Cancel</button>
               </>
             ) : (
               <>
-                <button onClick={() => { setEditing(true); setEditForm(selected); }} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333]">
-                  <Edit3 className="h-3.5 w-3.5 text-[#888]" />
+                <button onClick={() => { setEditing(true); setEditForm(selected); }} aria-label="Edit product" className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]">
+                  <Edit3 className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
-                <button onClick={() => deleteProduct(selected.id)} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333]">
-                  <Trash2 className="h-3.5 w-3.5 text-[#ef4444]" />
+                <button onClick={() => deleteProduct(selected.id)} aria-label="Delete product" className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]">
+                  <Trash2 className="h-3.5 w-3.5 text-risk" />
                 </button>
               </>
             )}
@@ -857,42 +849,44 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
         </div>
 
         {/* Stock Level & Quick Adjust */}
-        <div className="rounded-xl p-3 sm:p-4" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-          <span className="text-[9px] font-medium text-[#666] uppercase tracking-wider block mb-3">Stock Management</span>
-          <div className="flex items-center gap-4 mb-3">
+        <div className="rounded-[10px] border border-border/60 bg-card p-3 sm:p-4">
+          <span className="mb-3 block font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Stock management</span>
+          <div className="mb-3 flex items-center gap-4">
             <div>
-              <span className="text-[24px] sm:text-[28px] font-bold tabular-nums" style={{ color: STOCK_STATUS_CONFIG[getStockStatus(selected.totalQty || 0, selected.reorder_level)].color }}>
+              <span className={cn('text-[24px] font-semibold tabular-nums sm:text-[28px]', TONE_TEXT[selTone.tone])}>
                 {selected.totalQty ?? 0}
               </span>
-              <span className="text-[11px] text-[#666] ml-1">{selected.unit}</span>
+              <span className="ml-1 text-[11px] text-muted-foreground">{selected.unit}</span>
             </div>
             <div className="flex-1">
-              <div className="h-2 rounded-full bg-[#222] overflow-hidden">
-                <div className="h-full rounded-full transition-all" style={{
-                  width: `${Math.min(100, ((selected.totalQty || 0) / Math.max(selected.reorder_level * 3, 1)) * 100)}%`,
-                  backgroundColor: STOCK_STATUS_CONFIG[getStockStatus(selected.totalQty || 0, selected.reorder_level)].color,
-                }} />
+              <div className="h-2 overflow-hidden rounded-full bg-sunken">
+                <div
+                  className={cn('h-full rounded-full transition-all duration-200', TONE_DOT[selTone.tone])}
+                  style={{ width: `${Math.min(100, ((selected.totalQty || 0) / Math.max(selected.reorder_level * 3, 1)) * 100)}%` }}
+                />
               </div>
-              <div className="flex justify-between mt-1">
-                <span className="text-[8px] text-[#555]">0</span>
-                <span className="text-[8px] text-[#fbbf24]">Reorder: {selected.reorder_level}</span>
+              <div className="mt-1 flex justify-between">
+                <span className="text-[8px] tabular-nums text-muted-foreground">0</span>
+                <span className="text-[8px] tabular-nums text-attend">Reorder: {selected.reorder_level}</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2">
             {[+10, +50, -10, -50].map(n => (
               <button key={n} onClick={() => setAdjustQty(String(n))}
-                className="h-7 px-2.5 rounded-md text-[10px] font-medium transition-colors"
-                style={{ backgroundColor: '#252525', color: n > 0 ? '#34d399' : '#ef4444', border: '1px solid #333' }}>
+                className={cn(
+                  'h-7 rounded-md border border-border/60 bg-sunken px-2.5 text-[10px] font-medium tabular-nums transition-colors duration-150 hover:border-border',
+                  n > 0 ? 'text-ok' : 'text-risk',
+                )}>
                 {n > 0 ? '+' : ''}{n}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <input type="number" placeholder="Qty" value={adjustQty} onChange={e => setAdjustQty(e.target.value)}
-              className="w-16 h-7 bg-[#252525] border border-[#333] rounded-md px-2 text-[10px] text-white outline-none focus:border-[#0073E6] tabular-nums" />
+              className="h-7 w-16 rounded-md border border-border/60 bg-foreground/[0.03] px-2 text-[10px] tabular-nums text-foreground outline-none transition-colors duration-150 focus:border-primary/60" />
             <select value={adjustReason} onChange={e => setAdjustReason(e.target.value)}
-              className="h-7 bg-[#252525] border border-[#333] rounded-md px-1.5 text-[10px] text-[#ccc] outline-none flex-1 min-w-[90px]">
+              className="h-7 min-w-[90px] flex-1 rounded-md border border-border/60 bg-foreground/[0.03] px-1.5 text-[10px] text-foreground outline-none">
               <option value="correction">Correction</option>
               <option value="sale">Sale</option>
               <option value="purchase">Purchase</option>
@@ -901,8 +895,8 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
               <option value="count">Count</option>
             </select>
             <button onClick={adjustStock} disabled={!adjustQty || adjusting}
-              className="h-7 px-3 rounded-md text-[10px] font-medium bg-[#0073E6] text-white hover:bg-[#005bb5] disabled:opacity-30 flex items-center gap-1">
-              {adjusting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Adjust
+              className="flex h-7 items-center gap-1 rounded-md bg-primary px-3 text-[10px] font-medium text-primary-foreground transition-[filter] duration-150 hover:brightness-105 disabled:opacity-30">
+              <Check className="h-3 w-3" /> {adjusting ? 'Adjusting' : 'Adjust'}
             </button>
           </div>
         </div>
@@ -910,25 +904,25 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
         {/* Product Info Grid */}
         <div className="grid grid-cols-2 gap-3">
           {[
-            { icon: <DollarSign className="h-3.5 w-3.5" />, label: 'Cost Price', value: formatCurrency(selected.cost_price), field: 'cost_price', isNum: true },
-            { icon: <TrendingUp className="h-3.5 w-3.5" />, label: 'Selling Price', value: formatCurrency(selected.selling_price), field: 'selling_price', isNum: true },
+            { icon: <DollarSign className="h-3.5 w-3.5" />, label: 'Cost price', value: formatCurrency(selected.cost_price), field: 'cost_price', isNum: true },
+            { icon: <TrendingUp className="h-3.5 w-3.5" />, label: 'Selling price', value: formatCurrency(selected.selling_price), field: 'selling_price', isNum: true },
             { icon: <Package className="h-3.5 w-3.5" />, label: 'Unit', value: selected.unit, field: 'unit' },
-            { icon: <AlertTriangle className="h-3.5 w-3.5" />, label: 'Reorder Level', value: String(selected.reorder_level), field: 'reorder_level', isNum: true },
+            { icon: <AlertTriangle className="h-3.5 w-3.5" />, label: 'Reorder level', value: String(selected.reorder_level), field: 'reorder_level', isNum: true },
             { icon: <Shuffle className="h-3.5 w-3.5" />, label: 'Supplier', value: selected.supplier_name, field: 'supplier_name' },
             { icon: <Hash className="h-3.5 w-3.5" />, label: 'Barcode', value: selected.barcode, field: null },
           ].map(item => (
-            <div key={item.label} className="rounded-lg p-2.5" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-[#555]">{item.icon}</span>
-                <span className="text-[9px] text-[#666] font-medium uppercase tracking-wider">{item.label}</span>
+            <div key={item.label} className="rounded-lg border border-border/60 bg-card p-2.5">
+              <div className="mb-1 flex items-center gap-1.5">
+                <span className="text-muted-foreground/70">{item.icon}</span>
+                <span className="font-mono text-[9px] font-medium uppercase tracking-[0.1em] text-muted-foreground">{item.label}</span>
               </div>
               {editing && item.field ? (
                 <input type={item.isNum ? 'number' : 'text'} value={(editForm as any)[item.field] ?? ''}
                   onChange={e => setEditForm(f => ({ ...f, [item.field!]: item.isNum ? Number(e.target.value) : e.target.value }))}
-                  className="bg-[#252525] border border-[#333] rounded px-2 py-1 text-[11px] text-white outline-none w-full focus:border-[#0073E6]" />
+                  className="w-full rounded border border-border/60 bg-foreground/[0.03] px-2 py-1 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-primary/60" />
               ) : (
-                <span className="text-[11px] text-[#ccc] block truncate">
-                  {item.value || <span className="text-[#444] italic">Not set</span>}
+                <span className="block truncate text-[11px] tabular-nums text-ink-2">
+                  {item.value || <span className="text-muted-foreground/50">Not set</span>}
                 </span>
               )}
             </div>
@@ -937,13 +931,13 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
 
         {/* Profit Margin */}
         {selected.selling_price > 0 && selected.cost_price > 0 && (
-          <div className="rounded-xl p-3" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
-            <span className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-2">Profit Margin</span>
+          <div className="rounded-[10px] border border-border/60 bg-card p-3">
+            <span className="mb-2 block font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Profit margin</span>
             <div className="flex items-center gap-4">
-              <span className="text-[14px] font-bold text-[#34d399]">
+              <span className="text-[14px] font-semibold tabular-nums text-ok">
                 {((1 - selected.cost_price / selected.selling_price) * 100).toFixed(1)}%
               </span>
-              <span className="text-[10px] text-[#888]">
+              <span className="text-[10px] tabular-nums text-muted-foreground">
                 {formatCurrency(selected.selling_price - selected.cost_price)} profit per unit
               </span>
             </div>
@@ -952,13 +946,13 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
 
         {/* Description */}
         {(selected.description || editing) && (
-          <div className="rounded-xl p-3" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
-            <span className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-2">Description</span>
+          <div className="rounded-[10px] border border-border/60 bg-card p-3">
+            <span className="mb-2 block font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Description</span>
             {editing ? (
               <textarea value={editForm.description || ''} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
-                rows={3} className="w-full bg-[#252525] border border-[#333] rounded-md px-2.5 py-1.5 text-[11px] text-white outline-none resize-none focus:border-[#0073E6]" />
+                rows={3} className="w-full resize-none rounded-md border border-border/60 bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-primary/60" />
             ) : (
-              <p className="text-[11px] text-[#aaa]">{selected.description}</p>
+              <p className="text-[11px] leading-relaxed text-ink-2">{selected.description}</p>
             )}
           </div>
         )}
@@ -966,18 +960,17 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
         {/* Mobile: Activity link */}
         {isMobile && (
           <button onClick={() => setMobileView('activity')}
-            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[11px] font-medium text-[#ccc] hover:bg-[#1e1e1e] transition-colors"
-            style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-            <span className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-[#666]" /> View Activity ({selectedMovements.length})</span>
-            <ChevronLeft className="h-3.5 w-3.5 text-[#555] rotate-180" />
+            className="flex w-full items-center justify-between rounded-[10px] border border-border/60 bg-card px-3 py-2.5 text-[11px] font-medium text-ink-2 transition-colors duration-150 hover:bg-foreground/[0.025]">
+            <span className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-muted-foreground" /> View activity ({selectedMovements.length})</span>
+            <ChevronLeft className="h-3.5 w-3.5 rotate-180 text-muted-foreground" />
           </button>
         )}
 
         <div className="flex items-center gap-4 pt-2">
-          <span className="text-[9px] text-[#444] flex items-center gap-1">
+          <span className="flex items-center gap-1 font-mono text-[9px] tabular-nums text-muted-foreground/70">
             <Clock className="h-2.5 w-2.5" /> Created {format(new Date(selected.created_at), 'dd MMM yyyy')}
           </span>
-          <span className="text-[9px] text-[#444] flex items-center gap-1">
+          <span className="flex items-center gap-1 font-mono text-[9px] tabular-nums text-muted-foreground/70">
             <RefreshCw className="h-2.5 w-2.5" /> Updated {formatDistanceToNow(new Date(selected.updated_at), { addSuffix: true })}
           </span>
         </div>
@@ -990,45 +983,43 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
     <>
       {selected ? (
         <>
-          <div className="flex items-center gap-0 px-3 pt-2 shrink-0" style={{ borderBottom: '1px solid #222' }}>
-            <span className="text-[10px] font-semibold text-white pb-2 border-b-2 border-[#0073E6] px-2">Activity</span>
+          <div className="flex shrink-0 items-center gap-0 border-b border-border/60 px-3 pt-2">
+            <span className="border-b-2 border-primary px-2 pb-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground">Activity</span>
           </div>
-          <div className="flex-1 overflow-y-auto scrollbar-hide p-3 space-y-2">
+          <div className="scrollbar-hide flex-1 space-y-2 overflow-y-auto p-3">
             {selectedMovements.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-32 text-[#555]">
-                <Clock className="h-5 w-5 mb-1.5" />
+              <div className="flex h-32 flex-col items-center justify-center text-muted-foreground">
+                <Clock className="mb-1.5 h-5 w-5" />
                 <span className="text-[10px]">No stock movements yet</span>
               </div>
             ) : (
               selectedMovements.map(m => (
-                <div key={m.id} className="rounded-lg p-2.5" style={{ backgroundColor: '#1e1e1e', border: '1px solid #252525' }}>
+                <div key={m.id} className="rounded-lg border border-border/60 bg-card p-2.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{
-                      backgroundColor: m.quantity > 0 ? 'rgba(52,211,153,0.12)' : 'rgba(239,68,68,0.12)',
-                    }}>
-                      {m.quantity > 0 ? <Plus className="h-3 w-3 text-[#34d399]" /> : <Minus className="h-3 w-3 text-[#ef4444]" />}
+                    <div className={cn('flex h-6 w-6 items-center justify-center rounded-md', m.quantity > 0 ? 'bg-ok/10' : 'bg-risk/10')}>
+                      {m.quantity > 0 ? <Plus className="h-3 w-3 text-ok" /> : <Minus className="h-3 w-3 text-risk" />}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[10px] font-medium text-[#ccc]">
-                        {m.movement_type === 'adjustment' ? 'Stock Adjustment' : m.movement_type}
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] font-medium text-foreground">
+                        {m.movement_type === 'adjustment' ? 'Stock adjustment' : m.movement_type}
                       </span>
-                      <span className="text-[9px] text-[#666] block">
+                      <span className="block text-[9px] tabular-nums text-muted-foreground">
                         {m.reason || 'No reason'} · {m.quantity > 0 ? '+' : ''}{m.quantity}
                       </span>
                     </div>
-                    <span className="text-[8px] text-[#555] tabular-nums shrink-0">
+                    <span className="shrink-0 text-[8px] tabular-nums text-muted-foreground/70">
                       {formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}
                     </span>
                   </div>
-                  {m.notes && <p className="text-[9px] text-[#555] mt-1 pl-8">{m.notes}</p>}
+                  {m.notes && <p className="mt-1 pl-8 text-[9px] text-muted-foreground">{m.notes}</p>}
                 </div>
               ))
             )}
           </div>
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center h-full text-[#555]">
-          <Clock className="h-8 w-8 mb-2 text-[#333]" />
+        <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+          <Clock className="mb-2 h-8 w-8 text-muted-foreground/40" />
           <span className="text-[10px]">Select a product to view activity</span>
         </div>
       )}
@@ -1036,46 +1027,43 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden" style={{ backgroundColor: '#111', color: '#e0e0e0', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontSize: '12px' }}>
+    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background text-[12px] text-foreground">
       {/* ─── Top Bar ─── */}
-      <div className="h-11 flex items-center justify-between px-2 sm:px-3 shrink-0 select-none" style={{ backgroundColor: '#1a1a1a', borderBottom: '1px solid #2a2a2a' }}>
-        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-          <button onClick={isMobile ? handleMobileBack : onBack} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors shrink-0" title="Back">
-            <ArrowLeft className="h-3.5 w-3.5 text-[#999]" />
+      <div className="flex h-11 shrink-0 select-none items-center justify-between border-b border-border/60 bg-card px-2 sm:px-3">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+          <button onClick={isMobile ? handleMobileBack : onBack} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]" title="Back">
+            <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
-          <div className="w-[1px] h-4 bg-[#333] hidden sm:block" />
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Boxes className="h-3.5 w-3.5 text-[#0073E6] shrink-0" />
-            <span className="text-[11px] font-semibold text-[#ccc] tracking-wide truncate">{companyName || 'Inventory'}</span>
+          <div className="hidden h-4 w-px bg-border sm:block" />
+          <div className="flex min-w-0 items-center gap-1.5">
+            <Boxes className="h-3.5 w-3.5 shrink-0 text-primary" />
+            <span className="truncate text-[11px] font-semibold tracking-wide text-foreground">{companyName || 'Inventory'}</span>
           </div>
           {isMobile && mobileView !== 'list' && (
-            <span className="text-[9px] text-[#666] shrink-0">/ {mobileView === 'detail' ? 'Detail' : 'Activity'}</span>
+            <span className="shrink-0 text-[9px] text-muted-foreground">/ {mobileView === 'detail' ? 'Detail' : 'Activity'}</span>
           )}
-          <div className="w-[1px] h-4 bg-[#333] mx-1 hidden sm:block" />
-          <div className="hidden sm:flex items-center gap-1.5">
-            {statPills.map(s => (
-              <div key={s.label} className="flex items-center gap-1 px-2 py-0.5 rounded-md" style={{ backgroundColor: '#252525', border: '1px solid #2a2a2a' }}>
-                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.color }} />
-                <span className="text-[9px] font-medium" style={{ color: '#888' }}>{s.label}</span>
-                <span className="text-[10px] font-bold tabular-nums" style={{ color: s.color }}>{s.value}</span>
-              </div>
-            ))}
+          <div className="mx-1 hidden h-4 w-px bg-border sm:block" />
+          <div className="hidden items-center gap-1.5 sm:flex">
+            {statPills.map(statPill)}
           </div>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => { setShowAddModal(true); setNewForm(f => ({ ...f, sku: generateSKU() })); }}
-            className="h-7 px-2 sm:px-2.5 flex items-center gap-1 rounded-md text-[11px] font-medium bg-[#0073E6] text-white hover:bg-[#005bb5] transition-colors"
+            className="flex h-7 items-center gap-1 rounded-md bg-primary px-2 text-[11px] font-medium text-primary-foreground transition-[filter] duration-150 hover:brightness-105 sm:px-2.5"
           >
-            <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Add Product</span>
+            <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Add product</span>
           </button>
-          <div className="w-[1px] h-4 bg-[#333] hidden sm:block" />
-          <button onClick={loadAll} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors" title="Refresh">
-            <RefreshCw className="h-3.5 w-3.5 text-[#666]" />
+          <div className="hidden h-4 w-px bg-border sm:block" />
+          <button onClick={loadAll} className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]" title="Refresh">
+            <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
           <button
             onClick={() => setShowFilters(f => !f)}
-            className={`h-7 px-2 sm:px-2.5 flex items-center gap-1 rounded-md text-[11px] font-medium transition-colors ${showFilters ? 'bg-[#0073E6]/20 text-[#60a5fa]' : 'text-[#888] hover:text-[#ccc] hover:bg-[#333]'}`}
+            className={cn(
+              'flex h-7 items-center gap-1 rounded-md px-2 text-[11px] font-medium transition-colors duration-150 sm:px-2.5',
+              showFilters ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground',
+            )}
           >
             <SlidersHorizontal className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Filters</span>
           </button>
@@ -1084,80 +1072,76 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
 
       {/* ─── Mobile Stat Pills ─── */}
       {isMobile && (
-        <div className="flex items-center gap-1.5 px-2 py-1.5 overflow-x-auto scrollbar-hide shrink-0" style={{ backgroundColor: '#161616', borderBottom: '1px solid #222' }}>
-          {statPills.map(s => (
-            <div key={s.label} className="flex items-center gap-1 px-2 py-0.5 rounded-md shrink-0" style={{ backgroundColor: '#252525', border: '1px solid #2a2a2a' }}>
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.color }} />
-              <span className="text-[9px] font-medium" style={{ color: '#888' }}>{s.label}</span>
-              <span className="text-[10px] font-bold tabular-nums" style={{ color: s.color }}>{s.value}</span>
-            </div>
-          ))}
+        <div className="scrollbar-hide flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-border/60 bg-card px-2 py-1.5">
+          {statPills.map(statPill)}
         </div>
       )}
 
       {/* ─── Filter Bar ─── */}
-      <AnimatePresence>
-        {showFilters && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden shrink-0" style={{ backgroundColor: '#161616', borderBottom: '1px solid #2a2a2a' }}>
-            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 flex-wrap">
-              <span className="text-[10px] font-medium text-[#666] uppercase tracking-wider">Status:</span>
-              <div className="flex items-center gap-1 flex-wrap">
-                <button onClick={() => setStatusFilter(null)} className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${!statusFilter ? 'bg-[#333] text-white' : 'text-[#777] hover:text-white hover:bg-[#2a2a2a]'}`}>All</button>
-                {Object.entries(STOCK_STATUS_CONFIG).map(([key, cfg]) => (
-                  <button key={key} onClick={() => setStatusFilter(statusFilter === key ? null : key)}
-                    className="px-2 py-0.5 rounded text-[10px] font-medium transition-colors"
-                    style={{ backgroundColor: statusFilter === key ? cfg.bg : 'transparent', color: statusFilter === key ? cfg.color : '#777', border: statusFilter === key ? `1px solid ${cfg.color}30` : '1px solid transparent' }}
-                  >{cfg.label}</button>
-                ))}
-              </div>
-              {categories.length > 0 && (
-                <>
-                  <div className="w-[1px] h-4 bg-[#333] hidden sm:block" />
-                  <span className="text-[10px] font-medium text-[#666] uppercase tracking-wider">Category:</span>
-                  <div className="flex items-center gap-1 flex-wrap">
-                    <button onClick={() => setCategoryFilter(null)} className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${!categoryFilter ? 'bg-[#333] text-white' : 'text-[#777] hover:text-white hover:bg-[#2a2a2a]'}`}>All</button>
-                    {categories.map(c => (
-                      <button key={c.id} onClick={() => setCategoryFilter(categoryFilter === c.id ? null : c.id)}
-                        className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${categoryFilter === c.id ? 'bg-[#333] text-white' : 'text-[#777] hover:text-white hover:bg-[#2a2a2a]'}`}
-                      >{c.name}</button>
-                    ))}
-                  </div>
-                </>
-              )}
-              {(statusFilter || categoryFilter) && (
-                <button onClick={() => { setStatusFilter(null); setCategoryFilter(null); }} className="ml-auto text-[10px] text-[#ef4444] hover:text-[#f87171]">Clear all</button>
-              )}
+      {showFilters && (
+        <div className="shrink-0 border-b border-border/60 bg-sunken">
+          <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4">
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">Status</span>
+            <div className="flex flex-wrap items-center gap-1">
+              <button onClick={() => setStatusFilter(null)} className={cn('rounded px-2 py-0.5 text-[10px] font-medium transition-colors duration-150', !statusFilter ? 'bg-foreground/[0.08] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground')}>All</button>
+              {Object.entries(STOCK_STATUS).map(([key, cfg]) => (
+                <button key={key} onClick={() => setStatusFilter(statusFilter === key ? null : key)}
+                  className={cn(
+                    'rounded border px-2 py-0.5 text-[10px] font-medium transition-colors duration-150',
+                    statusFilter === key
+                      ? cn(TONE_BG[cfg.tone], TONE_TEXT[cfg.tone], 'border-border/60')
+                      : 'border-transparent text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground',
+                  )}
+                >{cfg.label}</button>
+              ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {categories.length > 0 && (
+              <>
+                <div className="hidden h-4 w-px bg-border sm:block" />
+                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">Category</span>
+                <div className="flex flex-wrap items-center gap-1">
+                  <button onClick={() => setCategoryFilter(null)} className={cn('rounded px-2 py-0.5 text-[10px] font-medium transition-colors duration-150', !categoryFilter ? 'bg-foreground/[0.08] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground')}>All</button>
+                  {categories.map(c => (
+                    <button key={c.id} onClick={() => setCategoryFilter(categoryFilter === c.id ? null : c.id)}
+                      className={cn('rounded px-2 py-0.5 text-[10px] font-medium transition-colors duration-150', categoryFilter === c.id ? 'bg-foreground/[0.08] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground')}
+                    >{c.name}</button>
+                  ))}
+                </div>
+              </>
+            )}
+            {(statusFilter || categoryFilter) && (
+              <button onClick={() => { setStatusFilter(null); setCategoryFilter(null); }} className="ml-auto text-[10px] text-risk transition-colors duration-150 hover:text-risk/80">Clear all</button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ─── Content: Mobile stacked vs Desktop 3-pane ─── */}
       {isMobile ? (
-        <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: '#141414' }}>
+        <div className="flex flex-1 flex-col overflow-hidden bg-background">
           {mobileView === 'list' && (
             <>
-              <div className="p-2 shrink-0" style={{ borderBottom: '1px solid #222' }}>
-                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
-                  <Search className="h-3.5 w-3.5 text-[#555]" />
+              <div className="shrink-0 border-b border-border/60 p-2">
+                <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-foreground/[0.03] px-2 py-1.5">
+                  <Search className="h-3.5 w-3.5 text-muted-foreground" />
                   <input type="text" placeholder="Search products…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                    className="bg-transparent text-[11px] text-[#ccc] placeholder:text-[#555] outline-none flex-1" />
-                  {searchQuery && <button onClick={() => setSearchQuery('')} className="hover:text-white text-[#555]"><X className="h-3 w-3" /></button>}
+                    className="flex-1 bg-transparent text-[11px] text-foreground outline-none placeholder:text-muted-foreground/60" />
+                  {searchQuery && <button onClick={() => setSearchQuery('')} aria-label="Clear search" className="text-muted-foreground hover:text-foreground"><X className="h-3 w-3" /></button>}
                 </div>
-                <div className="flex items-center justify-between mt-1.5 px-1">
-                  <span className="text-[9px] text-[#555] font-medium">{filtered.length} products</span>
+                <div className="mt-1.5 flex items-center justify-between px-1">
+                  <span className="text-[9px] font-medium tabular-nums text-muted-foreground">{filtered.length} products</span>
                 </div>
               </div>
               {renderProductList()}
             </>
           )}
           {mobileView === 'detail' && (
-            <div className="flex-1 overflow-y-auto scrollbar-hide" style={{ backgroundColor: '#111' }}>
+            <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
               {renderProductDetail()}
             </div>
           )}
           {mobileView === 'activity' && (
-            <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: '#141414' }}>
+            <div className="flex flex-1 flex-col overflow-hidden bg-background">
               {renderActivity()}
             </div>
           )}
@@ -1166,36 +1150,36 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
         <ResizablePanelGroup direction="horizontal" className="flex-1">
           {/* Left: Product List */}
           <ResizablePanel defaultSize={28} minSize={20} maxSize={40}>
-            <div className="h-full flex flex-col" style={{ backgroundColor: '#141414' }}>
-              <div className="p-2 shrink-0" style={{ borderBottom: '1px solid #222' }}>
-                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
-                  <Search className="h-3.5 w-3.5 text-[#555]" />
+            <div className="flex h-full flex-col bg-background">
+              <div className="shrink-0 border-b border-border/60 p-2">
+                <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-foreground/[0.03] px-2 py-1.5">
+                  <Search className="h-3.5 w-3.5 text-muted-foreground" />
                   <input type="text" placeholder="Search products…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                    className="bg-transparent text-[11px] text-[#ccc] placeholder:text-[#555] outline-none flex-1" />
-                  {searchQuery && <button onClick={() => setSearchQuery('')} className="hover:text-white text-[#555]"><X className="h-3 w-3" /></button>}
+                    className="flex-1 bg-transparent text-[11px] text-foreground outline-none placeholder:text-muted-foreground/60" />
+                  {searchQuery && <button onClick={() => setSearchQuery('')} aria-label="Clear search" className="text-muted-foreground hover:text-foreground"><X className="h-3 w-3" /></button>}
                 </div>
-                <div className="flex items-center justify-between mt-1.5 px-1">
-                  <span className="text-[9px] text-[#555] font-medium">{filtered.length} products</span>
+                <div className="mt-1.5 flex items-center justify-between px-1">
+                  <span className="text-[9px] font-medium tabular-nums text-muted-foreground">{filtered.length} products</span>
                 </div>
               </div>
               {renderProductList()}
             </div>
           </ResizablePanel>
 
-          <ResizableHandle className="w-[1px] bg-[#2a2a2a] hover:bg-[#0073E6] transition-colors" />
+          <ResizableHandle className="w-px bg-border transition-colors duration-150 hover:bg-primary" />
 
           {/* Center: Product Detail */}
           <ResizablePanel defaultSize={44}>
-            <div className="h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: '#111' }}>
+            <div className="scrollbar-hide h-full overflow-y-auto bg-background">
               {renderProductDetail()}
             </div>
           </ResizablePanel>
 
-          <ResizableHandle className="w-[1px] bg-[#2a2a2a] hover:bg-[#0073E6] transition-colors" />
+          <ResizableHandle className="w-px bg-border transition-colors duration-150 hover:bg-primary" />
 
           {/* Right: Activity */}
           <ResizablePanel defaultSize={28} minSize={18} maxSize={35}>
-            <div className="h-full flex flex-col" style={{ backgroundColor: '#141414' }}>
+            <div className="flex h-full flex-col bg-background">
               {renderActivity()}
             </div>
           </ResizablePanel>
@@ -1203,86 +1187,85 @@ function InventoryFullScreen({ companyId, userId, onBack }: { companyId: string;
       )}
 
       {/* ─── Add Product Modal ─── */}
-      <AnimatePresence>
-        {showAddModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60" onClick={() => setShowAddModal(false)}>
-            <motion.div initial={{ scale: 0.95, opacity: 0, y: isMobile ? 20 : 0 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: isMobile ? 20 : 0 }}
-              className="w-full sm:max-w-lg max-h-[85vh] overflow-y-auto rounded-t-xl sm:rounded-xl p-4 sm:p-5 space-y-4"
-              style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }} onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between">
-                <h3 className="text-[14px] font-semibold text-white">Add Product</h3>
-                <button onClick={() => setShowAddModal(false)} className="h-6 w-6 flex items-center justify-center rounded hover:bg-[#333]"><X className="h-3.5 w-3.5 text-[#888]" /></button>
+      {showAddModal && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 sm:items-center" onClick={() => setShowAddModal(false)}>
+          <div
+            className="max-h-[85vh] w-full space-y-4 overflow-y-auto rounded-t-xl border border-border/60 bg-card p-4 sm:max-w-lg sm:rounded-xl sm:p-5"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-[14px] font-semibold tracking-[-0.01em] text-foreground">Add product</h3>
+              <button onClick={() => setShowAddModal(false)} aria-label="Close" className="flex h-6 w-6 items-center justify-center rounded transition-colors duration-150 hover:bg-foreground/[0.06]"><X className="h-3.5 w-3.5 text-muted-foreground" /></button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className={LABEL_SM}>Product name</label>
+                <input value={newForm.name} onChange={e => setNewForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Blue Widget Pro"
+                  className={FIELD_SM} />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="sm:col-span-2">
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">Product Name *</label>
-                  <input value={newForm.name} onChange={e => setNewForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Blue Widget Pro"
-                    className="w-full h-8 bg-[#252525] border border-[#333] rounded-md px-2.5 text-[11px] text-white outline-none focus:border-[#0073E6]" />
-                </div>
-                <div>
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">SKU *</label>
-                  <div className="flex gap-1">
-                    <input value={newForm.sku} onChange={e => setNewForm(f => ({ ...f, sku: e.target.value }))}
-                      className="flex-1 h-8 bg-[#252525] border border-[#333] rounded-md px-2.5 text-[11px] text-white outline-none focus:border-[#0073E6]" />
-                    <button onClick={() => setNewForm(f => ({ ...f, sku: generateSKU() }))} className="h-8 w-8 flex items-center justify-center rounded-md bg-[#252525] border border-[#333] hover:bg-[#333]">
-                      <Shuffle className="h-3 w-3 text-[#888]" />
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">Unit</label>
-                  <select value={newForm.unit} onChange={e => setNewForm(f => ({ ...f, unit: e.target.value }))}
-                    className="w-full h-8 bg-[#252525] border border-[#333] rounded-md px-2 text-[11px] text-[#ccc] outline-none">
-                    {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">Cost Price</label>
-                  <input type="number" step="0.01" value={newForm.cost_price} onChange={e => setNewForm(f => ({ ...f, cost_price: Number(e.target.value) }))}
-                    className="w-full h-8 bg-[#252525] border border-[#333] rounded-md px-2.5 text-[11px] text-white outline-none focus:border-[#0073E6]" />
-                </div>
-                <div>
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">Selling Price</label>
-                  <input type="number" step="0.01" value={newForm.selling_price} onChange={e => setNewForm(f => ({ ...f, selling_price: Number(e.target.value) }))}
-                    className="w-full h-8 bg-[#252525] border border-[#333] rounded-md px-2.5 text-[11px] text-white outline-none focus:border-[#0073E6]" />
-                </div>
-                <div>
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">Reorder Level</label>
-                  <input type="number" value={newForm.reorder_level} onChange={e => setNewForm(f => ({ ...f, reorder_level: Number(e.target.value) }))}
-                    className="w-full h-8 bg-[#252525] border border-[#333] rounded-md px-2.5 text-[11px] text-white outline-none focus:border-[#0073E6]" />
-                </div>
-                <div>
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">Reorder Qty</label>
-                  <input type="number" value={newForm.reorder_qty} onChange={e => setNewForm(f => ({ ...f, reorder_qty: Number(e.target.value) }))}
-                    className="w-full h-8 bg-[#252525] border border-[#333] rounded-md px-2.5 text-[11px] text-white outline-none focus:border-[#0073E6]" />
-                </div>
-                <div>
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">Supplier</label>
-                  <input value={newForm.supplier_name} onChange={e => setNewForm(f => ({ ...f, supplier_name: e.target.value }))} placeholder="Supplier name"
-                    className="w-full h-8 bg-[#252525] border border-[#333] rounded-md px-2.5 text-[11px] text-white outline-none focus:border-[#0073E6]" />
-                </div>
-                <div>
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">Supplier Contact</label>
-                  <input value={newForm.supplier_contact} onChange={e => setNewForm(f => ({ ...f, supplier_contact: e.target.value }))} placeholder="Email or phone"
-                    className="w-full h-8 bg-[#252525] border border-[#333] rounded-md px-2.5 text-[11px] text-white outline-none focus:border-[#0073E6]" />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-1">Description</label>
-                  <textarea value={newForm.description} onChange={e => setNewForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Optional description..."
-                    className="w-full bg-[#252525] border border-[#333] rounded-md px-2.5 py-1.5 text-[11px] text-white outline-none resize-none focus:border-[#0073E6]" />
+              <div>
+                <label className={LABEL_SM}>SKU</label>
+                <div className="flex gap-1">
+                  <input value={newForm.sku} onChange={e => setNewForm(f => ({ ...f, sku: e.target.value }))}
+                    className={cn(FIELD_SM, 'flex-1 font-mono')} />
+                  <button onClick={() => setNewForm(f => ({ ...f, sku: generateSKU() }))} aria-label="Generate SKU" className="flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-foreground/[0.03] transition-colors duration-150 hover:bg-foreground/[0.06]">
+                    <Shuffle className="h-3 w-3 text-muted-foreground" />
+                  </button>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button onClick={() => setShowAddModal(false)} className="h-8 px-4 rounded-md text-[11px] font-medium text-[#888] hover:bg-[#333]">Cancel</button>
-                <button onClick={addProduct} disabled={savingNew || !newForm.name.trim()}
-                  className="h-8 px-4 rounded-md text-[11px] font-medium bg-[#0073E6] text-white hover:bg-[#005bb5] disabled:opacity-30 flex items-center gap-1">
-                  {savingNew ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />} Add Product
-                </button>
+              <div>
+                <label className={LABEL_SM}>Unit</label>
+                <select value={newForm.unit} onChange={e => setNewForm(f => ({ ...f, unit: e.target.value }))}
+                  className={cn(FIELD_SM, 'px-2')}>
+                  {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                </select>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <div>
+                <label className={LABEL_SM}>Cost price</label>
+                <input type="number" step="0.01" value={newForm.cost_price} onChange={e => setNewForm(f => ({ ...f, cost_price: Number(e.target.value) }))}
+                  className={cn(FIELD_SM, 'tabular-nums')} />
+              </div>
+              <div>
+                <label className={LABEL_SM}>Selling price</label>
+                <input type="number" step="0.01" value={newForm.selling_price} onChange={e => setNewForm(f => ({ ...f, selling_price: Number(e.target.value) }))}
+                  className={cn(FIELD_SM, 'tabular-nums')} />
+              </div>
+              <div>
+                <label className={LABEL_SM}>Reorder level</label>
+                <input type="number" value={newForm.reorder_level} onChange={e => setNewForm(f => ({ ...f, reorder_level: Number(e.target.value) }))}
+                  className={cn(FIELD_SM, 'tabular-nums')} />
+              </div>
+              <div>
+                <label className={LABEL_SM}>Reorder qty</label>
+                <input type="number" value={newForm.reorder_qty} onChange={e => setNewForm(f => ({ ...f, reorder_qty: Number(e.target.value) }))}
+                  className={cn(FIELD_SM, 'tabular-nums')} />
+              </div>
+              <div>
+                <label className={LABEL_SM}>Supplier</label>
+                <input value={newForm.supplier_name} onChange={e => setNewForm(f => ({ ...f, supplier_name: e.target.value }))} placeholder="Supplier name"
+                  className={FIELD_SM} />
+              </div>
+              <div>
+                <label className={LABEL_SM}>Supplier contact</label>
+                <input value={newForm.supplier_contact} onChange={e => setNewForm(f => ({ ...f, supplier_contact: e.target.value }))} placeholder="Email or phone"
+                  className={FIELD_SM} />
+              </div>
+              <div className="sm:col-span-2">
+                <label className={LABEL_SM}>Description</label>
+                <textarea value={newForm.description} onChange={e => setNewForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Optional description..."
+                  className="w-full resize-none rounded-md border border-border/60 bg-foreground/[0.03] px-2.5 py-1.5 text-[11px] text-foreground outline-none transition-colors duration-150 placeholder:text-muted-foreground/60 focus:border-primary/60" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button onClick={() => setShowAddModal(false)} className="h-8 rounded-md px-4 text-[11px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.06]">Cancel</button>
+              <button onClick={addProduct} disabled={savingNew || !newForm.name.trim()}
+                className="flex h-8 items-center gap-1 rounded-md bg-primary px-4 text-[11px] font-medium text-primary-foreground transition-[filter] duration-150 hover:brightness-105 disabled:opacity-30">
+                <Plus className="h-3 w-3" /> {savingNew ? 'Adding' : 'Add product'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

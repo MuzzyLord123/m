@@ -2,25 +2,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SubscriptionPaywall } from '@/components/lounge/SubscriptionPaywall';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
-import {
-  BarChart3, Brain, TrendingUp, Target, Send, Loader2, Plus,
-  FileText, Sparkles, RefreshCw, Trash2, ArrowUpRight, ArrowDownRight,
-} from 'lucide-react';
+import { Brain, Send, Plus, Sparkles, Trash2 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
+import {
+  PageHeader, Panel, PanelHeader, EmptyState, SkeletonBlock,
+} from '@/components/platform';
 
 /* ─── Types ─── */
 interface KPIGoal {
@@ -53,7 +48,16 @@ interface BIMetrics {
   dealsByStage: { stage: string; count: number; value: number }[];
 }
 
-const CHART_COLORS = ['hsl(var(--primary))', 'hsl(190, 80%, 50%)', 'hsl(142, 60%, 50%)', 'hsl(48, 96%, 53%)', 'hsl(330, 80%, 55%)'];
+const CHART_COLORS = [
+  'hsl(var(--primary))',
+  'hsl(var(--gold))',
+  'hsl(var(--ok))',
+  'hsl(var(--attend))',
+  'hsl(var(--muted-foreground))',
+];
+
+const TAB_TRIGGER =
+  'relative -mb-px gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-3 py-2 text-[13px] text-muted-foreground shadow-none transition-colors duration-150 hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-none';
 
 function LoungeAIIntelligenceInner() {
   const { user, session } = useAuth();
@@ -203,60 +207,61 @@ function LoungeAIIntelligenceInner() {
     toast.success('KPI removed');
   };
 
-  const statCards = [
-    { label: 'Total Revenue', value: `£${(metrics?.totalRevenue || 0).toLocaleString()}`, icon: TrendingUp, trend: '+12%', up: true },
-    { label: 'Active Projects', value: metrics?.activeProjects || 0, icon: BarChart3, trend: '+3', up: true },
-    { label: 'Open Deals', value: metrics?.openDeals || 0, icon: Target, trend: '-2', up: false },
-    { label: 'Content Requests', value: metrics?.contentRequests || 0, icon: FileText, trend: '+5', up: true },
-  ];
-
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      <LoungePageHeader
-        title="AI Business Intelligence"
-        description="Natural language analytics and KPI tracking powered by AI"
+    <div className="mx-auto max-w-[1024px] space-y-5 px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Quooro AI"
+        title="Business intelligence"
+        description="Ask questions of your own data and track the numbers that matter"
       />
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card, i) => (
-          <motion.div key={card.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <Card className="border-border/40 bg-card/80 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <card.icon className="w-4 h-4 text-muted-foreground" />
-                  <Badge variant="outline" className={`text-[10px] ${card.up ? 'text-emerald-500' : 'text-rose-500'}`}>
-                    {card.up ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
-                    {card.trend}
-                  </Badge>
-                </div>
-                <p className="text-2xl font-bold text-foreground">{card.value}</p>
-                <p className="text-xs text-muted-foreground">{card.label}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+      {/* Quiet stat strip */}
+      {loadingMetrics ? (
+        <SkeletonBlock className="h-[72px] rounded-[10px]" />
+      ) : (
+        <Panel as="div">
+          <div className="grid grid-cols-2 divide-x divide-border/60 lg:grid-cols-4">
+            <div className="px-4 py-3">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Revenue</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">
+                {`£${(metrics?.totalRevenue || 0).toLocaleString('en-GB')}`}
+              </p>
+            </div>
+            <div className="px-4 py-3">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Active projects</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">{metrics?.activeProjects || 0}</p>
+            </div>
+            <div className="px-4 py-3">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Open deals</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">{metrics?.openDeals || 0}</p>
+            </div>
+            <div className="px-4 py-3">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Content requests</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">{metrics?.contentRequests || 0}</p>
+            </div>
+          </div>
+        </Panel>
+      )}
 
       <Tabs defaultValue="insights" className="space-y-4">
-        <div className="overflow-x-auto">
-        <TabsList className="w-max bg-muted/50">
-          <TabsTrigger value="insights">AI Insights</TabsTrigger>
-          <TabsTrigger value="charts">Charts</TabsTrigger>
-          <TabsTrigger value="kpis">KPI Goals</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center gap-1 border-b border-border/60">
+          <TabsList className="h-auto gap-1 rounded-none border-0 bg-transparent p-0">
+            <TabsTrigger value="insights" className={TAB_TRIGGER}>Ask your data</TabsTrigger>
+            <TabsTrigger value="charts" className={TAB_TRIGGER}>Charts</TabsTrigger>
+            <TabsTrigger value="kpis" className={TAB_TRIGGER}>KPI goals</TabsTrigger>
+          </TabsList>
         </div>
 
         {/* AI Insights Tab */}
-        <TabsContent value="insights" className="space-y-4">
-          <Card className="border-border/40">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-cyan-500" />
-                Ask Your Data
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+        <TabsContent value="insights" className="mt-0">
+          <Panel as="div">
+            <PanelHeader label={
+              <span className="inline-flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3 text-primary" aria-hidden />
+                Ask your data
+              </span>
+            } />
+            <div className="space-y-3 p-4">
               <div className="flex gap-2">
                 <Input
                   placeholder="e.g. Which projects are behind schedule?"
@@ -265,34 +270,40 @@ function LoungeAIIntelligenceInner() {
                   onKeyDown={e => e.key === 'Enter' && handleAIQuery()}
                   className="bg-background/50"
                 />
-                <Button onClick={handleAIQuery} disabled={isQuerying} size="icon" className="shrink-0">
-                  {isQuerying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                <Button onClick={handleAIQuery} disabled={isQuerying} size="icon" className="shrink-0" aria-label="Ask">
+                  <Send className="h-4 w-4" />
                 </Button>
               </div>
+              {isQuerying && !aiResponse && (
+                <p className="text-[12.5px] text-muted-foreground">Analysing your data</p>
+              )}
               {aiResponse && (
-                <div className="p-4 rounded-xl bg-muted/30 border border-border/30 text-sm leading-relaxed whitespace-pre-wrap">
+                <div className="whitespace-pre-wrap border-l-2 border-border pl-4 text-[13px] leading-relaxed text-foreground">
                   {aiResponse}
                 </div>
               )}
               <div className="flex flex-wrap gap-2">
                 {['Top clients by revenue', 'Projects behind schedule', 'Deal pipeline summary', 'Content request breakdown'].map(q => (
-                  <Button key={q} variant="outline" size="sm" className="text-xs" onClick={() => { setQuery(q); }}>
+                  <button
+                    key={q}
+                    type="button"
+                    className="rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground transition-colors duration-150 hover:border-primary/50 hover:text-foreground"
+                    onClick={() => { setQuery(q); }}
+                  >
                     {q}
-                  </Button>
+                  </button>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </Panel>
         </TabsContent>
 
         {/* Charts Tab */}
-        <TabsContent value="charts" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="border-border/40">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Revenue Trend</CardTitle>
-              </CardHeader>
-              <CardContent>
+        <TabsContent value="charts" className="mt-0">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Panel as="div">
+              <PanelHeader label="Revenue trend" />
+              <div className="p-4">
                 <div className="h-[240px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={metrics?.revenueByMonth || []}>
@@ -300,18 +311,16 @@ function LoungeAIIntelligenceInner() {
                       <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                       <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                       <Tooltip />
-                      <Area type="monotone" dataKey="revenue" stroke="hsl(190, 80%, 50%)" fill="hsl(190, 80%, 50%)" fillOpacity={0.15} />
+                      <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.12} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Panel>
 
-            <Card className="border-border/40">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Projects by Status</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <Panel as="div">
+              <PanelHeader label="Projects by status" />
+              <div className="p-4">
                 <div className="h-[240px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -325,14 +334,12 @@ function LoungeAIIntelligenceInner() {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Panel>
 
-            <Card className="border-border/40 lg:col-span-2">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Deal Pipeline</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <Panel as="div" className="lg:col-span-2">
+              <PanelHeader label="Deal pipeline" />
+              <div className="p-4">
                 <div className="h-[240px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={metrics?.dealsByStage || []}>
@@ -344,57 +351,59 @@ function LoungeAIIntelligenceInner() {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Panel>
           </div>
         </TabsContent>
 
         {/* KPI Goals Tab */}
-        <TabsContent value="kpis" className="space-y-4">
+        <TabsContent value="kpis" className="mt-0 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Track progress towards your business goals</p>
-            <Button size="sm" onClick={() => setShowAddKPI(!showAddKPI)}>
-              <Plus className="w-4 h-4 mr-1" /> Add KPI
+            <p className="text-[13px] text-muted-foreground">Track progress towards your business goals</p>
+            <Button size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowAddKPI(!showAddKPI)}>
+              <Plus className="mr-1 h-3.5 w-3.5" /> Add KPI
             </Button>
           </div>
 
           {showAddKPI && (
-            <Card className="border-border/40">
-              <CardContent className="p-4 space-y-3">
-                <div className="grid grid-cols-3 gap-3">
-                  <Input placeholder="Metric name" value={newKPI.metric_name} onChange={e => setNewKPI(p => ({ ...p, metric_name: e.target.value }))} />
-                  <Input placeholder="Target" type="number" value={newKPI.target_value} onChange={e => setNewKPI(p => ({ ...p, target_value: e.target.value }))} />
-                  <Input placeholder="Unit (e.g. £, %)" value={newKPI.unit} onChange={e => setNewKPI(p => ({ ...p, unit: e.target.value }))} />
-                </div>
-                <Button size="sm" onClick={addKPI}>Save KPI</Button>
-              </CardContent>
-            </Card>
+            <Panel as="div" className="space-y-3 p-4">
+              <div className="grid grid-cols-3 gap-3">
+                <Input placeholder="Metric name" value={newKPI.metric_name} onChange={e => setNewKPI(p => ({ ...p, metric_name: e.target.value }))} />
+                <Input placeholder="Target" type="number" value={newKPI.target_value} onChange={e => setNewKPI(p => ({ ...p, target_value: e.target.value }))} />
+                <Input placeholder="Unit (e.g. £, %)" value={newKPI.unit} onChange={e => setNewKPI(p => ({ ...p, unit: e.target.value }))} />
+              </div>
+              <Button size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={addKPI}>Save KPI</Button>
+            </Panel>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {kpis.map(kpi => {
               const pct = kpi.target_value > 0 ? Math.min(100, (kpi.current_value / kpi.target_value) * 100) : 0;
               return (
-                <Card key={kpi.id} className="border-border/40">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-sm">{kpi.metric_name}</p>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteKPI(kpi.id)}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-xl font-bold">{kpi.unit}{kpi.current_value}</span>
-                      <span className="text-xs text-muted-foreground">/ {kpi.unit}{kpi.target_value}</span>
-                    </div>
-                    <Progress value={pct} className="h-2" />
-                    <p className="text-[11px] text-muted-foreground">{pct.toFixed(0)}% complete · {kpi.period}</p>
-                  </CardContent>
-                </Card>
+                <Panel as="div" key={kpi.id} className="space-y-3 p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[13px] font-medium text-foreground">{kpi.metric_name}</p>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" aria-label="Remove KPI" onClick={() => deleteKPI(kpi.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-semibold tabular-nums">{kpi.unit}{kpi.current_value}</span>
+                    <span className="text-xs tabular-nums text-muted-foreground">/ {kpi.unit}{kpi.target_value}</span>
+                  </div>
+                  <Progress value={pct} className="h-2" />
+                  <p className="text-[11px] tabular-nums text-muted-foreground">{pct.toFixed(0)}% complete · {kpi.period}</p>
+                </Panel>
               );
             })}
             {kpis.length === 0 && (
-              <p className="text-sm text-muted-foreground col-span-2 text-center py-8">No KPI goals yet. Add one to start tracking.</p>
+              <EmptyState
+                compact
+                className="col-span-full"
+                title="No KPI goals yet"
+                body="Add a goal to start tracking progress against a target."
+                action={{ label: 'Add KPI', onClick: () => setShowAddKPI(true) }}
+              />
             )}
           </div>
         </TabsContent>

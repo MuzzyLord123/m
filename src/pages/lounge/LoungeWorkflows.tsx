@@ -46,33 +46,37 @@ export default function LoungeWorkflows() {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-    <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <div className="flex items-center justify-between mb-4">
-        <div className="overflow-x-auto">
-        <TabsList className="w-max h-8">
-          <TabsTrigger value="workflows" className="text-xs gap-1.5 h-7 px-3">
-            <Workflow className="h-3.5 w-3.5" />
-            Workflows
-          </TabsTrigger>
-          <TabsTrigger value="onboarding" className="text-xs gap-1.5 h-7 px-3">
-            <UserPlus className="h-3.5 w-3.5" />
-            Client Onboarding
-          </TabsTrigger>
-        </TabsList>
-      </div>
-      </div>
-      <TabsContent value="workflows" className="mt-0">
-        <WorkflowListPage
-          onOpenWorkflow={(id) => setActiveWorkflowId(id)}
-          onNewWorkflow={() => setIsNewWorkflow(true)}
-          onOpenHub={() => setShowHub(true)}
-        />
-      </TabsContent>
-      <TabsContent value="onboarding" className="mt-0">
-        <ClientOnboardingEngine />
-      </TabsContent>
-    </Tabs>
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <div className="mb-5 flex items-center gap-1 border-b border-border/60">
+          <TabsList className="h-auto gap-1 rounded-none border-0 bg-transparent p-0">
+            <TabsTrigger
+              value="workflows"
+              className="relative -mb-px gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-3 py-2 text-[13px] text-muted-foreground shadow-none transition-colors duration-150 hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-none"
+            >
+              <Workflow className="h-3.5 w-3.5" />
+              Workflows
+            </TabsTrigger>
+            <TabsTrigger
+              value="onboarding"
+              className="relative -mb-px gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-3 py-2 text-[13px] text-muted-foreground shadow-none transition-colors duration-150 hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-none"
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              Client onboarding
+            </TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="workflows" className="mt-0">
+          <WorkflowListPage
+            onOpenWorkflow={(id) => setActiveWorkflowId(id)}
+            onNewWorkflow={() => setIsNewWorkflow(true)}
+            onOpenHub={() => setShowHub(true)}
+          />
+        </TabsContent>
+        <TabsContent value="onboarding" className="mt-0">
+          <ClientOnboardingEngine />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

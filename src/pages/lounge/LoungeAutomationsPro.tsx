@@ -2,24 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SubscriptionPaywall } from '@/components/lounge/SubscriptionPaywall';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { Key, Plus, Trash2, Eye, EyeOff, Zap, CalendarClock, Shield } from 'lucide-react';
 import {
-  Workflow, Clock, Key, Activity, Plus, Trash2, Copy, Eye,
-  EyeOff, CheckCircle2, XCircle, Loader2, BarChart3, Timer,
-  RefreshCw, Zap, CalendarClock, Shield,
-} from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
+  PageHeader, Panel, PanelHeader, StatusBadge, RelativeTime,
+  EmptyState, SkeletonLedger, FIELD, FIELD_LABEL,
+} from '@/components/platform';
 
 /* ─── Types ─── */
 interface AutomationRun {
@@ -55,6 +48,9 @@ interface APIKey {
   last_used_at: string | null;
   created_at: string;
 }
+
+const TAB_TRIGGER =
+  'relative -mb-px gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-3 py-2 text-[13px] text-muted-foreground shadow-none transition-colors duration-150 hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-none';
 
 function LoungeAutomationsProInner() {
   const { user } = useAuth();
@@ -160,195 +156,200 @@ function LoungeAutomationsProInner() {
   const successRate = totalRuns > 0 ? ((successRuns / totalRuns) * 100).toFixed(0) : '0';
   const avgDuration = runs.filter(r => r.duration_ms).reduce((sum, r) => sum + (r.duration_ms || 0), 0) / (runs.filter(r => r.duration_ms).length || 1);
 
-  const statCards = [
-    { label: 'Total Runs', value: totalRuns, icon: Activity, color: 'text-rose-500' },
-    { label: 'Success Rate', value: `${successRate}%`, icon: CheckCircle2, color: 'text-emerald-500' },
-    { label: 'Failed', value: failedRuns, icon: XCircle, color: 'text-red-500' },
-    { label: 'Avg Duration', value: `${(avgDuration / 1000).toFixed(1)}s`, icon: Timer, color: 'text-amber-500' },
+  const stats = [
+    { label: 'Runs', value: String(totalRuns) },
+    { label: 'Success rate', value: `${successRate}%` },
+    { label: 'Failed', value: String(failedRuns) },
+    { label: 'Avg duration', value: `${(avgDuration / 1000).toFixed(1)}s` },
   ];
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      <LoungePageHeader
-        title="Advanced Automations"
-        description="Scheduled workflows, API keys, and detailed execution history"
+    <div className="mx-auto max-w-[1024px] space-y-5 px-5 py-7 lg:px-8">
+      <PageHeader
+        kicker="Automations"
+        title="Advanced automations"
+        description="Scheduled workflows, API keys and execution history"
       />
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card, i) => (
-          <motion.div key={card.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <Card className="border-border/40">
-              <CardContent className="p-4">
-                <card.icon className={`w-4 h-4 ${card.color} mb-2`} />
-                <p className="text-2xl font-bold">{card.value}</p>
-                <p className="text-xs text-muted-foreground">{card.label}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+      {/* Quiet stat strip */}
+      <Panel as="div">
+        <div className="grid grid-cols-2 divide-x divide-border/60 lg:grid-cols-4">
+          {stats.map(s => (
+            <div key={s.label} className="px-4 py-3">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                {s.label}
+              </p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">{s.value}</p>
+            </div>
+          ))}
+        </div>
+      </Panel>
 
       <Tabs defaultValue="runs" className="space-y-4">
-        <div className="overflow-x-auto">
-        <TabsList className="w-max bg-muted/50">
-          <TabsTrigger value="runs">Run History</TabsTrigger>
-          <TabsTrigger value="schedules">Schedules</TabsTrigger>
-          <TabsTrigger value="api-keys">API Keys</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center gap-1 border-b border-border/60">
+          <TabsList className="h-auto gap-1 rounded-none border-0 bg-transparent p-0">
+            <TabsTrigger value="runs" className={TAB_TRIGGER}>Run history</TabsTrigger>
+            <TabsTrigger value="schedules" className={TAB_TRIGGER}>Schedules</TabsTrigger>
+            <TabsTrigger value="api-keys" className={TAB_TRIGGER}>API keys</TabsTrigger>
+          </TabsList>
         </div>
 
         {/* Runs Tab */}
-        <TabsContent value="runs" className="space-y-4">
-          <ScrollArea className="h-[500px]">
-            <div className="space-y-2">
-              {runs.map(run => (
-                <Card key={run.id} className="border-border/40">
-                  <CardContent className="p-3 flex items-center gap-3">
-                    {run.status === 'completed' ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    ) : run.status === 'failed' ? (
-                      <XCircle className="w-4 h-4 text-red-500 shrink-0" />
-                    ) : (
-                      <Loader2 className="w-4 h-4 text-amber-500 animate-spin shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px]">{run.trigger_type || 'manual'}</Badge>
-                        <Badge variant={run.status === 'completed' ? 'default' : 'destructive'} className="text-[10px]">
-                          {run.status}
-                        </Badge>
-                      </div>
+        <TabsContent value="runs" className="mt-0">
+          <Panel as="div">
+            <PanelHeader label="Last 50 runs" />
+            {loading ? (
+              <SkeletonLedger rows={6} />
+            ) : runs.length === 0 ? (
+              <EmptyState
+                compact
+                title="No runs yet"
+                body="When a workflow runs, its outcome and timing appear here."
+              />
+            ) : (
+              <div className="max-h-[500px] overflow-y-auto">
+                {runs.map(run => (
+                  <div key={run.id} className="flex items-center gap-3 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+                    <StatusBadge status={run.status} className="w-24 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
+                        {run.trigger_type || 'manual'}
+                      </p>
                       {run.error_message && (
-                        <p className="text-[11px] text-red-400 mt-1 truncate">{run.error_message}</p>
+                        <p className="mt-0.5 truncate text-[11.5px] text-risk">{run.error_message}</p>
                       )}
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-[11px] text-muted-foreground">{run.duration_ms ? `${(run.duration_ms / 1000).toFixed(1)}s` : '—'}</p>
-                      <p className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(run.created_at), { addSuffix: true })}</p>
+                    <div className="shrink-0 text-right">
+                      <p className="font-mono text-[11px] tabular-nums text-ink-2">
+                        {run.duration_ms ? `${(run.duration_ms / 1000).toFixed(1)}s` : '—'}
+                      </p>
+                      <RelativeTime date={run.created_at} />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-              {runs.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-12">No automation runs yet.</p>
-              )}
-            </div>
-          </ScrollArea>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Panel>
         </TabsContent>
 
         {/* Schedules Tab */}
-        <TabsContent value="schedules" className="space-y-4">
+        <TabsContent value="schedules" className="mt-0 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Schedule workflows to run automatically</p>
-            <Button size="sm" onClick={() => setShowNewSchedule(!showNewSchedule)}>
-              <Plus className="w-4 h-4 mr-1" /> New Schedule
+            <p className="text-[13px] text-muted-foreground">Schedule workflows to run automatically</p>
+            <Button size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowNewSchedule(!showNewSchedule)}>
+              <Plus className="mr-1 h-3.5 w-3.5" /> New schedule
             </Button>
           </div>
 
           {showNewSchedule && (
-            <Card className="border-border/40">
-              <CardContent className="p-4 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs">Schedule Name</Label>
-                    <Input value={newSchedule.name} onChange={e => setNewSchedule(p => ({ ...p, name: e.target.value }))} placeholder="Daily digest" className="mt-1" />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Cron Expression</Label>
-                    <Select value={newSchedule.cron} onValueChange={v => setNewSchedule(p => ({ ...p, cron: v }))}>
-                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0 9 * * *">Daily at 9am</SelectItem>
-                        <SelectItem value="0 9 * * 1">Weekly on Monday</SelectItem>
-                        <SelectItem value="0 9 1 * *">Monthly (1st)</SelectItem>
-                        <SelectItem value="0 */6 * * *">Every 6 hours</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+            <Panel as="div" className="space-y-3 p-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label className={FIELD_LABEL}>Schedule name</Label>
+                  <Input value={newSchedule.name} onChange={e => setNewSchedule(p => ({ ...p, name: e.target.value }))} placeholder="Daily digest" className="mt-1" />
                 </div>
-                <Button size="sm" onClick={createSchedule}>Create Schedule</Button>
-              </CardContent>
-            </Card>
+                <div>
+                  <Label className={FIELD_LABEL}>Frequency</Label>
+                  <Select value={newSchedule.cron} onValueChange={v => setNewSchedule(p => ({ ...p, cron: v }))}>
+                    <SelectTrigger className={`mt-1.5 ${FIELD}`}><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0 9 * * *">Daily at 9am</SelectItem>
+                      <SelectItem value="0 9 * * 1">Weekly on Monday</SelectItem>
+                      <SelectItem value="0 9 1 * *">Monthly (1st)</SelectItem>
+                      <SelectItem value="0 */6 * * *">Every 6 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={createSchedule}>Create schedule</Button>
+            </Panel>
           )}
 
-          <div className="space-y-2">
-            {schedules.map(s => (
-              <Card key={s.id} className="border-border/40">
-                <CardContent className="p-3 flex items-center gap-3">
-                  <CalendarClock className={`w-4 h-4 ${s.is_active ? 'text-emerald-500' : 'text-muted-foreground'} shrink-0`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{s.schedule_name}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      <code className="bg-muted/50 px-1 py-0.5 rounded text-[10px]">{s.cron_expression}</code>
-                      {' · '}{s.run_count} runs
+          <Panel as="div">
+            {loading ? (
+              <SkeletonLedger rows={3} />
+            ) : schedules.length === 0 ? (
+              <EmptyState
+                compact
+                title="No schedules yet"
+                body="Create a schedule to run a workflow on a fixed rhythm."
+              />
+            ) : (
+              schedules.map(s => (
+                <div key={s.id} className="flex items-center gap-3 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+                  <CalendarClock className={`h-4 w-4 shrink-0 ${s.is_active ? 'text-ok' : 'text-muted-foreground'}`} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-[450] text-foreground">{s.schedule_name}</p>
+                    <p className="mt-0.5 text-[11.5px] text-muted-foreground">
+                      <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[10px]">{s.cron_expression}</code>
+                      {' · '}<span className="tabular-nums">{s.run_count}</span> runs
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toggleSchedule(s.id, s.is_active)}>
-                      {s.is_active ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={s.is_active ? 'Pause schedule' : 'Resume schedule'} onClick={() => toggleSchedule(s.id, s.is_active)}>
+                      {s.is_active ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteSchedule(s.id)}>
-                      <Trash2 className="w-3 h-3" />
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Delete schedule" onClick={() => deleteSchedule(s.id)}>
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-            {schedules.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-8">No schedules configured.</p>
+                </div>
+              ))
             )}
-          </div>
+          </Panel>
         </TabsContent>
 
         {/* API Keys Tab */}
-        <TabsContent value="api-keys" className="space-y-4">
+        <TabsContent value="api-keys" className="mt-0 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Personal API keys for external integrations</p>
-            <Button size="sm" onClick={() => setShowNewKey(!showNewKey)}>
-              <Plus className="w-4 h-4 mr-1" /> New Key
+            <p className="text-[13px] text-muted-foreground">Personal API keys for external integrations</p>
+            <Button size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowNewKey(!showNewKey)}>
+              <Plus className="mr-1 h-3.5 w-3.5" /> New key
             </Button>
           </div>
 
           {showNewKey && (
-            <Card className="border-border/40">
-              <CardContent className="p-4 space-y-3">
-                <div>
-                  <Label className="text-xs">Key Name</Label>
-                  <Input value={newKeyName} onChange={e => setNewKeyName(e.target.value)} placeholder="e.g. Zapier Integration" className="mt-1" />
-                </div>
-                <Button size="sm" onClick={createAPIKey} disabled={creatingKey}>
-                  {creatingKey ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Key className="w-4 h-4 mr-1" />}
-                  Generate Key
-                </Button>
-              </CardContent>
-            </Card>
+            <Panel as="div" className="space-y-3 p-4">
+              <div>
+                <Label className={FIELD_LABEL}>Key name</Label>
+                <Input value={newKeyName} onChange={e => setNewKeyName(e.target.value)} placeholder="e.g. Zapier Integration" className="mt-1" />
+              </div>
+              <Button size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={createAPIKey} disabled={creatingKey}>
+                <Key className="mr-1 h-3.5 w-3.5" />
+                {creatingKey ? 'Generating key' : 'Generate key'}
+              </Button>
+            </Panel>
           )}
 
-          <div className="space-y-2">
-            {apiKeys.map(key => (
-              <Card key={key.id} className="border-border/40">
-                <CardContent className="p-3 flex items-center gap-3">
-                  <Shield className={`w-4 h-4 ${key.is_active ? 'text-emerald-500' : 'text-muted-foreground'} shrink-0`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{key.key_name}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      <code className="bg-muted/50 px-1 py-0.5 rounded text-[10px]">{key.key_prefix}••••••••</code>
-                      {' · '}{key.usage_count} uses · {key.rate_limit}/min limit
+          <Panel as="div">
+            {loading ? (
+              <SkeletonLedger rows={3} />
+            ) : apiKeys.length === 0 ? (
+              <EmptyState
+                compact
+                title="No API keys yet"
+                body="Generate a key to connect external tools to your account."
+              />
+            ) : (
+              apiKeys.map(key => (
+                <div key={key.id} className="flex items-center gap-3 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+                  <Shield className={`h-4 w-4 shrink-0 ${key.is_active ? 'text-ok' : 'text-muted-foreground'}`} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-[450] text-foreground">{key.key_name}</p>
+                    <p className="mt-0.5 text-[11.5px] text-muted-foreground">
+                      <code className="rounded bg-sunken px-1 py-0.5 font-mono text-[10px]">{key.key_prefix}••••••••</code>
+                      {' · '}<span className="tabular-nums">{key.usage_count}</span> uses · <span className="tabular-nums">{key.rate_limit}</span>/min limit
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteAPIKey(key.id)}>
-                      <Trash2 className="w-3 h-3" />
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Delete API key" onClick={() => deleteAPIKey(key.id)}>
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-            {apiKeys.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-8">No API keys created yet.</p>
+                </div>
+              ))
             )}
-          </div>
+          </Panel>
         </TabsContent>
       </Tabs>
     </div>

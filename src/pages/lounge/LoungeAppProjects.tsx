@@ -1,28 +1,25 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { LoungePageHeader } from '@/components/lounge/LoungePageHeader';
 import {
-  Layout, Code, Calendar, Clock, Target, ExternalLink,
-  CheckCircle, AlertCircle, ChevronRight,
-  Shield, Server, History, Palette, Eye, Rocket, Wrench, Box,
-  RefreshCw, Plus, FileCode, ArrowLeft, TestTube, FolderOpen, BarChart3
+  Layout, Code, Clock, Calendar, Target, ExternalLink,
+  ChevronRight, Shield, Server, History, Palette, Eye, Rocket, Wrench, Box,
+  RefreshCw, Plus, FileCode, ArrowLeft, TestTube, FolderOpen, BarChart3,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { SkeletonLoading } from '@/components/lounge/SkeletonLoading';
+import {
+  PageHeader, Panel, PanelHeader, StatusBadge, StatusDot, statusTone, statusLabel,
+  EmptyState, SkeletonLedger, FIELD, FIELD_LABEL,
+} from '@/components/platform';
 
 interface Milestone {
   name: string;
@@ -60,26 +57,27 @@ interface AppProject {
 
 const projectTypes: Record<string, { label: string; icon: typeof Layout }> = {
   dashboard: { label: 'Dashboard', icon: Layout },
-  web_app: { label: 'Web Application', icon: Code },
-  internal_tool: { label: 'Internal Tool', icon: Wrench },
-  client_portal: { label: 'Client Portal', icon: Shield },
-  inventory_system: { label: 'Inventory System', icon: Box },
-  database: { label: 'Database System', icon: Server },
-  workflow: { label: 'Workflow Tool', icon: RefreshCw },
-  mvp: { label: 'MVP / Prototype', icon: Rocket },
-  other: { label: 'Custom Build', icon: FileCode },
+  web_app: { label: 'Web application', icon: Code },
+  internal_tool: { label: 'Internal tool', icon: Wrench },
+  client_portal: { label: 'Client portal', icon: Shield },
+  inventory_system: { label: 'Inventory system', icon: Box },
+  database: { label: 'Database system', icon: Server },
+  workflow: { label: 'Workflow tool', icon: RefreshCw },
+  mvp: { label: 'MVP / prototype', icon: Rocket },
+  other: { label: 'Custom build', icon: FileCode },
 };
 
-const statusConfig: Record<string, { label: string; color: string; progress: number }> = {
-  planning: { label: 'Planning', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30', progress: 10 },
-  design: { label: 'Design', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30', progress: 25 },
-  development: { label: 'Development', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', progress: 50 },
-  testing: { label: 'Testing', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30', progress: 75 },
-  review: { label: 'Under Review', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30', progress: 85 },
-  deployed: { label: 'Deployed', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', progress: 95 },
-  maintenance: { label: 'Maintenance', color: 'bg-teal-500/20 text-teal-400 border-teal-500/30', progress: 100 },
-  on_hold: { label: 'On Hold', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', progress: 0 },
-  completed: { label: 'Completed', color: 'bg-green-500/20 text-green-400 border-green-500/30', progress: 100 },
+/** How far through the build each status sits (presentation only). */
+const statusProgress: Record<string, number> = {
+  planning: 10,
+  design: 25,
+  development: 50,
+  testing: 75,
+  review: 85,
+  deployed: 95,
+  maintenance: 100,
+  on_hold: 0,
+  completed: 100,
 };
 
 const statusSteps = [
@@ -90,15 +88,8 @@ const statusSteps = [
   { key: 'deployed', label: 'Deployed', icon: Rocket, description: 'Live and accessible in production' },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
+const TAB_TRIGGER =
+  'relative -mb-px gap-1.5 rounded-none border-b-2 border-transparent bg-transparent px-3 py-2 text-[13px] text-muted-foreground shadow-none transition-colors duration-150 hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-none';
 
 export default function LoungeAppProjects() {
   const { user } = useAuth();
@@ -163,9 +154,9 @@ export default function LoungeAppProjects() {
     }
   };
 
-  const getStatusConfig = (status: string) => {
-    return statusConfig[status] || statusConfig.planning;
-  };
+  const getStatusConfig = (status: string) => ({
+    progress: statusProgress[status] ?? statusProgress.planning,
+  });
 
   const getProjectTypeConfig = (type: string) => {
     return projectTypes[type] || projectTypes.other;
@@ -173,8 +164,12 @@ export default function LoungeAppProjects() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        <SkeletonLoading variant="detail" />
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8" aria-hidden>
+        <span className="block h-6 w-48 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-4 w-72 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-6 rounded-[10px] border border-border/60">
+          <SkeletonLedger rows={4} />
+        </div>
       </div>
     );
   }
@@ -182,584 +177,440 @@ export default function LoungeAppProjects() {
   // No projects state
   if (projects.length === 0) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <Layout className="w-5 h-5 text-blue-500" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">App Projects</h1>
-              <p className="text-muted-foreground">Track your custom applications and systems</p>
-            </div>
-          </div>
-          
-          <Card className="p-12 text-center">
-            <Layout className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-xl mb-2">No Active Projects</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              You don't have any app projects yet. When you request a custom application, 
-              dashboard, or system, it will appear here with real-time progress updates.
-            </p>
-          </Card>
-        </div>
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+        <PageHeader
+          kicker="Projects"
+          title="App projects"
+          description="Track your custom applications and systems"
+        />
+        <Panel className="mt-6">
+          <EmptyState
+            title="No app projects yet"
+            body="When you commission a custom application, dashboard or system, it appears here with live progress updates."
+          />
+        </Panel>
       </div>
     );
   }
 
   // Project detail view with tabs
   if (selectedProject) {
-    const config = getStatusConfig(selectedProject.status);
     const typeConfig = getProjectTypeConfig(selectedProject.project_type);
-    const TypeIcon = typeConfig.icon;
     const currentStepIndex = statusSteps.findIndex(s => s.key === selectedProject.status);
 
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-6 sm:space-y-8"
-        >
+      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+        <div className="space-y-5">
           {/* Header */}
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="space-y-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="gap-2 -ml-2 mb-2"
-                onClick={() => setSelectedProject(null)}
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Projects
-              </Button>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <TypeIcon className="w-5 h-5 text-blue-500" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{selectedProject.project_name}</h1>
-                  <p className="text-muted-foreground">{typeConfig.label}</p>
-                </div>
-              </div>
+          <div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="-ml-2 mb-3 h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => setSelectedProject(null)}
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to projects
+            </Button>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <PageHeader
+                kicker={typeConfig.label}
+                title={selectedProject.project_name}
+                className="min-w-0 flex-1"
+              />
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs">
+                    <Plus className="h-3.5 w-3.5" />
+                    Request change
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">
+                      Request a change
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-1.5">
+                      <Label className={FIELD_LABEL}>Change title</Label>
+                      <Input
+                        placeholder="e.g. Add user export feature"
+                        value={changeForm.title}
+                        onChange={(e) => setChangeForm(prev => ({ ...prev, title: e.target.value }))}
+                        className={FIELD}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className={FIELD_LABEL}>Description</Label>
+                      <Textarea
+                        placeholder="Describe the change you need"
+                        value={changeForm.description}
+                        onChange={(e) => setChangeForm(prev => ({ ...prev, description: e.target.value }))}
+                        className={cn(FIELD, 'min-h-[100px] py-2')}
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button variant="outline" size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={() => setDialogOpen(false)}>Cancel</Button>
+                      <Button size="sm" className="h-8 rounded-lg px-3 text-xs" onClick={handleSubmitChangeRequest} disabled={submitting}>
+                        {submitting ? 'Submitting' : 'Submit request'}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
-            
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Request Change
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Request Project Change</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label>Change Title *</Label>
-                    <Input
-                      placeholder="e.g., Add user export feature"
-                      value={changeForm.title}
-                      onChange={(e) => setChangeForm(prev => ({ ...prev, title: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Textarea
-                      placeholder="Describe the changes you'd like..."
-                      value={changeForm.description}
-                      onChange={(e) => setChangeForm(prev => ({ ...prev, description: e.target.value }))}
-                      className="min-h-[100px]"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 pt-2">
-                    <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={handleSubmitChangeRequest} disabled={submitting}>
-                      {submitting ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                          Submitting...
-                        </>
-                      ) : (
-                        'Submit Request'
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </motion.div>
+          </div>
 
-          {/* Tabbed Interface */}
-          <motion.div variants={itemVariants}>
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-6">
-                <TabsTrigger value="overview" className="gap-2">
-                  <Eye className="w-4 h-4 hidden sm:block" />
+          {/* Tabbed interface */}
+          <Tabs defaultValue="overview" className="w-full">
+            <div className="mb-5 flex items-center gap-1 border-b border-border/60">
+              <TabsList className="h-auto gap-1 rounded-none border-0 bg-transparent p-0">
+                <TabsTrigger value="overview" className={TAB_TRIGGER}>
+                  <Eye className="hidden h-3.5 w-3.5 sm:block" />
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="files" className="gap-2">
-                  <FolderOpen className="w-4 h-4 hidden sm:block" />
+                <TabsTrigger value="files" className={TAB_TRIGGER}>
+                  <FolderOpen className="hidden h-3.5 w-3.5 sm:block" />
                   Files
                 </TabsTrigger>
-                <TabsTrigger value="timeline" className="gap-2">
-                  <History className="w-4 h-4 hidden sm:block" />
+                <TabsTrigger value="timeline" className={TAB_TRIGGER}>
+                  <History className="hidden h-3.5 w-3.5 sm:block" />
                   Timeline
                 </TabsTrigger>
-                <TabsTrigger value="analytics" className="gap-2">
-                  <BarChart3 className="w-4 h-4 hidden sm:block" />
+                <TabsTrigger value="analytics" className={TAB_TRIGGER}>
+                  <BarChart3 className="hidden h-3.5 w-3.5 sm:block" />
                   Analytics
                 </TabsTrigger>
               </TabsList>
+            </div>
 
-              {/* Overview Tab */}
-              <TabsContent value="overview" className="space-y-6">
-                {/* Status Overview */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-blue-500/10">
-                          <Layout className="w-5 h-5 text-blue-500" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-muted-foreground">Status</p>
-                          <Badge className={cn("mt-1", config.color)}>{config.label}</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-amber-500/10">
-                          <Clock className="w-5 h-5 text-amber-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-muted-foreground">Estimated Hours</p>
-                          <p className="font-medium">{selectedProject.estimated_hours ? `${selectedProject.estimated_hours}h` : 'TBD'}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-purple-500/10">
-                          <Calendar className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-muted-foreground">Target Date</p>
-                          <p className="font-medium">
-                            {selectedProject.target_completion_date 
-                              ? format(new Date(selectedProject.target_completion_date), 'MMM d, yyyy')
-                              : 'Not set'}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-emerald-500/10">
-                          <Calendar className="w-5 h-5 text-emerald-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-muted-foreground">Started</p>
-                          <p className="font-medium">
-                            {selectedProject.start_date 
-                              ? format(new Date(selectedProject.start_date), 'MMM d, yyyy')
-                              : 'Not started'}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Description & Notes */}
-                {(selectedProject.description || selectedProject.notes) && (
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    {selectedProject.description && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <FileCode className="w-5 h-5 text-muted-foreground" />
-                            Project Description
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground">{selectedProject.description}</p>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    {selectedProject.notes && (
-                      <Card className="border-blue-500/20 bg-blue-500/5">
-                        <CardHeader>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <History className="w-5 h-5 text-blue-500" />
-                            Latest Update
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-muted-foreground">{selectedProject.notes}</p>
-                        </CardContent>
-                      </Card>
-                    )}
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="mt-0 space-y-4">
+              {/* Status strip */}
+              <Panel as="div">
+                <div className="grid grid-cols-2 divide-x divide-border/60 lg:grid-cols-4">
+                  <div className="px-4 py-3">
+                    <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Status</p>
+                    <StatusBadge status={selectedProject.status} className="mt-1.5" />
                   </div>
-                )}
+                  <div className="px-4 py-3">
+                    <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Estimated hours</p>
+                    <p className="mt-1 text-[13px] font-medium tabular-nums text-foreground">
+                      {selectedProject.estimated_hours ? `${selectedProject.estimated_hours}h` : 'To be confirmed'}
+                    </p>
+                  </div>
+                  <div className="px-4 py-3">
+                    <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Target date</p>
+                    <p className="mt-1 text-[13px] font-medium tabular-nums text-foreground">
+                      {selectedProject.target_completion_date
+                        ? format(new Date(selectedProject.target_completion_date), 'd MMM yyyy')
+                        : 'Not set'}
+                    </p>
+                  </div>
+                  <div className="px-4 py-3">
+                    <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Started</p>
+                    <p className="mt-1 text-[13px] font-medium tabular-nums text-foreground">
+                      {selectedProject.start_date
+                        ? format(new Date(selectedProject.start_date), 'd MMM yyyy')
+                        : 'Not started'}
+                    </p>
+                  </div>
+                </div>
+              </Panel>
 
-                {/* Features */}
-                {selectedProject.features.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-muted-foreground" />
-                        Features
-                      </CardTitle>
-                      <CardDescription>Planned features and their current status</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-3 md:grid-cols-2">
-                        {selectedProject.features.map((feature, index) => (
-                          <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                            <div className={cn(
-                              "w-2 h-2 rounded-full",
-                              feature.status === 'completed' ? 'bg-emerald-500' :
-                              feature.status === 'in_progress' ? 'bg-blue-500' : 'bg-muted-foreground'
-                            )} />
-                            <span className={cn(
-                              "flex-1",
-                              feature.status === 'completed' && 'text-muted-foreground line-through'
-                            )}>
-                              {feature.name}
-                            </span>
-                            <Badge variant="outline" className="text-xs capitalize">
-                              {feature.status.replace('_', ' ')}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-3">
-                  {selectedProject.preview_url && (
-                    <Button variant="outline" className="gap-2" asChild>
-                      <a href={selectedProject.preview_url} target="_blank" rel="noopener noreferrer">
-                        <Eye className="w-4 h-4" />
-                        View Preview
-                      </a>
-                    </Button>
+              {/* Description & notes */}
+              {(selectedProject.description || selectedProject.notes) && (
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {selectedProject.description && (
+                    <Panel as="div">
+                      <PanelHeader label="Project description" />
+                      <p className="px-4 py-3.5 text-[13px] leading-relaxed text-ink-2">
+                        {selectedProject.description}
+                      </p>
+                    </Panel>
                   )}
-                  {selectedProject.production_url && (
-                    <Button className="gap-2" asChild>
-                      <a href={selectedProject.production_url} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="w-4 h-4" />
-                        View Live
-                      </a>
-                    </Button>
+
+                  {selectedProject.notes && (
+                    <Panel as="div">
+                      <PanelHeader label="Latest update" />
+                      <div className="border-l-2 border-primary px-4 py-3.5">
+                        <p className="text-[13px] leading-relaxed text-ink-2">{selectedProject.notes}</p>
+                      </div>
+                    </Panel>
                   )}
                 </div>
-              </TabsContent>
+              )}
 
-              {/* Files Tab */}
-              <TabsContent value="files" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FolderOpen className="w-5 h-5 text-primary" />
-                      Project Files
-                    </CardTitle>
-                    <CardDescription>
-                      Access your project files and assets
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <FolderOpen className="w-16 h-16 text-muted-foreground/30 mb-4" />
-                      <h3 className="font-semibold text-lg mb-2">No Files Yet</h3>
-                      <p className="text-muted-foreground max-w-md">
-                        Project files will appear here as development progresses.
-                      </p>
+              {/* Features */}
+              {selectedProject.features.length > 0 && (
+                <Panel as="div">
+                  <PanelHeader label="Features" />
+                  {selectedProject.features.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-3 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+                      <StatusDot tone={statusTone(feature.status)} />
+                      <span
+                        className={cn(
+                          'min-w-0 flex-1 truncate text-[13px]',
+                          feature.status === 'completed' ? 'text-muted-foreground' : 'text-foreground',
+                        )}
+                      >
+                        {feature.name}
+                      </span>
+                      <StatusBadge status={feature.status} />
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                  ))}
+                </Panel>
+              )}
 
-              {/* Timeline Tab */}
-              <TabsContent value="timeline" className="space-y-6">
-                {/* Project Timeline */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Code className="w-5 h-5 text-blue-500" />
-                      Project Timeline
-                    </CardTitle>
-                    <CardDescription>
-                      Your project is currently in the <strong className="text-foreground">{config.label}</strong> phase
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-0">
-                      {statusSteps.map((step, index) => {
-                        const isCompleted = index < currentStepIndex;
-                        const isCurrent = step.key === selectedProject.status;
-                        const isPending = index > currentStepIndex;
-                        const StepIcon = step.icon;
+              {/* Action buttons */}
+              <div className="flex flex-wrap gap-2">
+                {selectedProject.preview_url && (
+                  <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" asChild>
+                    <a href={selectedProject.preview_url} target="_blank" rel="noopener noreferrer">
+                      <Eye className="h-3.5 w-3.5" />
+                      View preview
+                    </a>
+                  </Button>
+                )}
+                {selectedProject.production_url && (
+                  <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" asChild>
+                    <a href={selectedProject.production_url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      View live
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </TabsContent>
 
-                        return (
-                          <motion.div
-                            key={step.key}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="relative"
-                          >
-                            {index < statusSteps.length - 1 && (
-                              <div className={`absolute left-5 top-12 w-0.5 h-16 ${isCompleted ? 'bg-blue-500' : 'bg-border'}`} />
-                            )}
-                            
-                            <div className={`flex items-start gap-4 p-4 rounded-xl transition-all ${isCurrent ? 'bg-blue-500/5 border border-blue-500/20' : ''}`}>
-                              <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                                isCompleted 
-                                  ? 'bg-blue-500 text-white' 
-                                  : isCurrent 
-                                    ? 'bg-blue-500 text-white ring-4 ring-blue-500/20'
-                                    : 'bg-muted text-muted-foreground'
-                              }`}>
-                                {isCompleted ? <CheckCircle className="w-5 h-5" /> : <StepIcon className="w-5 h-5" />}
-                              </div>
+            {/* Files Tab */}
+            <TabsContent value="files" className="mt-0">
+              <Panel as="div">
+                <PanelHeader label="Project files" />
+                <EmptyState
+                  compact
+                  title="No files yet"
+                  body="Project files and assets appear here as development progresses."
+                />
+              </Panel>
+            </TabsContent>
 
-                              <div className="flex-1 min-w-0 pt-1">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <h3 className={`font-semibold ${isPending ? 'text-muted-foreground' : 'text-foreground'}`}>
-                                    {step.label}
-                                  </h3>
-                                  {isCurrent && <Badge className="bg-blue-500/20 text-blue-400 border-0">Current</Badge>}
-                                  {isCompleted && <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Completed</Badge>}
-                                </div>
-                                <p className={`text-sm mt-1 ${isPending ? 'text-muted-foreground/60' : 'text-muted-foreground'}`}>
-                                  {step.description}
-                                </p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
+            {/* Timeline Tab */}
+            <TabsContent value="timeline" className="mt-0 space-y-4">
+              {/* Project timeline */}
+              <Panel as="div">
+                <PanelHeader label="Project timeline" />
+                <div className="px-4 py-4">
+                  <p className="mb-4 text-[13px] text-ink-2">
+                    Your project is currently in the {statusLabel(selectedProject.status).toLowerCase()} phase
+                  </p>
+                  <div>
+                    {statusSteps.map((step, index) => {
+                      const isCompleted = index < currentStepIndex;
+                      const isCurrent = step.key === selectedProject.status;
+                      const isPending = index > currentStepIndex;
 
-                {/* Milestones */}
-                {selectedProject.milestones.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Target className="w-5 h-5 text-muted-foreground" />
-                        Milestones
-                      </CardTitle>
-                      <CardDescription>Key project milestones</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {selectedProject.milestones.map((milestone, index) => (
-                          <div key={index} className={cn(
-                            "flex items-start gap-3 p-3 rounded-lg",
-                            milestone.status === 'current' ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-muted/30'
-                          )}>
-                            <div className={cn(
-                              "w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5",
-                              milestone.status === 'completed' ? 'bg-emerald-500/20 text-emerald-500' :
-                              milestone.status === 'current' ? 'bg-blue-500 text-white' : 'bg-muted text-muted-foreground'
-                            )}>
-                              {milestone.status === 'completed' ? <CheckCircle className="w-4 h-4" /> : index + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{milestone.name}</span>
-                                {milestone.status === 'current' && (
-                                  <Badge className="bg-blue-500/20 text-blue-400 border-0 text-xs">Current</Badge>
+                      return (
+                        <div key={step.key} className="relative pb-6 last:pb-0">
+                          {index < statusSteps.length - 1 && (
+                            <span
+                              aria-hidden
+                              className={cn(
+                                'absolute left-[5px] top-4 h-full w-px',
+                                isCompleted ? 'bg-foreground/30' : 'bg-border',
+                              )}
+                            />
+                          )}
+                          <div className="flex items-start gap-3.5">
+                            <span
+                              className={cn(
+                                'relative z-10 mt-1 h-[11px] w-[11px] shrink-0 rounded-full border-[1.5px]',
+                                isCompleted && 'border-transparent bg-foreground/45',
+                                isCurrent && 'border-transparent bg-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.18)]',
+                                isPending && 'border-border bg-background',
+                              )}
+                            />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3
+                                  className={cn(
+                                    'text-[13px]',
+                                    isCurrent ? 'font-medium text-foreground' : isCompleted ? 'text-ink-2' : 'text-muted-foreground',
+                                  )}
+                                >
+                                  {step.label}
+                                </h3>
+                                {isCurrent && (
+                                  <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-primary">
+                                    In progress
+                                  </span>
                                 )}
                               </div>
-                              {milestone.description && (
-                                <p className="text-sm text-muted-foreground mt-1">{milestone.description}</p>
-                              )}
-                              {milestone.date && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {format(new Date(milestone.date), 'MMM d, yyyy')}
-                                </p>
-                              )}
+                              <p className={cn('mt-0.5 text-xs', isPending ? 'text-muted-foreground/60' : 'text-muted-foreground')}>
+                                {step.description}
+                              </p>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Panel>
 
-              {/* Analytics Tab */}
-              <TabsContent value="analytics" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="w-5 h-5 text-primary" />
-                      Project Analytics
-                    </CardTitle>
-                    <CardDescription>
-                      Performance metrics and usage insights
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <BarChart3 className="w-16 h-16 text-muted-foreground/30 mb-4" />
-                      <h3 className="font-semibold text-lg mb-2">Analytics Coming Soon</h3>
-                      <p className="text-muted-foreground max-w-md">
-                        We're building detailed analytics to help you understand your application's performance.
-                      </p>
+              {/* Milestones */}
+              {selectedProject.milestones.length > 0 && (
+                <Panel as="div">
+                  <PanelHeader label="Milestones" />
+                  {selectedProject.milestones.map((milestone, index) => (
+                    <div key={index} className="flex items-start gap-3 border-t border-border/60 px-4 py-3 first:border-t-0">
+                      <span
+                        className={cn(
+                          'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-mono text-[10px] tabular-nums',
+                          milestone.status === 'completed' && 'bg-foreground/[0.08] text-ink-2',
+                          milestone.status === 'current' && 'bg-primary/12 text-primary',
+                          milestone.status === 'pending' && 'bg-sunken text-muted-foreground',
+                        )}
+                      >
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[13px] font-medium text-foreground">{milestone.name}</span>
+                          {milestone.status === 'current' && (
+                            <StatusBadge tone="accent" label="Current" />
+                          )}
+                          {milestone.status === 'completed' && (
+                            <StatusBadge tone="ok" label="Completed" />
+                          )}
+                        </div>
+                        {milestone.description && (
+                          <p className="mt-0.5 text-xs text-muted-foreground">{milestone.description}</p>
+                        )}
+                        {milestone.date && (
+                          <p className="mt-0.5 font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                            {format(new Date(milestone.date), 'd MMM yyyy')}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  ))}
+                </Panel>
+              )}
+            </TabsContent>
 
-                {/* Tech Stack */}
-                {selectedProject.tech_stack && selectedProject.tech_stack.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Code className="w-5 h-5 text-muted-foreground" />
-                        Technology Stack
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProject.tech_stack.map((tech, index) => (
-                          <Badge key={index} variant="secondary" className="text-sm">
-                            {tech}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-            </Tabs>
-          </motion.div>
-        </motion.div>
+            {/* Analytics Tab */}
+            <TabsContent value="analytics" className="mt-0 space-y-4">
+              <Panel as="div">
+                <PanelHeader label="Project analytics" />
+                <EmptyState
+                  compact
+                  title="No analytics yet"
+                  body="Detailed performance metrics for your application are on the way."
+                />
+              </Panel>
+
+              {/* Tech stack */}
+              {selectedProject.tech_stack && selectedProject.tech_stack.length > 0 && (
+                <Panel as="div">
+                  <PanelHeader label="Technology stack" />
+                  <div className="flex flex-wrap gap-2 px-4 py-3.5">
+                    {selectedProject.tech_stack.map((tech, index) => (
+                      <span
+                        key={index}
+                        className="rounded-full border border-border/60 px-2.5 py-0.5 font-mono text-[11px] text-ink-2"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </Panel>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     );
   }
 
   // Projects list view
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="space-y-6"
-      >
-        <LoungePageHeader
-          title="App Projects"
+    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
+      <div className="space-y-5">
+        <PageHeader
+          kicker="Projects"
+          title="App projects"
           description="Track your custom applications and systems"
-          icon={Layout}
         />
 
-        {/* Stats Overview */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="text-2xl font-bold">{projects.length}</div>
-            <div className="text-sm text-muted-foreground">Total Projects</div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-2xl font-bold text-blue-500">
-              {projects.filter(p => p.status === 'development').length}
+        {/* Quiet stat strip */}
+        <Panel as="div">
+          <div className="grid grid-cols-2 divide-x divide-border/60 md:grid-cols-4">
+            <div className="px-4 py-3">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Total</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">{projects.length}</p>
             </div>
-            <div className="text-sm text-muted-foreground">In Development</div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-2xl font-bold text-emerald-500">
-              {projects.filter(p => ['deployed', 'completed'].includes(p.status)).length}
+            <div className="px-4 py-3">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">In development</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">
+                {projects.filter(p => p.status === 'development').length}
+              </p>
             </div>
-            <div className="text-sm text-muted-foreground">Completed</div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-2xl font-bold text-amber-500">
-              {projects.filter(p => p.status === 'testing').length}
+            <div className="px-4 py-3">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Completed</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">
+                {projects.filter(p => ['deployed', 'completed'].includes(p.status)).length}
+              </p>
             </div>
-            <div className="text-sm text-muted-foreground">In Testing</div>
-          </Card>
-        </motion.div>
+            <div className="px-4 py-3">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">In testing</p>
+              <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">
+                {projects.filter(p => p.status === 'testing').length}
+              </p>
+            </div>
+          </div>
+        </Panel>
 
-        {/* Projects List */}
-        <motion.div variants={itemVariants} className="space-y-4">
-          {projects.map((project, index) => {
+        {/* Projects ledger */}
+        <Panel as="div">
+          <PanelHeader label="All projects" />
+          {projects.map((project) => {
             const config = getStatusConfig(project.status);
             const typeConfig = getProjectTypeConfig(project.project_type);
             const TypeIcon = typeConfig.icon;
-            
+
             return (
-              <motion.div
+              <button
                 key={project.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                type="button"
+                onClick={() => setSelectedProject(project)}
+                className="flex w-full items-center gap-4 border-t border-border/60 px-4 py-3 text-left transition-colors duration-150 first:border-t-0 hover:bg-foreground/[0.025] focus-visible:bg-foreground/[0.03]"
               >
-                <Card 
-                  className="cursor-pointer hover:border-blue-500/30 transition-colors group"
-                  onClick={() => setSelectedProject(project)}
-                >
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-4 flex-1 min-w-0">
-                        <div className="p-2.5 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                          <TypeIcon className="w-5 h-5 text-blue-500" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-lg truncate group-hover:text-blue-500 transition-colors">
-                              {project.project_name}
-                            </h3>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {typeConfig.label}
-                            {project.target_completion_date && (
-                              <> • Target: {format(new Date(project.target_completion_date), 'MMM d, yyyy')}</>
-                            )}
-                          </p>
-                          
-                          {/* Progress Bar */}
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-muted-foreground">Progress</span>
-                              <span className="font-medium">{config.progress}%</span>
-                            </div>
-                            <Progress value={config.progress} className="h-1.5" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-3 shrink-0">
-                        <Badge className={config.color}>{config.label}</Badge>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                <TypeIcon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-[450] text-foreground">{project.project_name}</p>
+                  <p className="mt-0.5 truncate text-[11.5px] text-muted-foreground">
+                    {typeConfig.label}
+                    {project.target_completion_date && (
+                      <> · Target {format(new Date(project.target_completion_date), 'd MMM yyyy')}</>
+                    )}
+                  </p>
+                </div>
+                <div className="hidden w-32 shrink-0 sm:block">
+                  <div className="mb-1 flex justify-between font-mono text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground">
+                    <span>Progress</span>
+                    <span className="tabular-nums">{config.progress}%</span>
+                  </div>
+                  <Progress value={config.progress} className="h-1.5" />
+                </div>
+                <StatusBadge status={project.status} className="w-24 shrink-0 justify-end sm:justify-start" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+              </button>
             );
           })}
-        </motion.div>
-      </motion.div>
+        </Panel>
+      </div>
     </div>
   );
 }
