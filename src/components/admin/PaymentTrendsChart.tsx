@@ -31,11 +31,13 @@ interface PaymentTrendsChartProps {
 
 type DateRange = '30days' | '3months' | '6months' | '12months' | 'ytd';
 
+/* Series colours from the token set — brand ember and brass plus the
+   semantic ok/attend tones. No raw hex. */
 const COLORS = {
-  oneTime: '#3B82F6',    // Blue
-  monthly: '#10B981',    // Green
-  awaiting: '#F59E0B',   // Orange
-  total: '#8B5CF6',      // Purple
+  oneTime: 'hsl(var(--gold))',
+  monthly: 'hsl(var(--ok))',
+  awaiting: 'hsl(var(--attend))',
+  total: 'hsl(var(--primary))',
 };
 
 const PaymentTrendsChart = ({ invoices, loading = false }: PaymentTrendsChartProps) => {

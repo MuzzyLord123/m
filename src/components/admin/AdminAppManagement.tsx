@@ -1,16 +1,12 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Layout, Plus, Search, Filter, Edit2, Trash2, Save, X,
-  Calendar, Clock, Target, Code, ExternalLink, GitBranch,
-  CheckCircle, AlertCircle, Loader2, Users, Briefcase
+  Plus, Search, Edit2, Trash2, Save,
+  Clock, Code, Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -28,6 +24,11 @@ import {
 } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import {
+  PageHeader, Panel, DataTable, StatusBadge, ConfirmDialog, SkeletonTable,
+  type Column, type Tone,
+} from '@/components/platform';
 
 interface AppProject {
   id: string;
@@ -65,46 +66,36 @@ interface ClientProfile {
 
 const projectTypes = [
   { value: 'dashboard', label: 'Dashboard' },
-  { value: 'web_app', label: 'Web Application' },
-  { value: 'internal_tool', label: 'Internal Tool' },
-  { value: 'client_portal', label: 'Client Portal' },
-  { value: 'inventory_system', label: 'Inventory System' },
-  { value: 'database', label: 'Database System' },
-  { value: 'workflow', label: 'Workflow Tool' },
-  { value: 'mvp', label: 'MVP / Prototype' },
+  { value: 'web_app', label: 'Web application' },
+  { value: 'internal_tool', label: 'Internal tool' },
+  { value: 'client_portal', label: 'Client portal' },
+  { value: 'inventory_system', label: 'Inventory system' },
+  { value: 'database', label: 'Database system' },
+  { value: 'workflow', label: 'Workflow tool' },
+  { value: 'mvp', label: 'MVP / prototype' },
   { value: 'other', label: 'Other' },
 ];
 
-const statusOptions = [
-  { value: 'planning', label: 'Planning', color: 'bg-slate-500' },
-  { value: 'design', label: 'Design', color: 'bg-purple-500' },
-  { value: 'development', label: 'Development', color: 'bg-blue-500' },
-  { value: 'testing', label: 'Testing', color: 'bg-amber-500' },
-  { value: 'review', label: 'Client Review', color: 'bg-orange-500' },
-  { value: 'deployed', label: 'Deployed', color: 'bg-emerald-500' },
-  { value: 'maintenance', label: 'Maintenance', color: 'bg-teal-500' },
-  { value: 'on_hold', label: 'On Hold', color: 'bg-gray-500' },
-  { value: 'completed', label: 'Completed', color: 'bg-green-500' },
+/* Project stages on the platform tone vocabulary — the nine-hue rainbow
+   is gone. Accent marks the stages in motion. */
+const statusOptions: { value: string; label: string; tone: Tone }[] = [
+  { value: 'planning', label: 'Planning', tone: 'neutral' },
+  { value: 'design', label: 'Design', tone: 'neutral' },
+  { value: 'development', label: 'Development', tone: 'accent' },
+  { value: 'testing', label: 'Testing', tone: 'accent' },
+  { value: 'review', label: 'Client review', tone: 'attend' },
+  { value: 'deployed', label: 'Deployed', tone: 'ok' },
+  { value: 'maintenance', label: 'Maintenance', tone: 'ok' },
+  { value: 'on_hold', label: 'On hold', tone: 'neutral' },
+  { value: 'completed', label: 'Completed', tone: 'ok' },
 ];
 
 const priorityOptions = [
-  { value: 'low', label: 'Low', color: 'text-slate-500' },
-  { value: 'normal', label: 'Normal', color: 'text-blue-500' },
-  { value: 'high', label: 'High', color: 'text-orange-500' },
-  { value: 'urgent', label: 'Urgent', color: 'text-red-500' },
+  { value: 'low', label: 'Low' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'high', label: 'High' },
+  { value: 'urgent', label: 'Urgent' },
 ];
-
-const statusColors: Record<string, string> = {
-  planning: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-  design: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  development: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  testing: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  review: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-  deployed: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  maintenance: 'bg-teal-500/20 text-teal-400 border-teal-500/30',
-  on_hold: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-  completed: 'bg-green-500/20 text-green-400 border-green-500/30',
-};
 
 export default function AdminAppManagement() {
   const [projects, setProjects] = useState<AppProject[]>([]);
@@ -113,13 +104,13 @@ export default function AdminAppManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  
+
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedProject, setSelectedProject] = useState<AppProject | null>(null);
   const [saving, setSaving] = useState(false);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     user_id: '',
@@ -325,7 +316,7 @@ export default function AdminAppManagement() {
 
   const getClientName = (userId: string) => {
     const client = clients.find(c => c.user_id === userId);
-    return client?.full_name || client?.email || 'Unknown Client';
+    return client?.full_name || client?.email || 'Unknown client';
   };
 
   const getClientCompany = (userId: string) => {
@@ -337,60 +328,160 @@ export default function AdminAppManagement() {
     return projectTypes.find(t => t.value === type)?.label || type;
   };
 
-  const getStatusLabel = (status: string) => {
-    return statusOptions.find(s => s.value === status)?.label || status;
-  };
+  const statusMeta = (status: string) =>
+    statusOptions.find(s => s.value === status) || { label: status, tone: 'neutral' as Tone };
+
+  const LABEL = 'font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground';
+
+  const columns: Column<AppProject>[] = [
+    {
+      key: 'name',
+      header: 'Project',
+      sortValue: (p) => p.project_name.toLowerCase(),
+      render: (project) => (
+        <div className="min-w-0 py-1">
+          <p className="truncate text-[13px] font-medium text-foreground">{project.project_name}</p>
+          <p className="truncate text-[11px] text-muted-foreground">
+            {getClientName(project.user_id)}
+            {getClientCompany(project.user_id) && <> · {getClientCompany(project.user_id)}</>}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      hideBelowMd: true,
+      sortValue: (p) => p.project_type,
+      render: (project) => (
+        <span className="flex items-center gap-1.5 text-[12px] text-ink-2">
+          <Code className="h-3 w-3 text-muted-foreground" aria-hidden />
+          {getTypeLabel(project.project_type)}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      sortValue: (p) => p.status,
+      render: (project) => {
+        const sc = statusMeta(project.status);
+        return <StatusBadge tone={sc.tone} label={sc.label} />;
+      },
+    },
+    {
+      key: 'hours',
+      header: 'Est.',
+      align: 'right',
+      mono: true,
+      hideBelowMd: true,
+      sortValue: (p) => p.estimated_hours ?? -1,
+      render: (project) => (
+        <span className="text-muted-foreground">
+          {project.estimated_hours ? `${project.estimated_hours}h` : '·'}
+        </span>
+      ),
+    },
+    {
+      key: 'target',
+      header: 'Target',
+      mono: true,
+      hideBelowMd: true,
+      sortValue: (p) => p.target_completion_date || '',
+      render: (project) => (
+        <span className="text-muted-foreground">
+          {project.target_completion_date
+            ? format(new Date(project.target_completion_date), 'd MMM yyyy')
+            : '·'}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      align: 'right',
+      render: (project) => (
+        <span onClick={(e) => e.stopPropagation()} className="flex items-center justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            aria-label="Edit project"
+            onClick={() => handleEdit(project)}
+          >
+            <Edit2 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-risk hover:text-risk"
+            aria-label="Delete project"
+            onClick={() => {
+              setSelectedProject(project);
+              setShowDeleteDialog(true);
+            }}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </span>
+      ),
+    },
+  ];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="space-y-4" aria-busy>
+        <PageHeader kicker="Quooro office" title="App projects" description="Custom applications, dashboards and systems." />
+        <Panel>
+          <SkeletonTable cols={5} rows={6} />
+        </Panel>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-display font-bold">App Projects</h2>
-          <p className="text-muted-foreground">Manage custom applications, dashboards, and systems</p>
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Project
-        </Button>
-      </div>
+      <PageHeader
+        kicker="Quooro office"
+        title="App projects"
+        description="Custom applications, dashboards and systems."
+        actions={
+          <Button className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowCreateDialog(true)}>
+            <Plus className="mr-2 h-3.5 w-3.5" />
+            New project
+          </Button>
+        }
+      />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search projects..."
+            placeholder="Search projects…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="h-8 pl-9 text-[13px]"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="h-8 w-full text-[13px] sm:w-[180px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="all">All statuses</SelectItem>
             {statusOptions.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="h-8 w-full text-[13px] sm:w-[180px]">
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="all">All types</SelectItem>
             {projectTypes.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}
@@ -398,109 +489,58 @@ export default function AdminAppManagement() {
         </Select>
       </div>
 
-      {/* Projects Grid */}
-      {filteredProjects.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Layout className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="font-semibold text-lg mb-2">No projects found</h3>
-          <p className="text-muted-foreground mb-4">Create your first app project to get started</p>
-          <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Project
-          </Button>
-        </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredProjects.map((project) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Card className="h-full hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg truncate">{project.project_name}</CardTitle>
-                      <CardDescription className="flex items-center gap-1 mt-1">
-                        <Users className="w-3 h-3" />
-                        {getClientName(project.user_id)}
-                        {getClientCompany(project.user_id) && (
-                          <span className="text-xs">• {getClientCompany(project.user_id)}</span>
-                        )}
-                      </CardDescription>
-                    </div>
-                    <Badge className={statusColors[project.status] || 'bg-muted'}>
-                      {getStatusLabel(project.status)}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Code className="w-4 h-4" />
-                    <span>{getTypeLabel(project.project_type)}</span>
-                  </div>
-                  
-                  {project.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {project.description}
-                    </p>
-                  )}
-
-                  <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+      {/* Projects Table */}
+      <Panel className="overflow-hidden">
+        <DataTable
+          rows={filteredProjects}
+          columns={columns}
+          rowKey={(p) => p.id}
+          onRowClick={handleEdit}
+          aria-label="App projects"
+          defaultSort={{ key: 'target', dir: 'asc' }}
+          empty={{
+            title: 'No projects found',
+            body: 'Create your first app project to get started.',
+            action: { label: 'Create project', onClick: () => setShowCreateDialog(true) },
+          }}
+          mobileCard={(project) => {
+            const sc = statusMeta(project.status);
+            return (
+              <button
+                type="button"
+                onClick={() => handleEdit(project)}
+                className="flex w-full items-center gap-3 px-3 py-3 text-left transition-colors duration-150 active:bg-foreground/[0.04]"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-medium text-foreground">{project.project_name}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">{getClientName(project.user_id)}</p>
+                  <p className="mt-0.5 flex items-center gap-2 font-mono text-[10px] tabular-nums text-muted-foreground">
                     {project.estimated_hours && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {project.estimated_hours}h est.
-                      </span>
+                      <span className="flex items-center gap-1"><Clock className="h-2.5 w-2.5" aria-hidden />{project.estimated_hours}h</span>
                     )}
                     {project.target_completion_date && (
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {new Date(project.target_completion_date).toLocaleDateString()}
-                      </span>
+                      <span>{format(new Date(project.target_completion_date), 'd MMM yyyy')}</span>
                     )}
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handleEdit(project)}
-                    >
-                      <Edit2 className="w-3 h-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedProject(project);
-                        setShowDeleteDialog(true);
-                      }}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      )}
+                  </p>
+                </div>
+                <StatusBadge tone={sc.tone} label={sc.label} className="shrink-0 text-[10.5px]" />
+              </button>
+            );
+          }}
+        />
+      </Panel>
 
       {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] w-[95vw] overflow-y-auto rounded-xl border-border/60 bg-card sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create App Project</DialogTitle>
-            <DialogDescription>Add a new custom application, dashboard, or system for a client</DialogDescription>
+            <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">Create app project</DialogTitle>
+            <DialogDescription className="text-[13px]">Add a new custom application, dashboard or system for a client</DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Client *</Label>
+              <Label className={LABEL}>Client (required)</Label>
               <Select value={formData.user_id} onValueChange={(v) => setFormData({...formData, user_id: v})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a client" />
@@ -516,17 +556,17 @@ export default function AdminAppManagement() {
             </div>
 
             <div className="grid gap-2">
-              <Label>Project Name *</Label>
+              <Label className={LABEL}>Project name (required)</Label>
               <Input
                 value={formData.project_name}
                 onChange={(e) => setFormData({...formData, project_name: e.target.value})}
-                placeholder="e.g., Inventory Management System"
+                placeholder="e.g. Inventory management system"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Project Type</Label>
+                <Label className={LABEL}>Project type</Label>
                 <Select value={formData.project_type} onValueChange={(v) => setFormData({...formData, project_type: v})}>
                   <SelectTrigger>
                     <SelectValue />
@@ -539,7 +579,7 @@ export default function AdminAppManagement() {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>Priority</Label>
+                <Label className={LABEL}>Priority</Label>
                 <Select value={formData.priority} onValueChange={(v) => setFormData({...formData, priority: v})}>
                   <SelectTrigger>
                     <SelectValue />
@@ -554,37 +594,40 @@ export default function AdminAppManagement() {
             </div>
 
             <div className="grid gap-2">
-              <Label>Description</Label>
+              <Label className={LABEL}>Description</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Describe the project scope and objectives..."
+                placeholder="Describe the project scope and objectives…"
                 rows={3}
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="grid gap-2">
-                <Label>Estimated Hours</Label>
+                <Label className={LABEL}>Estimated hours</Label>
                 <Input
                   type="number"
+                  className="tabular-nums"
                   value={formData.estimated_hours}
                   onChange={(e) => setFormData({...formData, estimated_hours: e.target.value})}
-                  placeholder="e.g., 40"
+                  placeholder="e.g. 40"
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Start Date</Label>
+                <Label className={LABEL}>Start date</Label>
                 <Input
                   type="date"
+                  className="tabular-nums"
                   value={formData.start_date}
                   onChange={(e) => setFormData({...formData, start_date: e.target.value})}
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Target Completion</Label>
+                <Label className={LABEL}>Target completion</Label>
                 <Input
                   type="date"
+                  className="tabular-nums"
                   value={formData.target_completion_date}
                   onChange={(e) => setFormData({...formData, target_completion_date: e.target.value})}
                 />
@@ -592,28 +635,28 @@ export default function AdminAppManagement() {
             </div>
 
             <div className="grid gap-2">
-              <Label>Client Notes (visible to client)</Label>
+              <Label className={LABEL}>Client notes (visible to client)</Label>
               <Textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                placeholder="Notes visible to the client..."
+                placeholder="Notes visible to the client…"
                 rows={2}
               />
             </div>
 
             <div className="grid gap-2">
-              <Label>Admin Notes (internal only)</Label>
+              <Label className={LABEL}>Admin notes (internal only)</Label>
               <Textarea
                 value={formData.admin_notes}
                 onChange={(e) => setFormData({...formData, admin_notes: e.target.value})}
-                placeholder="Internal notes for the team..."
+                placeholder="Internal notes for the team…"
                 rows={2}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Preview URL</Label>
+                <Label className={LABEL}>Preview URL</Label>
                 <Input
                   value={formData.preview_url}
                   onChange={(e) => setFormData({...formData, preview_url: e.target.value})}
@@ -621,7 +664,7 @@ export default function AdminAppManagement() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Assigned To</Label>
+                <Label className={LABEL}>Assigned to</Label>
                 <Input
                   value={formData.assigned_to}
                   onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
@@ -632,12 +675,12 @@ export default function AdminAppManagement() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowCreateDialog(false); resetForm(); }}>
+            <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => { setShowCreateDialog(false); resetForm(); }}>
               Cancel
             </Button>
-            <Button onClick={handleCreate} disabled={saving}>
-              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-              Create Project
+            <Button className="h-8 rounded-lg px-3 text-xs" onClick={handleCreate} disabled={saving}>
+              {saving ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Plus className="mr-2 h-3.5 w-3.5" />}
+              Create project
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -645,24 +688,24 @@ export default function AdminAppManagement() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] w-[95vw] overflow-y-auto rounded-xl border-border/60 bg-card sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit App Project</DialogTitle>
-            <DialogDescription>Update project details and status</DialogDescription>
+            <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">Edit app project</DialogTitle>
+            <DialogDescription className="text-[13px]">Update project details and status</DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Project Name *</Label>
+              <Label className={LABEL}>Project name (required)</Label>
               <Input
                 value={formData.project_name}
                 onChange={(e) => setFormData({...formData, project_name: e.target.value})}
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="grid gap-2">
-                <Label>Project Type</Label>
+                <Label className={LABEL}>Project type</Label>
                 <Select value={formData.project_type} onValueChange={(v) => setFormData({...formData, project_type: v})}>
                   <SelectTrigger>
                     <SelectValue />
@@ -675,7 +718,7 @@ export default function AdminAppManagement() {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>Status</Label>
+                <Label className={LABEL}>Status</Label>
                 <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
                   <SelectTrigger>
                     <SelectValue />
@@ -688,7 +731,7 @@ export default function AdminAppManagement() {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>Priority</Label>
+                <Label className={LABEL}>Priority</Label>
                 <Select value={formData.priority} onValueChange={(v) => setFormData({...formData, priority: v})}>
                   <SelectTrigger>
                     <SelectValue />
@@ -703,7 +746,7 @@ export default function AdminAppManagement() {
             </div>
 
             <div className="grid gap-2">
-              <Label>Description</Label>
+              <Label className={LABEL}>Description</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -711,27 +754,30 @@ export default function AdminAppManagement() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="grid gap-2">
-                <Label>Estimated Hours</Label>
+                <Label className={LABEL}>Estimated hours</Label>
                 <Input
                   type="number"
+                  className="tabular-nums"
                   value={formData.estimated_hours}
                   onChange={(e) => setFormData({...formData, estimated_hours: e.target.value})}
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Start Date</Label>
+                <Label className={LABEL}>Start date</Label>
                 <Input
                   type="date"
+                  className="tabular-nums"
                   value={formData.start_date}
                   onChange={(e) => setFormData({...formData, start_date: e.target.value})}
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Target Completion</Label>
+                <Label className={LABEL}>Target completion</Label>
                 <Input
                   type="date"
+                  className="tabular-nums"
                   value={formData.target_completion_date}
                   onChange={(e) => setFormData({...formData, target_completion_date: e.target.value})}
                 />
@@ -739,7 +785,7 @@ export default function AdminAppManagement() {
             </div>
 
             <div className="grid gap-2">
-              <Label>Client Notes (visible to client)</Label>
+              <Label className={LABEL}>Client notes (visible to client)</Label>
               <Textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({...formData, notes: e.target.value})}
@@ -748,7 +794,7 @@ export default function AdminAppManagement() {
             </div>
 
             <div className="grid gap-2">
-              <Label>Admin Notes (internal only)</Label>
+              <Label className={LABEL}>Admin notes (internal only)</Label>
               <Textarea
                 value={formData.admin_notes}
                 onChange={(e) => setFormData({...formData, admin_notes: e.target.value})}
@@ -758,14 +804,14 @@ export default function AdminAppManagement() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Preview URL</Label>
+                <Label className={LABEL}>Preview URL</Label>
                 <Input
                   value={formData.preview_url}
                   onChange={(e) => setFormData({...formData, preview_url: e.target.value})}
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Production URL</Label>
+                <Label className={LABEL}>Production URL</Label>
                 <Input
                   value={formData.production_url}
                   onChange={(e) => setFormData({...formData, production_url: e.target.value})}
@@ -775,14 +821,14 @@ export default function AdminAppManagement() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Repository URL</Label>
+                <Label className={LABEL}>Repository URL</Label>
                 <Input
                   value={formData.repository_url}
                   onChange={(e) => setFormData({...formData, repository_url: e.target.value})}
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Assigned To</Label>
+                <Label className={LABEL}>Assigned to</Label>
                 <Input
                   value={formData.assigned_to}
                   onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
@@ -792,37 +838,27 @@ export default function AdminAppManagement() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowEditDialog(false); setSelectedProject(null); resetForm(); }}>
+            <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => { setShowEditDialog(false); setSelectedProject(null); resetForm(); }}>
               Cancel
             </Button>
-            <Button onClick={handleUpdate} disabled={saving}>
-              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-              Save Changes
+            <Button className="h-8 rounded-lg px-3 text-xs" onClick={handleUpdate} disabled={saving}>
+              {saving ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-2 h-3.5 w-3.5" />}
+              Save changes
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Project</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{selectedProject?.project_name}"? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowDeleteDialog(false); setSelectedProject(null); }}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={saving}>
-              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={(o) => { setShowDeleteDialog(o); if (!o) setSelectedProject(null); }}
+        title="Delete this project?"
+        consequence={`This permanently deletes "${selectedProject?.project_name || ''}" and its record for the client. It can't be undone.`}
+        confirmLabel="Delete project"
+        loading={saving}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

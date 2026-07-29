@@ -1,15 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  MessageSquare, Send, Search, User, 
-  Check, CheckCheck, ArrowLeft, X, Clock,
-  CheckCircle2, AlertCircle, Settings, Copy
+import {
+  MessageSquare, Send, Search, User,
+  Check, CheckCheck, ArrowLeft, X,
+  CheckCircle2, Settings, Copy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +16,8 @@ import { toast } from 'sonner';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { TypingIndicator } from '@/components/ui/TypingIndicator';
 import TeamInboxSettings from './TeamInboxSettings';
+import { AvatarID, StatusBadge, SkeletonLedger, EmptyState } from '@/components/platform';
+import { cn } from '@/lib/utils';
 
 interface ClientProfile {
   id: string;
@@ -67,7 +67,7 @@ export default function AdminMessaging() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'waiting' | 'closed'>('all');
   const [activeTab, setActiveTab] = useState<'messages' | 'settings'>('messages');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   const { handleTyping, stopTyping, isUserTyping } = useTypingIndicator(user?.id, selectedClient?.user_id || null);
   const clientIsTyping = selectedClient ? isUserTyping(selectedClient.user_id) : false;
 
@@ -103,7 +103,7 @@ export default function AdminMessaging() {
         (payload) => {
           const newMsg = payload.new as Message;
           // Check if this message is relevant to the currently selected client
-          if (selectedClient && 
+          if (selectedClient &&
               (newMsg.sender_id === selectedClient.user_id || newMsg.recipient_id === selectedClient.user_id)) {
             // Add new message to the list, avoiding duplicates
             setMessages(prev => {
@@ -160,7 +160,7 @@ export default function AdminMessaging() {
     const allConversations = conversationsData || [];
 
     // Only show clients who have messages
-    const clientsWithMessages = allClients.filter(client => 
+    const clientsWithMessages = allClients.filter(client =>
       allMessages.some(m => m.sender_id === client.user_id || m.recipient_id === client.user_id)
     );
 
@@ -267,7 +267,7 @@ export default function AdminMessaging() {
       setSending(false);
     }
   };
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewMessage(e.target.value);
     handleTyping();
@@ -287,8 +287,8 @@ export default function AdminMessaging() {
       if (selectedConversation) {
         const { error } = await supabase
           .from('conversations')
-          .update({ 
-            status, 
+          .update({
+            status,
             closed_at: status === 'closed' ? new Date().toISOString() : null,
             assigned_admin_id: user.id
           })
@@ -316,16 +316,17 @@ export default function AdminMessaging() {
     }
   };
 
+  /* Conversation status on the platform tone vocabulary — no hue map. */
   const getStatusBadge = (status: string | undefined) => {
     switch (status) {
       case 'open':
-        return <Badge variant="default" className="gap-1 bg-green-500/20 text-green-600 border-green-500/30"><CheckCircle2 className="w-3 h-3" />Open</Badge>;
+        return <StatusBadge tone="ok" label="Open" className="text-[10.5px]" />;
       case 'waiting':
-        return <Badge variant="secondary" className="gap-1 bg-yellow-500/20 text-yellow-600 border-yellow-500/30"><Clock className="w-3 h-3" />Waiting</Badge>;
+        return <StatusBadge tone="attend" label="Waiting" className="text-[10.5px]" />;
       case 'closed':
-        return <Badge variant="outline" className="gap-1 bg-muted text-muted-foreground"><X className="w-3 h-3" />Closed</Badge>;
+        return <StatusBadge tone="neutral" label="Closed" className="text-[10.5px]" />;
       default:
-        return <Badge variant="outline" className="gap-1"><AlertCircle className="w-3 h-3" />New</Badge>;
+        return <StatusBadge tone="neutral" label="New" className="text-[10.5px]" />;
     }
   };
 
@@ -340,12 +341,12 @@ export default function AdminMessaging() {
       );
       if (!matchesSearch) return false;
     }
-    
+
     if (statusFilter !== 'all') {
       const convStatus = conv.conversation?.status || 'open';
       if (convStatus !== statusFilter) return false;
     }
-    
+
     return true;
   });
 
@@ -353,7 +354,7 @@ export default function AdminMessaging() {
     const date = new Date(dateStr);
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) {
       return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     } else if (diffDays === 1) {
@@ -365,23 +366,16 @@ export default function AdminMessaging() {
     }
   };
 
-  const getInitials = (name: string | null, email: string | null) => {
-    if (name) {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    }
-    return email?.slice(0, 2).toUpperCase() || 'CL';
-  };
-
   return (
     <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'messages' | 'settings')} className="space-y-4">
-      <TabsList className="grid w-full max-w-md grid-cols-2">
-        <TabsTrigger value="messages" className="gap-2">
-          <MessageSquare className="w-4 h-4" />
+      <TabsList className="grid h-9 w-full max-w-md grid-cols-2 rounded-lg border border-border/60 bg-sunken p-0.5">
+        <TabsTrigger value="messages" className="h-8 gap-2 rounded-md text-xs data-[state=active]:bg-card">
+          <MessageSquare className="h-3.5 w-3.5" />
           Messages
         </TabsTrigger>
-        <TabsTrigger value="settings" className="gap-2">
-          <Settings className="w-4 h-4" />
-          Team Settings
+        <TabsTrigger value="settings" className="h-8 gap-2 rounded-md text-xs data-[state=active]:bg-card">
+          <Settings className="h-3.5 w-3.5" />
+          Team settings
         </TabsTrigger>
       </TabsList>
 
@@ -390,95 +384,93 @@ export default function AdminMessaging() {
       </TabsContent>
 
       <TabsContent value="messages">
-        <div className="h-[calc(100vh-280px)] min-h-[500px] flex rounded-2xl border border-border overflow-hidden bg-background">
+        <div className="flex h-[calc(100vh-280px)] min-h-[500px] overflow-hidden rounded-[10px] border border-border/60 bg-background">
           {/* Conversations List */}
-          <div className={`${selectedClient ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-80 lg:w-96 border-r border-border`}>
-            <div className="p-4 border-b border-border">
-              <h2 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-primary" />
-                Client Messages
+          <div className={cn('w-full flex-col border-r border-border/60 md:w-80 lg:w-96', selectedClient ? 'hidden md:flex' : 'flex')}>
+            <div className="border-b border-border/60 p-3">
+              <h2 className="mb-2.5 flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                Client messages
               </h2>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search clients..."
+                  placeholder="Search clients…"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
+                  className="h-8 pl-9 text-[13px]"
                 />
               </div>
-              
-              <div className="flex gap-1 mt-3">
+
+              <div className="mt-2.5 flex gap-1">
                 {(['all', 'open', 'waiting', 'closed'] as const).map((status) => (
-                  <Button
+                  <button
                     key={status}
-                    variant={statusFilter === status ? 'default' : 'outline'}
-                    size="sm"
+                    type="button"
                     onClick={() => setStatusFilter(status)}
-                    className="flex-1 text-xs capitalize"
+                    className={cn(
+                      'h-6 flex-1 rounded-md text-[11px] font-medium capitalize transition-colors duration-150',
+                      statusFilter === status
+                        ? 'bg-foreground/[0.08] text-foreground'
+                        : 'text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground',
+                    )}
                   >
                     {status}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
 
             <ScrollArea className="flex-1">
               {loading ? (
-                <div className="p-4 text-center">
-                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-sm text-muted-foreground mt-2">Loading...</p>
-                </div>
+                <SkeletonLedger rows={6} />
               ) : filteredConversations.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">
-                  <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p className="text-sm">No clients found</p>
-                </div>
+                <EmptyState compact title="No clients found" body="Conversations appear when clients message the studio." />
               ) : (
-                <div className="divide-y divide-border">
+                <div className="divide-y divide-border/60">
                   {filteredConversations.map((conv) => (
-                    <motion.button
+                    <button
                       key={conv.client.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
                       onClick={() => setSelectedClient(conv.client)}
-                      className={`w-full p-4 text-left hover:bg-muted/50 transition-colors ${
-                        selectedClient?.id === conv.client.id ? 'bg-muted' : ''
-                      }`}
+                      className={cn(
+                        'w-full px-3 py-2.5 text-left transition-colors duration-150 hover:bg-foreground/[0.025]',
+                        selectedClient?.id === conv.client.id && 'bg-foreground/[0.05]',
+                      )}
                     >
-                      <div className="flex items-start gap-3">
-                        <Avatar className="h-10 w-10 shrink-0">
-                          <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                            {getInitials(conv.client.full_name, conv.client.email)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2.5">
+                        <AvatarID
+                          name={conv.client.full_name}
+                          email={conv.client.email}
+                          size="lg"
+                          className="shrink-0"
+                        />
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium truncate">
+                            <span className="truncate text-[13px] font-medium text-foreground">
                               {conv.client.full_name || conv.client.email}
                             </span>
                             {conv.lastMessage && (
-                              <span className="text-xs text-muted-foreground shrink-0">
+                              <span className="shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">
                                 {formatTime(conv.lastMessage.created_at)}
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 mt-0.5">
+                          <div className="mt-0.5 flex items-center gap-2">
                             {getStatusBadge(conv.conversation?.status)}
                           </div>
-                          <div className="flex items-center justify-between gap-2 mt-1">
-                            <p className="text-sm text-muted-foreground truncate">
+                          <div className="mt-1 flex items-center justify-between gap-2">
+                            <p className="truncate text-[11.5px] text-muted-foreground">
                               {conv.lastMessage?.content || 'No messages yet'}
                             </p>
                             {conv.unreadCount > 0 && (
-                              <Badge className="bg-primary text-primary-foreground h-5 min-w-5 flex items-center justify-center text-xs">
+                              <Badge className="flex h-4 min-w-4 items-center justify-center bg-primary px-1 text-[10px] tabular-nums text-primary-foreground">
                                 {conv.unreadCount}
                               </Badge>
                             )}
                           </div>
                         </div>
                       </div>
-                    </motion.button>
+                    </button>
                   ))}
                 </div>
               )}
@@ -486,54 +478,55 @@ export default function AdminMessaging() {
           </div>
 
           {/* Chat Area */}
-          <div className={`${selectedClient ? 'flex' : 'hidden md:flex'} flex-col flex-1`}>
+          <div className={cn('flex-1 flex-col', selectedClient ? 'flex' : 'hidden md:flex')}>
             {selectedClient ? (
               <>
                 {/* Chat Header */}
-                <div className="p-4 border-b border-border flex items-center gap-3">
+                <div className="flex items-center gap-3 border-b border-border/60 p-3">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="md:hidden shrink-0"
+                    className="h-8 w-8 shrink-0 md:hidden"
+                    aria-label="Back to conversations"
                     onClick={() => setSelectedClient(null)}
                   >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {getInitials(selectedClient.full_name, selectedClient.email)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
+                  <AvatarID
+                    name={selectedClient.full_name}
+                    email={selectedClient.email}
+                    size="lg"
+                  />
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium truncate">
+                      <h3 className="truncate text-[13px] font-medium text-foreground">
                         {selectedClient.full_name || selectedClient.email}
                       </h3>
                       {getStatusBadge(selectedConversation?.status)}
                     </div>
                     <div className="flex items-center gap-2">
                       {clientIsTyping ? (
-                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
                           <span>typing</span>
                           <TypingIndicator />
                         </div>
                       ) : (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {selectedClient.customer_id} • {selectedClient.company || 'No company'}
+                        <p className="truncate text-[11.5px] text-muted-foreground">
+                          <span className="font-mono tabular-nums">{selectedClient.customer_id}</span> · {selectedClient.company || 'No company'}
                         </p>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     {selectedConversation?.status !== 'closed' && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => updateConversationStatus('closed')}
-                        className="gap-1"
+                        className="h-7 gap-1 rounded-md border-border/60 px-2.5 text-xs"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="h-3 w-3" />
                         Close
                       </Button>
                     )}
@@ -542,9 +535,9 @@ export default function AdminMessaging() {
                         variant="outline"
                         size="sm"
                         onClick={() => updateConversationStatus('open')}
-                        className="gap-1"
+                        className="h-7 gap-1 rounded-md border-border/60 px-2.5 text-xs"
                       >
-                        <CheckCircle2 className="w-3 h-3" />
+                        <CheckCircle2 className="h-3 w-3" />
                         Reopen
                       </Button>
                     )}
@@ -553,93 +546,91 @@ export default function AdminMessaging() {
 
                 {/* Messages */}
                 <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {messages.length === 0 ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p>No messages yet</p>
-                        <p className="text-sm">Send a message to start the conversation</p>
-                      </div>
+                      <EmptyState
+                        compact
+                        title="No messages yet"
+                        body="Send a message to start the conversation."
+                      />
                     ) : (
-                      <AnimatePresence initial={false}>
-                        {messages.map((message) => {
-                          const isAdmin = message.sender_id === user?.id;
-                          return (
-                            <motion.div
-                              key={message.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}
-                            >
-                              <div className="group/msg relative">
-                                <div
-                                  className={`max-w-full rounded-2xl px-4 py-2.5 ${
-                                    isAdmin
-                                      ? 'bg-primary text-primary-foreground rounded-br-md'
-                                      : 'bg-muted rounded-bl-md'
-                                  }`}
-                                >
-                                  <p className="text-sm whitespace-pre-wrap break-words">
-                                    {message.content}
-                                  </p>
-                                  <div className={`flex items-center gap-1 mt-1 ${isAdmin ? 'justify-end' : ''}`}>
-                                    <span className={`text-[10px] ${isAdmin ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                                      {formatTime(message.created_at)}
-                                    </span>
-                                    {isAdmin && (
-                                      message.is_read ? (
-                                        <CheckCheck className="w-3 h-3 text-primary-foreground/70" />
-                                      ) : (
-                                        <Check className="w-3 h-3 text-primary-foreground/70" />
-                                      )
-                                    )}
-                                  </div>
+                      messages.map((message) => {
+                        const isAdmin = message.sender_id === user?.id;
+                        return (
+                          <div
+                            key={message.id}
+                            className={cn('flex', isAdmin ? 'justify-end' : 'justify-start')}
+                          >
+                            <div className="group/msg relative">
+                              <div
+                                className={cn(
+                                  'max-w-full rounded-lg px-3 py-2',
+                                  isAdmin
+                                    ? 'rounded-br-sm bg-primary text-primary-foreground'
+                                    : 'rounded-bl-sm border border-border/60 bg-sunken text-foreground',
+                                )}
+                              >
+                                <p className="whitespace-pre-wrap break-words text-[13px]">
+                                  {message.content}
+                                </p>
+                                <div className={cn('mt-1 flex items-center gap-1', isAdmin && 'justify-end')}>
+                                  <span className={cn('font-mono text-[9.5px] tabular-nums', isAdmin ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
+                                    {formatTime(message.created_at)}
+                                  </span>
+                                  {isAdmin && (
+                                    message.is_read ? (
+                                      <CheckCheck className="h-3 w-3 text-primary-foreground/70" />
+                                    ) : (
+                                      <Check className="h-3 w-3 text-primary-foreground/70" />
+                                    )
+                                  )}
                                 </div>
-                                <button
-                                  onClick={() => { navigator.clipboard.writeText(message.content); toast.success('Copied to clipboard'); }}
-                                  className="absolute -bottom-3 right-1 opacity-0 group-hover/msg:opacity-100 transition-opacity h-6 w-6 rounded-md bg-card border border-border flex items-center justify-center shadow-sm hover:bg-muted"
-                                  title="Copy text"
-                                >
-                                  <Copy className="w-3 h-3 text-muted-foreground" />
-                                </button>
                               </div>
-                            </motion.div>
-                          );
-                        })}
-                      </AnimatePresence>
+                              <button
+                                onClick={() => { navigator.clipboard.writeText(message.content); toast.success('Copied to clipboard'); }}
+                                className="absolute -bottom-3 right-1 flex h-6 w-6 items-center justify-center rounded-md border border-border/60 bg-card opacity-0 transition-opacity duration-150 hover:bg-foreground/[0.04] group-hover/msg:opacity-100"
+                                title="Copy text"
+                              >
+                                <Copy className="h-3 w-3 text-muted-foreground" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
                     )}
                     <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
 
                 {/* Message Input */}
-                <div className="p-4 border-t border-border">
+                <div className="border-t border-border/60 p-3">
                   <div className="flex gap-2">
                     <Textarea
-                      placeholder="Type a message..."
+                      placeholder="Type a message…"
                       value={newMessage}
                       onChange={handleInputChange}
                       onKeyDown={handleKeyPress}
-                      className="min-h-[44px] max-h-32 resize-none"
+                      className="max-h-32 min-h-[40px] resize-none text-[13px]"
                       rows={1}
                     />
-                    <Button 
-                      onClick={sendMessage} 
+                    <Button
+                      onClick={sendMessage}
                       disabled={!newMessage.trim() || sending}
                       size="icon"
-                      className="shrink-0"
+                      className="h-9 w-9 shrink-0"
+                      aria-label="Send message"
                     >
-                      <Send className="w-4 h-4" />
+                      <Send className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-muted-foreground">
+              <div className="flex flex-1 items-center justify-center text-muted-foreground">
                 <div className="text-center">
-                  <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                  <h3 className="font-medium text-lg mb-1">Select a conversation</h3>
-                  <p className="text-sm">Choose a client from the list to view messages</p>
+                  <User className="mx-auto mb-3 h-8 w-8 opacity-30" />
+                  <h3 className="mb-1 text-[15px] font-medium text-foreground">Select a conversation</h3>
+                  <p className="text-[13px]">Choose a client from the list to view messages</p>
                 </div>
               </div>
             )}

@@ -30,6 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
+import { SkeletonLedger, SkeletonBlock } from '@/components/platform';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -75,8 +76,8 @@ const SSL_STATUS_OPTIONS = [
 ];
 
 const SSL_STATUS_CONFIG = {
-  active: { label: 'Active', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: CheckCircle },
-  pending: { label: 'Pending', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: Clock },
+  active: { label: 'Active', color: 'bg-ok/10 text-ok border-ok/20', icon: CheckCircle },
+  pending: { label: 'Pending', color: 'bg-attend/10 text-attend border-attend/20', icon: Clock },
   expired: { label: 'Expired', color: 'bg-destructive/10 text-destructive border-destructive/20', icon: AlertCircle },
 };
 
@@ -318,8 +319,9 @@ export default function AdminWebsiteManagement() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6" aria-busy>
+        <SkeletonLedger rows={6} />
+        <SkeletonBlock className="h-[320px] rounded-[10px]" />
       </div>
     );
   }
@@ -370,7 +372,7 @@ export default function AdminWebsiteManagement() {
                     </p>
                   </div>
                   {client.website_status === 'live' && (
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs">
+                    <Badge variant="outline" className="bg-ok/10 text-ok border-ok/20 text-xs">
                       Live
                     </Badge>
                   )}

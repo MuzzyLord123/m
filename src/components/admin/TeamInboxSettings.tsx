@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
+import { SkeletonLedger } from '@/components/platform';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -162,9 +163,7 @@ export default function TeamInboxSettings() {
     return (
       <Card>
         <CardContent className="py-8">
-          <div className="flex items-center justify-center">
-            <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-          </div>
+          <SkeletonLedger rows={4} />
         </CardContent>
       </Card>
     );

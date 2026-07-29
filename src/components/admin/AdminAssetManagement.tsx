@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import { 
   HardDrive,
   Users,
@@ -121,13 +120,14 @@ const FILE_TYPE_ICONS: Record<string, React.ElementType> = {
   other: File,
 };
 
+/* File-type chips on the token set — no hue map. */
 const FILE_TYPE_COLORS: Record<string, string> = {
-  image: 'bg-pink-500',
-  video: 'bg-purple-500',
-  audio: 'bg-blue-500',
-  document: 'bg-amber-500',
-  archive: 'bg-emerald-500',
-  other: 'bg-muted',
+  image: 'bg-foreground/[0.08]',
+  video: 'bg-foreground/[0.08]',
+  audio: 'bg-foreground/[0.08]',
+  document: 'bg-foreground/[0.08]',
+  archive: 'bg-foreground/[0.08]',
+  other: 'bg-foreground/[0.08]',
 };
 
 const formatFileSize = (bytes: number): string => {
@@ -136,16 +136,6 @@ const formatFileSize = (bytes: number): string => {
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-};
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
 };
 
 export default function AdminAssetManagement() {
@@ -370,14 +360,9 @@ export default function AdminAssetManagement() {
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="p-6 space-y-6"
-    >
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Asset Management</h1>
           <p className="text-muted-foreground">
@@ -388,11 +373,11 @@ export default function AdminAssetManagement() {
           <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
-      </motion.div>
+      </div>
 
       {/* Stats Overview */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-border/50 bg-card p-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-[10px] border border-border/60 bg-card p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Storage Used</p>
@@ -404,46 +389,46 @@ export default function AdminAssetManagement() {
           </div>
         </div>
         
-        <div className="rounded-2xl border border-border/50 bg-card p-5">
+        <div className="rounded-[10px] border border-border/60 bg-card p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Files</p>
               <p className="text-2xl font-bold mt-1">{stats?.totalFiles || 0}</p>
             </div>
-            <div className="p-3 rounded-xl bg-blue-500/10">
-              <File className="w-5 h-5 text-blue-500" />
+            <div className="p-3 rounded-xl bg-sunken">
+              <File className="w-5 h-5 text-muted-foreground" />
             </div>
           </div>
         </div>
         
-        <div className="rounded-2xl border border-border/50 bg-card p-5">
+        <div className="rounded-[10px] border border-border/60 bg-card p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Active Users</p>
               <p className="text-2xl font-bold mt-1">{stats?.totalUsers || 0}</p>
             </div>
-            <div className="p-3 rounded-xl bg-emerald-500/10">
-              <Users className="w-5 h-5 text-emerald-500" />
+            <div className="p-3 rounded-xl bg-sunken">
+              <Users className="w-5 h-5 text-muted-foreground" />
             </div>
           </div>
         </div>
         
-        <div className="rounded-2xl border border-border/50 bg-card p-5">
+        <div className="rounded-[10px] border border-border/60 bg-card p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Avg. Usage</p>
               <p className="text-2xl font-bold mt-1">{(stats?.averageUsage || 0).toFixed(1)}%</p>
             </div>
-            <div className="p-3 rounded-xl bg-amber-500/10">
-              <TrendingUp className="w-5 h-5 text-amber-500" />
+            <div className="p-3 rounded-xl bg-sunken">
+              <TrendingUp className="w-5 h-5 text-muted-foreground" />
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* File Type Breakdown */}
       {stats?.byFileType && Object.keys(stats.byFileType).length > 0 && (
-        <motion.div variants={itemVariants} className="rounded-2xl border border-border/50 bg-card p-5">
+        <div className="rounded-[10px] border border-border/60 bg-card p-5">
           <div className="flex items-center gap-2 mb-4">
             <PieChart className="w-5 h-5 text-primary" />
             <h3 className="font-semibold">Storage by File Type</h3>
@@ -455,7 +440,7 @@ export default function AdminAssetManagement() {
               return (
                 <div key={type} className="text-center">
                   <div className={`w-12 h-12 ${bgColor} rounded-xl flex items-center justify-center mx-auto mb-2`}>
-                    <Icon className="w-6 h-6 text-white" />
+                    <Icon className="w-6 h-6 text-ink-2" />
                   </div>
                   <p className="text-sm font-medium capitalize">{type}</p>
                   <p className="text-xs text-muted-foreground">{data.count} files</p>
@@ -464,15 +449,15 @@ export default function AdminAssetManagement() {
               );
             })}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* High Usage Alerts */}
       {stats?.highUsageClients && stats.highUsageClients.length > 0 && (
-        <motion.div variants={itemVariants} className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5">
+        <div className="rounded-[10px] border border-attend/30 bg-attend/[0.06] p-5">
           <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle className="w-5 h-5 text-amber-500" />
-            <h3 className="font-semibold text-amber-700 dark:text-amber-400">High Usage Clients</h3>
+            <AlertTriangle className="w-5 h-5 text-attend" />
+            <h3 className="font-semibold text-attend">High usage clients</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {stats.highUsageClients.slice(0, 6).map(client => {
@@ -498,11 +483,11 @@ export default function AdminAssetManagement() {
               );
             })}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Filters */}
-      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -540,10 +525,10 @@ export default function AdminAssetManagement() {
             <SelectItem value="archive">Archives</SelectItem>
           </SelectContent>
         </Select>
-      </motion.div>
+      </div>
 
       {/* Client List with Storage Info */}
-      <motion.div variants={itemVariants} className="rounded-2xl border border-border/50 overflow-hidden">
+      <div className="rounded-[10px] border border-border/60 overflow-hidden">
         <div className="p-4 bg-muted/30 border-b border-border/50">
           <h3 className="font-semibold">Client Storage Overview</h3>
         </div>
@@ -612,10 +597,10 @@ export default function AdminAssetManagement() {
             </TableBody>
           </Table>
         </ScrollArea>
-      </motion.div>
+      </div>
 
       {/* Recent Assets */}
-      <motion.div variants={itemVariants} className="rounded-2xl border border-border/50 overflow-hidden">
+      <div className="rounded-[10px] border border-border/60 overflow-hidden">
         <div className="p-4 bg-muted/30 border-b border-border/50 flex items-center justify-between">
           <h3 className="font-semibold">
             {selectedClient ? 'Filtered Assets' : 'Recent Assets'}
@@ -695,7 +680,7 @@ export default function AdminAssetManagement() {
             </TableBody>
           </Table>
         </ScrollArea>
-      </motion.div>
+      </div>
 
       {/* Client Detail Dialog */}
       <Dialog open={clientDetailOpen} onOpenChange={setClientDetailOpen}>
@@ -838,6 +823,6 @@ export default function AdminAssetManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </motion.div>
+    </div>
   );
 }

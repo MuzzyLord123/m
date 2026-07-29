@@ -245,10 +245,10 @@ export default function AdminAutomationRules() {
           </Card>
 
           {/* IF - Trigger */}
-          <Card className="border-blue-500/20">
+          <Card className="border-border/60">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <span className="h-6 w-6 rounded-md bg-blue-500/15 flex items-center justify-center text-blue-400 text-xs font-bold">IF</span>
+                <span className="h-6 w-6 rounded-md bg-sunken flex items-center justify-center text-ink-2 font-mono text-[10px] font-semibold">IF</span>
                 When this happens…
               </CardTitle>
             </CardHeader>
@@ -337,10 +337,10 @@ export default function AdminAutomationRules() {
           </div>
 
           {/* THEN - Action */}
-          <Card className="border-emerald-500/20">
+          <Card className="border-border/60">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <span className="h-6 w-6 rounded-md bg-emerald-500/15 flex items-center justify-center text-emerald-400 text-xs font-bold">DO</span>
+                <span className="h-6 w-6 rounded-md bg-sunken flex items-center justify-center text-ink-2 font-mono text-[10px] font-semibold">DO</span>
                 Then do this…
               </CardTitle>
             </CardHeader>
@@ -527,11 +527,11 @@ export default function AdminAutomationRules() {
                             </div>
                             {/* IF → THEN flow */}
                             <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                              <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-400 border-blue-500/20 gap-1">
+                              <Badge variant="outline" className="text-[10px] bg-foreground/[0.06] text-ink-2 border-border/60 gap-1">
                                 IF <span className="font-normal">{getTriggerLabel(rule.trigger_event)}</span>
                               </Badge>
                               <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
-                              <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20 gap-1">
+                              <Badge variant="outline" className="text-[10px] bg-ok/10 text-ok border-ok/20 gap-1">
                                 DO <span className="font-normal">{getActionLabel(rule.action_type)}</span>
                               </Badge>
                             </div>
@@ -600,11 +600,11 @@ export default function AdminAutomationRules() {
                     <CardContent className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         {log.status === 'success' ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-ok shrink-0" />
                         ) : log.status === 'error' ? (
                           <XCircle className="w-4 h-4 text-destructive shrink-0" />
                         ) : (
-                          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                          <AlertTriangle className="w-4 h-4 text-attend shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{rule?.name || 'Deleted rule'}</p>

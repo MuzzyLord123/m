@@ -147,15 +147,15 @@ export default function IPWorldMap({ ips, title = 'IP Locations Map', descriptio
           </div>
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <div className="w-3 h-3 rounded-full bg-risk" />
               <span className="text-muted-foreground">Blocked ({stats.blockedCountries})</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-emerald-500" />
+              <div className="w-3 h-3 rounded-full bg-ok" />
               <span className="text-muted-foreground">Whitelisted ({stats.whitelistedCountries})</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500" />
+              <div className="w-3 h-3 rounded-full bg-primary" />
               <span className="text-muted-foreground">Logins</span>
             </div>
           </div>
@@ -256,19 +256,19 @@ export default function IPWorldMap({ ips, title = 'IP Locations Map', descriptio
                         </div>
                         <div className="space-y-1 text-sm">
                           {hasBlocked && (
-                            <div className="flex items-center gap-2 text-red-500">
+                            <div className="flex items-center gap-2 text-risk">
                               <ShieldOff className="h-3 w-3" />
                               <span>{country.blocked.length} blocked IP(s)</span>
                             </div>
                           )}
                           {hasWhitelisted && (
-                            <div className="flex items-center gap-2 text-emerald-500">
+                            <div className="flex items-center gap-2 text-ok">
                               <ShieldCheck className="h-3 w-3" />
                               <span>{country.whitelisted.length} whitelisted IP(s)</span>
                             </div>
                           )}
                           {hasLogins && (
-                            <div className="flex items-center gap-2 text-blue-500">
+                            <div className="flex items-center gap-2 text-primary">
                               <MapPin className="h-3 w-3" />
                               <span>{country.logins.length} login(s)</span>
                             </div>
@@ -321,7 +321,7 @@ export default function IPWorldMap({ ips, title = 'IP Locations Map', descriptio
                           </Badge>
                         )}
                         {country.whitelisted.length > 0 && (
-                          <Badge className="bg-emerald-500 hover:bg-emerald-600 text-[10px] px-1 py-0 h-4">
+                          <Badge className="bg-ok text-[10px] px-1 py-0 h-4 hover:bg-ok/90">
                             {country.whitelisted.length}
                           </Badge>
                         )}

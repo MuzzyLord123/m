@@ -91,10 +91,10 @@ const platformOptions = [
 ];
 
 const statusOptions = [
-  { value: 'running', label: 'Running', icon: Play, color: 'text-emerald-600' },
-  { value: 'paused', label: 'Paused', icon: Pause, color: 'text-amber-600' },
-  { value: 'completed', label: 'Completed', icon: CheckCircle, color: 'text-blue-600' },
-  { value: 'scheduled', label: 'Scheduled', icon: Clock, color: 'text-purple-600' },
+  { value: 'running', label: 'Running', icon: Play, color: 'text-ok' },
+  { value: 'paused', label: 'Paused', icon: Pause, color: 'text-attend' },
+  { value: 'completed', label: 'Completed', icon: CheckCircle, color: 'text-ok' },
+  { value: 'scheduled', label: 'Scheduled', icon: Clock, color: 'text-ink-2' },
 ];
 
 const objectiveOptions = [
@@ -106,10 +106,10 @@ const objectiveOptions = [
 ];
 
 const statusColors: Record<string, string> = {
-  running: 'bg-emerald-500/20 text-emerald-600 border-emerald-500/30',
-  paused: 'bg-amber-500/20 text-amber-600 border-amber-500/30',
-  completed: 'bg-blue-500/20 text-blue-600 border-blue-500/30',
-  scheduled: 'bg-purple-500/20 text-purple-600 border-purple-500/30',
+  running: 'bg-ok/10 text-ok border-ok/20',
+  paused: 'bg-attend/10 text-attend border-attend/20',
+  completed: 'bg-ok/10 text-ok border-ok/20',
+  scheduled: 'bg-foreground/[0.06] text-ink-2 border-border/60',
 };
 
 export default function AdminAdManagement() {

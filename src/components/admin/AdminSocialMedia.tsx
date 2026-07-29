@@ -77,12 +77,12 @@ interface SocialMediaPost {
 }
 
 const platformConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  instagram: { label: 'Instagram', icon: Instagram, color: 'text-pink-500' },
-  facebook: { label: 'Facebook', icon: Facebook, color: 'text-blue-600' },
-  tiktok: { label: 'TikTok', icon: Play, color: 'text-foreground' },
-  linkedin: { label: 'LinkedIn', icon: Linkedin, color: 'text-blue-500' },
-  twitter: { label: 'Twitter/X', icon: Twitter, color: 'text-foreground' },
-  youtube: { label: 'YouTube', icon: Youtube, color: 'text-red-500' },
+  instagram: { label: 'Instagram', icon: Instagram, color: 'text-ink-2' },
+  facebook: { label: 'Facebook', icon: Facebook, color: 'text-ink-2' },
+  tiktok: { label: 'TikTok', icon: Play, color: 'text-ink-2' },
+  linkedin: { label: 'LinkedIn', icon: Linkedin, color: 'text-ink-2' },
+  twitter: { label: 'Twitter/X', icon: Twitter, color: 'text-ink-2' },
+  youtube: { label: 'YouTube', icon: Youtube, color: 'text-ink-2' },
 };
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {

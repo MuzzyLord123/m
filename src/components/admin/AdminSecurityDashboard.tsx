@@ -1,35 +1,22 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Shield, 
-  ShieldCheck, 
-  ShieldOff, 
-  Users, 
-  AlertTriangle,
+import {
   Send,
   Loader2,
   RefreshCw,
-  CheckCircle,
-  XCircle,
-  Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 import { useTwoFactor } from '@/hooks/useTwoFactor';
 import SecuritySettings from '@/components/security/SecuritySettings';
 import SecurityLogsPanel from '@/components/admin/SecurityLogsPanel';
 import IPManagementPanel from '@/components/admin/IPManagementPanel';
+import {
+  Panel, DataTable, StatusBadge, StatusDot, AvatarID, SkeletonBlock, SkeletonTable,
+  type Column,
+} from '@/components/platform';
 
 interface UserStats {
   userId: string;
@@ -73,7 +60,7 @@ export default function AdminSecurityDashboard() {
     if (myStatusLoading) {
       return;
     }
-    
+
     // Only fetch admin stats if the user is an admin
     if (myStatus?.role === 'admin') {
       fetchStats();
@@ -91,18 +78,101 @@ export default function AdminSecurityDashboard() {
     setSendingReminder(null);
   };
 
-  const adoptionPercentage = stats 
-    ? Math.round((stats.usersWithTwoFactor / stats.totalUsers) * 100) 
+  const adoptionPercentage = stats
+    ? Math.round((stats.usersWithTwoFactor / stats.totalUsers) * 100)
     : 0;
 
   const adminAdoptionPercentage = stats && stats.adminCount > 0
     ? Math.round((stats.adminsWithTwoFactor / stats.adminCount) * 100)
     : 0;
 
+  const columns: Column<UserStats>[] = [
+    {
+      key: 'user',
+      header: 'User',
+      sortValue: (u) => (u.fullName || u.email).toLowerCase(),
+      render: (user) => (
+        <div className="flex items-center gap-2 py-1">
+          <AvatarID name={user.fullName} email={user.email} size="md" />
+          <div className="min-w-0">
+            <p className="truncate text-[13px] font-medium">{user.fullName || 'Unknown'}</p>
+            <p className="truncate text-[11px] text-muted-foreground">{user.email}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'role',
+      header: 'Role',
+      hideBelowMd: true,
+      sortValue: (u) => u.role,
+      render: (user) => (
+        <StatusBadge
+          tone={user.role === 'admin' ? 'accent' : 'neutral'}
+          label={user.role === 'admin' ? 'Team' : 'Customer'}
+        />
+      ),
+    },
+    {
+      key: 'twofactor',
+      header: '2FA',
+      sortValue: (u) => (u.twoFactorEnabled ? 1 : 0),
+      render: (user) =>
+        user.twoFactorEnabled ? (
+          <StatusBadge tone="ok" label="Enabled" />
+        ) : (
+          <StatusBadge tone="attend" label="Not enabled" />
+        ),
+    },
+    {
+      key: 'lastLogin',
+      header: 'Last login',
+      hideBelowMd: true,
+      mono: true,
+      sortValue: (u) => u.lastLogin || '',
+      render: (user) =>
+        user.lastLogin ? (
+          <span className="text-muted-foreground">{format(new Date(user.lastLogin), 'd MMM yyyy')}</span>
+        ) : (
+          <span className="text-muted-foreground/60">Never</span>
+        ),
+    },
+    {
+      key: 'action',
+      header: '',
+      align: 'right',
+      render: (user) =>
+        !user.twoFactorEnabled ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => sendSecurityReminder(user.userId, user.email)}
+            disabled={sendingReminder === user.userId}
+            className="h-7 gap-2 rounded-md px-2.5 text-xs"
+          >
+            {sendingReminder === user.userId ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:inline">Send reminder</span>
+          </Button>
+        ) : null,
+    },
+  ];
+
   if (loading || myStatusLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="space-y-4" aria-busy>
+        <SkeletonBlock className="h-[120px] rounded-[10px]" />
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <SkeletonBlock key={i} className="h-[64px] rounded-[10px]" />
+          ))}
+        </div>
+        <Panel>
+          <SkeletonTable cols={4} rows={5} />
+        </Panel>
       </div>
     );
   }
@@ -110,14 +180,14 @@ export default function AdminSecurityDashboard() {
   // For non-admin users, just show their personal security settings
   if (!isAdmin) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <SecuritySettings />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* IP Management - Team-wide blacklist/whitelist */}
       <IPManagementPanel />
 
@@ -128,83 +198,56 @@ export default function AdminSecurityDashboard() {
       <SecuritySettings />
 
       {/* Adoption Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Total Users</CardDescription>
-            <CardTitle className="text-3xl flex items-center gap-2">
-              <Users className="h-6 w-6 text-muted-foreground" />
-              {stats?.totalUsers || 0}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>2FA Enabled</CardDescription>
-            <CardTitle className="text-3xl flex items-center gap-2">
-              <ShieldCheck className="h-6 w-6 text-green-500" />
-              {stats?.usersWithTwoFactor || 0}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Without 2FA</CardDescription>
-            <CardTitle className="text-3xl flex items-center gap-2">
-              <ShieldOff className="h-6 w-6 text-amber-500" />
-              {(stats?.totalUsers || 0) - (stats?.usersWithTwoFactor || 0)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Overall Adoption</CardDescription>
-            <CardTitle className="text-3xl flex items-center gap-2">
-              <Shield className="h-6 w-6 text-primary" />
-              {adoptionPercentage}%
-            </CardTitle>
-          </CardHeader>
-        </Card>
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: 'Total users', value: `${stats?.totalUsers || 0}`, tone: 'neutral' as const },
+          { label: '2FA enabled', value: `${stats?.usersWithTwoFactor || 0}`, tone: 'ok' as const },
+          { label: 'Without 2FA', value: `${(stats?.totalUsers || 0) - (stats?.usersWithTwoFactor || 0)}`, tone: 'attend' as const },
+          { label: 'Overall adoption', value: `${adoptionPercentage}%`, tone: 'neutral' as const },
+        ].map((s) => (
+          <Panel key={s.label} className="p-3">
+            <div className="flex items-center gap-1.5">
+              <StatusDot tone={s.tone} />
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{s.label}</p>
+            </div>
+            <p className="mt-1 text-[18px] font-semibold tabular-nums tracking-[-0.01em]">{s.value}</p>
+          </Panel>
+        ))}
       </div>
 
       {/* Adoption Progress */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">2FA Adoption Rate</CardTitle>
-          <CardDescription>
-            Track security adoption across your organization
+      <Card className="rounded-[10px] border-border/60 shadow-none">
+        <CardHeader className="px-4 py-3">
+          <CardTitle className="text-[15px] font-semibold tracking-[-0.01em]">2FA adoption rate</CardTitle>
+          <CardDescription className="text-[12px]">
+            Track security adoption across the organisation
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-5 px-4 pb-4">
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>All Users</span>
-              <span className="font-medium">{adoptionPercentage}%</span>
+            <div className="flex justify-between text-[13px]">
+              <span>All users</span>
+              <span className="font-mono font-medium tabular-nums">{adoptionPercentage}%</span>
             </div>
-            <Progress value={adoptionPercentage} className="h-3" />
-            <p className="text-xs text-muted-foreground">
+            <Progress value={adoptionPercentage} className="h-1.5 bg-sunken" />
+            <p className="text-[11px] tabular-nums text-muted-foreground">
               {stats?.usersWithTwoFactor || 0} of {stats?.totalUsers || 0} users have 2FA enabled
             </p>
           </div>
-          
+
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-[13px]">
               <span className="flex items-center gap-2">
-                Team Members
-                {adminAdoptionPercentage < 100 && (
-                  <AlertTriangle className="h-4 w-4 text-red-500" />
-                )}
+                Team members
+                {adminAdoptionPercentage < 100 && <StatusDot tone="risk" />}
               </span>
-              <span className="font-medium">{adminAdoptionPercentage}%</span>
+              <span className="font-mono font-medium tabular-nums">{adminAdoptionPercentage}%</span>
             </div>
-            <Progress 
-              value={adminAdoptionPercentage} 
-              className={`h-3 ${adminAdoptionPercentage < 100 ? '[&>div]:bg-red-500' : ''}`}
+            <Progress
+              value={adminAdoptionPercentage}
+              className={`h-1.5 bg-sunken ${adminAdoptionPercentage < 100 ? '[&>div]:bg-risk' : ''}`}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[11px] tabular-nums text-muted-foreground">
               {stats?.adminsWithTwoFactor || 0} of {stats?.adminCount || 0} team members have 2FA enabled
             </p>
           </div>
@@ -212,99 +255,45 @@ export default function AdminSecurityDashboard() {
       </Card>
 
       {/* User List */}
-      <Card>
-        <CardHeader>
+      <Card className="rounded-[10px] border-border/60 shadow-none">
+        <CardHeader className="px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Security Status by User</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-[15px] font-semibold tracking-[-0.01em]">Security status by user</CardTitle>
+              <CardDescription className="text-[12px]">
                 View 2FA status and send security reminders
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm" onClick={fetchStats} className="gap-2">
-              <RefreshCw className="h-4 w-4" />
+            <Button variant="outline" size="sm" onClick={fetchStats} className="h-8 gap-2 rounded-lg border-border/60 px-3 text-xs">
+              <RefreshCw className="h-3.5 w-3.5" />
               Refresh
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-lg border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>2FA Status</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {stats?.usersList?.map((user) => (
-                  <TableRow key={user.userId}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{user.fullName || 'Unknown'}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                        {user.role === 'admin' ? 'Team' : 'Customer'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {user.twoFactorEnabled ? (
-                        <div className="flex items-center gap-2 text-green-600">
-                          <CheckCircle className="h-4 w-4" />
-                          <span className="text-sm">Enabled</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 text-amber-600">
-                          <XCircle className="h-4 w-4" />
-                          <span className="text-sm">Not Enabled</span>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {user.lastLogin ? (
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                          <Clock className="h-4 w-4" />
-                          {new Date(user.lastLogin).toLocaleDateString()}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">Never</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {!user.twoFactorEnabled && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => sendSecurityReminder(user.userId, user.email)}
-                          disabled={sendingReminder === user.userId}
-                          className="gap-2"
-                        >
-                          {sendingReminder === user.userId ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Send className="h-4 w-4" />
-                          )}
-                          <span className="hidden sm:inline">Send Reminder</span>
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(!stats?.usersList || stats.usersList.length === 0) && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      No users found
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+        <CardContent className="px-4 pb-4">
+          <div className="overflow-hidden rounded-lg border border-border/60">
+            <DataTable
+              rows={stats?.usersList || []}
+              columns={columns}
+              rowKey={(u) => u.userId}
+              aria-label="Security status by user"
+              defaultSort={{ key: 'twofactor', dir: 'asc' }}
+              empty={{ title: 'No users found', body: 'Users appear here once accounts exist.' }}
+              mobileCard={(user) => (
+                <div className="flex items-center gap-3 px-3 py-3">
+                  <AvatarID name={user.fullName} email={user.email} size="lg" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-medium">{user.fullName || 'Unknown'}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">{user.email}</p>
+                  </div>
+                  {user.twoFactorEnabled ? (
+                    <StatusBadge tone="ok" label="Enabled" className="shrink-0 text-[10.5px]" />
+                  ) : (
+                    <StatusBadge tone="attend" label="Not enabled" className="shrink-0 text-[10.5px]" />
+                  )}
+                </div>
+              )}
+            />
           </div>
         </CardContent>
       </Card>

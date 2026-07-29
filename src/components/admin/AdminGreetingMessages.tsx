@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { SkeletonLedger } from '@/components/platform';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -169,9 +170,7 @@ export default function AdminGreetingMessages() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading client accounts…
-        </div>
+        <SkeletonLedger rows={5} />
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground border border-dashed border-border rounded-2xl">
           No client accounts found.

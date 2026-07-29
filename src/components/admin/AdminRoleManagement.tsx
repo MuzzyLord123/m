@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { SkeletonLedger } from '@/components/platform';
 import { toast } from 'sonner';
 import {
   useRBAC, RBAC_MODULES, RBAC_ACTIONS, RBAC_ACTION_LABELS, MODULE_GROUPS,
@@ -262,9 +263,7 @@ export default function AdminRoleManagement() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
+      <SkeletonLedger rows={6} />
     );
   }
 

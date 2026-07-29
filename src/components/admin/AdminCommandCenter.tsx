@@ -1,20 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import {
-  DollarSign, TrendingUp, Briefcase, Users, Zap, AlertTriangle,
-  ArrowUpRight, ArrowDownRight, Activity, Target, BarChart3,
-  Clock, CheckCircle, XCircle, MessageSquare, Globe, FileText,
-  Sparkles, RefreshCw
-} from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { composeOfficeBriefing } from '@/lib/greetings';
+import {
+  GreetingHeader, Panel, PanelHeader, PanelRow, StatusBadge, Money,
+  EmptyState, ErrorState, SkeletonBlock, SkeletonLedger, type Tone,
+} from '@/components/platform';
 import {
   ChartContainer, ChartTooltip, ChartTooltipContent
 } from '@/components/ui/chart';
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  ResponsiveContainer, PieChart, Pie, Cell
+  AreaChart, Area, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
 
 interface DashboardData {
@@ -26,7 +24,7 @@ interface DashboardData {
   // Pipeline
   pipelineValue: number;
   weightedPipeline: number;
-  dealsByStage: { stage: string; count: number; value: number; color: string }[];
+  dealsByStage: { stage: string; count: number; value: number }[];
   // Projects
   activeProjects: number;
   completedProjects: number;
@@ -47,16 +45,6 @@ interface DashboardData {
   openTickets: number;
   expiringSoon: number;
 }
-
-const STAGE_COLORS: Record<string, string> = {
-  qualification: '#60a5fa',
-  discovery: '#a78bfa',
-  proposal: '#fbbf24',
-  negotiation: '#f97316',
-  closing: '#34d399',
-  won: '#22c55e',
-  lost: '#ef4444',
-};
 
 export default function AdminCommandCenter() {
   const { user } = useAuth();
@@ -110,7 +98,7 @@ export default function AdminCommandCenter() {
       // Revenue calculations
       const paidInvoices = invoices.filter((i: any) => i.status === 'paid');
       const totalRevenue = paidInvoices.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0);
-      
+
       const now = new Date();
       const thisMonth = now.getMonth();
       const thisYear = now.getFullYear();
@@ -119,7 +107,7 @@ export default function AdminCommandCenter() {
         return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
       });
       const monthlyRevenue = monthlyPaid.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0);
-      
+
       const lastMonthPaid = paidInvoices.filter((i: any) => {
         const d = new Date(i.paid_at || i.created_at);
         const lm = thisMonth === 0 ? 11 : thisMonth - 1;
@@ -153,7 +141,6 @@ export default function AdminCommandCenter() {
         stage: stage.charAt(0).toUpperCase() + stage.slice(1),
         count: activeDeals.filter((d: any) => d.stage === stage).length,
         value: activeDeals.filter((d: any) => d.stage === stage).reduce((s: number, d: any) => s + Number(d.deal_value || 0), 0),
-        color: STAGE_COLORS[stage] || '#888',
       }));
 
       // Projects
@@ -222,31 +209,31 @@ export default function AdminCommandCenter() {
     setAiLoading(true);
     // Generate a local summary from the data
     const parts: string[] = [];
-    
+
     if (data.monthlyRevenue > 0) {
       parts.push(`This month's revenue is £${data.monthlyRevenue.toLocaleString()}${data.revenueGrowth > 0 ? `, up ${data.revenueGrowth.toFixed(0)}% from last month` : data.revenueGrowth < 0 ? `, down ${Math.abs(data.revenueGrowth).toFixed(0)}% from last month` : ''}.`);
     }
-    
+
     if (data.pipelineValue > 0) {
       parts.push(`Your pipeline holds £${data.pipelineValue.toLocaleString()} across ${data.dealsByStage.reduce((s, d) => s + d.count, 0)} active deals (£${data.weightedPipeline.toLocaleString()} weighted).`);
     }
-    
+
     if (data.activeProjects > 0) {
       parts.push(`${data.activeProjects} projects are in progress with ${data.pendingProjects} pending kickoff.`);
     }
 
     if (data.newLeadsThisMonth > 0) {
-      parts.push(`${data.newLeadsThisMonth} new leads this month${data.leadVelocity > 0 ? ` — velocity is up ${data.leadVelocity.toFixed(0)}%` : ''}.`);
+      parts.push(`${data.newLeadsThisMonth} new leads this month${data.leadVelocity > 0 ? `, velocity up ${data.leadVelocity.toFixed(0)}%` : ''}.`);
     }
 
     const alerts: string[] = [];
     if (data.overdueInvoices > 0) alerts.push(`${data.overdueInvoices} overdue invoice${data.overdueInvoices > 1 ? 's' : ''}`);
     if (data.pendingEnquiries > 0) alerts.push(`${data.pendingEnquiries} pending enquir${data.pendingEnquiries > 1 ? 'ies' : 'y'}`);
     if (data.openTickets > 0) alerts.push(`${data.openTickets} open ticket${data.openTickets > 1 ? 's' : ''}`);
-    if (alerts.length > 0) parts.push(`⚠️ Action needed: ${alerts.join(', ')}.`);
+    if (alerts.length > 0) parts.push(`Action needed: ${alerts.join(', ')}.`);
 
     if (parts.length === 0) parts.push('No significant activity to report. Your platform is running smoothly.');
-    
+
     setAiSummary(parts.join(' '));
     setAiLoading(false);
   };
@@ -255,267 +242,267 @@ export default function AdminCommandCenter() {
     if (data && !aiSummary) generateAiSummary();
   }, [data]);
 
-  const formatCurrency = (val: number) => `£${val.toLocaleString()}`;
-
   const alerts = useMemo(() => {
     if (!data) return [];
-    const items: { label: string; count: number; severity: 'error' | 'warning' | 'info'; icon: any }[] = [];
-    if (data.overdueInvoices > 0) items.push({ label: 'Overdue Invoices', count: data.overdueInvoices, severity: 'error', icon: DollarSign });
-    if (data.pendingEnquiries > 0) items.push({ label: 'Pending Enquiries', count: data.pendingEnquiries, severity: 'warning', icon: MessageSquare });
-    if (data.openTickets > 0) items.push({ label: 'Open Tickets', count: data.openTickets, severity: 'warning', icon: AlertTriangle });
-    if (data.pendingProjects > 0) items.push({ label: 'Pending Projects', count: data.pendingProjects, severity: 'info', icon: Clock });
+    const items: { label: string; count: number; tone: Tone; badge: string }[] = [];
+    if (data.overdueInvoices > 0) items.push({ label: 'Overdue invoices', count: data.overdueInvoices, tone: 'risk', badge: 'Overdue' });
+    if (data.pendingEnquiries > 0) items.push({ label: 'Pending enquiries', count: data.pendingEnquiries, tone: 'attend', badge: 'Pending' });
+    if (data.openTickets > 0) items.push({ label: 'Open tickets', count: data.openTickets, tone: 'attend', badge: 'Open' });
+    if (data.pendingProjects > 0) items.push({ label: 'Pending projects', count: data.pendingProjects, tone: 'neutral', badge: 'Queued' });
     return items;
   }, [data]);
 
-  const severityColors = {
-    error: { bg: '#2a1a1a', border: '#3d2020', text: '#ef4444', dot: '#ef4444' },
-    warning: { bg: '#2a2518', border: '#3d351e', text: '#f59e0b', dot: '#f59e0b' },
-    info: { bg: '#1a1f2a', border: '#1e2d3d', text: '#3b82f6', dot: '#3b82f6' },
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#0073E6] border-t-transparent rounded-full animate-spin" />
-          <span className="text-[11px] text-[#888]">Loading Command Center...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!data) return null;
+  // The office briefing: composed only from counts this screen already fetches.
+  const briefing = useMemo(
+    () =>
+      composeOfficeBriefing({
+        firstName: (user?.user_metadata?.full_name as string) || null,
+        newEnquiries: data?.pendingEnquiries ?? 0,
+      }),
+    [user, data],
+  );
 
   const chartConfig = {
-    revenue: { label: 'Revenue', color: '#0073E6' },
-    projected: { label: 'Projected', color: '#0073E6' },
+    revenue: { label: 'Revenue', color: 'hsl(var(--primary))' },
+    projected: { label: 'Projected', color: 'hsl(var(--primary))' },
   };
 
-  const pieColors = ['#0073E6', '#22c55e', '#f59e0b', '#a78bfa', '#ef4444'];
+  const stats = data
+    ? [
+        {
+          label: 'Total revenue',
+          value: <Money value={data.totalRevenue} whole />,
+          sub: <><Money value={data.monthlyRevenue} whole /> this month</>,
+          trend: data.revenueGrowth,
+        },
+        {
+          label: 'Pipeline value',
+          value: <Money value={data.pipelineValue} whole />,
+          sub: <><Money value={data.weightedPipeline} whole /> weighted</>,
+          trend: null,
+        },
+        {
+          label: 'Active projects',
+          value: String(data.activeProjects),
+          sub: `${data.completedProjects} completed`,
+          trend: null,
+        },
+        {
+          label: 'Leads this month',
+          value: String(data.newLeadsThisMonth),
+          sub: `${data.newLeadsLastMonth} last month`,
+          trend: data.leadVelocity,
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-4">
-      {/* AI Summary Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-lg p-4 flex items-start gap-3"
-        style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}
-      >
-        <div className="p-2 rounded-lg" style={{ backgroundColor: '#252525' }}>
-          <Sparkles className="h-4 w-4 text-[#0073E6]" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[11px] font-semibold text-[#ccc] uppercase tracking-wider">AI Summary</span>
-            <button
-              onClick={generateAiSummary}
-              className="p-1 rounded hover:bg-[#252525] transition-colors"
-              disabled={aiLoading}
-            >
-              <RefreshCw className={`h-3 w-3 text-[#666] ${aiLoading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-          <p className="text-[12px] text-[#aaa] leading-relaxed">
-            {aiLoading ? 'Generating summary...' : aiSummary}
-          </p>
-        </div>
-      </motion.div>
+      <GreetingHeader
+        salutation={briefing.salutation}
+        line={data ? briefing.line : undefined}
+        meta={
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            {format(new Date(), 'EEE d MMM yyyy')}
+          </span>
+        }
+      />
 
-      {/* Top KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          {
-            label: 'Total Revenue',
-            value: formatCurrency(data.totalRevenue),
-            sub: `${formatCurrency(data.monthlyRevenue)} this month`,
-            icon: DollarSign,
-            trend: data.revenueGrowth,
-          },
-          {
-            label: 'Pipeline Value',
-            value: formatCurrency(data.pipelineValue),
-            sub: `${formatCurrency(data.weightedPipeline)} weighted`,
-            icon: Target,
-            trend: null,
-          },
-          {
-            label: 'Active Projects',
-            value: String(data.activeProjects),
-            sub: `${data.completedProjects} completed`,
-            icon: Briefcase,
-            trend: null,
-          },
-          {
-            label: 'Lead Velocity',
-            value: `${data.newLeadsThisMonth}`,
-            sub: `${data.newLeadsLastMonth} last month`,
-            icon: Zap,
-            trend: data.leadVelocity,
-          },
-        ].map((kpi, i) => (
-          <motion.div
-            key={kpi.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="rounded-lg p-4"
-            style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-md" style={{ backgroundColor: '#252525' }}>
-                <kpi.icon className="h-4 w-4 text-[#0073E6]" />
-              </div>
-              {kpi.trend !== null && (
-                <div className={`flex items-center gap-0.5 text-[10px] font-medium ${kpi.trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {kpi.trend >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                  {Math.abs(kpi.trend).toFixed(0)}%
-                </div>
-              )}
-            </div>
-            <p className="text-xl font-bold text-white">{kpi.value}</p>
-            <p className="text-[11px] text-[#888] mt-0.5">{kpi.sub}</p>
-            <p className="text-[10px] text-[#555] mt-1 uppercase tracking-wider">{kpi.label}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        {/* Revenue Chart */}
-        <div className="lg:col-span-2 rounded-lg p-4" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-[12px] font-semibold text-[#ccc] uppercase tracking-wider">Revenue Trend</h3>
-              <p className="text-[11px] text-[#666]">Last 6 months</p>
-            </div>
-            <BarChart3 className="h-4 w-4 text-[#555]" />
+      {loading ? (
+        <div className="space-y-3" aria-busy>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <SkeletonBlock className="h-[88px] rounded-[10px]" />
+            <SkeletonBlock className="h-[88px] rounded-[10px]" />
+            <SkeletonBlock className="h-[88px] rounded-[10px]" />
+            <SkeletonBlock className="h-[88px] rounded-[10px]" />
           </div>
-          <div className="h-[200px]">
-            <ChartContainer config={chartConfig} className="h-full w-full">
-              <AreaChart data={data.revenueByMonth} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
-                <defs>
-                  <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0073E6" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#0073E6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#252525" />
-                <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#666' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: '#666' }} axisLine={false} tickLine={false} tickFormatter={(v) => `£${(v / 1000).toFixed(0)}k`} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area type="monotone" dataKey="revenue" stroke="#0073E6" fill="url(#revenueGrad)" strokeWidth={2} />
-              </AreaChart>
-            </ChartContainer>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <SkeletonBlock className="h-[260px] rounded-[10px] lg:col-span-2" />
+            <SkeletonBlock className="h-[260px] rounded-[10px]" />
           </div>
+          <Panel>
+            <SkeletonLedger rows={4} />
+          </Panel>
         </div>
+      ) : !data ? (
+        <Panel>
+          <ErrorState compact onRetry={fetchAllData} />
+        </Panel>
+      ) : (
+        <>
+          {/* Day summary, composed locally from the same fetch */}
+          <Panel>
+            <PanelHeader label="Day summary">
+              <button
+                type="button"
+                onClick={generateAiSummary}
+                disabled={aiLoading}
+                aria-label="Refresh summary"
+                className="rounded p-1 text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.04] hover:text-foreground"
+              >
+                <RefreshCw className={aiLoading ? 'h-3 w-3 animate-spin' : 'h-3 w-3'} />
+              </button>
+            </PanelHeader>
+            <p className="px-4 py-3 text-[13px] leading-relaxed text-ink-2">
+              {aiLoading ? 'Composing summary' : aiSummary}
+            </p>
+          </Panel>
 
-        {/* Pipeline Breakdown */}
-        <div className="rounded-lg p-4" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-[12px] font-semibold text-[#ccc] uppercase tracking-wider">Pipeline Stages</h3>
-              <p className="text-[11px] text-[#666]">{data.dealsByStage.reduce((s, d) => s + d.count, 0)} active deals</p>
-            </div>
-            <Target className="h-4 w-4 text-[#555]" />
-          </div>
-          <div className="space-y-3">
-            {data.dealsByStage.map((stage) => (
-              <div key={stage.stage}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] text-[#aaa]">{stage.stage}</span>
-                  <span className="text-[11px] font-medium text-[#ccc]">{stage.count} · {formatCurrency(stage.value)}</span>
+          {/* Stat row */}
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {stats.map((s) => (
+              <Panel key={s.label} className="p-3">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                    {s.label}
+                  </span>
+                  {s.trend !== null && (
+                    <span
+                      className={
+                        'font-mono text-[10.5px] tabular-nums ' +
+                        (s.trend >= 0 ? 'text-ok' : 'text-risk')
+                      }
+                    >
+                      {s.trend >= 0 ? '+' : ''}
+                      {s.trend.toFixed(0)}%
+                    </span>
+                  )}
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#252525' }}>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${data.pipelineValue > 0 ? (stage.value / data.pipelineValue) * 100 : 0}%` }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="h-full rounded-full"
-                    style={{ backgroundColor: stage.color }}
-                  />
-                </div>
-              </div>
+                <p className="mt-1.5 text-[20px] font-semibold tabular-nums tracking-[-0.01em] text-foreground">
+                  {s.value}
+                </p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">{s.sub}</p>
+              </Panel>
             ))}
           </div>
-        </div>
-      </div>
 
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        {/* Platform Usage */}
-        <div className="rounded-lg p-4" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-          <h3 className="text-[12px] font-semibold text-[#ccc] uppercase tracking-wider mb-4">Platform Usage</h3>
-          <div className="space-y-3">
-            {[
-              { label: 'Total Clients', value: data.totalClients, icon: Users, color: '#0073E6' },
-              { label: 'Active Clients', value: data.activeClients, icon: CheckCircle, color: '#22c55e' },
-              { label: 'Conversations', value: data.totalConversations, icon: MessageSquare, color: '#a78bfa' },
-              { label: 'Content Requests', value: data.totalContentRequests, icon: FileText, color: '#f59e0b' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between py-1.5" style={{ borderBottom: '1px solid #222' }}>
-                <div className="flex items-center gap-2">
-                  <item.icon className="h-3.5 w-3.5" style={{ color: item.color }} />
-                  <span className="text-[11px] text-[#aaa]">{item.label}</span>
-                </div>
-                <span className="text-[13px] font-semibold text-white">{item.value}</span>
+          {/* Charts row */}
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <Panel className="lg:col-span-2">
+              <PanelHeader label="Revenue, last 6 months" />
+              <div className="h-[200px] p-3">
+                <ChartContainer config={chartConfig} className="h-full w-full">
+                  <AreaChart data={data.revenueByMonth} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => `£${(v / 1000).toFixed(0)}k`}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="hsl(var(--primary))"
+                      fill="hsl(var(--primary))"
+                      fillOpacity={0.08}
+                      strokeWidth={1.5}
+                      isAnimationActive={false}
+                    />
+                  </AreaChart>
+                </ChartContainer>
               </div>
-            ))}
-          </div>
-        </div>
+            </Panel>
 
-        {/* Lead Sources */}
-        <div className="rounded-lg p-4" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-          <h3 className="text-[12px] font-semibold text-[#ccc] uppercase tracking-wider mb-4">Lead Sources</h3>
-          {data.leadsBySource.length > 0 ? (
-            <div className="space-y-3">
-              {data.leadsBySource.map((src, i) => (
-                <div key={src.source} className="flex items-center justify-between py-1.5" style={{ borderBottom: '1px solid #222' }}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: pieColors[i % pieColors.length] }} />
-                    <span className="text-[11px] text-[#aaa] capitalize">{src.source.replace(/_/g, ' ')}</span>
-                  </div>
-                  <span className="text-[13px] font-semibold text-white">{src.count}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-32">
-              <span className="text-[11px] text-[#555]">No lead data available</span>
-            </div>
-          )}
-        </div>
-
-        {/* Alerts */}
-        <div className="rounded-lg p-4" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-          <h3 className="text-[12px] font-semibold text-[#ccc] uppercase tracking-wider mb-4">Alerts & Actions</h3>
-          {alerts.length > 0 ? (
-            <div className="space-y-2">
-              {alerts.map((alert) => {
-                const colors = severityColors[alert.severity];
-                return (
-                  <div
-                    key={alert.label}
-                    className="rounded-md p-3 flex items-center justify-between"
-                    style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <alert.icon className="h-3.5 w-3.5" style={{ color: colors.text }} />
-                      <span className="text-[11px]" style={{ color: colors.text }}>{alert.label}</span>
+            <Panel>
+              <PanelHeader label="Pipeline">
+                <span className="font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                  {data.dealsByStage.reduce((s, d) => s + d.count, 0)} active deals
+                </span>
+              </PanelHeader>
+              <div className="space-y-3 p-3">
+                {data.dealsByStage.map((stage) => (
+                  <div key={stage.stage}>
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="text-[12px] text-ink-2">{stage.stage}</span>
+                      <span className="font-mono text-[11px] tabular-nums text-foreground">
+                        {stage.count} · <Money value={stage.value} whole />
+                      </span>
                     </div>
-                    <span className="text-[14px] font-bold" style={{ color: colors.text }}>{alert.count}</span>
+                    <div className="h-1 overflow-hidden rounded-full bg-sunken">
+                      <div
+                        className="h-full rounded-full bg-foreground/30"
+                        style={{
+                          width: `${data.pipelineValue > 0 ? (stage.value / data.pipelineValue) * 100 : 0}%`,
+                        }}
+                      />
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-32 text-center">
-              <CheckCircle className="h-6 w-6 text-emerald-500 mb-2" />
-              <span className="text-[11px] text-[#888]">All clear — no alerts</span>
-            </div>
-          )}
-        </div>
-      </div>
+                ))}
+              </div>
+            </Panel>
+          </div>
+
+          {/* Bottom row */}
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <Panel>
+              <PanelHeader label="Platform usage" />
+              {[
+                { label: 'Total clients', value: data.totalClients },
+                { label: 'Active clients', value: data.activeClients },
+                { label: 'Conversations', value: data.totalConversations },
+                { label: 'Content requests', value: data.totalContentRequests },
+              ].map((item) => (
+                <PanelRow
+                  key={item.label}
+                  title={item.label}
+                  trailing={
+                    <span className="font-mono text-[12px] tabular-nums text-foreground">
+                      {item.value}
+                    </span>
+                  }
+                />
+              ))}
+            </Panel>
+
+            <Panel>
+              <PanelHeader label="Lead sources" />
+              {data.leadsBySource.length > 0 ? (
+                data.leadsBySource.map((src) => (
+                  <PanelRow
+                    key={src.source}
+                    title={<span className="capitalize">{src.source.replace(/_/g, ' ')}</span>}
+                    trailing={
+                      <span className="font-mono text-[12px] tabular-nums text-foreground">
+                        {src.count}
+                      </span>
+                    }
+                  />
+                ))
+              ) : (
+                <EmptyState compact title="No lead data yet" body="Sources appear as leads arrive." />
+              )}
+            </Panel>
+
+            <Panel>
+              <PanelHeader label="Needs attention" />
+              {alerts.length > 0 ? (
+                alerts.map((alert) => (
+                  <PanelRow
+                    key={alert.label}
+                    leading={<StatusBadge tone={alert.tone} label={alert.badge} className="w-20" />}
+                    title={alert.label}
+                    trailing={
+                      <span className="font-mono text-[12px] tabular-nums text-foreground">
+                        {alert.count}
+                      </span>
+                    }
+                  />
+                ))
+              ) : (
+                <EmptyState compact title="All clear" body="Nothing needs attention right now." />
+              )}
+            </Panel>
+          </div>
+        </>
+      )}
     </div>
   );
 }

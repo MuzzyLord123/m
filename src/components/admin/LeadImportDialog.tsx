@@ -525,18 +525,18 @@ export default function LeadImportDialog({ open, onOpenChange, onImportComplete 
         {importResult ? (
           <div className="py-6 space-y-4">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
-                <Check className="w-8 h-8 text-green-500" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-ok/15 mb-4">
+                <Check className="w-8 h-8 text-ok" />
               </div>
               <h3 className="text-xl font-semibold">Import Complete</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-              <div className="p-4 rounded-lg bg-green-500/10">
-                <p className="text-2xl font-bold text-green-500">{importResult.added}</p>
+              <div className="p-4 rounded-lg bg-ok/10">
+                <p className="text-2xl font-bold tabular-nums text-ok">{importResult.added}</p>
                 <p className="text-sm text-muted-foreground">Added</p>
               </div>
-              <div className="p-4 rounded-lg bg-yellow-500/10">
-                <p className="text-2xl font-bold text-yellow-500">{importResult.duplicates}</p>
+              <div className="p-4 rounded-lg bg-attend/10">
+                <p className="text-2xl font-bold tabular-nums text-attend">{importResult.duplicates}</p>
                 <p className="text-sm text-muted-foreground">Duplicates</p>
               </div>
               <div className="p-4 rounded-lg bg-muted">
@@ -545,9 +545,9 @@ export default function LeadImportDialog({ open, onOpenChange, onImportComplete 
               </div>
             </div>
             {importResult.errors.length > 0 && (
-              <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
-                <p className="text-sm font-medium text-red-500 mb-2">Errors:</p>
-                <ul className="text-xs text-red-400 space-y-1">
+              <div className="p-4 rounded-lg bg-risk/10 border border-risk/30">
+                <p className="text-sm font-medium text-risk mb-2">Errors:</p>
+                <ul className="text-xs text-risk/80 space-y-1">
                   {importResult.errors.slice(0, 5).map((err, i) => (
                     <li key={i}>{err}</li>
                   ))}

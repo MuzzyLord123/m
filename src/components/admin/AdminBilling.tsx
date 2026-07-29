@@ -13,28 +13,23 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { 
-  CreditCard, 
-  Search, 
-  Plus, 
-  Edit, 
-  CheckCircle2, 
-  Clock,
-  AlertCircle,
-  Users,
-  TrendingUp,
+import {
+  CreditCard,
+  Search,
+  Plus,
+  Edit,
+  CheckCircle2,
   Send,
-  Globe,
   Megaphone,
   Share2,
-  Sparkles,
+  Palette,
   Mail,
-  FileText,
-  DollarSign,
-  ShoppingCart
+  FileText
 } from 'lucide-react';
 import { format } from 'date-fns';
 import InvoiceManager from '@/components/billing/InvoiceManager';
+import { Panel, StatusBadge, statusTone, statusLabel, Money, EmptyState, SkeletonBlock, SkeletonLedger } from '@/components/platform';
+import { cn } from '@/lib/utils';
 
 interface Profile {
   id: string;
@@ -72,7 +67,7 @@ const AVAILABLE_ADDONS = [
   { id: 'ad-management', name: 'Ad Management', price: 199, icon: Megaphone },
   { id: 'social-media', name: 'Social Media Management', price: 149, icon: Share2 },
   { id: 'seo', name: 'SEO Strategy', price: 199, icon: Search },
-  { id: 'branding', name: 'Branding & Design', price: 99, icon: Sparkles },
+  { id: 'branding', name: 'Branding & Design', price: 99, icon: Palette },
   { id: 'support-plus', name: 'Priority Support', price: 49, icon: CreditCard }
 ];
 
@@ -359,15 +354,6 @@ const AdminBilling = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
-      case 'pending': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
-      case 'overdue': return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
   // Summary stats
   const totalMonthlyRevenue = billingRecords.reduce((sum, b) => {
     const addonTotal = b.add_ons.filter(a => a.active).reduce((s, a) => s + a.price, 0);
@@ -397,179 +383,120 @@ const AdminBilling = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-4" aria-busy>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+          {Array.from({ length: 6 }, (_, i) => (
+            <SkeletonBlock key={i} className="h-[64px] rounded-[10px]" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <Panel><SkeletonLedger rows={6} /></Panel>
+          <Panel className="lg:col-span-2"><SkeletonLedger rows={4} /></Panel>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-primary/10 rounded-lg">
-                <Users className="h-4 w-4 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground truncate">Clients</p>
-                <p className="text-xl font-bold">{clients.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-green-500/10 rounded-lg">
-                <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground truncate">Monthly Rev.</p>
-                <p className="text-xl font-bold">£{totalMonthlyRevenue.toLocaleString()}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-emerald-500/10 rounded-lg">
-                <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground truncate">Total Made</p>
-                <p className="text-xl font-bold">£{totalRevenueMade.toLocaleString()}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-green-500/10 rounded-lg">
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground truncate">Paid</p>
-                <p className="text-xl font-bold">{paidClients}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-amber-500/10 rounded-lg">
-                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground truncate">Pending</p>
-                <p className="text-xl font-bold">{pendingPayments}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-blue-500/10 rounded-lg">
-                <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground truncate">In Cart</p>
-                <p className="text-xl font-bold">{clientsWithCart.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        {[
+          { label: 'Clients', value: String(clients.length) },
+          { label: 'Monthly revenue', value: <Money value={totalMonthlyRevenue} whole /> },
+          { label: 'Total collected', value: <Money value={totalRevenueMade} whole /> },
+          { label: 'Paid', value: String(paidClients) },
+          { label: 'Pending', value: String(pendingPayments) },
+          { label: 'In cart', value: String(clientsWithCart.length) },
+        ].map((s) => (
+          <Panel key={s.label as string} className="p-3">
+            <p className="truncate font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{s.label}</p>
+            <p className="mt-1 text-[18px] font-semibold tabular-nums tracking-[-0.01em] text-foreground">{s.value}</p>
+          </Panel>
+        ))}
       </div>
 
-      {/* Clients with items in Cart - Alert */}
+      {/* Clients with items in cart */}
       {clientsWithCart.length > 0 && (
-        <Card className="border-blue-500/30 bg-blue-500/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              Clients with Items in Cart
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {clientsWithCart.map(billing => {
-                const client = clients.find(c => c.user_id === billing.user_id);
-                const cartTotal = billing.one_off_charges.filter(c => !c.paid).reduce((s, c) => s + c.price, 0) + billing.plan_price;
-                return (
-                  <button
-                    key={billing.id}
-                    onClick={() => client && handleSelectClient(client)}
-                    className="flex items-center gap-2 px-3 py-2 bg-background rounded-lg border hover:border-primary/50 transition-colors"
-                  >
-                    <span className="font-medium text-sm">{client?.full_name || 'Unknown'}</span>
-                    <Badge variant="outline" className="text-xs">£{cartTotal.toLocaleString()}</Badge>
-                  </button>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        <Panel>
+          <div className="flex min-h-[40px] items-center gap-3 border-b border-border/60 px-4 py-2">
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-attend">
+              Clients with items in cart
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 p-3">
+            {clientsWithCart.map(billing => {
+              const client = clients.find(c => c.user_id === billing.user_id);
+              const cartTotal = billing.one_off_charges.filter(c => !c.paid).reduce((s, c) => s + c.price, 0) + billing.plan_price;
+              return (
+                <button
+                  key={billing.id}
+                  onClick={() => client && handleSelectClient(client)}
+                  className="flex items-center gap-2 rounded-lg border border-border/60 bg-background px-3 py-1.5 transition-colors duration-150 hover:border-primary/50"
+                >
+                  <span className="text-[13px] font-medium">{client?.full_name || 'Unknown'}</span>
+                  <span className="font-mono text-[11px] tabular-nums text-muted-foreground"><Money value={cartTotal} whole /></span>
+                </button>
+              );
+            })}
+          </div>
+        </Panel>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Client List */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
+        <Card className="rounded-[10px] border-border/60 shadow-none lg:col-span-1">
+          <CardHeader className="px-4 py-3">
+            <CardTitle className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              <CreditCard className="h-3.5 w-3.5" />
               Clients
             </CardTitle>
             <div className="relative mt-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search clients..."
+                placeholder="Search clients…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                className="h-8 pl-9 text-[13px]"
               />
             </div>
           </CardHeader>
           <CardContent className="p-0">
             <ScrollArea className="h-[600px]">
-              <div className="space-y-1 p-4 pt-0">
+              <div className="space-y-1 p-3 pt-0">
                 {filteredClients.map((client) => {
                   const billing = getClientBilling(client.user_id);
                   return (
                     <button
                       key={client.id}
                       onClick={() => handleSelectClient(client)}
-                      className={`w-full text-left p-3 rounded-lg transition-colors ${
+                      className={cn(
+                        'w-full rounded-lg p-2.5 text-left transition-colors duration-150',
                         selectedClient?.id === client.id
-                          ? 'bg-primary/10 border border-primary/20'
-                          : 'hover:bg-muted/50'
-                      }`}
+                          ? 'bg-primary/[0.06] ring-1 ring-inset ring-primary/20'
+                          : 'hover:bg-foreground/[0.025]',
+                      )}
                     >
                       <div className="flex items-center justify-between">
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium truncate">{client.full_name || 'Unnamed'}</p>
-                          <p className="text-sm text-muted-foreground truncate">{client.email}</p>
+                          <p className="truncate text-[13px] font-medium">{client.full_name || 'Unnamed'}</p>
+                          <p className="truncate text-[11px] text-muted-foreground">{client.email}</p>
                         </div>
                         <div className="ml-2 flex flex-col items-end gap-1">
                           {billing ? (
                             <>
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="border-border/60 text-[10px] font-normal text-muted-foreground">
                                 {billing.plan_name}
                               </Badge>
-                              <Badge className={`text-xs ${getStatusColor(billing.payment_status)}`}>
-                                {billing.payment_status === 'paid' && <CheckCircle2 className="h-3 w-3 mr-1" />}
-                                {billing.payment_status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                                {billing.payment_status}
-                              </Badge>
+                              <StatusBadge
+                                tone={statusTone(billing.payment_status)}
+                                label={statusLabel(billing.payment_status)}
+                                className="text-[10.5px]"
+                              />
                             </>
                           ) : (
-                            <Badge variant="outline" className="text-muted-foreground text-xs">
-                              No Plan
+                            <Badge variant="outline" className="border-border/60 text-[10px] font-normal text-muted-foreground">
+                              No plan
                             </Badge>
                           )}
                         </div>
@@ -583,14 +510,14 @@ const AdminBilling = () => {
         </Card>
 
         {/* Billing Details */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
+        <Card className="rounded-[10px] border-border/60 shadow-none lg:col-span-2">
+          <CardHeader className="px-4 py-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>
-                  {selectedClient ? `${selectedClient.full_name || 'Client'}'s Billing` : 'Select a Client'}
+                <CardTitle className="text-[15px] font-semibold tracking-[-0.01em]">
+                  {selectedClient ? `Billing for ${selectedClient.full_name || 'client'}` : 'Select a client'}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-[12px]">
                   {selectedClient?.email || 'Choose a client to manage their billing'}
                 </CardDescription>
               </div>
@@ -598,30 +525,30 @@ const AdminBilling = () => {
                 <div className="flex gap-2">
                   <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="gap-2">
-                        {selectedBilling ? <Edit className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                        {selectedBilling ? 'Edit Plan' : 'Create Plan'}
+                      <Button size="sm" className="h-8 gap-2 rounded-lg px-3 text-xs">
+                        {selectedBilling ? <Edit className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                        {selectedBilling ? 'Edit plan' : 'Create plan'}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="max-h-[90vh] w-[95vw] overflow-y-auto rounded-xl border-border/60 bg-card sm:max-w-2xl">
                       <DialogHeader>
-                        <DialogTitle>{selectedBilling ? 'Edit Billing' : 'Create Billing'}</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">{selectedBilling ? 'Edit billing' : 'Create billing'}</DialogTitle>
+                        <DialogDescription className="text-[13px]">
                           Configure billing for {selectedClient.full_name || 'this client'}
                         </DialogDescription>
                       </DialogHeader>
-                      
+
                       <Tabs defaultValue="plan" className="mt-4">
-                        <TabsList className="grid w-full grid-cols-3">
-                          <TabsTrigger value="plan">Plan</TabsTrigger>
-                          <TabsTrigger value="addons">Add-ons</TabsTrigger>
-                          <TabsTrigger value="settings">Settings</TabsTrigger>
+                        <TabsList className="grid h-9 w-full grid-cols-3 rounded-lg border border-border/60 bg-sunken p-0.5">
+                          <TabsTrigger value="plan" className="h-8 rounded-md text-xs data-[state=active]:bg-card">Plan</TabsTrigger>
+                          <TabsTrigger value="addons" className="h-8 rounded-md text-xs data-[state=active]:bg-card">Add-ons</TabsTrigger>
+                          <TabsTrigger value="settings" className="h-8 rounded-md text-xs data-[state=active]:bg-card">Settings</TabsTrigger>
                         </TabsList>
-                        
-                        <TabsContent value="plan" className="space-y-4 mt-4">
+
+                        <TabsContent value="plan" className="mt-4 space-y-4">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label>Plan</Label>
+                              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Plan</Label>
                               <Select value={formData.plan_name} onValueChange={handlePlanChange}>
                                 <SelectTrigger>
                                   <SelectValue />
@@ -629,46 +556,48 @@ const AdminBilling = () => {
                                 <SelectContent>
                                   {PLAN_OPTIONS.map((plan) => (
                                     <SelectItem key={plan.name} value={plan.name}>
-                                      {plan.name} - £{plan.price}/mo
+                                      {plan.name} at £{plan.price}/mo
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label>Custom Price (£/mo)</Label>
+                              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Custom price in £/mo</Label>
                               <Input
                                 type="number"
+                                className="tabular-nums"
                                 value={formData.plan_price}
                                 onChange={(e) => setFormData(prev => ({ ...prev, plan_price: Number(e.target.value) }))}
                               />
                             </div>
                           </div>
                         </TabsContent>
-                        
-                        <TabsContent value="addons" className="space-y-4 mt-4">
-                          <p className="text-sm text-muted-foreground">
+
+                        <TabsContent value="addons" className="mt-4 space-y-4">
+                          <p className="text-[13px] text-muted-foreground">
                             Select which add-ons to include in this client's package:
                           </p>
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             {AVAILABLE_ADDONS.map((addon) => {
                               const Icon = addon.icon;
                               const isActive = formData.selectedAddons.has(addon.id);
-                              
+
                               return (
-                                <div 
+                                <div
                                   key={addon.id}
-                                  className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
-                                    isActive ? 'border-primary bg-primary/5' : 'border-border'
-                                  }`}
+                                  className={cn(
+                                    'flex items-center justify-between rounded-lg border p-3 transition-colors duration-150',
+                                    isActive ? 'border-primary/50 bg-primary/[0.04]' : 'border-border/60',
+                                  )}
                                 >
                                   <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-lg ${isActive ? 'bg-primary/20' : 'bg-muted'}`}>
-                                      <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                                    <div className={cn('rounded-lg p-2', isActive ? 'bg-primary/10' : 'bg-sunken')}>
+                                      <Icon className={cn('h-4 w-4', isActive ? 'text-primary' : 'text-muted-foreground')} />
                                     </div>
                                     <div>
-                                      <p className="font-medium">{addon.name}</p>
-                                      <p className="text-sm text-muted-foreground">£{addon.price}/mo</p>
+                                      <p className="text-[13px] font-medium">{addon.name}</p>
+                                      <p className="text-[12px] tabular-nums text-muted-foreground">£{addon.price}/mo</p>
                                     </div>
                                   </div>
                                   <Switch
@@ -680,11 +609,11 @@ const AdminBilling = () => {
                             })}
                           </div>
                         </TabsContent>
-                        
-                        <TabsContent value="settings" className="space-y-4 mt-4">
+
+                        <TabsContent value="settings" className="mt-4 space-y-4">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label>Billing Cycle</Label>
+                              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Billing cycle</Label>
                               <Select 
                                 value={formData.billing_cycle} 
                                 onValueChange={(v) => setFormData(prev => ({ ...prev, billing_cycle: v }))}
@@ -700,7 +629,7 @@ const AdminBilling = () => {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label>Payment Status</Label>
+                              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Payment status</Label>
                               <Select 
                                 value={formData.payment_status} 
                                 onValueChange={(v) => setFormData(prev => ({ ...prev, payment_status: v }))}
@@ -717,19 +646,20 @@ const AdminBilling = () => {
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <Label>Next Billing Date</Label>
+                            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Next billing date</Label>
                             <Input
                               type="date"
+                              className="tabular-nums"
                               value={formData.next_billing_date}
                               onChange={(e) => setFormData(prev => ({ ...prev, next_billing_date: e.target.value }))}
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label>Admin Notes</Label>
+                            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Admin notes</Label>
                             <Textarea
                               value={formData.notes}
                               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                              placeholder="Internal notes..."
+                              placeholder="Internal notes…"
                               rows={3}
                             />
                           </div>
@@ -737,10 +667,10 @@ const AdminBilling = () => {
                       </Tabs>
 
                       {/* Total Preview */}
-                      <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                      <div className="mt-4 rounded-lg border border-border/60 bg-sunken p-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Total Monthly</span>
-                          <span className="text-xl font-bold">
+                          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Total monthly</span>
+                          <span className="font-mono text-[16px] font-semibold tabular-nums">
                             £{(formData.plan_price + Array.from(formData.selectedAddons).reduce((sum, id) => {
                               const addon = AVAILABLE_ADDONS.find(a => a.id === id);
                               return sum + (addon?.price || 0);
@@ -750,11 +680,11 @@ const AdminBilling = () => {
                       </div>
 
                       <DialogFooter className="mt-4">
-                        <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                        <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => setDialogOpen(false)}>
                           Cancel
                         </Button>
-                        <Button onClick={handleSaveBilling}>
-                          Save Changes
+                        <Button className="h-8 rounded-lg px-3 text-xs" onClick={handleSaveBilling}>
+                          Save changes
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -768,39 +698,38 @@ const AdminBilling = () => {
             {selectedClient && selectedBilling ? (
               <div className="space-y-6">
                 {/* Billing Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-muted/30 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Plan</p>
-                    <p className="text-xl font-bold">{selectedBilling.plan_name}</p>
-                    <p className="text-sm text-muted-foreground">£{selectedBilling.plan_price}/mo</p>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className="rounded-lg border border-border/60 bg-sunken p-3">
+                    <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Plan</p>
+                    <p className="mt-1 text-[16px] font-semibold tracking-[-0.01em]">{selectedBilling.plan_name}</p>
+                    <p className="text-[12px] tabular-nums text-muted-foreground">£{selectedBilling.plan_price}/mo</p>
                   </div>
-                  <div className="p-4 bg-muted/30 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Monthly Total</p>
-                    <p className="text-xl font-bold">£{clientMonthlyTotal}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="rounded-lg border border-border/60 bg-sunken p-3">
+                    <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Monthly total</p>
+                    <p className="mt-1 text-[16px] font-semibold tabular-nums tracking-[-0.01em]"><Money value={clientMonthlyTotal} whole /></p>
+                    <p className="text-[12px] tabular-nums text-muted-foreground">
                       {selectedBilling.add_ons.filter(a => a.active).length} add-ons
                     </p>
                   </div>
-                  <div className="p-4 bg-muted/30 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <Badge className={`mt-1 ${getStatusColor(selectedBilling.payment_status)}`}>
-                      {selectedBilling.payment_status === 'paid' && <CheckCircle2 className="h-3 w-3 mr-1" />}
-                      {selectedBilling.payment_status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                      {selectedBilling.payment_status === 'overdue' && <AlertCircle className="h-3 w-3 mr-1" />}
-                      {selectedBilling.payment_status.charAt(0).toUpperCase() + selectedBilling.payment_status.slice(1)}
-                    </Badge>
+                  <div className="rounded-lg border border-border/60 bg-sunken p-3">
+                    <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Status</p>
+                    <StatusBadge
+                      tone={statusTone(selectedBilling.payment_status)}
+                      label={statusLabel(selectedBilling.payment_status)}
+                      className="mt-1.5"
+                    />
                   </div>
                 </div>
 
                 {/* Active Add-ons */}
                 {selectedBilling.add_ons.filter(a => a.active).length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-3">Active Add-ons</h3>
+                    <h3 className="mb-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Active add-ons</h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedBilling.add_ons.filter(a => a.active).map((addon, index) => (
-                        <Badge key={index} variant="secondary" className="gap-1">
+                        <Badge key={index} variant="outline" className="gap-1 border-border/60 bg-sunken font-normal text-ink-2">
                           {addon.name}
-                          <span className="text-muted-foreground">£{addon.price}</span>
+                          <span className="tabular-nums text-muted-foreground">£{addon.price}</span>
                         </Badge>
                       ))}
                     </div>
@@ -811,54 +740,56 @@ const AdminBilling = () => {
 
                 {/* One-off Charges */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-muted-foreground">One-off Charges</h3>
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">One-off charges</h3>
                     <Dialog open={addChargeDialogOpen} onOpenChange={setAddChargeDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="gap-2">
-                          <Plus className="h-4 w-4" />
-                          Add Charge
+                        <Button variant="outline" size="sm" className="h-7 gap-2 rounded-md border-border/60 px-2.5 text-xs">
+                          <Plus className="h-3.5 w-3.5" />
+                          Add charge
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="rounded-xl border-border/60 bg-card">
                         <DialogHeader>
-                          <DialogTitle>Add One-off Charge</DialogTitle>
-                          <DialogDescription>
+                          <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">Add one-off charge</DialogTitle>
+                          <DialogDescription className="text-[13px]">
                             This charge will appear in the client's payment portal
                           </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                           <div className="space-y-2">
-                            <Label>Description</Label>
+                            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Description</Label>
                             <Input
                               value={newCharge.name}
                               onChange={(e) => setNewCharge(prev => ({ ...prev, name: e.target.value }))}
-                              placeholder="e.g., Website Redesign, Logo Design"
+                              placeholder="e.g. Website redesign, logo design"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label>Amount (£)</Label>
+                            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Amount in £</Label>
                             <Input
                               type="number"
+                              className="tabular-nums"
                               value={newCharge.price}
                               onChange={(e) => setNewCharge(prev => ({ ...prev, price: Number(e.target.value) }))}
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label>Date</Label>
+                            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Date</Label>
                             <Input
                               type="date"
+                              className="tabular-nums"
                               value={newCharge.date}
                               onChange={(e) => setNewCharge(prev => ({ ...prev, date: e.target.value }))}
                             />
                           </div>
                         </div>
                         <DialogFooter>
-                          <Button variant="outline" onClick={() => setAddChargeDialogOpen(false)}>
+                          <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => setAddChargeDialogOpen(false)}>
                             Cancel
                           </Button>
-                          <Button onClick={handleAddCharge}>
-                            Add Charge
+                          <Button className="h-8 rounded-lg px-3 text-xs" onClick={handleAddCharge}>
+                            Add charge
                           </Button>
                         </DialogFooter>
                       </DialogContent>
@@ -868,73 +799,77 @@ const AdminBilling = () => {
                   {selectedBilling.one_off_charges.length > 0 ? (
                     <div className="space-y-2">
                       {selectedBilling.one_off_charges.map((charge, index) => (
-                        <div 
-                          key={index} 
-                          className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                        <div
+                          key={index}
+                          className="flex h-10 items-center justify-between rounded-lg border border-border/60 px-3"
                         >
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => handleToggleChargePaid(index)}
-                              className={`h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${
-                                charge.paid 
-                                  ? 'bg-green-500 border-green-500' 
-                                  : 'border-muted-foreground hover:border-primary'
-                              }`}
+                              aria-label={charge.paid ? 'Mark as unpaid' : 'Mark as paid'}
+                              className={cn(
+                                'flex h-4 w-4 items-center justify-center rounded border transition-colors duration-150',
+                                charge.paid
+                                  ? 'border-ok bg-ok'
+                                  : 'border-muted-foreground hover:border-primary',
+                              )}
                             >
-                              {charge.paid && <CheckCircle2 className="h-3 w-3 text-white" />}
+                              {charge.paid && <CheckCircle2 className="h-3 w-3 text-background" />}
                             </button>
-                            <div>
-                              <p className={`font-medium ${charge.paid ? 'line-through text-muted-foreground' : ''}`}>
+                            <div className="flex items-baseline gap-2">
+                              <p className={cn('text-[13px] font-medium', charge.paid && 'text-muted-foreground line-through')}>
                                 {charge.name}
                               </p>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="font-mono text-[10.5px] tabular-nums text-muted-foreground">
                                 {format(new Date(charge.date), 'dd MMM yyyy')}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="font-semibold">£{charge.price.toFixed(2)}</span>
-                            <Badge className={charge.paid ? 'bg-green-500/10 text-green-600' : 'bg-amber-500/10 text-amber-600'}>
-                              {charge.paid ? 'Paid' : 'Pending'}
-                            </Badge>
+                            <span className="font-mono text-[13px] font-semibold tabular-nums">£{charge.price.toFixed(2)}</span>
+                            <StatusBadge
+                              tone={charge.paid ? 'ok' : 'attend'}
+                              label={charge.paid ? 'Paid' : 'Pending'}
+                              className="text-[10.5px]"
+                            />
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No one-off charges</p>
+                    <p className="text-[13px] text-muted-foreground">No one-off charges</p>
                   )}
                 </div>
 
                 {/* Pending Total & Actions */}
                 {clientPendingTotal > 0 && (
-                  <div className="p-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                  <div className="rounded-lg border border-attend/30 bg-attend/[0.06] p-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-amber-700 dark:text-amber-300">
-                          Total Pending: £{clientPendingTotal.toFixed(2)}
+                        <p className="text-[13px] font-medium text-attend">
+                          Total pending: <span className="font-mono tabular-nums">£{clientPendingTotal.toFixed(2)}</span>
                         </p>
-                        <p className="text-sm text-amber-600 dark:text-amber-400">
+                        <p className="text-[12px] tabular-nums text-muted-foreground">
                           {clientPendingCharges.length} unpaid charge{clientPendingCharges.length !== 1 ? 's' : ''}
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="gap-2"
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 gap-2 rounded-md border-border/60 px-2.5 text-xs"
                           onClick={handleSendPaymentRequest}
                         >
-                          <Send className="h-4 w-4" />
-                          Send Reminder
+                          <Send className="h-3.5 w-3.5" />
+                          Send reminder
                         </Button>
-                        <Button 
-                          size="sm" 
-                          className="gap-2"
+                        <Button
+                          size="sm"
+                          className="h-7 gap-2 rounded-md px-2.5 text-xs"
                           onClick={handleMarkAsPaid}
                         >
-                          <CheckCircle2 className="h-4 w-4" />
-                          Mark All Paid
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Mark all paid
                         </Button>
                       </div>
                     </div>
@@ -943,18 +878,18 @@ const AdminBilling = () => {
 
                 {/* Quick Actions */}
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" className="gap-2" onClick={() => setInvoiceDialogOpen(true)}>
-                    <FileText className="h-4 w-4" />
-                    Create Invoice
+                  <Button variant="outline" size="sm" className="h-7 gap-2 rounded-md border-border/60 px-2.5 text-xs" onClick={() => setInvoiceDialogOpen(true)}>
+                    <FileText className="h-3.5 w-3.5" />
+                    Create invoice
                   </Button>
-                  <Button variant="outline" size="sm" className="gap-2" onClick={handleSendPaymentRequest}>
-                    <Mail className="h-4 w-4" />
-                    Request Payment
+                  <Button variant="outline" size="sm" className="h-7 gap-2 rounded-md border-border/60 px-2.5 text-xs" onClick={handleSendPaymentRequest}>
+                    <Mail className="h-3.5 w-3.5" />
+                    Request payment
                   </Button>
                   {selectedBilling.payment_status !== 'paid' && (
-                    <Button variant="outline" size="sm" className="gap-2" onClick={handleMarkAsPaid}>
-                      <CheckCircle2 className="h-4 w-4" />
-                      Mark as Paid
+                    <Button variant="outline" size="sm" className="h-7 gap-2 rounded-md border-border/60 px-2.5 text-xs" onClick={handleMarkAsPaid}>
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Mark as paid
                     </Button>
                   )}
                 </div>
@@ -1060,25 +995,16 @@ const AdminBilling = () => {
                 />
               </div>
             ) : selectedClient && !selectedBilling ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <CreditCard className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Billing Set Up</h3>
-                <p className="text-muted-foreground mb-4 max-w-md">
-                  This client doesn't have billing configured yet. Create a plan to start tracking their payments.
-                </p>
-                <Button onClick={() => setDialogOpen(true)} className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Create Billing Plan
-                </Button>
-              </div>
+              <EmptyState
+                title="No billing set up"
+                body="This client doesn't have billing configured yet. Create a plan to start tracking their payments."
+                action={{ label: 'Create billing plan', onClick: () => setDialogOpen(true) }}
+              />
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Select a Client</h3>
-                <p className="text-muted-foreground max-w-md">
-                  Choose a client from the list to view and manage their billing information.
-                </p>
-              </div>
+              <EmptyState
+                title="Select a client"
+                body="Choose a client from the list to view and manage their billing information."
+              />
             )}
           </CardContent>
         </Card>

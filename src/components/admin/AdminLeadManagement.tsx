@@ -1,17 +1,17 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { decryptPiiFields } from '@/lib/piiDecrypt';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Target, Users, Phone, Mail, Globe, MapPin, Star,
   Search, Plus, Upload, Download,
-  ExternalLink, UserPlus, Check,
+  Check,
   MessageSquare, Clock, X, TrendingUp, Building2,
   Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  RefreshCw, SlidersHorizontal, Maximize2, Loader2,
+  RefreshCw, SlidersHorizontal, Maximize2,
   List, KanbanSquare, Handshake, LineChart, FileText,
   Edit3, Send, BarChart3, ArrowLeft,
+  Map as MapIcon, PenLine, FileCode, FileJson,
+  type LucideIcon,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +28,8 @@ import { useProposals, type Proposal } from '@/hooks/useProposals';
 import { ProposalList } from '@/components/crm/ProposalList';
 import { ProposalEditor } from '@/components/crm/ProposalEditor';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { StatusDot, StatusBadge, SkeletonLedger, type Tone } from '@/components/platform';
+import { cn } from '@/lib/utils';
 
 /* ─── Types ─── */
 export interface Lead {
@@ -85,36 +87,64 @@ type ViewMode = 'list' | 'kanban' | 'deals' | 'forecast' | 'proposals';
 type SortOption = 'updated' | 'created' | 'name' | 'status';
 
 /* ─── Constants ─── */
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  new: { label: 'New', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)' },
-  contacted: { label: 'Contacted', color: '#a78bfa', bg: 'rgba(167,139,250,0.12)' },
-  engaged: { label: 'Engaged', color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
-  live_preview_wanted: { label: 'Preview Wanted', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' },
-  converted: { label: 'Converted', color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
-  lost: { label: 'Lost', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
-  do_not_contact: { label: 'Do Not Contact', color: '#6b7280', bg: 'rgba(107,114,128,0.12)' },
+/* Every pipeline status resolves to the platform's muted tone vocabulary —
+   the old per-status hex rainbow is gone. Accent marks the one stage in
+   motion; attend marks awaiting-client. */
+const STATUS_CONFIG: Record<string, { label: string; tone: Tone }> = {
+  new: { label: 'New', tone: 'neutral' },
+  contacted: { label: 'Contacted', tone: 'neutral' },
+  engaged: { label: 'Engaged', tone: 'accent' },
+  live_preview_wanted: { label: 'Preview wanted', tone: 'attend' },
+  converted: { label: 'Converted', tone: 'ok' },
+  lost: { label: 'Lost', tone: 'risk' },
+  do_not_contact: { label: 'Do not contact', tone: 'neutral' },
 };
 
-const SOURCE_CONFIG: Record<string, { label: string; icon: string }> = {
-  google_maps: { label: 'Google Maps', icon: '🗺️' },
-  manual: { label: 'Manual', icon: '✏️' },
-  csv_import: { label: 'CSV Import', icon: '📊' },
-  html_import: { label: 'HTML Import', icon: '📄' },
-  json_import: { label: 'JSON Import', icon: '📋' },
+/* Tone → token classes for tinted initials chips and stage buttons. */
+const TONE_TEXT: Record<Tone, string> = {
+  ok: 'text-ok', attend: 'text-attend', risk: 'text-risk',
+  neutral: 'text-ink-2', accent: 'text-primary',
+};
+const TONE_BG: Record<Tone, string> = {
+  ok: 'bg-ok/10', attend: 'bg-attend/10', risk: 'bg-risk/10',
+  neutral: 'bg-foreground/[0.06]', accent: 'bg-primary/12',
+};
+
+const SOURCE_CONFIG: Record<string, { label: string }> = {
+  google_maps: { label: 'Google Maps' },
+  manual: { label: 'Manual' },
+  csv_import: { label: 'CSV import' },
+  html_import: { label: 'HTML import' },
+  json_import: { label: 'JSON import' },
+};
+
+const SOURCE_ICONS: Record<string, LucideIcon> = {
+  google_maps: MapIcon,
+  manual: PenLine,
+  csv_import: BarChart3,
+  html_import: FileCode,
+  json_import: FileJson,
 };
 
 const PIPELINE_ORDER = ['new', 'contacted', 'engaged', 'live_preview_wanted', 'converted', 'lost', 'do_not_contact'];
 
+const statusMeta = (status: string | null | undefined) =>
+  STATUS_CONFIG[status || 'new'] || STATUS_CONFIG.new;
+
+/* Static token classes — compiled by Tailwind, consumed by LeadDetailDialog. */
 export const leadStatusConfig = Object.fromEntries(
-  Object.entries(STATUS_CONFIG).map(([k, v]) => [k, { label: v.label, color: `text-[${v.color}]`, bgColor: `bg-[${v.bg}]` }])
+  Object.entries(STATUS_CONFIG).map(([k, v]) => [
+    k,
+    { label: v.label, color: TONE_TEXT[v.tone], bgColor: cn(TONE_BG[v.tone], TONE_TEXT[v.tone]) },
+  ])
 ) as Record<Lead['status'], { label: string; color: string; bgColor: string }>;
 
 export const sourceLabels: Record<Lead['source'], string> = {
   google_maps: 'Google Maps',
-  manual: 'Manual Entry',
-  csv_import: 'CSV Import',
-  html_import: 'HTML Import',
-  json_import: 'JSON Import',
+  manual: 'Manual entry',
+  csv_import: 'CSV import',
+  html_import: 'HTML import',
+  json_import: 'JSON import',
 };
 
 const LEADS_PER_PAGE = 50;
@@ -320,19 +350,42 @@ export default function AdminLeadManagement() {
     setMobileTab('details');
   };
 
+  /* ─── Small shared bits ─── */
+  const statPills = [
+    { label: 'Total', value: stats.total, tone: 'neutral' as Tone },
+    { label: 'New', value: stats.new, tone: 'neutral' as Tone },
+    { label: 'Engaged', value: stats.engaged, tone: 'accent' as Tone },
+    { label: 'Converted', value: stats.converted, tone: 'ok' as Tone },
+  ];
+
+  const statPill = (s: { label: string; value: number; tone: Tone }) => (
+    <div key={s.label} className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-sunken px-2 py-0.5">
+      <StatusDot tone={s.tone} />
+      <span className="font-mono text-[9px] font-medium uppercase tracking-[0.1em] text-muted-foreground">{s.label}</span>
+      <span className="text-[10px] font-semibold tabular-nums text-foreground">{s.value.toLocaleString()}</span>
+    </div>
+  );
+
+  const sourceLine = (source: string) => {
+    const Icon = SOURCE_ICONS[source] || FileText;
+    const label = (SOURCE_CONFIG[source] || { label: source }).label;
+    return (
+      <span className="flex items-center gap-1 text-[9px] text-muted-foreground">
+        <Icon className="h-2.5 w-2.5" aria-hidden /> {label}
+      </span>
+    );
+  };
+
   // Mobile detail/activity content (shared between mobile and desktop)
   const renderContactDetail = () => {
     if (!selected) return null;
-    const sc = STATUS_CONFIG[selected.status || 'new'] || STATUS_CONFIG.new;
+    const sc = statusMeta(selected.status);
     return (
-      <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
+      <div className="space-y-4 p-4 sm:space-y-5 sm:p-5">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <div
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xs sm:text-sm font-bold shrink-0"
-              style={{ backgroundColor: sc.bg, color: sc.color }}
-            >
+            <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-xs font-semibold sm:h-12 sm:w-12 sm:text-sm', TONE_BG[sc.tone], TONE_TEXT[sc.tone])}>
               {getInitials(selected)}
             </div>
             <div className="min-w-0">
@@ -340,49 +393,39 @@ export default function AdminLeadManagement() {
                 <input
                   value={editForm.business_name || editForm.personal_name || ''}
                   onChange={e => setEditForm(f => ({ ...f, business_name: e.target.value }))}
-                  className="bg-[#1e1e1e] border border-[#333] rounded px-2 py-1 text-[13px] sm:text-[14px] font-semibold text-white outline-none focus:border-[#0073E6] w-full"
+                  className="w-full rounded border border-border/60 bg-foreground/[0.03] px-2 py-1 text-[13px] font-semibold text-foreground outline-none transition-colors duration-150 focus:border-primary/60 sm:text-[14px]"
                 />
               ) : (
-                <h2 className="text-[14px] sm:text-[16px] font-semibold text-white truncate">{getDisplayName(selected)}</h2>
+                <h2 className="truncate text-[14px] font-semibold text-foreground sm:text-[16px]">{getDisplayName(selected)}</h2>
               )}
-              <div className="flex items-center gap-2 mt-1">
-                <Badge
-                  className="text-[9px] font-medium border px-1.5 py-0"
-                  style={{ backgroundColor: sc.bg, color: sc.color, borderColor: `${sc.color}30` }}
-                >
-                  {sc.label}
-                </Badge>
-                {selected.source && (
-                  <span className="text-[9px] text-[#666]">
-                    {(SOURCE_CONFIG[selected.source] || { icon: '📋', label: selected.source }).icon}{' '}
-                    {(SOURCE_CONFIG[selected.source] || { label: selected.source }).label}
-                  </span>
-                )}
+              <div className="mt-1 flex items-center gap-2">
+                <StatusBadge tone={sc.tone} label={sc.label} className="text-[10px]" />
+                {selected.source && sourceLine(selected.source)}
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex shrink-0 items-center gap-1">
             {editingContact ? (
               <>
-                <button onClick={saveEdit} className="h-7 px-3 rounded-md text-[10px] font-medium bg-[#0073E6] text-white hover:bg-[#005bb5] transition-colors flex items-center gap-1">
+                <button onClick={saveEdit} className="flex h-7 items-center gap-1 rounded-md bg-primary px-3 text-[10px] font-medium text-primary-foreground transition-[filter] duration-150 hover:brightness-105">
                   <Check className="h-3 w-3" /> Save
                 </button>
-                <button onClick={() => setEditingContact(false)} className="h-7 px-2.5 rounded-md text-[10px] font-medium text-[#888] hover:bg-[#333] transition-colors">
+                <button onClick={() => setEditingContact(false)} className="h-7 rounded-md px-2.5 text-[10px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.06]">
                   Cancel
                 </button>
               </>
             ) : (
               <>
                 {!isMobile && (
-                  <button onClick={() => setFullScreenLead(selected)} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors" title="Open full screen">
-                    <Maximize2 className="h-3.5 w-3.5 text-[#0073E6]" />
+                  <button onClick={() => setFullScreenLead(selected)} className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]" title="Open full screen">
+                    <Maximize2 className="h-3.5 w-3.5 text-primary" />
                   </button>
                 )}
-                <button onClick={() => { setEditingContact(true); setEditForm(selected); }} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors">
-                  <Edit3 className="h-3.5 w-3.5 text-[#888]" />
+                <button onClick={() => { setEditingContact(true); setEditForm(selected); }} aria-label="Edit lead" className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]">
+                  <Edit3 className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
-                <button onClick={() => deleteContact(selected.id)} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors">
-                  <Trash2 className="h-3.5 w-3.5 text-[#ef4444]" />
+                <button onClick={() => deleteContact(selected.id)} aria-label="Delete lead" className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]">
+                  <Trash2 className="h-3.5 w-3.5 text-risk" />
                 </button>
               </>
             )}
@@ -390,8 +433,8 @@ export default function AdminLeadManagement() {
         </div>
 
         {/* Pipeline Stage */}
-        <div className="rounded-xl p-3" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-          <span className="text-[9px] font-medium text-[#666] uppercase tracking-wider block mb-2">Pipeline Stage</span>
+        <div className="rounded-[10px] border border-border/60 bg-card p-3">
+          <span className="mb-2 block font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Pipeline stage</span>
           <div className="flex flex-wrap gap-1.5">
             {PIPELINE_ORDER.map((stage, i) => {
               const stc = STATUS_CONFIG[stage];
@@ -401,14 +444,16 @@ export default function AdminLeadManagement() {
                 <button
                   key={stage}
                   onClick={() => updateStatus(selected.id, stage)}
-                  className="h-7 px-2.5 rounded-md text-[10px] font-medium transition-all flex items-center justify-center gap-1.5 whitespace-nowrap"
-                  style={{
-                    backgroundColor: isActive ? stc.bg : isPast ? `${stc.color}08` : '#222',
-                    color: isActive ? stc.color : isPast ? `${stc.color}80` : '#888',
-                    border: isActive ? `1px solid ${stc.color}40` : '1px solid transparent',
-                  }}
+                  className={cn(
+                    'flex h-7 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-2.5 text-[10px] font-medium transition-colors duration-150',
+                    isActive
+                      ? cn(TONE_BG[stc.tone], TONE_TEXT[stc.tone], 'border-border/60')
+                      : isPast
+                        ? 'border-transparent bg-foreground/[0.03] text-ink-2'
+                        : 'border-transparent bg-sunken text-muted-foreground hover:text-foreground',
+                  )}
                 >
-                  {isActive && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: stc.color }} />}
+                  {isActive && <StatusDot tone={stc.tone} />}
                   {stc.label}
                 </button>
               );
@@ -424,22 +469,22 @@ export default function AdminLeadManagement() {
             { icon: <Globe className="h-3.5 w-3.5" />, label: 'Website', value: selected.website_url, field: 'website_url' },
             { icon: <Building2 className="h-3.5 w-3.5" />, label: 'Category', value: selected.category, field: 'category' },
             { icon: <MapPin className="h-3.5 w-3.5" />, label: 'Location', value: [selected.location_city, selected.location_postcode].filter(Boolean).join(', '), field: 'location_city' },
-            { icon: <Star className="h-3.5 w-3.5" />, label: 'Rating', value: selected.google_rating ? `${selected.google_rating} ★ (${selected.review_count || 0} reviews)` : null, field: null },
+            { icon: <Star className="h-3.5 w-3.5" />, label: 'Rating', value: selected.google_rating ? `${selected.google_rating} of 5 (${selected.review_count || 0} reviews)` : null, field: null },
           ].map(item => (
-            <div key={item.label} className="rounded-lg p-2.5" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-[#555]">{item.icon}</span>
-                <span className="text-[9px] text-[#666] font-medium uppercase tracking-wider">{item.label}</span>
+            <div key={item.label} className="rounded-lg border border-border/60 bg-card p-2.5">
+              <div className="mb-1 flex items-center gap-1.5">
+                <span className="text-muted-foreground/70">{item.icon}</span>
+                <span className="font-mono text-[9px] font-medium uppercase tracking-[0.1em] text-muted-foreground">{item.label}</span>
               </div>
               {editingContact && item.field ? (
                 <input
                   value={(editForm as any)[item.field] || ''}
                   onChange={e => setEditForm(f => ({ ...f, [item.field!]: e.target.value }))}
-                  className="bg-[#252525] border border-[#333] rounded px-2 py-1 text-[11px] text-white outline-none w-full focus:border-[#0073E6]"
+                  className="w-full rounded border border-border/60 bg-foreground/[0.03] px-2 py-1 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-primary/60"
                 />
               ) : (
-                <span className="text-[11px] text-[#ccc] block truncate">
-                  {item.value || <span className="text-[#444] italic">Not set</span>}
+                <span className="block truncate text-[11px] text-ink-2">
+                  {item.value || <span className="text-muted-foreground/50">Not set</span>}
                 </span>
               )}
             </div>
@@ -448,11 +493,11 @@ export default function AdminLeadManagement() {
 
         {/* Tags */}
         {selected.tags && Array.isArray(selected.tags) && selected.tags.length > 0 && (
-          <div className="rounded-xl p-3" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
-            <span className="text-[9px] text-[#666] font-medium uppercase tracking-wider block mb-2">Tags</span>
+          <div className="rounded-[10px] border border-border/60 bg-card p-3">
+            <span className="mb-2 block font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Tags</span>
             <div className="flex flex-wrap gap-1">
               {(selected.tags as string[]).map((tag, i) => (
-                <span key={i} className="px-2 py-0.5 rounded-md text-[9px] font-medium bg-[#252525] text-[#aaa] border border-[#333]">
+                <span key={i} className="rounded-md border border-border/60 bg-sunken px-2 py-0.5 text-[9px] font-medium text-ink-2">
                   {String(tag)}
                 </span>
               ))}
@@ -461,15 +506,15 @@ export default function AdminLeadManagement() {
         )}
 
         {/* Timestamps */}
-        <div className="flex items-center gap-3 sm:gap-4 pt-2 flex-wrap">
-          <span className="text-[9px] text-[#444] flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-3 pt-2 sm:gap-4">
+          <span className="flex items-center gap-1 font-mono text-[9px] tabular-nums text-muted-foreground/70">
             <Clock className="h-2.5 w-2.5" /> Created {format(new Date(selected.created_at), 'dd MMM yyyy')}
           </span>
-          <span className="text-[9px] text-[#444] flex items-center gap-1">
+          <span className="flex items-center gap-1 font-mono text-[9px] tabular-nums text-muted-foreground/70">
             <RefreshCw className="h-2.5 w-2.5" /> Updated {formatDistanceToNow(new Date(selected.updated_at), { addSuffix: true })}
           </span>
           {selected.last_contacted_at && (
-            <span className="text-[9px] text-[#444] flex items-center gap-1">
+            <span className="flex items-center gap-1 font-mono text-[9px] tabular-nums text-muted-foreground/70">
               <MessageSquare className="h-2.5 w-2.5" /> Contacted {formatDistanceToNow(new Date(selected.last_contacted_at), { addSuffix: true })}
             </span>
           )}
@@ -481,75 +526,71 @@ export default function AdminLeadManagement() {
   const renderActivityPanel = () => {
     if (!selected) return null;
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex h-full flex-col">
         {!isMobile && (
-          <div className="flex items-center gap-0 px-3 pt-2 shrink-0" style={{ borderBottom: '1px solid #222' }}>
-            <span className="text-[10px] font-semibold text-white pb-2 border-b-2 border-[#0073E6] px-2">Activity</span>
+          <div className="flex shrink-0 items-center gap-0 border-b border-border/60 px-3 pt-2">
+            <span className="border-b-2 border-primary px-2 pb-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground">Activity</span>
           </div>
         )}
 
         {/* Note input */}
-        <div className="p-3 shrink-0" style={{ borderBottom: '1px solid #222' }}>
-          <div className="rounded-lg overflow-hidden" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
+        <div className="shrink-0 border-b border-border/60 p-3">
+          <div className="overflow-hidden rounded-lg border border-border/60 bg-foreground/[0.02]">
             <textarea
               value={newNote}
               onChange={e => setNewNote(e.target.value)}
               placeholder="Add a note…"
               rows={2}
-              className="w-full bg-transparent text-[11px] text-[#ccc] placeholder:text-[#555] outline-none p-2.5 resize-none"
+              className="w-full resize-none bg-transparent p-2.5 text-[11px] text-foreground outline-none placeholder:text-muted-foreground/60"
             />
             <div className="flex items-center justify-end p-1.5 pt-0">
               <button
                 onClick={addNote}
                 disabled={!newNote.trim() || savingNote}
-                className="h-6 px-3 rounded-md text-[10px] font-medium bg-[#0073E6] text-white hover:bg-[#005bb5] transition-colors disabled:opacity-30 flex items-center gap-1"
+                className="flex h-6 items-center gap-1 rounded-md bg-primary px-3 text-[10px] font-medium text-primary-foreground transition-[filter] duration-150 hover:brightness-105 disabled:opacity-30"
               >
-                {savingNote ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
-                Add Note
+                <Send className="h-3 w-3" />
+                {savingNote ? 'Adding' : 'Add note'}
               </button>
             </div>
           </div>
         </div>
 
         {/* Timeline */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide p-3 space-y-3">
+        <div className="scrollbar-hide flex-1 space-y-3 overflow-y-auto p-3">
           {notes.map(note => (
-            <div key={note.id} className="rounded-lg p-3" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <FileText className="h-3 w-3 text-[#0073E6]" />
-                <span className="text-[9px] text-[#666] font-medium">Note</span>
-                <span className="text-[8px] text-[#444] ml-auto tabular-nums">
+            <div key={note.id} className="rounded-lg border border-border/60 bg-card p-3">
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <FileText className="h-3 w-3 text-primary" />
+                <span className="font-mono text-[9px] font-medium uppercase tracking-[0.1em] text-muted-foreground">Note</span>
+                <span className="ml-auto text-[8px] tabular-nums text-muted-foreground/70">
                   {formatDistanceToNow(new Date(note.created_at), { addSuffix: true })}
                 </span>
               </div>
-              <p className="text-[11px] text-[#bbb] leading-relaxed whitespace-pre-wrap">{note.content}</p>
+              <p className="whitespace-pre-wrap text-[11px] leading-relaxed text-ink-2">{note.content}</p>
             </div>
           ))}
           {statusHistory.map(h => (
             <div key={h.id} className="flex items-start gap-2 py-1.5">
-              <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: '#252525' }}>
-                <TrendingUp className="h-2.5 w-2.5 text-[#666]" />
+              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sunken">
+                <TrendingUp className="h-2.5 w-2.5 text-muted-foreground" />
               </div>
               <div>
-                <span className="text-[10px] text-[#888]">
-                  Status changed from{' '}
-                  <span style={{ color: (STATUS_CONFIG[h.old_status || 'new'] || STATUS_CONFIG.new).color }}>
-                    {(STATUS_CONFIG[h.old_status || 'new'] || STATUS_CONFIG.new).label}
-                  </span>
-                  {' → '}
-                  <span style={{ color: (STATUS_CONFIG[h.new_status] || STATUS_CONFIG.new).color }}>
-                    {(STATUS_CONFIG[h.new_status] || STATUS_CONFIG.new).label}
-                  </span>
+                <span className="flex flex-wrap items-center gap-1 text-[10px] text-muted-foreground">
+                  Status changed from
+                  <StatusBadge tone={statusMeta(h.old_status).tone} label={statusMeta(h.old_status).label} className="text-[10px]" />
+                  to
+                  <StatusBadge tone={statusMeta(h.new_status).tone} label={statusMeta(h.new_status).label} className="text-[10px]" />
                 </span>
-                <span className="text-[8px] text-[#444] block mt-0.5 tabular-nums">
+                <span className="mt-0.5 block text-[8px] tabular-nums text-muted-foreground/70">
                   {formatDistanceToNow(new Date(h.changed_at), { addSuffix: true })}
                 </span>
               </div>
             </div>
           ))}
           {notes.length === 0 && statusHistory.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-32 text-[#555]">
-              <MessageSquare className="h-5 w-5 mb-1.5 text-[#333]" />
+            <div className="flex h-32 flex-col items-center justify-center text-muted-foreground">
+              <MessageSquare className="mb-1.5 h-5 w-5 text-muted-foreground/40" />
               <span className="text-[10px]">No activity yet</span>
             </div>
           )}
@@ -560,37 +601,23 @@ export default function AdminLeadManagement() {
 
   /* ─── Render ─── */
   return (
-    <div
-      className="h-full w-full flex flex-col overflow-hidden lg:rounded-xl lg:border lg:border-[#2a2a2a]"
-      style={{ backgroundColor: '#111', color: '#e0e0e0', fontFamily: "'Inter', sans-serif", fontSize: '12px' }}
-    >
+    <div className="flex h-full w-full flex-col overflow-hidden bg-background text-[12px] text-foreground lg:rounded-[10px] lg:border lg:border-border/60">
       {/* ── Top Bar ── */}
-      <div className="flex flex-wrap items-center gap-2 px-3 py-2 shrink-0 lg:rounded-t-xl" style={{ backgroundColor: '#1a1a1a', borderBottom: '1px solid #2a2a2a' }}>
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border/60 bg-card px-3 py-2 lg:rounded-t-[10px]">
         {/* Left: Title + Stats */}
-        <div className="flex items-center gap-2 mr-auto">
+        <div className="mr-auto flex items-center gap-2">
           <div className="flex items-center gap-1.5">
-            <Target className="h-3.5 w-3.5 text-[#0073E6]" />
-            <span className="text-[11px] font-semibold text-[#ccc] tracking-wide">CRM</span>
+            <Target className="h-3.5 w-3.5 text-primary" />
+            <span className="text-[11px] font-semibold tracking-wide text-foreground">CRM</span>
           </div>
-          <div className="w-[1px] h-4 bg-[#333]" />
-          <div className="hidden lg:flex items-center gap-1.5">
-            {[
-              { label: 'Total', value: stats.total, color: '#888' },
-              { label: 'New', value: stats.new, color: '#60a5fa' },
-              { label: 'Engaged', value: stats.engaged, color: '#34d399' },
-              { label: 'Converted', value: stats.converted, color: '#22c55e' },
-            ].map(s => (
-              <div key={s.label} className="flex items-center gap-1 px-2 py-0.5 rounded-md" style={{ backgroundColor: '#252525', border: '1px solid #2a2a2a' }}>
-                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.color }} />
-                <span className="text-[9px] font-medium" style={{ color: '#888' }}>{s.label}</span>
-                <span className="text-[10px] font-bold tabular-nums" style={{ color: s.color }}>{s.value.toLocaleString()}</span>
-              </div>
-            ))}
+          <div className="h-4 w-px bg-border" />
+          <div className="hidden items-center gap-1.5 lg:flex">
+            {statPills.map(statPill)}
           </div>
         </div>
 
         {/* Center: View toggle */}
-        <div className="flex items-center gap-0.5 sm:gap-1 rounded-lg p-0.5 overflow-x-auto scrollbar-hide" style={{ backgroundColor: '#252525', border: '1px solid #2a2a2a' }}>
+        <div className="scrollbar-hide flex items-center gap-0.5 overflow-x-auto rounded-lg border border-border/60 bg-sunken p-0.5 sm:gap-1">
           {[
             { key: 'list' as ViewMode, icon: <List className="h-3 w-3" />, label: 'Contacts' },
             { key: 'kanban' as ViewMode, icon: <KanbanSquare className="h-3 w-3" />, label: 'Pipeline' },
@@ -601,11 +628,12 @@ export default function AdminLeadManagement() {
             <button
               key={v.key}
               onClick={() => { setViewMode(v.key); if (isMobile) setSelectedId(null); }}
-              className={`h-6 px-1.5 sm:px-2.5 flex items-center gap-1 rounded-md text-[10px] font-medium transition-all shrink-0 ${
+              className={cn(
+                'flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-[10px] font-medium transition-colors duration-150 sm:px-2.5',
                 viewMode === v.key
-                  ? 'bg-[#0073E6] text-white shadow-sm shadow-blue-500/20'
-                  : 'text-[#888] hover:text-[#ccc] hover:bg-[#333]'
-              }`}
+                  ? 'bg-card text-foreground'
+                  : 'text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground',
+              )}
             >
               {v.icon}
               <span className="hidden sm:inline">{v.label}</span>
@@ -615,22 +643,26 @@ export default function AdminLeadManagement() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-1.5">
-          <button onClick={exportCSV} className="hidden sm:flex h-7 px-2 items-center gap-1 rounded-md text-[11px] font-medium text-[#888] hover:text-[#ccc] hover:bg-[#333] transition-colors">
+          <button onClick={exportCSV} className="hidden h-7 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.06] hover:text-foreground sm:flex">
             <Download className="h-3.5 w-3.5" /> <span className="hidden xl:inline">Export</span>
           </button>
-          <button onClick={() => setShowImportDialog(true)} className="hidden sm:flex h-7 px-2 items-center gap-1 rounded-md text-[11px] font-medium text-[#888] hover:text-[#ccc] hover:bg-[#333] transition-colors">
+          <button onClick={() => setShowImportDialog(true)} className="hidden h-7 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.06] hover:text-foreground sm:flex">
             <Upload className="h-3.5 w-3.5" /> <span className="hidden xl:inline">Import</span>
           </button>
-          <button onClick={() => { setSelectedLead(null); setShowDetailDialog(true); }} className="h-7 px-2 sm:px-3 flex items-center gap-1 sm:gap-1.5 rounded-md text-[11px] font-medium bg-[#0073E6] text-white hover:bg-[#005bb5] transition-colors whitespace-nowrap">
-            <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Add Contact</span>
+          <button onClick={() => { setSelectedLead(null); setShowDetailDialog(true); }} className="flex h-7 items-center gap-1 whitespace-nowrap rounded-md bg-primary px-2 text-[11px] font-medium text-primary-foreground transition-[filter] duration-150 hover:brightness-105 sm:gap-1.5 sm:px-3">
+            <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Add contact</span>
           </button>
-          <div className="hidden sm:block w-[1px] h-4 bg-[#333]" />
-          <button onClick={fetchLeads} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors">
-            <RefreshCw className="h-3.5 w-3.5 text-[#666]" />
+          <div className="hidden h-4 w-px bg-border sm:block" />
+          <button onClick={fetchLeads} title="Refresh" className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]">
+            <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
           <button
             onClick={() => setShowFilters(f => !f)}
-            className={`h-7 px-2 flex items-center gap-1 rounded-md text-[11px] font-medium transition-colors ${showFilters ? 'bg-[#0073E6]/20 text-[#60a5fa]' : 'text-[#888] hover:text-[#ccc] hover:bg-[#333]'}`}
+            aria-label="Toggle filters"
+            className={cn(
+              'flex h-7 items-center gap-1 rounded-md px-2 text-[11px] font-medium transition-colors duration-150',
+              showFilters ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground',
+            )}
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
           </button>
@@ -638,64 +670,48 @@ export default function AdminLeadManagement() {
       </div>
 
       {/* Mobile stats row */}
-      <div className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 overflow-x-auto scrollbar-hide shrink-0" style={{ backgroundColor: '#1a1a1a', borderBottom: '1px solid #2a2a2a' }}>
-        {[
-          { label: 'Total', value: stats.total, color: '#888' },
-          { label: 'New', value: stats.new, color: '#60a5fa' },
-          { label: 'Engaged', value: stats.engaged, color: '#34d399' },
-          { label: 'Converted', value: stats.converted, color: '#22c55e' },
-        ].map(s => (
-          <div key={s.label} className="flex items-center gap-1 px-2 py-0.5 rounded-md shrink-0" style={{ backgroundColor: '#252525', border: '1px solid #2a2a2a' }}>
-            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.color }} />
-            <span className="text-[9px] font-medium" style={{ color: '#888' }}>{s.label}</span>
-            <span className="text-[10px] font-bold tabular-nums" style={{ color: s.color }}>{s.value.toLocaleString()}</span>
-          </div>
-        ))}
+      <div className="scrollbar-hide flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-border/60 bg-card px-3 py-1.5 lg:hidden">
+        {statPills.map(statPill)}
       </div>
 
       {/* ── Filter Bar ── */}
-      <AnimatePresence>
-        {showFilters && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden shrink-0"
-            style={{ backgroundColor: '#161616', borderBottom: '1px solid #2a2a2a' }}
-          >
-            <div className="flex items-center gap-3 px-4 py-2 overflow-x-auto scrollbar-hide">
-              <span className="text-[10px] font-medium text-[#666] uppercase tracking-wider shrink-0">Status:</span>
-              <div className="flex items-center gap-1 flex-nowrap">
+      {showFilters && (
+        <div className="shrink-0 border-b border-border/60 bg-sunken">
+          <div className="scrollbar-hide flex items-center gap-3 overflow-x-auto px-4 py-2">
+            <span className="shrink-0 font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">Status</span>
+            <div className="flex flex-nowrap items-center gap-1">
+              <button
+                onClick={() => setStatusFilter(null)}
+                className={cn(
+                  'shrink-0 rounded px-2 py-0.5 text-[10px] font-medium transition-colors duration-150',
+                  !statusFilter ? 'bg-foreground/[0.08] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground',
+                )}
+              >All</button>
+              {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
                 <button
-                  onClick={() => setStatusFilter(null)}
-                  className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors shrink-0 ${!statusFilter ? 'bg-[#333] text-white' : 'text-[#777] hover:text-white hover:bg-[#2a2a2a]'}`}
-                >All</button>
-                {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-                  <button
-                    key={key}
-                    onClick={() => setStatusFilter(statusFilter === key ? null : key)}
-                    className="px-2 py-0.5 rounded text-[10px] font-medium transition-colors shrink-0"
-                    style={{
-                      backgroundColor: statusFilter === key ? cfg.bg : 'transparent',
-                      color: statusFilter === key ? cfg.color : '#777',
-                      border: statusFilter === key ? `1px solid ${cfg.color}30` : '1px solid transparent',
-                    }}
-                  >{cfg.label}</button>
-                ))}
-              </div>
-              {statusFilter && (
-                <button onClick={() => setStatusFilter(null)} className="ml-auto text-[10px] text-[#ef4444] hover:text-[#f87171] shrink-0">
-                  Clear all
-                </button>
-              )}
+                  key={key}
+                  onClick={() => setStatusFilter(statusFilter === key ? null : key)}
+                  className={cn(
+                    'flex shrink-0 items-center gap-1.5 rounded border px-2 py-0.5 text-[10px] font-medium transition-colors duration-150',
+                    statusFilter === key
+                      ? cn(TONE_BG[cfg.tone], TONE_TEXT[cfg.tone], 'border-border/60')
+                      : 'border-transparent text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground',
+                  )}
+                ><StatusDot tone={cfg.tone} />{cfg.label}</button>
+              ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {statusFilter && (
+              <button onClick={() => setStatusFilter(null)} className="ml-auto shrink-0 text-[10px] text-risk transition-colors duration-150 hover:text-risk/80">
+                Clear all
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Main Content ── */}
       {viewMode === 'deals' ? (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col">
           <DealPipelineBoard
             deals={deals}
             onUpdateDeal={(id, updates) => updateDeal(id, updates)}
@@ -704,11 +720,11 @@ export default function AdminLeadManagement() {
           />
         </div>
       ) : viewMode === 'forecast' ? (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col">
           <DealForecast analytics={dealAnalytics} deals={deals} />
         </div>
       ) : viewMode === 'proposals' ? (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col">
           {selectedProposal ? (
             <ProposalEditor
               proposal={selectedProposal}
@@ -733,67 +749,68 @@ export default function AdminLeadManagement() {
         </div>
       ) : isMobile ? (
         /* ── Mobile: Single-view with back navigation ── */
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {selectedId && selected ? (
             <>
               {/* Mobile back header */}
-              <div className="flex items-center gap-2 px-3 py-2 shrink-0" style={{ backgroundColor: '#1a1a1a', borderBottom: '1px solid #2a2a2a' }}>
-                <button onClick={() => setSelectedId(null)} className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors">
-                  <ArrowLeft className="h-4 w-4 text-[#999]" />
+              <div className="flex shrink-0 items-center gap-2 border-b border-border/60 bg-card px-3 py-2">
+                <button onClick={() => setSelectedId(null)} aria-label="Back to list" className="flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]">
+                  <ArrowLeft className="h-4 w-4 text-muted-foreground" />
                 </button>
-                <span className="text-[12px] font-semibold text-[#ddd] truncate flex-1">{getDisplayName(selected)}</span>
+                <span className="flex-1 truncate text-[12px] font-semibold text-foreground">{getDisplayName(selected)}</span>
               </div>
               {/* Mobile tabs: Details / Activity */}
-              <div className="flex items-center shrink-0" style={{ backgroundColor: '#161616', borderBottom: '1px solid #2a2a2a' }}>
+              <div className="flex shrink-0 items-center border-b border-border/60 bg-sunken">
                 {(['details', 'activity'] as const).map(tab => (
                   <button
                     key={tab}
                     onClick={() => setMobileTab(tab)}
-                    className={`flex-1 h-9 text-[11px] font-semibold transition-colors ${
+                    className={cn(
+                      'h-9 flex-1 text-[11px] font-semibold transition-colors duration-150',
                       mobileTab === tab
-                        ? 'text-white border-b-2 border-[#0073E6]'
-                        : 'text-[#666]'
-                    }`}
+                        ? 'border-b-2 border-primary text-foreground'
+                        : 'text-muted-foreground',
+                    )}
                   >
                     {tab === 'details' ? 'Details' : 'Activity'}
                   </button>
                 ))}
               </div>
               <div
-                className="flex-1 overflow-y-auto overscroll-contain"
-                style={{ backgroundColor: '#111', WebkitOverflowScrolling: 'touch' }}
+                className="flex-1 overflow-y-auto overscroll-contain bg-background"
+                style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 {mobileTab === 'details' ? renderContactDetail() : renderActivityPanel()}
               </div>
             </>
           ) : (
             /* Mobile contact list */
-            <div className="flex-1 flex flex-col min-h-0" style={{ backgroundColor: '#141414' }}>
+            <div className="flex min-h-0 flex-1 flex-col bg-background">
               {/* Search */}
-              <div className="p-2 shrink-0" style={{ borderBottom: '1px solid #222' }}>
-                <div className="flex items-center gap-1.5 px-2 py-2 rounded-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
-                  <Search className="h-4 w-4 text-[#555]" />
+              <div className="shrink-0 border-b border-border/60 p-2">
+                <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-foreground/[0.03] px-2 py-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Search contacts…"
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    className="bg-transparent text-[12px] text-[#ccc] placeholder:text-[#555] outline-none flex-1"
+                    className="flex-1 bg-transparent text-[12px] text-foreground outline-none placeholder:text-muted-foreground/60"
                   />
                   {searchTerm && (
-                    <button onClick={() => setSearchTerm('')} className="hover:text-white text-[#555]">
+                    <button onClick={() => setSearchTerm('')} aria-label="Clear search" className="text-muted-foreground hover:text-foreground">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
-                <div className="flex items-center justify-between mt-1.5 px-1">
-                  <span className="text-[10px] text-[#555] font-medium">{totalCount} contacts</span>
+                <div className="mt-1.5 flex items-center justify-between px-1">
+                  <span className="text-[10px] font-medium tabular-nums text-muted-foreground">{totalCount} contacts</span>
                   <select
                     value={sortBy}
                     onChange={e => setSortBy(e.target.value as SortOption)}
-                    className="bg-transparent text-[10px] text-[#666] outline-none cursor-pointer"
+                    className="cursor-pointer bg-transparent text-[10px] text-muted-foreground outline-none"
                   >
-                    <option value="updated">Last Updated</option>
+                    <option value="updated">Last updated</option>
                     <option value="created">Created</option>
                     <option value="name">Name</option>
                     <option value="status">Status</option>
@@ -802,47 +819,42 @@ export default function AdminLeadManagement() {
               </div>
 
               <div
-                className="flex-1 overflow-y-auto scrollbar-hide overscroll-contain"
+                className="scrollbar-hide flex-1 overflow-y-auto overscroll-contain"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 {loading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <Loader2 className="h-4 w-4 animate-spin text-[#555]" />
-                  </div>
+                  <SkeletonLedger rows={6} />
                 ) : leads.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-32 text-[#555]">
-                    <Users className="h-5 w-5 mb-1.5" />
+                  <div className="flex h-32 flex-col items-center justify-center text-muted-foreground">
+                    <Users className="mb-1.5 h-5 w-5" />
                     <span className="text-[10px]">No contacts found</span>
                   </div>
                 ) : (
                   leads.map(c => {
-                    const sc = STATUS_CONFIG[c.status || 'new'] || STATUS_CONFIG.new;
+                    const sc = statusMeta(c.status);
                     return (
                       <button
                         key={c.id}
                         onClick={() => handleSelectContact(c.id)}
-                        className="w-full text-left px-3 py-3 transition-colors border-b border-[#1a1a1a] hover:bg-[#1a1a1a] active:bg-[#222]"
+                        className="w-full border-b border-border/60 px-3 py-3 text-left transition-colors duration-150 active:bg-foreground/[0.04]"
                       >
                         <div className="flex items-center gap-3">
-                          <div
-                            className="w-9 h-9 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0"
-                            style={{ backgroundColor: sc.bg, color: sc.color }}
-                          >
+                          <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-semibold', TONE_BG[sc.tone], TONE_TEXT[sc.tone])}>
                             {getInitials(c)}
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[12px] font-medium text-[#ddd] truncate">{getDisplayName(c)}</span>
-                              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: sc.color }} />
+                              <span className="truncate text-[12px] font-medium text-foreground">{getDisplayName(c)}</span>
+                              <StatusDot tone={sc.tone} />
                             </div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              {c.category && <span className="text-[10px] text-[#666] truncate">{c.category}</span>}
-                              <span className="text-[9px] text-[#444] ml-auto tabular-nums">
+                            <div className="mt-0.5 flex items-center gap-2">
+                              {c.category && <span className="truncate text-[10px] text-muted-foreground">{c.category}</span>}
+                              <span className="ml-auto text-[9px] tabular-nums text-muted-foreground/70">
                                 {formatDistanceToNow(new Date(c.updated_at), { addSuffix: true })}
                               </span>
                             </div>
                           </div>
-                          <ChevronRight className="h-4 w-4 text-[#444] shrink-0" />
+                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
                         </div>
                       </button>
                     );
@@ -852,11 +864,11 @@ export default function AdminLeadManagement() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="h-10 flex items-center justify-between px-3 shrink-0" style={{ borderTop: '1px solid #222' }}>
-                  <span className="text-[10px] text-[#555] tabular-nums">Page {currentPage}/{totalPages}</span>
+                <div className="flex h-10 shrink-0 items-center justify-between border-t border-border/60 px-3">
+                  <span className="font-mono text-[10px] tabular-nums text-muted-foreground">Page {currentPage}/{totalPages}</span>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-7 w-7 flex items-center justify-center rounded hover:bg-[#333] disabled:opacity-30"><ChevronLeft className="h-4 w-4 text-[#999]" /></button>
-                    <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-7 w-7 flex items-center justify-center rounded hover:bg-[#333] disabled:opacity-30"><ChevronRight className="h-4 w-4 text-[#999]" /></button>
+                    <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} aria-label="Previous page" className="flex h-7 w-7 items-center justify-center rounded transition-colors duration-150 hover:bg-foreground/[0.06] disabled:opacity-30"><ChevronLeft className="h-4 w-4 text-muted-foreground" /></button>
+                    <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} aria-label="Next page" className="flex h-7 w-7 items-center justify-center rounded transition-colors duration-150 hover:bg-foreground/[0.06] disabled:opacity-30"><ChevronRight className="h-4 w-4 text-muted-foreground" /></button>
                   </div>
                 </div>
               )}
@@ -868,32 +880,32 @@ export default function AdminLeadManagement() {
         <ResizablePanelGroup direction="horizontal" className="flex-1">
           {/* ── Left: Contact List ── */}
           <ResizablePanel defaultSize={28} minSize={20} maxSize={40}>
-            <div className="h-full flex flex-col" style={{ backgroundColor: '#141414' }}>
+            <div className="flex h-full flex-col bg-background">
               {/* Search */}
-              <div className="p-2 shrink-0" style={{ borderBottom: '1px solid #222' }}>
-                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
-                  <Search className="h-3.5 w-3.5 text-[#555]" />
+              <div className="shrink-0 border-b border-border/60 p-2">
+                <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-foreground/[0.03] px-2 py-1.5">
+                  <Search className="h-3.5 w-3.5 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Search contacts…"
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    className="bg-transparent text-[11px] text-[#ccc] placeholder:text-[#555] outline-none flex-1"
+                    className="flex-1 bg-transparent text-[11px] text-foreground outline-none placeholder:text-muted-foreground/60"
                   />
                   {searchTerm && (
-                    <button onClick={() => setSearchTerm('')} className="hover:text-white text-[#555]">
+                    <button onClick={() => setSearchTerm('')} aria-label="Clear search" className="text-muted-foreground hover:text-foreground">
                       <X className="h-3 w-3" />
                     </button>
                   )}
                 </div>
-                <div className="flex items-center justify-between mt-1.5 px-1">
-                  <span className="text-[9px] text-[#555] font-medium">{totalCount} contacts</span>
+                <div className="mt-1.5 flex items-center justify-between px-1">
+                  <span className="text-[9px] font-medium tabular-nums text-muted-foreground">{totalCount} contacts</span>
                   <select
                     value={sortBy}
                     onChange={e => setSortBy(e.target.value as SortOption)}
-                    className="bg-transparent text-[9px] text-[#666] outline-none cursor-pointer"
+                    className="cursor-pointer bg-transparent text-[9px] text-muted-foreground outline-none"
                   >
-                    <option value="updated">Last Updated</option>
+                    <option value="updated">Last updated</option>
                     <option value="created">Created</option>
                     <option value="name">Name</option>
                     <option value="status">Status</option>
@@ -902,52 +914,46 @@ export default function AdminLeadManagement() {
               </div>
 
               {/* Contact List */}
-              <div className="flex-1 overflow-y-auto scrollbar-hide">
+              <div className="scrollbar-hide flex-1 overflow-y-auto">
                 {loading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <Loader2 className="h-4 w-4 animate-spin text-[#555]" />
-                  </div>
+                  <SkeletonLedger rows={8} />
                 ) : leads.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-32 text-[#555]">
-                    <Users className="h-5 w-5 mb-1.5" />
+                  <div className="flex h-32 flex-col items-center justify-center text-muted-foreground">
+                    <Users className="mb-1.5 h-5 w-5" />
                     <span className="text-[10px]">No contacts found</span>
                   </div>
                 ) : viewMode === 'list' ? (
                   leads.map(c => {
-                    const sc = STATUS_CONFIG[c.status || 'new'] || STATUS_CONFIG.new;
+                    const sc = statusMeta(c.status);
                     return (
                       <button
                         key={c.id}
                         onClick={() => { setSelectedId(c.id); setEditingContact(false); }}
                         onDoubleClick={() => setFullScreenLead(c)}
-                        className={`w-full text-left px-3 py-2.5 transition-colors border-b ${
-                          selectedId === c.id
-                            ? 'bg-[#1e1e1e] border-[#333]'
-                            : 'border-[#1a1a1a] hover:bg-[#1a1a1a]'
-                        }`}
+                        className={cn(
+                          'w-full border-b border-border/60 px-3 py-2.5 text-left transition-colors duration-150',
+                          selectedId === c.id ? 'bg-foreground/[0.05]' : 'hover:bg-foreground/[0.025]',
+                        )}
                       >
                         <div className="flex items-start gap-2.5">
-                          <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
-                            style={{ backgroundColor: sc.bg, color: sc.color }}
-                          >
+                          <div className={cn('mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-semibold', TONE_BG[sc.tone], TONE_TEXT[sc.tone])}>
                             {getInitials(c)}
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] font-medium text-[#ddd] truncate">{getDisplayName(c)}</span>
-                              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: sc.color }} title={sc.label} />
+                              <span className="truncate text-[11px] font-medium text-foreground">{getDisplayName(c)}</span>
+                              <span title={sc.label}><StatusDot tone={sc.tone} /></span>
                             </div>
-                            {c.category && <span className="text-[9px] text-[#666] truncate block">{c.category}</span>}
-                            <div className="flex items-center gap-2 mt-0.5">
-                              {c.email && <Mail className="h-2.5 w-2.5 text-[#555]" />}
-                              {c.phone && <Phone className="h-2.5 w-2.5 text-[#555]" />}
+                            {c.category && <span className="block truncate text-[9px] text-muted-foreground">{c.category}</span>}
+                            <div className="mt-0.5 flex items-center gap-2">
+                              {c.email && <Mail className="h-2.5 w-2.5 text-muted-foreground/70" aria-label="Has email" />}
+                              {c.phone && <Phone className="h-2.5 w-2.5 text-muted-foreground/70" aria-label="Has phone" />}
                               {c.location_city && (
-                                <span className="text-[8px] text-[#555] flex items-center gap-0.5">
+                                <span className="flex items-center gap-0.5 text-[8px] text-muted-foreground">
                                   <MapPin className="h-2 w-2" />{c.location_city}
                                 </span>
                               )}
-                              <span className="text-[8px] text-[#444] ml-auto tabular-nums">
+                              <span className="ml-auto text-[8px] tabular-nums text-muted-foreground/70">
                                 {formatDistanceToNow(new Date(c.updated_at), { addSuffix: true })}
                               </span>
                             </div>
@@ -958,31 +964,32 @@ export default function AdminLeadManagement() {
                   })
                 ) : (
                   /* Kanban mini-view in left panel */
-                  <div className="p-2 space-y-3">
+                  <div className="space-y-3 p-2">
                     {PIPELINE_ORDER.map(stage => {
                       const sc = STATUS_CONFIG[stage];
                       const items = kanbanData[stage] || [];
                       return (
                         <div key={stage}>
-                          <div className="flex items-center gap-1.5 mb-1.5 px-1">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: sc.color }} />
-                            <span className="text-[10px] font-semibold" style={{ color: sc.color }}>{sc.label}</span>
-                            <span className="text-[9px] text-[#555] ml-auto">{items.length}</span>
+                          <div className="mb-1.5 flex items-center gap-1.5 px-1">
+                            <StatusDot tone={sc.tone} />
+                            <span className={cn('text-[10px] font-semibold', TONE_TEXT[sc.tone])}>{sc.label}</span>
+                            <span className="ml-auto text-[9px] tabular-nums text-muted-foreground">{items.length}</span>
                           </div>
                           <div className="space-y-0.5">
                             {items.slice(0, 5).map(c => (
                               <button
                                 key={c.id}
                                 onClick={() => { setSelectedId(c.id); setEditingContact(false); }}
-                                className={`w-full text-left px-2 py-1.5 rounded-md text-[10px] transition-colors ${
-                                  selectedId === c.id ? 'bg-[#252525] text-white' : 'text-[#999] hover:bg-[#1e1e1e] hover:text-[#ccc]'
-                                }`}
+                                className={cn(
+                                  'w-full rounded-md px-2 py-1.5 text-left text-[10px] transition-colors duration-150',
+                                  selectedId === c.id ? 'bg-foreground/[0.06] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground',
+                                )}
                               >
                                 {getDisplayName(c)}
                               </button>
                             ))}
                             {items.length > 5 && (
-                              <span className="text-[9px] text-[#555] px-2">+{items.length - 5} more</span>
+                              <span className="px-2 text-[9px] tabular-nums text-muted-foreground">+{items.length - 5} more</span>
                             )}
                           </div>
                         </div>
@@ -994,42 +1001,42 @@ export default function AdminLeadManagement() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="h-9 flex items-center justify-between px-3 shrink-0" style={{ borderTop: '1px solid #222' }}>
-                  <span className="text-[9px] text-[#555] tabular-nums">Pg {currentPage}/{totalPages}</span>
+                <div className="flex h-9 shrink-0 items-center justify-between border-t border-border/60 px-3">
+                  <span className="font-mono text-[9px] tabular-nums text-muted-foreground">Pg {currentPage}/{totalPages}</span>
                   <div className="flex items-center gap-0.5">
-                    <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="h-5 w-5 flex items-center justify-center rounded hover:bg-[#333] disabled:opacity-30"><ChevronsLeft className="h-3 w-3 text-[#999]" /></button>
-                    <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="h-5 w-5 flex items-center justify-center rounded hover:bg-[#333] disabled:opacity-30"><ChevronLeft className="h-3 w-3 text-[#999]" /></button>
-                    <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="h-5 w-5 flex items-center justify-center rounded hover:bg-[#333] disabled:opacity-30"><ChevronRight className="h-3 w-3 text-[#999]" /></button>
-                    <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} className="h-5 w-5 flex items-center justify-center rounded hover:bg-[#333] disabled:opacity-30"><ChevronsRight className="h-3 w-3 text-[#999]" /></button>
+                    <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} aria-label="First page" className="flex h-5 w-5 items-center justify-center rounded transition-colors duration-150 hover:bg-foreground/[0.06] disabled:opacity-30"><ChevronsLeft className="h-3 w-3 text-muted-foreground" /></button>
+                    <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} aria-label="Previous page" className="flex h-5 w-5 items-center justify-center rounded transition-colors duration-150 hover:bg-foreground/[0.06] disabled:opacity-30"><ChevronLeft className="h-3 w-3 text-muted-foreground" /></button>
+                    <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} aria-label="Next page" className="flex h-5 w-5 items-center justify-center rounded transition-colors duration-150 hover:bg-foreground/[0.06] disabled:opacity-30"><ChevronRight className="h-3 w-3 text-muted-foreground" /></button>
+                    <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} aria-label="Last page" className="flex h-5 w-5 items-center justify-center rounded transition-colors duration-150 hover:bg-foreground/[0.06] disabled:opacity-30"><ChevronsRight className="h-3 w-3 text-muted-foreground" /></button>
                   </div>
                 </div>
               )}
             </div>
           </ResizablePanel>
 
-          <ResizableHandle className="w-[1px] bg-[#2a2a2a] hover:bg-[#0073E6] transition-colors" />
+          <ResizableHandle className="w-px bg-border transition-colors duration-150 hover:bg-primary" />
 
           {/* ── Center: Contact Detail ── */}
           <ResizablePanel defaultSize={44}>
-            <div className="h-full overflow-y-auto scrollbar-hide" style={{ backgroundColor: '#111' }}>
+            <div className="scrollbar-hide h-full overflow-y-auto bg-background">
               {!selected ? (
-                <div className="flex flex-col items-center justify-center h-full text-[#555]">
-                  <Target className="h-10 w-10 mb-3 text-[#333]" />
-                  <span className="text-[13px] font-medium text-[#555]">Select a contact</span>
-                  <span className="text-[10px] text-[#444] mt-1">Choose from the list to view details</span>
+                <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                  <Target className="mb-3 h-10 w-10 text-muted-foreground/30" />
+                  <span className="text-[13px] font-medium">Select a contact</span>
+                  <span className="mt-1 text-[10px] text-muted-foreground/70">Choose from the list to view details</span>
                 </div>
               ) : renderContactDetail()}
             </div>
           </ResizablePanel>
 
-          <ResizableHandle className="w-[1px] bg-[#2a2a2a] hover:bg-[#0073E6] transition-colors" />
+          <ResizableHandle className="w-px bg-border transition-colors duration-150 hover:bg-primary" />
 
           {/* ── Right: Activity & Notes ── */}
           <ResizablePanel defaultSize={28} minSize={18} maxSize={35}>
-            <div className="h-full flex flex-col" style={{ backgroundColor: '#141414' }}>
+            <div className="flex h-full flex-col bg-background">
               {selected ? renderActivityPanel() : (
-                <div className="flex flex-col items-center justify-center h-full text-[#555]">
-                  <BarChart3 className="h-8 w-8 mb-2 text-[#333]" />
+                <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                  <BarChart3 className="mb-2 h-8 w-8 text-muted-foreground/30" />
                   <span className="text-[10px]">Select a contact to view activity</span>
                 </div>
               )}
@@ -1070,18 +1077,16 @@ export default function AdminLeadManagement() {
       />
 
       {/* Full-screen Lead View */}
-      <AnimatePresence>
-        {fullScreenLead && (
-          <FullScreenLeadView
-            lead={fullScreenLead as any}
-            leads={leads as any}
-            onBack={() => setFullScreenLead(null)}
-            onLeadChange={(l) => setFullScreenLead(l as unknown as Lead)}
-            onUpdate={fetchLeads}
-            onDelete={(id) => { setFullScreenLead(null); fetchLeads(); }}
-          />
-        )}
-      </AnimatePresence>
+      {fullScreenLead && (
+        <FullScreenLeadView
+          lead={fullScreenLead as any}
+          leads={leads as any}
+          onBack={() => setFullScreenLead(null)}
+          onLeadChange={(l) => setFullScreenLead(l as unknown as Lead)}
+          onUpdate={fetchLeads}
+          onDelete={(id) => { setFullScreenLead(null); fetchLeads(); }}
+        />
+      )}
     </div>
   );
 }

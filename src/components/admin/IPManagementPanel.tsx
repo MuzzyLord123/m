@@ -16,6 +16,7 @@ import { Shield, ShieldOff, ShieldCheck, Plus, Trash2, RefreshCw, Clock, User, A
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { useIPGeolocation, getFlagEmoji } from '@/hooks/useIPGeolocation';
+import { SkeletonTable } from '@/components/platform';
 
 interface BlockedIP {
   id: string;
@@ -287,7 +288,7 @@ export default function IPManagementPanel() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Auto-Blocked</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <AlertTriangle className="h-4 w-4 text-attend" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{autoBlocks.length}</div>
@@ -297,7 +298,7 @@ export default function IPManagementPanel() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Manual Blocks</CardTitle>
-            <Shield className="h-4 w-4 text-orange-500" />
+            <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{manualBlocks.length}</div>
@@ -307,7 +308,7 @@ export default function IPManagementPanel() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Whitelisted</CardTitle>
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <ShieldCheck className="h-4 w-4 text-ok" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{whitelistedIPs.length}</div>
@@ -412,9 +413,7 @@ export default function IPManagementPanel() {
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
+                <SkeletonTable cols={4} rows={4} />
               ) : blockedIPs.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -474,12 +473,12 @@ export default function IPManagementPanel() {
                             </TableCell>
                           <TableCell>
                             {block.is_auto_blocked ? (
-                              <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20">
+                              <Badge variant="outline" className="border-attend/20 bg-attend/10 text-attend">
                                 <AlertTriangle className="h-3 w-3 mr-1" />
                                 Auto ({block.failed_attempts} fails)
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20">
+                              <Badge variant="outline" className="border-border/60 bg-foreground/[0.06] text-ink-2">
                                 <User className="h-3 w-3 mr-1" />
                                 Manual
                               </Badge>
@@ -602,9 +601,7 @@ export default function IPManagementPanel() {
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
+                <SkeletonTable cols={4} rows={4} />
               ) : whitelistedIPs.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />

@@ -518,7 +518,7 @@ export default function AdminSettings() {
                       const profile = vaultProfiles[v.user_id];
                       return (
                         <div key={v.id} className="flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-card/50">
-                          <div className="p-2 rounded-lg bg-amber-500/10"><KeyRound className="w-4 h-4 text-amber-500" /></div>
+                          <div className="p-2 rounded-lg bg-attend/10"><KeyRound className="w-4 h-4 text-attend" /></div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{v.vault_name || 'Unnamed Vault'}</p>
                             <p className="text-xs text-muted-foreground">

@@ -416,7 +416,7 @@ export default function LeadDetailDialog({
               <Avatar className="h-10 w-10">
                 <AvatarFallback className={cn(
                   "text-sm font-medium",
-                  editedLead.is_personal ? "bg-purple-500/20 text-purple-600" : "bg-primary/10 text-primary"
+                  editedLead.is_personal ? "bg-gold/15 text-gold" : "bg-primary/10 text-primary"
                 )}>
                   {(editedLead.business_name || editedLead.personal_name || 'L').substring(0, 2).toUpperCase()}
                 </AvatarFallback>
@@ -592,7 +592,7 @@ export default function LeadDetailDialog({
                         />
                         {editedLead.google_rating && (
                           <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-4 h-4 fill-gold text-gold" />
                             <span className="text-sm">{editedLead.google_rating.toFixed(1)}</span>
                           </div>
                         )}
@@ -827,8 +827,8 @@ export default function LeadDetailDialog({
             )}
 
             {editedLead.converted_client_id && (
-              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-                <p className="text-sm text-green-600 font-medium">✓ Converted to Client</p>
+              <div className="p-3 rounded-lg bg-ok/10 border border-ok/30">
+                <p className="text-sm text-ok font-medium">Converted to client</p>
               </div>
             )}
 

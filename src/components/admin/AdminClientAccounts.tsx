@@ -1,29 +1,32 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Users, Search, Plus, ChevronDown, ChevronRight, 
-  UserPlus, Trash2, Mail, Phone, Building, 
-  CreditCard, Shield, Edit2, Eye, DollarSign, PoundSterling,
-  FileText, UserMinus, Crown, Wallet
+import {
+  Users, Search, Plus, ChevronRight,
+  Trash2, Mail, Building,
+  Edit2, Eye, PoundSterling,
+  FileText, Crown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Dialog, DialogContent, DialogDescription, 
-  DialogHeader, DialogTitle, DialogFooter 
+import {
+  Dialog, DialogContent, DialogDescription,
+  DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
-import { 
-  Select, SelectContent, SelectItem, 
-  SelectTrigger, SelectValue 
+import {
+  Select, SelectContent, SelectItem,
+  SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import {
+  PageHeader, AvatarID, StatusBadge, Money, EmptyState, SkeletonLedger,
+  Panel, type Tone,
+} from '@/components/platform';
+import { cn } from '@/lib/utils';
 
 interface ClientTeam {
   id: string;
@@ -67,11 +70,12 @@ interface ClientPricing {
   notes: string | null;
 }
 
-const roleColors: Record<string, string> = {
-  owner: 'bg-primary/20 text-primary border-primary/30',
-  financial: 'bg-green-500/20 text-green-500 border-green-500/30',
-  project: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-  member: 'bg-muted text-muted-foreground border-border',
+/* Member roles on the platform tone vocabulary — no per-role hue map. */
+const roleTones: Record<string, Tone> = {
+  owner: 'accent',
+  financial: 'ok',
+  project: 'neutral',
+  member: 'neutral',
 };
 
 const serviceTypes = [
@@ -92,7 +96,7 @@ export default function AdminClientAccounts() {
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<ClientTeam | null>(null);
   const [activeTab, setActiveTab] = useState('members');
-  
+
   // Pricing state
   const [clientPricing, setClientPricing] = useState<ClientPricing[]>([]);
   const [showAddPricing, setShowAddPricing] = useState(false);
@@ -104,7 +108,7 @@ export default function AdminClientAccounts() {
     billing_frequency: '',
     notes: '',
   });
-  
+
   // Member role update
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
@@ -213,7 +217,7 @@ export default function AdminClientAccounts() {
         });
 
       if (error) throw error;
-      
+
       toast.success('Pricing added successfully');
       setShowAddPricing(false);
       setNewPricing({
@@ -241,7 +245,7 @@ export default function AdminClientAccounts() {
         .eq('id', selectedMember.id);
 
       if (error) throw error;
-      
+
       toast.success('Member role updated');
       setShowRoleDialog(false);
       setSelectedMember(null);
@@ -261,7 +265,7 @@ export default function AdminClientAccounts() {
         .eq('id', pricingId);
 
       if (error) throw error;
-      
+
       toast.success('Pricing removed');
       if (selectedTeam) fetchClientPricing(selectedTeam.id);
     } catch (error) {
@@ -278,7 +282,7 @@ export default function AdminClientAccounts() {
         .eq('id', pricing.id);
 
       if (error) throw error;
-      
+
       toast.success(pricing.is_visible ? 'Pricing hidden from client' : 'Pricing visible to client');
       if (selectedTeam) fetchClientPricing(selectedTeam.id);
     } catch (error) {
@@ -287,357 +291,352 @@ export default function AdminClientAccounts() {
     }
   };
 
-  const filteredTeams = teams.filter(team => 
+  const filteredTeams = teams.filter(team =>
     team.team_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     team.team_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
     team.primaryAccount?.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     team.primaryAccount?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getInitials = (name: string | null | undefined) => {
-    if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      <div className="space-y-4">
+        <PageHeader kicker="Quooro office" title="Client accounts" description="Client teams, members and custom pricing." />
+        <Panel>
+          <SkeletonLedger rows={5} />
+        </Panel>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-full overflow-x-hidden">
+    <div className="max-w-full space-y-4 overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="min-w-0">
-          <h2 className="text-2xl font-display font-bold">Client Accounts</h2>
-          <p className="text-muted-foreground">Manage client teams, members, and custom pricing</p>
-        </div>
-        <div className="flex gap-2 w-full sm:w-auto">
+      <PageHeader
+        kicker="Quooro office"
+        title="Client accounts"
+        description="Client teams, members and custom pricing."
+        actions={
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search clients..."
+              placeholder="Search clients…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 w-full"
+              className="h-8 w-full pl-9 text-[13px]"
             />
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Team List */}
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {filteredTeams.length === 0 ? (
-          <Card className="p-8 text-center">
-            <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Client Teams</h3>
-            <p className="text-muted-foreground">
-              Client teams are created when customers register and set up their accounts.
-            </p>
-          </Card>
+          <Panel>
+            <EmptyState
+              title="No client teams yet"
+              body="Client teams are created when customers register and set up their accounts."
+            />
+          </Panel>
         ) : (
           filteredTeams.map((team) => (
-            <motion.div
+            <Card
               key={team.id}
-              layout
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              className={cn(
+                'rounded-[10px] border-border/60 shadow-none',
+                selectedTeam?.id === team.id && 'border-primary/50',
+              )}
             >
-              <Card className={selectedTeam?.id === team.id ? 'border-primary' : ''}>
-                <CardHeader 
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setExpandedTeam(expandedTeam === team.id ? null : team.id);
-                    setSelectedTeam(team);
-                  }}
-                >
-                  <div className="flex items-center justify-between gap-2 min-w-0">
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                      <div className="hidden sm:flex -space-x-2 shrink-0">
-                        {team.members.slice(0, 3).map((member, i) => (
-                          <Avatar key={member.id} className="border-2 border-background h-10 w-10">
-                            <AvatarImage src={member.profile?.avatar_url || ''} />
-                            <AvatarFallback className="text-xs">
-                              {getInitials(member.display_name || member.profile?.full_name)}
-                            </AvatarFallback>
-                          </Avatar>
-                        ))}
-                        {team.members.length > 3 && (
-                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-background">
-                            +{team.members.length - 3}
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <CardTitle className="text-base sm:text-lg flex items-center gap-2 flex-wrap">
-                          <span className="truncate max-w-[140px] sm:max-w-none">{team.team_name || team.primaryAccount?.company || 'Unnamed Team'}</span>
-                          <Badge variant="outline" className="text-[10px] sm:text-xs shrink-0">
-                            {team.team_code}
-                          </Badge>
-                        </CardTitle>
-                        <CardDescription className="flex items-center gap-3 sm:gap-4 mt-1 flex-wrap text-xs">
-                          <span className="flex items-center gap-1 min-w-0">
-                            <Crown className="h-3 w-3 shrink-0" />
-                            <span className="truncate">{team.primaryAccount?.full_name || 'No primary account'}</span>
-                          </span>
-                          <span className="flex items-center gap-1 shrink-0">
-                            <Users className="h-3 w-3" />
-                            {team.members.length} member{team.members.length !== 1 ? 's' : ''}
-                          </span>
-                        </CardDescription>
-                      </div>
+              <CardHeader
+                className="cursor-pointer px-4 py-3"
+                onClick={() => {
+                  setExpandedTeam(expandedTeam === team.id ? null : team.id);
+                  setSelectedTeam(team);
+                }}
+              >
+                <div className="flex min-w-0 items-center justify-between gap-2">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <div className="hidden shrink-0 -space-x-2 sm:flex">
+                      {team.members.slice(0, 3).map((member) => (
+                        <AvatarID
+                          key={member.id}
+                          name={member.display_name || member.profile?.full_name}
+                          email={member.profile?.email}
+                          src={member.profile?.avatar_url || undefined}
+                          size="lg"
+                          className="border-2 border-background"
+                        />
+                      ))}
+                      {team.members.length > 3 && (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-background bg-sunken text-[10px] font-medium tabular-nums text-muted-foreground">
+                          +{team.members.length - 3}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="px-2 sm:px-3"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTeam(team);
-                          setActiveTab('pricing');
-                          setExpandedTeam(team.id);
-                        }}
-                      >
-                        <PoundSterling className="h-4 w-4 sm:mr-1" />
-                        <span className="hidden sm:inline">Pricing</span>
-                      </Button>
-                      <motion.div
-                        animate={{ rotate: expandedTeam === team.id ? 90 : 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                      </motion.div>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="flex flex-wrap items-center gap-2 text-[14px] font-semibold tracking-[-0.01em]">
+                        <span className="max-w-[140px] truncate sm:max-w-none">{team.team_name || team.primaryAccount?.company || 'Unnamed team'}</span>
+                        <Badge variant="outline" className="shrink-0 border-border/60 font-mono text-[10px] font-medium tracking-[0.04em] text-muted-foreground">
+                          {team.team_code}
+                        </Badge>
+                      </CardTitle>
+                      <CardDescription className="mt-1 flex flex-wrap items-center gap-3 text-[11.5px] sm:gap-4">
+                        <span className="flex min-w-0 items-center gap-1">
+                          <Crown className="h-3 w-3 shrink-0" aria-hidden />
+                          <span className="truncate">{team.primaryAccount?.full_name || 'No primary account'}</span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1 tabular-nums">
+                          <Users className="h-3 w-3" aria-hidden />
+                          {team.members.length} member{team.members.length !== 1 ? 's' : ''}
+                        </span>
+                      </CardDescription>
                     </div>
                   </div>
-                </CardHeader>
-
-                <AnimatePresence>
-                  {expandedTeam === team.id && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
+                  <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 rounded-md border-border/60 px-2 text-xs sm:px-3"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTeam(team);
+                        setActiveTab('pricing');
+                        setExpandedTeam(team.id);
+                      }}
                     >
-                      <CardContent className="pt-0">
-                        <Tabs value={activeTab} onValueChange={setActiveTab}>
-                          <TabsList className="mb-4 flex-wrap h-auto">
-                            <TabsTrigger value="members">
-                              <Users className="h-4 w-4 mr-2" />
-                              Members
-                            </TabsTrigger>
-                            <TabsTrigger value="pricing">
-                              <PoundSterling className="h-4 w-4 mr-2" />
-                              Custom Pricing
-                            </TabsTrigger>
-                            {team.primaryAccount?.enquiry_data && (
-                              <TabsTrigger value="enquiry">
-                                <FileText className="h-4 w-4 mr-2" />
-                                Enquiry Info
-                              </TabsTrigger>
-                            )}
-                          </TabsList>
+                      <PoundSterling className="h-3.5 w-3.5 sm:mr-1" />
+                      <span className="hidden sm:inline">Pricing</span>
+                    </Button>
+                    <ChevronRight
+                      className={cn(
+                        'h-4 w-4 text-muted-foreground transition-transform duration-150',
+                        expandedTeam === team.id && 'rotate-90',
+                      )}
+                    />
+                  </div>
+                </div>
+              </CardHeader>
 
-                          {team.primaryAccount?.enquiry_data && (
-                            <TabsContent value="enquiry" className="space-y-6">
-                              <EnquiryInfoSection data={team.primaryAccount.enquiry_data} />
-                            </TabsContent>
-                          )}
+              {expandedTeam === team.id && (
+                <CardContent className="px-4 pb-4 pt-0">
+                  <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="mb-3 h-auto flex-wrap rounded-lg border border-border/60 bg-sunken p-0.5">
+                      <TabsTrigger value="members" className="h-7 rounded-md px-3 text-xs data-[state=active]:bg-card">
+                        <Users className="mr-2 h-3.5 w-3.5" />
+                        Members
+                      </TabsTrigger>
+                      <TabsTrigger value="pricing" className="h-7 rounded-md px-3 text-xs data-[state=active]:bg-card">
+                        <PoundSterling className="mr-2 h-3.5 w-3.5" />
+                        Custom pricing
+                      </TabsTrigger>
+                      {team.primaryAccount?.enquiry_data && (
+                        <TabsTrigger value="enquiry" className="h-7 rounded-md px-3 text-xs data-[state=active]:bg-card">
+                          <FileText className="mr-2 h-3.5 w-3.5" />
+                          Enquiry info
+                        </TabsTrigger>
+                      )}
+                    </TabsList>
+
+                    {team.primaryAccount?.enquiry_data && (
+                      <TabsContent value="enquiry" className="space-y-4">
+                        <EnquiryInfoSection data={team.primaryAccount.enquiry_data} />
+                      </TabsContent>
+                    )}
 
 
-                          <TabsContent value="members" className="space-y-3">
-                            {team.members.map((member) => (
-                              <div
-                                key={member.id}
-                                className="flex items-center justify-between p-3 rounded-lg border bg-card"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <Avatar className="h-10 w-10">
-                                    <AvatarImage src={member.profile?.avatar_url || ''} />
-                                    <AvatarFallback>
-                                      {getInitials(member.display_name || member.profile?.full_name)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <p className="font-medium">
-                                      {member.display_name || member.profile?.full_name || 'Unknown'}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                      {member.profile?.email}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge 
-                                    variant="outline" 
-                                    className={roleColors[member.member_role] || roleColors.member}
-                                  >
-                                    {member.member_role}
-                                  </Badge>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                      setSelectedMember(member);
-                                      setNewRole(member.member_role);
-                                      setShowRoleDialog(true);
-                                    }}
-                                  >
-                                    <Edit2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </TabsContent>
-
-                          <TabsContent value="pricing" className="space-y-4">
-                            <div className="flex justify-between items-center">
-                              <p className="text-sm text-muted-foreground">
-                                Custom pricing visible only to this client
+                    <TabsContent value="members" className="space-y-2">
+                      {team.members.map((member) => (
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between rounded-lg border border-border/60 bg-card px-3 py-2"
+                        >
+                          <div className="flex items-center gap-3">
+                            <AvatarID
+                              name={member.display_name || member.profile?.full_name}
+                              email={member.profile?.email}
+                              src={member.profile?.avatar_url || undefined}
+                              size="lg"
+                            />
+                            <div>
+                              <p className="text-[13px] font-medium text-foreground">
+                                {member.display_name || member.profile?.full_name || 'Unknown'}
                               </p>
-                              <Button size="sm" onClick={() => setShowAddPricing(true)}>
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Pricing
-                              </Button>
+                              <p className="text-[11px] text-muted-foreground">
+                                {member.profile?.email}
+                              </p>
                             </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <StatusBadge
+                              tone={roleTones[member.member_role] || roleTones.member}
+                              label={member.member_role}
+                              className="capitalize"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0"
+                              aria-label="Change role"
+                              onClick={() => {
+                                setSelectedMember(member);
+                                setNewRole(member.member_role);
+                                setShowRoleDialog(true);
+                              }}
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </TabsContent>
 
-                            {clientPricing.length === 0 ? (
-                              <div className="text-center py-8 text-muted-foreground">
-                                <Wallet className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                <p>No custom pricing set for this client</p>
+                    <TabsContent value="pricing" className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[12px] text-muted-foreground">
+                          Custom pricing visible only to this client
+                        </p>
+                        <Button size="sm" className="h-7 rounded-md px-3 text-xs" onClick={() => setShowAddPricing(true)}>
+                          <Plus className="mr-1.5 h-3.5 w-3.5" />
+                          Add pricing
+                        </Button>
+                      </div>
+
+                      {clientPricing.length === 0 ? (
+                        <EmptyState
+                          compact
+                          title="No custom pricing yet"
+                          body="Negotiated prices you add here appear on this client's billing."
+                        />
+                      ) : (
+                        <div className="space-y-2">
+                          {clientPricing.map((pricing) => (
+                            <div
+                              key={pricing.id}
+                              className={cn(
+                                'flex items-center justify-between rounded-lg border border-border/60 px-3 py-2',
+                                !pricing.is_visible && 'opacity-50',
+                              )}
+                            >
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-[13px] font-medium text-foreground">{pricing.service_name}</p>
+                                  <Badge variant="outline" className="border-border/60 text-[10px] font-normal text-muted-foreground">
+                                    {pricing.service_type}
+                                  </Badge>
+                                  {pricing.is_recurring && (
+                                    <Badge variant="outline" className="border-border/60 bg-sunken text-[10px] font-normal capitalize text-ink-2">
+                                      {pricing.billing_frequency || 'Recurring'}
+                                    </Badge>
+                                  )}
+                                </div>
+                                {pricing.notes && (
+                                  <p className="mt-1 text-[11.5px] text-muted-foreground">
+                                    {pricing.notes}
+                                  </p>
+                                )}
                               </div>
-                            ) : (
-                              <div className="space-y-2">
-                                {clientPricing.map((pricing) => (
-                                  <div
-                                    key={pricing.id}
-                                    className={`flex items-center justify-between p-3 rounded-lg border ${
-                                      !pricing.is_visible ? 'opacity-50' : ''
-                                    }`}
-                                  >
-                                    <div>
-                                      <div className="flex items-center gap-2">
-                                        <p className="font-medium">{pricing.service_name}</p>
-                                        <Badge variant="outline" className="text-xs">
-                                          {pricing.service_type}
-                                        </Badge>
-                                        {pricing.is_recurring && (
-                                          <Badge variant="secondary" className="text-xs">
-                                            {pricing.billing_frequency || 'Recurring'}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      {pricing.notes && (
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                          {pricing.notes}
-                                        </p>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-lg font-bold text-primary">
-                                        £{pricing.negotiated_price.toLocaleString()}
-                                        {pricing.is_recurring && (
-                                          <span className="text-sm font-normal text-muted-foreground">
-                                            /{pricing.billing_frequency?.replace('ly', '') || 'mo'}
-                                          </span>
-                                        )}
-                                      </span>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => togglePricingVisibility(pricing)}
-                                      >
-                                        {pricing.is_visible ? (
-                                          <Eye className="h-4 w-4" />
-                                        ) : (
-                                          <Eye className="h-4 w-4 opacity-50" />
-                                        )}
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => deletePricing(pricing.id)}
-                                      >
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                ))}
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-[13px] font-semibold tabular-nums text-foreground">
+                                  <Money value={pricing.negotiated_price} whole />
+                                  {pricing.is_recurring && (
+                                    <span className="text-[11px] font-normal text-muted-foreground">
+                                      /{pricing.billing_frequency?.replace('ly', '') || 'mo'}
+                                    </span>
+                                  )}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0"
+                                  aria-label={pricing.is_visible ? 'Hide from client' : 'Show to client'}
+                                  onClick={() => togglePricingVisibility(pricing)}
+                                >
+                                  {pricing.is_visible ? (
+                                    <Eye className="h-3.5 w-3.5" />
+                                  ) : (
+                                    <Eye className="h-3.5 w-3.5 opacity-50" />
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0"
+                                  aria-label="Remove pricing"
+                                  onClick={() => deletePricing(pricing.id)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 text-risk" />
+                                </Button>
                               </div>
-                            )}
-                          </TabsContent>
-                        </Tabs>
-                      </CardContent>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </Card>
-            </motion.div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              )}
+            </Card>
           ))
         )}
       </div>
 
       {/* Role Update Dialog */}
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
-        <DialogContent>
+        <DialogContent className="rounded-xl border-border/60 bg-card">
           <DialogHeader>
-            <DialogTitle>Update Member Role</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">Update member role</DialogTitle>
+            <DialogDescription className="text-[13px]">
               Change the role for {selectedMember?.display_name || selectedMember?.profile?.full_name}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Role</Label>
+              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Role</Label>
               <Select value={newRole} onValueChange={setNewRole}>
-                <SelectTrigger>
+                <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="owner">Owner (Full Access)</SelectItem>
-                  <SelectItem value="financial">Financial (Billing Access)</SelectItem>
-                  <SelectItem value="project">Project (No Billing)</SelectItem>
-                  <SelectItem value="member">Member (View Only)</SelectItem>
+                  <SelectItem value="owner">Owner (full access)</SelectItem>
+                  <SelectItem value="financial">Financial (billing access)</SelectItem>
+                  <SelectItem value="project">Project (no billing)</SelectItem>
+                  <SelectItem value="member">Member (view only)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-sm text-muted-foreground">
-              <p><strong>Owner:</strong> Full access to all features including billing and team management</p>
-              <p><strong>Financial:</strong> Can view and manage billing, invoices, and pricing</p>
-              <p><strong>Project:</strong> Access to project features, no billing visibility</p>
-              <p><strong>Member:</strong> View-only access to allowed sections</p>
+            <div className="space-y-1 text-[12px] text-muted-foreground">
+              <p><strong className="font-medium text-foreground">Owner:</strong> full access to all features including billing and team management</p>
+              <p><strong className="font-medium text-foreground">Financial:</strong> can view and manage billing, invoices and pricing</p>
+              <p><strong className="font-medium text-foreground">Project:</strong> access to project features, no billing visibility</p>
+              <p><strong className="font-medium text-foreground">Member:</strong> view-only access to allowed sections</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowRoleDialog(false)}>
+            <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowRoleDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={updateMemberRole}>Update Role</Button>
+            <Button className="h-8 rounded-lg px-3 text-xs" onClick={updateMemberRole}>Update role</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Add Pricing Dialog */}
       <Dialog open={showAddPricing} onOpenChange={setShowAddPricing}>
-        <DialogContent>
+        <DialogContent className="rounded-xl border-border/60 bg-card">
           <DialogHeader>
-            <DialogTitle>Add Custom Pricing</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">Add custom pricing</DialogTitle>
+            <DialogDescription className="text-[13px]">
               Set a negotiated price for {selectedTeam?.team_name || 'this client'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Service Type *</Label>
-              <Select 
-                value={newPricing.service_type} 
+              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Service type (required)</Label>
+              <Select
+                value={newPricing.service_type}
                 onValueChange={(v) => setNewPricing({ ...newPricing, service_type: v })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -648,20 +647,22 @@ export default function AdminClientAccounts() {
               </Select>
             </div>
             <div>
-              <Label>Service Name *</Label>
+              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Service name (required)</Label>
               <Input
                 value={newPricing.service_name}
                 onChange={(e) => setNewPricing({ ...newPricing, service_name: e.target.value })}
-                placeholder="e.g., Business Website Build"
+                placeholder="e.g. Business website build"
+                className="mt-1.5"
               />
             </div>
             <div>
-              <Label>Negotiated Price (£) *</Label>
+              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Negotiated price in £ (required)</Label>
               <Input
                 type="number"
                 value={newPricing.negotiated_price}
                 onChange={(e) => setNewPricing({ ...newPricing, negotiated_price: e.target.value })}
                 placeholder="0.00"
+                className="mt-1.5 tabular-nums"
               />
             </div>
             <div className="flex items-center gap-4">
@@ -673,11 +674,11 @@ export default function AdminClientAccounts() {
                   onChange={(e) => setNewPricing({ ...newPricing, is_recurring: e.target.checked })}
                   className="rounded"
                 />
-                <Label htmlFor="is_recurring">Recurring</Label>
+                <Label htmlFor="is_recurring" className="text-[13px]">Recurring</Label>
               </div>
               {newPricing.is_recurring && (
-                <Select 
-                  value={newPricing.billing_frequency} 
+                <Select
+                  value={newPricing.billing_frequency}
                   onValueChange={(v) => setNewPricing({ ...newPricing, billing_frequency: v })}
                 >
                   <SelectTrigger className="w-32">
@@ -692,19 +693,20 @@ export default function AdminClientAccounts() {
               )}
             </div>
             <div>
-              <Label>Notes (optional)</Label>
+              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Notes (optional)</Label>
               <Textarea
                 value={newPricing.notes}
                 onChange={(e) => setNewPricing({ ...newPricing, notes: e.target.value })}
-                placeholder="Any additional details about this pricing..."
+                placeholder="Any additional details about this pricing…"
+                className="mt-1.5"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddPricing(false)}>
+            <Button variant="outline" className="h-8 rounded-lg px-3 text-xs" onClick={() => setShowAddPricing(false)}>
               Cancel
             </Button>
-            <Button onClick={addClientPricing}>Add Pricing</Button>
+            <Button className="h-8 rounded-lg px-3 text-xs" onClick={addClientPricing}>Add pricing</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -729,7 +731,7 @@ function EnquiryInfoSection({ data }: { data: Record<string, any> }) {
         ['Phone', 'phone'],
         ['Company', 'company'],
         ['Address', 'business_address'],
-        ['How They Heard', 'how_did_you_hear'],
+        ['How they heard', 'how_did_you_hear'],
       ],
     },
     {
@@ -739,11 +741,11 @@ function EnquiryInfoSection({ data }: { data: Record<string, any> }) {
         ['Package', 'selected_package'],
         ['Budget', 'budget'],
         ['Timeline', 'timeline'],
-        ['Primary Goal', 'primary_goal'],
+        ['Primary goal', 'primary_goal'],
         ['Pages', 'page_count'],
-        ['Project Details', 'project_details'],
-        ['Must-Have Features', 'must_have_features'],
-        ['Inspiration Sites', 'inspiration_sites'],
+        ['Project details', 'project_details'],
+        ['Must-have features', 'must_have_features'],
+        ['Inspiration sites', 'inspiration_sites'],
         ['Competitors', 'competitors'],
       ],
     },
@@ -751,38 +753,38 @@ function EnquiryInfoSection({ data }: { data: Record<string, any> }) {
       title: 'Business',
       icon: Building,
       fields: [
-        ['Business Type', 'business_type'],
-        ['Employee Count', 'employee_count'],
-        ['Years in Business', 'years_in_business'],
-        ['Existing Site', 'website'],
-        ['Has Existing Site', 'has_existing_site'],
-        ['Social Media', 'social_media'],
-        ['Brand Colors', 'brand_colors'],
-        ['Additional Notes', 'additional_notes'],
+        ['Business type', 'business_type'],
+        ['Employee count', 'employee_count'],
+        ['Years in business', 'years_in_business'],
+        ['Existing site', 'website'],
+        ['Has existing site', 'has_existing_site'],
+        ['Social media', 'social_media'],
+        ['Brand colours', 'brand_colors'],
+        ['Additional notes', 'additional_notes'],
       ],
     },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {sections.map(({ title, icon: Icon, fields }) => {
         const rows = fields
           .map(([label, key]) => [label, fmt(data[key])] as const)
           .filter(([, v]) => v !== null);
         if (!rows.length) return null;
         return (
-          <div key={title} className="rounded-lg border bg-card">
-            <div className="flex items-center gap-2 px-4 py-3 border-b">
-              <Icon className="h-4 w-4 text-primary" />
-              <h4 className="font-semibold text-sm">{title}</h4>
+          <div key={title} className="rounded-[10px] border border-border/60 bg-card">
+            <div className="flex items-center gap-2 border-b border-border/60 px-4 py-2.5">
+              <Icon className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+              <h4 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{title}</h4>
             </div>
-            <div className="divide-y">
+            <div className="divide-y divide-border/60">
               {rows.map(([label, value]) => (
-                <div key={label} className="px-4 py-3">
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+                <div key={label} className="px-4 py-2.5">
+                  <p className="mb-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
                     {label}
                   </p>
-                  <p className="text-sm break-words">{value}</p>
+                  <p className="break-words text-[13px] text-ink-2">{value}</p>
                 </div>
               ))}
             </div>
@@ -792,4 +794,3 @@ function EnquiryInfoSection({ data }: { data: Record<string, any> }) {
     </div>
   );
 }
-

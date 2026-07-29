@@ -57,16 +57,16 @@ interface Profile {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof Clock }> = {
-  open: { label: 'Open', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: AlertCircle },
-  in_progress: { label: 'In Progress', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: Loader2 },
-  resolved: { label: 'Resolved', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: CheckCircle2 },
+  open: { label: 'Open', color: 'bg-attend/10 text-attend border-attend/20', icon: AlertCircle },
+  in_progress: { label: 'In progress', color: 'bg-primary/10 text-primary border-primary/20', icon: Loader2 },
+  resolved: { label: 'Resolved', color: 'bg-ok/10 text-ok border-ok/20', icon: CheckCircle2 },
   closed: { label: 'Closed', color: 'bg-muted text-muted-foreground border-border', icon: CheckCircle2 },
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: 'Low', color: 'bg-slate-500/10 text-slate-600 border-slate-500/20' },
-  standard: { label: 'Standard', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
-  high: { label: 'High', color: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
+  low: { label: 'Low', color: 'bg-foreground/[0.06] text-ink-2 border-border/60' },
+  standard: { label: 'Standard', color: 'bg-foreground/[0.06] text-ink-2 border-border/60' },
+  high: { label: 'High', color: 'bg-risk/10 text-risk border-risk/20' },
   urgent: { label: 'Urgent', color: 'bg-destructive/10 text-destructive border-destructive/20' },
 };
 
@@ -283,8 +283,8 @@ export default function AdminSupportTickets() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-500/10">
-                <AlertCircle className="w-4 h-4 text-amber-600" />
+              <div className="p-2 rounded-lg bg-attend/10">
+                <AlertCircle className="w-4 h-4 text-attend" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.open}</p>
@@ -296,8 +296,8 @@ export default function AdminSupportTickets() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <Loader2 className="w-4 h-4 text-blue-600" />
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Loader2 className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.in_progress}</p>
@@ -309,8 +309,8 @@ export default function AdminSupportTickets() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-500/10">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="p-2 rounded-lg bg-ok/10">
+                <CheckCircle2 className="w-4 h-4 text-ok" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.resolved}</p>

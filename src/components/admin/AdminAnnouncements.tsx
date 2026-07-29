@@ -39,9 +39,9 @@ interface Announcement {
 
 const priorityColors: Record<string, string> = {
   low: 'bg-muted text-muted-foreground',
-  normal: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
-  high: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
-  urgent: 'bg-red-500/15 text-red-600 dark:text-red-400',
+  normal: 'bg-foreground/[0.06] text-ink-2',
+  high: 'bg-attend/10 text-attend',
+  urgent: 'bg-risk/10 text-risk',
 };
 
 export default function AdminAnnouncements() {
