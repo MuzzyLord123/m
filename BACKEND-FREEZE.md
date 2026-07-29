@@ -89,3 +89,13 @@ sorted-diff of all logic-bearing lines against HEAD: the only differences
 are className strings and one removed marketing microcopy paragraph. All
 handlers, ids, values, validation, autoComplete and supabase calls are
 byte-identical.
+
+## Recorded exception addendum — 2026-07-29 (3)
+
+GetStarted.tsx enquiry wizard rebuilt as a dual-panel experience at the
+owner's explicit request ("enterprise level… dual page look… fits on the
+entire page, no scroll"). Presentation only: new EnquiryBrandPanel
+(marketing component) on the left, compressed elite field layout on the
+right. Verified by sorted-diff of every logic-bearing line (supabase
+insert, handlers, validation, autosave, field names/values) against HEAD:
+zero non-className differences.

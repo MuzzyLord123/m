@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Send, 
@@ -22,8 +23,8 @@ import {
   AlertCircle,
   CheckCircle2
 } from "lucide-react";
-import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { EnquiryBrandPanel } from "@/components/marketing/EnquiryBrandPanel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -391,8 +392,14 @@ export default function GetStarted() {
     );
   };
 
+  // Elite field + label recipe — presentation only, shared with the auth pages.
+  const F = "h-11 rounded-xl border-border/60 bg-foreground/[0.03] text-[15px] shadow-none transition-all duration-200 focus-visible:border-primary/60 focus-visible:ring-1 focus-visible:ring-primary/30 dark:bg-foreground/[0.05]";
+  const L = "mb-1 block font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground";
+  const chipOn = "border-primary bg-primary text-primary-foreground";
+  const chipOff = "border-border/60 text-foreground hover:border-primary/50";
+
   return (
-    <Layout>
+    <div className="relative min-h-screen bg-background lg:grid lg:grid-cols-[1.05fr_1fr]">
       {/* Draft Restore Dialog */}
       <Dialog open={showDraftDialog} onOpenChange={setShowDraftDialog}>
         <DialogContent className="sm:max-w-md">
@@ -416,32 +423,31 @@ export default function GetStarted() {
         </DialogContent>
       </Dialog>
 
-      <section className="min-h-screen pt-24 pb-16 relative overflow-hidden">
-        {/* Conversion zone: calm by design. The stock-photo wash is gone — just
-            the drafting grid, fading out before the form itself. No aurora, no
-            drawn arcs, nothing that competes with filling in a field. */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[50vh]"
-          aria-hidden
-          style={{
-            backgroundImage: `
-              linear-gradient(hsl(var(--foreground) / 0.025) 1px, transparent 1px),
-              linear-gradient(90deg, hsl(var(--foreground) / 0.025) 1px, transparent 1px)
-            `,
-            backgroundSize: "72px 72px",
-            maskImage: "radial-gradient(ellipse 80% 90% at 50% 0%, black, transparent 78%)",
-            WebkitMaskImage: "radial-gradient(ellipse 80% 90% at 50% 0%, black, transparent 78%)",
-          }}
-        />
-        <div className="container-tight max-w-3xl relative">
-          {submitted ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="relative overflow-hidden border border-border/60 bg-background p-12 md:p-16"
+      {/* Brand panel — the live intake ledger. Hidden below lg. */}
+      <EnquiryBrandPanel step={step} steps={stepTitles} submitted={submitted} />
+
+      {/* Form column */}
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 flex min-h-screen flex-col lg:h-screen"
+      >
+        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-6 sm:px-8 lg:min-h-0 lg:py-5">
+          {/* Top bar */}
+          <div className="mb-4 flex items-center justify-between">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
             >
-              <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-primary" />
+              <ArrowLeft className="w-4 h-4" />
+              Back to website
+            </Link>
+            <span className="mono-label lg:hidden">Free preview first</span>
+          </div>
+
+          {submitted ? (
+            <div className="flex flex-1 flex-col items-center justify-center text-center">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -450,27 +456,25 @@ export default function GetStarted() {
               >
                 <Check className="h-8 w-8 text-primary-foreground" strokeWidth={2.2} />
               </motion.div>
-              <h2 className="mb-4 font-display text-3xl font-semibold tracking-[-0.03em] md:text-4xl">
+              <h2 className="mb-3 font-display text-3xl font-semibold tracking-[-0.03em] md:text-4xl">
                 Thank you, {formData.firstName}.
               </h2>
-              <p className="text-lg text-muted-foreground mb-8 max-w-md">
+              <p className="mb-7 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
                 We've received your enquiry and will be in touch within 24 hours to discuss your project.
               </p>
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
+              <div className="mb-8 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px]">
                 <Mail className="w-4 h-4" />
                 Check your inbox for a confirmation email
               </div>
-            </motion.div>
+              <Button variant="outline" asChild>
+                <Link to="/">Return to website</Link>
+              </Button>
+            </div>
           ) : (
             <>
-              {/* Sheet header + progress rail — the drafting-index voice */}
-              <div className="mb-10">
-                <div className="mb-8 flex items-center justify-between">
-                  <span className="mono-label">Project enquiry</span>
-                  <span className="mono-label text-primary">Free preview first</span>
-                </div>
-
-                <div className="flex items-center gap-2" aria-hidden>
+              {/* Mobile progress rail — the left ledger covers this on lg */}
+              <div className="mb-4 lg:hidden" aria-hidden>
+                <div className="flex items-center gap-2">
                   {stepTitles.map((s, i) => (
                     <div
                       key={i}
@@ -481,20 +485,20 @@ export default function GetStarted() {
                           backgroundColor: step > i ? "hsl(var(--primary))" : "transparent",
                           borderColor: step > i ? "hsl(var(--primary))" : "hsl(var(--border))",
                         }}
-                        className={`relative flex h-8 w-8 items-center justify-center border transition-colors ${
+                        className={`relative flex h-7 w-7 items-center justify-center rounded-lg border transition-colors ${
                           step > i ? "text-primary-foreground" : "text-muted-foreground"
                         }`}
                       >
                         {step > i + 1 ? (
-                          <Check className="h-3.5 w-3.5" strokeWidth={2.4} />
+                          <Check className="h-3 w-3" strokeWidth={2.4} />
                         ) : (
-                          <span className="font-mono text-[11px] tabular-nums">
+                          <span className="font-mono text-[10px] tabular-nums">
                             {String(i + 1).padStart(2, "0")}
                           </span>
                         )}
                       </motion.div>
                       {i < stepTitles.length - 1 && (
-                        <div className="mx-2 h-px flex-1 overflow-hidden bg-border">
+                        <div className="mx-1.5 h-px flex-1 overflow-hidden bg-border">
                           <motion.div
                             initial={{ width: "0%" }}
                             animate={{ width: step > i + 1 ? "100%" : "0%" }}
@@ -506,48 +510,38 @@ export default function GetStarted() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 flex items-center justify-between">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    Step {step} of {TOTAL_STEPS}
-                  </p>
-                  {lastSaved && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
-                    >
-                      <Save className="h-3 w-3" />
-                      Draft saved
-                    </motion.p>
-                  )}
-                </div>
               </div>
 
-              {/* Step Header */}
+              {/* Step header */}
               <motion.div
                 key={`header-${step}`}
-                initial={{ opacity: 0, y: -14 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="mb-10"
               >
-                <div className="mb-5 flex items-center gap-3">
-                  <span className="font-mono text-[11px] tabular-nums text-primary">
-                    {String(step).padStart(2, "0")}
+                <div className="mb-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-[11px] tabular-nums text-primary">
+                      {String(step).padStart(2, "0")}
+                    </span>
+                    <span className="h-px w-8 bg-primary" />
+                    <CurrentIcon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                  </div>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    Step {step} of {TOTAL_STEPS}
                   </span>
-                  <span className="h-px w-8 bg-primary" />
-                  <CurrentIcon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
                 </div>
-                <h1 className="font-display text-3xl font-semibold tracking-[-0.03em] md:text-4xl">
+                <h1 className="font-display text-2xl font-semibold tracking-[-0.02em] md:text-3xl lg:text-2xl xl:text-3xl">
                   {stepTitles[step - 1].title}
                 </h1>
-                <p className="mt-2 text-lg font-light text-muted-foreground">
+                <p className="mt-1 text-sm font-light text-muted-foreground">
                   {stepTitles[step - 1].subtitle}
                 </p>
               </motion.div>
 
-              {/* Form Steps */}
-              <div className="relative overflow-hidden">
+              {/* Step content — fills the column; scrolls inside itself if a
+                  short laptop viewport ever needs it, so the page never does */}
+              <div className="relative -mr-2 mt-3 flex-1 overflow-x-hidden pr-2 lg:min-h-0 lg:overflow-y-auto">
                 <AnimatePresence mode="wait" custom={direction}>
                   <motion.div
                     key={step}
@@ -557,14 +551,14 @@ export default function GetStarted() {
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    className="border border-border/60 bg-background p-6 md:p-10"
+                    className="pb-2"
                   >
                     {/* Step 1: Personal Info */}
                     {step === 1 && (
-                      <div className="space-y-6">
-                        <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
                           <div>
-                            <label className="block text-sm font-medium mb-2">First Name *</label>
+                            <label className={L}>First name</label>
                             <div className="relative">
                               <Input
                                 name="firstName"
@@ -572,7 +566,7 @@ export default function GetStarted() {
                                 value={formData.firstName}
                                 onChange={handleChange}
                                 onBlur={() => handleBlur("firstName")}
-                                className={getFieldClasses("firstName", "h-12 text-base pr-12")}
+                                className={getFieldClasses("firstName", `${F} pr-10`)}
                               />
                               <FieldSuccess name="firstName" />
                             </div>
@@ -581,7 +575,7 @@ export default function GetStarted() {
                             </AnimatePresence>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium mb-2">Last Name *</label>
+                            <label className={L}>Last name</label>
                             <div className="relative">
                               <Input
                                 name="lastName"
@@ -589,7 +583,7 @@ export default function GetStarted() {
                                 value={formData.lastName}
                                 onChange={handleChange}
                                 onBlur={() => handleBlur("lastName")}
-                                className={getFieldClasses("lastName", "h-12 text-base pr-12")}
+                                className={getFieldClasses("lastName", `${F} pr-10`)}
                               />
                               <FieldSuccess name="lastName" />
                             </div>
@@ -599,9 +593,9 @@ export default function GetStarted() {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-2">Email Address *</label>
+                          <label className={L}>Email address</label>
                           <div className="relative">
-                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                               name="email"
                               type="email"
@@ -609,7 +603,7 @@ export default function GetStarted() {
                               value={formData.email}
                               onChange={handleChange}
                               onBlur={() => handleBlur("email")}
-                              className={getFieldClasses("email", "h-12 text-base pl-12 pr-12")}
+                              className={getFieldClasses("email", `${F} pl-10 pr-10`)}
                             />
                             <FieldSuccess name="email" />
                           </div>
@@ -618,9 +612,9 @@ export default function GetStarted() {
                           </AnimatePresence>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-2">Phone Number</label>
+                          <label className={L}>Phone</label>
                           <div className="relative">
-                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <Phone className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                               name="phone"
                               type="tel"
@@ -628,7 +622,7 @@ export default function GetStarted() {
                               value={formData.phone}
                               onChange={handleChange}
                               onBlur={() => handleBlur("phone")}
-                              className={getFieldClasses("phone", "h-12 text-base pl-12 pr-12")}
+                              className={getFieldClasses("phone", `${F} pl-10 pr-10`)}
                             />
                             <FieldSuccess name="phone" />
                           </div>
@@ -641,18 +635,18 @@ export default function GetStarted() {
 
                     {/* Step 2: Business Info */}
                     {step === 2 && (
-                      <div className="space-y-6">
+                      <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium mb-2">Business Name *</label>
+                          <label className={L}>Business name</label>
                           <div className="relative">
-                            <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <Building2 className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                               name="businessName"
                               placeholder="Your Business Ltd"
                               value={formData.businessName}
                               onChange={handleChange}
                               onBlur={() => handleBlur("businessName")}
-                              className={getFieldClasses("businessName", "h-12 text-base pl-12 pr-12")}
+                              className={getFieldClasses("businessName", `${F} pl-10 pr-10`)}
                             />
                             <FieldSuccess name="businessName" />
                           </div>
@@ -661,8 +655,8 @@ export default function GetStarted() {
                           </AnimatePresence>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-3">Business Type *</label>
-                          <div className="grid grid-cols-2 gap-3">
+                          <label className={L}>Business type</label>
+                          <div className="grid grid-cols-2 gap-2">
                             {businessTypes.map((type) => (
                               <button
                                 key={type}
@@ -671,10 +665,8 @@ export default function GetStarted() {
                                   setFormData(prev => ({ ...prev, businessType: type }));
                                   validation.setFieldTouched("businessType");
                                 }}
-                                className={`rounded-lg border p-3 text-sm font-medium text-left transition-colors ${
-                                  formData.businessType === type
-                                    ? "border-primary bg-primary text-primary-foreground"
-                                    : "border-border/60 text-foreground hover:border-primary/50"
+                                className={`rounded-lg border px-3 py-2 text-left text-[13px] font-medium transition-colors ${
+                                  formData.businessType === type ? chipOn : chipOff
                                 }`}
                               >
                                 {type}
@@ -686,56 +678,56 @@ export default function GetStarted() {
                           </AnimatePresence>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-2">Business Address</label>
+                          <label className={L}>Business address</label>
                           <div className="relative">
-                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <MapPin className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                               name="businessAddress"
                               placeholder="123 High Street, London"
                               value={formData.businessAddress}
                               onChange={handleChange}
-                              className="h-12 text-base pl-12"
+                              className={`${F} pl-10`}
                             />
                           </div>
                         </div>
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
                           <div>
-                            <label className="block text-sm font-medium mb-2">Current Website</label>
+                            <label className={L}>Current website</label>
                             <div className="relative">
-                              <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                              <Globe className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                               <Input
                                 name="website"
                                 placeholder="www.example.com"
                                 value={formData.website}
                                 onChange={handleChange}
-                                className="h-12 text-base pl-12"
+                                className={`${F} pl-10`}
                               />
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium mb-2">Years in Business</label>
+                            <label className={L}>Years in business</label>
                             <div className="relative">
-                              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                              <Calendar className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                               <Input
                                 name="yearsInBusiness"
                                 placeholder="e.g. 5 years"
                                 value={formData.yearsInBusiness}
                                 onChange={handleChange}
-                                className="h-12 text-base pl-12"
+                                className={`${F} pl-10`}
                               />
                             </div>
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium mb-2">Number of Employees</label>
+                          <label className={L}>Number of employees</label>
                           <div className="relative">
-                            <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <Users className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <Input
                               name="employeeCount"
                               placeholder="e.g. 1-5, 10-20, 50+"
                               value={formData.employeeCount}
                               onChange={handleChange}
-                              className="h-12 text-base pl-12"
+                              className={`${F} pl-10`}
                             />
                           </div>
                         </div>
@@ -744,10 +736,10 @@ export default function GetStarted() {
 
                     {/* Step 3: Project Requirements */}
                     {step === 3 && (
-                      <div className="space-y-8">
+                      <div className="space-y-3">
                         <div>
-                          <label className="block text-sm font-medium mb-3">Which package interests you? *</label>
-                          <div className="space-y-3">
+                          <label className={L}>Which package interests you?</label>
+                          <div className="space-y-2">
                             {packages.map((pkg) => (
                               <button
                                 key={pkg.id}
@@ -756,18 +748,18 @@ export default function GetStarted() {
                                   setFormData(prev => ({ ...prev, selectedPackage: pkg.name }));
                                   validation.setFieldTouched("selectedPackage");
                                 }}
-                                className={`w-full rounded-lg border p-4 text-left transition-colors ${
+                                className={`w-full rounded-lg border px-3.5 py-2 text-left transition-colors ${
                                   formData.selectedPackage === pkg.name
                                     ? "border-primary bg-primary/[0.06]"
                                     : "border-border/60 hover:border-primary/50"
                                 }`}
                               >
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <div className="font-semibold">{pkg.name}</div>
-                                    <div className="text-sm text-muted-foreground">{pkg.desc}</div>
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="text-sm font-semibold tracking-tight">{pkg.name}</div>
+                                    <div className="text-[11px] font-light leading-tight text-muted-foreground">{pkg.desc}</div>
                                   </div>
-                                  <div className={`text-sm font-bold ${formData.selectedPackage === pkg.name ? "text-primary" : "text-muted-foreground"}`}>
+                                  <div className={`shrink-0 font-mono text-[9px] uppercase tracking-[0.16em] ${formData.selectedPackage === pkg.name ? "text-primary" : "text-muted-foreground"}`}>
                                     {pkg.price}
                                   </div>
                                 </div>
@@ -780,17 +772,15 @@ export default function GetStarted() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-3">What's your budget?</label>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          <label className={L}>What's your budget?</label>
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             {budgetRanges.map((budget) => (
                               <button
                                 key={budget}
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, budget }))}
-                                className={`rounded-lg border p-3 text-sm font-medium transition-colors ${
-                                  formData.budget === budget
-                                    ? "border-primary bg-primary text-primary-foreground"
-                                    : "border-border/60 text-foreground hover:border-primary/50"
+                                className={`rounded-lg border px-3 py-2 text-[13px] font-medium transition-colors ${
+                                  formData.budget === budget ? chipOn : chipOff
                                 }`}
                               >
                                 {budget}
@@ -800,17 +790,15 @@ export default function GetStarted() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-3">When do you need it?</label>
-                          <div className="space-y-2">
+                          <label className={L}>When do you need it?</label>
+                          <div className="grid gap-2 sm:grid-cols-2">
                             {timelines.map((timeline) => (
                               <button
                                 key={timeline}
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, timeline }))}
-                                className={`w-full rounded-lg border p-3 text-sm font-medium text-left transition-colors ${
-                                  formData.timeline === timeline
-                                    ? "border-primary bg-primary text-primary-foreground"
-                                    : "border-border/60 text-foreground hover:border-primary/50"
+                                className={`rounded-lg border px-3 py-2 text-left text-[13px] font-medium transition-colors ${
+                                  formData.timeline === timeline ? chipOn : chipOff
                                 }`}
                               >
                                 {timeline}
@@ -820,17 +808,15 @@ export default function GetStarted() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-3">Do you have an existing website?</label>
-                          <div className="grid grid-cols-3 gap-3">
+                          <label className={L}>Do you have an existing website?</label>
+                          <div className="grid grid-cols-3 gap-2">
                             {["Yes, needs redesign", "Yes, keep some parts", "No, starting fresh"].map((option) => (
                               <button
                                 key={option}
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, hasExistingSite: option }))}
-                                className={`rounded-lg border p-3 text-sm font-medium transition-colors ${
-                                  formData.hasExistingSite === option
-                                    ? "border-primary bg-primary text-primary-foreground"
-                                    : "border-border/60 text-foreground hover:border-primary/50"
+                                className={`rounded-lg border px-2 py-2 text-[12px] font-medium transition-colors ${
+                                  formData.hasExistingSite === option ? chipOn : chipOff
                                 }`}
                               >
                                 {option}
@@ -843,10 +829,10 @@ export default function GetStarted() {
 
                     {/* Step 4: Goals & Features */}
                     {step === 4 && (
-                      <div className="space-y-8">
+                      <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium mb-3">What's your primary goal? *</label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <label className={L}>What's your primary goal?</label>
+                          <div className="grid grid-cols-2 gap-2">
                             {[
                               "Get more enquiries/leads",
                               "Sell products online",
@@ -864,10 +850,8 @@ export default function GetStarted() {
                                   setFormData(prev => ({ ...prev, primaryGoal: goal }));
                                   validation.setFieldTouched("primaryGoal");
                                 }}
-                                className={`rounded-lg border p-4 text-sm font-medium text-left transition-colors ${
-                                  formData.primaryGoal === goal
-                                    ? "border-primary bg-primary text-primary-foreground"
-                                    : "border-border/60 text-foreground hover:border-primary/50"
+                                className={`rounded-lg border px-3 py-2 text-left text-[13px] font-medium transition-colors ${
+                                  formData.primaryGoal === goal ? chipOn : chipOff
                                 }`}
                               >
                                 {goal}
@@ -880,8 +864,8 @@ export default function GetStarted() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-3">Must-have features (select all that apply)</label>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          <label className={L}>Must-have features</label>
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             {[
                               "Contact Form",
                               "Google Maps",
@@ -900,13 +884,11 @@ export default function GetStarted() {
                                 key={feature}
                                 type="button"
                                 onClick={() => handleFeatureToggle(feature)}
-                                className={`flex items-center gap-2 rounded-lg border p-3 text-sm font-medium transition-colors ${
-                                  formData.mustHaveFeatures.includes(feature)
-                                    ? "border-primary bg-primary text-primary-foreground"
-                                    : "border-border/60 text-foreground hover:border-primary/50"
+                                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-[12.5px] font-medium transition-colors ${
+                                  formData.mustHaveFeatures.includes(feature) ? chipOn : chipOff
                                 }`}
                               >
-                                {formData.mustHaveFeatures.includes(feature) && <Check className="w-4 h-4" />}
+                                {formData.mustHaveFeatures.includes(feature) && <Check className="h-3.5 w-3.5 shrink-0" />}
                                 {feature}
                               </button>
                             ))}
@@ -914,39 +896,39 @@ export default function GetStarted() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-2">Any competitor websites you like?</label>
+                          <label className={L}>Any competitor websites you like?</label>
                           <Textarea
                             name="competitors"
                             placeholder="Share URLs of websites you admire or want to compete with..."
                             value={formData.competitors}
                             onChange={handleChange}
-                            rows={3}
-                            className="text-base"
+                            rows={2}
+                            className={`${F} h-auto min-h-[64px]`}
                           />
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
                           <div>
-                            <label className="block text-sm font-medium mb-2">Brand Colours</label>
+                            <label className={L}>Brand colours</label>
                             <div className="relative">
-                              <Palette className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                              <Palette className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                               <Input
                                 name="brandColors"
                                 placeholder="e.g. Blue and white"
                                 value={formData.brandColors}
                                 onChange={handleChange}
-                                className="h-12 text-base pl-12"
+                                className={`${F} pl-10`}
                               />
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium mb-2">Inspiration Sites</label>
+                            <label className={L}>Inspiration sites</label>
                             <Input
                               name="inspirationSites"
                               placeholder="URLs of sites you love"
                               value={formData.inspirationSites}
                               onChange={handleChange}
-                              className="h-12 text-base"
+                              className={F}
                             />
                           </div>
                         </div>
@@ -955,40 +937,38 @@ export default function GetStarted() {
 
                     {/* Step 5: Final Details */}
                     {step === 5 && (
-                      <div className="space-y-6">
+                      <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium mb-2">Tell us about your project *</label>
+                          <label className={L}>Tell us about your project</label>
                           <Textarea
                             name="projectDescription"
                             placeholder="Describe your vision, what you want to achieve, any specific requirements or ideas you have... (minimum 20 characters)"
                             value={formData.projectDescription}
                             onChange={handleChange}
                             onBlur={() => handleBlur("projectDescription")}
-                            rows={5}
-                            className={getFieldClasses("projectDescription", "text-base")}
+                            rows={4}
+                            className={getFieldClasses("projectDescription", `${F} h-auto min-h-[104px]`)}
                           />
                           <div className="flex items-center justify-between mt-1">
                             <AnimatePresence>
                               <FieldError name="projectDescription" />
                             </AnimatePresence>
-                            <span className={`text-xs ${formData.projectDescription.length < 20 ? 'text-muted-foreground' : 'text-[hsl(var(--success))]'}`}>
+                            <span className={`font-mono text-[10px] uppercase tracking-[0.14em] ${formData.projectDescription.length < 20 ? 'text-muted-foreground' : 'text-[hsl(var(--success))]'}`}>
                               {formData.projectDescription.length}/20 min
                             </span>
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-3">How did you hear about us?</label>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          <label className={L}>How did you hear about us?</label>
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             {howDidYouHear.map((source) => (
                               <button
                                 key={source}
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, howDidYouHear: source }))}
-                                className={`rounded-lg border p-3 text-sm font-medium transition-colors ${
-                                  formData.howDidYouHear === source
-                                    ? "border-primary bg-primary text-primary-foreground"
-                                    : "border-border/60 text-foreground hover:border-primary/50"
+                                className={`rounded-lg border px-2.5 py-2 text-[12.5px] font-medium transition-colors ${
+                                  formData.howDidYouHear === source ? chipOn : chipOff
                                 }`}
                               >
                                 {source}
@@ -997,54 +977,55 @@ export default function GetStarted() {
                           </div>
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Your Social Media Handles</label>
-                          <div className="relative">
-                            <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <Input
-                              name="socialMedia"
-                              placeholder="@yourbusiness (Instagram, Facebook, etc.)"
-                              value={formData.socialMedia}
+                        <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
+                          <div>
+                            <label className={L}>Social media handles</label>
+                            <div className="relative">
+                              <Instagram className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                              <Input
+                                name="socialMedia"
+                                placeholder="@yourbusiness"
+                                value={formData.socialMedia}
+                                onChange={handleChange}
+                                className={`${F} pl-10`}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className={L}>Anything else we should know?</label>
+                            <Textarea
+                              name="additionalNotes"
+                              placeholder="Any additional information or special requirements..."
+                              value={formData.additionalNotes}
                               onChange={handleChange}
-                              className="h-12 text-base pl-12"
+                              rows={1}
+                              className={`${F} h-11 min-h-[44px]`}
                             />
                           </div>
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Anything else we should know?</label>
-                          <Textarea
-                            name="additionalNotes"
-                            placeholder="Any additional information, questions, or special requirements..."
-                            value={formData.additionalNotes}
-                            onChange={handleChange}
-                            rows={3}
-                            className="text-base"
-                          />
-                        </div>
-
-                        {/* Summary Preview */}
-                        <div className="border border-border/60 p-6">
-                          <h4 className="mb-4 flex items-center gap-2.5 font-display font-semibold tracking-tight">
-                            <Briefcase className="h-4 w-4 text-primary" strokeWidth={1.5} />
-                            Quick summary
+                        {/* Summary Preview — the ledger, in miniature */}
+                        <div className="rounded-xl border border-border/60 p-4">
+                          <h4 className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                            <Briefcase className="h-3.5 w-3.5 text-primary" strokeWidth={1.5} />
+                            Your enquiry
                           </h4>
-                          <div className="grid md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-muted-foreground">Name:</span>
-                              <span className="ml-2 font-medium">{formData.firstName} {formData.lastName}</span>
+                          <div className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+                            <div className="flex items-baseline justify-between gap-4 border-b border-border/40 pb-1.5">
+                              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Name</span>
+                              <span className="truncate font-medium">{formData.firstName} {formData.lastName}</span>
                             </div>
-                            <div>
-                              <span className="text-muted-foreground">Business:</span>
-                              <span className="ml-2 font-medium">{formData.businessName}</span>
+                            <div className="flex items-baseline justify-between gap-4 border-b border-border/40 pb-1.5">
+                              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Business</span>
+                              <span className="truncate font-medium">{formData.businessName}</span>
                             </div>
-                            <div>
-                              <span className="text-muted-foreground">Package:</span>
-                              <span className="ml-2 font-medium">{formData.selectedPackage}</span>
+                            <div className="flex items-baseline justify-between gap-4 border-b border-border/40 pb-1.5">
+                              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Package</span>
+                              <span className="truncate font-medium">{formData.selectedPackage}</span>
                             </div>
-                            <div>
-                              <span className="text-muted-foreground">Budget:</span>
-                              <span className="ml-2 font-medium">{formData.budget || "Not specified"}</span>
+                            <div className="flex items-baseline justify-between gap-4 border-b border-border/40 pb-1.5">
+                              <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">Budget</span>
+                              <span className="truncate font-medium">{formData.budget || "Not specified"}</span>
                             </div>
                           </div>
                         </div>
@@ -1054,18 +1035,29 @@ export default function GetStarted() {
                 </AnimatePresence>
               </div>
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8">
+              {/* Navigation — pinned to the column foot */}
+              <div className="mt-3 flex items-center justify-between gap-4 border-t border-border/60 pt-3.5">
                 <Button
                   variant="outline"
                   size="lg"
                   onClick={prevStep}
                   disabled={step === 1}
-                  className={`${step === 1 ? "opacity-0 pointer-events-none" : ""}`}
+                  className={`h-11 rounded-xl ${step === 1 ? "opacity-0 pointer-events-none" : ""}`}
                 >
                   <ArrowLeft className="w-5 h-5 mr-2" />
                   Back
                 </Button>
+
+                {lastSaved && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="hidden items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground sm:flex"
+                  >
+                    <Save className="h-3 w-3" />
+                    Draft saved
+                  </motion.p>
+                )}
 
                 {step < TOTAL_STEPS ? (
                   <Button
@@ -1073,6 +1065,7 @@ export default function GetStarted() {
                     size="lg"
                     onClick={nextStep}
                     disabled={!canProceed()}
+                    className="h-11 rounded-xl"
                   >
                     Continue
                     <ArrowRight className="w-5 h-5 ml-2" />
@@ -1083,6 +1076,7 @@ export default function GetStarted() {
                     size="lg"
                     onClick={handleSubmit}
                     disabled={loading || !canProceed()}
+                    className="h-11 rounded-xl"
                   >
                     {loading ? (
                       <>
@@ -1101,7 +1095,7 @@ export default function GetStarted() {
             </>
           )}
         </div>
-      </section>
-    </Layout>
+      </motion.div>
+    </div>
   );
 }
