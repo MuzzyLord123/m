@@ -72,7 +72,7 @@ export function NotesPanel({ entityType, entityId, orgId }: { entityType: Entity
 
   return (
     <div>
-      <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+      <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em] flex items-center gap-1.5">
         <StickyNote className="h-3 w-3" /> Notes
       </label>
       <div className="mt-1.5 space-y-2">
@@ -91,16 +91,19 @@ export function NotesPanel({ entityType, entityId, orgId }: { entityType: Entity
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-3"><Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" /></div>
+          <div className="space-y-1.5" aria-hidden>
+            <div className="h-14 rounded-md border border-border/60 bg-foreground/[0.04] animate-pulse" />
+            <div className="h-14 rounded-md border border-border/60 bg-foreground/[0.04] animate-pulse" />
+          </div>
         ) : notes.length === 0 ? (
-          <p className="text-xs text-muted-foreground italic">No notes yet.</p>
+          <p className="text-xs text-muted-foreground">No notes yet.</p>
         ) : (
           <ul className="space-y-1.5">
             {notes.map(n => (
-              <li key={n.id} className="group rounded-md border border-border bg-background/50 p-2.5">
-                <p className="text-sm whitespace-pre-wrap text-foreground/90">{n.body}</p>
+              <li key={n.id} className="group rounded-md border border-border/60 bg-background/50 p-2.5">
+                <p className="text-sm whitespace-pre-wrap text-ink-2">{n.body}</p>
                 <div className="flex items-center justify-between mt-1.5">
-                  <span className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(n.occurred_at), { addSuffix: true })}</span>
+                  <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{formatDistanceToNow(new Date(n.occurred_at), { addSuffix: true })}</span>
                   <button
                     onClick={() => removeNote(n.id)}
                     className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"

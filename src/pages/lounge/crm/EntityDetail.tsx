@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { X, Building2, User, Target, Mail, Phone, Globe, MapPin, DollarSign, Clock, Sparkles, Loader2, ExternalLink, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Building2, User, Target, Mail, Phone, Globe, MapPin, PoundSterling, Clock, FileText, ExternalLink, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,11 +12,12 @@ import {
 import { formatDistanceToNow, format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { fetchTimeline, fetchFinancials, setLifecycleStage, type EntityType, type LifecycleStage } from './useCRMData';
-import { adminColor, type AdminUser } from './useAdmins';
+import { type AdminUser } from './useAdmins';
 import { supabase } from '@/integrations/supabase/client';
 import { UserPlus } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { NotesPanel } from './NotesPanel';
+import { AvatarID, SkeletonLedger } from '@/components/platform';
 
 interface Props {
   entityType: EntityType;
@@ -30,13 +30,7 @@ interface Props {
   onChanged: () => void;
 }
 
-const REL_COLORS: Record<string, string> = {
-  customer: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-  lead: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-  supplier: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-  partner: 'bg-violet-500/15 text-violet-400 border-violet-500/30',
-  investor: 'bg-pink-500/15 text-pink-400 border-pink-500/30',
-};
+const REL_CHIP = 'text-[10px] font-medium px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground capitalize';
 
 export function EntityDetail({ entityType, entity, stages, list, admins, onNavigate, onClose, onChanged }: Props) {
   const { toast } = useToast();
@@ -95,27 +89,24 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      className="flex flex-col h-full bg-card"
-    >
+    <div className="flex flex-col h-full bg-card border-l border-border/60">
       {/* Header */}
-      <div className="flex items-start gap-3 p-4 sm:p-5 border-b border-border">
-        <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Icon className="h-5 w-5 text-primary" />
+      <div className="flex items-start gap-3 p-4 sm:p-5 border-b border-border/60">
+        <div className="h-9 w-9 rounded-[10px] border border-border/60 bg-sunken flex items-center justify-center shrink-0">
+          <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold text-foreground truncate">{title || 'Untitled'}</h2>
+          <p className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{entityType}</p>
+          <h2 className="text-[15px] font-semibold text-foreground truncate">{title || 'Untitled'}</h2>
           <div className="flex flex-wrap gap-1.5 mt-1.5">
             {(entity.relationship_type || []).map((r: string) => (
-              <span key={r} className={`text-[10px] font-medium px-2 py-0.5 rounded-full border capitalize ${REL_COLORS[r] || 'bg-muted text-muted-foreground border-border'}`}>
+              <span key={r} className={REL_CHIP}>
                 {r}
               </span>
             ))}
             {currentStage && (
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-border" style={{ backgroundColor: `${currentStage.color}15`, color: currentStage.color, borderColor: `${currentStage.color}40` }}>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground">
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: currentStage.color }} />
                 {currentStage.name}
               </span>
             )}
@@ -132,7 +123,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-[10px] text-muted-foreground tabular-nums px-1 min-w-[54px] text-center">
+            <span className="font-mono text-[10px] text-muted-foreground tabular-nums px-1 min-w-[54px] text-center">
               {currentIndex + 1} / {list.length}
             </span>
             <Button
@@ -163,7 +154,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
           <TabsContent value="overview" className="p-4 sm:p-5 space-y-4 mt-3">
             {/* Lifecycle stage selector */}
             <div>
-              <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Lifecycle Stage</label>
+              <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Lifecycle stage</label>
               <Select value={entity.lifecycle_stage_id || ''} onValueChange={handleStageChange} disabled={updating}>
                 <SelectTrigger className="mt-1.5 h-9">
                   <SelectValue placeholder="Set stage" />
@@ -184,7 +175,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
             {/* Owner / assignment picker */}
             {admins && admins.length > 0 && (
               <div>
-                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Assigned to</label>
+                <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Assigned to</label>
                 <OwnerPicker entity={entity} entityType={entityType} admins={admins} onChanged={onChanged} />
               </div>
             )}
@@ -196,21 +187,21 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
               {entity.mobile && <Field icon={Phone} label="Mobile" value={entity.mobile} onClick={() => setCallTarget({ label: title || 'this contact', number: entity.mobile })} />}
               {entity.website && <Field icon={Globe} label="Website" value={entity.website} href={entity.website} external />}
               {entity.industry && <Field icon={Tag} label="Industry" value={entity.industry} />}
-              {entity.job_title && <Field icon={Target} label="Job Title" value={entity.job_title} />}
-              {entity.value != null && <Field icon={DollarSign} label="Value" value={`${entity.currency || 'GBP'} ${Number(entity.value).toLocaleString()}`} />}
+              {entity.job_title && <Field icon={Target} label="Job title" value={entity.job_title} />}
+              {entity.value != null && <Field icon={PoundSterling} label="Value" value={`${entity.currency || 'GBP'} ${Number(entity.value).toLocaleString()}`} />}
               {(entity.city || entity.country) && <Field icon={MapPin} label="Location" value={[entity.city, entity.country].filter(Boolean).join(', ')} />}
             </div>
 
             {entity.notes || entity.description ? (
               <div>
-                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Notes</label>
-                <p className="mt-1.5 text-sm text-foreground/80 whitespace-pre-wrap">{entity.notes || entity.description}</p>
+                <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Notes</label>
+                <p className="mt-1.5 text-sm text-ink-2 whitespace-pre-wrap">{entity.notes || entity.description}</p>
               </div>
             ) : null}
 
             {(entity.tags?.length ?? 0) > 0 && (
               <div>
-                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Tags</label>
+                <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Tags</label>
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {entity.tags.map((t: string) => (
                     <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
@@ -221,24 +212,24 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
 
             <NotesPanel entityType={entityType} entityId={entity.id} orgId={entity.org_id ?? null} />
 
-            <div className="pt-2 text-[11px] text-muted-foreground">
+            <div className="pt-2 font-mono text-[10px] tabular-nums text-muted-foreground">
               Updated {formatDistanceToNow(new Date(entity.updated_at), { addSuffix: true })}
             </div>
           </TabsContent>
 
           <TabsContent value="timeline" className="p-4 sm:p-5 mt-3">
             {loadingTab ? (
-              <div className="flex justify-center py-8"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
+              <SkeletonLedger rows={3} />
             ) : timeline.length === 0 ? (
               <EmptyState icon={Clock} label="No timeline events yet" hint="Communications and stage changes will appear here." />
             ) : (
-              <ol className="relative border-l border-border ml-1.5 space-y-4">
+              <ol className="relative border-l border-border/60 ml-1.5 space-y-4">
                 {timeline.map((ev, i) => (
                   <li key={i} className="ml-4 pl-1">
-                    <span className="absolute -left-[5px] w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-background" />
+                    <span className="absolute -left-[3.5px] w-1.5 h-1.5 mt-1 rounded-full bg-primary ring-4 ring-card" />
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-primary">{ev.event_type || ev.kind}</span>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{ev.event_type || ev.kind}</span>
+                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
                         {ev.occurred_at ? format(new Date(ev.occurred_at), 'd MMM yyyy · HH:mm') : ''}
                       </span>
                     </div>
@@ -252,7 +243,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
 
           <TabsContent value="financials" className="p-4 sm:p-5 mt-3 space-y-4">
             {loadingTab ? (
-              <div className="flex justify-center py-8"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
+              <SkeletonLedger rows={3} />
             ) : (
               <>
                 {financials?.ltv && (
@@ -263,22 +254,22 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
                   </div>
                 )}
                 {financials?.links?.length ? (
-                  <div className="border border-border rounded-lg divide-y divide-border">
+                  <div className="border border-border/60 rounded-[10px] divide-y divide-border/60">
                     {financials.links.map(l => (
                       <div key={`${l.finance_type}-${l.finance_id}`} className="flex items-center gap-3 p-3">
-                        <Sparkles className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium truncate">{l.reference || l.finance_type}</p>
                           <p className="text-[10px] text-muted-foreground capitalize">{l.finance_type.replace('_', ' ')} · {l.status || 'no status'}</p>
                         </div>
-                        <div className="text-xs font-medium text-foreground shrink-0">
-                          {l.amount != null ? `${l.currency || 'GBP'} ${Number(l.amount).toLocaleString()}` : '—'}
+                        <div className="font-mono text-xs font-medium tabular-nums text-foreground shrink-0">
+                          {l.amount != null ? `${l.currency || 'GBP'} ${Number(l.amount).toLocaleString()}` : '–'}
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <EmptyState icon={DollarSign} label="No financial records linked" hint="Invoices, proposals, and contracts linked to this record will appear here." />
+                  <EmptyState icon={PoundSterling} label="No financial records linked" hint="Invoices, proposals and contracts linked to this record will appear here." />
                 )}
               </>
             )}
@@ -308,7 +299,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </motion.div>
+    </div>
   );
 }
 
@@ -327,11 +318,11 @@ function Field({ icon: Icon, label, value, href, external, onClick }: any) {
 }
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: 'success' | 'warn' | 'muted' }) {
-  const color = tone === 'success' ? 'text-emerald-400' : tone === 'warn' ? 'text-amber-400' : 'text-foreground';
+  const color = tone === 'success' ? 'text-ok' : tone === 'warn' ? 'text-attend' : 'text-foreground';
   return (
-    <div className="rounded-lg border border-border p-3">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className={`text-sm font-semibold mt-1 ${color}`}>{value}</p>
+    <div className="rounded-[10px] border border-border/60 p-3">
+      <p className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <p className={`text-sm font-semibold tabular-nums mt-1 ${color}`}>{value}</p>
     </div>
   );
 }
@@ -339,9 +330,9 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: 'su
 function EmptyState({ icon: Icon, label, hint }: any) {
   return (
     <div className="flex flex-col items-center text-center py-10">
-      <Icon className="h-6 w-6 text-muted-foreground/40 mb-2" />
-      <p className="text-sm text-muted-foreground">{label}</p>
-      {hint && <p className="text-[11px] text-muted-foreground/70 mt-1 max-w-xs">{hint}</p>}
+      <Icon className="h-5 w-5 text-muted-foreground/50 mb-2.5" />
+      <p className="text-[13px] font-medium text-foreground">{label}</p>
+      {hint && <p className="text-[11px] text-muted-foreground mt-1 max-w-xs">{hint}</p>}
     </div>
   );
 }
@@ -367,10 +358,10 @@ function OwnerPicker({ entity, entityType, admins, onChanged }: { entity: any; e
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button disabled={saving} className="mt-1.5 w-full h-9 px-3 rounded-md border border-input bg-background text-sm flex items-center gap-2 hover:bg-accent transition-colors">
+        <button disabled={saving} className="mt-1.5 w-full h-9 px-3 rounded-md border border-border/60 bg-background text-sm flex items-center gap-2 hover:bg-foreground/[0.025] transition-colors">
           {current ? (
             <>
-              <span className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-semibold text-white" style={{ backgroundColor: adminColor(current.user_id) }}>{current.initials}</span>
+              <AvatarID name={current.full_name} email={current.email} size="sm" />
               <span className="truncate">{current.full_name || current.email}</span>
             </>
           ) : (
@@ -382,10 +373,10 @@ function OwnerPicker({ entity, entityType, admins, onChanged }: { entity: any; e
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuLabel className="text-[10px] uppercase tracking-wide">Assign to</DropdownMenuLabel>
+        <DropdownMenuLabel className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">Assign to</DropdownMenuLabel>
         {admins.map(a => (
           <DropdownMenuItem key={a.user_id} onClick={() => set(a.user_id)}>
-            <span className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-semibold text-white mr-2" style={{ backgroundColor: adminColor(a.user_id) }}>{a.initials}</span>
+            <AvatarID name={a.full_name} email={a.email} size="sm" className="mr-2" />
             {a.full_name || a.email}
           </DropdownMenuItem>
         ))}

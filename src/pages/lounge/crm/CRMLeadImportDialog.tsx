@@ -38,16 +38,16 @@ interface ImportResult { added: number; duplicates: number; errors: string[]; }
 
 const FIELD_OPTIONS = [
   { value: '__skip', label: 'Skip this column' },
-  { value: 'business_name', label: 'Business Name' },
-  { value: 'personal_name', label: 'Personal Name' },
-  { value: 'contact_name', label: 'Contact Name' },
+  { value: 'business_name', label: 'Business name' },
+  { value: 'personal_name', label: 'Personal name' },
+  { value: 'contact_name', label: 'Contact name' },
   { value: 'phone', label: 'Phone' },
   { value: 'email', label: 'Email' },
   { value: 'website_url', label: 'Website' },
   { value: 'location_city', label: 'City' },
   { value: 'location_postcode', label: 'Postcode' },
-  { value: 'google_rating', label: 'Google Rating' },
-  { value: 'review_count', label: 'Review Count' },
+  { value: 'google_rating', label: 'Google rating' },
+  { value: 'review_count', label: 'Review count' },
   { value: 'category', label: 'Category' },
 ];
 
@@ -294,28 +294,27 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Upload className="h-5 w-5" /> Import Leads</DialogTitle>
-          <DialogDescription>Import from CSV, Excel, JSON, HTML tables, or add one manually. Duplicates (matching email, phone, or name) are skipped automatically.</DialogDescription>
+          <DialogTitle className="flex items-center gap-2"><Upload className="h-4 w-4 text-muted-foreground" /> Import leads</DialogTitle>
+          <DialogDescription>Import from CSV, Excel, JSON, HTML tables, or add one manually. Duplicates (matching email, phone or name) are skipped automatically.</DialogDescription>
         </DialogHeader>
 
         {result ? (
           <div className="py-8 text-center space-y-4">
-            <div className="mx-auto h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-              <Check className="h-6 w-6 text-green-500" />
+            <div className="mx-auto h-11 w-11 rounded-full border border-border/60 bg-ok/10 flex items-center justify-center">
+              <Check className="h-5 w-5 text-ok" />
             </div>
             <div className="text-lg font-semibold">Import complete</div>
             <div className="flex justify-center gap-6 text-sm">
-              <div><div className="text-2xl font-bold text-green-500">{result.added}</div><div className="text-muted-foreground">Added</div></div>
-              <div><div className="text-2xl font-bold text-yellow-500">{result.duplicates}</div><div className="text-muted-foreground">Duplicates</div></div>
-              <div><div className="text-2xl font-bold text-red-500">{result.errors.length}</div><div className="text-muted-foreground">Errors</div></div>
+              <div><div className="text-2xl font-semibold tabular-nums text-ok">{result.added}</div><div className="text-muted-foreground">Added</div></div>
+              <div><div className="text-2xl font-semibold tabular-nums text-attend">{result.duplicates}</div><div className="text-muted-foreground">Duplicates</div></div>
+              <div><div className="text-2xl font-semibold tabular-nums text-risk">{result.errors.length}</div><div className="text-muted-foreground">Errors</div></div>
             </div>
             <Button onClick={() => close(false)}>Done</Button>
           </div>
         ) : importing ? (
           <div className="py-8 space-y-4">
-            <div className="text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" /></div>
             <Progress value={progress} />
-            <div className="text-center text-sm text-muted-foreground">{processed} / {leads.length} • {progress}%</div>
+            <div className="text-center font-mono text-xs tabular-nums text-muted-foreground">{processed} / {leads.length} · {progress}%</div>
           </div>
         ) : step === 'preview' ? (
           <div className="space-y-4">
@@ -327,9 +326,9 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
               </div>
               <Button variant="ghost" size="sm" onClick={reset}><X className="h-3 w-3 mr-1" /> Start over</Button>
             </div>
-            <div className="border rounded-md max-h-[400px] overflow-auto">
+            <div className="border border-border/60 rounded-[10px] max-h-[400px] overflow-auto">
               <table className="w-full text-xs">
-                <thead className="bg-muted/50 sticky top-0"><tr>
+                <thead className="bg-sunken sticky top-0"><tr>
                   <th className="text-left p-2">Business</th><th className="text-left p-2">Contact</th>
                   <th className="text-left p-2">Email</th><th className="text-left p-2">Phone</th>
                   <th className="text-left p-2">City</th>
@@ -351,9 +350,9 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
         ) : step === 'mapping' ? (
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground">Map each column to a lead field. Auto-detected where possible.</div>
-            <div className="border rounded-md max-h-[400px] overflow-auto">
+            <div className="border border-border/60 rounded-[10px] max-h-[400px] overflow-auto">
               <table className="w-full text-xs">
-                <thead className="bg-muted/50 sticky top-0"><tr>
+                <thead className="bg-sunken sticky top-0"><tr>
                   <th className="text-left p-2 w-1/3">Column</th><th className="text-left p-2 w-1/3">Sample</th>
                   <th className="text-left p-2">Map to</th>
                 </tr></thead>
@@ -387,7 +386,7 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
             </TabsList>
 
             <TabsContent value="csv" className="pt-4">
-              <div onClick={() => csvRef.current?.click()} className="border-2 border-dashed rounded-lg p-10 text-center cursor-pointer hover:border-primary hover:bg-muted/30">
+              <div onClick={() => csvRef.current?.click()} className="border border-dashed border-border/60 rounded-[10px] p-10 text-center cursor-pointer transition-colors duration-150 hover:border-primary/40 hover:bg-muted/30">
                 <FileSpreadsheet className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
                 <div className="font-medium">Choose CSV file</div>
                 <div className="text-xs text-muted-foreground">Columns are mapped in the next step</div>
@@ -396,7 +395,7 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
             </TabsContent>
 
             <TabsContent value="excel" className="pt-4">
-              <div onClick={() => xlsxRef.current?.click()} className="border-2 border-dashed rounded-lg p-10 text-center cursor-pointer hover:border-primary hover:bg-muted/30">
+              <div onClick={() => xlsxRef.current?.click()} className="border border-dashed border-border/60 rounded-[10px] p-10 text-center cursor-pointer transition-colors duration-150 hover:border-primary/40 hover:bg-muted/30">
                 <FileSpreadsheet className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
                 <div className="font-medium">Choose Excel file (.xlsx / .xls)</div>
                 <div className="text-xs text-muted-foreground">First sheet, first row = headers</div>
@@ -405,7 +404,7 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
             </TabsContent>
 
             <TabsContent value="json" className="pt-4">
-              <div onClick={() => jsonRef.current?.click()} className="border-2 border-dashed rounded-lg p-10 text-center cursor-pointer hover:border-primary hover:bg-muted/30">
+              <div onClick={() => jsonRef.current?.click()} className="border border-dashed border-border/60 rounded-[10px] p-10 text-center cursor-pointer transition-colors duration-150 hover:border-primary/40 hover:bg-muted/30">
                 <FileJson className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
                 <div className="font-medium">Choose JSON file</div>
                 <div className="text-xs text-muted-foreground">Array of objects, or {'{ leads: [...] }'}</div>
@@ -421,8 +420,8 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
 
             <TabsContent value="manual" className="pt-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <div><Label className="text-xs">Business Name</Label><Input value={manual.business_name || ''} onChange={e => setManual({ ...manual, business_name: e.target.value })} /></div>
-                <div><Label className="text-xs">Contact / Personal Name</Label><Input value={manual.personal_name || ''} onChange={e => setManual({ ...manual, personal_name: e.target.value })} /></div>
+                <div><Label className="text-xs">Business name</Label><Input value={manual.business_name || ''} onChange={e => setManual({ ...manual, business_name: e.target.value })} /></div>
+                <div><Label className="text-xs">Contact / personal name</Label><Input value={manual.personal_name || ''} onChange={e => setManual({ ...manual, personal_name: e.target.value })} /></div>
                 <div><Label className="text-xs">Email</Label><Input type="email" value={manual.email || ''} onChange={e => setManual({ ...manual, email: e.target.value })} /></div>
                 <div><Label className="text-xs">Phone</Label><Input value={manual.phone || ''} onChange={e => setManual({ ...manual, phone: e.target.value })} /></div>
                 <div><Label className="text-xs">Website</Label><Input value={manual.website_url || ''} onChange={e => setManual({ ...manual, website_url: e.target.value })} /></div>

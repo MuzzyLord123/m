@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Download, Upload, Loader2, Sparkles } from 'lucide-react';
+import { Download, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from '@/hooks/use-toast';
@@ -71,7 +71,7 @@ export function ImportExportMenu({ entity, rows, onImported }: Props) {
           {entity === 'contact' && (
             <>
               <DropdownMenuItem onClick={() => setLeadDialogOpen(true)}>
-                <Sparkles className="h-3.5 w-3.5 mr-2" /> Import leads (CSV, Excel, JSON, HTML, Manual)
+                <Upload className="h-3.5 w-3.5 mr-2" /> Import leads (CSV, Excel, JSON, HTML, manual)
               </DropdownMenuItem>
               <DropdownMenuSeparator />
             </>

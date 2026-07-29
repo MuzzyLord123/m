@@ -1,9 +1,8 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Building2, User, Target, LayoutDashboard, Workflow, Search, Plus,
-  Loader2, TrendingUp, Users as UsersIcon, DollarSign, Sparkles, Menu, Shield, UserPlus, Check,
+  Users as UsersIcon, PoundSterling, Radar, Menu, Shield, UserPlus, ChevronDown,
 } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { usePortalHome } from '@/hooks/usePortalHome';
@@ -25,8 +24,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { useCRMData, type EntityType } from './useCRMData';
 import { EntityDetail } from './EntityDetail';
 import { ImportExportMenu } from './ImportExportMenu';
-import { useAdmins, adminColor, type AdminUser } from './useAdmins';
+import { useAdmins, type AdminUser } from './useAdmins';
 import { NewEntityDialog } from './NewEntityDialog';
+import { AvatarID, EmptyState, Panel, PanelHeader, SkeletonLedger } from '@/components/platform';
 
 type Section = 'dashboard' | 'companies' | 'contacts' | 'opportunities' | 'workflows';
 type OwnerFilter = 'all' | 'mine' | 'unassigned' | string; // string = specific user id
@@ -39,13 +39,7 @@ const NAV: { key: Section; label: string; icon: any; entity?: EntityType }[] = [
   { key: 'workflows', label: 'Workflows', icon: Workflow },
 ];
 
-const REL_COLORS: Record<string, string> = {
-  customer: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-  lead: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-  supplier: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-  partner: 'bg-violet-500/15 text-violet-400 border-violet-500/30',
-  investor: 'bg-pink-500/15 text-pink-400 border-pink-500/30',
-};
+const REL_CHIP = 'text-[9px] font-medium px-1.5 py-0.5 rounded border border-border/60 text-muted-foreground capitalize';
 
 const TABLE_FOR: Record<EntityType, 'crm_companies' | 'crm_contacts' | 'crm_opportunities'> = {
   company: 'crm_companies',
@@ -134,7 +128,7 @@ export default function CRMShell() {
             <Icon className="h-4 w-4 shrink-0" />
             <span>{item.label}</span>
             {item.entity && (
-              <span className="ml-auto text-[10px] text-muted-foreground">
+              <span className="ml-auto font-mono text-[10px] tabular-nums text-muted-foreground">
                 {item.entity === 'company' ? companies.length : item.entity === 'contact' ? contacts.length : opportunities.length}
               </span>
             )}
@@ -155,16 +149,16 @@ export default function CRMShell() {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-background text-foreground">
-      <header className="h-14 border-b border-border flex items-center gap-2 px-3 sm:px-4 shrink-0">
+      <header className="h-12 border-b border-border/60 flex items-center gap-2 px-3 sm:px-4 shrink-0">
         {isMobile && (
           <Sheet open={navOpen} onOpenChange={setNavOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9"><Menu className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8"><Menu className="h-4 w-4" /></Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0">
-              <div className="h-14 flex items-center gap-2 px-4 border-b border-border">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="font-semibold">CRM</span>
+              <div className="h-12 flex items-center gap-2 px-4 border-b border-border/60">
+                <Radar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold">CRM</span>
               </div>
               {nav}
             </SheetContent>
@@ -175,10 +169,10 @@ export default function CRMShell() {
           <span className="hidden sm:inline">Exit to {portalHome === '/dashboard' ? 'Team' : 'Lounge'}</span>
         </Button>
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-md bg-primary/15 flex items-center justify-center">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
+          <div className="h-7 w-7 rounded-[8px] border border-border/60 bg-card flex items-center justify-center">
+            <Radar className="h-3.5 w-3.5 text-primary" />
           </div>
-          <span className="font-semibold text-sm hidden sm:inline">Business Relationships</span>
+          <span className="font-semibold text-sm hidden sm:inline">Business relationships</span>
         </div>
         <div className="flex-1" />
         {section !== 'dashboard' && section !== 'workflows' && (
@@ -191,15 +185,15 @@ export default function CRMShell() {
 
       <div className="flex-1 flex overflow-hidden">
         {!isMobile && (
-          <aside className="w-60 border-r border-border shrink-0 bg-card/40">
+          <aside className="w-60 border-r border-border/60 shrink-0 bg-card/40">
             <ScrollArea className="h-full">{nav}</ScrollArea>
           </aside>
         )}
 
         <main className="flex-1 flex overflow-hidden">
           {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <div className="flex-1 overflow-hidden p-4 sm:p-6">
+              <SkeletonLedger rows={8} className="max-w-6xl rounded-[10px] border border-border/60 bg-card" />
             </div>
           ) : section === 'dashboard' ? (
             <Dashboard
@@ -214,21 +208,21 @@ export default function CRMShell() {
             <>
               <div className={`${selected && isMobile ? 'hidden' : 'flex'} ${selected && !isMobile ? 'w-[380px] border-r border-border' : 'flex-1'} flex-col overflow-hidden bg-background`}>
                 {/* Filter + toolbar */}
-                <div className="flex items-center gap-2 px-3 py-2 border-b border-border overflow-x-auto">
+                <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60 overflow-x-auto">
                   <FilterChip active={ownerFilter === 'all'} onClick={() => setOwnerFilter('all')} label={`All ${rows.length}`} />
                   <FilterChip active={ownerFilter === 'mine'} onClick={() => setOwnerFilter('mine')} label="Mine" />
                   <FilterChip active={ownerFilter === 'unassigned'} onClick={() => setOwnerFilter('unassigned')} label="Unassigned" />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className={`shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                      <button className={`shrink-0 inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
                         ownerFilter !== 'all' && ownerFilter !== 'mine' && ownerFilter !== 'unassigned'
-                          ? 'bg-primary/15 text-primary border-primary/30' : 'border-border text-muted-foreground hover:text-foreground'
-                      }`}>Teammate ▾</button>
+                          ? 'bg-primary/15 text-primary border-primary/30' : 'border-border/60 text-muted-foreground hover:text-foreground'
+                      }`}>Teammate <ChevronDown className="h-3 w-3" /></button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-56">
                       {admins.map(a => (
                         <DropdownMenuItem key={a.user_id} onClick={() => setOwnerFilter(a.user_id)}>
-                          <span className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-semibold text-white mr-2" style={{ backgroundColor: adminColor(a.user_id) }}>{a.initials}</span>
+                          <AvatarID name={a.full_name} email={a.email} size="sm" className="mr-2" />
                           {a.full_name || a.email}
                         </DropdownMenuItem>
                       ))}
@@ -236,8 +230,8 @@ export default function CRMShell() {
                   </DropdownMenu>
                 </div>
 
-                <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-border/60">
+                  <span className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
                     {selectedIds.size > 0 ? `${selectedIds.size} selected` : `${rows.length} ${currentEntity}${rows.length === 1 ? '' : 's'}`}
                   </span>
                   <div className="flex items-center gap-1">
@@ -247,10 +241,10 @@ export default function CRMShell() {
                           <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs"><UserPlus className="h-3 w-3" /> Assign</Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56">
-                          <DropdownMenuLabel className="text-[10px] uppercase tracking-wide">Assign to</DropdownMenuLabel>
+                          <DropdownMenuLabel className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">Assign to</DropdownMenuLabel>
                           {admins.map(a => (
                             <DropdownMenuItem key={a.user_id} onClick={() => assignTo(a.user_id)}>
-                              <span className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-semibold text-white mr-2" style={{ backgroundColor: adminColor(a.user_id) }}>{a.initials}</span>
+                              <AvatarID name={a.full_name} email={a.email} size="sm" className="mr-2" />
                               {a.full_name || a.email}
                             </DropdownMenuItem>
                           ))}
@@ -281,27 +275,27 @@ export default function CRMShell() {
                 />
               </div>
 
-              <AnimatePresence mode="wait">
-                {selected && (
-                  <div className={`${isMobile ? 'fixed inset-0 z-40 bg-background' : 'flex-1'} flex flex-col`}>
-                    <EntityDetail
-                      key={selected.entity.id}
-                      entityType={selected.type}
-                      entity={selected.entity}
-                      stages={stages}
-                      list={rows}
-                      admins={admins}
-                      onNavigate={(e) => setSelected({ type: selected.type, entity: e })}
-                      onClose={() => setSelected(null)}
-                      onChanged={refresh}
-                    />
-                  </div>
-                )}
-              </AnimatePresence>
+              {selected && (
+                <div className={`${isMobile ? 'fixed inset-0 z-40 bg-background' : 'flex-1'} flex flex-col`}>
+                  <EntityDetail
+                    key={selected.entity.id}
+                    entityType={selected.type}
+                    entity={selected.entity}
+                    stages={stages}
+                    list={rows}
+                    admins={admins}
+                    onNavigate={(e) => setSelected({ type: selected.type, entity: e })}
+                    onClose={() => setSelected(null)}
+                    onChanged={refresh}
+                  />
+                </div>
+              )}
               {!selected && !isMobile && (
-                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-8">
-                  <Sparkles className="h-8 w-8 mb-3 opacity-40" />
-                  <p className="text-sm">Select a record to view details, timeline, and financials</p>
+                <div className="flex-1 flex flex-col justify-center">
+                  <EmptyState
+                    title="No record selected"
+                    body="Select a record to view details, timeline and financials."
+                  />
                 </div>
               )}
             </>
@@ -329,7 +323,7 @@ function FilterChip({ active, onClick, label }: { active: boolean; onClick: () =
     <button
       onClick={onClick}
       className={`shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
-        active ? 'bg-primary/15 text-primary border-primary/30' : 'border-border text-muted-foreground hover:text-foreground'
+        active ? 'bg-primary/15 text-primary border-primary/30' : 'border-border/60 text-muted-foreground hover:text-foreground'
       }`}
     >
       {label}
@@ -351,7 +345,11 @@ function VirtualList({ rows, stages, adminById, currentEntity, selectedId, selec
   });
 
   if (rows.length === 0) {
-    return <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">No records</div>;
+    return (
+      <div className="flex-1 flex flex-col justify-center">
+        <EmptyState compact title="No records" body="Nothing matches the current filters." />
+      </div>
+    );
   }
 
   return (
@@ -367,9 +365,9 @@ function VirtualList({ rows, stages, adminById, currentEntity, selectedId, selec
             <div
               key={r.id}
               style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${vi.start}px)` }}
-              className="border-b border-border"
+              className="border-b border-border/60"
             >
-              <div className={`flex items-start gap-2 px-3 py-3 hover:bg-accent/40 ${isSel ? 'bg-accent' : ''} ${isChecked ? 'bg-primary/5' : ''}`}>
+              <div className={`flex items-start gap-2 px-3 py-3 transition-colors duration-150 hover:bg-foreground/[0.025] ${isSel ? 'bg-foreground/[0.04]' : ''} ${isChecked ? 'bg-primary/5' : ''}`}>
                 <div className="pt-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                   <Checkbox checked={isChecked} onCheckedChange={() => onToggle(r.id)} />
                 </div>
@@ -388,12 +386,13 @@ function VirtualList({ rows, stages, adminById, currentEntity, selectedId, selec
                       </p>
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {(r.relationship_type || []).slice(0, 2).map((rel: string) => (
-                          <span key={rel} className={`text-[9px] font-medium px-1.5 py-0.5 rounded border capitalize ${REL_COLORS[rel] || 'bg-muted text-muted-foreground border-border'}`}>
+                          <span key={rel} className={REL_CHIP}>
                             {rel}
                           </span>
                         ))}
                         {stage && (
-                          <span className="text-[9px] font-medium px-1.5 py-0.5 rounded border" style={{ backgroundColor: `${stage.color}15`, color: stage.color, borderColor: `${stage.color}40` }}>
+                          <span className="inline-flex items-center gap-1 text-[9px] font-medium px-1.5 py-0.5 rounded border border-border/60 text-muted-foreground">
+                            <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: stage.color }} />
                             {stage.name}
                           </span>
                         )}
@@ -401,17 +400,13 @@ function VirtualList({ rows, stages, adminById, currentEntity, selectedId, selec
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       {assignee ? (
-                        <span
-                          className="h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-semibold text-white"
-                          style={{ backgroundColor: adminColor(assignee.user_id) }}
-                          title={`Assigned to ${assignee.full_name || assignee.email}`}
-                        >
-                          {assignee.initials}
+                        <span title={`Assigned to ${assignee.full_name || assignee.email}`}>
+                          <AvatarID name={assignee.full_name} email={assignee.email} size="sm" />
                         </span>
                       ) : (
-                        <span className="h-6 w-6 rounded-full border border-dashed border-border" title="Unassigned" />
+                        <span className="h-6 w-6 rounded-full border border-dashed border-border/60" title="Unassigned" />
                       )}
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground whitespace-nowrap">
                         {formatDistanceToNow(new Date(r.updated_at), { addSuffix: false })}
                       </span>
                     </div>
@@ -445,8 +440,8 @@ function Dashboard({ companies, contacts, opportunities, stages, admins, userId,
     <ScrollArea className="flex-1">
       <div className="p-4 sm:p-6 max-w-6xl space-y-5">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold">Business Overview</h1>
-          <p className="text-sm text-muted-foreground mt-1">Every company, person, and deal in one connected view.</p>
+          <h1 className="text-[17px] font-semibold tracking-[-0.01em]">Business overview</h1>
+          <p className="text-[13px] text-muted-foreground mt-1">Every company, person and deal in one connected view.</p>
         </div>
 
         {/* My workload */}
@@ -460,47 +455,46 @@ function Dashboard({ companies, contacts, opportunities, stages, admins, userId,
           <KPI icon={Building2} label="Companies" value={companies.length} sub={`${customersCount} customers · ${leadsCount} leads`} />
           <KPI icon={UsersIcon} label="Contacts" value={contacts.length} sub="People across all orgs" />
           <KPI icon={Target} label="Opportunities" value={opportunities.length} sub="Open deals" />
-          <KPI icon={DollarSign} label="Pipeline" value={`£${(pipeline / 1000).toFixed(1)}k`} sub="Weighted TBD" />
+          <KPI icon={PoundSterling} label="Pipeline" value={`£${(pipeline / 1000).toFixed(1)}k`} sub="Not yet weighted" />
         </div>
 
         {/* Team assignment */}
-        <div className="rounded-xl border border-border bg-card p-4">
-          <h2 className="text-sm font-semibold mb-3">Leads assigned per admin</h2>
-          <div className="space-y-2">
+        <Panel>
+          <PanelHeader label="Leads assigned per admin" />
+          <div className="space-y-2.5 p-4">
             {admins.map((a: AdminUser) => {
               const n = leadsByAdmin.get(a.user_id) || 0;
               const pct = contacts.length ? (n / contacts.length) * 100 : 0;
               const isMe = a.user_id === userId;
               return (
                 <div key={a.user_id} className="flex items-center gap-3 text-xs">
-                  <span className="h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-semibold text-white shrink-0" style={{ backgroundColor: adminColor(a.user_id) }}>{a.initials}</span>
-                  <span className="w-32 truncate text-foreground/80">{a.full_name || a.email}{isMe && <span className="text-primary"> (you)</span>}</span>
-                  <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                  <AvatarID name={a.full_name} email={a.email} size="sm" />
+                  <span className="w-32 truncate text-ink-2">{a.full_name || a.email}{isMe && <span className="text-primary"> (you)</span>}</span>
+                  <div className="relative flex-1 h-1.5" aria-hidden>
+                    <div className="absolute inset-x-0 top-1/2 h-px bg-border/50" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-foreground/45" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="w-10 text-right tabular-nums text-muted-foreground">{n}</span>
+                  <span className="w-10 text-right font-mono text-[11px] tabular-nums text-muted-foreground">{n}</span>
                 </div>
               );
             })}
             {unassignedCount > 0 && (
               <div className="flex items-center gap-3 text-xs">
-                <span className="h-6 w-6 rounded-full border border-dashed border-border shrink-0" />
+                <span className="h-6 w-6 rounded-full border border-dashed border-border/60 shrink-0" />
                 <span className="w-32 truncate text-muted-foreground">Unassigned</span>
-                <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full bg-amber-400" style={{ width: `${(unassignedCount / contacts.length) * 100}%` }} />
+                <div className="relative flex-1 h-1.5" aria-hidden>
+                  <div className="absolute inset-x-0 top-1/2 h-px bg-border/50" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-attend/70" style={{ width: `${(unassignedCount / contacts.length) * 100}%` }} />
                 </div>
-                <span className="w-10 text-right tabular-nums text-amber-400">{unassignedCount}</span>
+                <span className="w-10 text-right font-mono text-[11px] tabular-nums text-attend">{unassignedCount}</span>
               </div>
             )}
           </div>
-        </div>
+        </Panel>
 
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold">Lifecycle stages</h2>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="space-y-1.5">
+        <Panel>
+          <PanelHeader label="Lifecycle stages" />
+          <div className="space-y-2 p-4">
             {stages.map((s: any) => {
               // Dedupe: contacts and companies share the same lead — take the max, then add opportunities
               const cCount = contacts.filter((c: any) => c.lifecycle_stage_id === s.id).length;
@@ -511,21 +505,22 @@ function Dashboard({ companies, contacts, opportunities, stages, admins, userId,
               const pct = (count / totalContacts) * 100;
               return (
                 <div key={s.id} className="flex items-center gap-3 text-xs">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-                  <span className="w-28 text-foreground/80 truncate">{s.name}</span>
-                  <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: s.color }} />
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
+                  <span className="w-28 text-ink-2 truncate">{s.name}</span>
+                  <div className="relative flex-1 h-1.5" aria-hidden>
+                    <div className="absolute inset-x-0 top-1/2 h-px bg-border/50" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-foreground/45" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="w-10 text-right tabular-nums text-muted-foreground">{count}</span>
+                  <span className="w-10 text-right font-mono text-[11px] tabular-nums text-muted-foreground">{count}</span>
                 </div>
               );
             })}
           </div>
-        </div>
+        </Panel>
 
-        <div className="rounded-xl border border-border bg-card p-4">
-          <h2 className="text-sm font-semibold mb-3">Recently updated</h2>
-          <ul className="divide-y divide-border -mx-4">
+        <Panel>
+          <PanelHeader label="Recently updated" />
+          <ul className="divide-y divide-border/60">
             {[...companies.slice(0, 3).map((c: any) => ({ ...c, _t: 'company' as EntityType, _name: c.name })),
               ...contacts.slice(0, 3).map((c: any) => ({ ...c, _t: 'contact' as EntityType, _name: c.full_name || c.email })),
               ...opportunities.slice(0, 3).map((c: any) => ({ ...c, _t: 'opportunity' as EntityType, _name: c.title }))]
@@ -535,30 +530,27 @@ function Dashboard({ companies, contacts, opportunities, stages, admins, userId,
                 const Icon = r._t === 'company' ? Building2 : r._t === 'contact' ? User : Target;
                 return (
                   <li key={`${r._t}-${r.id}`}>
-                    <button onClick={() => onOpen(r._t, r)} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-accent/40 transition-colors">
+                    <button onClick={() => onOpen(r._t, r)} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-foreground/[0.025] transition-colors duration-150">
                       <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <span className="text-sm truncate flex-1 text-left">{r._name || 'Untitled'}</span>
-                      <span className="text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(r.updated_at), { addSuffix: true })}</span>
+                      <span className="text-[13px] truncate flex-1 text-left">{r._name || 'Untitled'}</span>
+                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{formatDistanceToNow(new Date(r.updated_at), { addSuffix: true })}</span>
                     </button>
                   </li>
                 );
               })}
           </ul>
-        </div>
+        </Panel>
       </div>
     </ScrollArea>
   );
 }
 
-function KPI({ icon: Icon, label, value, sub, tone }: any) {
-  const toneClass = tone === 'primary' ? 'text-primary' : tone === 'warn' ? 'text-amber-400' : 'text-foreground';
+function KPI({ label, value, sub, tone }: any) {
+  const toneClass = tone === 'warn' ? 'text-attend' : 'text-foreground';
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
-        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-      </div>
-      <p className={`text-2xl font-semibold mt-2 ${toneClass}`}>{value}</p>
+    <div className="rounded-[10px] border border-border/60 bg-card p-3.5">
+      <p className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">{label}</p>
+      <p className={`text-[22px] leading-tight font-semibold tabular-nums tracking-[-0.01em] mt-2 ${toneClass}`}>{value}</p>
       <p className="text-[11px] text-muted-foreground mt-1 truncate">{sub}</p>
     </div>
   );
@@ -585,22 +577,22 @@ function WorkflowsView() {
     <ScrollArea className="flex-1">
       <div className="p-4 sm:p-6 max-w-5xl space-y-5">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold">Workflows</h1>
-          <p className="text-sm text-muted-foreground mt-1">Automations that fire when relationships change stage.</p>
+          <h1 className="text-[17px] font-semibold tracking-[-0.01em]">Workflows</h1>
+          <p className="text-[13px] text-muted-foreground mt-1">Automations that fire when relationships change stage.</p>
         </div>
         {loading ? (
-          <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          <SkeletonLedger rows={4} className="rounded-[10px] border border-border/60 bg-card" />
         ) : (
-          <div className="rounded-xl border border-border bg-card divide-y divide-border">
+          <Panel className="divide-y divide-border/60">
             {workflows.length === 0 ? (
-              <div className="p-8 text-center text-sm text-muted-foreground">No workflows configured</div>
+              <EmptyState compact title="No workflows configured" body="Workflows appear here once automations are set up for stage changes." />
             ) : workflows.map(w => (
               <div key={w.id} className="p-4">
-                <p className="text-sm font-medium">{w.name}</p>
+                <p className="text-[13px] font-medium">{w.name}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">{w.description || 'No description'}</p>
               </div>
             ))}
-          </div>
+          </Panel>
         )}
       </div>
     </ScrollArea>

@@ -10,7 +10,7 @@ import {
   ArrowUp, ArrowDown, Bold, Italic, Underline,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
   Plus, Search, Clock, FileText, MoreHorizontal, Trash, FolderOpen,
-  LayoutGrid, List, Settings, MessageSquare, Component, Sparkles, Play,
+  LayoutGrid, List, Settings, MessageSquare, Component, Play,
   Pipette, Scissors, Group, Ungroup, MoveHorizontal, ArrowUpRight,
   Blend, PaintBucket, Maximize2, Minimize2, SquareDashedBottom,
 } from 'lucide-react';
@@ -211,38 +211,38 @@ function HomeDashboard({ onOpenProject, onNewProject, onBack }: {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col" style={{ backgroundColor: '#f5f5f5' }}>
+    <div className="h-screen w-screen flex flex-col bg-background">
       {/* ═══ TOP NAV ═══ */}
-      <div className="h-12 flex items-center justify-between px-4 shrink-0 bg-white border-b border-gray-200">
+      <div className="h-12 flex items-center justify-between px-4 shrink-0 bg-card border-b border-border/60">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-0.5">
-            <button onClick={onBack} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title="Back">
-              <ArrowLeft className="h-4 w-4 text-gray-500" />
+            <button onClick={onBack} className="p-1.5 rounded-lg hover:bg-foreground/[0.05] transition-colors" title="Back">
+              <ArrowLeft className="h-4 w-4 text-muted-foreground" />
             </button>
-            <button onClick={() => window.history.forward()} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title="Forward">
-              <ArrowRight className="h-4 w-4 text-gray-500" />
+            <button onClick={() => window.history.forward()} className="p-1.5 rounded-lg hover:bg-foreground/[0.05] transition-colors" title="Forward">
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
-              <Sparkles className="h-3.5 w-3.5 text-white" />
+            <div className="w-7 h-7 rounded-lg border border-border/60 bg-card flex items-center justify-center">
+              <Frame className="h-3.5 w-3.5 text-primary" />
             </div>
-            <span className="text-[14px] font-bold text-gray-900">Workshop Studio</span>
+            <span className="text-[14px] font-semibold text-foreground">Workshop Studio</span>
           </div>
         </div>
 
         {/* Center tabs like Figma */}
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-sunken rounded-lg p-0.5">
           {['Design', 'FigJam', 'Slides', 'Dev'].map((tab, i) => (
-            <button key={tab} className={`px-3 py-1 text-[12px] font-medium rounded-md transition-colors ${i === 0 ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+            <button key={tab} className={`px-3 py-1 text-[12px] font-medium rounded-md transition-colors ${i === 0 ? 'bg-card text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
               {tab}
             </button>
           ))}
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={onNewProject} size="sm" className="h-8 text-[12px] bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
-            <Plus className="h-3.5 w-3.5 mr-1" /> New Design
+          <Button onClick={onNewProject} size="sm" className="h-8 text-[12px] bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg">
+            <Plus className="h-3.5 w-3.5 mr-1" /> New design
           </Button>
         </div>
       </div>
@@ -250,14 +250,14 @@ function HomeDashboard({ onOpenProject, onNewProject, onBack }: {
       {/* ═══ MAIN CONTENT ═══ */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="w-56 border-r border-gray-200 bg-white p-3 flex flex-col gap-1">
+        <div className="w-56 border-r border-border/60 bg-card p-3 flex flex-col gap-1">
           <div className="relative mb-3">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <input
               placeholder="Search files..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full h-8 pl-8 pr-3 text-[12px] bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full h-8 pl-8 pr-3 text-[12px] bg-sunken border border-border/60 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary"
             />
           </div>
 
@@ -269,16 +269,16 @@ function HomeDashboard({ onOpenProject, onNewProject, onBack }: {
             <button
               key={item.key}
               onClick={() => setActiveTab(item.key as any)}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-colors ${activeTab === item.key ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'}`}
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-colors ${activeTab === item.key ? 'bg-primary/10 text-primary' : 'text-ink-2 hover:bg-foreground/[0.03]'}`}
             >
               <item.icon className="h-4 w-4" />
               {item.label}
             </button>
           ))}
 
-          <div className="mt-auto pt-3 border-t border-gray-100">
-            <div className="px-3 py-2 text-[11px] text-gray-400 flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-400 to-indigo-500 flex items-center justify-center text-white text-[8px] font-bold">WS</div>
+          <div className="mt-auto pt-3 border-t border-border/40">
+            <div className="px-3 py-2 text-[11px] text-muted-foreground flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full border border-border/60 bg-sunken flex items-center justify-center text-muted-foreground text-[8px] font-semibold">WS</div>
               Workshop Studio
             </div>
           </div>
@@ -289,12 +289,12 @@ function HomeDashboard({ onOpenProject, onNewProject, onBack }: {
           {/* Header */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-4">
-              <h2 className="text-[18px] font-bold text-gray-900">
+              <h2 className="text-[18px] font-semibold text-foreground">
                 {activeTab === 'recent' ? 'Recents' : activeTab === 'drafts' ? 'Drafts' : 'Shared files'}
               </h2>
               <div className="flex items-center gap-1 text-[12px]">
                 {['Recently viewed', 'Shared files'].map((tab, i) => (
-                  <button key={tab} className={`px-3 py-1 rounded-md transition-colors ${i === 0 ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-500 hover:text-gray-700'}`}>
+                  <button key={tab} className={`px-3 py-1 rounded-md transition-colors ${i === 0 ? 'bg-sunken text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'}`}>
                     {tab}
                   </button>
                 ))}
@@ -302,11 +302,11 @@ function HomeDashboard({ onOpenProject, onNewProject, onBack }: {
             </div>
 
             <div className="flex items-center gap-2">
-              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}>
-                <LayoutGrid className="h-4 w-4 text-gray-500" />
+              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-sunken' : 'hover:bg-foreground/[0.03]'}`}>
+                <LayoutGrid className="h-4 w-4 text-muted-foreground" />
               </button>
-              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}>
-                <List className="h-4 w-4 text-gray-500" />
+              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-sunken' : 'hover:bg-foreground/[0.03]'}`}>
+                <List className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
           </div>
@@ -314,30 +314,30 @@ function HomeDashboard({ onOpenProject, onNewProject, onBack }: {
           {/* Empty state or projects grid */}
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-                <FileText className="h-8 w-8 text-gray-300" />
+              <div className="w-20 h-20 rounded-xl bg-sunken flex items-center justify-center mb-4">
+                <FileText className="h-8 w-8 text-muted-foreground/60" />
               </div>
-              <h3 className="text-[15px] font-semibold text-gray-900 mb-1">No designs yet</h3>
-              <p className="text-[13px] text-gray-500 mb-5">Create your first design to get started</p>
-              <Button onClick={onNewProject} className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg h-9 text-[13px]">
-                <Plus className="h-4 w-4 mr-1.5" /> New Design File
+              <h3 className="text-[15px] font-semibold text-foreground mb-1">No designs yet</h3>
+              <p className="text-[13px] text-muted-foreground mb-5">Create your first design to get started</p>
+              <Button onClick={onNewProject} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg h-9 text-[13px]">
+                <Plus className="h-4 w-4 mr-1.5" /> New design file
               </Button>
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {/* New file card */}
-              <button onClick={onNewProject} className="aspect-[4/3] rounded-xl border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50/30 flex flex-col items-center justify-center gap-2 transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
-                  <Plus className="h-5 w-5 text-gray-400 group-hover:text-blue-500" />
+              <button onClick={onNewProject} className="aspect-[4/3] rounded-xl border border-dashed border-border/60 hover:border-primary/50 hover:bg-primary/5 flex flex-col items-center justify-center gap-2 transition-all group">
+                <div className="w-10 h-10 rounded-xl bg-sunken group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                  <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                 </div>
-                <span className="text-[12px] font-medium text-gray-400 group-hover:text-blue-500">New file</span>
+                <span className="text-[12px] font-medium text-muted-foreground group-hover:text-primary">New file</span>
               </button>
 
               {filtered.map(project => (
                 <div key={project.id} className="group relative">
                   <button
                     onClick={() => onOpenProject(project)}
-                    className="w-full aspect-[4/3] rounded-xl border border-gray-200 bg-white hover:border-blue-400 hover:shadow-md overflow-hidden transition-all"
+                    className="w-full aspect-[4/3] rounded-xl border border-border/60 bg-card hover:border-primary/50 overflow-hidden transition-all"
                   >
                     {/* Thumbnail - checkered pattern like Figma */}
                     <div className="w-full h-full" style={{
@@ -361,7 +361,7 @@ function HomeDashboard({ onOpenProject, onNewProject, onBack }: {
                             ))}
                           </div>
                         ) : (
-                          <div className="w-16 h-20 rounded bg-gray-200/60" />
+                          <div className="w-16 h-20 rounded bg-foreground/10" />
                         )}
                       </div>
                     </div>
@@ -369,19 +369,19 @@ function HomeDashboard({ onOpenProject, onNewProject, onBack }: {
 
                   {/* File info */}
                   <div className="flex items-center gap-2 mt-2 px-0.5">
-                    <div className="w-5 h-5 rounded bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shrink-0">
-                      <FileText className="h-2.5 w-2.5 text-white" />
+                    <div className="w-5 h-5 rounded border border-border/60 bg-sunken flex items-center justify-center shrink-0">
+                      <FileText className="h-2.5 w-2.5 text-muted-foreground" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[12px] font-medium text-gray-900 truncate">{project.name}</div>
-                      <div className="text-[10px] text-gray-400">Edited {formatTimeAgo(project.updatedAt)}</div>
+                      <div className="text-[12px] font-medium text-foreground truncate">{project.name}</div>
+                      <div className="text-[10px] text-muted-foreground">Edited {formatTimeAgo(project.updatedAt)}</div>
                     </div>
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5">
-                      <button onClick={(e) => { e.stopPropagation(); duplicateProject(project); }} className="p-1 rounded hover:bg-gray-100">
-                        <Copy className="h-3 w-3 text-gray-400" />
+                      <button onClick={(e) => { e.stopPropagation(); duplicateProject(project); }} className="p-1 rounded hover:bg-foreground/[0.05]">
+                        <Copy className="h-3 w-3 text-muted-foreground" />
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }} className="p-1 rounded hover:bg-red-50">
-                        <Trash className="h-3 w-3 text-gray-400 hover:text-red-500" />
+                      <button onClick={(e) => { e.stopPropagation(); deleteProject(project.id); }} className="p-1 rounded hover:bg-risk/10">
+                        <Trash className="h-3 w-3 text-muted-foreground hover:text-risk" />
                       </button>
                     </div>
                   </div>
@@ -394,17 +394,17 @@ function HomeDashboard({ onOpenProject, onNewProject, onBack }: {
                 <button
                   key={project.id}
                   onClick={() => onOpenProject(project)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-foreground/[0.03] transition-colors group"
                 >
-                  <div className="w-10 h-7 rounded border border-gray-200 bg-white shrink-0" style={{
+                  <div className="w-10 h-7 rounded border border-border/60 bg-card shrink-0" style={{
                     backgroundImage: 'repeating-conic-gradient(#e5e5e5 0% 25%, #f5f5f5 0% 50%)',
                     backgroundSize: '8px 8px',
                   }} />
                   <div className="flex-1 text-left min-w-0">
-                    <div className="text-[13px] font-medium text-gray-900 truncate">{project.name}</div>
+                    <div className="text-[13px] font-medium text-foreground truncate">{project.name}</div>
                   </div>
-                  <span className="text-[11px] text-gray-400">{formatTimeAgo(project.updatedAt)}</span>
-                  <span className="text-[11px] text-gray-300 font-mono">{project.elements.length} layers</span>
+                  <span className="text-[11px] text-muted-foreground">{formatTimeAgo(project.updatedAt)}</span>
+                  <span className="text-[11px] text-muted-foreground/60 font-mono">{project.elements.length} layers</span>
                 </button>
               ))}
             </div>
@@ -748,7 +748,7 @@ export default function WorkshopStudio() {
           ctx.fillStyle = '#e5e5e5'; ctx.fillRect(0, 0, el.width, el.height);
           ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1; ctx.strokeRect(0, 0, el.width, el.height);
           ctx.fillStyle = '#999'; ctx.font = `400 ${12}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText('📷 Image', el.width / 2, el.height / 2);
+          ctx.fillText('Image', el.width / 2, el.height / 2);
           break;
         }
         case 'text': {
@@ -1437,7 +1437,7 @@ export default function WorkshopStudio() {
   const exportToWorkshop = () => {
     const workshopElements = elements.map(el => ({ id: uid(), type: el.type === 'text' ? 'text' : 'container', name: el.name, props: el.type === 'text' ? { text: el.text || '' } : {}, styles: { desktop: { position: 'absolute' as const, left: `${el.x}px`, top: `${el.y}px`, width: `${el.width}px`, height: `${el.height}px`, backgroundColor: el.fill, borderRadius: el.type === 'ellipse' ? '50%' : `${el.borderRadius}px`, opacity: String(el.opacity) } }, children: [] }));
     localStorage.setItem('figma-export', JSON.stringify(workshopElements));
-    toast.success('Design exported to Workshop!');
+    toast.success('Design exported to Workshop');
   };
 
   const insertStudioComponent = useCallback((comp: typeof STUDIO_COMPONENTS[0]) => {
@@ -1470,12 +1470,12 @@ export default function WorkshopStudio() {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${bounds.x - 20} ${bounds.y - 20} ${bounds.w - bounds.x + 40} ${bounds.h - bounds.y + 40}">\n${svgParts.join('\n')}\n</svg>`;
     const blob = new Blob([svg], { type: 'image/svg+xml' }); const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'workshop-studio-export.svg'; a.click(); URL.revokeObjectURL(url);
-    toast.success('SVG exported!');
+    toast.success('SVG exported');
   };
 
   const toggleSection = (key: string) => setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
   const SectionHeader = ({ label, sectionKey }: { label: string; sectionKey: string }) => (
-    <button onClick={() => toggleSection(sectionKey)} className="w-full flex items-center justify-between py-1.5 px-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors">
+    <button onClick={() => toggleSection(sectionKey)} className="w-full flex items-center justify-between py-1.5 px-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">
       {label}
       {expandedSections[sectionKey] ? <ChevronDown className="h-2.5 w-2.5" /> : <ChevronRight className="h-2.5 w-2.5" />}
     </button>
@@ -1521,62 +1521,62 @@ export default function WorkshopStudio() {
   // EDITOR VIEW (Figma-style layout)
   // ═══════════════════════════════════════════════
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden bg-white">
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-background">
       {/* ═══ MINIMAL TOP BAR (like Figma) ═══ */}
-      <div className="h-12 flex items-center justify-between px-3 shrink-0 bg-white border-b border-gray-200 overflow-hidden">
+      <div className="h-10 flex items-center justify-between px-3 shrink-0 bg-card border-b border-border/60 overflow-hidden">
         {/* Left: Logo + File name */}
         <div className="flex items-center gap-2 shrink-0 min-w-0">
           <div className="flex items-center gap-0.5">
-            <button onClick={goHome} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title="Back">
-              <ArrowLeft className="h-4 w-4 text-gray-500" />
+            <button onClick={goHome} className="p-1.5 rounded-lg hover:bg-foreground/[0.05] transition-colors" title="Back">
+              <ArrowLeft className="h-4 w-4 text-muted-foreground" />
             </button>
-            <button onClick={() => window.history.forward()} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title="Forward">
-              <ArrowRight className="h-4 w-4 text-gray-500" />
+            <button onClick={() => window.history.forward()} className="p-1.5 rounded-lg hover:bg-foreground/[0.05] transition-colors" title="Forward">
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
-          <button onClick={goHome} className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center hover:opacity-90 transition-opacity">
-            <Sparkles className="h-3.5 w-3.5 text-white" />
+          <button onClick={goHome} className="w-8 h-8 rounded-lg border border-border/60 bg-card flex items-center justify-center hover:bg-foreground/[0.03] transition-colors">
+            <Frame className="h-3.5 w-3.5 text-primary" />
           </button>
           <div className="flex items-center gap-1.5">
             <input
               value={projectName}
               onChange={e => setProjectName(e.target.value)}
               onBlur={saveProject}
-              className="text-[13px] font-medium text-gray-900 bg-transparent border-none outline-none w-36 hover:bg-gray-50 rounded px-1.5 py-0.5 focus:bg-gray-100"
+              className="text-[13px] font-medium text-foreground bg-transparent border-none outline-none w-36 hover:bg-foreground/[0.03] rounded px-1.5 py-0.5 focus:bg-sunken"
             />
-            <span className="text-[10px] text-gray-300 font-medium">Drafts</span>
+            <span className="text-[10px] text-muted-foreground/60 font-medium">Drafts</span>
           </div>
         </div>
 
         {/* Center: minimal controls */}
         <div className="flex items-center gap-1 shrink-0">
           <Tooltip><TooltipTrigger asChild>
-            <button onClick={undo} disabled={historyIdx <= 0} className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-20 transition-colors">
-              <Undo2 className="h-4 w-4 text-gray-500" />
+            <button onClick={undo} disabled={historyIdx <= 0} className="p-1.5 rounded-md hover:bg-foreground/[0.05] disabled:opacity-20 transition-colors">
+              <Undo2 className="h-4 w-4 text-muted-foreground" />
             </button>
           </TooltipTrigger><TooltipContent side="bottom" className="text-[11px]">Undo (⌘Z)</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <button onClick={redo} disabled={historyIdx >= history.length - 1} className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-20 transition-colors">
-              <Redo2 className="h-4 w-4 text-gray-500" />
+            <button onClick={redo} disabled={historyIdx >= history.length - 1} className="p-1.5 rounded-md hover:bg-foreground/[0.05] disabled:opacity-20 transition-colors">
+              <Redo2 className="h-4 w-4 text-muted-foreground" />
             </button>
           </TooltipTrigger><TooltipContent side="bottom" className="text-[11px]">Redo (⌘Y)</TooltipContent></Tooltip>
         </div>
 
         {/* Right: View + Share + Export */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="relative flex items-center gap-0.5 bg-gray-100 rounded-lg px-2 py-0.5">
-            <button onClick={() => setZoom(z => clamp(z * 0.9, 0.05, 20))} className="p-0.5"><ZoomOut className="h-3.5 w-3.5 text-gray-500" /></button>
-            <button onClick={() => setShowZoomPresets(p => !p)} className="text-[11px] text-gray-600 w-10 text-center font-medium hover:text-gray-900">{Math.round(zoom * 100)}%</button>
-            <button onClick={() => setZoom(z => clamp(z * 1.1, 0.05, 20))} className="p-0.5"><ZoomIn className="h-3.5 w-3.5 text-gray-500" /></button>
+          <div className="relative flex items-center gap-0.5 bg-sunken rounded-lg px-2 py-0.5">
+            <button onClick={() => setZoom(z => clamp(z * 0.9, 0.05, 20))} className="p-0.5"><ZoomOut className="h-3.5 w-3.5 text-muted-foreground" /></button>
+            <button onClick={() => setShowZoomPresets(p => !p)} className="font-mono tabular-nums text-[11px] text-ink-2 w-10 text-center font-medium hover:text-foreground">{Math.round(zoom * 100)}%</button>
+            <button onClick={() => setZoom(z => clamp(z * 1.1, 0.05, 20))} className="p-0.5"><ZoomIn className="h-3.5 w-3.5 text-muted-foreground" /></button>
             {showZoomPresets && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowZoomPresets(false)} />
-                <div className="absolute top-full right-0 mt-1 z-50 bg-white rounded-xl shadow-2xl border border-gray-200 py-1 w-36">
+                <div className="absolute top-full right-0 mt-1 z-50 bg-card rounded-xl shadow-lg border border-border/60 py-1 w-36">
                   {ZOOM_PRESETS.map(p => (
                     <button key={p.label} onClick={() => { p.value === -1 ? zoomToFit() : (() => { setZoom(p.value); setPan({ x: 0, y: 0 }); })(); setShowZoomPresets(false); }}
-                      className="w-full flex items-center justify-between px-3 py-1.5 text-[12px] text-gray-700 hover:bg-gray-50">
+                      className="w-full flex items-center justify-between px-3 py-1.5 text-[12px] text-ink-2 hover:bg-foreground/[0.03]">
                       <span>{p.label}</span>
-                      {p.value !== -1 && Math.round(zoom * 100) === Math.round(p.value * 100) && <span className="text-blue-500">✓</span>}
+                      {p.value !== -1 && Math.round(zoom * 100) === Math.round(p.value * 100) && <span className="text-primary">✓</span>}
                     </button>
                   ))}
                 </div>
@@ -1584,17 +1584,17 @@ export default function WorkshopStudio() {
             )}
           </div>
 
-          <button onClick={() => setShowGrid(!showGrid)} className={`p-1.5 rounded-md transition-colors ${showGrid ? 'bg-blue-50 text-blue-500' : 'hover:bg-gray-100 text-gray-400'}`}>
+          <button onClick={() => setShowGrid(!showGrid)} className={`p-1.5 rounded-md transition-colors ${showGrid ? 'bg-primary/10 text-primary' : 'hover:bg-foreground/[0.05] text-muted-foreground'}`}>
             <Grid3X3 className="h-3.5 w-3.5" />
           </button>
-          <button onClick={() => setSnapToGrid(!snapToGrid)} className={`p-1.5 rounded-md transition-colors ${snapToGrid ? 'bg-blue-50 text-blue-500' : 'hover:bg-gray-100 text-gray-400'}`}>
+          <button onClick={() => setSnapToGrid(!snapToGrid)} className={`p-1.5 rounded-md transition-colors ${snapToGrid ? 'bg-primary/10 text-primary' : 'hover:bg-foreground/[0.05] text-muted-foreground'}`}>
             <Magnet className="h-3.5 w-3.5" />
           </button>
 
-          <div className="h-5 w-px bg-gray-200 mx-1" />
+          <div className="h-5 w-px bg-border/60 mx-1" />
 
-          <Button size="sm" onClick={exportAsSVG} variant="outline" className="h-7 text-[11px] border-gray-200 text-gray-600 hover:text-gray-900 bg-white">SVG</Button>
-          <Button size="sm" onClick={exportToWorkshop} className="h-7 text-[11px] bg-blue-500 hover:bg-blue-600 text-white border-0 rounded-lg">
+          <Button size="sm" onClick={exportAsSVG} variant="outline" className="h-7 text-[11px] border-border/60 text-ink-2 hover:text-foreground bg-card">SVG</Button>
+          <Button size="sm" onClick={exportToWorkshop} className="h-7 text-[11px] bg-primary hover:bg-primary/90 text-primary-foreground border-0 rounded-lg">
             <Download className="h-3 w-3 mr-1" /> Export
           </Button>
         </div>
@@ -1605,15 +1605,15 @@ export default function WorkshopStudio() {
 
         {/* ═══ LEFT PANEL (Pages / Layers / Assets - like Figma) ═══ */}
         {showLeftPanel && (
-          <div className="w-56 border-r border-gray-200 bg-white shrink-0 flex flex-col">
+          <div className="w-56 border-r border-border/60 bg-card shrink-0 flex flex-col">
             {/* Tabs */}
-            <div className="flex items-center border-b border-gray-100 px-1">
+            <div className="flex items-center border-b border-border/40 px-1">
               {[
                 { key: 'pages' as LeftTab, label: 'Pages' },
                 { key: 'file' as LeftTab, label: 'Layers' },
                 { key: 'assets' as LeftTab, label: 'Assets' },
               ].map(tab => (
-                <button key={tab.key} onClick={() => setLeftTab(tab.key)} className={`flex-1 py-2.5 text-[11px] font-medium text-center transition-colors ${leftTab === tab.key ? 'text-gray-900 border-b-2 border-blue-500' : 'text-gray-400 hover:text-gray-600'}`}>
+                <button key={tab.key} onClick={() => setLeftTab(tab.key)} className={`flex-1 py-2.5 text-[11px] font-medium text-center transition-colors ${leftTab === tab.key ? 'text-foreground border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}>
                   {tab.label}
                 </button>
               ))}
@@ -1625,22 +1625,22 @@ export default function WorkshopStudio() {
                 // Pages panel
                 <div className="p-2">
                   <div className="flex items-center justify-between px-1 mb-2">
-                    <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Pages</span>
-                    <button onClick={addPage} className="p-1 rounded hover:bg-gray-100"><Plus className="h-3 w-3 text-gray-400" /></button>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Pages</span>
+                    <button onClick={addPage} className="p-1 rounded hover:bg-foreground/[0.05]"><Plus className="h-3 w-3 text-muted-foreground" /></button>
                   </div>
                   {pages.map(page => (
-                    <div key={page.id} className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer group ${activePageId === page.id ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                    <div key={page.id} className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer group ${activePageId === page.id ? 'bg-primary/10' : 'hover:bg-foreground/[0.03]'}`}
                       onClick={() => switchPage(page.id)}>
-                      <FileText className={`h-3.5 w-3.5 shrink-0 ${activePageId === page.id ? 'text-blue-500' : 'text-gray-300'}`} />
+                      <FileText className={`h-3.5 w-3.5 shrink-0 ${activePageId === page.id ? 'text-primary' : 'text-muted-foreground/60'}`} />
                       <input
                         value={page.name}
                         onChange={e => renamePage(page.id, e.target.value)}
                         onClick={e => e.stopPropagation()}
-                        className={`text-[12px] bg-transparent border-none outline-none flex-1 min-w-0 ${activePageId === page.id ? 'text-blue-600 font-medium' : 'text-gray-600'}`}
+                        className={`text-[12px] bg-transparent border-none outline-none flex-1 min-w-0 ${activePageId === page.id ? 'text-primary font-medium' : 'text-ink-2'}`}
                       />
                       {pages.length > 1 && (
-                        <button onClick={(e) => { e.stopPropagation(); deletePage(page.id); }} className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-red-50">
-                          <Trash className="h-3 w-3 text-gray-300 hover:text-red-400" />
+                        <button onClick={(e) => { e.stopPropagation(); deletePage(page.id); }} className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-risk/10">
+                          <Trash className="h-3 w-3 text-muted-foreground/60 hover:text-risk" />
                         </button>
                       )}
                     </div>
@@ -1648,16 +1648,16 @@ export default function WorkshopStudio() {
 
                   {/* Local Components */}
                   {localComponents.length > 0 && (
-                    <div className="mt-4 border-t border-gray-100 pt-2">
+                    <div className="mt-4 border-t border-border/40 pt-2">
                       <div className="flex items-center justify-between px-1 mb-2">
-                        <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Local Components</span>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Local components</span>
                       </div>
                       {localComponents.map(comp => (
                         <button key={comp.id} onClick={() => insertComponent(comp)}
-                          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-blue-50 text-left">
-                          <Component className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-                          <span className="text-[11px] text-gray-600 truncate">{comp.name}</span>
-                          <span className="text-[9px] text-gray-300 ml-auto">{comp.elements.length}</span>
+                          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-foreground/[0.04] text-left">
+                          <Component className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="text-[11px] text-ink-2 truncate">{comp.name}</span>
+                          <span className="text-[9px] text-muted-foreground/60 ml-auto">{comp.elements.length}</span>
                         </button>
                       ))}
                     </div>
@@ -1668,9 +1668,9 @@ export default function WorkshopStudio() {
                 <div>
                   {elements.length === 0 ? (
                     <div className="text-center py-16 px-4">
-                      <Layers className="h-8 w-8 mx-auto mb-2 text-gray-200" />
-                      <p className="text-[12px] text-gray-400">No layers yet</p>
-                      <p className="text-[10px] text-gray-300 mt-1">Draw something on the canvas</p>
+                      <Layers className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                      <p className="text-[12px] text-muted-foreground">No layers yet</p>
+                      <p className="text-[10px] text-muted-foreground/60 mt-1">Draw something on the canvas</p>
                     </div>
                   ) : (
                     [...elements].reverse().map(el => {
@@ -1680,16 +1680,16 @@ export default function WorkshopStudio() {
                         <button
                           key={el.id}
                           onClick={(e) => e.shiftKey ? setSelectedIds(prev => prev.includes(el.id) ? prev.filter(id => id !== el.id) : [...prev, el.id]) : setSelectedIds([el.id])}
-                          className={`w-full flex items-center gap-2 px-3 py-1.5 text-left transition-colors group ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                          className={`w-full flex items-center gap-2 px-3 py-1.5 text-left transition-colors group ${isSelected ? 'bg-primary/10' : 'hover:bg-foreground/[0.03]'}`}
                         >
-                          <TypeIcon className={`h-3.5 w-3.5 shrink-0 ${isSelected ? 'text-blue-500' : 'text-gray-300'}`} />
-                          <span className={`text-[12px] truncate flex-1 ${isSelected ? 'text-blue-600 font-medium' : 'text-gray-600'}`}>{el.name}</span>
+                          <TypeIcon className={`h-3.5 w-3.5 shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground/60'}`} />
+                          <span className={`text-[12px] truncate flex-1 ${isSelected ? 'text-primary font-medium' : 'text-ink-2'}`}>{el.name}</span>
                           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
                             <button onClick={(e) => { e.stopPropagation(); const u = elements.map(x => x.id === el.id ? { ...x, visible: !x.visible } : x); setElements(u); }} className="p-0.5">
-                              {el.visible ? <Eye className="h-3 w-3 text-gray-300" /> : <EyeOff className="h-3 w-3 text-gray-400" />}
+                              {el.visible ? <Eye className="h-3 w-3 text-muted-foreground/60" /> : <EyeOff className="h-3 w-3 text-muted-foreground" />}
                             </button>
                             <button onClick={(e) => { e.stopPropagation(); const u = elements.map(x => x.id === el.id ? { ...x, locked: !x.locked } : x); setElements(u); }} className="p-0.5">
-                              {el.locked ? <Lock className="h-3 w-3 text-gray-400" /> : <Unlock className="h-3 w-3 text-gray-300" />}
+                              {el.locked ? <Lock className="h-3 w-3 text-muted-foreground" /> : <Unlock className="h-3 w-3 text-muted-foreground/60" />}
                             </button>
                           </div>
                         </button>
@@ -1701,12 +1701,12 @@ export default function WorkshopStudio() {
                 // Assets library with 152 components
                 <div className="p-3 flex flex-col h-full">
                   <div className="relative mb-3">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400" />
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                     <input
                       placeholder="Search 152 components..."
                       value={assetSearch}
                       onChange={e => setAssetSearch(e.target.value)}
-                      className="w-full h-7 pl-8 pr-3 text-[11px] bg-gray-50 border border-gray-200 rounded-md text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full h-7 pl-8 pr-3 text-[11px] bg-sunken border border-border/60 rounded-md text-ink-2 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                   </div>
                   <div className="flex-1 overflow-y-auto space-y-1">
@@ -1714,16 +1714,16 @@ export default function WorkshopStudio() {
                       const q = assetSearch.trim().toLowerCase();
                       if (q) {
                         const matches = STUDIO_COMPONENTS.filter(c => c.name.toLowerCase().includes(q) || c.tags.some(t => t.includes(q)));
-                        if (matches.length === 0) return <div className="text-center py-8 text-[11px] text-gray-400">No components found</div>;
+                        if (matches.length === 0) return <div className="text-center py-8 text-[11px] text-muted-foreground">No components found</div>;
                         return matches.map(comp => (
                           <button key={comp.id} onClick={() => insertStudioComponent(comp)}
-                            className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors text-left">
+                            className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-foreground/[0.04] cursor-pointer transition-colors text-left">
                             <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: comp.thumbnail + '20', border: `1px solid ${comp.thumbnail}30` }}>
                               <Component className="h-3.5 w-3.5" style={{ color: comp.thumbnail }} />
                             </div>
                             <div className="min-w-0">
-                              <div className="text-[11px] font-medium text-gray-800 truncate">{comp.name}</div>
-                              <div className="text-[9px] text-gray-400">{comp.category}</div>
+                              <div className="text-[11px] font-medium text-foreground truncate">{comp.name}</div>
+                              <div className="text-[9px] text-muted-foreground">{comp.category}</div>
                             </div>
                           </button>
                         ));
@@ -1731,34 +1731,34 @@ export default function WorkshopStudio() {
                       if (!expandedAssetCat) {
                         return STUDIO_CATEGORIES.map(cat => (
                           <button key={cat.key} onClick={() => setExpandedAssetCat(cat.key)}
-                            className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                            className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-foreground/[0.03] cursor-pointer transition-colors">
                             <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: cat.color + '18' }}>
                               <Component className="h-4 w-4" style={{ color: cat.color }} />
                             </div>
                             <div>
-                              <div className="text-[12px] font-medium text-gray-800">{cat.key}</div>
-                              <div className="text-[10px] text-gray-400">{cat.count} components</div>
+                              <div className="text-[12px] font-medium text-foreground">{cat.key}</div>
+                              <div className="text-[10px] text-muted-foreground">{cat.count} components</div>
                             </div>
-                            <ChevronRight className="h-3 w-3 text-gray-300 ml-auto" />
+                            <ChevronRight className="h-3 w-3 text-muted-foreground/60 ml-auto" />
                           </button>
                         ));
                       }
                       const catComps = STUDIO_COMPONENTS.filter(c => c.category === expandedAssetCat);
                       return (
                         <>
-                          <button onClick={() => setExpandedAssetCat(null)} className="flex items-center gap-1.5 text-[11px] text-blue-500 font-medium mb-1 hover:text-blue-600">
-                            <ArrowLeft className="h-3 w-3" /> All Categories
+                          <button onClick={() => setExpandedAssetCat(null)} className="flex items-center gap-1.5 text-[11px] text-primary font-medium mb-1 hover:text-primary/80">
+                            <ArrowLeft className="h-3 w-3" /> All categories
                           </button>
-                          <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">{expandedAssetCat} ({catComps.length})</div>
+                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-1">{expandedAssetCat} ({catComps.length})</div>
                           {catComps.map(comp => (
                             <button key={comp.id} onClick={() => insertStudioComponent(comp)}
-                              className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors text-left">
+                              className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-foreground/[0.04] cursor-pointer transition-colors text-left">
                               <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: comp.thumbnail + '20', border: `1px solid ${comp.thumbnail}30` }}>
                                 <Component className="h-3.5 w-3.5" style={{ color: comp.thumbnail }} />
                               </div>
                               <div className="min-w-0">
-                                <div className="text-[11px] font-medium text-gray-800 truncate">{comp.name}</div>
-                                <div className="text-[9px] text-gray-400">{comp.elements.length} elements</div>
+                                <div className="text-[11px] font-medium text-foreground truncate">{comp.name}</div>
+                                <div className="text-[9px] text-muted-foreground">{comp.elements.length} elements</div>
                               </div>
                             </button>
                           ))}
@@ -1812,7 +1812,7 @@ export default function WorkshopStudio() {
                 onChange={e => setEditingTextValue(e.target.value)}
                 onBlur={commitTextEdit}
                 onKeyDown={e => { if (e.key === 'Escape') commitTextEdit(); }}
-                className="absolute z-20 border-2 border-blue-500 rounded bg-transparent outline-none resize-none"
+                className="absolute z-20 border-2 border-primary rounded bg-transparent outline-none resize-none"
                 style={{
                   left: sx, top: sy,
                   width: el.width * zoom, height: Math.max(el.height * zoom, 40),
@@ -1843,7 +1843,7 @@ export default function WorkshopStudio() {
                 <svg className="absolute inset-0 z-10 pointer-events-none" style={{ width: '100%', height: '100%' }}>
                   <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#FF3366" strokeWidth="1" strokeDasharray="4 2" />
                 </svg>
-                <div className="absolute z-10 pointer-events-none px-1 py-0.5 rounded bg-red-500 text-white text-[9px] font-mono font-bold"
+                <div className="absolute z-10 pointer-events-none px-1 py-0.5 rounded bg-risk text-white text-[9px] font-mono font-semibold"
                   style={{ left: midX - 12, top: midY - 8 }}>
                   {Math.round(m.dist)}
                 </div>
@@ -1854,32 +1854,32 @@ export default function WorkshopStudio() {
           {/* ═══ CONTEXT MENU ═══ */}
           {contextMenu && (
             <div
-              className="fixed z-50 bg-white rounded-xl shadow-2xl border border-gray-200 py-1.5 w-52"
+              className="fixed z-50 bg-card rounded-xl shadow-lg border border-border/60 py-1.5 w-52"
               style={{ left: contextMenu.x, top: contextMenu.y }}
               onClick={() => setContextMenu(null)}
             >
               {[
                 { label: 'Copy', shortcut: '⌘C', action: () => duplicateSelected(), disabled: selectedIds.length === 0 },
-                { label: 'Paste Style', shortcut: '⌘⌥V', action: pasteStyle, disabled: !copiedStyle },
-                { label: 'Copy Style', shortcut: '⌘⌥C', action: copyStyle, disabled: selectedIds.length === 0 },
+                { label: 'Paste style', shortcut: '⌘⌥V', action: pasteStyle, disabled: !copiedStyle },
+                { label: 'Copy style', shortcut: '⌘⌥C', action: copyStyle, disabled: selectedIds.length === 0 },
                 { divider: true },
                 { label: 'Group', shortcut: '⌘G', action: groupSelected, disabled: selectedIds.length < 2 },
                 { label: 'Ungroup', shortcut: '⌘⇧G', action: ungroupSelected, disabled: !selectedEl || selectedEl.type !== 'group' },
                 { divider: true },
-                { label: 'Bring Forward', shortcut: '⌘]', action: bringForward, disabled: selectedIds.length !== 1 },
-                { label: 'Send Backward', shortcut: '⌘[', action: sendBackward, disabled: selectedIds.length !== 1 },
-                { label: 'Bring to Front', shortcut: '⌘⇧]', action: bringToFront, disabled: selectedIds.length !== 1 },
-                { label: 'Send to Back', shortcut: '⌘⇧[', action: sendToBack, disabled: selectedIds.length !== 1 },
+                { label: 'Bring forward', shortcut: '⌘]', action: bringForward, disabled: selectedIds.length !== 1 },
+                { label: 'Send backward', shortcut: '⌘[', action: sendBackward, disabled: selectedIds.length !== 1 },
+                { label: 'Bring to front', shortcut: '⌘⇧]', action: bringToFront, disabled: selectedIds.length !== 1 },
+                { label: 'Send to back', shortcut: '⌘⇧[', action: sendToBack, disabled: selectedIds.length !== 1 },
                 { divider: true },
                 { label: 'Duplicate', shortcut: '⌘D', action: duplicateSelected, disabled: selectedIds.length === 0 },
                 { label: 'Delete', shortcut: '⌫', action: deleteSelected, disabled: selectedIds.length === 0, danger: true },
               ].map((item, i) => {
-                if ('divider' in item && item.divider) return <div key={i} className="h-px bg-gray-100 my-1" />;
+                if ('divider' in item && item.divider) return <div key={i} className="h-px bg-border/60 my-1" />;
                 return (
                   <button key={i} onClick={item.action} disabled={item.disabled}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 text-[12px] transition-colors disabled:opacity-30 ${(item as any).danger ? 'text-red-500 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-50'}`}>
+                    className={`w-full flex items-center justify-between px-3 py-1.5 text-[12px] transition-colors disabled:opacity-30 ${(item as any).danger ? 'text-risk hover:bg-risk/10' : 'text-ink-2 hover:bg-foreground/[0.03]'}`}>
                     <span>{item.label}</span>
-                    <span className="text-[10px] text-gray-400 font-mono">{item.shortcut}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{item.shortcut}</span>
                   </button>
                 );
               })}
@@ -1893,19 +1893,19 @@ export default function WorkshopStudio() {
           {showImageDialog && (
             <>
               <div className="fixed inset-0 z-50 bg-black/20" onClick={() => setShowImageDialog(false)} />
-              <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 p-5 w-80">
-                <h3 className="text-[14px] font-semibold text-gray-900 mb-3">Place Image</h3>
+              <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-card rounded-xl shadow-lg border border-border/60 p-5 w-80">
+                <h3 className="text-[14px] font-semibold text-foreground mb-3">Place image</h3>
                 <Input
                   value={imageUrlInput}
                   onChange={e => setImageUrlInput(e.target.value)}
                   placeholder="Paste image URL..."
-                  className="h-9 text-[12px] mb-3 border-gray-200"
+                  className="h-9 text-[12px] mb-3 border-border/60"
                   autoFocus
                   onKeyDown={e => e.key === 'Enter' && placeImage()}
                 />
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" className="flex-1 h-8 text-[11px]" onClick={() => setShowImageDialog(false)}>Cancel</Button>
-                  <Button size="sm" className="flex-1 h-8 text-[11px] bg-blue-500 hover:bg-blue-600" onClick={placeImage}>Place</Button>
+                  <Button size="sm" className="flex-1 h-8 text-[11px] bg-primary hover:bg-primary/90" onClick={placeImage}>Place</Button>
                 </div>
               </div>
             </>
@@ -1915,16 +1915,16 @@ export default function WorkshopStudio() {
           {showCommandPalette && (
             <>
               <div className="fixed inset-0 z-50 bg-black/30" onClick={() => setShowCommandPalette(false)} />
-              <div className="fixed top-[15%] left-1/2 -translate-x-1/2 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 w-[480px] max-h-[60vh] flex flex-col overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
-                  <Search className="h-4 w-4 text-gray-400 shrink-0" />
+              <div className="fixed top-[15%] left-1/2 -translate-x-1/2 z-50 bg-card rounded-xl shadow-lg border border-border/60 w-[480px] max-h-[60vh] flex flex-col overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-border/40">
+                  <Search className="h-4 w-4 text-muted-foreground shrink-0" />
                   <input
                     ref={commandInputRef}
                     autoFocus
                     value={commandSearch}
                     onChange={e => setCommandSearch(e.target.value)}
                     placeholder="Search commands..."
-                    className="flex-1 text-[14px] text-gray-900 bg-transparent border-none outline-none placeholder-gray-400"
+                    className="flex-1 text-[14px] text-foreground bg-transparent border-none outline-none placeholder:text-muted-foreground"
                     onKeyDown={e => {
                       if (e.key === 'Escape') setShowCommandPalette(false);
                       if (e.key === 'Enter' && filteredCommands.length > 0) {
@@ -1933,7 +1933,7 @@ export default function WorkshopStudio() {
                       }
                     }}
                   />
-                  <kbd className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">ESC</kbd>
+                  <kbd className="text-[10px] text-muted-foreground bg-sunken px-1.5 py-0.5 rounded font-mono">ESC</kbd>
                 </div>
                 <div className="overflow-y-auto max-h-[50vh] py-1">
                   {(() => {
@@ -1941,19 +1941,19 @@ export default function WorkshopStudio() {
                     filteredCommands.forEach(c => { (grouped[c.category] ||= []).push(c); });
                     return Object.entries(grouped).map(([cat, items]) => (
                       <div key={cat}>
-                        <div className="px-4 py-1.5 text-[10px] text-gray-400 uppercase tracking-wider font-semibold">{cat}</div>
+                        <div className="px-4 py-1.5 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{cat}</div>
                         {items.map((item, i) => (
                           <button key={i} onClick={() => { item.action(); setShowCommandPalette(false); }}
-                            className="w-full flex items-center justify-between px-4 py-2 text-[13px] text-gray-700 hover:bg-blue-50 transition-colors">
+                            className="w-full flex items-center justify-between px-4 py-2 text-[13px] text-ink-2 hover:bg-foreground/[0.04] transition-colors">
                             <span>{item.label}</span>
-                            {item.shortcut && <kbd className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">{item.shortcut}</kbd>}
+                            {item.shortcut && <kbd className="text-[10px] text-muted-foreground bg-sunken px-1.5 py-0.5 rounded font-mono">{item.shortcut}</kbd>}
                           </button>
                         ))}
                       </div>
                     ));
                   })()}
                   {filteredCommands.length === 0 && (
-                    <div className="text-center py-8 text-[13px] text-gray-400">No commands found</div>
+                    <div className="text-center py-8 text-[13px] text-muted-foreground">No commands found</div>
                   )}
                 </div>
               </div>
@@ -1964,32 +1964,32 @@ export default function WorkshopStudio() {
           {showFramePresets && (
             <>
               <div className="fixed inset-0 z-50" onClick={() => setShowFramePresets(false)} />
-              <div className="fixed top-[15%] left-1/2 -translate-x-1/2 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 w-72 max-h-[60vh] overflow-y-auto py-1">
-                <div className="px-3 py-2 text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Frame Presets</div>
+              <div className="fixed top-[15%] left-1/2 -translate-x-1/2 z-50 bg-card rounded-xl shadow-lg border border-border/60 w-72 max-h-[60vh] overflow-y-auto py-1">
+                <div className="px-3 py-2 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Frame presets</div>
                 {FRAME_PRESETS.map(preset => (
                   <button key={preset.label} onClick={() => insertFramePreset(preset)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-[12px] text-gray-700 hover:bg-blue-50 transition-colors">
+                    className="w-full flex items-center justify-between px-3 py-2 text-[12px] text-ink-2 hover:bg-foreground/[0.04] transition-colors">
                     <span>{preset.label}</span>
-                    <span className="text-[10px] text-gray-400 font-mono">{preset.w}×{preset.h}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{preset.w}×{preset.h}</span>
                   </button>
                 ))}
               </div>
             </>
           )}
 
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-white rounded-xl shadow-lg border border-gray-200 p-1 z-10 max-w-[calc(100%-32px)] overflow-x-auto scrollbar-none">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-card rounded-xl shadow-lg border border-border/60 p-1 z-10 max-w-[calc(100%-32px)] overflow-x-auto scrollbar-none">
             {toolItems.map((t, i) => {
               const Icon = t.icon;
               const active = tool === t.key;
               return (
                 <div key={t.key} className="flex items-center">
-                  {t.separator && i > 0 && <div className="w-px h-5 bg-gray-200 mx-0.5" />}
+                  {t.separator && i > 0 && <div className="w-px h-5 bg-border/60 mx-0.5" />}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => { if (t.key === 'image') { setShowImageDialog(true); } else if (t.key === 'frame') { setTool('frame'); } else { setTool(t.key); } }}
                         onDoubleClick={() => { if (t.key === 'frame') setShowFramePresets(true); }}
-                        className={`p-1.5 rounded-lg transition-all ${active ? 'bg-blue-500 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'}`}
+                        className={`p-1.5 rounded-lg transition-all ${active ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground'}`}
                       >
                         <Icon className="h-3.5 w-3.5" />
                       </button>
@@ -2000,58 +2000,58 @@ export default function WorkshopStudio() {
               );
             })}
 
-            <div className="w-px h-5 bg-gray-200 mx-0.5" />
+            <div className="w-px h-5 bg-border/60 mx-0.5" />
 
             {/* Group/Ungroup */}
             <Tooltip><TooltipTrigger asChild>
-              <button onClick={groupSelected} disabled={selectedIds.length < 2} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-all disabled:opacity-20">
+              <button onClick={groupSelected} disabled={selectedIds.length < 2} className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground transition-all disabled:opacity-20">
                 <Group className="h-3.5 w-3.5" />
               </button>
             </TooltipTrigger><TooltipContent side="top" className="text-[11px]">Group (⌘G)</TooltipContent></Tooltip>
 
             <Tooltip><TooltipTrigger asChild>
-              <button onClick={ungroupSelected} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-all">
+              <button onClick={ungroupSelected} className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground transition-all">
                 <Ungroup className="h-3.5 w-3.5" />
               </button>
             </TooltipTrigger><TooltipContent side="top" className="text-[11px]">Ungroup (⌘⇧G)</TooltipContent></Tooltip>
 
-            <div className="w-px h-5 bg-gray-200 mx-0.5" />
+            <div className="w-px h-5 bg-border/60 mx-0.5" />
 
             <Tooltip><TooltipTrigger asChild>
-              <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-all">
+              <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground transition-all">
                 <RotateCcw className="h-3.5 w-3.5" />
               </button>
             </TooltipTrigger><TooltipContent side="top" className="text-[11px]">Reset view</TooltipContent></Tooltip>
 
             <Tooltip><TooltipTrigger asChild>
-              <button onClick={() => setShowLeftPanel(!showLeftPanel)} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-all">
+              <button onClick={() => setShowLeftPanel(!showLeftPanel)} className="p-1.5 rounded-lg text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground transition-all">
                 <Layers className="h-3.5 w-3.5" />
               </button>
             </TooltipTrigger><TooltipContent side="top" className="text-[11px]">Toggle layers</TooltipContent></Tooltip>
           </div>
 
           {/* Status bar */}
-          <div className="absolute bottom-4 left-4 px-2.5 py-1 rounded-lg text-[10px] font-medium text-gray-400 bg-white border border-gray-200 shadow-sm z-10">
+          <div className="absolute bottom-4 left-4 px-2.5 py-1 rounded-lg font-mono tabular-nums text-[10px] font-medium text-muted-foreground bg-card border border-border/60 z-10">
             {elements.length} layers · {selectedIds.length} selected · {Math.round(zoom * 100)}%
           </div>
         </div>
 
         {/* ═══ RIGHT PANEL (Design / Prototype / Export - like Figma) ═══ */}
-        <div className="w-60 border-l border-gray-200 bg-white shrink-0 flex flex-col overflow-hidden">
+        <div className="w-60 border-l border-border/60 bg-card shrink-0 flex flex-col overflow-hidden">
           {/* Tabs */}
-          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-border/40">
             <div className="flex items-center gap-3">
               {[
                 { key: 'design' as RightTab, label: 'Design' },
                 { key: 'prototype' as RightTab, label: 'Prototype' },
                 { key: 'export' as RightTab, label: 'Export' },
               ].map(tab => (
-                <button key={tab.key} onClick={() => setRightTab(tab.key)} className={`text-[11px] font-medium transition-colors ${rightTab === tab.key ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}>
+                <button key={tab.key} onClick={() => setRightTab(tab.key)} className={`text-[11px] font-medium transition-colors ${rightTab === tab.key ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                   {tab.label}
                 </button>
               ))}
             </div>
-            <span className="text-[11px] text-blue-500 font-medium">{Math.round(zoom * 100)}%</span>
+            <span className="font-mono tabular-nums text-[11px] text-muted-foreground font-medium">{Math.round(zoom * 100)}%</span>
           </div>
 
           {/* Content */}
@@ -2060,7 +2060,7 @@ export default function WorkshopStudio() {
               selectedEl ? (
                 <div className="px-3 py-2 space-y-0">
                   {/* Name */}
-                  <Input value={selectedEl.name} onChange={e => updateSelected({ name: e.target.value })} onBlur={commitUpdate} className="h-7 text-[12px] bg-gray-50 border-gray-200 text-gray-800 font-medium mb-2" />
+                  <Input value={selectedEl.name} onChange={e => updateSelected({ name: e.target.value })} onBlur={commitUpdate} className="h-7 text-[12px] bg-sunken border-border/60 text-foreground font-medium mb-2" />
 
                   {/* Position */}
                   <SectionHeader label="Position" sectionKey="position" />
@@ -2068,8 +2068,8 @@ export default function WorkshopStudio() {
                     <div className="grid grid-cols-2 gap-1.5 pb-2">
                       {[['X', selectedEl.x, 'x'], ['Y', selectedEl.y, 'y']].map(([label, val, key]) => (
                         <div key={key as string}>
-                          <span className="text-[9px] text-gray-400 uppercase">{label as string}</span>
-                          <Input type="number" value={Math.round(val as number)} onChange={e => updateSelected({ [key as string]: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" />
+                          <span className="text-[9px] text-muted-foreground uppercase">{label as string}</span>
+                          <Input type="number" value={Math.round(val as number)} onChange={e => updateSelected({ [key as string]: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" />
                         </div>
                       ))}
                     </div>
@@ -2082,29 +2082,29 @@ export default function WorkshopStudio() {
                       <div className="grid grid-cols-2 gap-1.5">
                         {[['W', selectedEl.width, 'width'], ['H', selectedEl.height, 'height']].map(([label, val, key]) => (
                           <div key={key as string}>
-                            <span className="text-[9px] text-gray-400 uppercase">{label as string}</span>
-                            <Input type="number" value={Math.round(val as number)} onChange={e => updateSelected({ [key as string]: Math.max(1, +e.target.value) })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" />
+                            <span className="text-[9px] text-muted-foreground uppercase">{label as string}</span>
+                            <Input type="number" value={Math.round(val as number)} onChange={e => updateSelected({ [key as string]: Math.max(1, +e.target.value) })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" />
                           </div>
                         ))}
                       </div>
                       <div className="grid grid-cols-2 gap-1.5">
                         <div>
-                          <span className="text-[9px] text-gray-400 uppercase">Rotation</span>
-                          <Input type="number" value={selectedEl.rotation} onChange={e => updateSelected({ rotation: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" />
+                          <span className="text-[9px] text-muted-foreground uppercase">Rotation</span>
+                          <Input type="number" value={selectedEl.rotation} onChange={e => updateSelected({ rotation: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" />
                         </div>
                         <div>
-                          <span className="text-[9px] text-gray-400 uppercase">Radius</span>
-                          <Input type="number" value={selectedEl.borderRadius} onChange={e => updateSelected({ borderRadius: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" />
+                          <span className="text-[9px] text-muted-foreground uppercase">Radius</span>
+                          <Input type="number" value={selectedEl.borderRadius} onChange={e => updateSelected({ borderRadius: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-1.5">
                         <div>
-                          <span className="text-[9px] text-gray-400 uppercase">Opacity</span>
-                          <input type="range" min="0" max="1" step="0.01" value={selectedEl.opacity} onChange={e => updateSelected({ opacity: +e.target.value })} onMouseUp={commitUpdate} className="w-full h-1 mt-1 accent-blue-500" />
+                          <span className="text-[9px] text-muted-foreground uppercase">Opacity</span>
+                          <input type="range" min="0" max="1" step="0.01" value={selectedEl.opacity} onChange={e => updateSelected({ opacity: +e.target.value })} onMouseUp={commitUpdate} className="w-full h-1 mt-1 accent-primary" />
                         </div>
                         <div>
-                          <span className="text-[9px] text-gray-400 uppercase">Blend Mode</span>
-                          <select value={selectedEl.blendMode || 'normal'} onChange={e => { updateSelected({ blendMode: e.target.value }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-gray-50 border border-gray-200 text-gray-700 rounded px-1 mt-0.5">
+                          <span className="text-[9px] text-muted-foreground uppercase">Blend mode</span>
+                          <select value={selectedEl.blendMode || 'normal'} onChange={e => { updateSelected({ blendMode: e.target.value }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-sunken border border-border/60 text-ink-2 rounded px-1 mt-0.5">
                             {BLEND_MODES.map(m => <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1).replace('-', ' ')}</option>)}
                           </select>
                         </div>
@@ -2117,14 +2117,14 @@ export default function WorkshopStudio() {
                   {expandedSections.constraints && (
                     <div className="grid grid-cols-2 gap-1.5 pb-2">
                       <div>
-                        <span className="text-[9px] text-gray-400 uppercase">Horizontal</span>
-                        <select value={selectedEl.constraintH || 'left'} onChange={e => { updateSelected({ constraintH: e.target.value as any }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-gray-50 border border-gray-200 text-gray-700 rounded px-1">
+                        <span className="text-[9px] text-muted-foreground uppercase">Horizontal</span>
+                        <select value={selectedEl.constraintH || 'left'} onChange={e => { updateSelected({ constraintH: e.target.value as any }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-sunken border border-border/60 text-ink-2 rounded px-1">
                           {['left', 'right', 'center', 'scale'].map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
                         </select>
                       </div>
                       <div>
-                        <span className="text-[9px] text-gray-400 uppercase">Vertical</span>
-                        <select value={selectedEl.constraintV || 'top'} onChange={e => { updateSelected({ constraintV: e.target.value as any }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-gray-50 border border-gray-200 text-gray-700 rounded px-1">
+                        <span className="text-[9px] text-muted-foreground uppercase">Vertical</span>
+                        <select value={selectedEl.constraintV || 'top'} onChange={e => { updateSelected({ constraintV: e.target.value as any }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-sunken border border-border/60 text-ink-2 rounded px-1">
                           {['top', 'bottom', 'center', 'scale'].map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
                         </select>
                       </div>
@@ -2134,13 +2134,13 @@ export default function WorkshopStudio() {
                   {/* Auto Layout (like Figma) */}
                   {(selectedEl.type === 'frame' || selectedEl.type === 'group') && (
                     <>
-                      <SectionHeader label="Auto Layout" sectionKey="autolayout" />
+                      <SectionHeader label="Auto layout" sectionKey="autolayout" />
                       {expandedSections.autolayout && (
                         <div className="space-y-1.5 pb-2">
                           <div className="flex items-center justify-between">
                             <button onClick={() => { updateSelected({ autoLayout: !selectedEl.autoLayout, layoutDirection: selectedEl.layoutDirection || 'vertical', layoutGap: selectedEl.layoutGap ?? 8, layoutPaddingH: selectedEl.layoutPaddingH ?? 16, layoutPaddingV: selectedEl.layoutPaddingV ?? 16 }); commitUpdate(); }}
-                              className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-[10px] font-medium ${selectedEl.autoLayout ? 'bg-blue-50 text-blue-500' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>
-                              {selectedEl.autoLayout ? '✓ Enabled' : 'Add Auto Layout'}
+                              className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-[10px] font-medium ${selectedEl.autoLayout ? 'bg-primary/10 text-primary' : 'bg-sunken text-muted-foreground hover:bg-foreground/[0.05]'}`}>
+                              {selectedEl.autoLayout ? '✓ Enabled' : 'Add auto layout'}
                             </button>
                           </div>
                           {selectedEl.autoLayout && (
@@ -2148,22 +2148,22 @@ export default function WorkshopStudio() {
                               <div className="flex gap-1">
                                 {(['horizontal', 'vertical'] as const).map(d => (
                                   <button key={d} onClick={() => { updateSelected({ layoutDirection: d }); commitUpdate(); }}
-                                    className={`flex-1 py-1 text-[10px] rounded ${selectedEl.layoutDirection === d ? 'bg-blue-50 text-blue-500 font-medium' : 'bg-gray-50 text-gray-400'}`}>
+                                    className={`flex-1 py-1 text-[10px] rounded ${selectedEl.layoutDirection === d ? 'bg-primary/10 text-primary font-medium' : 'bg-sunken text-muted-foreground'}`}>
                                     {d === 'horizontal' ? '→ Horizontal' : '↓ Vertical'}
                                   </button>
                                 ))}
                               </div>
                               <div className="grid grid-cols-3 gap-1.5">
-                                <div><span className="text-[9px] text-gray-400">Gap</span><Input type="number" value={selectedEl.layoutGap ?? 8} onChange={e => updateSelected({ layoutGap: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" /></div>
-                                <div><span className="text-[9px] text-gray-400">Pad H</span><Input type="number" value={selectedEl.layoutPaddingH ?? 16} onChange={e => updateSelected({ layoutPaddingH: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" /></div>
-                                <div><span className="text-[9px] text-gray-400">Pad V</span><Input type="number" value={selectedEl.layoutPaddingV ?? 16} onChange={e => updateSelected({ layoutPaddingV: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" /></div>
+                                <div><span className="text-[9px] text-muted-foreground">Gap</span><Input type="number" value={selectedEl.layoutGap ?? 8} onChange={e => updateSelected({ layoutGap: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" /></div>
+                                <div><span className="text-[9px] text-muted-foreground">Pad H</span><Input type="number" value={selectedEl.layoutPaddingH ?? 16} onChange={e => updateSelected({ layoutPaddingH: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" /></div>
+                                <div><span className="text-[9px] text-muted-foreground">Pad V</span><Input type="number" value={selectedEl.layoutPaddingV ?? 16} onChange={e => updateSelected({ layoutPaddingV: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" /></div>
                               </div>
                               <div>
-                                <span className="text-[9px] text-gray-400 uppercase">Align Items</span>
+                                <span className="text-[9px] text-muted-foreground uppercase">Align items</span>
                                 <div className="flex gap-0.5 mt-0.5">
                                   {(['start', 'center', 'end', 'stretch'] as const).map(a => (
                                     <button key={a} onClick={() => { updateSelected({ layoutAlign: a }); commitUpdate(); }}
-                                      className={`flex-1 py-1 text-[9px] rounded ${selectedEl.layoutAlign === a ? 'bg-blue-50 text-blue-500 font-medium' : 'bg-gray-50 text-gray-400'}`}>
+                                      className={`flex-1 py-1 text-[9px] rounded ${selectedEl.layoutAlign === a ? 'bg-primary/10 text-primary font-medium' : 'bg-sunken text-muted-foreground'}`}>
                                       {a}
                                     </button>
                                   ))}
@@ -2180,21 +2180,21 @@ export default function WorkshopStudio() {
                   {expandedSections.fill && (
                     <div className="space-y-1.5 pb-2">
                       <div className="flex items-center gap-1.5">
-                        <input type="color" value={selectedEl.fill === 'transparent' ? '#000000' : selectedEl.fill} onChange={e => updateSelected({ fill: e.target.value })} onBlur={commitUpdate} className="w-7 h-7 rounded-md border border-gray-200 cursor-pointer" />
-                        <Input value={selectedEl.fill} onChange={e => updateSelected({ fill: e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 flex-1 font-mono" />
+                        <input type="color" value={selectedEl.fill === 'transparent' ? '#000000' : selectedEl.fill} onChange={e => updateSelected({ fill: e.target.value })} onBlur={commitUpdate} className="w-7 h-7 rounded-md border border-border/60 cursor-pointer" />
+                        <Input value={selectedEl.fill} onChange={e => updateSelected({ fill: e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 flex-1 font-mono" />
                       </div>
                       <div className="flex gap-1 flex-wrap">
                         {COLORS.map(c => (
-                          <button key={c} onClick={() => { updateSelected({ fill: c }); commitUpdate(); }} className="w-5 h-5 rounded border border-gray-200 transition-transform hover:scale-110" style={{ backgroundColor: c }} />
+                          <button key={c} onClick={() => { updateSelected({ fill: c }); commitUpdate(); }} className="w-5 h-5 rounded border border-border/60 transition-transform hover:scale-110" style={{ backgroundColor: c }} />
                         ))}
                       </div>
                       {/* Gradient controls */}
                       <div>
-                        <span className="text-[9px] text-gray-400 uppercase">Gradient</span>
+                        <span className="text-[9px] text-muted-foreground uppercase">Gradient</span>
                         <div className="flex gap-1 mt-0.5">
                           {(['none', 'linear', 'radial'] as const).map(t => (
                             <button key={t} onClick={() => { updateSelected({ gradientType: t, gradientStart: selectedEl.gradientStart || selectedEl.fill, gradientEnd: selectedEl.gradientEnd || '#ffffff' }); commitUpdate(); }}
-                              className={`flex-1 py-1 text-[10px] rounded ${selectedEl.gradientType === t ? 'bg-blue-50 text-blue-500 font-medium' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>
+                              className={`flex-1 py-1 text-[10px] rounded ${selectedEl.gradientType === t ? 'bg-primary/10 text-primary font-medium' : 'bg-sunken text-muted-foreground hover:bg-foreground/[0.05]'}`}>
                               {t === 'none' ? 'Solid' : t === 'linear' ? 'Linear' : 'Radial'}
                             </button>
                           ))}
@@ -2203,13 +2203,13 @@ export default function WorkshopStudio() {
                       {selectedEl.gradientType && selectedEl.gradientType !== 'none' && (
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-1.5">
-                            <input type="color" value={selectedEl.gradientStart || '#6366f1'} onChange={e => updateSelected({ gradientStart: e.target.value })} onBlur={commitUpdate} className="w-6 h-6 rounded border border-gray-200 cursor-pointer" />
-                            <span className="text-[9px] text-gray-400">→</span>
-                            <input type="color" value={selectedEl.gradientEnd || '#ffffff'} onChange={e => updateSelected({ gradientEnd: e.target.value })} onBlur={commitUpdate} className="w-6 h-6 rounded border border-gray-200 cursor-pointer" />
-                            <Input type="number" value={selectedEl.gradientAngle || 0} onChange={e => updateSelected({ gradientAngle: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 w-14 font-mono" placeholder="Angle" />
+                            <input type="color" value={selectedEl.gradientStart || '#6366f1'} onChange={e => updateSelected({ gradientStart: e.target.value })} onBlur={commitUpdate} className="w-6 h-6 rounded border border-border/60 cursor-pointer" />
+                            <span className="text-[9px] text-muted-foreground">→</span>
+                            <input type="color" value={selectedEl.gradientEnd || '#ffffff'} onChange={e => updateSelected({ gradientEnd: e.target.value })} onBlur={commitUpdate} className="w-6 h-6 rounded border border-border/60 cursor-pointer" />
+                            <Input type="number" value={selectedEl.gradientAngle || 0} onChange={e => updateSelected({ gradientAngle: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 w-14 font-mono" placeholder="Angle" />
                           </div>
                           {/* Gradient preview */}
-                          <div className="h-4 rounded-md border border-gray-200" style={{
+                          <div className="h-4 rounded-md border border-border/60" style={{
                             background: selectedEl.gradientType === 'linear'
                               ? `linear-gradient(${selectedEl.gradientAngle || 0}deg, ${selectedEl.gradientStart}, ${selectedEl.gradientEnd})`
                               : `radial-gradient(circle, ${selectedEl.gradientStart}, ${selectedEl.gradientEnd})`
@@ -2223,8 +2223,8 @@ export default function WorkshopStudio() {
                   <SectionHeader label="Stroke" sectionKey="stroke" />
                   {expandedSections.stroke && (
                     <div className="flex items-center gap-1.5 pb-2">
-                      <input type="color" value={selectedEl.stroke === 'transparent' ? '#000' : selectedEl.stroke} onChange={e => updateSelected({ stroke: e.target.value })} onBlur={commitUpdate} className="w-7 h-7 rounded-md border border-gray-200 cursor-pointer" />
-                      <Input type="number" value={selectedEl.strokeWidth} onChange={e => updateSelected({ strokeWidth: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 w-16 font-mono" placeholder="Width" />
+                      <input type="color" value={selectedEl.stroke === 'transparent' ? '#000' : selectedEl.stroke} onChange={e => updateSelected({ stroke: e.target.value })} onBlur={commitUpdate} className="w-7 h-7 rounded-md border border-border/60 cursor-pointer" />
+                      <Input type="number" value={selectedEl.strokeWidth} onChange={e => updateSelected({ strokeWidth: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 w-16 font-mono" placeholder="Width" />
                     </div>
                   )}
 
@@ -2234,57 +2234,57 @@ export default function WorkshopStudio() {
                       <SectionHeader label="Typography" sectionKey="text" />
                       {expandedSections.text && (
                         <div className="space-y-1.5 pb-2">
-                          <textarea value={selectedEl.text || ''} onChange={e => updateSelected({ text: e.target.value })} onBlur={commitUpdate} className="w-full h-16 text-[12px] bg-gray-50 border border-gray-200 text-gray-700 rounded-md p-2 resize-none" />
+                          <textarea value={selectedEl.text || ''} onChange={e => updateSelected({ text: e.target.value })} onBlur={commitUpdate} className="w-full h-16 text-[12px] bg-sunken border border-border/60 text-ink-2 rounded-md p-2 resize-none" />
                           <div className="grid grid-cols-2 gap-1.5">
                             <div>
-                              <span className="text-[9px] text-gray-400 uppercase">Font</span>
-                              <select value={selectedEl.fontFamily || 'Inter'} onChange={e => { updateSelected({ fontFamily: e.target.value }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-gray-50 border border-gray-200 text-gray-700 rounded px-1">
+                              <span className="text-[9px] text-muted-foreground uppercase">Font</span>
+                              <select value={selectedEl.fontFamily || 'Inter'} onChange={e => { updateSelected({ fontFamily: e.target.value }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-sunken border border-border/60 text-ink-2 rounded px-1">
                                 {FONT_FAMILIES.map(f => <option key={f} value={f}>{f}</option>)}
                               </select>
                             </div>
                             <div>
-                              <span className="text-[9px] text-gray-400 uppercase">Size</span>
-                              <Input type="number" value={selectedEl.fontSize || 16} onChange={e => updateSelected({ fontSize: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" />
+                              <span className="text-[9px] text-muted-foreground uppercase">Size</span>
+                              <Input type="number" value={selectedEl.fontSize || 16} onChange={e => updateSelected({ fontSize: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" />
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-1.5">
                             <div>
-                              <span className="text-[9px] text-gray-400 uppercase">Line Height</span>
-                              <Input type="number" step="0.1" value={selectedEl.lineHeight || 1.4} onChange={e => updateSelected({ lineHeight: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" />
+                              <span className="text-[9px] text-muted-foreground uppercase">Line height</span>
+                              <Input type="number" step="0.1" value={selectedEl.lineHeight || 1.4} onChange={e => updateSelected({ lineHeight: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" />
                             </div>
                             <div>
-                              <span className="text-[9px] text-gray-400 uppercase">Letter Spacing</span>
-                              <Input type="number" step="0.1" value={selectedEl.letterSpacing || 0} onChange={e => updateSelected({ letterSpacing: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" />
+                              <span className="text-[9px] text-muted-foreground uppercase">Letter spacing</span>
+                              <Input type="number" step="0.1" value={selectedEl.letterSpacing || 0} onChange={e => updateSelected({ letterSpacing: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" />
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-1.5">
                             <div>
-                              <span className="text-[9px] text-gray-400 uppercase">Weight</span>
-                              <select value={selectedEl.fontWeight || '400'} onChange={e => { updateSelected({ fontWeight: e.target.value }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-gray-50 border border-gray-200 text-gray-700 rounded px-1">
+                              <span className="text-[9px] text-muted-foreground uppercase">Weight</span>
+                              <select value={selectedEl.fontWeight || '400'} onChange={e => { updateSelected({ fontWeight: e.target.value }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-sunken border border-border/60 text-ink-2 rounded px-1">
                                 {['100','200','300','400','500','600','700','800','900'].map(w => <option key={w} value={w}>{w}</option>)}
                               </select>
                             </div>
                             <div>
-                              <span className="text-[9px] text-gray-400 uppercase">Decoration</span>
-                              <select value={selectedEl.textDecoration || 'none'} onChange={e => { updateSelected({ textDecoration: e.target.value }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-gray-50 border border-gray-200 text-gray-700 rounded px-1">
+                              <span className="text-[9px] text-muted-foreground uppercase">Decoration</span>
+                              <select value={selectedEl.textDecoration || 'none'} onChange={e => { updateSelected({ textDecoration: e.target.value }); commitUpdate(); }} className="w-full h-6 text-[11px] bg-sunken border border-border/60 text-ink-2 rounded px-1">
                                 {['none','underline','line-through','overline'].map(d => <option key={d} value={d}>{d}</option>)}
                               </select>
                             </div>
                           </div>
                           <div className="flex gap-0.5">
                             {[{ v: 'left', I: AlignLeft }, { v: 'center', I: AlignCenter }, { v: 'right', I: AlignRight }].map(({ v, I }) => (
-                              <button key={v} onClick={() => { updateSelected({ textAlign: v }); commitUpdate(); }} className={`p-1.5 rounded-md ${selectedEl.textAlign === v ? 'bg-blue-50 text-blue-500' : 'text-gray-400 hover:bg-gray-100'}`}>
+                              <button key={v} onClick={() => { updateSelected({ textAlign: v }); commitUpdate(); }} className={`p-1.5 rounded-md ${selectedEl.textAlign === v ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-foreground/[0.05]'}`}>
                                 <I className="h-3.5 w-3.5" />
                               </button>
                             ))}
-                            <div className="w-px bg-gray-200 mx-1" />
-                            <button onClick={() => { updateSelected({ fontWeight: selectedEl.fontWeight === '700' ? '400' : '700' }); commitUpdate(); }} className={`p-1.5 rounded-md ${selectedEl.fontWeight === '700' ? 'bg-blue-50 text-blue-500' : 'text-gray-400 hover:bg-gray-100'}`}>
+                            <div className="w-px bg-border/60 mx-1" />
+                            <button onClick={() => { updateSelected({ fontWeight: selectedEl.fontWeight === '700' ? '400' : '700' }); commitUpdate(); }} className={`p-1.5 rounded-md ${selectedEl.fontWeight === '700' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-foreground/[0.05]'}`}>
                               <Bold className="h-3.5 w-3.5" />
                             </button>
-                            <button onClick={() => { updateSelected({ fontStyle: selectedEl.fontStyle === 'italic' ? 'normal' : 'italic' }); commitUpdate(); }} className={`p-1.5 rounded-md ${selectedEl.fontStyle === 'italic' ? 'bg-blue-50 text-blue-500' : 'text-gray-400 hover:bg-gray-100'}`}>
+                            <button onClick={() => { updateSelected({ fontStyle: selectedEl.fontStyle === 'italic' ? 'normal' : 'italic' }); commitUpdate(); }} className={`p-1.5 rounded-md ${selectedEl.fontStyle === 'italic' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-foreground/[0.05]'}`}>
                               <Italic className="h-3.5 w-3.5" />
                             </button>
-                            <button onClick={() => { updateSelected({ textDecoration: selectedEl.textDecoration === 'underline' ? 'none' : 'underline' }); commitUpdate(); }} className={`p-1.5 rounded-md ${selectedEl.textDecoration === 'underline' ? 'bg-blue-50 text-blue-500' : 'text-gray-400 hover:bg-gray-100'}`}>
+                            <button onClick={() => { updateSelected({ textDecoration: selectedEl.textDecoration === 'underline' ? 'none' : 'underline' }); commitUpdate(); }} className={`p-1.5 rounded-md ${selectedEl.textDecoration === 'underline' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-foreground/[0.05]'}`}>
                               <Underline className="h-3.5 w-3.5" />
                             </button>
                           </div>
@@ -2297,9 +2297,9 @@ export default function WorkshopStudio() {
                   <SectionHeader label="Shadow" sectionKey="shadow" />
                   {expandedSections.shadow && (
                     <div className="grid grid-cols-3 gap-1.5 pb-2">
-                      <div><span className="text-[9px] text-gray-400">X</span><Input type="number" value={selectedEl.shadowX || 0} onChange={e => updateSelected({ shadowX: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" /></div>
-                      <div><span className="text-[9px] text-gray-400">Y</span><Input type="number" value={selectedEl.shadowY || 0} onChange={e => updateSelected({ shadowY: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" /></div>
-                      <div><span className="text-[9px] text-gray-400">Blur</span><Input type="number" value={selectedEl.shadowBlur || 0} onChange={e => updateSelected({ shadowBlur: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono" /></div>
+                      <div><span className="text-[9px] text-muted-foreground">X</span><Input type="number" value={selectedEl.shadowX || 0} onChange={e => updateSelected({ shadowX: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" /></div>
+                      <div><span className="text-[9px] text-muted-foreground">Y</span><Input type="number" value={selectedEl.shadowY || 0} onChange={e => updateSelected({ shadowY: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" /></div>
+                      <div><span className="text-[9px] text-muted-foreground">Blur</span><Input type="number" value={selectedEl.shadowBlur || 0} onChange={e => updateSelected({ shadowBlur: +e.target.value })} onBlur={commitUpdate} className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono" /></div>
                     </div>
                   )}
 
@@ -2308,14 +2308,14 @@ export default function WorkshopStudio() {
                   {expandedSections.effects && (
                     <div className="space-y-1.5 pb-2">
                       <div>
-                        <span className="text-[9px] text-gray-400">Blur: {selectedEl.blur || 0}px</span>
-                        <input type="range" min="0" max="20" value={selectedEl.blur || 0} onChange={e => updateSelected({ blur: +e.target.value })} onMouseUp={commitUpdate} className="w-full h-1 accent-blue-500" />
+                        <span className="text-[9px] text-muted-foreground">Blur: {selectedEl.blur || 0}px</span>
+                        <input type="range" min="0" max="20" value={selectedEl.blur || 0} onChange={e => updateSelected({ blur: +e.target.value })} onMouseUp={commitUpdate} className="w-full h-1 accent-primary" />
                       </div>
                       <div className="flex gap-1">
-                        <button onClick={() => { updateSelected({ flipX: !selectedEl.flipX }); commitUpdate(); }} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-gray-50 hover:bg-gray-100 text-[10px] text-gray-500">
+                        <button onClick={() => { updateSelected({ flipX: !selectedEl.flipX }); commitUpdate(); }} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-sunken hover:bg-foreground/[0.05] text-[10px] text-muted-foreground">
                           <FlipHorizontal className="h-3 w-3" /> Flip H
                         </button>
-                        <button onClick={() => { updateSelected({ flipY: !selectedEl.flipY }); commitUpdate(); }} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-gray-50 hover:bg-gray-100 text-[10px] text-gray-500">
+                        <button onClick={() => { updateSelected({ flipY: !selectedEl.flipY }); commitUpdate(); }} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-sunken hover:bg-foreground/[0.05] text-[10px] text-muted-foreground">
                           <FlipVertical className="h-3 w-3" /> Flip V
                         </button>
                       </div>
@@ -2323,20 +2323,20 @@ export default function WorkshopStudio() {
                   )}
 
                   {/* Actions */}
-                  <div className="pt-2 border-t border-gray-100 space-y-1.5">
+                  <div className="pt-2 border-t border-border/40 space-y-1.5">
                     <div className="flex gap-1">
-                      <button onClick={duplicateSelected} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-gray-50 hover:bg-gray-100 text-[10px] text-gray-500">
+                      <button onClick={duplicateSelected} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-sunken hover:bg-foreground/[0.05] text-[10px] text-muted-foreground">
                         <Copy className="h-3 w-3" /> Duplicate
                       </button>
-                      <button onClick={deleteSelected} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-red-50 hover:bg-red-100 text-[10px] text-red-500">
+                      <button onClick={deleteSelected} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-risk/10 hover:bg-risk/15 text-[10px] text-risk">
                         <Trash2 className="h-3 w-3" /> Delete
                       </button>
                     </div>
                     <div className="flex gap-1">
-                      <button onClick={bringForward} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-gray-50 hover:bg-gray-100 text-[10px] text-gray-500">
+                      <button onClick={bringForward} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-sunken hover:bg-foreground/[0.05] text-[10px] text-muted-foreground">
                         <ArrowUp className="h-3 w-3" /> Forward
                       </button>
-                      <button onClick={sendBackward} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-gray-50 hover:bg-gray-100 text-[10px] text-gray-500">
+                      <button onClick={sendBackward} className="flex-1 flex items-center justify-center gap-1 p-1.5 rounded-md bg-sunken hover:bg-foreground/[0.05] text-[10px] text-muted-foreground">
                         <ArrowDown className="h-3 w-3" /> Back
                       </button>
                     </div>
@@ -2344,7 +2344,7 @@ export default function WorkshopStudio() {
                     {/* Boolean Operations */}
                     {multiSelected && (
                       <>
-                        <span className="text-[9px] text-gray-400 uppercase block pt-1">Boolean Operations</span>
+                        <span className="text-[9px] text-muted-foreground uppercase block pt-1">Boolean operations</span>
                         <div className="grid grid-cols-4 gap-1">
                           {[
                             { label: 'Union', icon: '∪' },
@@ -2352,14 +2352,14 @@ export default function WorkshopStudio() {
                             { label: 'Inter', icon: '∩' },
                             { label: 'Flat', icon: '⊟' },
                           ].map(op => (
-                            <button key={op.label} onClick={flattenSelected} className="flex flex-col items-center gap-0.5 p-1.5 rounded-md bg-gray-50 hover:bg-gray-100">
-                              <span className="text-[14px] text-gray-400 leading-none">{op.icon}</span>
-                              <span className="text-[8px] text-gray-400">{op.label}</span>
+                            <button key={op.label} onClick={flattenSelected} className="flex flex-col items-center gap-0.5 p-1.5 rounded-md bg-sunken hover:bg-foreground/[0.05]">
+                              <span className="text-[14px] text-muted-foreground leading-none">{op.icon}</span>
+                              <span className="text-[8px] text-muted-foreground">{op.label}</span>
                             </button>
                           ))}
                         </div>
 
-                        <span className="text-[9px] text-gray-400 uppercase block pt-1">Align</span>
+                        <span className="text-[9px] text-muted-foreground uppercase block pt-1">Align</span>
                         <div className="flex gap-0.5">
                           {[
                             { fn: () => alignSelected('left'), I: AlignStartVertical },
@@ -2369,22 +2369,22 @@ export default function WorkshopStudio() {
                             { fn: () => alignSelected('centerV'), I: AlignCenterHorizontal },
                             { fn: () => alignSelected('bottom'), I: AlignEndHorizontal },
                           ].map(({ fn, I }, i) => (
-                            <button key={i} onClick={fn} className="p-1.5 rounded-md bg-gray-50 hover:bg-gray-100">
-                              <I className="h-3 w-3 text-gray-400" />
+                            <button key={i} onClick={fn} className="p-1.5 rounded-md bg-sunken hover:bg-foreground/[0.05]">
+                              <I className="h-3 w-3 text-muted-foreground" />
                             </button>
                           ))}
                         </div>
                         <div className="flex gap-1">
-                          <button onClick={() => distributeSelected('h')} className="flex-1 p-1.5 rounded-md bg-gray-50 hover:bg-gray-100 text-[10px] text-gray-500">Distribute H</button>
-                          <button onClick={() => distributeSelected('v')} className="flex-1 p-1.5 rounded-md bg-gray-50 hover:bg-gray-100 text-[10px] text-gray-500">Distribute V</button>
+                          <button onClick={() => distributeSelected('h')} className="flex-1 p-1.5 rounded-md bg-sunken hover:bg-foreground/[0.05] text-[10px] text-muted-foreground">Distribute H</button>
+                          <button onClick={() => distributeSelected('v')} className="flex-1 p-1.5 rounded-md bg-sunken hover:bg-foreground/[0.05] text-[10px] text-muted-foreground">Distribute V</button>
                         </div>
                       </>
                     )}
 
-                    {/* Create Component */}
+                    {/* Create component */}
                     {selectedIds.length > 0 && (
-                      <button onClick={createComponent} className="w-full flex items-center justify-center gap-1 p-1.5 rounded-md bg-purple-50 hover:bg-purple-100 text-[10px] text-purple-500">
-                        <Component className="h-3 w-3" /> Create Component
+                      <button onClick={createComponent} className="w-full flex items-center justify-center gap-1 p-1.5 rounded-md bg-primary/10 hover:bg-primary/15 text-[10px] text-primary">
+                        <Component className="h-3 w-3" /> Create component
                       </button>
                     )}
                   </div>
@@ -2393,23 +2393,23 @@ export default function WorkshopStudio() {
                 // No selection - show page properties
                 <div className="p-3">
                   <div className="mb-3">
-                    <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Page</span>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Page</span>
                     <div className="flex items-center gap-2 mt-1.5">
-                      <div className="w-6 h-6 rounded border border-gray-200" style={{ backgroundColor: '#F5F5F5' }} />
-                      <Input value="F5F5F5" className="h-6 text-[11px] bg-gray-50 border-gray-200 text-gray-700 font-mono flex-1" readOnly />
-                      <span className="text-[11px] text-gray-400 font-mono">100 %</span>
+                      <div className="w-6 h-6 rounded border border-border/60" style={{ backgroundColor: '#F5F5F5' }} />
+                      <Input value="F5F5F5" className="h-6 text-[11px] bg-sunken border-border/60 text-ink-2 font-mono flex-1" readOnly />
+                      <span className="text-[11px] text-muted-foreground font-mono">100 %</span>
                     </div>
                   </div>
-                  <div className="border-t border-gray-100 pt-3">
+                  <div className="border-t border-border/40 pt-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Variables</span>
-                      <Settings className="h-3 w-3 text-gray-300" />
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Variables</span>
+                      <Settings className="h-3 w-3 text-muted-foreground/60" />
                     </div>
                   </div>
-                  <div className="border-t border-gray-100 pt-3">
+                  <div className="border-t border-border/40 pt-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Styles</span>
-                      <Plus className="h-3 w-3 text-gray-300" />
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Styles</span>
+                      <Plus className="h-3 w-3 text-muted-foreground/60" />
                     </div>
                   </div>
                 </div>
@@ -2417,42 +2417,42 @@ export default function WorkshopStudio() {
             ) : rightTab === 'export' ? (
               // Export tab
               <div className="p-3 space-y-3">
-                <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Export</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Export</span>
                 {selectedEl ? (
                   <div className="space-y-2">
-                    <div className="text-[12px] text-gray-700 font-medium">{selectedEl.name}</div>
-                    <div className="text-[10px] text-gray-400">{Math.round(selectedEl.width)} × {Math.round(selectedEl.height)}</div>
+                    <div className="text-[12px] text-ink-2 font-medium">{selectedEl.name}</div>
+                    <div className="font-mono tabular-nums text-[10px] text-muted-foreground">{Math.round(selectedEl.width)} × {Math.round(selectedEl.height)}</div>
                     <div className="space-y-1.5">
                       {EXPORT_SCALES.map(s => (
                         <button key={s.label} onClick={() => exportElementAsPNG(s.scale)}
-                          className="w-full flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors">
+                          className="w-full flex items-center justify-between p-2 rounded-lg bg-sunken hover:bg-foreground/[0.04] transition-colors">
                           <div className="flex items-center gap-2">
-                            <Download className="h-3.5 w-3.5 text-gray-400" />
-                            <span className="text-[11px] text-gray-700 font-medium">PNG {s.label}</span>
+                            <Download className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-[11px] text-ink-2 font-medium">PNG {s.label}</span>
                           </div>
-                          <span className="text-[10px] text-gray-400">{Math.round(selectedEl.width * s.scale)}×{Math.round(selectedEl.height * s.scale)}</span>
+                          <span className="font-mono tabular-nums text-[10px] text-muted-foreground">{Math.round(selectedEl.width * s.scale)}×{Math.round(selectedEl.height * s.scale)}</span>
                         </button>
                       ))}
                     </div>
-                    <div className="pt-2 border-t border-gray-100">
-                      <button onClick={exportAsSVG} className="w-full flex items-center justify-center gap-1.5 p-2 rounded-lg bg-gray-50 hover:bg-blue-50 text-[11px] text-gray-700 font-medium">
-                        <Download className="h-3.5 w-3.5" /> Export All as SVG
+                    <div className="pt-2 border-t border-border/40">
+                      <button onClick={exportAsSVG} className="w-full flex items-center justify-center gap-1.5 p-2 rounded-lg bg-sunken hover:bg-foreground/[0.04] text-[11px] text-ink-2 font-medium">
+                        <Download className="h-3.5 w-3.5" /> Export all as SVG
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Download className="h-8 w-8 mx-auto mb-2 text-gray-200" />
-                    <p className="text-[12px] text-gray-400">Select a layer to export</p>
+                    <Download className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                    <p className="text-[12px] text-muted-foreground">Select a layer to export</p>
                   </div>
                 )}
               </div>
             ) : (
               // Prototype tab
               <div className="p-4 text-center py-16">
-                <Play className="h-8 w-8 mx-auto mb-2 text-gray-200" />
-                <p className="text-[12px] text-gray-400">Prototype</p>
-                <p className="text-[10px] text-gray-300 mt-1">Select a layer to add interactions</p>
+                <Play className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                <p className="text-[12px] text-muted-foreground">Prototype</p>
+                <p className="text-[10px] text-muted-foreground/60 mt-1">Select a layer to add interactions</p>
               </div>
             )}
           </div>
