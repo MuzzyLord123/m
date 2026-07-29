@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, Trash2, Upload, Landmark, ArrowRight, Link2, Unlink, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Upload, Landmark, ArrowRight, Link2, Unlink, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { StatusBadge } from '@/components/platform';
 
 type SubTab = 'accounts' | 'transactions' | 'reconcile';
 
@@ -32,12 +33,7 @@ interface Reconciliation {
   status: 'open'|'completed'; completed_at: string | null;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  unmatched:  '#f59e0b',
-  matched:    '#3b82f6',
-  reconciled: '#10b981',
-  ignored:    '#94a3b8',
-};
+// Status tones come from the platform StatusBadge vocabulary.
 
 function money(n: number, c = 'GBP') {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: c, minimumFractionDigits: 2 }).format(Number(n || 0));
@@ -98,20 +94,20 @@ export default function BankingView({
     <div className="space-y-5">
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard label="Bank balance"  value={money(totals.balance, currency)} color="#3b82f6" icon={Landmark} />
-        <KpiCard label="Unmatched"     value={String(totals.unmatched)}        color="#f59e0b" icon={Sparkles} />
-        <KpiCard label="Matched"       value={String(totals.matched)}          color="#3b82f6" icon={Link2} />
-        <KpiCard label="Reconciled"    value={String(totals.reconciled)}       color="#10b981" icon={CheckCircle2} />
+        <KpiCard label="Bank balance"  value={money(totals.balance, currency)} />
+        <KpiCard label="Unmatched"     value={String(totals.unmatched)} />
+        <KpiCard label="Matched"       value={String(totals.matched)} />
+        <KpiCard label="Reconciled"    value={String(totals.reconciled)} />
       </div>
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex gap-1 rounded-xl bg-card/60 border border-border/30 p-1">
+        <div className="flex gap-1 rounded-lg bg-card border border-border/60 p-1">
           {(['accounts','transactions','reconcile'] as SubTab[]).map(k => (
             <button key={k} onClick={() => setSub(k)}
               className={cn(
                 "px-3 h-8 text-[12px] rounded-lg font-medium capitalize transition-colors",
-                sub === k ? "bg-brand/15 text-foreground" : "text-muted-foreground hover:text-foreground"
+                sub === k ? "bg-foreground/[0.05] text-foreground" : "text-muted-foreground hover:text-foreground"
               )}>{k}</button>
           ))}
         </div>
@@ -119,7 +115,7 @@ export default function BankingView({
         <div className="flex items-center gap-2">
           {bankAccounts.length > 0 && sub !== 'accounts' && (
             <Select value={selectedBankId} onValueChange={setSelectedBankId}>
-              <SelectTrigger className="h-8 w-[200px] text-xs rounded-xl bg-card/60">
+              <SelectTrigger className="h-8 w-[200px] text-xs rounded-lg bg-card">
                 <SelectValue placeholder="Select bank account" />
               </SelectTrigger>
               <SelectContent>
@@ -128,17 +124,17 @@ export default function BankingView({
             </Select>
           )}
           {sub === 'accounts' && (
-            <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => setShowAccountModal(true)} disabled={cashAccounts.length === 0}>
+            <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => setShowAccountModal(true)} disabled={cashAccounts.length === 0}>
               <Plus className="h-3.5 w-3.5" /> Add bank account
             </Button>
           )}
           {sub === 'transactions' && selectedBankId && (
-            <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => setShowImportModal(true)}>
+            <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => setShowImportModal(true)}>
               <Upload className="h-3.5 w-3.5" /> Import CSV
             </Button>
           )}
           {sub === 'reconcile' && selectedBankId && (
-            <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => setShowReconModal(true)}>
+            <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => setShowReconModal(true)}>
               <Plus className="h-3.5 w-3.5" /> Start reconciliation
             </Button>
           )}
@@ -191,16 +187,11 @@ export default function BankingView({
 }
 
 /* ---------- Panels ---------- */
-function KpiCard({ label, value, color, icon: Icon }: any) {
+function KpiCard({ label, value }: any) {
   return (
-    <div className="p-4 rounded-2xl bg-card/60 border border-border/20">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: `${color}15` }}>
-          <Icon className="h-3.5 w-3.5" style={{ color }} />
-        </div>
-        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</span>
-      </div>
-      <div className="text-lg font-bold tracking-tight">{value}</div>
+    <div className="flex items-center justify-between gap-3 rounded-[10px] border border-border/60 bg-card px-4 py-3">
+      <span className="font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{label}</span>
+      <span className="font-mono text-[15px] font-medium tabular-nums text-foreground">{value}</span>
     </div>
   );
 }
@@ -213,14 +204,14 @@ function BankAccountsList({ banks, accounts, currency, onDelete }: {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {banks.map(b => (
-        <div key={b.id} className="p-4 rounded-2xl border border-border/30 bg-card/50 flex items-start justify-between">
+        <div key={b.id} className="p-4 rounded-[10px] border border-border/60 bg-card flex items-start justify-between">
           <div>
             <div className="text-sm font-semibold">{b.name}</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">{b.institution || '—'} {b.account_number_last4 ? `· •••${b.account_number_last4}` : ''}</div>
-            <div className="text-[11px] text-muted-foreground mt-1">Linked to <span className="font-mono">{amap[b.coa_account_id] || '—'}</span></div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">{b.institution || '–'} {b.account_number_last4 ? `· •••${b.account_number_last4}` : ''}</div>
+            <div className="text-[11px] text-muted-foreground mt-1">Linked to <span className="font-mono">{amap[b.coa_account_id] || '–'}</span></div>
             <div className="text-[11px] text-muted-foreground mt-1">Opening {money(b.opening_balance, b.currency || currency)} on {new Date(b.opening_balance_date).toLocaleDateString('en-GB')}</div>
           </div>
-          <Button size="sm" variant="ghost" className="h-7 text-red-500" onClick={() => onDelete(b.id)}>
+          <Button size="sm" variant="ghost" className="h-7 text-risk" onClick={() => onDelete(b.id)}>
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -235,27 +226,24 @@ function TransactionsTable({ txns, currency, onMatch, onUnmatch, onDelete }: {
 }) {
   if (txns.length === 0) return <Empty icon={Upload} title="No transactions" hint='Import statement lines via CSV to start reconciling.' />;
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+    <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
       <table className="w-full text-xs">
         <thead className="bg-muted/20 text-muted-foreground">
           <tr><Th>Date</Th><Th>Description</Th><Th>Ref</Th><Th right>Amount</Th><Th>Status</Th><Th right>Actions</Th></tr>
         </thead>
         <tbody>
           {txns.map(t => (
-            <tr key={t.id} className="border-t border-border/20 hover:bg-muted/10">
+            <tr key={t.id} className="border-t border-border/60 hover:bg-foreground/[0.025]">
               <Td>{new Date(t.txn_date).toLocaleDateString('en-GB')}</Td>
               <Td>{t.description}</Td>
-              <Td>{t.reference || '—'}</Td>
+              <Td>{t.reference || '–'}</Td>
               <Td right>
-                <span className={cn("font-mono font-medium", t.amount >= 0 ? "text-emerald-500" : "text-red-500")}>
+                <span className={cn("font-mono font-medium", t.amount >= 0 ? "text-ok" : "text-risk")}>
                   {t.amount >= 0 ? '+' : ''}{money(t.amount, currency)}
                 </span>
               </Td>
               <Td>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider"
-                  style={{ background: `${STATUS_COLORS[t.status]}20`, color: STATUS_COLORS[t.status] }}>
-                  {t.status}
-                </span>
+                <StatusBadge status={t.status} className="text-[10.5px] capitalize" />
               </Td>
               <Td right>
                 <div className="flex gap-1 justify-end">
@@ -270,7 +258,7 @@ function TransactionsTable({ txns, currency, onMatch, onUnmatch, onDelete }: {
                     </Button>
                   )}
                   {t.status !== 'reconciled' && (
-                    <Button size="sm" variant="ghost" className="h-7 text-red-500" onClick={() => onDelete(t.id)}>
+                    <Button size="sm" variant="ghost" className="h-7 text-risk" onClick={() => onDelete(t.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   )}
@@ -289,20 +277,20 @@ function ReconciliationList({ recons, currency, onComplete, onDelete }: {
 }) {
   if (recons.length === 0) return <Empty icon={CheckCircle2} title="No reconciliations yet" hint='Click "Start reconciliation" to check your books against a bank statement.' />;
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+    <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
       <table className="w-full text-xs">
         <thead className="bg-muted/20 text-muted-foreground">
           <tr><Th>Statement date</Th><Th right>Opening</Th><Th right>Closing</Th><Th>Status</Th><Th right>Actions</Th></tr>
         </thead>
         <tbody>
           {recons.map(r => (
-            <tr key={r.id} className="border-t border-border/20 hover:bg-muted/10">
+            <tr key={r.id} className="border-t border-border/60 hover:bg-foreground/[0.025]">
               <Td>{new Date(r.statement_date).toLocaleDateString('en-GB')}</Td>
               <Td right>{money(r.opening_balance, currency)}</Td>
               <Td right>{money(r.closing_balance, currency)}</Td>
               <Td>
                 <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium uppercase",
-                  r.status === 'completed' ? "bg-emerald-500/15 text-emerald-500" : "bg-amber-500/15 text-amber-500")}>
+                  r.status === 'completed' ? "bg-ok/15 text-ok" : "bg-attend/15 text-attend")}>
                   {r.status}
                 </span>
               </Td>
@@ -314,7 +302,7 @@ function ReconciliationList({ recons, currency, onComplete, onDelete }: {
                     </Button>
                   )}
                   {r.status === 'open' && (
-                    <Button size="sm" variant="ghost" className="h-7 text-red-500" onClick={() => onDelete(r.id)}>
+                    <Button size="sm" variant="ghost" className="h-7 text-risk" onClick={() => onDelete(r.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   )}
@@ -459,7 +447,7 @@ function CsvImportModal({ bank, onClose, onSaved }: {
   async function handleFile(f: File) {
     const text = await f.text();
     const parsed = parseCsv(text);
-    if (parsed.length === 0) { toast.error('No rows detected — expected columns: date, description, amount (or debit/credit)'); return; }
+    if (parsed.length === 0) { toast.error('No rows detected. Expected columns: date, description, amount (or debit/credit)'); return; }
     setRows(parsed);
     toast.success(`Parsed ${parsed.length} rows`);
   }
@@ -489,16 +477,16 @@ function CsvImportModal({ bank, onClose, onSaved }: {
             <Upload className="h-3.5 w-3.5" /> Choose CSV file
           </Button>
           {rows.length > 0 && (
-            <div className="rounded-xl border border-border/30 max-h-72 overflow-auto">
+            <div className="rounded-lg border border-border/60 max-h-72 overflow-auto">
               <table className="w-full text-xs">
                 <thead className="bg-muted/20 text-muted-foreground sticky top-0">
                   <tr><Th>Date</Th><Th>Description</Th><Th>Ref</Th><Th right>Amount</Th></tr>
                 </thead>
                 <tbody>
                   {rows.slice(0, 200).map((r, i) => (
-                    <tr key={i} className="border-t border-border/20">
-                      <Td>{r.date}</Td><Td>{r.description}</Td><Td>{r.reference || '—'}</Td>
-                      <Td right className={r.amount >= 0 ? 'text-emerald-500' : 'text-red-500'}>{r.amount.toFixed(2)}</Td>
+                    <tr key={i} className="border-t border-border/60">
+                      <Td>{r.date}</Td><Td>{r.description}</Td><Td>{r.reference || '–'}</Td>
+                      <Td right className={r.amount >= 0 ? 'text-ok' : 'text-risk'}>{r.amount.toFixed(2)}</Td>
                     </tr>
                   ))}
                 </tbody>
@@ -600,15 +588,15 @@ function MatchModal({ txn, accounts, onClose, onSaved }: {
         <DialogHeader><DialogTitle>Match transaction</DialogTitle></DialogHeader>
         <div className="text-xs bg-muted/20 rounded-lg p-3 mb-3 space-y-1">
           <div className="flex justify-between"><span className="text-muted-foreground">{new Date(txn.txn_date).toLocaleDateString('en-GB')}</span>
-            <span className={cn("font-mono font-bold", txn.amount >= 0 ? "text-emerald-500" : "text-red-500")}>{txn.amount >= 0 ? '+' : ''}{txn.amount.toFixed(2)}</span></div>
+            <span className={cn("font-mono font-bold", txn.amount >= 0 ? "text-ok" : "text-risk")}>{txn.amount >= 0 ? '+' : ''}{txn.amount.toFixed(2)}</span></div>
           <div className="text-foreground">{txn.description}</div>
         </div>
 
-        <div className="flex gap-1 rounded-xl bg-card/60 border border-border/30 p-1 mb-3">
+        <div className="flex gap-1 rounded-lg bg-card border border-border/60 p-1 mb-3">
           {(['auto','existing'] as const).map(k => (
             <button key={k} onClick={() => setMode(k)}
               className={cn("flex-1 px-3 h-8 text-[12px] rounded-lg font-medium transition-colors",
-                mode === k ? "bg-brand/15 text-foreground" : "text-muted-foreground hover:text-foreground")}>
+                mode === k ? "bg-foreground/[0.05] text-foreground" : "text-muted-foreground hover:text-foreground")}>
               {k === 'auto' ? 'Auto-post journal' : 'Link existing entry'}
             </button>
           ))}
@@ -628,13 +616,13 @@ function MatchModal({ txn, accounts, onClose, onSaved }: {
         ) : (
           <div className="space-y-3">
             <div className="text-[11px] text-muted-foreground">Showing posted entries within ±15 days. The bank line must exactly match this transaction's amount.</div>
-            <div className="rounded-xl border border-border/30 max-h-64 overflow-auto">
+            <div className="rounded-lg border border-border/60 max-h-64 overflow-auto">
               {candidates.length === 0 ? (
                 <div className="p-4 text-xs text-muted-foreground text-center">No candidate entries in the window.</div>
               ) : candidates.map(c => (
                 <button key={c.id} onClick={() => setEntryId(c.id)}
-                  className={cn("w-full text-left px-3 py-2 text-xs border-b border-border/20 hover:bg-muted/10",
-                    entryId === c.id && "bg-brand/10")}>
+                  className={cn("w-full text-left px-3 py-2 text-xs border-b border-border/60 hover:bg-foreground/[0.025]",
+                    entryId === c.id && "bg-primary/[0.06]")}>
                   <div className="flex justify-between">
                     <span>{new Date(c.entry_date).toLocaleDateString('en-GB')}</span>
                     <span className="text-[10px] text-muted-foreground uppercase">{c.source_type}</span>
@@ -665,7 +653,7 @@ function Field({ label, children }: any) {
 }
 function Empty({ icon: Icon, title, hint }: any) {
   return (
-    <div className="rounded-2xl border border-dashed border-border/40 bg-card/30 p-10 flex flex-col items-center text-center">
+    <div className="rounded-[10px] border border-dashed border-border/60 bg-card/30 p-10 flex flex-col items-center text-center">
       <Icon className="h-8 w-8 text-muted-foreground mb-2" />
       <div className="text-sm font-semibold">{title}</div>
       <div className="text-xs text-muted-foreground mt-1 max-w-sm">{hint}</div>

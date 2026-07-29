@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { StatusBadge, SkeletonTable } from '@/components/platform';
 import {
   fetchLedger, computeTrialBalance, computeGeneralLedger, computeJournalReport,
   computeProfitAndLoss, computeBalanceSheet, computeCashFlow,
@@ -28,16 +29,16 @@ import {
 type ReportKey = 'trial' | 'gl' | 'journal' | 'pl' | 'bs' | 'cf' | 'ar' | 'ap' | 'vat' | 'fa';
 
 const REPORT_TABS: { key: ReportKey; label: string; icon: any; hint: string }[] = [
-  { key: 'pl',      label: 'Profit & Loss',    icon: TrendingUp, hint: 'Revenue − expense for a period.' },
-  { key: 'bs',      label: 'Balance Sheet',    icon: Building2,  hint: 'Assets = liabilities + equity, as-of a date.' },
-  { key: 'cf',      label: 'Cash Flow',        icon: Waves,      hint: 'Cash movements grouped operating / investing / financing.' },
-  { key: 'ar',      label: 'Aged Receivables', icon: Users,      hint: 'Unpaid customer invoices, bucketed by days overdue.' },
-  { key: 'ap',      label: 'Aged Payables',    icon: Truck,      hint: 'Unpaid supplier bills, bucketed by days overdue.' },
-  { key: 'vat',     label: 'VAT Summary',      icon: Receipt,    hint: 'Filed returns + live outstanding VAT since last filing.' },
+  { key: 'pl',      label: 'Profit and loss',  icon: TrendingUp, hint: 'Revenue − expense for a period.' },
+  { key: 'bs',      label: 'Balance sheet',    icon: Building2,  hint: 'Assets = liabilities + equity, as-of a date.' },
+  { key: 'cf',      label: 'Cash flow',        icon: Waves,      hint: 'Cash movements grouped operating / investing / financing.' },
+  { key: 'ar',      label: 'Aged receivables', icon: Users,      hint: 'Unpaid customer invoices, bucketed by days overdue.' },
+  { key: 'ap',      label: 'Aged payables',    icon: Truck,      hint: 'Unpaid supplier bills, bucketed by days overdue.' },
+  { key: 'vat',     label: 'VAT summary',      icon: Receipt,    hint: 'Filed returns + live outstanding VAT since last filing.' },
   { key: 'fa',      label: 'Fixed-asset Register', icon: Package, hint: 'Cost, accumulated depreciation and NBV per asset.' },
-  { key: 'trial',   label: 'Trial Balance',    icon: Scale,      hint: 'As-of any date. Must net to zero.' },
-  { key: 'gl',      label: 'General Ledger',   icon: BookOpen,   hint: 'Every transaction, per account, running balance.' },
-  { key: 'journal', label: 'Journal Report',   icon: ScrollText, hint: 'Chronological entries with all lines.' },
+  { key: 'trial',   label: 'Trial balance',    icon: Scale,      hint: 'As-of any date. Must net to zero.' },
+  { key: 'gl',      label: 'General ledger',   icon: BookOpen,   hint: 'Every transaction, per account, running balance.' },
+  { key: 'journal', label: 'Journal report',   icon: ScrollText, hint: 'Chronological entries with all lines.' },
 ];
 
 
@@ -116,16 +117,16 @@ export default function ReportsCentre({ orgId, orgName, currency }: Props) {
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-lg font-bold tracking-tight">Reports Centre</h2>
+          <h2 className="text-[15px] font-semibold tracking-[-0.01em]">Reports centre</h2>
           <p className="text-xs text-muted-foreground">{orgName} · live from the ledger · auto-updates on every change</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={handleBundleZip}
-            className="h-9 px-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-card/60 border border-border/30 text-foreground hover:bg-card/90">
-            Download all · ZIP
+            className="h-8 rounded-lg border border-border/60 bg-card px-3 font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-foreground transition-colors duration-150 hover:border-border">
+            Download all (ZIP)
           </button>
           <button onClick={() => setSubmitOpen(true)}
-            className="h-9 px-3 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:opacity-90 flex items-center gap-1.5">
+            className="flex h-8 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary/90">
             <Send className="h-3.5 w-3.5" /> Send to accountant
           </button>
         </div>
@@ -136,10 +137,10 @@ export default function ReportsCentre({ orgId, orgName, currency }: Props) {
         {REPORT_TABS.map(t => (
           <button key={t.key} onClick={() => setReport(t.key)}
             className={cn(
-              'flex items-center gap-1.5 px-3 h-9 rounded-xl text-[12px] font-medium border transition-colors',
+              'flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[12px] font-medium transition-colors duration-150',
               report === t.key
-                ? 'bg-brand/10 border-brand/40 text-foreground'
-                : 'bg-card/40 border-border/30 text-muted-foreground hover:text-foreground hover:bg-card/70',
+                ? 'border-primary/50 bg-primary/[0.06] text-foreground'
+                : 'border-border/60 bg-card text-muted-foreground hover:text-foreground hover:border-border',
             )}>
             <t.icon className="h-3.5 w-3.5" />
             {t.label}
@@ -152,21 +153,21 @@ export default function ReportsCentre({ orgId, orgName, currency }: Props) {
 
       {/* Date controls */}
       {!hidesDates && (
-        <div className="rounded-2xl border border-border/20 bg-card/40 p-3 flex flex-wrap items-end gap-3">
+        <div className="flex flex-wrap items-end gap-3 rounded-[10px] border border-border/60 bg-card p-3">
           <Calendar className="h-4 w-4 text-muted-foreground mb-2" />
           {usesAsOf ? (
             <div>
-              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">As-of date</Label>
+              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">As-of date</Label>
               <Input type="date" value={asOf} onChange={e => setAsOf(e.target.value)} className="h-9 w-44 rounded-lg text-xs" />
             </div>
           ) : (
             <>
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">From</Label>
+                <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">From</Label>
                 <Input type="date" value={from} onChange={e => setFrom(e.target.value)} className="h-9 w-44 rounded-lg text-xs" />
               </div>
               <div>
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">To</Label>
+                <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">To</Label>
                 <Input type="date" value={to} onChange={e => setTo(e.target.value)} className="h-9 w-44 rounded-lg text-xs" />
               </div>
               <QuickRange onPick={(f, t) => { setFrom(f); setTo(t); }} />
@@ -176,7 +177,7 @@ export default function ReportsCentre({ orgId, orgName, currency }: Props) {
       )}
 
       {needsLedger && (loading || !snap) ? (
-        <div className="h-48 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+        <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonTable cols={5} rows={6} /></div>
       ) : (
         <>
           {report === 'pl'      && snap && <ProfitLossPanel snap={snap} from={from} to={to} currency={currency} orgName={orgName} />}
@@ -211,7 +212,7 @@ function QuickRange({ onPick }: { onPick: (f: string, t: string) => void }) {
     <div className="flex gap-1 ml-auto">
       {opts.map(([label, fn]) => (
         <button key={label} onClick={() => { const [f, t] = fn(); onPick(f, t); }}
-          className="h-9 px-2.5 rounded-lg text-[11px] font-medium bg-card/60 border border-border/30 hover:bg-card/90">
+          className="h-9 rounded-lg border border-border/60 bg-card px-2.5 text-[11px] font-medium transition-colors duration-150 hover:border-border">
           {label}
         </button>
       ))}
@@ -220,12 +221,12 @@ function QuickRange({ onPick }: { onPick: (f: string, t: string) => void }) {
 }
 
 function ExportBar({ onPdf, onXlsx, onCsv, className }: { onPdf?: () => void; onXlsx?: () => void; onCsv?: () => void; className?: string }) {
-  const btn = 'h-7 px-2.5 rounded-md text-[10px] font-semibold uppercase tracking-wider border transition-colors';
+  const btn = 'h-7 rounded-md border border-border/60 px-2.5 font-mono text-[9.5px] font-medium uppercase tracking-[0.1em] text-muted-foreground transition-colors duration-150 hover:border-border hover:text-foreground';
   return (
     <div className={cn('flex items-center gap-1.5', className)}>
-      {onPdf && <button onClick={onPdf} className={cn(btn, 'bg-red-500/10 border-red-500/30 text-red-500 hover:bg-red-500/20')}>PDF</button>}
-      {onXlsx && <button onClick={onXlsx} className={cn(btn, 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20')}>XLSX</button>}
-      {onCsv && <button onClick={onCsv} className={cn(btn, 'bg-blue-500/10 border-blue-500/30 text-blue-500 hover:bg-blue-500/20')}>CSV</button>}
+      {onPdf && <button onClick={onPdf} className={btn}>PDF</button>}
+      {onXlsx && <button onClick={onXlsx} className={btn}>XLSX</button>}
+      {onCsv && <button onClick={onCsv} className={btn}>CSV</button>}
     </div>
   );
 }
@@ -238,16 +239,16 @@ function TrialBalancePanel({ snap, asOf, currency, orgName }: { snap: LedgerSnap
   const balanced = Math.abs(diff) < 0.005;
 
   return (
-    <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-      <header className="px-5 py-3 border-b border-border/20 flex items-center justify-between">
+    <section className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div>
-          <h3 className="text-[13px] font-bold">Trial Balance</h3>
+          <h3 className="text-[13px] font-[550] tracking-[-0.01em]">Trial balance</h3>
           <p className="text-[10px] text-muted-foreground">{orgName} · as at {new Date(asOf).toLocaleDateString('en-GB')} · posted entries only</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn('text-[11px] px-2 py-1 rounded-md font-mono',
-            balanced ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500')}>
-            {balanced ? 'BALANCED' : `OFF BY ${money(Math.abs(diff), currency)}`}
+          <span className={cn('font-mono text-[10px] uppercase tracking-[0.1em] tabular-nums',
+            balanced ? 'text-ok' : 'text-risk')}>
+            {balanced ? 'Balanced' : `Off by ${money(Math.abs(diff), currency)}`}
           </span>
           <ExportBar
             onPdf={() => exportTrialBalancePDF(rows, { orgName, currency, asOf })}
@@ -257,7 +258,7 @@ function TrialBalancePanel({ snap, asOf, currency, orgName }: { snap: LedgerSnap
         </div>
       </header>
       <table className="w-full text-xs">
-        <thead className="bg-card/60 text-[10px] uppercase tracking-wider text-muted-foreground">
+        <thead className="bg-sunken font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
           <tr>
             <th className="text-left px-4 py-2 font-medium w-16">Code</th>
             <th className="text-left px-4 py-2 font-medium">Account</th>
@@ -270,20 +271,20 @@ function TrialBalancePanel({ snap, asOf, currency, orgName }: { snap: LedgerSnap
           {rows.length === 0 ? (
             <tr><td colSpan={5} className="text-center py-8 text-muted-foreground text-[11px]">No posted activity as of this date.</td></tr>
           ) : rows.map(r => (
-            <tr key={r.account_id} className="border-t border-border/10 hover:bg-accent/10">
+            <tr key={r.account_id} className="border-t border-border/60 transition-colors duration-150 hover:bg-foreground/[0.025]">
               <td className="px-4 py-1.5 font-mono text-muted-foreground">{r.code}</td>
               <td className="px-4 py-1.5">{r.name}</td>
               <td className="px-4 py-1.5"><TypeChip t={r.type} /></td>
-              <td className="px-4 py-1.5 text-right tabular-nums">{r.debit > 0 ? money(r.debit, currency) : ''}</td>
-              <td className="px-4 py-1.5 text-right tabular-nums">{r.credit > 0 ? money(r.credit, currency) : ''}</td>
+              <td className="px-4 py-1.5 text-right font-mono tabular-nums">{r.debit > 0 ? money(r.debit, currency) : ''}</td>
+              <td className="px-4 py-1.5 text-right font-mono tabular-nums">{r.credit > 0 ? money(r.credit, currency) : ''}</td>
             </tr>
           ))}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-border/40 font-bold bg-card/60">
+          <tr className="border-t border-border bg-sunken font-[550]">
             <td colSpan={3} className="px-4 py-2 text-[11px] uppercase tracking-wider">Totals</td>
-            <td className="px-4 py-2 text-right tabular-nums">{money(totalDebit, currency)}</td>
-            <td className="px-4 py-2 text-right tabular-nums">{money(totalCredit, currency)}</td>
+            <td className="px-4 py-2 text-right font-mono tabular-nums">{money(totalDebit, currency)}</td>
+            <td className="px-4 py-2 text-right font-mono tabular-nums">{money(totalCredit, currency)}</td>
           </tr>
         </tfoot>
       </table>
@@ -315,10 +316,10 @@ function GeneralLedgerPanel({ snap, from, to, currency, orgName }: { snap: Ledge
   }, [lines]);
 
   return (
-    <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-      <header className="px-5 py-3 border-b border-border/20 flex items-center gap-3 flex-wrap">
+    <section className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      <header className="flex flex-wrap items-center gap-3 border-b border-border/60 px-4 py-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-[13px] font-bold">General Ledger</h3>
+          <h3 className="text-[13px] font-[550] tracking-[-0.01em]">General ledger</h3>
           <p className="text-[10px] text-muted-foreground">
             {orgName} · {new Date(from).toLocaleDateString('en-GB')} – {new Date(to).toLocaleDateString('en-GB')} · {lines.length} lines
           </p>
@@ -353,7 +354,7 @@ function GeneralLedgerPanel({ snap, from, to, currency, orgName }: { snap: Ledge
       {grouped.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground text-[11px]">No transactions in this range.</div>
       ) : (
-        <div className="divide-y divide-border/10">
+        <div className="divide-y divide-border/60">
           {grouped.map(([accId, accLines]) => {
             const first = accLines[0];
             const totalDebit = accLines.reduce((s, l) => s + l.debit, 0);
@@ -361,13 +362,13 @@ function GeneralLedgerPanel({ snap, from, to, currency, orgName }: { snap: Ledge
             const closing = accLines[accLines.length - 1].running_balance;
             return (
               <div key={accId}>
-                <div className="px-5 py-2 bg-card/60 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider">
+                <div className="flex items-center gap-2 bg-sunken px-4 py-2 font-mono text-[10px] font-medium uppercase tracking-[0.13em]">
                   <span className="font-mono text-muted-foreground">{first.account_code}</span>
                   <span>{first.account_name}</span>
-                  <span className="ml-auto text-muted-foreground">Closing: <span className="tabular-nums text-foreground">{money(closing, currency)}</span></span>
+                  <span className="ml-auto text-muted-foreground">Closing: <span className="font-mono tabular-nums text-foreground">{money(closing, currency)}</span></span>
                 </div>
                 <table className="w-full text-xs">
-                  <thead className="text-[10px] uppercase tracking-wider text-muted-foreground bg-card/30">
+                  <thead className="bg-sunken font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
                     <tr>
                       <th className="text-left px-4 py-1.5 font-medium w-24">Date</th>
                       <th className="text-left px-4 py-1.5 font-medium">Description</th>
@@ -380,26 +381,26 @@ function GeneralLedgerPanel({ snap, from, to, currency, orgName }: { snap: Ledge
                   </thead>
                   <tbody>
                     {accLines.map(l => (
-                      <tr key={l.entry_id + l.account_id + l.debit + l.credit + Math.random()} className="border-t border-border/5 hover:bg-accent/10">
+                      <tr key={l.entry_id + l.account_id + l.debit + l.credit + Math.random()} className="border-t border-border/40 transition-colors duration-150 hover:bg-foreground/[0.025]">
                         <td className="px-4 py-1 tabular-nums">{new Date(l.entry_date).toLocaleDateString('en-GB')}</td>
                         <td className="px-4 py-1 truncate max-w-[280px]">
                           {l.description || <span className="text-muted-foreground italic">(no description)</span>}
-                          {l.memo && <span className="text-muted-foreground"> — {l.memo}</span>}
+                          {l.memo && <span className="text-muted-foreground"> · {l.memo}</span>}
                         </td>
                         <td className="px-4 py-1 font-mono text-[10px] text-muted-foreground">{l.reference}</td>
                         <td className="px-4 py-1 text-[10px] text-muted-foreground capitalize">{l.source_type.replace(/_/g, ' ')}</td>
-                        <td className="px-4 py-1 text-right tabular-nums">{l.debit > 0 ? money(l.debit, currency) : ''}</td>
-                        <td className="px-4 py-1 text-right tabular-nums">{l.credit > 0 ? money(l.credit, currency) : ''}</td>
-                        <td className="px-4 py-1 text-right tabular-nums font-medium">{money(l.running_balance, currency)}</td>
+                        <td className="px-4 py-1 text-right font-mono tabular-nums">{l.debit > 0 ? money(l.debit, currency) : ''}</td>
+                        <td className="px-4 py-1 text-right font-mono tabular-nums">{l.credit > 0 ? money(l.credit, currency) : ''}</td>
+                        <td className="px-4 py-1 text-right font-mono tabular-nums font-medium">{money(l.running_balance, currency)}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t border-border/20 font-semibold bg-card/40">
+                    <tr className="border-t border-border bg-sunken font-medium">
                       <td colSpan={4} className="px-4 py-1.5 text-[10px] uppercase text-muted-foreground">Totals</td>
-                      <td className="px-4 py-1.5 text-right tabular-nums">{money(totalDebit, currency)}</td>
-                      <td className="px-4 py-1.5 text-right tabular-nums">{money(totalCredit, currency)}</td>
-                      <td className="px-4 py-1.5 text-right tabular-nums">{money(closing, currency)}</td>
+                      <td className="px-4 py-1.5 text-right font-mono tabular-nums">{money(totalDebit, currency)}</td>
+                      <td className="px-4 py-1.5 text-right font-mono tabular-nums">{money(totalCredit, currency)}</td>
+                      <td className="px-4 py-1.5 text-right font-mono tabular-nums">{money(closing, currency)}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -422,10 +423,10 @@ function JournalReportPanel({ snap, from, to, currency, orgName }: { snap: Ledge
   const sources = useMemo(() => Array.from(new Set(snap.entries.map(e => e.source_type))).sort(), [snap]);
 
   return (
-    <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-      <header className="px-5 py-3 border-b border-border/20 flex items-center gap-3 flex-wrap">
+    <section className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      <header className="flex flex-wrap items-center gap-3 border-b border-border/60 px-4 py-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-[13px] font-bold">Journal Report</h3>
+          <h3 className="text-[13px] font-[550] tracking-[-0.01em]">Journal report</h3>
           <p className="text-[10px] text-muted-foreground">
             {orgName} · {new Date(from).toLocaleDateString('en-GB')} – {new Date(to).toLocaleDateString('en-GB')} · {entries.length} entries
           </p>
@@ -449,7 +450,7 @@ function JournalReportPanel({ snap, from, to, currency, orgName }: { snap: Ledge
       {entries.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground text-[11px]">No entries in this range.</div>
       ) : (
-        <div className="divide-y divide-border/10">
+        <div className="divide-y divide-border/60">
           {entries.map(e => {
             const isOpen = expanded.has(e.id);
             return (
@@ -457,22 +458,21 @@ function JournalReportPanel({ snap, from, to, currency, orgName }: { snap: Ledge
                 <button onClick={() => setExpanded(prev => {
                     const n = new Set(prev); n.has(e.id) ? n.delete(e.id) : n.add(e.id); return n;
                   })}
-                  className="w-full flex items-center gap-3 px-5 py-2 hover:bg-accent/10 text-left text-xs">
+                  className="flex w-full items-center gap-3 px-4 py-2 text-left text-xs transition-colors duration-150 hover:bg-foreground/[0.025]">
                   {isOpen ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
-                  <span className="tabular-nums text-muted-foreground w-24">{new Date(e.date).toLocaleDateString('en-GB')}</span>
+                  <span className="w-24 font-mono tabular-nums text-muted-foreground">{new Date(e.date).toLocaleDateString('en-GB')}</span>
                   <span className="flex-1 truncate">{e.description || <span className="text-muted-foreground italic">(no description)</span>}</span>
-                  <span className={cn('text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 uppercase tracking-wider',
-                    e.is_system ? 'bg-blue-500/10 text-blue-500' : 'bg-amber-500/10 text-amber-500')}>
+                  <span className="flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground">
                     {e.is_system ? <Zap className="h-2.5 w-2.5" /> : <User className="h-2.5 w-2.5" />}
                     {e.is_system ? 'auto' : 'manual'}
                   </span>
                   <span className="text-[10px] text-muted-foreground capitalize w-20 text-right">{e.source_type.replace(/_/g, ' ')}</span>
-                  <span className="tabular-nums text-[11px] font-semibold w-28 text-right">{money(e.total_debit, currency)}</span>
+                  <span className="w-28 text-right font-mono text-[11px] font-medium tabular-nums">{money(e.total_debit, currency)}</span>
                 </button>
                 {isOpen && (
-                  <div className="bg-card/20 border-t border-border/10 px-5 py-2">
+                  <div className="border-t border-border/60 bg-sunken/60 px-4 py-2">
                     <table className="w-full text-[11px]">
-                      <thead className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                      <thead className="font-mono text-[9px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
                         <tr>
                           <th className="text-left py-1 w-16">Code</th>
                           <th className="text-left py-1">Account</th>
@@ -487,14 +487,14 @@ function JournalReportPanel({ snap, from, to, currency, orgName }: { snap: Ledge
                             <td className="py-1 font-mono text-muted-foreground">{l.account_code}</td>
                             <td className="py-1">{l.account_name}</td>
                             <td className="py-1 text-muted-foreground">{l.memo || ''}</td>
-                            <td className="py-1 text-right tabular-nums">{l.debit > 0 ? money(l.debit, currency) : ''}</td>
-                            <td className="py-1 text-right tabular-nums">{l.credit > 0 ? money(l.credit, currency) : ''}</td>
+                            <td className="py-1 text-right font-mono tabular-nums">{l.debit > 0 ? money(l.debit, currency) : ''}</td>
+                            <td className="py-1 text-right font-mono tabular-nums">{l.credit > 0 ? money(l.credit, currency) : ''}</td>
                           </tr>
                         ))}
                         <tr className="border-t border-border/20 font-semibold">
                           <td colSpan={3} className="py-1 text-[10px] uppercase text-muted-foreground">Totals</td>
-                          <td className="py-1 text-right tabular-nums">{money(e.total_debit, currency)}</td>
-                          <td className="py-1 text-right tabular-nums">{money(e.total_credit, currency)}</td>
+                          <td className="py-1 text-right font-mono tabular-nums">{money(e.total_debit, currency)}</td>
+                          <td className="py-1 text-right font-mono tabular-nums">{money(e.total_credit, currency)}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -510,12 +510,15 @@ function JournalReportPanel({ snap, from, to, currency, orgName }: { snap: Ledge
 }
 
 function TypeChip({ t }: { t: AccountType }) {
-  const colors: Record<AccountType, string> = {
-    asset:'bg-emerald-500/10 text-emerald-500', liability:'bg-amber-500/10 text-amber-500',
-    equity:'bg-violet-500/10 text-violet-500', revenue:'bg-blue-500/10 text-blue-500',
-    expense:'bg-red-500/10 text-red-500',
+  const dot: Record<AccountType, string> = {
+    asset: 'bg-ok', liability: 'bg-attend', equity: 'bg-gold', revenue: 'bg-primary', expense: 'bg-risk',
   };
-  return <span className={cn('text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-md font-medium', colors[t])}>{t}</span>;
+  return (
+    <span className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
+      <span aria-hidden className={cn('h-1.5 w-1.5 rounded-full', dot[t])} />
+      {t}
+    </span>
+  );
 }
 
 /* ---------------- Profit & Loss ---------------- */
@@ -523,16 +526,16 @@ function ProfitLossPanel({ snap, from, to, currency, orgName }: { snap: LedgerSn
   const pl = useMemo(() => computeProfitAndLoss(snap, from, to), [snap, from, to]);
   const margin = pl.totalRevenue > 0 ? (pl.netIncome / pl.totalRevenue) * 100 : 0;
   return (
-    <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-      <header className="px-5 py-3 border-b border-border/20 flex items-center justify-between">
+    <section className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div>
-          <h3 className="text-[13px] font-bold">Profit &amp; Loss</h3>
+          <h3 className="text-[13px] font-[550] tracking-[-0.01em]">Profit and loss</h3>
           <p className="text-[10px] text-muted-foreground">{orgName} · {new Date(from).toLocaleDateString('en-GB')} – {new Date(to).toLocaleDateString('en-GB')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className={cn('text-[11px] px-2 py-1 rounded-md font-mono',
-            pl.netIncome >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500')}>
-            {pl.netIncome >= 0 ? 'PROFIT' : 'LOSS'} · {money(pl.netIncome, currency)}
+          <span className={cn('font-mono text-[10px] uppercase tracking-[0.1em] tabular-nums',
+            pl.netIncome >= 0 ? 'text-ok' : 'text-risk')}>
+            {pl.netIncome >= 0 ? 'Profit' : 'Loss'} · {money(pl.netIncome, currency)}
           </span>
           <span className="text-[10px] text-muted-foreground">margin {margin.toFixed(1)}%</span>
           <ExportBar
@@ -542,11 +545,11 @@ function ProfitLossPanel({ snap, from, to, currency, orgName }: { snap: LedgerSn
         </div>
       </header>
       <div className="p-5 space-y-5">
-        <PLGroup title="Revenue" rows={pl.revenue} total={pl.totalRevenue} currency={currency} accent="text-emerald-500" />
-        <PLGroup title="Expenses" rows={pl.expense} total={pl.totalExpense} currency={currency} accent="text-red-500" />
-        <div className="flex items-center justify-between border-t-2 border-border/40 pt-3 text-sm font-bold">
-          <span className="uppercase tracking-wider text-[11px]">Net Income</span>
-          <span className={cn('tabular-nums text-base', pl.netIncome >= 0 ? 'text-emerald-500' : 'text-red-500')}>
+        <PLGroup title="Revenue" rows={pl.revenue} total={pl.totalRevenue} currency={currency} accent="text-ok" />
+        <PLGroup title="Expenses" rows={pl.expense} total={pl.totalExpense} currency={currency} accent="text-risk" />
+        <div className="flex items-center justify-between border-t border-border pt-3 text-sm font-[550]">
+          <span className="font-mono text-[10px] uppercase tracking-[0.13em]">Net income</span>
+          <span className={cn('font-mono text-base tabular-nums', pl.netIncome >= 0 ? 'text-ok' : 'text-risk')}>
             {money(pl.netIncome, currency)}
           </span>
         </div>
@@ -557,7 +560,7 @@ function ProfitLossPanel({ snap, from, to, currency, orgName }: { snap: LedgerSn
 function PLGroup({ title, rows, total, currency, accent }: { title: string; rows: any[]; total: number; currency: string; accent: string }) {
   return (
     <div>
-      <div className={cn('text-[11px] uppercase tracking-wider font-bold mb-1.5', accent)}>{title}</div>
+      <div className={cn('mb-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.13em]', accent)}>{title}</div>
       {rows.length === 0 ? (
         <div className="text-[11px] text-muted-foreground italic py-2">No activity.</div>
       ) : (
@@ -567,12 +570,12 @@ function PLGroup({ title, rows, total, currency, accent }: { title: string; rows
               <tr key={r.account_id} className="border-t border-border/5">
                 <td className="py-1.5 pr-2 font-mono text-muted-foreground w-16">{r.code}</td>
                 <td className="py-1.5">{r.name}</td>
-                <td className="py-1.5 text-right tabular-nums w-32">{money(r.amount, currency)}</td>
+                <td className="py-1.5 text-right font-mono tabular-nums w-32">{money(r.amount, currency)}</td>
               </tr>
             ))}
             <tr className="border-t border-border/20 font-semibold">
               <td colSpan={2} className="py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">Total {title}</td>
-              <td className="py-1.5 text-right tabular-nums">{money(total, currency)}</td>
+              <td className="py-1.5 text-right font-mono tabular-nums">{money(total, currency)}</td>
             </tr>
           </tbody>
         </table>
@@ -585,16 +588,16 @@ function PLGroup({ title, rows, total, currency, accent }: { title: string; rows
 function BalanceSheetPanel({ snap, asOf, currency, orgName }: { snap: LedgerSnapshot; asOf: string; currency: string; orgName: string }) {
   const bs = useMemo(() => computeBalanceSheet(snap, asOf), [snap, asOf]);
   return (
-    <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-      <header className="px-5 py-3 border-b border-border/20 flex items-center justify-between">
+    <section className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div>
-          <h3 className="text-[13px] font-bold">Balance Sheet</h3>
+          <h3 className="text-[13px] font-[550] tracking-[-0.01em]">Balance sheet</h3>
           <p className="text-[10px] text-muted-foreground">{orgName} · as at {new Date(asOf).toLocaleDateString('en-GB')}</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn('text-[11px] px-2 py-1 rounded-md font-mono',
-            bs.balanced ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500')}>
-            {bs.balanced ? 'BALANCED' : `OFF BY ${money(Math.abs(bs.diff), currency)}`}
+          <span className={cn('font-mono text-[10px] uppercase tracking-[0.1em] tabular-nums',
+            bs.balanced ? 'text-ok' : 'text-risk')}>
+            {bs.balanced ? 'Balanced' : `Off by ${money(Math.abs(bs.diff), currency)}`}
           </span>
           <ExportBar
             onPdf={() => exportBSPDF(bs, { orgName, currency })}
@@ -604,18 +607,18 @@ function BalanceSheetPanel({ snap, asOf, currency, orgName }: { snap: LedgerSnap
       </header>
       <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="space-y-3">
-          <BSGroup title="Assets" rows={bs.assets} total={bs.totalAssets} currency={currency} accent="text-emerald-500" />
+          <BSGroup title="Assets" rows={bs.assets} total={bs.totalAssets} currency={currency} accent="text-ok" />
         </div>
         <div className="space-y-5">
-          <BSGroup title="Liabilities" rows={bs.liabilities} total={bs.totalLiabilities} currency={currency} accent="text-amber-500" />
+          <BSGroup title="Liabilities" rows={bs.liabilities} total={bs.totalLiabilities} currency={currency} accent="text-attend" />
           <BSGroup
             title="Equity"
             rows={[...bs.equity, ...(Math.abs(bs.retainedEarnings) > 0.005 ? [{ account_id: '__re', code: '3900', name: 'Retained Earnings (current)', subtype: null, amount: bs.retainedEarnings }] : [])]}
-            total={bs.totalEquity} currency={currency} accent="text-violet-500"
+            total={bs.totalEquity} currency={currency} accent="text-gold"
           />
-          <div className="flex items-center justify-between border-t-2 border-border/40 pt-3 text-sm font-bold">
-            <span className="uppercase tracking-wider text-[11px]">Liabilities + Equity</span>
-            <span className="tabular-nums">{money(bs.totalLiabilities + bs.totalEquity, currency)}</span>
+          <div className="flex items-center justify-between border-t border-border pt-3 text-sm font-[550]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.13em]">Liabilities + equity</span>
+            <span className="font-mono tabular-nums">{money(bs.totalLiabilities + bs.totalEquity, currency)}</span>
           </div>
         </div>
       </div>
@@ -625,7 +628,7 @@ function BalanceSheetPanel({ snap, asOf, currency, orgName }: { snap: LedgerSnap
 function BSGroup({ title, rows, total, currency, accent }: { title: string; rows: any[]; total: number; currency: string; accent: string }) {
   return (
     <div>
-      <div className={cn('text-[11px] uppercase tracking-wider font-bold mb-1.5', accent)}>{title}</div>
+      <div className={cn('mb-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.13em]', accent)}>{title}</div>
       {rows.length === 0 ? (
         <div className="text-[11px] text-muted-foreground italic py-2">No balances.</div>
       ) : (
@@ -635,12 +638,12 @@ function BSGroup({ title, rows, total, currency, accent }: { title: string; rows
               <tr key={r.account_id} className="border-t border-border/5">
                 <td className="py-1.5 pr-2 font-mono text-muted-foreground w-16">{r.code}</td>
                 <td className="py-1.5">{r.name}</td>
-                <td className="py-1.5 text-right tabular-nums w-32">{money(r.amount, currency)}</td>
+                <td className="py-1.5 text-right font-mono tabular-nums w-32">{money(r.amount, currency)}</td>
               </tr>
             ))}
             <tr className="border-t border-border/20 font-semibold">
               <td colSpan={2} className="py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">Total {title}</td>
-              <td className="py-1.5 text-right tabular-nums">{money(total, currency)}</td>
+              <td className="py-1.5 text-right font-mono tabular-nums">{money(total, currency)}</td>
             </tr>
           </tbody>
         </table>
@@ -653,16 +656,16 @@ function BSGroup({ title, rows, total, currency, accent }: { title: string; rows
 function CashFlowPanel({ snap, from, to, currency, orgName }: { snap: LedgerSnapshot; from: string; to: string; currency: string; orgName: string }) {
   const cf = useMemo(() => computeCashFlow(snap, from, to), [snap, from, to]);
   return (
-    <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-      <header className="px-5 py-3 border-b border-border/20 flex items-center justify-between">
+    <section className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div>
-          <h3 className="text-[13px] font-bold">Cash Flow Statement</h3>
+          <h3 className="text-[13px] font-[550] tracking-[-0.01em]">Cash flow statement</h3>
           <p className="text-[10px] text-muted-foreground">{orgName} · {new Date(from).toLocaleDateString('en-GB')} – {new Date(to).toLocaleDateString('en-GB')}</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn('text-[11px] px-2 py-1 rounded-md font-mono',
-            cf.netChange >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500')}>
-            NET {money(cf.netChange, currency)}
+          <span className={cn('font-mono text-[10px] uppercase tracking-[0.1em] tabular-nums',
+            cf.netChange >= 0 ? 'text-ok' : 'text-risk')}>
+            Net {money(cf.netChange, currency)}
           </span>
           <ExportBar
             onPdf={() => exportCFPDF(cf, { orgName, currency })}
@@ -671,20 +674,20 @@ function CashFlowPanel({ snap, from, to, currency, orgName }: { snap: LedgerSnap
         </div>
       </header>
       <div className="p-5 space-y-4">
-        <div className="flex items-center justify-between text-xs pb-2 border-b border-border/20">
-          <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Opening cash</span>
-          <span className="tabular-nums font-medium">{money(cf.openingCash, currency)}</span>
+        <div className="flex items-center justify-between text-xs pb-2 border-b border-border/60">
+          <span className="font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">Opening cash</span>
+          <span className="font-mono font-medium tabular-nums">{money(cf.openingCash, currency)}</span>
         </div>
-        <CFGroup title="Operating activities" rows={cf.operating} total={cf.totalOperating} currency={currency} accent="text-blue-500" />
-        <CFGroup title="Investing activities" rows={cf.investing} total={cf.totalInvesting} currency={currency} accent="text-violet-500" />
-        <CFGroup title="Financing activities" rows={cf.financing} total={cf.totalFinancing} currency={currency} accent="text-amber-500" />
-        <div className="flex items-center justify-between border-t-2 border-border/40 pt-3 text-sm font-bold">
-          <span className="uppercase tracking-wider text-[11px]">Net change in cash</span>
-          <span className={cn('tabular-nums', cf.netChange >= 0 ? 'text-emerald-500' : 'text-red-500')}>{money(cf.netChange, currency)}</span>
+        <CFGroup title="Operating activities" rows={cf.operating} total={cf.totalOperating} currency={currency} accent="text-primary" />
+        <CFGroup title="Investing activities" rows={cf.investing} total={cf.totalInvesting} currency={currency} accent="text-gold" />
+        <CFGroup title="Financing activities" rows={cf.financing} total={cf.totalFinancing} currency={currency} accent="text-attend" />
+        <div className="flex items-center justify-between border-t border-border pt-3 text-sm font-[550]">
+          <span className="font-mono text-[10px] uppercase tracking-[0.13em]">Net change in cash</span>
+          <span className={cn('font-mono tabular-nums', cf.netChange >= 0 ? 'text-ok' : 'text-risk')}>{money(cf.netChange, currency)}</span>
         </div>
-        <div className="flex items-center justify-between text-xs pt-2 border-t border-border/20">
-          <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Closing cash</span>
-          <span className="tabular-nums font-medium">{money(cf.closingCash, currency)}</span>
+        <div className="flex items-center justify-between text-xs pt-2 border-t border-border/60">
+          <span className="font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">Closing cash</span>
+          <span className="font-mono font-medium tabular-nums">{money(cf.closingCash, currency)}</span>
         </div>
       </div>
     </section>
@@ -693,7 +696,7 @@ function CashFlowPanel({ snap, from, to, currency, orgName }: { snap: LedgerSnap
 function CFGroup({ title, rows, total, currency, accent }: { title: string; rows: any[]; total: number; currency: string; accent: string }) {
   return (
     <div>
-      <div className={cn('text-[11px] uppercase tracking-wider font-bold mb-1.5', accent)}>{title}</div>
+      <div className={cn('mb-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.13em]', accent)}>{title}</div>
       {rows.length === 0 ? (
         <div className="text-[11px] text-muted-foreground italic py-2">No cash activity.</div>
       ) : (
@@ -703,12 +706,12 @@ function CFGroup({ title, rows, total, currency, accent }: { title: string; rows
               <tr key={r.label} className="border-t border-border/5">
                 <td className="py-1.5 capitalize">{r.label}</td>
                 <td className="py-1.5 text-right text-[10px] text-muted-foreground w-16">{r.entries}</td>
-                <td className="py-1.5 text-right tabular-nums w-32">{money(r.amount, currency)}</td>
+                <td className="py-1.5 text-right font-mono tabular-nums w-32">{money(r.amount, currency)}</td>
               </tr>
             ))}
             <tr className="border-t border-border/20 font-semibold">
               <td colSpan={2} className="py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">Subtotal</td>
-              <td className="py-1.5 text-right tabular-nums">{money(total, currency)}</td>
+              <td className="py-1.5 text-right font-mono tabular-nums">{money(total, currency)}</td>
             </tr>
           </tbody>
         </table>
@@ -727,26 +730,26 @@ function AgedPanel({ kind, orgId, orgName, asOf, currency }: { kind: 'ar' | 'ap'
     fn(orgId, asOf).then(d => { if (!c) { setData(d); setLoading(false); } });
     return () => { c = true; };
   }, [kind, orgId, asOf]);
-  if (loading || !data) return <div className="h-48 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  if (loading || !data) return <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonTable cols={5} rows={6} /></div>;
   const title = kind === 'ar' ? 'Aged Receivables' : 'Aged Payables';
   const partyLabel = kind === 'ar' ? 'Customer' : 'Supplier';
   const docLabel = kind === 'ar' ? 'Invoice' : 'Bill';
   const bucketOrder: AgedReport['buckets'] extends infer T ? (keyof T)[] : never = ['current', '1-30', '31-60', '61-90', '90+'] as any;
   const bucketColor = (b: string) =>
-    b === 'current' ? 'text-emerald-500' :
-    b === '1-30' ? 'text-blue-500' :
-    b === '31-60' ? 'text-amber-500' :
-    b === '61-90' ? 'text-orange-500' : 'text-red-500';
+    b === 'current' ? 'text-ok' :
+    b === '1-30' ? 'text-muted-foreground' :
+    b === '31-60' ? 'text-attend' :
+    b === '61-90' ? 'text-attend' : 'text-risk';
   return (
-    <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-      <header className="px-5 py-3 border-b border-border/20 flex items-center justify-between">
+    <section className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div>
-          <h3 className="text-[13px] font-bold">{title}</h3>
+          <h3 className="text-[13px] font-[550] tracking-[-0.01em]">{title}</h3>
           <p className="text-[10px] text-muted-foreground">{orgName} · as at {new Date(asOf).toLocaleDateString('en-GB')} · {data.rows.length} open {docLabel.toLowerCase()}s</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] px-2 py-1 rounded-md font-mono bg-brand/10 text-foreground">
-            OUTSTANDING {money(data.totalOutstanding, currency)}
+          <span className="font-mono text-[10px] uppercase tracking-[0.1em] tabular-nums text-foreground">
+            Outstanding {money(data.totalOutstanding, currency)}
           </span>
           <ExportBar
             onPdf={() => exportAgedPDF(kind, data, { orgName, currency })}
@@ -756,9 +759,9 @@ function AgedPanel({ kind, orgId, orgName, asOf, currency }: { kind: 'ar' | 'ap'
       </header>
       <div className="p-4 grid grid-cols-2 md:grid-cols-5 gap-2">
         {(bucketOrder as any).map((b: any) => (
-          <div key={b} className="rounded-xl border border-border/20 bg-card/40 p-3">
-            <div className={cn('text-[10px] uppercase tracking-wider font-bold', bucketColor(b))}>{b === 'current' ? 'Current' : `${b} days`}</div>
-            <div className="text-sm font-semibold tabular-nums mt-1">{money((data.buckets as any)[b], currency)}</div>
+          <div key={b} className="rounded-lg border border-border/60 bg-card p-3">
+            <div className={cn('font-mono text-[9.5px] font-medium uppercase tracking-[0.13em]', bucketColor(b))}>{b === 'current' ? 'Current' : `${b} days`}</div>
+            <div className="mt-1 font-mono text-sm font-medium tabular-nums">{money((data.buckets as any)[b], currency)}</div>
           </div>
         ))}
       </div>
@@ -766,7 +769,7 @@ function AgedPanel({ kind, orgId, orgName, asOf, currency }: { kind: 'ar' | 'ap'
         <div className="text-center py-8 text-muted-foreground text-[11px]">Nothing outstanding.</div>
       ) : (
         <table className="w-full text-xs">
-          <thead className="bg-card/60 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <thead className="bg-sunken font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
             <tr>
               <th className="text-left px-4 py-2 font-medium">{partyLabel}</th>
               <th className="text-left px-4 py-2 font-medium">{docLabel} #</th>
@@ -780,24 +783,24 @@ function AgedPanel({ kind, orgId, orgName, asOf, currency }: { kind: 'ar' | 'ap'
           </thead>
           <tbody>
             {data.rows.map(r => (
-              <tr key={r.id} className="border-t border-border/10 hover:bg-accent/10">
+              <tr key={r.id} className="border-t border-border/60 transition-colors duration-150 hover:bg-foreground/[0.025]">
                 <td className="px-4 py-1.5">{r.party_name}</td>
                 <td className="px-4 py-1.5 font-mono text-[11px]">{r.document_number}</td>
                 <td className="px-4 py-1.5 tabular-nums text-muted-foreground">{new Date(r.document_date).toLocaleDateString('en-GB')}</td>
-                <td className="px-4 py-1.5 tabular-nums text-muted-foreground">{r.due_date ? new Date(r.due_date).toLocaleDateString('en-GB') : '—'}</td>
-                <td className={cn('px-4 py-1.5 font-medium text-[10px] uppercase tracking-wider', bucketColor(r.bucket))}>
+                <td className="px-4 py-1.5 tabular-nums text-muted-foreground">{r.due_date ? new Date(r.due_date).toLocaleDateString('en-GB') : '–'}</td>
+                <td className={cn('px-4 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.1em]', bucketColor(r.bucket))}>
                   {r.bucket === 'current' ? 'current' : `${r.bucket} · ${r.days_overdue}d`}
                 </td>
-                <td className="px-4 py-1.5 text-right tabular-nums">{money(r.total, r.currency)}</td>
-                <td className="px-4 py-1.5 text-right tabular-nums text-muted-foreground">{money(r.paid, r.currency)}</td>
-                <td className="px-4 py-1.5 text-right tabular-nums font-semibold">{money(r.outstanding, r.currency)}</td>
+                <td className="px-4 py-1.5 text-right font-mono tabular-nums">{money(r.total, r.currency)}</td>
+                <td className="px-4 py-1.5 text-right font-mono tabular-nums text-muted-foreground">{money(r.paid, r.currency)}</td>
+                <td className="px-4 py-1.5 text-right font-mono tabular-nums font-semibold">{money(r.outstanding, r.currency)}</td>
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr className="border-t-2 border-border/40 font-bold bg-card/60">
+            <tr className="border-t border-border bg-sunken font-[550]">
               <td colSpan={7} className="px-4 py-2 text-[11px] uppercase tracking-wider text-right">Total outstanding</td>
-              <td className="px-4 py-2 text-right tabular-nums">{money(data.totalOutstanding, currency)}</td>
+              <td className="px-4 py-2 text-right font-mono tabular-nums">{money(data.totalOutstanding, currency)}</td>
             </tr>
           </tfoot>
         </table>
@@ -814,16 +817,16 @@ function VatSummaryPanel({ orgId, orgName, currency }: { orgId: string; orgName:
     fetchVatSummary(orgId).then(d => { if (!c) { setData(d); setLoading(false); logRecalc(orgId, 'vat_summary', {}, t0, d?.returns?.length); } });
     return () => { c = true; };
   }, [orgId]);
-  if (loading || !data) return <div className="h-48 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
-  const statusColor = (s: string) =>
-    s === 'paid' ? 'bg-emerald-500/10 text-emerald-500' :
-    s === 'filed' || s === 'submitted' ? 'bg-blue-500/10 text-blue-500' :
-    'bg-amber-500/10 text-amber-500';
+  if (loading || !data) return <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonTable cols={5} rows={6} /></div>;
+  const statusToneOf = (s: string) =>
+    s === 'paid' ? 'ok' as const :
+    s === 'filed' || s === 'submitted' ? 'neutral' as const :
+    'attend' as const;
   return (
-    <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-      <header className="px-5 py-3 border-b border-border/20 flex items-center justify-between">
+    <section className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div>
-          <h3 className="text-[13px] font-bold">VAT Summary</h3>
+          <h3 className="text-[13px] font-[550] tracking-[-0.01em]">VAT summary</h3>
           <p className="text-[10px] text-muted-foreground">{orgName} · live outstanding since last filed period</p>
         </div>
         <ExportBar
@@ -832,18 +835,18 @@ function VatSummaryPanel({ orgId, orgName, currency }: { orgId: string; orgName:
         />
       </header>
       <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-2">
-        <StatCard label="Live output VAT" value={money(data.outstandingOutputVat, currency)} accent="text-blue-500" hint="Since last filed period" />
-        <StatCard label="Live input VAT" value={money(data.outstandingInputVat, currency)} accent="text-violet-500" hint="Since last filed period" />
-        <StatCard label="Live net due" value={money(data.liveNet, currency)} accent={data.liveNet >= 0 ? 'text-amber-500' : 'text-emerald-500'} hint="Output − input" />
-        <StatCard label="Total paid" value={money(data.totalPaid, currency)} accent="text-emerald-500" hint={`${data.returns.length} returns on file`} />
+        <StatCard label="Live output VAT" value={money(data.outstandingOutputVat, currency)} hint="Since last filed period" />
+        <StatCard label="Live input VAT" value={money(data.outstandingInputVat, currency)} hint="Since last filed period" />
+        <StatCard label="Live net due" value={money(data.liveNet, currency)} hint="Output − input" />
+        <StatCard label="Total paid" value={money(data.totalPaid, currency)} hint={`${data.returns.length} returns on file`} />
       </div>
       <div className="border-t border-border/20">
-        <div className="px-5 py-2 text-[10px] uppercase tracking-wider text-muted-foreground bg-card/40">Filed returns</div>
+        <div className="bg-sunken px-4 py-2 font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">Filed returns</div>
         {data.returns.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground text-[11px]">No VAT returns filed yet.</div>
         ) : (
           <table className="w-full text-xs">
-            <thead className="text-[10px] uppercase tracking-wider text-muted-foreground bg-card/30">
+            <thead className="bg-sunken font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
               <tr>
                 <th className="text-left px-4 py-2 font-medium">Period</th>
                 <th className="text-left px-4 py-2 font-medium w-24">Status</th>
@@ -856,16 +859,16 @@ function VatSummaryPanel({ orgId, orgName, currency }: { orgId: string; orgName:
             </thead>
             <tbody>
               {data.returns.map(r => (
-                <tr key={r.id} className="border-t border-border/10 hover:bg-accent/10">
+                <tr key={r.id} className="border-t border-border/60 transition-colors duration-150 hover:bg-foreground/[0.025]">
                   <td className="px-4 py-1.5 tabular-nums">
                     {new Date(r.period_start).toLocaleDateString('en-GB')} – {new Date(r.period_end).toLocaleDateString('en-GB')}
                   </td>
-                  <td className="px-4 py-1.5"><span className={cn('text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-md font-medium', statusColor(r.status))}>{r.status}</span></td>
-                  <td className="px-4 py-1.5 font-mono text-[11px] text-muted-foreground">{r.reference || '—'}</td>
-                  <td className="px-4 py-1.5 text-right tabular-nums">{money(r.output_vat, currency)}</td>
-                  <td className="px-4 py-1.5 text-right tabular-nums">{money(r.input_vat, currency)}</td>
-                  <td className="px-4 py-1.5 text-right tabular-nums font-semibold">{money(r.net_due, currency)}</td>
-                  <td className="px-4 py-1.5 text-right tabular-nums text-muted-foreground">{r.payment_amount ? money(r.payment_amount, currency) : '—'}</td>
+                  <td className="px-4 py-1.5"><StatusBadge tone={statusToneOf(r.status)} label={r.status} className="text-[10.5px] capitalize" /></td>
+                  <td className="px-4 py-1.5 font-mono text-[11px] text-muted-foreground">{r.reference || '–'}</td>
+                  <td className="px-4 py-1.5 text-right font-mono tabular-nums">{money(r.output_vat, currency)}</td>
+                  <td className="px-4 py-1.5 text-right font-mono tabular-nums">{money(r.input_vat, currency)}</td>
+                  <td className="px-4 py-1.5 text-right font-mono tabular-nums font-semibold">{money(r.net_due, currency)}</td>
+                  <td className="px-4 py-1.5 text-right font-mono tabular-nums text-muted-foreground">{r.payment_amount ? money(r.payment_amount, currency) : '–'}</td>
                 </tr>
               ))}
             </tbody>
@@ -885,13 +888,13 @@ function FixedAssetPanel({ orgId, orgName, currency }: { orgId: string; orgName:
     fetchFixedAssetRegister(orgId).then(d => { if (!c) { setData(d); setLoading(false); logRecalc(orgId, 'fixed_asset_register', {}, t0, d?.rows?.length); } });
     return () => { c = true; };
   }, [orgId]);
-  if (loading || !data) return <div className="h-48 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  if (loading || !data) return <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonTable cols={5} rows={6} /></div>;
   const rows = data.rows.filter(r => showDisposed || r.status !== 'disposed');
   return (
-    <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-      <header className="px-5 py-3 border-b border-border/20 flex items-center justify-between">
+    <section className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
+      <header className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div>
-          <h3 className="text-[13px] font-bold">Fixed-asset Register</h3>
+          <h3 className="text-[13px] font-[550] tracking-[-0.01em]">Fixed-asset register</h3>
           <p className="text-[10px] text-muted-foreground">{orgName} · {data.countActive} active · {data.countDisposed} disposed</p>
         </div>
         <div className="flex items-center gap-3">
@@ -906,16 +909,16 @@ function FixedAssetPanel({ orgId, orgName, currency }: { orgId: string; orgName:
         </div>
       </header>
       <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-2">
-        <StatCard label="Total cost" value={money(data.totalCost, currency)} accent="text-blue-500" hint="Active assets" />
-        <StatCard label="Accumulated depr." value={money(data.totalAccumDepr, currency)} accent="text-amber-500" hint="Charged to date" />
-        <StatCard label="Net book value" value={money(data.totalNbv, currency)} accent="text-emerald-500" hint="Active assets" />
-        <StatCard label="Disposal proceeds" value={money(data.totalDisposed, currency)} accent="text-violet-500" hint={`${data.countDisposed} disposed`} />
+        <StatCard label="Total cost" value={money(data.totalCost, currency)} hint="Active assets" />
+        <StatCard label="Accumulated depr." value={money(data.totalAccumDepr, currency)} hint="Charged to date" />
+        <StatCard label="Net book value" value={money(data.totalNbv, currency)} hint="Active assets" />
+        <StatCard label="Disposal proceeds" value={money(data.totalDisposed, currency)} hint={`${data.countDisposed} disposed`} />
       </div>
       {rows.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground text-[11px]">No assets to display.</div>
       ) : (
         <table className="w-full text-xs">
-          <thead className="bg-card/60 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <thead className="bg-sunken font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
             <tr>
               <th className="text-left px-4 py-2 font-medium w-20">Tag</th>
               <th className="text-left px-4 py-2 font-medium">Asset</th>
@@ -930,20 +933,17 @@ function FixedAssetPanel({ orgId, orgName, currency }: { orgId: string; orgName:
           </thead>
           <tbody>
             {rows.map(r => (
-              <tr key={r.id} className="border-t border-border/10 hover:bg-accent/10">
-                <td className="px-4 py-1.5 font-mono text-[11px] text-muted-foreground">{r.asset_tag || '—'}</td>
+              <tr key={r.id} className="border-t border-border/60 transition-colors duration-150 hover:bg-foreground/[0.025]">
+                <td className="px-4 py-1.5 font-mono text-[11px] text-muted-foreground">{r.asset_tag || '–'}</td>
                 <td className="px-4 py-1.5">{r.name}</td>
-                <td className="px-4 py-1.5 text-muted-foreground">{r.category || '—'}</td>
+                <td className="px-4 py-1.5 text-muted-foreground">{r.category || '–'}</td>
                 <td className="px-4 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">{r.method.replace(/_/g, ' ')}</td>
                 <td className="px-4 py-1.5 tabular-nums text-muted-foreground">{new Date(r.purchase_date).toLocaleDateString('en-GB')}</td>
-                <td className="px-4 py-1.5 text-right tabular-nums">{money(r.purchase_cost, currency)}</td>
-                <td className="px-4 py-1.5 text-right tabular-nums text-muted-foreground">{money(r.accumulated_depreciation, currency)}</td>
-                <td className="px-4 py-1.5 text-right tabular-nums font-semibold">{money(r.net_book_value, currency)}</td>
+                <td className="px-4 py-1.5 text-right font-mono tabular-nums">{money(r.purchase_cost, currency)}</td>
+                <td className="px-4 py-1.5 text-right font-mono tabular-nums text-muted-foreground">{money(r.accumulated_depreciation, currency)}</td>
+                <td className="px-4 py-1.5 text-right font-mono tabular-nums font-semibold">{money(r.net_book_value, currency)}</td>
                 <td className="px-4 py-1.5">
-                  <span className={cn('text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-md font-medium',
-                    r.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' :
-                    r.status === 'disposed' ? 'bg-red-500/10 text-red-500' :
-                    'bg-amber-500/10 text-amber-500')}>{r.status}</span>
+                  <StatusBadge tone={r.status === 'active' ? 'ok' : r.status === 'disposed' ? 'risk' : 'attend'} label={r.status} className="text-[10.5px] capitalize" />
                 </td>
               </tr>
             ))}
@@ -954,12 +954,12 @@ function FixedAssetPanel({ orgId, orgName, currency }: { orgId: string; orgName:
   );
 }
 
-function StatCard({ label, value, accent, hint }: { label: string; value: string; accent: string; hint?: string }) {
+function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl border border-border/20 bg-card/40 p-3">
-      <div className={cn('text-[10px] uppercase tracking-wider font-bold', accent)}>{label}</div>
-      <div className="text-sm font-semibold tabular-nums mt-1">{value}</div>
-      {hint && <div className="text-[9px] text-muted-foreground mt-0.5">{hint}</div>}
+    <div className="rounded-lg border border-border/60 bg-card p-3">
+      <div className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{label}</div>
+      <div className="mt-1 font-mono text-sm font-medium tabular-nums">{value}</div>
+      {hint && <div className="mt-0.5 text-[9.5px] text-muted-foreground">{hint}</div>}
     </div>
   );
 }

@@ -188,12 +188,12 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
         <h2 className="text-lg font-bold flex items-center gap-2"><Users className="h-4 w-4" /> Accountant access</h2>
         <p className="text-xs text-muted-foreground mt-1">
           Invite an external accountant to log into a dedicated portal for this organization only.
-          They will see nothing else in Quooro — just your accounting app.
+          They will see nothing else in Quooro, just your accounting app.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-border/20 bg-card/40 p-4">
-        <div className="flex gap-1 p-1 bg-muted/30 rounded-xl mb-4 w-fit">
+      <div className="rounded-[10px] border border-border/60 bg-card p-4">
+        <div className="flex gap-1 p-1 bg-muted/30 rounded-lg mb-4 w-fit">
           <button
             type="button"
             onClick={() => setMode('invite')}
@@ -215,8 +215,8 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
             <Label className="text-xs">Invite by email</Label>
             <div className="flex gap-2 mt-1.5">
               <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="accountant@firm.co.uk"
-                type="email" className="h-9 rounded-xl text-sm flex-1" />
-              <Button onClick={createInvite} disabled={busy} className="h-9 rounded-xl gap-1.5">
+                type="email" className="h-9 rounded-lg text-sm flex-1" />
+              <Button onClick={createInvite} disabled={busy} className="h-9 rounded-lg gap-1.5">
                 <Plus className="h-3.5 w-3.5" /> Create invite
               </Button>
             </div>
@@ -229,7 +229,7 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
             <div>
               <Label className="text-xs">Full name (optional)</Label>
               <Input value={dName} onChange={e => setDName(e.target.value)} placeholder="Jane Smith"
-                className="h-9 rounded-xl text-sm mt-1.5" />
+                className="h-9 rounded-lg text-sm mt-1.5" />
             </div>
             <div>
               <Label className="text-xs">Login ID</Label>
@@ -237,7 +237,7 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
                 onChange={e => setDLoginId(e.target.value.replace(/[^a-zA-Z0-9._-]/g, ''))}
                 placeholder="jane.smith"
                 autoCapitalize="none" spellCheck={false}
-                className="h-9 rounded-xl text-sm mt-1.5 font-mono" />
+                className="h-9 rounded-lg text-sm mt-1.5 font-mono" />
               <p className="text-[10px] text-muted-foreground mt-1">
                 Letters, numbers, dot, underscore, hyphen. No spaces. Min 3 characters.
               </p>
@@ -249,14 +249,14 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
                   <Input value={dPass} onChange={e => setDPass(e.target.value)}
                     type={showPass ? 'text' : 'password'} placeholder="Meet every requirement below"
                     autoCapitalize="none" spellCheck={false}
-                    className="h-9 rounded-xl text-sm pr-9" />
+                    className="h-9 rounded-lg text-sm pr-9" />
                   <button type="button" onClick={() => setShowPass(s => !s)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                     {showPass ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                   </button>
                 </div>
                 <Button type="button" variant="outline" onClick={genPassword}
-                  className="h-9 rounded-xl gap-1.5 text-xs">
+                  className="h-9 rounded-lg gap-1.5 text-xs">
                   <RefreshCw className="h-3 w-3" /> Generate
                 </Button>
               </div>
@@ -269,7 +269,7 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
                   { ok: pwChecks.special, label: 'One special character' },
                   { ok: pwChecks.noSpace, label: 'No spaces' },
                 ].map((r) => (
-                  <li key={r.label} className={`flex items-center gap-1.5 text-[10px] ${r.ok ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                  <li key={r.label} className={`flex items-center gap-1.5 text-[10px] ${r.ok ? 'text-ok' : 'text-muted-foreground'}`}>
                     {r.ok ? <Check className="h-3 w-3" /> : <X className="h-3 w-3 opacity-50" />}
                     {r.label}
                   </li>
@@ -282,14 +282,14 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
                 <Input value={dPass2} onChange={e => setDPass2(e.target.value)}
                   type={showPass2 ? 'text' : 'password'} placeholder="Retype the password"
                   autoCapitalize="none" spellCheck={false}
-                  className="h-9 rounded-xl text-sm pr-9" />
+                  className="h-9 rounded-lg text-sm pr-9" />
                 <button type="button" onClick={() => setShowPass2(s => !s)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPass2 ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
               {dPass2.length > 0 && (
-                <p className={`mt-1 flex items-center gap-1.5 text-[10px] ${pwMatch ? 'text-emerald-500' : 'text-destructive'}`}>
+                <p className={`mt-1 flex items-center gap-1.5 text-[10px] ${pwMatch ? 'text-ok' : 'text-destructive'}`}>
                   {pwMatch ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                   {pwMatch ? 'Passwords match' : 'Passwords do not match'}
                 </p>
@@ -297,18 +297,18 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
             </div>
             <Button onClick={createDirectLogin}
               disabled={creating || !idValid || !pwAllGood || !pwMatch}
-              className="w-full h-9 rounded-xl gap-1.5">
+              className="w-full h-9 rounded-lg gap-1.5">
               {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />}
               Create accountant login
             </Button>
             <p className="text-[10px] text-muted-foreground">
-              Creates the login instantly. Share the Login ID + password securely with your accountant — they sign in at <span className="font-mono">/accountant</span>. If the Login ID already exists, its password will be reset.
+              Creates the login instantly. Share the Login ID and password securely with your accountant. They sign in at <span className="font-mono">/accountant</span>. If the Login ID already exists, its password will be reset.
             </p>
           </div>
         )}
       </div>
 
-      <div className="rounded-2xl border border-border/20 bg-card/40 p-4">
+      <div className="rounded-[10px] border border-border/60 bg-card p-4">
         <Label className="text-xs flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> Send invite emails from</Label>
         {accts.length === 0 ? (
           <p className="text-[11px] text-muted-foreground mt-2">
@@ -317,11 +317,11 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
         ) : (
           <div className="mt-1.5">
             <Select value={selectedAcct} onValueChange={setSelectedAcct}>
-              <SelectTrigger className="h-9 rounded-xl text-sm"><SelectValue placeholder="Choose account" /></SelectTrigger>
+              <SelectTrigger className="h-9 rounded-lg text-sm"><SelectValue placeholder="Choose account" /></SelectTrigger>
               <SelectContent>
                 {accts.map(a => (
                   <SelectItem key={a.id} value={a.id} className="text-xs">
-                    {a.display_name ? `${a.display_name} — ` : ''}{a.email_address}
+                    {a.display_name ? `${a.display_name} · ` : ''}{a.email_address}
                     <span className="ml-2 text-[10px] uppercase text-muted-foreground">{a.provider}</span>
                   </SelectItem>
                 ))}
@@ -336,17 +336,17 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
 
 
       {/* Active accountants */}
-      <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-        <header className="px-5 py-3 border-b border-border/20 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+      <section className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
+        <header className="px-5 py-3 border-b border-border/60 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
           Active accountants ({members.length})
         </header>
         {members.length === 0 ? (
           <div className="p-6 text-center text-[11px] text-muted-foreground">No accountants have accepted yet.</div>
         ) : (
-          <div className="divide-y divide-border/10">
+          <div className="divide-y divide-border/60">
             {members.map(m => (
               <div key={m.id} className="flex items-center gap-3 px-5 py-2.5 text-xs">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-ok" />
                 <span className="flex-1 font-mono text-[11px]">{m.user_id.slice(0, 12)}…</span>
                 <span className="text-[10px] text-muted-foreground">since {new Date(m.created_at).toLocaleDateString('en-GB')}</span>
                 <Button size="sm" variant="ghost" onClick={() => removeMember(m.id)} className="h-7 w-7 p-0">
@@ -360,21 +360,21 @@ export default function AccountantsSettings({ orgId }: { orgId: string }) {
 
 
       {/* Invites */}
-      <section className="rounded-2xl border border-border/20 bg-card/40 overflow-hidden">
-        <header className="px-5 py-3 border-b border-border/20 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+      <section className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
+        <header className="px-5 py-3 border-b border-border/60 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
           Invites ({invites.length})
         </header>
         {invites.length === 0 ? (
           <div className="p-6 text-center text-[11px] text-muted-foreground">No invites yet.</div>
         ) : (
-          <div className="divide-y divide-border/10">
+          <div className="divide-y divide-border/60">
             {invites.map(i => (
               <div key={i.id} className="flex items-center gap-3 px-5 py-2.5 text-xs">
-                {i.status === 'accepted' && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />}
-                {i.status === 'pending' && <Clock className="h-3.5 w-3.5 text-amber-500" />}
-                {(i.status === 'revoked' || i.status === 'expired') && <XCircle className="h-3.5 w-3.5 text-red-500" />}
+                {i.status === 'accepted' && <CheckCircle2 className="h-3.5 w-3.5 text-ok" />}
+                {i.status === 'pending' && <Clock className="h-3.5 w-3.5 text-attend" />}
+                {(i.status === 'revoked' || i.status === 'expired') && <XCircle className="h-3.5 w-3.5 text-risk" />}
                 <span className="flex-1">{i.email}</span>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{i.status}</span>
+                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{i.status}</span>
                 {i.status === 'pending' && (
                   <>
                     <Button size="sm" variant="outline" onClick={() => sendInviteEmail(i.id)}

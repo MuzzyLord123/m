@@ -9,8 +9,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { SkeletonLedger } from '@/components/platform';
 import {
   ArrowLeft, ArrowRight, KeyRound, Plus, Search, Copy, Eye, EyeOff,
   Shield, ShieldCheck, Globe, Lock, FolderLock, QrCode, Fingerprint,
@@ -94,7 +94,7 @@ type SetupStep = 'name' | 'password' | 'totp' | 'questions' | 'captcha' | 'maste
 type PasswordCategory = 'all' | 'logins' | 'cards' | 'servers' | 'wifi';
 
 const CATEGORIES: { id: PasswordCategory; label: string; icon: any }[] = [
-  { id: 'all', label: 'All Items', icon: KeyRound },
+  { id: 'all', label: 'All items', icon: KeyRound },
   { id: 'logins', label: 'Logins', icon: Globe },
   { id: 'cards', label: 'Cards', icon: CreditCard },
   { id: 'servers', label: 'Servers', icon: Server },
@@ -256,7 +256,7 @@ export default function OfficePasswordVault() {
       }) as any).select().single();
 
       if (error) throw error;
-      toast.success('Password Vault created successfully!');
+      toast.success('Password vault created');
       setActiveVault(data);
       setSessionKey(setupPassword);
       setPhase('dashboard');
@@ -321,7 +321,7 @@ export default function OfficePasswordVault() {
       setPhase('dashboard');
       loadVaultItems(activeVault.id);
       await (supabase.from('password_vault_configs').update({ failed_attempts: 0 }) as any).eq('id', activeVault.id);
-      toast.success('Password Vault unlocked');
+      toast.success('Password vault unlocked');
     } catch {
       toast.error('Verification failed');
     } finally {
@@ -464,8 +464,8 @@ export default function OfficePasswordVault() {
 
   if (phase === 'loading') {
     return (
-      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
-        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+        <div className="w-full max-w-lg rounded-[10px] border border-border/60 bg-card"><SkeletonLedger rows={4} /></div>
       </div>
     );
   }
@@ -474,48 +474,45 @@ export default function OfficePasswordVault() {
   if (phase === 'list') {
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-        <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3">
-          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
+        <header className="shrink-0 h-[52px] border-b border-border/60 bg-background flex items-center px-5 gap-3">
+          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
             <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
           </Button>
-          <div className="h-4 w-px bg-border/40" />
-          <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
-            <KeyRound className="h-3.5 w-3.5 text-white" />
-          </div>
-          <span className="text-sm font-bold tracking-tight">Password Vault</span>
-          <div className="flex items-center gap-1 ml-2 px-2 py-0.5 rounded-md bg-emerald-500/10">
-            <Lock className="h-2.5 w-2.5 text-emerald-500" />
-            <span className="text-[9px] font-bold text-emerald-500">AES-256-GCM</span>
-          </div>
+          <div className="h-4 w-px bg-border/60" />
+          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Password vault</span>
+          <span className="ml-2 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.1em] text-ok">
+            <Lock className="h-2.5 w-2.5" />
+            AES-256-GCM
+          </span>
         </header>
 
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="max-w-lg w-full">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-primary/10">
-                <Shield className="w-6 h-6 text-primary" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+                <Shield className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-foreground">Password Vaults</h2>
-                <p className="text-xs text-muted-foreground">AES-GCM encrypted · Google Authenticator · 16-digit Master Key</p>
+                <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-foreground">Password vaults</h2>
+                <p className="text-xs text-muted-foreground">AES-GCM encrypted · Google Authenticator · 16-digit master key</p>
               </div>
             </div>
 
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs text-muted-foreground">{allVaults.length} vault{allVaults.length !== 1 ? 's' : ''}</p>
               <Button onClick={startNewVault} size="sm" className="gap-1.5 text-xs">
-                <Plus className="w-3.5 h-3.5" /> Create Vault
+                <Plus className="w-3.5 h-3.5" /> Create vault
               </Button>
             </div>
 
             {allVaults.length === 0 ? (
               <Card className="border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
-                  <FolderLock className="w-12 h-12 text-muted-foreground/50" />
+                  <FolderLock className="w-12 h-12 text-muted-foreground" />
                   <p className="text-muted-foreground text-sm">No password vaults yet</p>
-                  <p className="text-xs text-muted-foreground max-w-sm text-center">Create your first vault with AES-GCM encryption, Google Authenticator, security questions, and an unrecoverable 16-digit Master Key.</p>
+                  <p className="text-xs text-muted-foreground max-w-sm text-center">Create your first vault with AES-GCM encryption, Google Authenticator, security questions and an unrecoverable 16-digit master key.</p>
                   <Button onClick={startNewVault} variant="outline" size="sm" className="gap-1 mt-2">
-                    <Plus className="w-4 h-4" /> Create Your First Vault
+                    <Plus className="w-4 h-4" /> Create your first vault
                   </Button>
                 </CardContent>
               </Card>
@@ -524,15 +521,15 @@ export default function OfficePasswordVault() {
                 {allVaults.map(vault => (
                   <Card key={vault.id} className="hover:border-primary/30 transition-colors cursor-pointer" onClick={() => openVault(vault)}>
                     <CardContent className="flex items-center gap-4 py-4 px-5">
-                      <div className="p-3 rounded-xl bg-primary/10">
-                        <FolderLock className="w-6 h-6 text-primary" />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+                        <FolderLock className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold truncate">{vault.vault_name || 'Password Vault'}</p>
                         <p className="text-xs text-muted-foreground">
                           Created {new Date(vault.created_at).toLocaleDateString()}
                           {vault.failed_attempts > 0 && (
-                            <span className="text-destructive ml-2">· {vault.failed_attempts} failed attempt(s)</span>
+                            <span className="ml-2 text-risk">· {vault.failed_attempts} failed attempt(s)</span>
                           )}
                         </p>
                       </div>
@@ -553,15 +550,15 @@ export default function OfficePasswordVault() {
 
   // ─── SETUP WIZARD ───
   if (phase === 'setup') {
-    const stepLabels = ['Name', 'Password', 'Authenticator', 'Questions', 'Verify', 'Master Key'];
+    const stepLabels = ['Name', 'Password', 'Authenticator', 'Questions', 'Verify', 'Master key'];
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-        <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3">
-          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => setPhase('list')}>
-            <ArrowLeft className="h-3.5 w-3.5" /> All Vaults
+        <header className="shrink-0 h-[52px] border-b border-border/60 bg-background flex items-center px-5 gap-3">
+          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => setPhase('list')}>
+            <ArrowLeft className="h-3.5 w-3.5" /> All vaults
           </Button>
-          <div className="h-4 w-px bg-border/40" />
-          <span className="text-sm font-bold">Create Password Vault</span>
+          <div className="h-4 w-px bg-border/60" />
+          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Create password vault</span>
         </header>
 
         <div className="flex-1 flex items-center justify-center p-6">
@@ -578,23 +575,22 @@ export default function OfficePasswordVault() {
               Step {stepIdx + 1} of {stepLabels.length}: {stepLabels[stepIdx]}
             </p>
 
-            <AnimatePresence mode="wait">
-              <motion.div key={setupStep} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
-                <Card className="border-primary/20">
+            <div key={setupStep}>
+                <Card className="border-border/60">
                   <CardContent className="pt-6 space-y-5">
 
                     {setupStep === 'name' && (
                       <>
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="p-2 rounded-lg bg-primary/10"><FolderLock className="w-5 h-5 text-primary" /></div>
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken"><FolderLock className="h-4 w-4 text-muted-foreground" /></div>
                           <div>
-                            <h3 className="font-semibold">Name Your Vault</h3>
+                            <h3 className="font-semibold">Name your vault</h3>
                             <p className="text-xs text-muted-foreground">Give your password vault a descriptive name.</p>
                           </div>
                         </div>
                         <div>
-                          <Label>Vault Name</Label>
-                          <Input value={vaultName} onChange={e => setVaultName(e.target.value)} placeholder="e.g. Work Passwords, Personal Logins" />
+                          <Label>Vault name</Label>
+                          <Input value={vaultName} onChange={e => setVaultName(e.target.value)} placeholder="e.g. Work passwords, personal logins" />
                           {vaultName.length > 0 && vaultName.trim().length < 2 && (
                             <p className="text-xs text-destructive mt-1">Name must be at least 2 characters</p>
                           )}
@@ -605,15 +601,15 @@ export default function OfficePasswordVault() {
                     {setupStep === 'password' && (
                       <>
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="p-2 rounded-lg bg-primary/10"><Lock className="w-5 h-5 text-primary" /></div>
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken"><Lock className="h-4 w-4 text-muted-foreground" /></div>
                           <div>
-                            <h3 className="font-semibold">Create Vault Password</h3>
+                            <h3 className="font-semibold">Create the vault password</h3>
                             <p className="text-xs text-muted-foreground">Minimum 12 characters. Separate from your account password.</p>
                           </div>
                         </div>
                         <div className="space-y-3">
                           <div>
-                            <Label>Vault Password</Label>
+                            <Label>Vault password</Label>
                             <div className="relative">
                               <Input type={showPassword ? 'text' : 'password'} value={setupPassword} onChange={e => setSetupPassword(e.target.value)} placeholder="Enter vault password (min 12 chars)" className="pr-10" />
                               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -625,7 +621,7 @@ export default function OfficePasswordVault() {
                             )}
                           </div>
                           <div>
-                            <Label>Confirm Password</Label>
+                            <Label>Confirm password</Label>
                             <Input type="password" value={setupPasswordConfirm} onChange={e => setSetupPasswordConfirm(e.target.value)} placeholder="Re-enter vault password" />
                             {setupPasswordConfirm && setupPassword !== setupPasswordConfirm && (
                               <p className="text-xs text-destructive mt-1">Passwords do not match</p>
@@ -638,14 +634,14 @@ export default function OfficePasswordVault() {
                     {setupStep === 'totp' && (
                       <>
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="p-2 rounded-lg bg-primary/10"><QrCode className="w-5 h-5 text-primary" /></div>
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken"><QrCode className="h-4 w-4 text-muted-foreground" /></div>
                           <div>
                             <h3 className="font-semibold">Link Google Authenticator</h3>
                             <p className="text-xs text-muted-foreground">Scan the QR code or enter the key manually.</p>
                           </div>
                         </div>
                         <div className="flex flex-col items-center gap-4">
-                          <div className="bg-white p-4 rounded-xl border">
+                          <div className="bg-white p-4 rounded-lg border">
                             <img
                               src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(generateTOTPUri(totpSecret, user?.email || '', vaultName))}`}
                               alt="QR Code"
@@ -667,9 +663,9 @@ export default function OfficePasswordVault() {
                     {setupStep === 'questions' && (
                       <>
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="p-2 rounded-lg bg-primary/10"><Fingerprint className="w-5 h-5 text-primary" /></div>
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken"><Fingerprint className="h-4 w-4 text-muted-foreground" /></div>
                           <div>
-                            <h3 className="font-semibold">Security Questions</h3>
+                            <h3 className="font-semibold">Security questions</h3>
                             <p className="text-xs text-muted-foreground">Answer 5 questions used to verify your identity.</p>
                           </div>
                         </div>
@@ -697,7 +693,7 @@ export default function OfficePasswordVault() {
                                   updated[i] = { ...updated[i], answer: e.target.value };
                                   setSecurityAnswers(updated);
                                 }}
-                                placeholder="Your answer..."
+                                placeholder="Your answer…"
                                 className="text-sm"
                               />
                             </div>
@@ -709,14 +705,14 @@ export default function OfficePasswordVault() {
                     {setupStep === 'captcha' && (
                       <>
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="p-2 rounded-lg bg-primary/10"><ShieldCheck className="w-5 h-5 text-primary" /></div>
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken"><ShieldCheck className="h-4 w-4 text-muted-foreground" /></div>
                           <div>
-                            <h3 className="font-semibold">Human Verification</h3>
-                            <p className="text-xs text-muted-foreground">Solve this challenge to prove you're not a bot.</p>
+                            <h3 className="font-semibold">Human verification</h3>
+                            <p className="text-xs text-muted-foreground">Solve this challenge to continue.</p>
                           </div>
                         </div>
                         <div className="flex flex-col items-center gap-4 py-4">
-                          <div className="bg-muted/50 border border-border rounded-xl p-6 text-center min-w-[250px]">
+                          <div className="bg-muted/50 border border-border rounded-lg p-6 text-center min-w-[250px]">
                             <p className="text-lg font-semibold mb-4">{CAPTCHA_CHALLENGES[captchaIdx].question}</p>
                             <Input value={captchaAnswer} onChange={e => setCaptchaAnswer(e.target.value)} placeholder="Your answer" className="text-center text-lg max-w-[150px] mx-auto" />
                           </div>
@@ -736,47 +732,47 @@ export default function OfficePasswordVault() {
                     {setupStep === 'masterkey' && (
                       <>
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="p-2 rounded-lg bg-destructive/10"><Key className="w-5 h-5 text-destructive" /></div>
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-risk/30 bg-risk/5"><Key className="h-4 w-4 text-risk" /></div>
                           <div>
-                            <h3 className="font-semibold">Your Master Key</h3>
-                            <p className="text-xs text-destructive font-medium">Save this key — it is UNRECOVERABLE. Losing it means permanent loss of access.</p>
+                            <h3 className="font-semibold">Your master key</h3>
+                            <p className="text-xs font-medium text-risk">Save this key. It cannot be recovered, and losing it means permanent loss of access.</p>
                           </div>
                         </div>
                         <div className="flex flex-col items-center gap-4 py-4">
-                          <div className="bg-muted/50 border-2 border-destructive/30 rounded-xl p-6 text-center">
+                          <div className="rounded-lg border border-risk/30 bg-sunken p-6 text-center">
                             <code className="text-xl font-mono font-bold tracking-[0.15em] select-all text-foreground">{masterKey}</code>
                           </div>
                           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
                             navigator.clipboard.writeText(masterKey);
                             setMasterKeyCopied(true);
-                            toast.success('Master Key copied');
+                            toast.success('Master key copied');
                           }}>
                             {masterKeyCopied ? <CheckCircle2 className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
-                            {masterKeyCopied ? 'Copied' : 'Copy Master Key'}
+                            {masterKeyCopied ? 'Copied' : 'Copy master key'}
                           </Button>
-                          <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 max-w-sm">
+                          <div className="max-w-sm rounded-lg border border-risk/20 bg-risk/5 p-3">
                             <div className="flex items-start gap-2">
-                              <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-                              <p className="text-xs text-destructive">Write this key down and store it in a safe place. If you lose this key, you will <strong>permanently lose access</strong> to this vault. It cannot be recovered.</p>
+                              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-risk" />
+                              <p className="text-xs text-risk">Write this key down and store it in a safe place. If you lose this key, you will <strong>permanently lose access</strong> to this vault. It cannot be recovered.</p>
                             </div>
                           </div>
                           <label className="flex items-center gap-2 cursor-pointer mt-2">
                             <input type="checkbox" checked={masterKeyConfirmed} onChange={e => setMasterKeyConfirmed(e.target.checked)} className="rounded" />
-                            <span className="text-xs text-muted-foreground">I have saved my Master Key in a secure location</span>
+                            <span className="text-xs text-muted-foreground">I have saved my master key in a secure location</span>
                           </label>
                         </div>
                       </>
                     )}
 
                     {/* Navigation */}
-                    <div className="flex items-center justify-between pt-4 border-t border-border/30">
+                    <div className="flex items-center justify-between pt-4 border-t border-border/60">
                       <Button variant="ghost" size="sm" onClick={handleSetupBack} disabled={setupStep === 'masterkey'}>
                         <ArrowLeft className="w-4 h-4 mr-1" /> Back
                       </Button>
                       {setupStep === 'masterkey' ? (
                         <Button size="sm" onClick={handleFinalizeSetup} disabled={saving || !masterKeyConfirmed} className="gap-1.5">
                           {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-                          {saving ? 'Creating...' : 'Create Vault'}
+                          {saving ? 'Creating…' : 'Create vault'}
                         </Button>
                       ) : (
                         <Button size="sm" onClick={handleSetupNext} disabled={
@@ -792,8 +788,7 @@ export default function OfficePasswordVault() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
-            </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
@@ -804,23 +799,23 @@ export default function OfficePasswordVault() {
   if (phase === 'unlock') {
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-        <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3">
-          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => setPhase('list')}>
-            <ArrowLeft className="h-3.5 w-3.5" /> All Vaults
+        <header className="shrink-0 h-[52px] border-b border-border/60 bg-background flex items-center px-5 gap-3">
+          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => setPhase('list')}>
+            <ArrowLeft className="h-3.5 w-3.5" /> All vaults
           </Button>
-          <div className="h-4 w-px bg-border/40" />
-          <span className="text-sm font-bold">Unlock: {activeVault?.vault_name}</span>
+          <div className="h-4 w-px bg-border/60" />
+          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Unlock · {activeVault?.vault_name}</span>
         </header>
 
         <div className="flex-1 flex items-center justify-center p-6">
-          <Card className="max-w-md w-full border-primary/20">
+          <Card className="max-w-md w-full border-border/60">
             <CardContent className="pt-6 space-y-5">
               {unlockStep === 'password' && (
                 <>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-lg bg-primary/10"><Lock className="w-5 h-5 text-primary" /></div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken"><Lock className="h-4 w-4 text-muted-foreground" /></div>
                     <div>
-                      <h3 className="font-semibold">Step 1: Vault Password</h3>
+                      <h3 className="font-semibold">Step 1: vault password</h3>
                       <p className="text-xs text-muted-foreground">Enter your vault password to begin unlock.</p>
                     </div>
                   </div>
@@ -833,7 +828,7 @@ export default function OfficePasswordVault() {
                   </div>
                   <Button className="w-full" onClick={handleUnlockPassword} disabled={unlocking || !unlockPassword}>
                     {unlocking ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
-                    Verify Password
+                    Verify password
                   </Button>
                 </>
               )}
@@ -841,9 +836,9 @@ export default function OfficePasswordVault() {
               {unlockStep === 'totp' && (
                 <>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-lg bg-primary/10"><QrCode className="w-5 h-5 text-primary" /></div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken"><QrCode className="h-4 w-4 text-muted-foreground" /></div>
                     <div>
-                      <h3 className="font-semibold">Step 2: Authenticator Code</h3>
+                      <h3 className="font-semibold">Step 2: authenticator code</h3>
                       <p className="text-xs text-muted-foreground">Enter 6-digit code from Google Authenticator.</p>
                     </div>
                   </div>
@@ -851,7 +846,7 @@ export default function OfficePasswordVault() {
                     onKeyDown={e => e.key === 'Enter' && unlockTOTP.length === 6 && handleUnlockTOTP()} />
                   <Button className="w-full" onClick={handleUnlockTOTP} disabled={unlocking || unlockTOTP.length !== 6}>
                     {unlocking ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
-                    Verify Code
+                    Verify code
                   </Button>
                 </>
               )}
@@ -859,9 +854,9 @@ export default function OfficePasswordVault() {
               {unlockStep === 'question' && unlockQuestion && (
                 <>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-lg bg-primary/10"><Fingerprint className="w-5 h-5 text-primary" /></div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken"><Fingerprint className="h-4 w-4 text-muted-foreground" /></div>
                     <div>
-                      <h3 className="font-semibold">Step 3: Security Question</h3>
+                      <h3 className="font-semibold">Step 3: security question</h3>
                       <p className="text-xs text-muted-foreground">Answer this question to complete unlock.</p>
                     </div>
                   </div>
@@ -870,7 +865,7 @@ export default function OfficePasswordVault() {
                     onKeyDown={e => e.key === 'Enter' && unlockAnswer && handleUnlockQuestion()} />
                   <Button className="w-full" onClick={handleUnlockQuestion} disabled={unlocking || !unlockAnswer}>
                     {unlocking ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
-                    Unlock Vault
+                    Unlock vault
                   </Button>
                 </>
               )}
@@ -884,35 +879,32 @@ export default function OfficePasswordVault() {
   // ─── DASHBOARD ───
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={lockVault}>
-          <ArrowLeft className="h-3.5 w-3.5" /> Lock & Exit
+      <header className="shrink-0 h-[52px] border-b border-border/60 bg-background flex items-center px-5 gap-3">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={lockVault}>
+          <ArrowLeft className="h-3.5 w-3.5" /> Lock and exit
         </Button>
-        <div className="h-4 w-px bg-border/40" />
-        <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
-          <KeyRound className="h-3.5 w-3.5 text-white" />
-        </div>
-        <span className="text-sm font-bold tracking-tight">{activeVault?.vault_name}</span>
-        <div className="flex items-center gap-1 ml-2 px-2 py-0.5 rounded-md bg-emerald-500/10">
-          <ShieldCheck className="h-2.5 w-2.5 text-emerald-500" />
-          <span className="text-[9px] font-bold text-emerald-500">Unlocked · AES-GCM</span>
-        </div>
+        <div className="h-4 w-px bg-border/60" />
+        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{activeVault?.vault_name}</span>
+        <span className="ml-2 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.1em] text-ok">
+          <ShieldCheck className="h-2.5 w-2.5" />
+          Unlocked · AES-GCM
+        </span>
         <div className="flex-1" />
-        <Button variant="outline" size="sm" className="h-8 w-8 sm:w-auto sm:gap-1.5 rounded-xl text-xs" onClick={handleRevealKey}>
-          <Key className="h-3.5 w-3.5" /><span className="hidden sm:inline">Master Key</span>
+        <Button variant="outline" size="sm" className="h-8 w-8 sm:w-auto sm:gap-1.5 rounded-lg text-xs" onClick={handleRevealKey}>
+          <Key className="h-3.5 w-3.5" /><span className="hidden sm:inline">Master key</span>
         </Button>
-        <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs bg-gradient-to-r from-slate-700 to-slate-900 text-white border-0 shadow-sm" onClick={() => setAddDialogOpen(true)}>
-          <Plus className="h-3.5 w-3.5" /> Add Password
+        <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => setAddDialogOpen(true)}>
+          <Plus className="h-3.5 w-3.5" /> Add password
         </Button>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="hidden md:flex w-52 border-r border-border/20 bg-card/20 shrink-0 flex-col">
+        <div className="hidden w-52 shrink-0 flex-col border-r border-border/60 bg-background md:flex">
           <div className="p-3">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/40" />
-              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search vault…" className="h-7 pl-7 text-[10px] bg-card/50 border-border/20 rounded-lg" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search vault…" className="h-7 pl-7 text-[10px] bg-card border-border/60 rounded-lg" />
             </div>
           </div>
 
@@ -921,34 +913,34 @@ export default function OfficePasswordVault() {
               const count = cat.id === 'all' ? passwordItems.length : passwordItems.filter(i => i.category === cat.id).length;
               return (
                 <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-                  className={cn("w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-all",
-                    activeCategory === cat.id ? "bg-accent/60 shadow-sm" : "hover:bg-accent/30"
+                  className={cn("flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition-colors duration-150",
+                    activeCategory === cat.id ? "bg-foreground/[0.05]" : "hover:bg-foreground/[0.025]"
                   )}>
                   <cat.icon className={cn("h-3.5 w-3.5", activeCategory === cat.id ? "text-foreground" : "text-muted-foreground")} />
                   <span className={cn("text-[11px] font-medium flex-1", activeCategory === cat.id ? "text-foreground" : "text-muted-foreground")}>{cat.label}</span>
-                  <span className="text-[9px] text-muted-foreground/50 tabular-nums">{count}</span>
+                  <span className="font-mono text-[9px] tabular-nums text-muted-foreground">{count}</span>
                 </button>
               );
             })}
           </div>
 
           {/* Stats */}
-          <div className="p-3 border-t border-border/15">
-            <div className="rounded-xl bg-card/60 border border-border/20 p-3">
+          <div className="p-3 border-t border-border/60">
+            <div className="rounded-lg bg-card border border-border/60 p-3">
               <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                <span className="text-[10px] font-bold text-foreground">Vault Status</span>
+                <ShieldCheck className="h-4 w-4 text-ok" />
+                <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-foreground">Vault status</span>
               </div>
-              <div className="text-[24px] font-bold text-foreground">{stats.total}</div>
+              <div className="font-mono text-[22px] font-medium tabular-nums text-foreground">{stats.total}</div>
               <p className="text-[9px] text-muted-foreground">stored passwords</p>
               <div className="flex items-center gap-3 mt-2">
                 <div className="flex items-center gap-1">
-                  <Shield className="h-2.5 w-2.5 text-emerald-500" />
-                  <span className="text-[9px] text-emerald-500 font-medium">{stats.with2FA} 2FA</span>
+                  <Shield className="h-2.5 w-2.5 text-ok" />
+                  <span className="font-mono text-[9px] font-medium tabular-nums text-ok">{stats.with2FA} 2FA</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Star className="h-2.5 w-2.5 text-amber-500" />
-                  <span className="text-[9px] text-amber-500 font-medium">{stats.starred} starred</span>
+                  <Star className="h-2.5 w-2.5 text-gold" />
+                  <span className="font-mono text-[9px] font-medium tabular-nums text-gold">{stats.starred} starred</span>
                 </div>
               </div>
             </div>
@@ -960,14 +952,14 @@ export default function OfficePasswordVault() {
           {/* Mobile: search + category pills */}
           <div className="flex flex-col gap-2 mb-4 md:hidden">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
-              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search vault…" className="h-9 pl-8 text-sm bg-card/50 border-border/20 rounded-xl" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search vault…" className="h-9 pl-8 text-sm bg-card border-border/60 rounded-lg" />
             </div>
             <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
               {CATEGORIES.map(cat => (
                 <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-                  className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium whitespace-nowrap shrink-0 transition-all",
-                    activeCategory === cat.id ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted/40 text-muted-foreground/60 hover:text-foreground")}>
+                  className={cn("flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border px-3 py-1.5 text-[11px] font-medium transition-colors duration-150",
+                    activeCategory === cat.id ? "border-primary bg-primary text-primary-foreground" : "border-border/60 text-muted-foreground hover:border-border hover:text-foreground")}>
                   <cat.icon className="h-3 w-3" />
                   {cat.label}
                 </button>
@@ -975,15 +967,13 @@ export default function OfficePasswordVault() {
             </div>
           </div>
           {loadingItems ? (
-            <div className="flex items-center justify-center h-64">
-              <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
+            <div className="rounded-[10px] border border-border/60 bg-card"><SkeletonLedger rows={5} /></div>
           ) : filteredItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 gap-3">
-              <KeyRound className="w-12 h-12 text-muted-foreground/30" />
+              <KeyRound className="w-12 h-12 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">No passwords stored yet</p>
               <Button variant="outline" size="sm" onClick={() => setAddDialogOpen(true)} className="gap-1.5">
-                <Plus className="w-4 h-4" /> Add Your First Password
+                <Plus className="w-4 h-4" /> Add your first password
               </Button>
             </div>
           ) : (
@@ -993,54 +983,54 @@ export default function OfficePasswordVault() {
                 const catConfig = CATEGORIES.find(c => c.id === item.category) || CATEGORIES[1];
                 const CatIcon = catConfig.icon;
                 return (
-                  <motion.div key={item.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-                    className="group flex items-center gap-4 px-4 py-3.5 rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all">
-                    <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-primary/10">
-                      <CatIcon className="h-4.5 w-4.5 text-primary" />
+                  <div key={item.id}
+                    className="group flex items-center gap-4 rounded-[10px] border border-border/60 bg-card px-4 py-3 transition-colors duration-150 hover:border-border">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+                      <CatIcon className="h-4 w-4 text-muted-foreground" />
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-[12px] font-bold text-foreground truncate">{dec.title || '***'}</span>
-                        {item.starred && <Star className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />}
-                        {item.has_2fa && <Shield className="h-3 w-3 text-emerald-500 shrink-0" />}
+                        <span className="truncate text-[12.5px] font-[550] text-foreground">{dec.title || '***'}</span>
+                        {item.starred && <Star className="h-3 w-3 shrink-0 fill-gold text-gold" />}
+                        {item.has_2fa && <Shield className="h-3 w-3 text-ok shrink-0" />}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-muted-foreground/60">{dec.username || '***'}</span>
+                        <span className="text-[10px] text-muted-foreground">{dec.username || '***'}</span>
                         {dec.url && (
                           <>
-                            <span className="text-[9px] text-muted-foreground/30">·</span>
-                            <span className="text-[9px] text-muted-foreground/40">{dec.url}</span>
+                            <span className="text-[9px] text-muted-foreground">·</span>
+                            <span className="text-[9px] text-muted-foreground">{dec.url}</span>
                           </>
                         )}
                       </div>
                     </div>
 
                     {/* Password field */}
-                    <div className="hidden sm:flex items-center gap-1.5 bg-background/60 border border-border/20 rounded-lg px-3 py-1.5">
-                      <span className="text-[11px] font-mono text-muted-foreground w-24 text-center">
+                    <div className="hidden items-center gap-1.5 rounded-lg border border-border/60 bg-sunken px-3 py-1.5 sm:flex">
+                      <span className="w-24 text-center font-mono text-[11px] tabular-nums text-muted-foreground">
                         {revealedId === item.id ? '••visible••' : '••••••••••••'}
                       </span>
-                      <button onClick={() => revealPassword(item)} className="h-5 w-5 rounded flex items-center justify-center hover:bg-accent/40">
+                      <button onClick={() => revealPassword(item)} className="h-5 w-5 rounded flex items-center justify-center hover:bg-foreground/[0.025]">
                         {revealedId === item.id ? <EyeOff className="h-3 w-3 text-muted-foreground" /> : <Eye className="h-3 w-3 text-muted-foreground" />}
                       </button>
-                      <button onClick={() => copyDecryptedPassword(item)} className="h-5 w-5 rounded flex items-center justify-center hover:bg-accent/40">
+                      <button onClick={() => copyDecryptedPassword(item)} className="h-5 w-5 rounded flex items-center justify-center hover:bg-foreground/[0.025]">
                         <Copy className="h-3 w-3 text-muted-foreground" />
                       </button>
                     </div>
                     {/* Mobile copy-only button */}
-                    <button onClick={() => copyDecryptedPassword(item)} className="sm:hidden h-8 w-8 rounded-lg flex items-center justify-center bg-background/60 border border-border/20 hover:bg-accent/40 shrink-0">
+                    <button onClick={() => copyDecryptedPassword(item)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-sunken hover:bg-foreground/[0.025] sm:hidden">
                       <Copy className="h-3.5 w-3.5 text-muted-foreground" />
                     </button>
 
-                    <button onClick={() => handleToggleStar(item)} className="h-6 w-6 rounded flex items-center justify-center hover:bg-accent/40 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                      {item.starred ? <StarOff className="h-3.5 w-3.5 text-amber-500" /> : <Star className="h-3.5 w-3.5 text-muted-foreground" />}
+                    <button onClick={() => handleToggleStar(item)} className="h-6 w-6 rounded flex items-center justify-center hover:bg-foreground/[0.025] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      {item.starred ? <StarOff className="h-3.5 w-3.5 text-gold" /> : <Star className="h-3.5 w-3.5 text-muted-foreground" />}
                     </button>
 
-                    <button onClick={() => handleDeleteItem(item.id)} className="h-6 w-6 rounded flex items-center justify-center hover:bg-destructive/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    <button onClick={() => handleDeleteItem(item.id)} className="flex h-6 w-6 items-center justify-center rounded opacity-100 transition-opacity hover:bg-risk/10 md:opacity-0 md:group-hover:opacity-100">
+                      <Trash2 className="h-3.5 w-3.5 text-risk" />
                     </button>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -1053,16 +1043,16 @@ export default function OfficePasswordVault() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Plus className="w-4 h-4" /> Add Password
+              <Plus className="w-4 h-4" /> Add password
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Title *</Label>
+              <Label>Title (required)</Label>
               <Input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="e.g. Google, GitHub, Netflix" />
             </div>
             <div>
-              <Label>Username / Email</Label>
+              <Label>Username or email</Label>
               <Input value={newUsername} onChange={e => setNewUsername(e.target.value)} placeholder="user@example.com" />
             </div>
             <div>
@@ -1081,7 +1071,7 @@ export default function OfficePasswordVault() {
             </div>
             <div>
               <Label>URL</Label>
-              <Input value={newUrl} onChange={e => setNewUrl(e.target.value)} placeholder="https://..." />
+              <Input value={newUrl} onChange={e => setNewUrl(e.target.value)} placeholder="https://…" />
             </div>
             <div>
               <Label>Category</Label>
@@ -1094,7 +1084,7 @@ export default function OfficePasswordVault() {
             </div>
             <div>
               <Label>Notes (optional)</Label>
-              <Input value={newNotes} onChange={e => setNewNotes(e.target.value)} placeholder="Additional notes..." />
+              <Input value={newNotes} onChange={e => setNewNotes(e.target.value)} placeholder="Additional notes…" />
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={newHas2FA} onChange={e => setNewHas2FA(e.target.checked)} className="rounded" />
@@ -1105,7 +1095,7 @@ export default function OfficePasswordVault() {
             <Button variant="ghost" onClick={() => setAddDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleAddItem} disabled={addingItem || !newTitle.trim()}>
               {addingItem ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : null}
-              Save Password
+              Save password
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1116,24 +1106,24 @@ export default function OfficePasswordVault() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Key className="w-4 h-4 text-destructive" /> Master Key
+              <Key className="w-4 h-4 text-risk" /> Master key
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 py-4">
-            <div className="bg-muted/50 border-2 border-destructive/30 rounded-xl p-4 text-center w-full">
+            <div className="w-full rounded-lg border border-risk/30 bg-sunken p-4 text-center">
               <code className="text-lg font-mono font-bold tracking-[0.1em] select-all text-foreground">{revealedKey}</code>
             </div>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
               if (revealedKey) {
                 navigator.clipboard.writeText(revealedKey);
                 setRevealKeyCopied(true);
-                toast.success('Master Key copied');
+                toast.success('Master key copied');
               }
             }}>
               {revealKeyCopied ? <CheckCircle2 className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
               {revealKeyCopied ? 'Copied' : 'Copy'}
             </Button>
-            <p className="text-xs text-destructive text-center">Keep this key safe. If lost, vault access is permanently gone.</p>
+            <p className="text-center text-xs text-risk">Keep this key safe. If lost, vault access is permanently gone.</p>
           </div>
         </DialogContent>
       </Dialog>

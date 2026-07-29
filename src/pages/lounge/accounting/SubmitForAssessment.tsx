@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Loader2, CheckCircle2, AlertTriangle, Send, Mail, UserCheck, Download, FileText, Sparkles, ShieldCheck, FileSpreadsheet, FileArchive, XCircle, Clock,
+  Loader2, CheckCircle2, AlertTriangle, Send, Mail, UserCheck, Download, FileText, ShieldCheck, FileSpreadsheet, FileArchive, XCircle, Clock,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -140,7 +140,7 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
     if (readiness && !readiness.ok) {
       const proceed = window.confirm(
         'Your books have unresolved items. Send anyway?\n\n' +
-        readiness.checks.filter(c => !c.ok).map(c => `• ${c.label}${c.detail ? ` — ${c.detail}` : ''}`).join('\n'),
+        readiness.checks.filter(c => !c.ok).map(c => `• ${c.label}${c.detail ? `: ${c.detail}` : ''}`).join('\n'),
       );
       if (!proceed) return;
     }
@@ -242,8 +242,8 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
         toast.success('Pack sent to your accountant.');
       }
     } catch (e: any) {
-      setFailure({ title: 'Something went wrong', detail: e?.message });
-      toast.error(e?.message || 'Something went wrong');
+      setFailure({ title: "That didn't go through. Check the details and try again.", detail: e?.message });
+      toast.error(e?.message || "That didn't go through. Check the details and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -255,8 +255,8 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-              <Send className="h-4 w-4 text-white" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+              <Send className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
               <DialogTitle>Send my accounts to be assessed</DialogTitle>
@@ -268,13 +268,13 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
         <div className="space-y-5 mt-2">
           {/* Period */}
           <section>
-            <Label className="text-xs font-bold uppercase tracking-wider">1. Period</Label>
+            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">1. Period</Label>
             <div className="mt-2 space-y-2">
               <Select
                 value={useCustom ? 'custom' : presetKey}
                 onValueChange={v => { if (v === 'custom') setUseCustom(true); else { setUseCustom(false); setPresetKey(v); } }}
               >
-                <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-10 rounded-lg"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {presets.map(p => <SelectItem key={p.key} value={p.key}>{p.label}</SelectItem>)}
                   <SelectItem value="custom">Custom range…</SelectItem>
@@ -282,8 +282,8 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
               </Select>
               {useCustom && (
                 <div className="grid grid-cols-2 gap-2">
-                  <Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="h-10 rounded-xl" />
-                  <Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="h-10 rounded-xl" />
+                  <Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="h-10 rounded-lg" />
+                  <Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="h-10 rounded-lg" />
                 </div>
               )}
             </div>
@@ -291,8 +291,8 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
 
           {/* Readiness */}
           <section>
-            <Label className="text-xs font-bold uppercase tracking-wider">2. Readiness check</Label>
-            <div className="mt-2 rounded-2xl border border-border/30 bg-card/40 p-3">
+            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">2. Readiness check</Label>
+            <div className="mt-2 rounded-[10px] border border-border/60 bg-card p-3">
               {checking ? (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" /> Running automated checks on your books…
@@ -302,15 +302,15 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
                   {readiness.checks.map(c => (
                     <div key={c.key} className="flex items-center gap-2 text-xs">
                       {c.ok
-                        ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                        : <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
-                      <span className={cn('flex-1', !c.ok && 'text-amber-600 dark:text-amber-400')}>{c.label}</span>
+                        ? <CheckCircle2 className="h-3.5 w-3.5 text-ok shrink-0" />
+                        : <AlertTriangle className="h-3.5 w-3.5 text-attend shrink-0" />}
+                      <span className={cn('flex-1', !c.ok && 'text-attend')}>{c.label}</span>
                       {c.detail && <span className="text-[10px] text-muted-foreground">{c.detail}</span>}
                     </div>
                   ))}
                   {readiness.ok && (
-                    <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-500 font-bold">
-                      <Sparkles className="h-3.5 w-3.5" /> Everything looks good — ready to send.
+                    <div className="mt-2 flex items-center gap-1.5 text-xs font-medium text-ok">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Everything looks good. Ready to send.
                     </div>
                   )}
                 </div>
@@ -322,37 +322,37 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
 
           {/* Target */}
           <section>
-            <Label className="text-xs font-bold uppercase tracking-wider">3. Who receives it?</Label>
+            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">3. Who receives it?</Label>
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setTarget('accountant')}
                 className={cn(
-                  'text-left rounded-xl border p-3 transition-colors',
-                  target === 'accountant' ? 'border-brand bg-brand/5' : 'border-border/30 bg-card/40 hover:bg-card/70',
+                  'text-left rounded-[10px] border p-3 transition-colors duration-150',
+                  target === 'accountant' ? 'border-primary bg-primary/[0.04]' : 'border-border/60 bg-card hover:border-border',
                 )}
               >
-                <UserCheck className="h-4 w-4 mb-1.5 text-emerald-500" />
-                <div className="text-sm font-bold">My invited accountant</div>
+                <UserCheck className="mb-1.5 h-4 w-4 text-muted-foreground" />
+                <div className="text-sm font-[550]">My invited accountant</div>
                 <div className="text-[11px] text-muted-foreground mt-0.5">
                   Locks this period read-only and notifies them inside Quooro.
                 </div>
                 {accountantMembers.length > 0 && (
-                  <div className="text-[10px] mt-1 text-emerald-500">{accountantMembers.length} accountant(s) linked</div>
+                  <div className="mt-1 text-[10px] text-ok">{accountantMembers.length} accountant(s) linked</div>
                 )}
               </button>
               <button
                 type="button"
                 onClick={() => setTarget('email')}
                 className={cn(
-                  'text-left rounded-xl border p-3 transition-colors',
-                  target === 'email' ? 'border-brand bg-brand/5' : 'border-border/30 bg-card/40 hover:bg-card/70',
+                  'text-left rounded-[10px] border p-3 transition-colors duration-150',
+                  target === 'email' ? 'border-primary bg-primary/[0.04]' : 'border-border/60 bg-card hover:border-border',
                 )}
               >
-                <Mail className="h-4 w-4 mb-1.5 text-blue-500" />
-                <div className="text-sm font-bold">Email the PDF pack</div>
+                <Mail className="mb-1.5 h-4 w-4 text-muted-foreground" />
+                <div className="text-sm font-[550]">Email the PDF pack</div>
                 <div className="text-[11px] text-muted-foreground mt-0.5">
-                  Send to any accountant or HMRC agent — attached as a PDF.
+                  Send to any accountant or HMRC agent, attached as a PDF.
                 </div>
               </button>
             </div>
@@ -361,13 +361,13 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
               <div className="mt-3 space-y-2">
                 <div>
                   <Label className="text-xs">Recipient email</Label>
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="accountant@example.com" className="mt-1 h-10 rounded-xl" />
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="accountant@example.com" className="mt-1 h-10 rounded-lg" />
                 </div>
                 {emailAccounts.length > 0 ? (
                   <div>
                     <Label className="text-xs">Send from</Label>
                     <Select value={sendingAccountId} onValueChange={setSendingAccountId}>
-                      <SelectTrigger className="mt-1 h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="mt-1 h-10 rounded-lg"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {emailAccounts.map(a => (
                           <SelectItem key={a.id} value={a.id}>
@@ -378,7 +378,7 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
                     </Select>
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-[11px] text-amber-600 dark:text-amber-400">
+                  <div className="rounded-lg border border-attend/30 bg-attend/5 p-3 text-[11px] text-attend">
                     Connect a Gmail or Microsoft account under <span className="font-mono">Settings → Email</span> so the pack is sent from your address. You'll still get a local copy downloaded.
                   </div>
                 )}
@@ -388,7 +388,7 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
 
           {/* Format */}
           <section>
-            <Label className="text-xs font-bold uppercase tracking-wider">4. Pack format</Label>
+            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">4. Pack format</Label>
             <div className="mt-2 grid grid-cols-3 gap-2">
               {([
                 { key: 'pdf' as const, label: 'PDF', icon: FileText, hint: 'Signed-off report pack' },
@@ -397,11 +397,11 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
               ]).map(f => (
                 <button key={f.key} type="button" onClick={() => setFormat(f.key)}
                   className={cn(
-                    'text-left rounded-xl border p-2.5 transition-colors',
-                    format === f.key ? 'border-brand bg-brand/5' : 'border-border/30 bg-card/40 hover:bg-card/70',
+                    'text-left rounded-[10px] border p-2.5 transition-colors duration-150',
+                    format === f.key ? 'border-primary bg-primary/[0.04]' : 'border-border/60 bg-card hover:border-border',
                   )}>
-                  <f.icon className="h-4 w-4 mb-1 text-brand" />
-                  <div className="text-xs font-bold">{f.label}</div>
+                  <f.icon className="mb-1 h-4 w-4 text-muted-foreground" />
+                  <div className="text-xs font-[550]">{f.label}</div>
                   <div className="text-[10px] text-muted-foreground">{f.hint}</div>
                 </button>
               ))}
@@ -410,42 +410,42 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
 
           {/* Note */}
           <section>
-            <Label className="text-xs font-bold uppercase tracking-wider">5. Anything to add? (optional)</Label>
+            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">5. Anything to add? (optional)</Label>
             <Textarea value={note} onChange={e => setNote(e.target.value)} rows={2} placeholder="e.g. Please review the entertaining expenses in Sept."
-              className="mt-2 rounded-xl" />
+              className="mt-2 rounded-lg" />
           </section>
 
-          <div className="rounded-xl bg-muted/30 p-3 flex items-start gap-2 text-[11px] text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5 mt-0.5 text-emerald-500 shrink-0" />
+          <div className="flex items-start gap-2 rounded-lg border border-border/60 bg-sunken p-3 text-[11px] text-muted-foreground">
+            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ok" />
             <div>
-              The pack is built server-side from your live ledger. Numbers reconcile: Trial Balance debits equal credits, and the pack matches what you see in Reports.
+              The pack is built server-side from your live ledger. Numbers reconcile: trial balance debits equal credits, and the pack matches what you see in Reports.
             </div>
           </div>
 
           {/* Delivery status */}
           {(steps.length > 0 || failure || success) && (
             <section>
-              <Label className="text-xs font-bold uppercase tracking-wider">Delivery status</Label>
-              <div className="mt-2 rounded-2xl border border-border/30 bg-card/40 p-3 space-y-2">
+              <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Delivery status</Label>
+              <div className="mt-2 space-y-2 rounded-[10px] border border-border/60 bg-card p-3">
                 {steps.map(s => (
                   <div key={s.key} className="flex items-center gap-2 text-xs">
-                    {s.state === 'done' && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />}
-                    {s.state === 'active' && <Loader2 className="h-3.5 w-3.5 text-brand animate-spin shrink-0" />}
-                    {s.state === 'idle' && <Clock className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />}
-                    {s.state === 'error' && <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
-                    <span className={cn('flex-1', s.state === 'idle' && 'text-muted-foreground/70', s.state === 'error' && 'text-red-500 font-medium')}>
+                    {s.state === 'done' && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-ok" />}
+                    {s.state === 'active' && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />}
+                    {s.state === 'idle' && <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+                    {s.state === 'error' && <XCircle className="h-3.5 w-3.5 shrink-0 text-risk" />}
+                    <span className={cn('flex-1', s.state === 'idle' && 'text-muted-foreground', s.state === 'error' && 'font-medium text-risk')}>
                       {s.label}
                     </span>
                     {s.detail && <span className="text-[10px] text-muted-foreground">{s.detail}</span>}
                   </div>
                 ))}
                 {failure && (
-                  <div className="mt-2 rounded-xl border border-red-500/30 bg-red-500/5 p-3 space-y-1.5">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-red-500">
+                  <div className="mt-2 space-y-1.5 rounded-lg border border-risk/30 bg-risk/5 p-3">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-risk">
                       <XCircle className="h-3.5 w-3.5" /> {failure.title}
-                      {failure.status ? <span className="text-[10px] font-mono text-red-500/70">HTTP {failure.status}</span> : null}
+                      {failure.status ? <span className="font-mono text-[10px] tabular-nums text-risk/70">HTTP {failure.status}</span> : null}
                     </div>
-                    {failure.hint && <div className="text-[11px] text-red-600/90 dark:text-red-300/90">{failure.hint}</div>}
+                    {failure.hint && <div className="text-[11px] text-risk/90">{failure.hint}</div>}
                     {failure.detail && (
                       <details className="text-[10px] text-muted-foreground">
                         <summary className="cursor-pointer">Technical details</summary>
@@ -455,11 +455,11 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
                   </div>
                 )}
                 {success && (
-                  <div className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-500">
+                  <div className="mt-2 rounded-lg border border-ok/30 bg-ok/5 p-3">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-ok">
                       <CheckCircle2 className="h-3.5 w-3.5" /> {success.title}
                     </div>
-                    <div className="text-[11px] text-emerald-700/90 dark:text-emerald-300/90 mt-0.5">{success.detail}</div>
+                    <div className="mt-0.5 text-[11px] text-ok/90">{success.detail}</div>
                   </div>
                 )}
               </div>
@@ -474,10 +474,10 @@ export default function SubmitForAssessment({ open, onClose, orgId, orgName, cur
           <Button
             onClick={handleSubmit}
             disabled={submitting || checking}
-            className="gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90"
+            className="gap-1.5"
           >
             {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-            {failure ? 'Retry' : success ? 'Send again' : target === 'email' ? 'Build pack & email' : 'Send to my accountant'}
+            {failure ? 'Retry' : success ? 'Send again' : target === 'email' ? 'Build pack and email' : 'Send to my accountant'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Loader2, Plus, FileSpreadsheet, Lock, CheckCircle2, Send, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { SkeletonTable } from '@/components/platform';
 
 interface Account { id: string; code: string; name: string; type: string; }
 interface VatReturn {
@@ -126,7 +127,7 @@ export default function VatView({ orgId, accounts, currency }: { orgId: string; 
   }, [returns]);
 
   if (loading) {
-    return <div className="flex items-center justify-center py-24"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+    return <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonTable cols={5} rows={6} /></div>;
   }
 
   return (
@@ -138,13 +139,13 @@ export default function VatView({ orgId, accounts, currency }: { orgId: string; 
             {totals.count} return{totals.count === 1 ? '' : 's'} · Outstanding to pay {money(totals.outstanding, currency)}
           </p>
         </div>
-        <Button size="sm" className="h-8 rounded-xl gap-1.5 text-xs" onClick={() => setCreating(v => !v)}>
+        <Button size="sm" className="h-8 rounded-lg gap-1.5 text-xs" onClick={() => setCreating(v => !v)}>
           <Plus className="h-3.5 w-3.5" /> New return
         </Button>
       </div>
 
       {creating && (
-        <div className="rounded-2xl border border-border/30 bg-card/60 p-4 space-y-3">
+        <div className="rounded-[10px] border border-border/60 bg-card p-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-[11px]">Period start</Label>
@@ -164,7 +165,7 @@ export default function VatView({ orgId, accounts, currency }: { orgId: string; 
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 rounded-xl bg-background/50 border border-border/30 p-3">
+          <div className="grid grid-cols-3 gap-3 rounded-lg bg-background/50 border border-border/60 p-3">
             <PreviewCell label="Output VAT (sales)" value={money(preview?.output ?? 0, currency)} tone="revenue" />
             <PreviewCell label="Input VAT (purchases)" value={money(preview?.input ?? 0, currency)} tone="expense" />
             <PreviewCell label={(preview?.net ?? 0) >= 0 ? 'Net Payable' : 'Net Refund'} value={money(Math.abs(preview?.net ?? 0), currency)} tone={(preview?.net ?? 0) >= 0 ? 'due' : 'refund'} />
@@ -178,13 +179,13 @@ export default function VatView({ orgId, accounts, currency }: { orgId: string; 
       )}
 
       {returns.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border/30 py-16 text-center">
-          <FileSpreadsheet className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
+        <div className="rounded-[10px] border border-dashed border-border/60 py-16 text-center">
+          <FileSpreadsheet className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm text-muted-foreground">No VAT returns yet</p>
-          <p className="text-xs text-muted-foreground/70 mt-1">Create your first return above.</p>
+          <p className="text-xs text-muted-foreground mt-1">Create your first return above.</p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+        <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
           <table className="w-full text-xs">
             <thead className="bg-background/60 text-muted-foreground uppercase tracking-wider text-[10px]">
               <tr>
@@ -196,7 +197,7 @@ export default function VatView({ orgId, accounts, currency }: { orgId: string; 
                 <th className="text-right px-4 py-2.5">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/10">
+            <tbody className="divide-y divide-border/60">
               {returns.map(r => (
                 <tr key={r.id} className="hover:bg-background/40">
                   <td className="px-4 py-2.5">
@@ -208,7 +209,7 @@ export default function VatView({ orgId, accounts, currency }: { orgId: string; 
                   <td className="px-3 py-2.5 text-right tabular-nums">{money(Number(r.output_vat), currency)}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{money(Number(r.input_vat), currency)}</td>
                   <td className={cn("px-3 py-2.5 text-right tabular-nums font-semibold",
-                    Number(r.net_due) >= 0 ? "text-amber-500" : "text-emerald-500")}>
+                    Number(r.net_due) >= 0 ? "text-attend" : "text-ok")}>
                     {Number(r.net_due) >= 0 ? '' : '−'}{money(Math.abs(Number(r.net_due)), currency)}
                   </td>
                   <td className="px-3 py-2.5"><StatusPill status={r.status} /></td>
@@ -226,7 +227,7 @@ export default function VatView({ orgId, accounts, currency }: { orgId: string; 
                         </Button>
                       )}
                       {r.status === 'paid' && (
-                        <span className="inline-flex items-center gap-1 text-[10px] text-emerald-500 font-medium">
+                        <span className="inline-flex items-center gap-1 text-[10px] text-ok font-medium">
                           <CheckCircle2 className="h-3 w-3" /> Settled
                         </span>
                       )}
@@ -281,26 +282,27 @@ export default function VatView({ orgId, accounts, currency }: { orgId: string; 
 }
 
 function PreviewCell({ label, value, tone }: { label: string; value: string; tone: 'revenue'|'expense'|'due'|'refund' }) {
-  const color = tone === 'revenue' ? '#3b82f6' : tone === 'expense' ? '#ef4444' : tone === 'due' ? '#f59e0b' : '#10b981';
+  const color = tone === 'revenue' ? 'text-primary' : tone === 'expense' ? 'text-risk' : tone === 'due' ? 'text-attend' : 'text-ok';
   return (
     <div>
-      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</div>
-      <div className="text-base font-bold tabular-nums mt-0.5" style={{ color }}>{value}</div>
+      <div className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{label}</div>
+      <div className={cn("mt-0.5 font-mono text-base font-medium tabular-nums", color)}>{value}</div>
     </div>
   );
 }
 
 function StatusPill({ status }: { status: VatReturn['status'] }) {
-  const map: Record<VatReturn['status'], { label: string; color: string; icon?: any }> = {
-    draft:     { label: 'Draft',     color: 'bg-muted text-muted-foreground' },
-    submitted: { label: 'Submitted', color: 'bg-amber-500/15 text-amber-500' },
-    paid:      { label: 'Paid',      color: 'bg-emerald-500/15 text-emerald-500', icon: Lock },
-    void:      { label: 'Void',      color: 'bg-red-500/15 text-red-500' },
+  const map: Record<VatReturn['status'], { label: string; color: string; dot: string; icon?: any }> = {
+    draft:     { label: 'Draft',     color: 'text-muted-foreground', dot: 'bg-muted-foreground/50' },
+    submitted: { label: 'Submitted', color: 'text-attend', dot: 'bg-attend' },
+    paid:      { label: 'Paid',      color: 'text-ok', dot: 'bg-ok', icon: Lock },
+    void:      { label: 'Void',      color: 'text-risk', dot: 'bg-risk' },
   };
   const s = map[status];
   const Icon = s.icon;
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium", s.color)}>
+    <span className={cn("inline-flex items-center gap-1.5 text-[10.5px] font-medium", s.color)}>
+      <span aria-hidden className={cn("inline-block h-1.5 w-1.5 rounded-full", s.dot)} />
       {Icon && <Icon className="h-2.5 w-2.5" />}{s.label}
     </span>
   );

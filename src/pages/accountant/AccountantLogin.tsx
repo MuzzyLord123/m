@@ -30,26 +30,27 @@ export default function AccountantLogin() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-2xl border border-border/30 bg-card/60 backdrop-blur-xl p-8">
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4">
-          <Calculator className="h-6 w-6 text-white" />
+      <div className="w-full max-w-md rounded-[10px] border border-border/60 bg-card p-8">
+        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+          <Calculator className="h-5 w-5 text-muted-foreground" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">Accountant Portal</h1>
+        <span className="mb-1 block font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Accountant portal</span>
+        <h1 className="text-[19px] font-semibold tracking-[-0.015em]">Sign in</h1>
         <p className="text-sm text-muted-foreground mt-1 mb-6">
           Sign in to access your client's accounting.
         </p>
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <Label className="text-xs">Email</Label>
+            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Email</Label>
             <Input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              required className="mt-1.5 h-10 rounded-xl" />
+              required className="mt-1.5 h-10 rounded-lg" />
           </div>
           <div>
-            <Label className="text-xs">Password</Label>
+            <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Password</Label>
             <Input type="password" value={password} onChange={e => setPassword(e.target.value)}
-              required className="mt-1.5 h-10 rounded-xl" />
+              required className="mt-1.5 h-10 rounded-lg" />
           </div>
-          <Button type="submit" disabled={busy} className="w-full h-10 rounded-xl gap-2">
+          <Button type="submit" disabled={busy} className="w-full h-10 rounded-lg gap-2">
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
             Sign in
           </Button>

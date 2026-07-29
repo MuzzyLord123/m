@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { StatusBadge, SkeletonBlock } from '@/components/platform';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -69,17 +69,17 @@ type Tab = 'running' | 'hosted';
 
 // Restrained status system: a single small dot + text label, no loud pill backgrounds.
 const STATUS_META: Record<Status, { label: string; dot: string; text: string }> = {
-  active:    { label: 'Active',    dot: 'bg-emerald-500',            text: 'text-foreground' },
-  trial:     { label: 'Trial',     dot: 'bg-blue-500',               text: 'text-foreground' },
-  paused:    { label: 'Paused',    dot: 'bg-amber-500',              text: 'text-foreground' },
-  cancelled: { label: 'Cancelled', dot: 'bg-muted-foreground/40',    text: 'text-muted-foreground' },
+  active:    { label: 'Active',    dot: 'bg-ok',                     text: 'text-foreground' },
+  trial:     { label: 'Trial',     dot: 'bg-attend',                 text: 'text-foreground' },
+  paused:    { label: 'Paused',    dot: 'bg-attend',                 text: 'text-foreground' },
+  cancelled: { label: 'Cancelled', dot: 'bg-muted-foreground/50',    text: 'text-muted-foreground' },
 };
 
 const HOSTING_META: Record<HostingStatus, { label: string; dot: string; text: string }> = {
-  live:         { label: 'Live',         dot: 'bg-emerald-500',                     text: 'text-foreground' },
-  building:     { label: 'Building',     dot: 'bg-blue-500 animate-pulse',          text: 'text-foreground' },
-  error:        { label: 'Error',        dot: 'bg-red-500 animate-pulse',           text: 'text-red-500' },
-  not_deployed: { label: 'Not deployed', dot: 'bg-muted-foreground/40',             text: 'text-muted-foreground' },
+  live:         { label: 'Live',         dot: 'bg-ok',                              text: 'text-foreground' },
+  building:     { label: 'Building',     dot: 'bg-primary animate-pulse',           text: 'text-foreground' },
+  error:        { label: 'Error',        dot: 'bg-risk',                            text: 'text-risk' },
+  not_deployed: { label: 'Not deployed', dot: 'bg-muted-foreground/50',             text: 'text-muted-foreground' },
 };
 
 function money(n: number, currency = 'GBP') {
@@ -190,20 +190,20 @@ export default function OfficeEcommerce({
         : "fixed inset-0 z-50 bg-background flex flex-col overflow-hidden"
     )}>
       {/* Header */}
-      <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-3 sm:px-5 gap-2 sm:gap-3">
+      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 bg-background px-3 sm:gap-3 sm:px-5">
         {!embedded && (
-          <Button variant="ghost" size="sm" className="h-8 gap-1.5 rounded-xl text-xs px-2 sm:px-3"
+          <Button variant="ghost" size="sm" className="h-8 gap-1.5 rounded-lg px-2 text-xs sm:px-3"
             onClick={() => navigate('/lounge')}>
             <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Lounge</span>
           </Button>
         )}
-        {!embedded && <div className="hidden sm:block h-4 w-px bg-border/40" />}
-        <div className="h-7 w-7 rounded-lg bg-foreground/5 border border-border/40 flex items-center justify-center shrink-0">
+        {!embedded && <div className="hidden h-4 w-px bg-border/60 sm:block" />}
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-sunken">
           {initialTab === 'hosted' ? <Server className="h-3.5 w-3.5 text-foreground" /> : <ShoppingBag className="h-3.5 w-3.5 text-foreground" />}
         </div>
-        <span className="text-sm font-semibold tracking-tight">{title ?? 'E-commerce'}</span>
+        <span className="text-[13px] font-[550] tracking-[-0.01em]">{title ?? 'E-commerce'}</span>
         {!embedded && (
-          <span className="ml-1 px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-medium bg-muted/60 text-muted-foreground border border-border/40 uppercase tracking-wider whitespace-nowrap">
+          <span className="ml-1 whitespace-nowrap font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
             Internal
           </span>
         )}
@@ -215,10 +215,10 @@ export default function OfficeEcommerce({
 
       {/* Tabs (hidden when embedded — page is dedicated to a single tab) */}
       {!embedded && (
-      <div className="shrink-0 border-b border-border/30 bg-background/60 backdrop-blur-xl px-2 sm:px-5">
+      <div className="shrink-0 border-b border-border/60 bg-background px-2 sm:px-5">
         <div className="flex gap-1 overflow-x-auto scrollbar-hide">
           {([
-            { id: 'running', label: 'Running Subscriptions', icon: ShoppingBag },
+            { id: 'running', label: 'Running subscriptions', icon: ShoppingBag },
             { id: 'hosted',  label: 'Hosted',                 icon: Server },
           ] as { id: Tab; label: string; icon: any }[]).map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
@@ -228,7 +228,7 @@ export default function OfficeEcommerce({
               )}>
               <t.icon className="h-3.5 w-3.5" />
               {t.label}
-              <span className="text-[10px] text-muted-foreground/70 ml-1 tabular-nums">
+              <span className="ml-1 font-mono text-[10px] tabular-nums text-muted-foreground">
                 ({t.id === 'hosted'
                   ? sites.filter(s => s.hosting_status === 'live').length
                   : sites.filter(s => s.status !== 'cancelled' && Number(s.billing_amount) > 0).length})
@@ -245,24 +245,24 @@ export default function OfficeEcommerce({
         <div className="max-w-7xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
           {/* Summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-            <SummaryCard label="Active subscriptions" value={String(summary.activeCount)} icon={CheckCircle2} color="#10b981" />
-            <SummaryCard label="MRR (equivalent)"     value={money(summary.mrr)}          icon={Rocket}       color="#a855f7" />
-            <SummaryCard label="Renewing in 30 days"  value={String(summary.renewing)}    icon={Calendar}     color="#3b82f6" />
-            <SummaryCard label="Hosting errors"       value={String(summary.errors)}      icon={AlertTriangle} color={summary.errors > 0 ? '#ef4444' : '#94a3b8'} />
+            <SummaryCard label="Active subscriptions" value={String(summary.activeCount)} />
+            <SummaryCard label="MRR (equivalent)"     value={money(summary.mrr)} />
+            <SummaryCard label="Renewing in 30 days"  value={String(summary.renewing)} />
+            <SummaryCard label="Hosting errors"       value={String(summary.errors)} risk={summary.errors > 0} />
           </div>
 
           {/* Filter bar */}
-          <div className="rounded-2xl border border-border/30 bg-card/40 p-2 sm:p-3 flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-border/60 bg-card p-2 sm:p-3">
             <div className="relative flex-1 min-w-[180px]">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search sites, clients, URLs…"
-                className="h-9 pl-8 rounded-xl text-sm bg-background/60" />
+                className="h-9 rounded-lg border-border/60 bg-background pl-8 text-sm" />
             </div>
 
             {tab === 'running' ? (
               <>
                 <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
-                  <SelectTrigger className="h-9 w-[130px] rounded-xl text-xs bg-background/60">
+                  <SelectTrigger className="h-9 w-[130px] rounded-lg text-xs">
                     <Filter className="h-3.5 w-3.5 mr-1.5" /><SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -274,7 +274,7 @@ export default function OfficeEcommerce({
                   </SelectContent>
                 </Select>
                 <Select value={renewalFilter} onValueChange={(v: any) => setRenewalFilter(v)}>
-                  <SelectTrigger className="h-9 w-[150px] rounded-xl text-xs bg-background/60">
+                  <SelectTrigger className="h-9 w-[150px] rounded-lg text-xs">
                     <Calendar className="h-3.5 w-3.5 mr-1.5" /><SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -286,7 +286,7 @@ export default function OfficeEcommerce({
               </>
             ) : (
               <Select value={hostingFilter} onValueChange={(v: any) => setHostingFilter(v)}>
-                <SelectTrigger className="h-9 w-[150px] rounded-xl text-xs bg-background/60">
+                <SelectTrigger className="h-9 w-[150px] rounded-lg text-xs">
                   <Server className="h-3.5 w-3.5 mr-1.5" /><SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -302,20 +302,18 @@ export default function OfficeEcommerce({
 
           {/* Grid */}
           {loading ? (
-            <div className="h-64 flex items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4" aria-hidden>
+              {Array.from({ length: 8 }, (_, i) => <SkeletonBlock key={i} className="h-56 rounded-[10px]" />)}
             </div>
           ) : filtered.length === 0 ? (
             <EmptyState tab={tab} onCreate={() => setShowNew(true)} />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-              <AnimatePresence mode="popLayout">
-                {filtered.map(s => (
-                  <SiteCard key={s.id} site={s} tab={tab}
-                    onOpen={() => setDetail(s)}
-                    onEdit={() => setEditing(s)} />
-                ))}
-              </AnimatePresence>
+              {filtered.map(s => (
+                <SiteCard key={s.id} site={s} tab={tab}
+                  onOpen={() => setDetail(s)}
+                  onEdit={() => setEditing(s)} />
+              ))}
             </div>
           )}
         </div>
@@ -371,46 +369,40 @@ function SiteCard({ site, tab, onOpen, onEdit }: { site: Site; tab: Tab; onOpen:
   const attention = site.hosting_status === 'error' || site.hosting_status === 'building';
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.96 }}
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.2 }}
+    <div
       className={cn(
-        'group rounded-2xl overflow-hidden border bg-card/60 hover:bg-card/80 transition-colors cursor-pointer flex flex-col',
-        attention ? 'border-red-500/40 shadow-lg shadow-red-500/5' : 'border-border/30 hover:border-border/60'
+        'group flex cursor-pointer flex-col overflow-hidden rounded-[10px] border bg-card transition-colors duration-150',
+        attention ? 'border-risk/40' : 'border-border/60 hover:border-border'
       )}
       onClick={handleClick}
     >
       {/* Hero */}
-      <div className="relative aspect-[16/10] bg-gradient-to-br from-muted/60 to-muted/20 overflow-hidden">
+      <div className="relative aspect-[16/10] overflow-hidden bg-sunken">
         {site.hero_image_url ? (
           <img src={site.hero_image_url} alt={site.site_name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="h-full w-full object-cover"
             loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <ImageIcon className="h-8 w-8 text-muted-foreground/30" />
+            <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
           </div>
         )}
         {/* Restrained status: single small dot + label on a subtle backdrop chip */}
         <div className="absolute top-2 left-2">
-          <span className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium bg-background/85 backdrop-blur-md border border-border/40 text-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium border border-border/60 bg-background/95 text-foreground">
             <span className={cn('h-1.5 w-1.5 rounded-full', st.dot)} />
             {st.label}
           </span>
         </div>
         {/* Hosting dot + label */}
         <div className="absolute top-2 right-2">
-          <span className={cn('inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium bg-background/85 backdrop-blur-md border border-border/40', hs.text)}>
+          <span className={cn('inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium border border-border/60 bg-background/95', hs.text)}>
             <span className={cn('h-1.5 w-1.5 rounded-full', hs.dot)} />
             {hs.label}
           </span>
         </div>
         {tab === 'hosted' && site.site_url && (
-          <div className="absolute bottom-2 right-2 h-7 w-7 rounded-lg bg-background/80 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-md border border-border/60 bg-background/95 opacity-0 transition-opacity group-hover:opacity-100">
             <ExternalLink className="h-3.5 w-3.5" />
           </div>
         )}
@@ -420,7 +412,7 @@ function SiteCard({ site, tab, onOpen, onEdit }: { site: Site; tab: Tab; onOpen:
       <div className="p-3 sm:p-4 flex flex-col gap-1.5 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <div className="font-bold text-sm truncate">{site.site_name}</div>
+            <div className="truncate text-[13px] font-[550]">{site.site_name}</div>
             <div className="text-[11px] text-muted-foreground truncate">
               {site.client_name || (site.site_url ? site.site_url.replace(/^https?:\/\//, '') : 'No client')}
             </div>
@@ -435,18 +427,17 @@ function SiteCard({ site, tab, onOpen, onEdit }: { site: Site; tab: Tab; onOpen:
         </div>
 
         <div className="flex items-center justify-between gap-2 mt-1">
-          <div className="text-[11px] tabular-nums font-bold">
+          <div className="font-mono text-[11.5px] font-medium tabular-nums">
             {Number(site.billing_amount) > 0
               ? <>{money(Number(site.billing_amount), site.billing_currency)} <span className="text-muted-foreground font-medium">/ {site.billing_cycle === 'annual' ? 'yr' : 'mo'}</span></>
               : <span className="text-muted-foreground font-medium">No billing</span>}
           </div>
           {renewalDays !== null && site.status !== 'cancelled' && (
             <div className={cn(
-              'text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 whitespace-nowrap',
-              renewalDays < 0    ? 'bg-red-500/10 text-red-500' :
-              renewalDays <= 7   ? 'bg-amber-500/10 text-amber-500' :
-              renewalDays <= 30  ? 'bg-blue-500/10 text-blue-500' :
-                                   'bg-muted/50 text-muted-foreground'
+              'flex items-center gap-1 whitespace-nowrap font-mono text-[10px] tabular-nums',
+              renewalDays < 0    ? 'text-risk' :
+              renewalDays <= 7   ? 'text-attend' :
+                                   'text-muted-foreground'
             )}>
               <Calendar className="h-2.5 w-2.5" />
               {renewalDays < 0 ? `${Math.abs(renewalDays)}d overdue` : `${renewalDays}d`}
@@ -454,23 +445,18 @@ function SiteCard({ site, tab, onOpen, onEdit }: { site: Site; tab: Tab; onOpen:
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 /* ============================================================
    Summary Card
    ============================================================ */
-function SummaryCard({ label, value, icon: Icon, color }: { label: string; value: string; icon: any; color: string }) {
+function SummaryCard({ label, value, risk = false }: { label: string; value: string; risk?: boolean }) {
   return (
-    <div className="p-3 sm:p-4 rounded-2xl bg-card/60 border border-border/20">
-      <div className="flex items-center gap-2 mb-1.5">
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: `${color}15` }}>
-          <Icon className="h-3.5 w-3.5" style={{ color }} />
-        </div>
-        <span className="text-[10px] text-muted-foreground uppercase tracking-wider truncate">{label}</span>
-      </div>
-      <div className="text-lg sm:text-xl font-bold tabular-nums">{value}</div>
+    <div className="flex items-center justify-between gap-3 rounded-[10px] border border-border/60 bg-card px-4 py-3">
+      <span className="truncate font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{label}</span>
+      <span className={cn('font-mono text-[15px] font-medium tabular-nums', risk ? 'text-risk' : 'text-foreground')}>{value}</span>
     </div>
   );
 }
@@ -481,8 +467,8 @@ function SummaryCard({ label, value, icon: Icon, color }: { label: string; value
 function EmptyState({ tab, onCreate }: { tab: Tab; onCreate: () => void }) {
   const isHosted = tab === 'hosted';
   return (
-    <div className="rounded-xl border border-dashed border-border/50 bg-card/30 py-20 px-6 text-center">
-      <div className="h-14 w-14 rounded-2xl bg-foreground/[0.04] border border-border/40 mx-auto flex items-center justify-center mb-4">
+    <div className="rounded-[10px] border border-dashed border-border bg-card px-6 py-20 text-center">
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-border/60 bg-sunken">
         {isHosted ? <Server className="h-6 w-6 text-muted-foreground" /> : <ShoppingBag className="h-6 w-6 text-muted-foreground" />}
       </div>
       <h3 className="text-base font-semibold tracking-tight">
@@ -490,8 +476,8 @@ function EmptyState({ tab, onCreate }: { tab: Tab; onCreate: () => void }) {
       </h3>
       <p className="text-[13px] text-muted-foreground mt-1.5 max-w-md mx-auto leading-relaxed">
         {isHosted
-          ? 'Every site marked as Live in production will appear here — regardless of billing state. Deploy a site or mark one as Live to see it.'
-          : 'Every client currently being billed shows up here — regardless of whether their site is live. Add a site with an active subscription to get started.'}
+          ? 'Every site marked as live in production appears here, regardless of billing state. Deploy a site or mark one as live to see it.'
+          : 'Every client currently being billed shows up here, regardless of whether their site is live. Add a site with an active subscription to get started.'}
       </p>
       <Button className="mt-5 h-9 rounded-lg text-xs gap-1.5" onClick={onCreate}>
         <Plus className="h-3.5 w-3.5" /> {isHosted ? 'Add a hosted site' : 'Add a subscription'}
@@ -580,13 +566,13 @@ function SiteEditor({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
-          <DialogTitle className="text-base font-bold">{isNew ? 'New subscription site' : 'Edit site'}</DialogTitle>
+          <DialogTitle className="text-[15px] font-semibold tracking-[-0.01em]">{isNew ? 'New subscription site' : 'Edit site'}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-          <Field label="Site name *" className="sm:col-span-2">
+          <Field label="Site name (required)" className="sm:col-span-2">
             <Input value={form.site_name} onChange={e => set('site_name', e.target.value)} placeholder="Acme Storefront" />
           </Field>
           <Field label="Client name">
@@ -662,9 +648,9 @@ function SiteEditor({
           </Field>
 
           <Field label="Hosted-only site (not billed)" className="sm:col-span-2">
-            <label className="flex items-center gap-2 h-9 px-3 rounded-xl border border-border/30 bg-background/40 cursor-pointer text-xs">
+            <label className="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-border/60 bg-card px-3 text-xs">
               <input type="checkbox" checked={form.is_hosted_only} onChange={e => set('is_hosted_only', e.target.checked)} className="rounded" />
-              Show in Hosted tab only — internal demo, free-hosted, etc.
+              Show in the Hosted tab only (internal demo, free-hosted and similar)
             </label>
           </Field>
 
@@ -675,8 +661,8 @@ function SiteEditor({
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="ghost" onClick={onClose} className="h-9 rounded-xl text-xs">Cancel</Button>
-          <Button onClick={save} disabled={saving} className="h-9 rounded-xl text-xs gap-1.5">
+          <Button variant="ghost" onClick={onClose} className="h-9 rounded-lg text-xs">Cancel</Button>
+          <Button onClick={save} disabled={saving} className="h-9 gap-1.5 rounded-lg text-xs">
             {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
             {isNew ? 'Create site' : 'Save changes'}
           </Button>
@@ -689,8 +675,8 @@ function SiteEditor({
 function Field({ label, className, children }: { label: string; className?: string; children: React.ReactNode }) {
   return (
     <div className={className}>
-      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
-      <div className="mt-1 [&_input]:h-9 [&_input]:rounded-xl [&_input]:text-sm [&_textarea]:rounded-xl [&_textarea]:text-sm [&_[role=combobox]]:h-9 [&_[role=combobox]]:rounded-xl [&_[role=combobox]]:text-xs">
+      <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</Label>
+      <div className="mt-1 [&_input]:h-9 [&_input]:rounded-lg [&_input]:text-sm [&_textarea]:rounded-lg [&_textarea]:text-sm [&_[role=combobox]]:h-9 [&_[role=combobox]]:rounded-lg [&_[role=combobox]]:text-xs">
         {children}
       </div>
     </div>
@@ -755,19 +741,19 @@ function SiteDetail({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl p-0">
+      <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto rounded-xl p-0">
         {/* Hero */}
-        <div className="relative aspect-[21/9] bg-gradient-to-br from-muted/60 to-muted/20 overflow-hidden rounded-t-2xl">
+        <div className="relative aspect-[21/9] overflow-hidden rounded-t-xl bg-sunken">
           {site.hero_image_url ? (
             <img src={site.hero_image_url} alt={site.site_name} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center"><ImageIcon className="h-10 w-10 text-muted-foreground/30" /></div>
+            <div className="w-full h-full flex items-center justify-center"><ImageIcon className="h-10 w-10 text-muted-foreground/40" /></div>
           )}
           <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium bg-background/85 backdrop-blur-md border border-border/40 text-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium border border-border/60 bg-background/95 text-foreground">
               <span className={cn('h-1.5 w-1.5 rounded-full', st.dot)} /> {st.label}
             </span>
-            <span className={cn('inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium bg-background/85 backdrop-blur-md border border-border/40', hs.text)}>
+            <span className={cn('inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium border border-border/60 bg-background/95', hs.text)}>
               <span className={cn('h-1.5 w-1.5 rounded-full', hs.dot)} /> {hs.label}
             </span>
           </div>
@@ -777,7 +763,7 @@ function SiteDetail({
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div className="min-w-0">
               <DialogHeader className="p-0">
-                <DialogTitle className="text-lg font-bold">{site.site_name}</DialogTitle>
+                <DialogTitle className="text-[17px] font-semibold tracking-[-0.015em]">{site.site_name}</DialogTitle>
               </DialogHeader>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {site.client_name || 'No client set'}
@@ -785,26 +771,26 @@ function SiteDetail({
               </p>
               {site.site_url && (
                 <a href={site.site_url} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-fuchsia-500 hover:underline mt-1">
+                  className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline">
                   <Globe className="h-3 w-3" /> {site.site_url.replace(/^https?:\/\//, '')} <ExternalLink className="h-3 w-3" />
                 </a>
               )}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5" onClick={onEdit}>
+              <Button size="sm" variant="ghost" className="h-8 gap-1.5 rounded-lg text-xs" onClick={onEdit}>
                 <Edit3 className="h-3.5 w-3.5" /> Edit
               </Button>
               {site.status !== 'cancelled' && (site.status === 'paused'
-                ? <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5" disabled={busy} onClick={() => quickAction('resume')}><Play className="h-3.5 w-3.5" /> Resume</Button>
-                : <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5" disabled={busy} onClick={() => quickAction('pause')}><Pause className="h-3.5 w-3.5" /> Pause</Button>
+                ? <Button size="sm" variant="ghost" className="h-8 gap-1.5 rounded-lg text-xs" disabled={busy} onClick={() => quickAction('resume')}><Play className="h-3.5 w-3.5" /> Resume</Button>
+                : <Button size="sm" variant="ghost" className="h-8 gap-1.5 rounded-lg text-xs" disabled={busy} onClick={() => quickAction('pause')}><Pause className="h-3.5 w-3.5" /> Pause</Button>
               )}
               {site.status !== 'cancelled' && (
-                <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5 text-amber-500" disabled={busy} onClick={() => quickAction('cancel')}>
+                <Button size="sm" variant="ghost" className="h-8 gap-1.5 rounded-lg text-xs text-attend" disabled={busy} onClick={() => quickAction('cancel')}>
                   <XCircle className="h-3.5 w-3.5" /> Cancel
                 </Button>
               )}
-              <Button size="sm" variant="ghost" className="h-8 rounded-xl text-xs gap-1.5 text-red-500" disabled={busy} onClick={() => quickAction('delete')}>
+              <Button size="sm" variant="ghost" className="h-8 gap-1.5 rounded-lg text-xs text-risk" disabled={busy} onClick={() => quickAction('delete')}>
                 <Trash2 className="h-3.5 w-3.5" /> Delete
               </Button>
             </div>
@@ -814,18 +800,18 @@ function SiteDetail({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
             <InfoTile label="Billing" value={Number(site.billing_amount) > 0
               ? `${money(Number(site.billing_amount), site.billing_currency)} / ${site.billing_cycle === 'annual' ? 'yr' : 'mo'}`
-              : '—'} />
+              : '–'} />
             <InfoTile label="Renewal" value={site.next_renewal_date
               ? `${new Date(site.next_renewal_date).toLocaleDateString('en-GB')}${renewalDays !== null ? ` (${renewalDays < 0 ? `${Math.abs(renewalDays)}d late` : `${renewalDays}d`})` : ''}`
-              : '—'} />
+              : '–'} />
             <InfoTile label="Hosting" value={`${site.hosting_provider} · ${hs.label}`} />
             <InfoTile label="Started" value={site.subscription_start_date
-              ? new Date(site.subscription_start_date).toLocaleDateString('en-GB') : '—'} />
+              ? new Date(site.subscription_start_date).toLocaleDateString('en-GB') : '–'} />
           </div>
 
           {site.notes && (
-            <div className="rounded-2xl border border-border/30 bg-card/40 p-4">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">Notes</div>
+            <div className="rounded-[10px] border border-border/60 bg-card p-4">
+              <div className="mb-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Notes</div>
               <p className="text-xs whitespace-pre-wrap">{site.notes}</p>
             </div>
           )}
@@ -835,8 +821,8 @@ function SiteDetail({
 
 
           {/* Events */}
-          <div className="rounded-2xl border border-border/30 bg-card/40 p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+          <div className="rounded-[10px] border border-border/60 bg-card p-4">
+            <div className="mb-2 flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
               <History className="h-3 w-3" /> Activity
             </div>
             {events.length === 0 ? (
@@ -844,8 +830,8 @@ function SiteDetail({
             ) : (
               <div className="space-y-1.5">
                 {events.map(e => (
-                  <div key={e.id} className="flex items-center gap-3 text-xs py-1 border-b border-border/10 last:border-0">
-                    <span className="text-muted-foreground tabular-nums w-32 shrink-0">{new Date(e.occurred_at).toLocaleString('en-GB')}</span>
+                  <div key={e.id} className="flex items-center gap-3 border-b border-border/60 py-1 text-xs last:border-0">
+                    <span className="w-32 shrink-0 font-mono tabular-nums text-muted-foreground">{new Date(e.occurred_at).toLocaleString('en-GB')}</span>
                     <span className="font-medium capitalize">{e.event_type.replace(/_/g, ' ')}</span>
                     <span className="text-[10px] text-muted-foreground ml-auto">{e.actor || 'system'}</span>
                   </div>
@@ -861,9 +847,9 @@ function SiteDetail({
 
 function InfoTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-3 rounded-xl bg-card/50 border border-border/20">
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="text-xs font-semibold mt-0.5 truncate">{value}</div>
+    <div className="rounded-lg border border-border/60 bg-card p-3">
+      <div className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{label}</div>
+      <div className="mt-0.5 truncate font-mono text-xs font-medium tabular-nums">{value}</div>
     </div>
   );
 }
@@ -1010,13 +996,13 @@ function BillingHistory({ site, userId, onChanged }: { site: Site; userId: strin
   }
 
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 p-4 space-y-3">
+    <div className="space-y-3 rounded-[10px] border border-border/60 bg-card p-4">
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-          <Receipt className="h-3 w-3" /> Accounting & billing
+        <div className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <Receipt className="h-3 w-3" /> Accounting and billing
         </div>
         {isLinked && (
-          <Button size="sm" className="h-8 rounded-xl text-xs gap-1.5" onClick={generateInvoice} disabled={generating}>
+          <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={generateInvoice} disabled={generating}>
             {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Zap className="h-3.5 w-3.5" />}
             Generate invoice
           </Button>
@@ -1024,25 +1010,25 @@ function BillingHistory({ site, userId, onChanged }: { site: Site; userId: strin
       </div>
 
       {loading ? (
-        <div className="h-12 flex items-center justify-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
+        <SkeletonBlock className="h-12 rounded-lg" />
       ) : !isLinked ? (
         <>
           <p className="text-xs text-muted-foreground">
             Link this site to an accounting organization to auto-generate recurring invoices posted to your ledger.
           </p>
           {orgs.length === 0 ? (
-            <p className="text-[11px] text-amber-500">No accounting organization found. Set one up in the Accounting app first.</p>
+            <p className="text-[11px] text-attend">No accounting organization found. Set one up in the Accounting app first.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <MiniField label="Organization">
                 <Select value={form.acc_org_id} onValueChange={(v) => setForm(p => ({ ...p, acc_org_id: v, acc_customer_id: '', acc_revenue_account_id: '' }))}>
-                  <SelectTrigger className="h-9 rounded-xl text-xs"><SelectValue placeholder="Select…" /></SelectTrigger>
+                  <SelectTrigger className="h-9 rounded-lg text-xs"><SelectValue placeholder="Select…" /></SelectTrigger>
                   <SelectContent>{orgs.map(o => <SelectItem key={o.id} value={o.id} className="text-xs">{o.name}</SelectItem>)}</SelectContent>
                 </Select>
               </MiniField>
               <MiniField label="Customer">
                 <Select value={form.acc_customer_id} onValueChange={(v) => setForm(p => ({ ...p, acc_customer_id: v }))} disabled={!form.acc_org_id}>
-                  <SelectTrigger className="h-9 rounded-xl text-xs"><SelectValue placeholder={form.acc_org_id ? 'Select…' : 'Pick org first'} /></SelectTrigger>
+                  <SelectTrigger className="h-9 rounded-lg text-xs"><SelectValue placeholder={form.acc_org_id ? 'Select…' : 'Pick org first'} /></SelectTrigger>
                   <SelectContent>
                     {orgCustomers.length === 0 ? <div className="px-2 py-1.5 text-[11px] text-muted-foreground">No customers yet</div>
                       : orgCustomers.map(c => <SelectItem key={c.id} value={c.id} className="text-xs">{c.name}</SelectItem>)}
@@ -1051,7 +1037,7 @@ function BillingHistory({ site, userId, onChanged }: { site: Site; userId: strin
               </MiniField>
               <MiniField label="Revenue account">
                 <Select value={form.acc_revenue_account_id} onValueChange={(v) => setForm(p => ({ ...p, acc_revenue_account_id: v }))} disabled={!form.acc_org_id}>
-                  <SelectTrigger className="h-9 rounded-xl text-xs"><SelectValue placeholder={form.acc_org_id ? 'Select…' : 'Pick org first'} /></SelectTrigger>
+                  <SelectTrigger className="h-9 rounded-lg text-xs"><SelectValue placeholder={form.acc_org_id ? 'Select…' : 'Pick org first'} /></SelectTrigger>
                   <SelectContent>
                     {orgAccounts.length === 0 ? <div className="px-2 py-1.5 text-[11px] text-muted-foreground">No revenue accounts</div>
                       : orgAccounts.map(a => <SelectItem key={a.id} value={a.id} className="text-xs">{a.account_code} · {a.account_name}</SelectItem>)}
@@ -1065,7 +1051,7 @@ function BillingHistory({ site, userId, onChanged }: { site: Site; userId: strin
               <input type="checkbox" checked={form.auto_invoice} onChange={e => setForm(p => ({ ...p, auto_invoice: e.target.checked }))} />
               Enable auto-invoice on renewal date
             </label>
-            <Button size="sm" className="h-8 rounded-xl text-xs gap-1.5" onClick={saveLink} disabled={linking || orgs.length === 0}>
+            <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={saveLink} disabled={linking || orgs.length === 0}>
               {linking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
               Link to Accounting
             </Button>
@@ -1074,30 +1060,26 @@ function BillingHistory({ site, userId, onChanged }: { site: Site; userId: strin
       ) : (
         <>
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
-            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
-              <CheckCircle2 className="h-3 w-3" /> Linked
-            </span>
-            <span>Org: <b className="text-foreground">{orgs.find(o => o.id === site.acc_org_id)?.name || '—'}</b></span>
-            <span>· Customer: <b className="text-foreground">{customers.find(c => c.id === site.acc_customer_id)?.name || '—'}</b></span>
-            {site.auto_invoice && <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 bg-blue-500/10 text-blue-500 border border-blue-500/30"><Zap className="h-3 w-3" /> Auto</span>}
+            <StatusBadge tone="ok" label="Linked" />
+            <span>Org: <b className="text-foreground">{orgs.find(o => o.id === site.acc_org_id)?.name || '–'}</b></span>
+            <span>· Customer: <b className="text-foreground">{customers.find(c => c.id === site.acc_customer_id)?.name || '–'}</b></span>
+            {site.auto_invoice && <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground"><Zap className="h-3 w-3" /> Auto</span>}
           </div>
           {invoices.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No invoices yet — click "Generate invoice" to create the first draft.</p>
+            <p className="text-xs text-muted-foreground">No invoices yet. Choose "Generate invoice" to create the first draft.</p>
           ) : (
             <div className="space-y-1">
               {invoices.map(inv => (
-                <div key={inv.id} className="flex items-center gap-3 text-xs py-1.5 border-b border-border/10 last:border-0">
+                <div key={inv.id} className="flex items-center gap-3 border-b border-border/60 py-1.5 text-xs last:border-0">
                   <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="font-mono text-[11px]">{inv.invoice_number}</span>
+                  <span className="font-mono text-[11px] tabular-nums">{inv.invoice_number}</span>
                   <span className="text-muted-foreground">{new Date(inv.invoice_date).toLocaleDateString('en-GB')}</span>
-                  <span className={cn(
-                    'ml-auto px-1.5 py-0.5 rounded text-[10px] font-semibold border capitalize',
-                    inv.status === 'paid'    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' :
-                    inv.status === 'sent'    ? 'bg-blue-500/10 text-blue-500 border-blue-500/30' :
-                    inv.status === 'overdue' ? 'bg-red-500/10 text-red-500 border-red-500/30' :
-                                               'bg-muted/50 text-muted-foreground border-border/30'
-                  )}>{inv.status}</span>
-                  <span className="tabular-nums font-semibold w-20 text-right">{money(Number(inv.total), inv.currency)}</span>
+                  <StatusBadge
+                    tone={inv.status === 'paid' ? 'ok' : inv.status === 'sent' ? 'attend' : inv.status === 'overdue' ? 'risk' : 'neutral'}
+                    label={inv.status}
+                    className="ml-auto text-[10.5px] capitalize"
+                  />
+                  <span className="w-20 text-right font-mono font-medium tabular-nums">{money(Number(inv.total), inv.currency)}</span>
                 </div>
               ))}
             </div>
@@ -1111,7 +1093,7 @@ function BillingHistory({ site, userId, onChanged }: { site: Site; userId: strin
 function MiniField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</Label>
       <div className="mt-1">{children}</div>
     </div>
   );

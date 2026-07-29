@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Loader2, Plus, Users, CalendarDays, Send, Wallet, Trash2, Lock, CheckCircle2, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { SkeletonTable } from '@/components/platform';
 
 interface Employee {
   id: string; org_id: string;
@@ -65,7 +66,7 @@ export default function PayrollView({ orgId, currency }: { orgId: string; curren
   }, [orgId]);
   useEffect(() => { refresh(); }, [refresh]);
 
-  if (loading) return <div className="flex items-center justify-center py-24"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  if (loading) return <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonTable cols={5} rows={6} /></div>;
 
   return (
     <div className="space-y-4">
@@ -76,23 +77,23 @@ export default function PayrollView({ orgId, currency }: { orgId: string; curren
         </div>
         <div className="flex gap-2">
           {tab === 'employees' && (
-            <Button size="sm" className="h-8 rounded-xl gap-1.5 text-xs" onClick={() => setAddEmp(true)}>
+            <Button size="sm" className="h-8 rounded-lg gap-1.5 text-xs" onClick={() => setAddEmp(true)}>
               <UserPlus className="h-3.5 w-3.5" /> Add employee
             </Button>
           )}
           {tab === 'runs' && (
-            <Button size="sm" className="h-8 rounded-xl gap-1.5 text-xs" onClick={() => setNewRun(true)} disabled={employees.filter(e => e.is_active).length === 0}>
+            <Button size="sm" className="h-8 rounded-lg gap-1.5 text-xs" onClick={() => setNewRun(true)} disabled={employees.filter(e => e.is_active).length === 0}>
               <Plus className="h-3.5 w-3.5" /> New pay run
             </Button>
           )}
         </div>
       </div>
 
-      <div className="flex gap-1 border-b border-border/30">
+      <div className="flex gap-1 border-b border-border/60">
         {(['runs','employees'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={cn("px-3 h-8 text-[11px] font-medium border-b-2 transition-colors capitalize",
-              tab === t ? "border-brand text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
+              tab === t ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
             {t === 'runs' ? <><CalendarDays className="h-3 w-3 inline mr-1" />Pay Runs</> : <><Users className="h-3 w-3 inline mr-1" />Employees</>}
           </button>
         ))}
@@ -121,13 +122,13 @@ function EmployeesList({ employees, currency, onChange }: { employees: Employee[
     onChange();
   }
   if (employees.length === 0) {
-    return <div className="rounded-2xl border border-dashed border-border/30 py-16 text-center">
-      <Users className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
+    return <div className="rounded-[10px] border border-dashed border-border/60 py-16 text-center">
+      <Users className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-sm text-muted-foreground">No employees yet</p>
     </div>;
   }
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+    <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
       <table className="w-full text-xs">
         <thead className="bg-background/60 text-muted-foreground uppercase tracking-wider text-[10px]">
           <tr>
@@ -138,20 +139,20 @@ function EmployeesList({ employees, currency, onChange }: { employees: Employee[
             <th className="text-right px-4 py-2.5">Status</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border/10">
+        <tbody className="divide-y divide-border/60">
           {employees.map(e => (
             <tr key={e.id} className="hover:bg-background/40">
               <td className="px-4 py-2.5">
                 <div className="font-medium">{e.full_name}</div>
-                <div className="text-[10px] text-muted-foreground">{e.job_title || '—'} · {e.email || ''}</div>
+                <div className="text-[10px] text-muted-foreground">{e.job_title || '–'} · {e.email || ''}</div>
               </td>
-              <td className="px-3 py-2.5 font-mono text-[11px]">{e.tax_code || '—'}</td>
+              <td className="px-3 py-2.5 font-mono text-[11px]">{e.tax_code || '–'}</td>
               <td className="px-3 py-2.5 capitalize">{e.pay_type}</td>
               <td className="px-3 py-2.5 text-right tabular-nums">{money(Number(e.pay_rate), currency)}{e.pay_type === 'hourly' && '/hr'}</td>
               <td className="px-4 py-2.5 text-right">
                 <button onClick={() => toggleActive(e)}
                   className={cn("inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium",
-                    e.is_active ? "bg-emerald-500/15 text-emerald-500" : "bg-muted text-muted-foreground")}>
+                    e.is_active ? "bg-ok/15 text-ok" : "bg-muted text-muted-foreground")}>
                   {e.is_active ? 'Active' : 'Inactive'}
                 </button>
               </td>
@@ -224,13 +225,13 @@ function EmployeeDialog({ orgId, onClose, onSaved }: { orgId: string; onClose: (
 /* ---------- Pay runs ---------- */
 function PayRunsList({ runs, currency, onOpen }: { runs: PayRun[]; currency: string; onOpen: (r: PayRun) => void }) {
   if (runs.length === 0) {
-    return <div className="rounded-2xl border border-dashed border-border/30 py-16 text-center">
-      <CalendarDays className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
+    return <div className="rounded-[10px] border border-dashed border-border/60 py-16 text-center">
+      <CalendarDays className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-sm text-muted-foreground">No pay runs yet</p>
     </div>;
   }
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+    <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
       <table className="w-full text-xs">
         <thead className="bg-background/60 text-muted-foreground uppercase tracking-wider text-[10px]">
           <tr>
@@ -242,7 +243,7 @@ function PayRunsList({ runs, currency, onOpen }: { runs: PayRun[]; currency: str
             <th className="text-left px-3 py-2.5">Status</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border/10">
+        <tbody className="divide-y divide-border/60">
           {runs.map(r => {
             const ded = Number(r.total_paye)+Number(r.total_ni_ee)+Number(r.total_pension)+Number(r.total_other_ded);
             return (
@@ -253,8 +254,8 @@ function PayRunsList({ runs, currency, onOpen }: { runs: PayRun[]; currency: str
                 </td>
                 <td className="px-3 py-2.5 tabular-nums">{new Date(r.pay_date).toLocaleDateString('en-GB')}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{money(Number(r.total_gross), currency)}</td>
-                <td className="px-3 py-2.5 text-right tabular-nums text-amber-500">{money(ded, currency)}</td>
-                <td className="px-3 py-2.5 text-right tabular-nums font-semibold text-emerald-500">{money(Number(r.total_net), currency)}</td>
+                <td className="px-3 py-2.5 text-right tabular-nums text-attend">{money(ded, currency)}</td>
+                <td className="px-3 py-2.5 text-right tabular-nums font-semibold text-ok">{money(Number(r.total_net), currency)}</td>
                 <td className="px-3 py-2.5"><RunStatus s={r.status} /></td>
               </tr>
             );
@@ -268,9 +269,9 @@ function PayRunsList({ runs, currency, onOpen }: { runs: PayRun[]; currency: str
 function RunStatus({ s }: { s: PayRun['status'] }) {
   const map: Record<PayRun['status'], { l: string; c: string; i?: any }> = {
     draft:  { l: 'Draft',  c: 'bg-muted text-muted-foreground' },
-    posted: { l: 'Posted', c: 'bg-amber-500/15 text-amber-500', i: Lock },
-    paid:   { l: 'Paid',   c: 'bg-emerald-500/15 text-emerald-500', i: CheckCircle2 },
-    void:   { l: 'Void',   c: 'bg-red-500/15 text-red-500' },
+    posted: { l: 'Posted', c: 'bg-attend/15 text-attend', i: Lock },
+    paid:   { l: 'Paid',   c: 'bg-ok/15 text-ok', i: CheckCircle2 },
+    void:   { l: 'Void',   c: 'bg-risk/15 text-risk' },
   };
   const x = map[s]; const I = x.i;
   return <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium", x.c)}>{I && <I className="h-2.5 w-2.5" />}{x.l}</span>;
@@ -300,7 +301,7 @@ function NewRunDialog({ orgId, employees, onClose, onCreated }: { orgId: string;
       await (supabase as any).rpc('acc_recalc_pay_run', { _pay_run_id: data.id });
     }
     setBusy(false);
-    toast.success('Pay run created — edit payslips before posting');
+    toast.success('Pay run created. Edit payslips before posting');
     onCreated();
   }
   return (
@@ -405,7 +406,7 @@ function PayRunEditor({ run, orgId, employees, banks, currency, busy, setBusy, o
           </DialogTitle>
         </DialogHeader>
 
-        {loading ? <div className="py-12 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></div> : (
+        {loading ? <SkeletonTable cols={4} rows={4} /> : (
           <div className="flex-1 overflow-auto">
             <table className="w-full text-xs">
               <thead className="bg-background/60 text-muted-foreground uppercase tracking-wider text-[10px] sticky top-0">
@@ -422,10 +423,10 @@ function PayRunEditor({ run, orgId, employees, banks, currency, busy, setBusy, o
                   <th className="text-right px-2 py-2"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/10">
+              <tbody className="divide-y divide-border/60">
                 {slips.map(s => (
                   <tr key={s.id}>
-                    <td className="px-3 py-1.5 font-medium">{empMap[s.employee_id]?.full_name || '—'}</td>
+                    <td className="px-3 py-1.5 font-medium">{empMap[s.employee_id]?.full_name || '–'}</td>
                     {(['hours','gross','paye','ni_ee','ni_er','pension','other_ded'] as const).map(k => (
                       <td key={k} className="px-1 py-1.5">
                         <Input type="number" step="0.01" value={Number((s as any)[k])} disabled={!editable}
@@ -434,10 +435,10 @@ function PayRunEditor({ run, orgId, employees, banks, currency, busy, setBusy, o
                           className="h-7 rounded-md text-right tabular-nums text-[11px]" />
                       </td>
                     ))}
-                    <td className="px-2 py-1.5 text-right tabular-nums font-semibold text-emerald-500">{money(Number(s.net), currency)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums font-semibold text-ok">{money(Number(s.net), currency)}</td>
                     <td className="px-2 py-1.5 text-right">
                       {editable && (
-                        <button className="text-muted-foreground hover:text-red-500" onClick={async () => {
+                        <button className="text-muted-foreground hover:text-risk" onClick={async () => {
                           if (!confirm('Remove this payslip?')) return;
                           await (supabase as any).from('acc_payslips').delete().eq('id', s.id);
                           await (supabase as any).rpc('acc_recalc_pay_run', { _pay_run_id: run.id });
@@ -458,7 +459,7 @@ function PayRunEditor({ run, orgId, employees, banks, currency, busy, setBusy, o
                   <td className="px-2 py-2 text-right tabular-nums">{money(Number(run.total_ni_er), currency)}</td>
                   <td className="px-2 py-2 text-right tabular-nums">{money(Number(run.total_pension), currency)}</td>
                   <td className="px-2 py-2 text-right tabular-nums">{money(Number(run.total_other_ded), currency)}</td>
-                  <td className="px-2 py-2 text-right tabular-nums text-emerald-500">{money(Number(run.total_net), currency)}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-ok">{money(Number(run.total_net), currency)}</td>
                   <td></td>
                 </tr>
               </tfoot>
@@ -466,7 +467,7 @@ function PayRunEditor({ run, orgId, employees, banks, currency, busy, setBusy, o
           </div>
         )}
 
-        <DialogFooter className="border-t border-border/20 pt-3">
+        <DialogFooter className="border-t border-border/60 pt-3">
           <Button variant="ghost" size="sm" className="h-8 rounded-lg text-xs" onClick={onClose}>Close</Button>
           {run.status === 'draft' && (
             <Button size="sm" className="h-8 rounded-lg text-xs gap-1" onClick={post} disabled={busy === run.id}>

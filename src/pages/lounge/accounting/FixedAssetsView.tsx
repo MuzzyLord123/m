@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Loader2, Plus, Boxes, CalendarClock, Send, Lock, CheckCircle2, X, TrendingDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { SkeletonTable } from '@/components/platform';
 
 interface Account { id: string; code: string; name: string; type: string; }
 interface Asset {
@@ -76,7 +77,7 @@ export default function FixedAssetsView({ orgId, accounts, currency }: { orgId: 
     return { count: active.length, cost, bv };
   }, [assets]);
 
-  if (loading) return <div className="flex items-center justify-center py-24"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  if (loading) return <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonTable cols={5} rows={6} /></div>;
 
   return (
     <div className="space-y-4">
@@ -88,18 +89,18 @@ export default function FixedAssetsView({ orgId, accounts, currency }: { orgId: 
           </p>
         </div>
         <div className="flex gap-2">
-          {tab === 'assets' && <Button size="sm" className="h-8 rounded-xl gap-1.5 text-xs" onClick={() => setAddOpen(true)}><Plus className="h-3.5 w-3.5" /> Add asset</Button>}
-          {tab === 'runs' && <Button size="sm" className="h-8 rounded-xl gap-1.5 text-xs" onClick={createRun} disabled={busy === 'new'}>
+          {tab === 'assets' && <Button size="sm" className="h-8 rounded-lg gap-1.5 text-xs" onClick={() => setAddOpen(true)}><Plus className="h-3.5 w-3.5" /> Add asset</Button>}
+          {tab === 'runs' && <Button size="sm" className="h-8 rounded-lg gap-1.5 text-xs" onClick={createRun} disabled={busy === 'new'}>
             {busy === 'new' ? <Loader2 className="h-3 w-3 animate-spin" /> : <CalendarClock className="h-3.5 w-3.5" />} New depreciation run
           </Button>}
         </div>
       </div>
 
-      <div className="flex gap-1 border-b border-border/30">
+      <div className="flex gap-1 border-b border-border/60">
         {(['assets','runs'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={cn("px-3 h-8 text-[11px] font-medium border-b-2 transition-colors capitalize",
-              tab === t ? "border-brand text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
+              tab === t ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
             {t === 'assets' ? <><Boxes className="h-3 w-3 inline mr-1" />Assets</> : <><TrendingDown className="h-3 w-3 inline mr-1" />Depreciation runs</>}
           </button>
         ))}
@@ -125,13 +126,13 @@ export default function FixedAssetsView({ orgId, accounts, currency }: { orgId: 
 /* -------- Assets -------- */
 function AssetsList({ assets, currency, onAcquire, onDispose }: { assets: Asset[]; currency: string; onAcquire: (a: Asset) => void; onDispose: (a: Asset) => void }) {
   if (assets.length === 0) return (
-    <div className="rounded-2xl border border-dashed border-border/30 py-16 text-center">
-      <Boxes className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
+    <div className="rounded-[10px] border border-dashed border-border/60 py-16 text-center">
+      <Boxes className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-sm text-muted-foreground">No fixed assets yet</p>
     </div>
   );
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+    <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
       <table className="w-full text-xs">
         <thead className="bg-background/60 text-muted-foreground uppercase tracking-wider text-[10px]">
           <tr>
@@ -144,21 +145,21 @@ function AssetsList({ assets, currency, onAcquire, onDispose }: { assets: Asset[
             <th className="text-right px-4 py-2.5">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border/10">
+        <tbody className="divide-y divide-border/60">
           {assets.map(a => {
             const bv = Number(a.purchase_cost) - Number(a.accumulated_depreciation);
             return (
               <tr key={a.id} className="hover:bg-background/40">
                 <td className="px-4 py-2.5">
                   <div className="font-medium">{a.name}</div>
-                  <div className="text-[10px] text-muted-foreground">{a.asset_tag || '—'} · {a.category || 'Uncategorised'} · purchased {new Date(a.purchase_date).toLocaleDateString('en-GB')}</div>
+                  <div className="text-[10px] text-muted-foreground">{a.asset_tag || '–'} · {a.category || 'Uncategorised'} · purchased {new Date(a.purchase_date).toLocaleDateString('en-GB')}</div>
                 </td>
                 <td className="px-3 py-2.5">
                   <span className="capitalize text-[11px]">{a.depreciation_method.replace('_',' ')}</span>
                   <div className="text-[10px] text-muted-foreground">{a.useful_life_months}m life</div>
                 </td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{money(Number(a.purchase_cost), currency)}</td>
-                <td className="px-3 py-2.5 text-right tabular-nums text-amber-500">{money(Number(a.accumulated_depreciation), currency)}</td>
+                <td className="px-3 py-2.5 text-right tabular-nums text-attend">{money(Number(a.accumulated_depreciation), currency)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums font-semibold">{money(bv, currency)}</td>
                 <td className="px-3 py-2.5"><AssetStatus s={a.status} /></td>
                 <td className="px-4 py-2.5 text-right">
@@ -178,8 +179,8 @@ function AssetsList({ assets, currency, onAcquire, onDispose }: { assets: Asset[
 
 function AssetStatus({ s }: { s: Asset['status'] }) {
   const map = {
-    active: { l: 'Active', c: 'bg-emerald-500/15 text-emerald-500' },
-    fully_depreciated: { l: 'Fully depreciated', c: 'bg-amber-500/15 text-amber-500' },
+    active: { l: 'Active', c: 'bg-ok/15 text-ok' },
+    fully_depreciated: { l: 'Fully depreciated', c: 'bg-attend/15 text-attend' },
     disposed: { l: 'Disposed', c: 'bg-muted text-muted-foreground' },
   }[s];
   return <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium", map.c)}>{map.l}</span>;
@@ -322,10 +323,10 @@ function DisposeDialog({ asset, banks, currency, onClose, onDone }: { asset: Ass
               </Select>
             </div>
           )}
-          <div className="rounded-xl bg-background/50 border border-border/30 p-3 text-xs space-y-1">
+          <div className="rounded-lg bg-background/50 border border-border/60 p-3 text-xs space-y-1">
             <div className="flex justify-between"><span className="text-muted-foreground">Book value</span><span className="tabular-nums">{money(bv, currency)}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Proceeds</span><span className="tabular-nums">{money(proceeds, currency)}</span></div>
-            <div className={cn("flex justify-between font-semibold", gainLoss >= 0 ? "text-emerald-500" : "text-red-500")}>
+            <div className={cn("flex justify-between font-semibold", gainLoss >= 0 ? "text-ok" : "text-risk")}>
               <span>{gainLoss >= 0 ? 'Gain' : 'Loss'}</span><span className="tabular-nums">{money(Math.abs(gainLoss), currency)}</span>
             </div>
           </div>
@@ -342,13 +343,13 @@ function DisposeDialog({ asset, banks, currency, onClose, onDone }: { asset: Ass
 /* -------- Runs -------- */
 function RunsList({ runs, currency, onOpen }: { runs: DeprRun[]; currency: string; onOpen: (r: DeprRun) => void }) {
   if (runs.length === 0) return (
-    <div className="rounded-2xl border border-dashed border-border/30 py-16 text-center">
-      <TrendingDown className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
+    <div className="rounded-[10px] border border-dashed border-border/60 py-16 text-center">
+      <TrendingDown className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
       <p className="text-sm text-muted-foreground">No depreciation runs yet</p>
     </div>
   );
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+    <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
       <table className="w-full text-xs">
         <thead className="bg-background/60 text-muted-foreground uppercase tracking-wider text-[10px]">
           <tr>
@@ -358,17 +359,17 @@ function RunsList({ runs, currency, onOpen }: { runs: DeprRun[]; currency: strin
             <th className="text-right px-4 py-2.5">Posted</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border/10">
+        <tbody className="divide-y divide-border/60">
           {runs.map(r => (
             <tr key={r.id} className="hover:bg-background/40 cursor-pointer" onClick={() => onOpen(r)}>
               <td className="px-4 py-2.5 font-medium">{new Date(r.period_end).toLocaleDateString('en-GB')}</td>
               <td className="px-3 py-2.5 text-right tabular-nums">{money(Number(r.total_amount), currency)}</td>
               <td className="px-3 py-2.5">
                 {r.status === 'posted'
-                  ? <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-emerald-500/15 text-emerald-500"><Lock className="h-2.5 w-2.5" />Posted</span>
+                  ? <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-ok/15 text-ok"><Lock className="h-2.5 w-2.5" />Posted</span>
                   : <span className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground">Draft</span>}
               </td>
-              <td className="px-4 py-2.5 text-right text-muted-foreground">{r.posted_at ? new Date(r.posted_at).toLocaleString('en-GB') : '—'}</td>
+              <td className="px-4 py-2.5 text-right text-muted-foreground">{r.posted_at ? new Date(r.posted_at).toLocaleString('en-GB') : '–'}</td>
             </tr>
           ))}
         </tbody>
@@ -430,16 +431,16 @@ function RunEditor({ run, assets, currency, onClose, onChanged }: { run: DeprRun
                   <th className="text-right px-2 py-2"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/10">
+              <tbody className="divide-y divide-border/60">
                 {lines.map(l => (
                   <tr key={l.id}>
-                    <td className="px-3 py-1.5 font-medium">{map[l.asset_id]?.name || '—'}</td>
+                    <td className="px-3 py-1.5 font-medium">{map[l.asset_id]?.name || '–'}</td>
                     <td className="px-2 py-1.5 text-right tabular-nums">{money(Number(l.book_value_before), currency)}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums text-amber-500 font-semibold">{money(Number(l.amount), currency)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums text-attend font-semibold">{money(Number(l.amount), currency)}</td>
                     <td className="px-2 py-1.5 text-right tabular-nums">{money(Number(l.book_value_after), currency)}</td>
                     <td className="px-2 py-1.5 text-right">
                       {run.status === 'draft' && (
-                        <button onClick={() => removeLine(l.id)} className="text-muted-foreground hover:text-red-500"><X className="h-3 w-3" /></button>
+                        <button onClick={() => removeLine(l.id)} className="text-muted-foreground hover:text-risk"><X className="h-3 w-3" /></button>
                       )}
                     </td>
                   </tr>
@@ -449,14 +450,14 @@ function RunEditor({ run, assets, currency, onClose, onChanged }: { run: DeprRun
                 <tr>
                   <td className="px-3 py-2 text-[10px] uppercase text-muted-foreground">Total</td>
                   <td></td>
-                  <td className="px-2 py-2 text-right tabular-nums text-amber-500">{money(Number(run.total_amount), currency)}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-attend">{money(Number(run.total_amount), currency)}</td>
                   <td></td><td></td>
                 </tr>
               </tfoot>
             </table>
           </div>
         )}
-        <DialogFooter className="border-t border-border/20 pt-3">
+        <DialogFooter className="border-t border-border/60 pt-3">
           <Button variant="ghost" size="sm" className="h-8 rounded-lg text-xs" onClick={onClose}>Close</Button>
           {run.status === 'draft' && lines.length > 0 && (
             <Button size="sm" className="h-8 rounded-lg text-xs gap-1" onClick={post} disabled={busy}>

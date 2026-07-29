@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { StatusBadge } from '@/components/platform';
 
 type SubTab = 'invoices' | 'customers' | 'aging';
 
@@ -36,19 +37,12 @@ interface AgingRow {
   days_overdue: number; bucket: 'current'|'1-30'|'31-60'|'61-90'|'90+';
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  draft:  '#94a3b8',
-  posted: '#3b82f6',
-  paid:   '#10b981',
-  void:   '#ef4444',
-};
-
-const BUCKET_COLORS: Record<string, string> = {
-  current: '#10b981',
-  '1-30':  '#3b82f6',
-  '31-60': '#f59e0b',
-  '61-90': '#f97316',
-  '90+':   '#ef4444',
+const BUCKET_TONES: Record<string, string> = {
+  current: 'text-ok',
+  '1-30':  'text-muted-foreground',
+  '31-60': 'text-attend',
+  '61-90': 'text-attend',
+  '90+':   'text-risk',
 };
 
 function money(n: number, c = 'GBP') {
@@ -100,33 +94,33 @@ export default function AccountsReceivableView({
     <div className="space-y-5">
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard label="Outstanding"       value={money(totals.outstanding, currency)} color="#3b82f6" icon={Receipt} />
-        <KpiCard label="Overdue"           value={money(totals.overdue, currency)}     color="#ef4444" icon={XCircle} />
-        <KpiCard label="Paid (all-time)"   value={money(totals.paidThisPeriod, currency)} color="#10b981" icon={CheckCircle2} />
-        <KpiCard label="Total invoices"    value={String(totals.count)}                color="#8b5cf6" icon={FileText} />
+        <KpiCard label="Outstanding"       value={money(totals.outstanding, currency)} />
+        <KpiCard label="Overdue"           value={money(totals.overdue, currency)} />
+        <KpiCard label="Paid (all-time)"   value={money(totals.paidThisPeriod, currency)} />
+        <KpiCard label="Total invoices"    value={String(totals.count)} />
       </div>
 
       {/* Sub-tabs */}
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 rounded-xl bg-card/60 border border-border/30 p-1">
+        <div className="flex gap-1 rounded-lg bg-card border border-border/60 p-1">
           {(['invoices','customers','aging'] as SubTab[]).map(k => (
             <button key={k} onClick={() => setSub(k)}
               className={cn(
                 "px-3 h-8 text-[12px] rounded-lg font-medium capitalize transition-colors",
-                sub === k ? "bg-brand/15 text-foreground" : "text-muted-foreground hover:text-foreground"
+                sub === k ? "bg-foreground/[0.05] text-foreground" : "text-muted-foreground hover:text-foreground"
               )}>{k}</button>
           ))}
         </div>
         <div className="flex gap-2">
           {sub === 'invoices' && (
-            <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs"
+            <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs"
               onClick={() => setShowInvoiceModal(true)}
               disabled={customers.length === 0}>
               <Plus className="h-3.5 w-3.5" /> New invoice
             </Button>
           )}
           {sub === 'customers' && (
-            <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={() => setShowCustomerModal(true)}>
+            <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => setShowCustomerModal(true)}>
               <Plus className="h-3.5 w-3.5" /> New customer
             </Button>
           )}
@@ -183,16 +177,11 @@ export default function AccountsReceivableView({
 }
 
 /* ---------- KPI card ---------- */
-function KpiCard({ label, value, color, icon: Icon }: any) {
+function KpiCard({ label, value }: any) {
   return (
-    <div className="p-4 rounded-2xl bg-card/60 border border-border/20">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: `${color}15` }}>
-          <Icon className="h-3.5 w-3.5" style={{ color }} />
-        </div>
-        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</span>
-      </div>
-      <div className="text-lg font-bold tracking-tight">{value}</div>
+    <div className="flex items-center justify-between gap-3 rounded-[10px] border border-border/60 bg-card px-4 py-3">
+      <span className="font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{label}</span>
+      <span className="font-mono text-[15px] font-medium tabular-nums text-foreground">{value}</span>
     </div>
   );
 }
@@ -207,7 +196,7 @@ function InvoicesTable({ invoices, customers, currency, onPost, onVoid, onDelete
     return <Empty icon={Receipt} title="No invoices yet" hint={customers.length === 0 ? 'Add a customer first, then create your first invoice.' : 'Click "New invoice" to raise your first AR invoice.'} />;
   }
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+    <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
       <table className="w-full text-xs">
         <thead className="bg-muted/20 text-muted-foreground">
           <tr>
@@ -220,19 +209,16 @@ function InvoicesTable({ invoices, customers, currency, onPost, onVoid, onDelete
           {invoices.map(i => {
             const bal = Number(i.total) - Number(i.amount_paid);
             return (
-              <tr key={i.id} className="border-t border-border/20 hover:bg-muted/10">
+              <tr key={i.id} className="border-t border-border/60 hover:bg-foreground/[0.025]">
                 <Td mono>{i.invoice_number}</Td>
-                <Td>{cmap[i.customer_id] || '—'}</Td>
+                <Td>{cmap[i.customer_id] || '–'}</Td>
                 <Td>{new Date(i.invoice_date).toLocaleDateString('en-GB')}</Td>
-                <Td>{i.due_date ? new Date(i.due_date).toLocaleDateString('en-GB') : '—'}</Td>
+                <Td>{i.due_date ? new Date(i.due_date).toLocaleDateString('en-GB') : '–'}</Td>
                 <Td right>{money(i.total, i.currency || currency)}</Td>
                 <Td right>{money(i.amount_paid, i.currency || currency)}</Td>
                 <Td right>{money(bal, i.currency || currency)}</Td>
                 <Td>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-wider"
-                    style={{ background: `${STATUS_COLORS[i.status]}20`, color: STATUS_COLORS[i.status] }}>
-                    {i.status}
-                  </span>
+                  <StatusBadge status={i.status} className="text-[10.5px] capitalize" />
                 </Td>
                 <Td right>
                   <div className="flex gap-1 justify-end">
@@ -241,7 +227,7 @@ function InvoicesTable({ invoices, customers, currency, onPost, onVoid, onDelete
                         <Button size="sm" variant="ghost" className="h-7 gap-1 text-[11px]" onClick={() => onPost(i.id)}>
                           <Send className="h-3 w-3" /> Post
                         </Button>
-                        <Button size="sm" variant="ghost" className="h-7 text-red-500" onClick={() => onDelete(i.id)}>
+                        <Button size="sm" variant="ghost" className="h-7 text-risk" onClick={() => onDelete(i.id)}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </>
@@ -252,7 +238,7 @@ function InvoicesTable({ invoices, customers, currency, onPost, onVoid, onDelete
                       </Button>
                     )}
                     {(i.status === 'posted' || i.status === 'paid') && i.amount_paid === 0 && (
-                      <Button size="sm" variant="ghost" className="h-7 text-[11px] text-red-500" onClick={() => onVoid(i.id)}>
+                      <Button size="sm" variant="ghost" className="h-7 text-[11px] text-risk" onClick={() => onVoid(i.id)}>
                         <XCircle className="h-3 w-3" /> Void
                       </Button>
                     )}
@@ -271,26 +257,26 @@ function InvoicesTable({ invoices, customers, currency, onPost, onVoid, onDelete
 function CustomersTable({ customers, onChange }: { customers: Customer[]; onChange: () => void }) {
   if (customers.length === 0) return <Empty icon={Users} title="No customers" hint='Click "New customer" to add one.' />;
   return (
-    <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+    <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
       <table className="w-full text-xs">
         <thead className="bg-muted/20 text-muted-foreground">
           <tr><Th>Name</Th><Th>Email</Th><Th>Phone</Th><Th>Currency</Th><Th right>Active</Th><Th right>Actions</Th></tr>
         </thead>
         <tbody>
           {customers.map(c => (
-            <tr key={c.id} className="border-t border-border/20 hover:bg-muted/10">
+            <tr key={c.id} className="border-t border-border/60 hover:bg-foreground/[0.025]">
               <Td>{c.name}</Td>
-              <Td>{c.email || '—'}</Td>
-              <Td>{c.phone || '—'}</Td>
+              <Td>{c.email || '–'}</Td>
+              <Td>{c.phone || '–'}</Td>
               <Td>{c.currency}</Td>
               <Td right>
                 <span className={cn("px-2 py-0.5 rounded-md text-[10px] font-medium uppercase",
-                  c.is_active ? "bg-emerald-500/15 text-emerald-500" : "bg-muted/30 text-muted-foreground")}>
+                  c.is_active ? "bg-ok/15 text-ok" : "bg-muted/30 text-muted-foreground")}>
                   {c.is_active ? 'Active' : 'Inactive'}
                 </span>
               </Td>
               <Td right>
-                <Button size="sm" variant="ghost" className="h-7 text-red-500"
+                <Button size="sm" variant="ghost" className="h-7 text-risk"
                   onClick={async () => {
                     if (!confirm('Delete customer?')) return;
                     const { error } = await db.from('acc_customers').delete().eq('id', c.id);
@@ -319,28 +305,27 @@ function AgingTable({ rows, currency }: { rows: AgingRow[]; currency: string }) 
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
         {(['current','1-30','31-60','61-90','90+'] as const).map(k => (
-          <div key={k} className="p-3 rounded-xl border border-border/30 bg-card/40">
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{k === 'current' ? 'Current' : `${k} days`}</div>
-            <div className="text-sm font-bold mt-1" style={{ color: BUCKET_COLORS[k] }}>{money(buckets[k], currency)}</div>
+          <div key={k} className="p-3 rounded-lg border border-border/60 bg-card">
+            <div className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{k === 'current' ? 'Current' : `${k} days`}</div>
+            <div className={cn("mt-1 font-mono text-sm font-medium tabular-nums", BUCKET_TONES[k])}>{money(buckets[k], currency)}</div>
           </div>
         ))}
       </div>
-      <div className="rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
+      <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
         <table className="w-full text-xs">
           <thead className="bg-muted/20 text-muted-foreground">
             <tr><Th>Invoice #</Th><Th>Customer</Th><Th>Due</Th><Th right>Balance</Th><Th right>Days overdue</Th><Th>Bucket</Th></tr>
           </thead>
           <tbody>
             {rows.map(r => (
-              <tr key={r.invoice_id} className="border-t border-border/20 hover:bg-muted/10">
+              <tr key={r.invoice_id} className="border-t border-border/60 hover:bg-foreground/[0.025]">
                 <Td mono>{r.invoice_number}</Td>
                 <Td>{r.customer_name}</Td>
-                <Td>{r.due_date ? new Date(r.due_date).toLocaleDateString('en-GB') : '—'}</Td>
+                <Td>{r.due_date ? new Date(r.due_date).toLocaleDateString('en-GB') : '–'}</Td>
                 <Td right>{money(r.balance, currency)}</Td>
                 <Td right>{r.days_overdue}</Td>
                 <Td>
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-medium uppercase"
-                    style={{ background: `${BUCKET_COLORS[r.bucket]}20`, color: BUCKET_COLORS[r.bucket] }}>
+                  <span className={cn('font-mono text-[10px] font-medium uppercase tracking-[0.1em]', BUCKET_TONES[r.bucket])}>
                     {r.bucket}
                   </span>
                 </Td>
@@ -502,7 +487,7 @@ function InvoiceModal({ orgId, customers, revenueAccounts, currency, onClose, on
               <Plus className="h-3 w-3" /> Add line
             </Button>
           </div>
-          <div className="rounded-xl border border-border/30 overflow-hidden">
+          <div className="rounded-lg border border-border/60 overflow-hidden">
             <table className="w-full text-xs">
               <thead className="bg-muted/20 text-muted-foreground">
                 <tr>
@@ -513,7 +498,7 @@ function InvoiceModal({ orgId, customers, revenueAccounts, currency, onClose, on
               </thead>
               <tbody>
                 {lines.map((l, idx) => (
-                  <tr key={idx} className="border-t border-border/20">
+                  <tr key={idx} className="border-t border-border/60">
                     <Td><Input className="h-8 text-xs" value={l.description} onChange={e => updateLine(idx, { description: e.target.value })} /></Td>
                     <Td>
                       <Select value={l.revenue_account_id || ''} onValueChange={v => updateLine(idx, { revenue_account_id: v })}>
@@ -526,7 +511,7 @@ function InvoiceModal({ orgId, customers, revenueAccounts, currency, onClose, on
                     <Td right><Input type="number" step="0.01" className="h-8 text-xs text-right w-20" value={l.tax_rate * 100} onChange={e => updateLine(idx, { tax_rate: Number(e.target.value) / 100 })} /></Td>
                     <Td right>{money(l.line_total, currency)}</Td>
                     <Td right>
-                      <Button size="sm" variant="ghost" className="h-7 text-red-500" onClick={() => setLines(prev => prev.filter((_, i) => i !== idx))}>
+                      <Button size="sm" variant="ghost" className="h-7 text-risk" onClick={() => setLines(prev => prev.filter((_, i) => i !== idx))}>
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </Td>
@@ -625,7 +610,7 @@ function Field({ label, children }: any) {
 }
 function Empty({ icon: Icon, title, hint }: any) {
   return (
-    <div className="rounded-2xl border border-dashed border-border/40 bg-card/30 p-10 flex flex-col items-center text-center">
+    <div className="rounded-[10px] border border-dashed border-border/60 bg-card/30 p-10 flex flex-col items-center text-center">
       <Icon className="h-8 w-8 text-muted-foreground mb-2" />
       <div className="text-sm font-semibold">{title}</div>
       <div className="text-xs text-muted-foreground mt-1 max-w-sm">{hint}</div>

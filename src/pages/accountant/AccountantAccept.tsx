@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calculator, Loader2, ShieldCheck } from 'lucide-react';
+import { SkeletonForm } from '@/components/platform';
 import { toast } from 'sonner';
 
 interface InviteInfo {
@@ -91,11 +92,11 @@ export default function AccountantAccept() {
     }
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+  if (loading) return <div className="flex min-h-screen items-center justify-center p-6"><div className="w-full max-w-md overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonForm fields={2} className="p-6" /></div></div>;
   if (error) return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-md text-center space-y-3">
-        <h1 className="text-xl font-bold">Invite unavailable</h1>
+        <h1 className="text-[17px] font-semibold tracking-[-0.015em]">Invite unavailable</h1>
         <p className="text-sm text-muted-foreground">{error}</p>
       </div>
     </div>
@@ -106,27 +107,27 @@ export default function AccountantAccept() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-2xl border border-border/30 bg-card/60 backdrop-blur-xl p-8">
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4">
-          <ShieldCheck className="h-6 w-6 text-white" />
+      <div className="w-full max-w-md rounded-[10px] border border-border/60 bg-card p-8">
+        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+          <ShieldCheck className="h-5 w-5 text-muted-foreground" />
         </div>
-        <h1 className="text-xl font-bold tracking-tight">Accountant invite</h1>
+        <h1 className="text-[19px] font-semibold tracking-[-0.015em]">Accountant invite</h1>
         <p className="text-sm text-muted-foreground mt-1 mb-1">
           <span className="font-semibold text-foreground">{invite.org_name}</span> has invited you to manage their accounting on Quooro.
         </p>
         <p className="text-xs text-muted-foreground mb-6">Invite for <span className="font-mono">{invite.email}</span></p>
 
         {alreadyRightUser ? (
-          <Button onClick={acceptWithSession} disabled={busy} className="w-full h-10 rounded-xl gap-2">
+          <Button onClick={acceptWithSession} disabled={busy} className="w-full h-10 rounded-lg gap-2">
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />}
             Accept and open portal
           </Button>
         ) : (
           <>
-            <div className="flex gap-1 mb-4 p-1 rounded-xl bg-card/60 border border-border/20">
+            <div className="mb-4 flex gap-1 rounded-lg border border-border/60 bg-sunken p-1">
               {(['signup','signin'] as const).map(m => (
                 <button key={m} onClick={() => setMode(m)}
-                  className={`flex-1 h-8 rounded-lg text-xs font-medium ${mode===m?'bg-brand/20 text-foreground':'text-muted-foreground'}`}>
+                  className={`h-8 flex-1 rounded-md text-xs font-medium transition-colors duration-150 ${mode===m?'bg-card text-foreground':'text-muted-foreground hover:text-foreground'}`}>
                   {m === 'signup' ? 'Create account' : 'I already have one'}
                 </button>
               ))}
@@ -134,18 +135,18 @@ export default function AccountantAccept() {
             <form onSubmit={submit} className="space-y-3">
               {mode === 'signup' && (
                 <div>
-                  <Label className="text-xs">Your name</Label>
-                  <Input value={fullName} onChange={e => setFullName(e.target.value)} required className="mt-1.5 h-10 rounded-xl" />
+                  <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Your name</Label>
+                  <Input value={fullName} onChange={e => setFullName(e.target.value)} required className="mt-1.5 h-10 rounded-lg" />
                 </div>
               )}
               <div>
-                <Label className="text-xs">Password</Label>
+                <Label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Password</Label>
                 <Input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                  required minLength={6} className="mt-1.5 h-10 rounded-xl" />
+                  required minLength={6} className="mt-1.5 h-10 rounded-lg" />
               </div>
-              <Button type="submit" disabled={busy} className="w-full h-10 rounded-xl gap-2">
+              <Button type="submit" disabled={busy} className="w-full h-10 rounded-lg gap-2">
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                {mode === 'signup' ? 'Create account & accept' : 'Sign in & accept'}
+                {mode === 'signup' ? 'Create account and accept' : 'Sign in and accept'}
               </Button>
             </form>
           </>

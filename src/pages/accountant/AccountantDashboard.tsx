@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Building2, LogOut, Loader2, Calculator, ChevronRight } from 'lucide-react';
+import { Building2, LogOut, ChevronRight } from 'lucide-react';
+import { SkeletonLedger } from '@/components/platform';
 import { toast } from 'sonner';
 
 interface OrgRow {
@@ -40,14 +41,11 @@ export default function AccountantDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border/20 bg-background/70 backdrop-blur-xl sticky top-0 z-10">
+      <header className="border-b border-border/60 bg-background sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-            <Calculator className="h-4 w-4 text-white" />
-          </div>
           <div>
-            <div className="text-sm font-bold">Accountant Portal</div>
-            <div className="text-[10px] text-muted-foreground">{email}</div>
+            <div className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Accountant portal</div>
+            <div className="font-mono text-[10px] text-muted-foreground">{email}</div>
           </div>
           <Button size="sm" variant="ghost" onClick={signOut} className="ml-auto h-8 gap-1.5 text-xs">
             <LogOut className="h-3.5 w-3.5" /> Sign out
@@ -56,15 +54,15 @@ export default function AccountantDashboard() {
       </header>
 
       <main className="max-w-5xl mx-auto p-6">
-        <h1 className="text-2xl font-bold tracking-tight mb-1">Your client organizations</h1>
-        <p className="text-sm text-muted-foreground mb-6">Choose an organization to open its accounting.</p>
+        <h1 className="mb-0.5 text-[17px] font-semibold tracking-[-0.015em]">Your client organizations</h1>
+        <p className="mb-5 text-[13px] text-muted-foreground">Choose an organization to open its accounting.</p>
 
         {loading ? (
-          <div className="h-40 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+          <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card"><SkeletonLedger rows={3} /></div>
         ) : orgs.length === 0 ? (
-          <div className="rounded-2xl border border-border/30 bg-card/40 p-10 text-center">
+          <div className="rounded-[10px] border border-border/60 bg-card p-10 text-center">
             <Building2 className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
-            <h2 className="text-sm font-bold">No client access yet</h2>
+            <h2 className="text-sm font-[550]">No client access yet</h2>
             <p className="text-xs text-muted-foreground mt-1">
               You'll see organizations here after accepting an invite.
             </p>
@@ -73,14 +71,14 @@ export default function AccountantDashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {orgs.map(o => (
               <button key={o.id} onClick={() => nav(`/accountant/org/${o.id}`)}
-                className="text-left rounded-2xl border border-border/30 bg-card/40 hover:bg-card/70 p-5 transition-colors group">
+                className="group rounded-[10px] border border-border/60 bg-card p-4 text-left transition-colors duration-150 hover:border-border">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-600/20 border border-emerald-500/20 flex items-center justify-center">
-                    <Building2 className="h-4 w-4 text-emerald-500" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold truncate">{o.name}</div>
-                    <div className="text-[10px] text-muted-foreground">{o.base_currency}</div>
+                    <div className="truncate text-[13px] font-[550]">{o.name}</div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{o.base_currency}</div>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                 </div>

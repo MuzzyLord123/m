@@ -1,18 +1,21 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Receipt, Plus, Trash2, DollarSign, TrendingUp, TrendingDown,
-  Download, Search, FileText, Palette, Eye, Edit, X, Save, ChevronLeft,
-  ChevronRight, Type, Image, Square, Minus, Bold, Italic, AlignLeft,
-  AlignCenter, AlignRight, Upload, ZoomIn, ZoomOut, Pen, Highlighter,
-  Copy, Layers, Sparkles, Check, Building2, Globe, Mail, Phone, Hash,
-  Calendar, CreditCard, FileDown, Printer, Send, Star, Stamp
+  ArrowLeft, Receipt, Plus, Trash2, TrendingDown,
+  Download, FileText, Eye, X, Save, ChevronLeft,
+  ChevronRight, Type, Image, Square,
+  Upload, ZoomIn, ZoomOut, Pen, Highlighter,
+  Building2, Globe, Hash,
+  Calendar, CreditCard, Printer, Send, Stamp, Megaphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import {
+  Panel, PanelHeader, PanelRow, StatusBadge, Money, EmptyState,
+  type Tone,
+} from '@/components/platform';
 import jsPDF from 'jspdf';
 import * as pdfjsLib from 'pdfjs-dist';
 import { supabase } from '@/integrations/supabase/client';
@@ -67,7 +70,7 @@ const PREMIUM_TEMPLATES: PremiumTemplate[] = [
 
 /* ─── Pre-built Invoice Presets ─── */
 interface InvoicePreset {
-  id: string; name: string; description: string; icon: any; color: string;
+  id: string; name: string; description: string; icon: any;
   templateId: string; companyName: string; companyAddress: string; companyEmail: string;
   clientName: string; clientAddress: string; clientEmail: string;
   items: InvoiceLineItem[]; taxRate: number; notes: string; currency: string;
@@ -75,7 +78,7 @@ interface InvoicePreset {
 
 const INVOICE_PRESETS: InvoicePreset[] = [
   {
-    id: 'web-design', name: 'Website Design', description: 'Full web design project', icon: Globe, color: '#0071e3',
+    id: 'web-design', name: 'Website Design', description: 'Full web design project', icon: Globe,
     templateId: 'sapphire', companyName: 'Studio Co.', companyAddress: '100 Design Street, London EC1A 1BB', companyEmail: 'hello@studio.co',
     clientName: 'Acme Corporation', clientAddress: '200 Business Rd, Manchester M1 1AA', clientEmail: 'accounts@acme.com',
     items: [
@@ -87,7 +90,7 @@ const INVOICE_PRESETS: InvoicePreset[] = [
     taxRate: 20, notes: 'Payment due within 30 days. Bank transfer preferred.', currency: 'GBP',
   },
   {
-    id: 'consulting', name: 'Consulting Retainer', description: 'Monthly advisory services', icon: Building2, color: '#1e293b',
+    id: 'consulting', name: 'Consulting Retainer', description: 'Monthly advisory services', icon: Building2,
     templateId: 'executive', companyName: 'Apex Advisory', companyAddress: '1 Canary Wharf, London E14 5AB', companyEmail: 'invoice@apex.io',
     clientName: 'TechStart Ltd', clientAddress: '50 Silicon Way, Cambridge CB1 2AB', clientEmail: 'finance@techstart.com',
     items: [
@@ -98,7 +101,7 @@ const INVOICE_PRESETS: InvoicePreset[] = [
     taxRate: 20, notes: 'Retainer fees are non-refundable. Net 14 terms.', currency: 'GBP',
   },
   {
-    id: 'photography', name: 'Photography Package', description: 'Event & product shoot', icon: Image, color: '#be185d',
+    id: 'photography', name: 'Photography Package', description: 'Event & product shoot', icon: Image,
     templateId: 'rose', companyName: 'Iris Photography', companyAddress: '34 Lens Lane, Brighton BN1 1AA', companyEmail: 'bookings@iris.photo',
     clientName: 'FreshFoods Market', clientAddress: '88 Organic Ave, Bristol BS1 5AA', clientEmail: 'marketing@freshfoods.co.uk',
     items: [
@@ -110,7 +113,7 @@ const INVOICE_PRESETS: InvoicePreset[] = [
     taxRate: 20, notes: '50% deposit required before shoot date. Includes 2 rounds of revisions.', currency: 'GBP',
   },
   {
-    id: 'saas', name: 'SaaS License', description: 'Annual software subscription', icon: CreditCard, color: '#7c3aed',
+    id: 'saas', name: 'SaaS License', description: 'Annual software subscription', icon: CreditCard,
     templateId: 'violet', companyName: 'CloudStack Inc.', companyAddress: '500 Tech Park, San Francisco CA 94105', companyEmail: 'billing@cloudstack.io',
     clientName: 'Global Enterprises PLC', clientAddress: '1 Corporate Plaza, London EC2V 8AA', clientEmail: 'procurement@globalent.com',
     items: [
@@ -122,7 +125,7 @@ const INVOICE_PRESETS: InvoicePreset[] = [
     taxRate: 0, notes: 'Annual billing. Auto-renews unless cancelled 30 days before term end.', currency: 'USD',
   },
   {
-    id: 'construction', name: 'Construction Project', description: 'Building & renovation', icon: Building2, color: '#ea580c',
+    id: 'construction', name: 'Construction Project', description: 'Building & renovation', icon: Building2,
     templateId: 'sunset', companyName: 'Buildwell Construction', companyAddress: '12 Builder Yard, Leeds LS1 4AA', companyEmail: 'accounts@buildwell.co.uk',
     clientName: 'Horizon Properties', clientAddress: '99 Estate Road, Leeds LS2 7BB', clientEmail: 'payments@horizonprop.co.uk',
     items: [
@@ -135,7 +138,7 @@ const INVOICE_PRESETS: InvoicePreset[] = [
     taxRate: 20, notes: 'Payment schedule: 30% upfront, 40% at midpoint, 30% on completion. CIS deduction applies.', currency: 'GBP',
   },
   {
-    id: 'marketing', name: 'Marketing Campaign', description: 'Digital marketing package', icon: Sparkles, color: '#059669',
+    id: 'marketing', name: 'Marketing Campaign', description: 'Digital marketing package', icon: Megaphone,
     templateId: 'emerald', companyName: 'GrowthLab Agency', companyAddress: '22 Creative Quarter, Shoreditch EC2A 3AA', companyEmail: 'billing@growthlab.agency',
     clientName: 'StyleHub Fashion', clientAddress: '10 Regent Street, London W1B 5AA', clientEmail: 'finance@stylehub.com',
     items: [
@@ -147,7 +150,7 @@ const INVOICE_PRESETS: InvoicePreset[] = [
     taxRate: 20, notes: 'Ad spend billed separately. Monthly reporting included.', currency: 'GBP',
   },
   {
-    id: 'freelance-dev', name: 'Freelance Development', description: 'App development sprint', icon: FileText, color: '#27272a',
+    id: 'freelance-dev', name: 'Freelance Development', description: 'App development sprint', icon: FileText,
     templateId: 'carbon', companyName: 'Alex Rivera', companyAddress: '15 Code Street, Edinburgh EH1 2AA', companyEmail: 'alex@riveradev.com',
     clientName: 'HealthFirst App', clientAddress: '5 Wellness Way, Glasgow G1 1AA', clientEmail: 'dev@healthfirst.app',
     items: [
@@ -159,7 +162,7 @@ const INVOICE_PRESETS: InvoicePreset[] = [
     taxRate: 0, notes: 'Sole trader — VAT not applicable. Payment via bank transfer within 14 days.', currency: 'GBP',
   },
   {
-    id: 'legal', name: 'Legal Services', description: 'Professional legal fees', icon: Stamp, color: '#1e293b',
+    id: 'legal', name: 'Legal Services', description: 'Professional legal fees', icon: Stamp,
     templateId: 'slate', companyName: 'Carter & Associates LLP', companyAddress: 'Lincoln House, 300 High Holborn, London WC1V 7AA', companyEmail: 'billing@carterlaw.co.uk',
     clientName: 'Nova Ventures', clientAddress: '42 Innovation Park, Oxford OX1 2AA', clientEmail: 'legal@novaventures.io',
     items: [
@@ -172,14 +175,11 @@ const INVOICE_PRESETS: InvoicePreset[] = [
   },
 ];
 
-const INV_STATUS: Record<InvStatus, { label: string; color: string }> = {
-  draft: { label: 'Draft', color: '#94a3b8' }, sent: { label: 'Sent', color: '#3b82f6' },
-  paid: { label: 'Paid', color: '#10b981' }, overdue: { label: 'Overdue', color: '#ef4444' },
+const INV_STATUS: Record<InvStatus, { label: string; tone: Tone }> = {
+  draft: { label: 'Draft', tone: 'neutral' }, sent: { label: 'Sent', tone: 'attend' },
+  paid: { label: 'Paid', tone: 'ok' }, overdue: { label: 'Overdue', tone: 'risk' },
 };
-const CAT_COLORS: Record<ExpCategory, string> = {
-  software: '#3b82f6', hardware: '#8b5cf6', travel: '#f59e0b',
-  office: '#10b981', marketing: '#ec4899', other: '#94a3b8',
-};
+const EXP_CATEGORIES: ExpCategory[] = ['software', 'hardware', 'travel', 'office', 'marketing', 'other'];
 
 const PDF_TOOLS: { id: PDFTool; icon: any; label: string }[] = [
   { id: 'text', icon: Type, label: 'Text' }, { id: 'draw', icon: Pen, label: 'Draw' },
@@ -434,7 +434,7 @@ export default function OfficeInvoices() {
     const buf = await f.arrayBuffer();
     const d = await pdfjsLib.getDocument({ data: buf }).promise;
     setPdfFile(f); setPdfDoc(d); setPdfTotal(d.numPages); setPdfPage(1);
-    setPdfAnnotations([]); setPdfTextEdits({}); toast.success(`Loaded — ${d.numPages} pages`);
+    setPdfAnnotations([]); setPdfTextEdits({}); toast.success(`Loaded ${d.numPages} pages`);
   };
 
   const renderPdfPage = async () => {
@@ -515,58 +515,51 @@ export default function OfficeInvoices() {
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-3 sm:px-5 gap-2 sm:gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Back to Office</span>
+      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 bg-background px-3 sm:gap-3 sm:px-5">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
+          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
         </Button>
-        <div className="h-4 w-px bg-border/40 hidden sm:block" />
-        <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shrink-0">
-          <Receipt className="h-3.5 w-3.5 text-white" />
-        </div>
-        <span className="text-xs sm:text-sm font-bold tracking-tight truncate">Invoice & Expenses</span>
+        <div className="hidden h-4 w-px bg-border/60 sm:block" />
+        <span className="truncate font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Invoices and expenses</span>
         <div className="flex-1" />
       </header>
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-10">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pt-6 pb-3">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Invoice & Expenses</h1>
-            <p className="text-sm text-muted-foreground/60 mt-1">Create, manage, and export professional invoices.</p>
-          </motion.div>
-
-          {/* Summary Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-5">
-            {[
-              { label: 'Total Invoiced', value: `£${totalInvoiced.toLocaleString()}`, icon: Receipt, color: '#3b82f6' },
-              { label: 'Collected', value: `£${totalPaid.toLocaleString()}`, icon: TrendingUp, color: '#10b981' },
-              { label: 'Expenses', value: `£${totalExpenses.toLocaleString()}`, icon: TrendingDown, color: '#ef4444' },
-              { label: 'Net Profit', value: `£${(totalPaid - totalExpenses).toLocaleString()}`, icon: DollarSign, color: '#8b5cf6' },
-            ].map((s, i) => (
-              <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                className="p-4 rounded-2xl bg-card/50 border border-border/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="h-8 w-8 rounded-xl flex items-center justify-center" style={{ background: `${s.color}15` }}>
-                    <s.icon className="h-4 w-4" style={{ color: s.color }} />
-                  </div>
-                  <span className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-wider">{s.label}</span>
-                </div>
-                <span className="text-xl font-bold text-foreground">{s.value}</span>
-              </motion.div>
-            ))}
+          <div className="pb-3 pt-5">
+            <h1 className="text-[17px] font-semibold tracking-[-0.015em] text-foreground">Invoices and expenses</h1>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">Create, manage and export invoices.</p>
           </div>
 
+          {/* Position ledger */}
+          <Panel className="mb-4 overflow-hidden">
+            <div className="grid grid-cols-1 gap-px bg-border/60 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { label: 'Total invoiced', value: totalInvoiced },
+                { label: 'Collected', value: totalPaid },
+                { label: 'Expenses', value: totalExpenses },
+                { label: 'Net profit', value: totalPaid - totalExpenses },
+              ].map(s => (
+                <div key={s.label} className="flex items-center justify-between gap-3 bg-card px-4 py-3">
+                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{s.label}</span>
+                  <Money value={s.value} whole className="font-mono text-[15px] font-medium text-foreground" />
+                </div>
+              ))}
+            </div>
+          </Panel>
+
           {/* Tabs */}
-          <div className="flex flex-wrap items-center gap-1 mb-5 bg-muted/30 p-0.5 rounded-xl">
+          <div className="mb-4 flex w-fit max-w-full flex-wrap items-center gap-0.5 rounded-lg border border-border/60 bg-sunken p-0.5">
             {([
               { key: 'invoices' as MainTab, label: 'Invoices', icon: Receipt },
               { key: 'expenses' as MainTab, label: 'Expenses', icon: TrendingDown },
-              { key: 'creator' as MainTab, label: 'Create Invoice', icon: Sparkles },
-              { key: 'pdf-editor' as MainTab, label: 'PDF Editor', icon: FileText },
-              { key: 'summary' as MainTab, label: 'Summary', icon: DollarSign },
+              { key: 'creator' as MainTab, label: 'Create invoice', icon: Plus },
+              { key: 'pdf-editor' as MainTab, label: 'PDF editor', icon: FileText },
+              { key: 'summary' as MainTab, label: 'Summary', icon: Hash },
             ]).map(t => (
               <button key={t.key} onClick={() => { setTab(t.key); if (t.key === 'creator') setCreatorStep('templates'); }}
-                className={cn("px-3 py-2 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap",
-                  tab === t.key ? "bg-background shadow-sm text-foreground" : "text-muted-foreground/60 hover:text-foreground")}>
+                className={cn("flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors duration-150",
+                  tab === t.key ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground")}>
                 <t.icon className="h-3 w-3" /> {t.label}
               </button>
             ))}
@@ -574,57 +567,53 @@ export default function OfficeInvoices() {
 
           {/* ═══ INVOICES TAB ═══ */}
           {tab === 'invoices' && (
-            <div className="pb-10 space-y-2">
-              {invoices.map(inv => {
-                const sc = INV_STATUS[inv.status];
-                return (
-                   <motion.div key={inv.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    className="group p-3 sm:p-5 rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                        <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${sc.color}15` }}>
-                          <Receipt className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: sc.color }} />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="text-[12px] sm:text-[13px] font-semibold text-foreground truncate">{inv.number}</h3>
-                          <span className="text-[10px] text-muted-foreground/50 truncate block">{inv.client}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                        <div className="text-right">
-                          <span className="text-[13px] sm:text-[14px] font-bold text-foreground block">£{inv.amount.toLocaleString()}</span>
-                          <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${sc.color}15`, color: sc.color }}>{sc.label}</span>
-                        </div>
-                        <button onClick={() => deleteInv(inv.id)} className="h-7 w-7 rounded-lg hover:bg-destructive/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-                        </button>
-                      </div>
+            <div className="pb-10">
+              <Panel>
+                <PanelHeader label="Invoices" />
+                {invoices.length === 0 && (
+                  <EmptyState compact title="No invoices yet" body="Create your first invoice from the Create invoice tab." />
+                )}
+                {invoices.map(inv => {
+                  const sc = INV_STATUS[inv.status];
+                  return (
+                    <div key={inv.id} className="group flex w-full items-center gap-3 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-mono text-xs tabular-nums text-foreground">{inv.number}</span>
+                        <span className="block truncate text-[11.5px] text-muted-foreground">{inv.client} · {inv.items}</span>
+                      </span>
+                      <StatusBadge tone={sc.tone} label={sc.label} className="hidden sm:inline-flex" />
+                      <Money value={inv.amount} whole className="font-mono text-[13px] font-medium text-foreground" />
+                      <button onClick={() => deleteInv(inv.id)} aria-label="Delete invoice" className="flex h-7 w-7 items-center justify-center rounded-md opacity-0 transition-opacity hover:bg-risk/10 focus-visible:opacity-100 group-hover:opacity-100">
+                        <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      </button>
                     </div>
-                  </motion.div>
-                );
-              })}
+                  );
+                })}
+              </Panel>
             </div>
           )}
 
           {/* ═══ EXPENSES TAB ═══ */}
           {tab === 'expenses' && (
-            <div className="pb-10 space-y-2">
-              {expenses.map(exp => (
-                <motion.div key={exp.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="group flex items-center gap-4 p-4 rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 transition-all">
-                  <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${CAT_COLORS[exp.category]}15` }}>
-                    <TrendingDown className="h-5 w-5" style={{ color: CAT_COLORS[exp.category] }} />
+            <div className="pb-10">
+              <Panel>
+                <PanelHeader label="Expenses" />
+                {expenses.length === 0 && (
+                  <EmptyState compact title="No expenses recorded" body="Expenses you add will appear here." />
+                )}
+                {expenses.map(exp => (
+                  <div key={exp.id} className="group flex w-full items-center gap-3 border-t border-border/60 px-4 py-2.5 first:border-t-0">
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[13px] font-[450] text-foreground">{exp.title}</span>
+                      <span className="block truncate text-[11.5px] text-muted-foreground">{exp.date} · {exp.category}</span>
+                    </span>
+                    <Money value={exp.amount} whole className="font-mono text-[13px] font-medium text-foreground" />
+                    <button onClick={() => deleteExp(exp.id)} aria-label="Delete expense" className="flex h-7 w-7 items-center justify-center rounded-md opacity-0 transition-opacity hover:bg-risk/10 focus-visible:opacity-100 group-hover:opacity-100">
+                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-[12px] font-semibold text-foreground block truncate">{exp.title}</span>
-                    <span className="text-[10px] text-muted-foreground/45">{exp.date} · {exp.category}</span>
-                  </div>
-                  <span className="text-[13px] font-bold text-foreground shrink-0">£{exp.amount.toLocaleString()}</span>
-                  <button onClick={() => deleteExp(exp.id)} className="h-7 w-7 rounded-lg hover:bg-destructive/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                    <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  </button>
-                </motion.div>
-              ))}
+                ))}
+              </Panel>
             </div>
           )}
 
@@ -633,16 +622,16 @@ export default function OfficeInvoices() {
             <div className="pb-10">
               {/* Template Selection */}
               <div className="mb-8">
-                <h2 className="text-lg font-bold text-foreground mb-1">Choose a Style</h2>
-                <p className="text-sm text-muted-foreground/50 mb-5">Select a visual template for your invoice. You can customise everything afterwards.</p>
+                <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-foreground mb-0.5">Choose a style</h2>
+                <p className="text-[13px] text-muted-foreground mb-4">Select a visual template for your invoice. You can customise everything afterwards.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
-                  {PREMIUM_TEMPLATES.map((t, i) => (
-                    <motion.button key={t.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+                  {PREMIUM_TEMPLATES.map(t => (
+                    <button key={t.id}
                       onClick={() => { setSelectedTemplate(t); setCreatorStep('edit'); }}
-                      className={cn("group relative p-4 rounded-2xl border-2 transition-all text-left hover:shadow-xl hover:-translate-y-1",
-                        selectedTemplate.id === t.id ? "border-foreground shadow-lg" : "border-border/20 hover:border-border/50")}>
-                      {/* Mini preview */}
-                      <div className="rounded-xl overflow-hidden mb-3 aspect-[3/4] relative" style={{ background: t.previewBg }}>
+                      className={cn("group relative rounded-[10px] border bg-card p-3 text-left transition-colors duration-150",
+                        selectedTemplate.id === t.id ? "border-primary ring-1 ring-primary/40" : "border-border/60 hover:border-border")}>
+                      {/* Mini document preview */}
+                      <div className="rounded-md overflow-hidden mb-2.5 aspect-[3/4] relative border border-border/40" style={{ background: t.previewBg }}>
                         <div className="absolute inset-x-0 top-0 h-[30%]" style={t.headerStyle === 'dark' ? { background: t.accent } : t.headerStyle === 'bold-bar' ? { background: `linear-gradient(135deg, ${t.accent}, ${t.accent}cc)` } : t.headerStyle === 'gradient' ? { background: `linear-gradient(135deg, ${t.accent}22, ${t.accent}08)` } : {}} />
                         {t.headerStyle === 'border-left' && <div className="absolute left-0 top-0 bottom-0 w-1.5" style={{ background: t.accent }} />}
                         {t.headerStyle === 'corner-accent' && <div className="absolute top-0 right-0 w-8 h-8 rounded-bl-2xl" style={{ background: t.accent }} />}
@@ -662,67 +651,67 @@ export default function OfficeInvoices() {
                           </div>
                         </div>
                       </div>
-                      <span className="text-[12px] font-bold text-foreground block">{t.name}</span>
-                      <span className="text-[10px] text-muted-foreground/50">{t.description}</span>
-                    </motion.button>
+                      <span className="text-[12px] font-[550] text-foreground block">{t.name}</span>
+                      <span className="text-[10.5px] text-muted-foreground">{t.description}</span>
+                    </button>
                   ))}
                 </div>
               </div>
 
               {/* Pre-built Invoice Presets */}
               <div>
-                <h2 className="text-lg font-bold text-foreground mb-1">Start from a Template</h2>
-                <p className="text-sm text-muted-foreground/50 mb-5">Professional invoices ready to customise. Click to load and edit.</p>
+                <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-foreground mb-0.5">Start from a template</h2>
+                <p className="text-[13px] text-muted-foreground mb-4">Professional invoices ready to customise. Click to load and edit.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-                  {INVOICE_PRESETS.map((preset, i) => {
+                  {INVOICE_PRESETS.map(preset => {
                     const presetTotal = preset.items.reduce((s, it) => s + it.quantity * it.rate, 0);
                     const presetTax = presetTotal * (preset.taxRate / 100);
                     return (
-                      <motion.button key={preset.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.04 }}
+                      <button key={preset.id}
                         onClick={() => loadPreset(preset)}
-                        className="group p-5 rounded-2xl border border-border/20 bg-card/40 hover:border-border/50 hover:shadow-xl hover:-translate-y-1 transition-all text-left">
+                        className="group rounded-[10px] border border-border/60 bg-card p-4 text-left transition-colors duration-150 hover:border-border">
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform" style={{ background: `${preset.color}12` }}>
-                            <preset.icon className="h-5 w-5" style={{ color: preset.color }} />
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+                            <preset.icon className="h-4 w-4 text-muted-foreground" />
                           </div>
                           <div className="min-w-0">
-                            <span className="text-[13px] font-bold text-foreground block truncate">{preset.name}</span>
-                            <span className="text-[10px] text-muted-foreground/45">{preset.description}</span>
+                            <span className="text-[13px] font-[550] text-foreground block truncate">{preset.name}</span>
+                            <span className="text-[10.5px] text-muted-foreground">{preset.description}</span>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-muted-foreground/40">{preset.items.length} line items</span>
-                          <span className="text-[13px] font-bold" style={{ color: preset.color }}>{fmtMoney(presetTotal + presetTax, preset.currency)}</span>
+                          <span className="text-[10.5px] text-muted-foreground">{preset.items.length} line items</span>
+                          <span className="font-mono text-[13px] font-medium tabular-nums text-foreground">{fmtMoney(presetTotal + presetTax, preset.currency)}</span>
                         </div>
-                        <div className="mt-2 pt-2 border-t border-border/10">
-                          <span className="text-[9px] text-muted-foreground/35">{preset.clientName}</span>
+                        <div className="mt-2 border-t border-border/60 pt-2">
+                          <span className="text-[10px] text-muted-foreground">{preset.clientName}</span>
                         </div>
-                      </motion.button>
+                      </button>
                     );
                   })}
                 </div>
               </div>
 
               {/* Blank Invoice */}
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-6 text-center">
-                <Button variant="outline" className="h-12 px-8 rounded-2xl gap-2 text-sm font-semibold" onClick={() => {
+              <div className="mt-6 text-center">
+                <Button variant="outline" className="h-10 gap-2 rounded-lg px-6 text-[13px] font-medium" onClick={() => {
                   setLineItems([{ id: '1', description: '', quantity: 1, rate: 0 }]);
                   setClientName(''); setClientAddress(''); setClientEmail('');
                   setCompanyName('Your Company'); setCompanyAddress('123 Business St, London, UK');
                   setCompanyEmail('hello@company.com'); setInvoiceNotes(''); setTaxRate(20); setCurrency('GBP');
                   setCreatorStep('edit');
                 }}>
-                  <Plus className="h-4 w-4" /> Start from Blank
+                  <Plus className="h-4 w-4" /> Start from blank
                 </Button>
-              </motion.div>
+              </div>
             </div>
           )}
 
           {tab === 'creator' && creatorStep === 'edit' && (
             <div className="pb-10">
               {/* Back to templates */}
-              <button onClick={() => setCreatorStep('templates')} className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/50 hover:text-foreground mb-4 transition-colors">
-                <ArrowLeft className="h-3 w-3" /> Back to Templates
+              <button onClick={() => setCreatorStep('templates')} className="mb-4 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground">
+                <ArrowLeft className="h-3 w-3" /> Back to templates
               </button>
 
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
@@ -730,12 +719,12 @@ export default function OfficeInvoices() {
                 <div className="lg:col-span-3 space-y-6">
                   {/* Template selector strip */}
                   <div>
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 mb-2">Template Style</h3>
+                    <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-2">Template style</h3>
                     <div className="flex flex-wrap gap-1.5">
                       {PREMIUM_TEMPLATES.map(t => (
                         <button key={t.id} onClick={() => setSelectedTemplate(t)}
-                          className={cn("shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-[11px] font-medium",
-                            selectedTemplate.id === t.id ? "border-foreground bg-foreground/5 text-foreground" : "border-border/20 text-muted-foreground/50 hover:border-border/40")}>
+                          className={cn("flex shrink-0 items-center gap-2 rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-colors duration-150",
+                            selectedTemplate.id === t.id ? "border-primary bg-card text-foreground" : "border-border/60 text-muted-foreground hover:border-border")}>
                           <div className="h-3 w-3 rounded-full" style={{ background: t.accent }} />
                           {t.name}
                         </button>
@@ -746,23 +735,23 @@ export default function OfficeInvoices() {
                   {/* Company & Client — side by side */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                     <div className="space-y-2.5">
-                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 flex items-center gap-1.5"><Building2 className="h-3 w-3" /> From</h4>
-                      <div className="p-4 rounded-2xl bg-card/40 border border-border/15 space-y-2">
-                        <Input placeholder="Company / Your Name" value={companyName} onChange={e => setCompanyName(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
-                        <Input placeholder="Address" value={companyAddress} onChange={e => setCompanyAddress(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
+                      <h4 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5"><Building2 className="h-3 w-3" /> From</h4>
+                      <div className="space-y-2 rounded-[10px] border border-border/60 bg-card p-4">
+                        <Input placeholder="Company or your name" value={companyName} onChange={e => setCompanyName(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
+                        <Input placeholder="Address" value={companyAddress} onChange={e => setCompanyAddress(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
                         <div className="grid grid-cols-2 gap-2">
-                          <Input placeholder="Email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
-                          <Input placeholder="Phone" value={companyPhone} onChange={e => setCompanyPhone(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
+                          <Input placeholder="Email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
+                          <Input placeholder="Phone" value={companyPhone} onChange={e => setCompanyPhone(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
                         </div>
-                        <Input placeholder="VAT Number (optional)" value={companyVat} onChange={e => setCompanyVat(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
+                        <Input placeholder="VAT number (optional)" value={companyVat} onChange={e => setCompanyVat(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
                       </div>
                     </div>
                     <div className="space-y-2.5">
-                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 flex items-center gap-1.5"><Send className="h-3 w-3" /> Bill To</h4>
-                      <div className="p-4 rounded-2xl bg-card/40 border border-border/15 space-y-2">
-                        <Input placeholder="Client Name *" value={clientName} onChange={e => setClientName(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
-                        <Input placeholder="Client Address" value={clientAddress} onChange={e => setClientAddress(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
-                        <Input placeholder="Client Email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
+                      <h4 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground flex items-center gap-1.5"><Send className="h-3 w-3" /> Bill to</h4>
+                      <div className="space-y-2 rounded-[10px] border border-border/60 bg-card p-4">
+                        <Input placeholder="Client name (required)" value={clientName} onChange={e => setClientName(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
+                        <Input placeholder="Client address" value={clientAddress} onChange={e => setClientAddress(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
+                        <Input placeholder="Client email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
                       </div>
                     </div>
                   </div>
@@ -770,20 +759,20 @@ export default function OfficeInvoices() {
                   {/* Invoice Details Row */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 block mb-1.5"><Hash className="h-3 w-3 inline mr-1" />Invoice #</label>
-                      <Input value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
+                      <label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-1.5"><Hash className="h-3 w-3 inline mr-1" />Invoice no.</label>
+                      <Input value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 block mb-1.5"><Calendar className="h-3 w-3 inline mr-1" />Date</label>
-                      <Input type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
+                      <label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-1.5"><Calendar className="h-3 w-3 inline mr-1" />Date</label>
+                      <Input type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 block mb-1.5"><Calendar className="h-3 w-3 inline mr-1" />Due Date</label>
-                      <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="h-9 rounded-xl text-sm border-border/20 bg-background/50" />
+                      <label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-1.5"><Calendar className="h-3 w-3 inline mr-1" />Due date</label>
+                      <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} className="h-9 rounded-lg border-border/60 bg-card text-sm" />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Currency</label>
-                      <select value={currency} onChange={e => setCurrency(e.target.value)} className="h-9 w-full rounded-xl text-sm border border-border/20 bg-background/50 px-3">
+                      <label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-1.5">Currency</label>
+                      <select value={currency} onChange={e => setCurrency(e.target.value)} className="h-9 w-full rounded-lg border border-border/60 bg-card px-3 text-sm">
                         <option value="GBP">£ GBP</option>
                         <option value="USD">$ USD</option>
                         <option value="EUR">€ EUR</option>
@@ -793,33 +782,33 @@ export default function OfficeInvoices() {
 
                   {/* Line Items — Table Style */}
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 mb-2">Line Items</h4>
-                    <div className="rounded-2xl border border-border/15 overflow-hidden overflow-x-auto">
+                    <h4 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-2">Line items</h4>
+                    <div className="overflow-hidden overflow-x-auto rounded-[10px] border border-border/60">
                       {/* Table header - hidden on mobile */}
-                      <div className="hidden sm:grid grid-cols-[1fr_70px_90px_90px_36px] gap-2 px-4 py-2.5 bg-muted/30 border-b border-border/10">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40">Description</span>
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40 text-center">Qty</span>
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40 text-right">Rate</span>
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40 text-right">Amount</span>
+                      <div className="hidden sm:grid grid-cols-[1fr_70px_90px_90px_36px] gap-2 px-4 py-2.5 bg-sunken border-b border-border/60">
+                        <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">Description</span>
+                        <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground text-center">Qty</span>
+                        <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground text-right">Rate</span>
+                        <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground text-right">Amount</span>
                         <span />
                       </div>
                       {/* Rows - card layout on mobile, table on desktop */}
                       {lineItems.map((item, idx) => (
-                        <div key={item.id} className={cn("px-3 sm:px-4 py-2.5 sm:py-2 items-center group", idx % 2 === 0 && "bg-card/30")}>
+                        <div key={item.id} className={cn("px-3 sm:px-4 py-2.5 sm:py-2 items-center group", idx % 2 === 0 && "bg-sunken/40")}>
                           {/* Mobile layout */}
                           <div className="sm:hidden space-y-2">
-                            <Input placeholder="Description" value={item.description} onChange={e => updateLineItem(item.id, 'description', e.target.value)} className="h-9 rounded-lg text-sm border-border/15 bg-transparent" />
+                            <Input placeholder="Description" value={item.description} onChange={e => updateLineItem(item.id, 'description', e.target.value)} className="h-9 rounded-md border-border/60 bg-transparent text-sm" />
                             <div className="flex items-center gap-2">
                               <div className="flex-1">
                                 <label className="text-[9px] text-muted-foreground/40 block mb-0.5">Qty</label>
-                                <Input type="number" value={item.quantity || ''} onChange={e => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 0)} className="h-8 rounded-lg text-sm text-center border-border/15 bg-transparent" />
+                                <Input type="number" value={item.quantity || ''} onChange={e => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 0)} className="h-8 rounded-md border-border/60 bg-transparent text-center text-sm tabular-nums" />
                               </div>
                               <div className="flex-1">
                                 <label className="text-[9px] text-muted-foreground/40 block mb-0.5">Rate</label>
-                                <Input type="number" value={item.rate || ''} onChange={e => updateLineItem(item.id, 'rate', parseFloat(e.target.value) || 0)} className="h-8 rounded-lg text-sm text-right border-border/15 bg-transparent" />
+                                <Input type="number" value={item.rate || ''} onChange={e => updateLineItem(item.id, 'rate', parseFloat(e.target.value) || 0)} className="h-8 rounded-md border-border/60 bg-transparent text-right text-sm tabular-nums" />
                               </div>
                               <div className="shrink-0 text-right pt-3">
-                                <span className="text-[12px] font-bold text-foreground">{fmtMoney(item.quantity * item.rate, currency)}</span>
+                                <span className="font-mono text-[12px] font-medium tabular-nums text-foreground">{fmtMoney(item.quantity * item.rate, currency)}</span>
                               </div>
                               {lineItems.length > 1 && (
                                 <button onClick={() => removeLineItem(item.id)} className="h-8 w-8 rounded-lg hover:bg-destructive/20 flex items-center justify-center shrink-0 mt-3">
@@ -830,10 +819,10 @@ export default function OfficeInvoices() {
                           </div>
                           {/* Desktop layout */}
                           <div className="hidden sm:grid grid-cols-[1fr_70px_90px_90px_36px] gap-2 items-center">
-                            <Input placeholder="Description" value={item.description} onChange={e => updateLineItem(item.id, 'description', e.target.value)} className="h-8 rounded-lg text-sm border-border/15 bg-transparent" />
-                            <Input type="number" value={item.quantity || ''} onChange={e => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 0)} className="h-8 rounded-lg text-sm text-center border-border/15 bg-transparent" />
-                            <Input type="number" value={item.rate || ''} onChange={e => updateLineItem(item.id, 'rate', parseFloat(e.target.value) || 0)} className="h-8 rounded-lg text-sm text-right border-border/15 bg-transparent" />
-                            <span className="text-[12px] font-bold text-foreground text-right">{fmtMoney(item.quantity * item.rate, currency)}</span>
+                            <Input placeholder="Description" value={item.description} onChange={e => updateLineItem(item.id, 'description', e.target.value)} className="h-8 rounded-md border-border/60 bg-transparent text-sm" />
+                            <Input type="number" value={item.quantity || ''} onChange={e => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 0)} className="h-8 rounded-md border-border/60 bg-transparent text-center text-sm tabular-nums" />
+                            <Input type="number" value={item.rate || ''} onChange={e => updateLineItem(item.id, 'rate', parseFloat(e.target.value) || 0)} className="h-8 rounded-md border-border/60 bg-transparent text-right text-sm tabular-nums" />
+                            <span className="text-right font-mono text-[12px] font-medium tabular-nums text-foreground">{fmtMoney(item.quantity * item.rate, currency)}</span>
                             {lineItems.length > 1 ? (
                               <button onClick={() => removeLineItem(item.id)} className="h-7 w-7 rounded-lg hover:bg-destructive/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <X className="h-3 w-3 text-muted-foreground" />
@@ -843,30 +832,30 @@ export default function OfficeInvoices() {
                         </div>
                       ))}
                     </div>
-                    <Button variant="ghost" size="sm" className="mt-2 h-8 gap-1 text-[11px] rounded-xl" onClick={addLineItem}>
-                      <Plus className="h-3 w-3" /> Add Line Item
+                    <Button variant="ghost" size="sm" className="mt-2 h-8 gap-1 rounded-lg text-[11px]" onClick={addLineItem}>
+                      <Plus className="h-3 w-3" /> Add line item
                     </Button>
                   </div>
 
                   {/* Tax & Notes */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Tax Rate (%)</label>
-                      <Input type="number" value={taxRate} onChange={e => setTaxRate(parseFloat(e.target.value) || 0)} className="h-9 rounded-xl text-sm w-24 border-border/20 bg-background/50" />
+                      <label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-1.5">Tax rate (%)</label>
+                      <Input type="number" value={taxRate} onChange={e => setTaxRate(parseFloat(e.target.value) || 0)} className="h-9 w-24 rounded-lg border-border/60 bg-card text-sm" />
                     </div>
                     <div className="col-span-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 block mb-1.5">Notes / Terms</label>
+                      <label className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground block mb-1.5">Notes and terms</label>
                       <textarea value={invoiceNotes} onChange={e => setInvoiceNotes(e.target.value)} placeholder="Payment terms, bank details, notes…"
-                        className="w-full h-20 rounded-xl border border-border/20 bg-background/50 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring" />
+                        className="h-20 w-full resize-none rounded-lg border border-border/60 bg-card px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
                     </div>
                   </div>
 
                   {/* Actions */}
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2">
-                    <Button className="h-10 sm:h-11 px-4 sm:px-6 gap-2 rounded-xl text-xs sm:text-sm font-semibold flex-1 sm:flex-none" onClick={saveInvoice}><Save className="h-4 w-4" /> Save Draft</Button>
-                    <Button variant="outline" className="h-10 sm:h-11 px-4 sm:px-6 gap-2 rounded-xl text-xs sm:text-sm font-semibold flex-1 sm:flex-none" onClick={exportInvoicePDF}><Download className="h-4 w-4" /> Export PDF</Button>
-                    <Button variant="ghost" className="h-10 sm:h-11 px-4 sm:px-6 gap-2 rounded-xl text-xs sm:text-sm font-semibold hidden sm:flex" onClick={() => { exportInvoicePDF(); saveInvoice(); }}>
-                      <Printer className="h-4 w-4" /> Save & Export
+                    <Button className="h-9 flex-1 gap-2 rounded-lg px-4 text-xs font-medium sm:flex-none sm:px-5 sm:text-[13px]" onClick={saveInvoice}><Save className="h-4 w-4" /> Save draft</Button>
+                    <Button variant="outline" className="h-9 flex-1 gap-2 rounded-lg px-4 text-xs font-medium sm:flex-none sm:px-5 sm:text-[13px]" onClick={exportInvoicePDF}><Download className="h-4 w-4" /> Export PDF</Button>
+                    <Button variant="ghost" className="hidden h-9 gap-2 rounded-lg px-4 text-xs font-medium sm:flex sm:px-5 sm:text-[13px]" onClick={() => { exportInvoicePDF(); saveInvoice(); }}>
+                      <Printer className="h-4 w-4" /> Save and export
                     </Button>
                   </div>
                 </div>
@@ -874,8 +863,8 @@ export default function OfficeInvoices() {
                 {/* Right: Live Preview */}
                 <div className="lg:col-span-2 hidden lg:block">
                   <div className="sticky top-4">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 mb-2 flex items-center gap-1.5"><Eye className="h-3 w-3" /> Live Preview</h4>
-                    <div className="rounded-2xl border border-border/20 bg-white shadow-2xl overflow-hidden" style={{ minHeight: 580 }}>
+                    <h4 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-2 flex items-center gap-1.5"><Eye className="h-3 w-3" /> Live preview</h4>
+                    <div className="overflow-hidden rounded-[10px] border border-border/60 bg-white" style={{ minHeight: 580 }}>
                       {/* Template-driven header */}
                       {selectedTemplate.headerStyle === 'bold-bar' || selectedTemplate.headerStyle === 'dark' ? (
                         <div className="px-6 py-5" style={{ background: selectedTemplate.accent }}>
@@ -980,28 +969,28 @@ export default function OfficeInvoices() {
           {tab === 'pdf-editor' && (
             <div className="pb-10">
               {!pdfDoc ? (
-                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                  className="max-w-md mx-auto p-10 rounded-3xl border-2 border-dashed border-border/30 bg-card/30 flex flex-col items-center gap-4 hover:border-primary/30 transition-all cursor-pointer mt-8"
+                <div
+                  className="mx-auto mt-8 flex max-w-md cursor-pointer flex-col items-center gap-3 rounded-[10px] border border-dashed border-border bg-card p-10 transition-colors duration-150 hover:border-primary/50"
                   onClick={() => pdfFileRef.current?.click()}
                   onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f?.type === 'application/pdf') loadPDF(f); }}>
-                  <div className="h-16 w-16 rounded-2xl bg-destructive/10 flex items-center justify-center"><Upload className="h-8 w-8 text-destructive" /></div>
-                  <h2 className="text-lg font-bold text-foreground">Upload a PDF</h2>
-                  <p className="text-sm text-muted-foreground/60 text-center">Drag & drop or click to browse. Edit, annotate, then save.</p>
-                  <Button variant="outline" className="rounded-xl">Choose File</Button>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-border/60 bg-sunken"><Upload className="h-5 w-5 text-muted-foreground" /></div>
+                  <h2 className="text-[15px] font-semibold text-foreground">Upload a PDF</h2>
+                  <p className="text-center text-[13px] text-muted-foreground">Drag and drop or click to browse. Edit, annotate, then save.</p>
+                  <Button variant="outline" className="h-8 rounded-lg text-xs">Choose file</Button>
                   <input ref={pdfFileRef} type="file" accept="application/pdf" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f?.type === 'application/pdf') loadPDF(f); }} />
-                </motion.div>
+                </div>
               ) : (
                 <div>
-                  <div className="flex items-center gap-2 mb-4 p-2 rounded-xl bg-card/50 border border-border/20 flex-wrap">
+                  <div className="mb-4 flex flex-wrap items-center gap-2 rounded-[10px] border border-border/60 bg-card p-2">
                     <Button variant="ghost" size="sm" className="h-8 rounded-lg text-xs" onClick={() => { setPdfDoc(null); setPdfFile(null); setPdfAnnotations([]); }}>
                       <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Back
                     </Button>
                     <span className="text-xs font-medium text-foreground truncate max-w-[150px]">{pdfFile?.name}</span>
-                    <div className="h-4 w-px bg-border/40" />
-                    <div className="flex items-center gap-0.5 bg-muted/50 p-0.5 rounded-lg">
+                    <div className="h-4 w-px bg-border/60" />
+                    <div className="flex items-center gap-0.5 rounded-lg border border-border/60 bg-sunken p-0.5">
                       {PDF_TOOLS.map(t => (
                         <button key={t.id} onClick={() => setPdfTool(t.id)}
-                          className={cn("h-7 w-7 rounded-md flex items-center justify-center transition-all", pdfTool === t.id ? "bg-background shadow-sm text-foreground" : "text-muted-foreground/60 hover:text-foreground")}>
+                          className={cn("flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150", pdfTool === t.id ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground")}>
                           <t.icon className="h-3.5 w-3.5" />
                         </button>
                       ))}
@@ -1009,30 +998,30 @@ export default function OfficeInvoices() {
                     <div className="flex gap-0.5">
                       {PDF_COLORS.map(c => (
                         <button key={c} onClick={() => setPdfColor(c)}
-                          className={cn("h-5 w-5 rounded-full border-2 transition-all", pdfColor === c ? "border-foreground scale-110" : "border-transparent")}
+                          className={cn("h-5 w-5 rounded-full border-2 transition-colors duration-150", pdfColor === c ? "border-foreground" : "border-transparent")}
                           style={{ background: c }} />
                       ))}
                     </div>
-                    <div className="h-4 w-px bg-border/40" />
+                    <div className="h-4 w-px bg-border/60" />
                     {pdfTotal > 1 && (
                       <div className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" className="h-7 w-7" disabled={pdfPage <= 1} onClick={() => { setPdfPage(p => p - 1); setTimeout(renderPdfPage, 50); }}><ChevronLeft className="h-3.5 w-3.5" /></Button>
-                        <span className="text-[10px] font-mono w-10 text-center">{pdfPage}/{pdfTotal}</span>
+                        <span className="w-10 text-center font-mono text-[10px] tabular-nums">{pdfPage}/{pdfTotal}</span>
                         <Button variant="ghost" size="icon" className="h-7 w-7" disabled={pdfPage >= pdfTotal} onClick={() => { setPdfPage(p => p + 1); setTimeout(renderPdfPage, 50); }}><ChevronRight className="h-3.5 w-3.5" /></Button>
                       </div>
                     )}
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setPdfZoom(z => Math.max(50, z - 25)); setTimeout(renderPdfPage, 50); }}><ZoomOut className="h-3.5 w-3.5" /></Button>
-                    <span className="text-[10px] w-8 text-center font-mono">{pdfZoom}%</span>
+                    <span className="w-8 text-center font-mono text-[10px] tabular-nums">{pdfZoom}%</span>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setPdfZoom(z => Math.min(200, z + 25)); setTimeout(renderPdfPage, 50); }}><ZoomIn className="h-3.5 w-3.5" /></Button>
                     <div className="flex-1" />
-                    <Button variant="ghost" size="sm" className="h-8 gap-1 rounded-lg text-xs text-emerald-600" onClick={savePdfToInvoices}><Save className="h-3.5 w-3.5" /> Save</Button>
+                    <Button variant="ghost" size="sm" className="h-8 gap-1 rounded-lg text-xs" onClick={savePdfToInvoices}><Save className="h-3.5 w-3.5" /> Save</Button>
                     <Button size="sm" className="h-8 gap-1 rounded-lg text-xs" onClick={exportEditedPdf}><Download className="h-3.5 w-3.5" /> Export</Button>
                   </div>
                   <div className="flex justify-center overflow-auto">
-                    <div ref={pdfContainerRef} className="relative shadow-2xl rounded-lg bg-white"
+                    <div ref={pdfContainerRef} className="relative rounded-md border border-border/60 bg-white"
                       style={{ width: pdfPageSize.width, height: pdfPageSize.height }}
                       onClick={handlePdfCanvasClick} onMouseDown={handlePdfMouseDown} onMouseMove={handlePdfMouseMove} onMouseUp={handlePdfMouseUp} onMouseLeave={handlePdfMouseUp}>
-                      <canvas ref={pdfCanvasRef} className="absolute inset-0 rounded-lg" style={{ width: pdfPageSize.width, height: pdfPageSize.height }} />
+                      <canvas ref={pdfCanvasRef} className="absolute inset-0 rounded-md" style={{ width: pdfPageSize.width, height: pdfPageSize.height }} />
                       <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 10, width: pdfPageSize.width, height: pdfPageSize.height }}>
                         {pdfAnnotations.filter(a => a.type === 'draw' && a.page === pdfPage).map(a => (
                           <polyline key={a.id} points={a.points?.map(p => `${p.x},${p.y}`).join(' ') || ''} fill="none" stroke={a.color} strokeWidth="2" strokeLinecap="round" />
@@ -1100,37 +1089,36 @@ export default function OfficeInvoices() {
 
           {/* ═══ SUMMARY TAB ═══ */}
           {tab === 'summary' && (
-            <div className="pb-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 rounded-2xl bg-card/50 border border-border/20">
-                <h3 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-4">Invoice Status</h3>
-                <div className="space-y-3">
-                  {Object.entries(INV_STATUS).map(([key, cfg]) => {
-                    const count = invoices.filter(i => i.status === key).length;
-                    const amount = invoices.filter(i => i.status === key).reduce((s, i) => s + i.amount, 0);
-                    return (
-                      <div key={key} className="flex items-center justify-between">
-                        <span className="text-[11px] font-medium" style={{ color: cfg.color }}>{cfg.label} ({count})</span>
-                        <span className="text-[12px] font-bold text-foreground">£{amount.toLocaleString()}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="p-6 rounded-2xl bg-card/50 border border-border/20">
-                <h3 className="text-[11px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-4">Expense Categories</h3>
-                <div className="space-y-3">
-                  {Object.entries(CAT_COLORS).map(([cat, color]) => {
-                    const catTotal = expenses.filter(e => e.category === cat).reduce((s, e) => s + e.amount, 0);
-                    if (catTotal === 0) return null;
-                    return (
-                      <div key={cat} className="flex items-center justify-between">
-                        <span className="text-[11px] font-medium capitalize" style={{ color }}>{cat}</span>
-                        <span className="text-[12px] font-bold text-foreground">£{catTotal.toLocaleString()}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+            <div className="grid grid-cols-1 gap-4 pb-10 md:grid-cols-2">
+              <Panel>
+                <PanelHeader label="Invoice status" />
+                {Object.entries(INV_STATUS).map(([key, cfg]) => {
+                  const count = invoices.filter(i => i.status === key).length;
+                  const amount = invoices.filter(i => i.status === key).reduce((s, i) => s + i.amount, 0);
+                  return (
+                    <PanelRow
+                      key={key}
+                      leading={undefined}
+                      title={<StatusBadge tone={cfg.tone} label={`${cfg.label} (${count})`} />}
+                      trailing={<Money value={amount} whole className="font-mono text-[13px] font-medium text-foreground" />}
+                    />
+                  );
+                })}
+              </Panel>
+              <Panel>
+                <PanelHeader label="Expense categories" />
+                {EXP_CATEGORIES.map(cat => {
+                  const catTotal = expenses.filter(e => e.category === cat).reduce((s, e) => s + e.amount, 0);
+                  if (catTotal === 0) return null;
+                  return (
+                    <PanelRow
+                      key={cat}
+                      title={<span className="capitalize">{cat}</span>}
+                      trailing={<Money value={catTotal} whole className="font-mono text-[13px] font-medium text-foreground" />}
+                    />
+                  );
+                })}
+              </Panel>
             </div>
           )}
         </div>

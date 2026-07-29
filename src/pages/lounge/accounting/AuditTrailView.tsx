@@ -44,9 +44,9 @@ interface RecalcRow {
 }
 
 const ACTION_META: Record<string, { icon: any; color: string; label: string }> = {
-  INSERT: { icon: Plus,   color: 'text-emerald-500', label: 'Created' },
-  UPDATE: { icon: Pencil, color: 'text-blue-500',    label: 'Updated' },
-  DELETE: { icon: Trash2, color: 'text-red-500',     label: 'Deleted' },
+  INSERT: { icon: Plus,   color: 'text-ok', label: 'Created' },
+  UPDATE: { icon: Pencil, color: 'text-attend',    label: 'Updated' },
+  DELETE: { icon: Trash2, color: 'text-risk',     label: 'Deleted' },
 };
 
 const ENTITY_LABEL: Record<string, string> = {
@@ -159,11 +159,11 @@ export default function AuditTrailView({ open, onClose, orgId, orgName }: Props)
       <DialogContent className="max-w-5xl max-h-[92vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <History className="h-4 w-4 text-white" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-sunken">
+              <History className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
-              <DialogTitle>Audit trail — {orgName}</DialogTitle>
+              <DialogTitle>Audit trail · {orgName}</DialogTitle>
               <DialogDescription>Every ledger change and every report recalculation, in real time.</DialogDescription>
             </div>
             <Button size="sm" variant="ghost" className="ml-auto" onClick={load} disabled={loading}>
@@ -174,10 +174,10 @@ export default function AuditTrailView({ open, onClose, orgId, orgName }: Props)
 
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4 flex-1 overflow-hidden">
           {/* --- Ledger changes --- */}
-          <div className="flex flex-col rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
-            <div className="p-3 border-b border-border/30 space-y-2">
+          <div className="flex flex-col rounded-[10px] border border-border/60 bg-card overflow-hidden">
+            <div className="p-3 border-b border-border/60 space-y-2">
               <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-brand" />
+                <FileText className="h-4 w-4 text-muted-foreground" />
                 <div className="text-sm font-bold flex-1">Ledger changes</div>
                 <Badge variant="secondary" className="text-[10px]">{filtered.length}</Badge>
               </div>
@@ -206,7 +206,7 @@ export default function AuditTrailView({ open, onClose, orgId, orgName }: Props)
                 </Select>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto divide-y divide-border/20">
+            <div className="flex-1 overflow-y-auto divide-y divide-border/60">
               {filtered.length === 0 && !loading && (
                 <div className="p-8 text-center text-xs text-muted-foreground">No ledger changes recorded yet.</div>
               )}
@@ -215,7 +215,7 @@ export default function AuditTrailView({ open, onClose, orgId, orgName }: Props)
                 const Icon = meta.icon;
                 const fields = changedFields(row);
                 return (
-                  <div key={row.id} className="p-3 hover:bg-muted/30">
+                  <div key={row.id} className="p-3 hover:bg-foreground/[0.025]">
                     <div className="flex items-start gap-2.5">
                       <div className={cn('h-7 w-7 rounded-lg bg-muted/60 flex items-center justify-center shrink-0', meta.color)}>
                         <Icon className="h-3.5 w-3.5" />
@@ -235,7 +235,7 @@ export default function AuditTrailView({ open, onClose, orgId, orgName }: Props)
                         {fields.length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1">
                             {fields.map(f => (
-                              <span key={f} className="text-[10px] font-mono bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded">{f}</span>
+                              <span key={f} className="rounded border border-border/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">{f}</span>
                             ))}
                           </div>
                         )}
@@ -248,13 +248,13 @@ export default function AuditTrailView({ open, onClose, orgId, orgName }: Props)
           </div>
 
           {/* --- Report recalculations --- */}
-          <div className="flex flex-col rounded-2xl border border-border/30 bg-card/40 overflow-hidden">
-            <div className="p-3 border-b border-border/30 flex items-center gap-2">
-              <Timer className="h-4 w-4 text-amber-500" />
+          <div className="flex flex-col rounded-[10px] border border-border/60 bg-card overflow-hidden">
+            <div className="p-3 border-b border-border/60 flex items-center gap-2">
+              <Timer className="h-4 w-4 text-attend" />
               <div className="text-sm font-bold flex-1">Report recalculations</div>
               <Badge variant="secondary" className="text-[10px]">{recalcs.length}</Badge>
             </div>
-            <div className="flex-1 overflow-y-auto divide-y divide-border/20">
+            <div className="flex-1 overflow-y-auto divide-y divide-border/60">
               {recalcs.length === 0 && !loading && (
                 <div className="p-8 text-center text-xs text-muted-foreground">
                   No recalculations yet. Open a report to record one.

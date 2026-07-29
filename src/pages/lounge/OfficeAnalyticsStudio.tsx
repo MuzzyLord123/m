@@ -1,27 +1,47 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, BarChart3, TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart,
-  Eye, Download, Plus, Filter, Calendar, RefreshCw, Maximize2, Settings,
-  PieChart, Activity, Layers, Globe, Target, Zap, ArrowUpRight, ArrowDownRight,
-  ChevronDown, Search, Star, Clock, MoreHorizontal, Share2, Bell, Palette,
-  Trash2, Edit2, X, Check
+  ArrowLeft, BarChart3, TrendingUp, DollarSign,
+  Download, Plus, RefreshCw,
+  Layers, Globe, Zap,
+  Search, Star, Trash2, Edit2, X, Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   AreaChart, Area, BarChart, Bar, PieChart as RPieChart, Pie, Cell,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ScatterChart, Scatter, ZAxis, Treemap,
   ComposedChart
 } from 'recharts';
 import { toast } from 'sonner';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
+import {
+  TemperamentProvider, Panel, PanelHeader, PanelRow, StatusDot, StatusBadge,
+  DataTable, Money, type Column, type Tone,
+} from '@/components/platform';
+
+/* ─── Chart tokens: every series resolves to the platform palette ─── */
+const C = {
+  primary: 'hsl(var(--primary))',
+  gold: 'hsl(var(--gold))',
+  ok: 'hsl(var(--ok))',
+  attend: 'hsl(var(--attend))',
+  risk: 'hsl(var(--risk))',
+  muted: 'hsl(var(--muted-foreground))',
+  border: 'hsl(var(--border))',
+};
+const TICK = { fontSize: 10, fill: C.muted };
+const TICK_SM = { fontSize: 9, fill: C.muted };
+const TOOLTIP_STYLE = {
+  background: 'hsl(var(--popover))',
+  border: '1px solid hsl(var(--border))',
+  borderRadius: '10px',
+  fontSize: '11px',
+};
 
 /* ─── Data generators per time range ─── */
 function generateRevenueData(range: TimeRange) {
@@ -75,20 +95,20 @@ function generateKPIs(range: TimeRange): KPI[] {
   const rev = Math.round(478230 * mult);
   const users = Math.round(12847 * (range === '24h' ? 0.08 : range === '7d' ? 0.3 : range === '30d' ? 1 : range === '90d' ? 1.5 : 2));
   return [
-    { label: 'Total Revenue', value: `£${rev.toLocaleString()}`, change: 12.5, icon: DollarSign, color: '#10b981', sparkline: [42, 48, 55, 51, 63, 72, 68, 78].map(v => v * mult) },
-    { label: 'Active Users', value: users.toLocaleString(), change: 8.3, icon: Users, color: '#6366f1', sparkline: [8200, 9100, 9800, 10200, 11000, 11800, 12200, 12847].map(v => Math.round(v * mult / 10)) },
-    { label: 'Conversion Rate', value: '3.24%', change: -0.8, icon: Target, color: '#f59e0b', sparkline: [3.8, 3.5, 3.2, 3.4, 3.1, 3.3, 3.0, 3.24] },
-    { label: 'Avg Order Value', value: '£127.50', change: 5.2, icon: ShoppingCart, color: '#06b6d4', sparkline: [105, 110, 115, 118, 120, 122, 125, 127.5] },
-    { label: 'Page Views', value: `${(2.4 * mult).toFixed(1)}M`, change: 18.7, icon: Eye, color: '#ec4899', sparkline: [1.6, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4].map(v => v * mult) },
-    { label: 'Bounce Rate', value: '34.2%', change: -3.1, icon: Activity, color: '#ef4444', sparkline: [40, 38, 37, 36, 35.5, 35, 34.5, 34.2] },
+    { label: 'Total revenue', value: `£${rev.toLocaleString()}`, change: 12.5 },
+    { label: 'Active users', value: users.toLocaleString(), change: 8.3 },
+    { label: 'Conversion rate', value: '3.24%', change: -0.8 },
+    { label: 'Avg order value', value: '£127.50', change: 5.2 },
+    { label: 'Page views', value: `${(2.4 * mult).toFixed(1)}M`, change: 18.7 },
+    { label: 'Bounce rate', value: '34.2%', change: -3.1 },
   ];
 }
 
 const PIE_DATA = [
-  { name: 'Enterprise', value: 42, color: '#6366f1' },
-  { name: 'Growth', value: 28, color: '#06b6d4' },
-  { name: 'Professional', value: 18, color: '#10b981' },
-  { name: 'Starter', value: 12, color: '#f59e0b' },
+  { name: 'Enterprise', value: 42, color: C.primary },
+  { name: 'Growth', value: 28, color: C.gold },
+  { name: 'Professional', value: 18, color: C.ok },
+  { name: 'Starter', value: 12, color: C.muted },
 ];
 
 /* ─── Sales data ─── */
@@ -104,11 +124,11 @@ function generateSalesData() {
 
 function generateFunnelData() {
   return [
-    { stage: 'Leads', value: 10000, color: '#6366f1' },
-    { stage: 'Qualified', value: 6200, color: '#06b6d4' },
-    { stage: 'Proposal', value: 3800, color: '#10b981' },
-    { stage: 'Negotiation', value: 2100, color: '#f59e0b' },
-    { stage: 'Closed Won', value: 1400, color: '#22c55e' },
+    { stage: 'Leads', value: 10000, color: 'hsl(var(--primary))' },
+    { stage: 'Qualified', value: 6200, color: 'hsl(var(--primary) / 0.8)' },
+    { stage: 'Proposal', value: 3800, color: 'hsl(var(--primary) / 0.65)' },
+    { stage: 'Negotiation', value: 2100, color: 'hsl(var(--primary) / 0.5)' },
+    { stage: 'Closed won', value: 1400, color: 'hsl(var(--ok))' },
   ];
 }
 
@@ -124,11 +144,11 @@ function generateCampaignData() {
 }
 
 const CHANNEL_PIE = [
-  { name: 'Organic Search', value: 38, color: '#10b981' },
-  { name: 'Paid Social', value: 22, color: '#6366f1' },
-  { name: 'Direct', value: 18, color: '#06b6d4' },
-  { name: 'Referral', value: 12, color: '#f59e0b' },
-  { name: 'Email', value: 10, color: '#ec4899' },
+  { name: 'Organic search', value: 38, color: C.primary },
+  { name: 'Paid social', value: 22, color: C.gold },
+  { name: 'Direct', value: 18, color: C.ok },
+  { name: 'Referral', value: 12, color: C.attend },
+  { name: 'Email', value: 10, color: C.muted },
 ];
 
 /* ─── Product data ─── */
@@ -155,16 +175,16 @@ function generateFinanceData() {
       { month: 'Feb', inflow: 88000, outflow: 54000, net: 34000 },
     ],
     expenses: [
-      { category: 'Salaries', value: 45, color: '#6366f1' },
-      { category: 'Marketing', value: 18, color: '#ec4899' },
-      { category: 'Infrastructure', value: 15, color: '#06b6d4' },
-      { category: 'Office', value: 10, color: '#f59e0b' },
-      { category: 'Other', value: 12, color: '#94a3b8' },
+      { category: 'Salaries', value: 45, color: C.primary },
+      { category: 'Marketing', value: 18, color: C.gold },
+      { category: 'Infrastructure', value: 15, color: C.ok },
+      { category: 'Office', value: 10, color: C.attend },
+      { category: 'Other', value: 12, color: C.muted },
     ],
   };
 }
 
-type KPI = { label: string; value: string; change: number; icon: any; color: string; sparkline: number[] };
+type KPI = { label: string; value: string; change: number };
 type TimeRange = '24h' | '7d' | '30d' | '90d' | '1y';
 
 interface DashboardItem {
@@ -174,167 +194,199 @@ interface DashboardItem {
   starred: boolean;
 }
 
-function MiniSparkline({ data, color, width = 80, height = 24 }: { data: number[]; color: string; width?: number; height?: number }) {
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-  const points = data.map((v, i) => `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * height}`).join(' ');
+const formatCurrency = (v: number) => `£${(v / 1000).toFixed(0)}k`;
+
+/* ─── Shared presentation pieces ─── */
+
+/** Fact ledger: label left, mono value right, quiet delta. */
+function FactLedger({ facts, cols = 3 }: {
+  facts: { label: string; value: string; change: number; good?: boolean }[];
+  cols?: 2 | 3;
+}) {
   return (
-    <svg width={width} height={height} className="overflow-visible">
-      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.7} />
-    </svg>
+    <Panel className="overflow-hidden">
+      <div className={cn(
+        'grid gap-px bg-border/60',
+        cols === 3 ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4',
+      )}>
+        {facts.map(f => (
+          <div key={f.label} className="flex items-center justify-between gap-3 bg-card px-4 py-3">
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-muted-foreground">
+              {f.label}
+            </span>
+            <span className="text-right">
+              <span className="block font-mono text-[15px] font-medium tabular-nums leading-tight text-foreground">
+                {f.value}
+              </span>
+              <span className={cn(
+                'block font-mono text-[10px] tabular-nums',
+                f.good ? 'text-ok' : 'text-risk',
+              )}>
+                {f.change >= 0 ? '+' : ''}{f.change}%
+              </span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </Panel>
   );
 }
 
-const formatCurrency = (v: number) => `£${(v / 1000).toFixed(0)}k`;
+function ChartPanel({ title, sub, children, className }: {
+  title: string; sub?: string; children: React.ReactNode; className?: string;
+}) {
+  return (
+    <Panel className={cn('p-4', className)}>
+      <h3 className="text-[13px] font-[550] tracking-[-0.01em] text-foreground">{title}</h3>
+      {sub && <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p>}
+      <div className="mt-3">{children}</div>
+    </Panel>
+  );
+}
+
+function LegendRow({ items }: { items: { label: string; color: string }[] }) {
+  return (
+    <div className="mt-2 flex items-center justify-center gap-5">
+      {items.map(l => (
+        <div key={l.label} className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: l.color }} />
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground">{l.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PieLegend({ items }: { items: { name: string; value: number; color: string }[] }) {
+  return (
+    <div className="space-y-1.5">
+      {items.map(d => (
+        <div key={d.name} className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-[3px]" style={{ background: d.color }} />
+          <span className="flex-1 text-[11px] text-muted-foreground">{d.name}</span>
+          <span className="font-mono text-[11px] font-medium tabular-nums text-foreground">{d.value}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /* ─── Dashboard Content Components ─── */
 
 function OverviewDashboard({ timeRange, kpis, revenueData, trafficData, conversionData }: {
   timeRange: TimeRange; kpis: KPI[]; revenueData: any[]; trafficData: any[]; conversionData: any[];
 }) {
+  const liveFeed: { event: string; detail: string; time: string; tone: Tone }[] = [
+    { event: 'New subscription', detail: 'Enterprise plan, Acme Corp', time: '2s ago', tone: 'ok' },
+    { event: 'Goal reached', detail: 'Monthly active users exceeded 12,500', time: '5m ago', tone: 'ok' },
+    { event: 'Anomaly detected', detail: 'Bounce rate spike on /pricing page', time: '12m ago', tone: 'risk' },
+    { event: 'Report generated', detail: 'Q4 executive summary ready', time: '28m ago', tone: 'neutral' },
+    { event: 'A/B test result', detail: 'Variant B: +14% CTR on CTA button', time: '1h ago', tone: 'neutral' },
+    { event: 'New milestone', detail: 'Revenue crossed £450k this quarter', time: '2h ago', tone: 'ok' },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        {kpis.map((kpi, i) => (
-          <motion.div key={kpi.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-            className="relative group p-4 rounded-2xl bg-card/60 border border-border/20 hover:border-border/40 hover:shadow-xl transition-all overflow-hidden">
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `radial-gradient(circle at 30% 30%, ${kpi.color}08, transparent 70%)` }} />
-            <div className="relative">
-              <div className="flex items-center justify-between mb-2">
-                <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: `${kpi.color}15` }}>
-                  <kpi.icon className="h-3.5 w-3.5" style={{ color: kpi.color }} />
-                </div>
-                <MiniSparkline data={kpi.sparkline} color={kpi.color} width={50} height={18} />
-              </div>
-              <div className="text-[18px] font-bold text-foreground tracking-tight">{kpi.value}</div>
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-[9px] text-muted-foreground/50 font-medium">{kpi.label}</span>
-                <span className={cn("text-[9px] font-bold flex items-center gap-0.5", kpi.change >= 0 ? "text-emerald-500" : "text-red-500")}>
-                  {kpi.change >= 0 ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}
-                  {Math.abs(kpi.change)}%
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+    <div className="space-y-4">
+      {/* KPI fact ledger */}
+      <FactLedger cols={3} facts={kpis.map(k => ({ ...k, good: k.change >= 0 }))} />
 
       {/* Revenue + Pie */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="xl:col-span-2 rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground">Revenue & Profitability</h3>
-          <p className="text-[10px] text-muted-foreground/50 mt-0.5 mb-4">Breakdown with margin analysis</p>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <ChartPanel title="Revenue and profitability" sub="Breakdown with margin analysis" className="xl:col-span-2">
           <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={revenueData}>
               <defs>
-                <linearGradient id="gradRevenue" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#6366f1" stopOpacity={0.3} /><stop offset="100%" stopColor="#6366f1" stopOpacity={0} /></linearGradient>
-                <linearGradient id="gradProfit" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#10b981" stopOpacity={0.3} /><stop offset="100%" stopColor="#10b981" stopOpacity={0} /></linearGradient>
+                <linearGradient id="gradRevenue" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.primary} stopOpacity={0.25} /><stop offset="100%" stopColor={C.primary} stopOpacity={0} /></linearGradient>
+                <linearGradient id="gradProfit" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.ok} stopOpacity={0.2} /><stop offset="100%" stopColor={C.ok} stopOpacity={0} /></linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={formatCurrency} />
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
-              <Area type="monotone" dataKey="revenue" stroke="#6366f1" fill="url(#gradRevenue)" strokeWidth={2} />
-              <Area type="monotone" dataKey="profit" stroke="#10b981" fill="url(#gradProfit)" strokeWidth={2} />
-              <Line type="monotone" dataKey="costs" stroke="#ef4444" strokeDasharray="4 4" strokeWidth={1.5} dot={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.border} opacity={0.4} />
+              <XAxis dataKey="label" tick={TICK} axisLine={false} tickLine={false} />
+              <YAxis tick={TICK} axisLine={false} tickLine={false} tickFormatter={formatCurrency} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Area type="monotone" dataKey="revenue" stroke={C.primary} fill="url(#gradRevenue)" strokeWidth={1.5} />
+              <Area type="monotone" dataKey="profit" stroke={C.ok} fill="url(#gradProfit)" strokeWidth={1.5} />
+              <Line type="monotone" dataKey="costs" stroke={C.risk} strokeDasharray="4 4" strokeWidth={1} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
-          <div className="flex items-center justify-center gap-6 mt-2">
-            {[{ label: 'Revenue', color: '#6366f1' }, { label: 'Profit', color: '#10b981' }, { label: 'Costs', color: '#ef4444' }].map(l => (
-              <div key={l.label} className="flex items-center gap-1.5"><div className="h-2 w-2 rounded-full" style={{ background: l.color }} /><span className="text-[9px] text-muted-foreground/60 font-medium">{l.label}</span></div>
-            ))}
-          </div>
-        </motion.div>
+          <LegendRow items={[
+            { label: 'Revenue', color: C.primary },
+            { label: 'Profit', color: C.ok },
+            { label: 'Costs', color: C.risk },
+          ]} />
+        </ChartPanel>
 
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-          className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Revenue by Plan</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">Subscription tier distribution</p>
+        <ChartPanel title="Revenue by plan" sub="Subscription tier distribution">
           <ResponsiveContainer width="100%" height={180}>
             <RPieChart>
               <Pie data={PIE_DATA} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
                 {PIE_DATA.map(entry => <Cell key={entry.name} fill={entry.color} stroke="none" />)}
               </Pie>
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
             </RPieChart>
           </ResponsiveContainer>
-          <div className="space-y-1.5 mt-2">
-            {PIE_DATA.map(d => (
-              <div key={d.name} className="flex items-center gap-2"><div className="h-2.5 w-2.5 rounded-sm" style={{ background: d.color }} /><span className="text-[10px] text-muted-foreground flex-1">{d.name}</span><span className="text-[10px] font-bold text-foreground">{d.value}%</span></div>
-            ))}
+          <div className="mt-2">
+            <PieLegend items={PIE_DATA} />
           </div>
-        </motion.div>
+        </ChartPanel>
       </div>
 
       {/* Traffic + Conversion */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Traffic Sources</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">Breakdown by acquisition channel</p>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <ChartPanel title="Traffic sources" sub="Breakdown by acquisition channel">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={trafficData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="day" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
-              <Bar dataKey="organic" stackId="a" fill="#6366f1" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="direct" stackId="a" fill="#06b6d4" />
-              <Bar dataKey="social" stackId="a" fill="#ec4899" />
-              <Bar dataKey="referral" stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.border} opacity={0.4} />
+              <XAxis dataKey="day" tick={TICK} axisLine={false} tickLine={false} />
+              <YAxis tick={TICK} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Bar dataKey="organic" stackId="a" fill={C.primary} radius={[0, 0, 0, 0]} />
+              <Bar dataKey="direct" stackId="a" fill={C.gold} />
+              <Bar dataKey="social" stackId="a" fill={C.muted} />
+              <Bar dataKey="referral" stackId="a" fill={C.attend} radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </motion.div>
+          <LegendRow items={[
+            { label: 'Organic', color: C.primary },
+            { label: 'Direct', color: C.gold },
+            { label: 'Social', color: C.muted },
+            { label: 'Referral', color: C.attend },
+          ]} />
+        </ChartPanel>
 
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-          className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Conversion Tracking</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">Conversion rate & sessions</p>
+        <ChartPanel title="Conversion tracking" sub="Conversion rate and sessions">
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={conversionData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="hour" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={Math.max(0, Math.floor(conversionData.length / 8))} />
-              <YAxis yAxisId="left" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
-              <Line yAxisId="left" type="monotone" dataKey="rate" stroke="#10b981" strokeWidth={2} dot={false} />
-              <Line yAxisId="right" type="monotone" dataKey="sessions" stroke="#6366f1" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.border} opacity={0.4} />
+              <XAxis dataKey="hour" tick={TICK_SM} axisLine={false} tickLine={false} interval={Math.max(0, Math.floor(conversionData.length / 8))} />
+              <YAxis yAxisId="left" tick={TICK_SM} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
+              <YAxis yAxisId="right" orientation="right" tick={TICK_SM} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Line yAxisId="left" type="monotone" dataKey="rate" stroke={C.primary} strokeWidth={1.5} dot={false} />
+              <Line yAxisId="right" type="monotone" dataKey="sessions" stroke={C.muted} strokeWidth={1} strokeDasharray="4 4" dot={false} />
             </LineChart>
           </ResponsiveContainer>
-        </motion.div>
+          <LegendRow items={[
+            { label: 'Rate', color: C.primary },
+            { label: 'Sessions', color: C.muted },
+          ]} />
+        </ChartPanel>
       </div>
 
-      {/* Live Feed */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-        className="rounded-2xl bg-card/60 border border-border/20 p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <h3 className="text-[13px] font-bold text-foreground">Live Activity Feed</h3>
-          <span className="text-[9px] text-muted-foreground/40 ml-auto">Auto-refreshing</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {[
-            { event: 'New subscription', detail: 'Enterprise plan — Acme Corp', time: '2s ago', color: '#10b981' },
-            { event: 'Goal reached', detail: 'Monthly active users exceeded 12,500', time: '5m ago', color: '#6366f1' },
-            { event: 'Anomaly detected', detail: 'Bounce rate spike on /pricing page', time: '12m ago', color: '#ef4444' },
-            { event: 'Report generated', detail: 'Q4 Executive Summary ready', time: '28m ago', color: '#06b6d4' },
-            { event: 'A/B test result', detail: 'Variant B: +14% CTR on CTA button', time: '1h ago', color: '#f59e0b' },
-            { event: 'New milestone', detail: 'Revenue crossed £450k this quarter', time: '2h ago', color: '#ec4899' },
-          ].map((item, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-background/50 border border-border/10">
-              <div className="h-2 w-2 rounded-full mt-1.5 shrink-0" style={{ background: item.color }} />
-              <div className="flex-1 min-w-0">
-                <div className="text-[11px] font-semibold text-foreground">{item.event}</div>
-                <div className="text-[10px] text-muted-foreground/50 truncate">{item.detail}</div>
-              </div>
-              <span className="text-[9px] text-muted-foreground/35 shrink-0">{item.time}</span>
-            </div>
-          ))}
-        </div>
-      </motion.div>
+      {/* Live feed */}
+      <Panel>
+        <PanelHeader label="Live activity">
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground">Auto-refreshing</span>
+        </PanelHeader>
+        {liveFeed.map(item => (
+          <PanelRow
+            key={item.event}
+            leading={<StatusDot tone={item.tone} />}
+            title={item.event}
+            meta={item.detail}
+            trailing={<span className="font-mono text-[10.5px] tabular-nums text-muted-foreground">{item.time}</span>}
+          />
+        ))}
+      </Panel>
     </div>
   );
 }
@@ -351,96 +403,91 @@ function SalesDashboard({ timeRange }: { timeRange: TimeRange }) {
     { month: 'Feb', avgDays: 17, deals: 32 },
   ], []);
 
-  return (
-    <div className="space-y-6">
-      {/* Sales KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: 'Total Deals', value: '108', change: 15, color: '#6366f1' },
-          { label: 'Won Revenue', value: '£660K', change: 22, color: '#10b981' },
-          { label: 'Avg Win Rate', value: '66%', change: 4, color: '#f59e0b' },
-          { label: 'Avg Deal Size', value: '£6.1K', change: 8, color: '#06b6d4' },
-        ].map(k => (
-          <div key={k.label} className="p-4 rounded-2xl bg-card/60 border border-border/20">
-            <span className="text-[9px] text-muted-foreground/50 font-medium">{k.label}</span>
-            <div className="text-[20px] font-bold text-foreground mt-1">{k.value}</div>
-            <span className="text-[9px] font-bold text-emerald-500 flex items-center gap-0.5 mt-1"><ArrowUpRight className="h-2.5 w-2.5" />{k.change}%</span>
-          </div>
-        ))}
-      </div>
+  const ranked = salesData.sort((a, b) => b.revenue - a.revenue);
+  const repColumns: Column<(typeof ranked)[number]>[] = [
+    {
+      key: 'rep', header: 'Rep', sortValue: r => r.rep,
+      render: r => (
+        <span className="flex items-center gap-2.5 font-[450] text-foreground">
+          <span className="w-3 font-mono text-[10px] tabular-nums text-muted-foreground">{ranked.indexOf(r) + 1}</span>
+          {r.rep}
+        </span>
+      ),
+    },
+    { key: 'deals', header: 'Deals', align: 'right', mono: true, sortValue: r => r.deals, render: r => r.deals },
+    { key: 'revenue', header: 'Revenue', align: 'right', mono: true, sortValue: r => r.revenue, render: r => <Money value={r.revenue} whole /> },
+    {
+      key: 'winRate', header: 'Win rate', align: 'right', sortValue: r => r.winRate,
+      render: r => (
+        <span className={cn('font-mono text-xs tabular-nums', r.winRate >= 70 ? 'text-ok' : r.winRate >= 60 ? 'text-attend' : 'text-risk')}>
+          {r.winRate}%
+        </span>
+      ),
+    },
+    { key: 'pipeline', header: 'Pipeline', align: 'right', mono: true, hideBelowMd: true, sortValue: r => r.pipeline, render: r => <Money value={r.pipeline} whole /> },
+  ];
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Sales Funnel */}
-        <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-4">Sales Funnel</h3>
+  return (
+    <div className="space-y-4">
+      <FactLedger cols={2} facts={[
+        { label: 'Total deals', value: '108', change: 15, good: true },
+        { label: 'Won revenue', value: '£660k', change: 22, good: true },
+        { label: 'Avg win rate', value: '66%', change: 4, good: true },
+        { label: 'Avg deal size', value: '£6.1k', change: 8, good: true },
+      ]} />
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {/* Sales funnel */}
+        <ChartPanel title="Sales funnel">
           <div className="space-y-2">
-            {funnelData.map((stage, i) => {
+            {funnelData.map(stage => {
               const width = (stage.value / funnelData[0].value) * 100;
               return (
                 <div key={stage.stage} className="flex items-center gap-3">
-                  <span className="text-[10px] text-muted-foreground w-20 text-right">{stage.stage}</span>
-                  <div className="flex-1 h-8 rounded-lg overflow-hidden bg-muted/20 relative">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${width}%` }} transition={{ delay: i * 0.1, duration: 0.6 }}
-                      className="h-full rounded-lg flex items-center px-3" style={{ background: stage.color }}>
-                      <span className="text-[10px] font-bold text-white">{stage.value.toLocaleString()}</span>
-                    </motion.div>
+                  <span className="w-20 text-right text-[11px] text-muted-foreground">{stage.stage}</span>
+                  <div className="relative h-8 flex-1 overflow-hidden rounded-md bg-sunken">
+                    <div className="flex h-full items-center rounded-md px-3" style={{ width: `${width}%`, background: stage.color }}>
+                      <span className="font-mono text-[10px] font-medium tabular-nums text-primary-foreground">{stage.value.toLocaleString()}</span>
+                    </div>
                   </div>
-                  <span className="text-[9px] text-muted-foreground/50 w-10">{Math.round(width)}%</span>
+                  <span className="w-10 font-mono text-[10px] tabular-nums text-muted-foreground">{Math.round(width)}%</span>
                 </div>
               );
             })}
           </div>
-        </div>
+        </ChartPanel>
 
-        {/* Deal Velocity */}
-        <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Deal Velocity</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">Average days to close</p>
+        {/* Deal velocity */}
+        <ChartPanel title="Deal velocity" sub="Average days to close">
           <ResponsiveContainer width="100%" height={200}>
             <ComposedChart data={dealVelocity}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis yAxisId="left" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
-              <Bar yAxisId="right" dataKey="deals" fill="#6366f1" radius={[4, 4, 0, 0]} opacity={0.6} />
-              <Line yAxisId="left" type="monotone" dataKey="avgDays" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981', r: 3 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.border} opacity={0.4} />
+              <XAxis dataKey="month" tick={TICK} axisLine={false} tickLine={false} />
+              <YAxis yAxisId="left" tick={TICK} axisLine={false} tickLine={false} />
+              <YAxis yAxisId="right" orientation="right" tick={TICK} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Bar yAxisId="right" dataKey="deals" fill={C.primary} radius={[2, 2, 0, 0]} opacity={0.35} />
+              <Line yAxisId="left" type="monotone" dataKey="avgDays" stroke={C.ok} strokeWidth={1.5} dot={{ fill: C.ok, r: 2.5 }} />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+          <LegendRow items={[
+            { label: 'Deals', color: C.primary },
+            { label: 'Avg days', color: C.ok },
+          ]} />
+        </ChartPanel>
       </div>
 
-      {/* Rep Leaderboard */}
-      <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-        <h3 className="text-[13px] font-bold text-foreground mb-4">Sales Rep Leaderboard</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[11px]">
-            <thead><tr className="border-b border-border/20">
-              <th className="text-left pb-2 text-muted-foreground/50 font-medium">Rep</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Deals</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Revenue</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Win Rate</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Pipeline</th>
-            </tr></thead>
-            <tbody>
-              {salesData.sort((a, b) => b.revenue - a.revenue).map((rep, i) => (
-                <tr key={rep.rep} className="border-b border-border/10 hover:bg-muted/10">
-                  <td className="py-2.5 font-medium text-foreground flex items-center gap-2">
-                    <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white",
-                      i === 0 ? "bg-amber-500" : i === 1 ? "bg-zinc-400" : i === 2 ? "bg-amber-700" : "bg-muted-foreground/20"
-                    )}>{i + 1}</span>
-                    {rep.rep}
-                  </td>
-                  <td className="py-2.5 text-right text-muted-foreground">{rep.deals}</td>
-                  <td className="py-2.5 text-right font-semibold text-foreground">£{(rep.revenue / 1000).toFixed(0)}K</td>
-                  <td className="py-2.5 text-right"><span className={cn("px-1.5 py-0.5 rounded text-[9px] font-bold", rep.winRate >= 70 ? "bg-emerald-500/10 text-emerald-500" : rep.winRate >= 60 ? "bg-amber-500/10 text-amber-500" : "bg-red-500/10 text-red-500")}>{rep.winRate}%</span></td>
-                  <td className="py-2.5 text-right text-muted-foreground">£{(rep.pipeline / 1000).toFixed(0)}K</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Rep leaderboard */}
+      <Panel className="overflow-hidden">
+        <PanelHeader label="Sales rep leaderboard" />
+        <DataTable
+          rows={ranked}
+          columns={repColumns}
+          rowKey={r => r.rep}
+          defaultSort={{ key: 'revenue', dir: 'desc' }}
+          aria-label="Sales rep leaderboard"
+        />
+      </Panel>
     </div>
   );
 }
@@ -448,92 +495,73 @@ function SalesDashboard({ timeRange }: { timeRange: TimeRange }) {
 function MarketingDashboard({ timeRange }: { timeRange: TimeRange }) {
   const campaigns = useMemo(() => generateCampaignData(), []);
 
-  return (
-    <div className="space-y-6">
-      {/* Marketing KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: 'Total Spend', value: '£33K', change: -5, color: '#ef4444' },
-          { label: 'Total Leads', value: '1,870', change: 18, color: '#6366f1' },
-          { label: 'Avg CPL', value: '£17.60', change: -12, color: '#10b981' },
-          { label: 'Best ROI', value: '8.5x', change: 24, color: '#f59e0b' },
-        ].map(k => (
-          <div key={k.label} className="p-4 rounded-2xl bg-card/60 border border-border/20">
-            <span className="text-[9px] text-muted-foreground/50 font-medium">{k.label}</span>
-            <div className="text-[20px] font-bold text-foreground mt-1">{k.value}</div>
-            <span className={cn("text-[9px] font-bold flex items-center gap-0.5 mt-1", k.change >= 0 ? "text-emerald-500" : "text-red-500")}>
-              {k.change >= 0 ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}{Math.abs(k.change)}%
-            </span>
-          </div>
-        ))}
-      </div>
+  const campaignColumns: Column<(typeof campaigns)[number]>[] = [
+    { key: 'campaign', header: 'Campaign', sortValue: c => c.campaign, render: c => <span className="font-[450] text-foreground">{c.campaign}</span> },
+    { key: 'spend', header: 'Spend', align: 'right', mono: true, sortValue: c => c.spend, render: c => <Money value={c.spend} whole /> },
+    { key: 'leads', header: 'Leads', align: 'right', mono: true, sortValue: c => c.leads, render: c => c.leads },
+    { key: 'cpl', header: 'CPL', align: 'right', mono: true, hideBelowMd: true, sortValue: c => c.cpl, render: c => <Money value={c.cpl} /> },
+    { key: 'conversions', header: 'Conv.', align: 'right', mono: true, hideBelowMd: true, sortValue: c => c.conversions, render: c => c.conversions },
+    {
+      key: 'roi', header: 'ROI', align: 'right', sortValue: c => c.roi,
+      render: c => (
+        <span className={cn('font-mono text-xs tabular-nums', c.roi >= 5 ? 'text-ok' : c.roi >= 3 ? 'text-attend' : 'text-risk')}>
+          {c.roi}x
+        </span>
+      ),
+    },
+  ];
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Channel Distribution */}
-        <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Channel Distribution</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">Lead acquisition by channel</p>
+  return (
+    <div className="space-y-4">
+      <FactLedger cols={2} facts={[
+        { label: 'Total spend', value: '£33k', change: -5, good: false },
+        { label: 'Total leads', value: '1,870', change: 18, good: true },
+        { label: 'Avg CPL', value: '£17.60', change: -12, good: false },
+        { label: 'Best ROI', value: '8.5x', change: 24, good: true },
+      ]} />
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {/* Channel distribution */}
+        <ChartPanel title="Channel distribution" sub="Lead acquisition by channel">
           <div className="flex items-center gap-4">
             <ResponsiveContainer width="50%" height={180}>
               <RPieChart>
                 <Pie data={CHANNEL_PIE} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value">
                   {CHANNEL_PIE.map(entry => <Cell key={entry.name} fill={entry.color} stroke="none" />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} />
               </RPieChart>
             </ResponsiveContainer>
-            <div className="flex-1 space-y-2">
-              {CHANNEL_PIE.map(d => (
-                <div key={d.name} className="flex items-center gap-2"><div className="h-2.5 w-2.5 rounded-sm" style={{ background: d.color }} /><span className="text-[10px] text-muted-foreground flex-1">{d.name}</span><span className="text-[10px] font-bold text-foreground">{d.value}%</span></div>
-              ))}
+            <div className="flex-1">
+              <PieLegend items={CHANNEL_PIE} />
             </div>
           </div>
-        </div>
+        </ChartPanel>
 
         {/* Campaign ROI */}
-        <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Campaign ROI</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">Return on investment per campaign</p>
+        <ChartPanel title="Campaign ROI" sub="Return on investment per campaign">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={campaigns} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis type="number" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}x`} />
-              <YAxis type="category" dataKey="campaign" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={90} />
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
-              <Bar dataKey="roi" fill="#6366f1" radius={[0, 4, 4, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.border} opacity={0.4} />
+              <XAxis type="number" tick={TICK} axisLine={false} tickLine={false} tickFormatter={v => `${v}x`} />
+              <YAxis type="category" dataKey="campaign" tick={TICK_SM} axisLine={false} tickLine={false} width={90} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Bar dataKey="roi" fill={C.primary} radius={[0, 2, 2, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartPanel>
       </div>
 
-      {/* Campaign Table */}
-      <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-        <h3 className="text-[13px] font-bold text-foreground mb-4">Campaign Performance</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[11px]">
-            <thead><tr className="border-b border-border/20">
-              <th className="text-left pb-2 text-muted-foreground/50 font-medium">Campaign</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Spend</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Leads</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">CPL</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Conversions</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">ROI</th>
-            </tr></thead>
-            <tbody>
-              {campaigns.map(c => (
-                <tr key={c.campaign} className="border-b border-border/10 hover:bg-muted/10">
-                  <td className="py-2.5 font-medium text-foreground">{c.campaign}</td>
-                  <td className="py-2.5 text-right text-muted-foreground">£{(c.spend / 1000).toFixed(1)}K</td>
-                  <td className="py-2.5 text-right text-muted-foreground">{c.leads}</td>
-                  <td className="py-2.5 text-right text-muted-foreground">£{c.cpl.toFixed(2)}</td>
-                  <td className="py-2.5 text-right text-muted-foreground">{c.conversions}</td>
-                  <td className="py-2.5 text-right"><span className={cn("px-1.5 py-0.5 rounded text-[9px] font-bold", c.roi >= 5 ? "bg-emerald-500/10 text-emerald-500" : c.roi >= 3 ? "bg-amber-500/10 text-amber-500" : "bg-red-500/10 text-red-500")}>{c.roi}x</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Campaign table */}
+      <Panel className="overflow-hidden">
+        <PanelHeader label="Campaign performance" />
+        <DataTable
+          rows={campaigns}
+          columns={campaignColumns}
+          rowKey={c => c.campaign}
+          aria-label="Campaign performance"
+        />
+      </Panel>
     </div>
   );
 }
@@ -545,96 +573,75 @@ function ProductDashboard({ timeRange }: { timeRange: TimeRange }) {
     day: `D${i + 1}`, errors: Math.floor(15 + Math.random() * 30 - i * 0.8), warnings: Math.floor(40 + Math.random() * 20)
   })), []);
 
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: 'DAU', value: '4,280', change: 12, color: '#6366f1' },
-          { label: 'Avg Session', value: '8m 42s', change: 6, color: '#10b981' },
-          { label: 'NPS Score', value: '72', change: 4, color: '#f59e0b' },
-          { label: 'Error Rate', value: '0.3%', change: -18, color: '#ef4444' },
-        ].map(k => (
-          <div key={k.label} className="p-4 rounded-2xl bg-card/60 border border-border/20">
-            <span className="text-[9px] text-muted-foreground/50 font-medium">{k.label}</span>
-            <div className="text-[20px] font-bold text-foreground mt-1">{k.value}</div>
-            <span className={cn("text-[9px] font-bold flex items-center gap-0.5 mt-1", (k.label === 'Error Rate' ? k.change <= 0 : k.change >= 0) ? "text-emerald-500" : "text-red-500")}>
-              {k.change >= 0 ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}{Math.abs(k.change)}%
-            </span>
-          </div>
-        ))}
-      </div>
+  const featureColumns: Column<(typeof productMetrics)[number]>[] = [
+    { key: 'feature', header: 'Feature', sortValue: p => p.feature, render: p => <span className="font-[450] text-foreground">{p.feature}</span> },
+    { key: 'usage', header: 'Usage', align: 'right', mono: true, sortValue: p => p.usage, render: p => `${p.usage}%` },
+    { key: 'satisfaction', header: 'Satisfaction', align: 'right', mono: true, hideBelowMd: true, sortValue: p => p.satisfaction, render: p => `${p.satisfaction}/5` },
+    { key: 'errors', header: 'Errors (7d)', align: 'right', mono: true, sortValue: p => p.errors, render: p => p.errors },
+    {
+      key: 'health', header: 'Health', align: 'right',
+      render: p => {
+        const health = p.satisfaction >= 4.2 && p.errors < 15 ? 'Healthy' : p.errors >= 20 ? 'At risk' : 'Stable';
+        return <StatusBadge tone={health === 'Healthy' ? 'ok' : health === 'At risk' ? 'risk' : 'attend'} label={health} />;
+      },
+    },
+  ];
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Feature Usage Radar */}
-        <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Feature Engagement</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">Usage vs Satisfaction radar</p>
+  return (
+    <div className="space-y-4">
+      <FactLedger cols={2} facts={[
+        { label: 'DAU', value: '4,280', change: 12, good: true },
+        { label: 'Avg session', value: '8m 42s', change: 6, good: true },
+        { label: 'NPS score', value: '72', change: 4, good: true },
+        { label: 'Error rate', value: '0.3%', change: -18, good: true },
+      ]} />
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {/* Feature usage radar */}
+        <ChartPanel title="Feature engagement" sub="Usage against satisfaction">
           <ResponsiveContainer width="100%" height={250}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke="hsl(var(--border))" />
-              <PolarAngleAxis dataKey="feature" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} />
-              <PolarRadiusAxis tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} />
-              <Radar name="Usage" dataKey="usage" stroke="#6366f1" fill="#6366f1" fillOpacity={0.15} strokeWidth={2} />
-              <Radar name="Satisfaction" dataKey="satisfaction" stroke="#10b981" fill="#10b981" fillOpacity={0.1} strokeWidth={2} />
+              <PolarGrid stroke={C.border} />
+              <PolarAngleAxis dataKey="feature" tick={TICK_SM} />
+              <PolarRadiusAxis tick={{ fontSize: 8, fill: C.muted }} />
+              <Radar name="Usage" dataKey="usage" stroke={C.primary} fill={C.primary} fillOpacity={0.12} strokeWidth={1.5} />
+              <Radar name="Satisfaction" dataKey="satisfaction" stroke={C.ok} fill={C.ok} fillOpacity={0.08} strokeWidth={1.5} />
               <Legend wrapperStyle={{ fontSize: 10 }} />
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
             </RadarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartPanel>
 
-        {/* Error Trend */}
-        <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Error & Warning Trend</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">14-day rolling window</p>
+        {/* Error trend */}
+        <ChartPanel title="Error and warning trend" sub="14-day rolling window">
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={errorTrend}>
               <defs>
-                <linearGradient id="errGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef4444" stopOpacity={0.3} /><stop offset="100%" stopColor="#ef4444" stopOpacity={0} /></linearGradient>
-                <linearGradient id="warnGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f59e0b" stopOpacity={0.2} /><stop offset="100%" stopColor="#f59e0b" stopOpacity={0} /></linearGradient>
+                <linearGradient id="errGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.risk} stopOpacity={0.25} /><stop offset="100%" stopColor={C.risk} stopOpacity={0} /></linearGradient>
+                <linearGradient id="warnGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.attend} stopOpacity={0.15} /><stop offset="100%" stopColor={C.attend} stopOpacity={0} /></linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="day" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
-              <Area type="monotone" dataKey="warnings" stroke="#f59e0b" fill="url(#warnGrad)" strokeWidth={1.5} />
-              <Area type="monotone" dataKey="errors" stroke="#ef4444" fill="url(#errGrad)" strokeWidth={2} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.border} opacity={0.4} />
+              <XAxis dataKey="day" tick={TICK_SM} axisLine={false} tickLine={false} />
+              <YAxis tick={TICK_SM} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Area type="monotone" dataKey="warnings" stroke={C.attend} fill="url(#warnGrad)" strokeWidth={1} />
+              <Area type="monotone" dataKey="errors" stroke={C.risk} fill="url(#errGrad)" strokeWidth={1.5} />
               <Legend wrapperStyle={{ fontSize: 10 }} />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </ChartPanel>
       </div>
 
-      {/* Feature Table */}
-      <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-        <h3 className="text-[13px] font-bold text-foreground mb-4">Feature Health</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[11px]">
-            <thead><tr className="border-b border-border/20">
-              <th className="text-left pb-2 text-muted-foreground/50 font-medium">Feature</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Usage %</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Satisfaction</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Errors (7d)</th>
-              <th className="text-right pb-2 text-muted-foreground/50 font-medium">Health</th>
-            </tr></thead>
-            <tbody>
-              {productMetrics.map(p => {
-                const health = p.satisfaction >= 4.2 && p.errors < 15 ? 'Healthy' : p.errors >= 20 ? 'At Risk' : 'Stable';
-                return (
-                  <tr key={p.feature} className="border-b border-border/10 hover:bg-muted/10">
-                    <td className="py-2.5 font-medium text-foreground">{p.feature}</td>
-                    <td className="py-2.5 text-right text-muted-foreground">{p.usage}%</td>
-                    <td className="py-2.5 text-right text-muted-foreground">{p.satisfaction}/5</td>
-                    <td className="py-2.5 text-right text-muted-foreground">{p.errors}</td>
-                    <td className="py-2.5 text-right"><span className={cn("px-1.5 py-0.5 rounded text-[9px] font-bold",
-                      health === 'Healthy' ? "bg-emerald-500/10 text-emerald-500" : health === 'At Risk' ? "bg-red-500/10 text-red-500" : "bg-amber-500/10 text-amber-500"
-                    )}>{health}</span></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Feature table */}
+      <Panel className="overflow-hidden">
+        <PanelHeader label="Feature health" />
+        <DataTable
+          rows={productMetrics}
+          columns={featureColumns}
+          rowKey={p => p.feature}
+          aria-label="Feature health"
+        />
+      </Panel>
     </div>
   );
 }
@@ -643,82 +650,68 @@ function FinanceDashboard({ timeRange }: { timeRange: TimeRange }) {
   const { cashflow, expenses } = useMemo(() => generateFinanceData(), []);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: 'Net Cash', value: '£142K', change: 28, color: '#10b981' },
-          { label: 'MRR', value: '£68K', change: 14, color: '#6366f1' },
-          { label: 'Burn Rate', value: '£50.7K', change: -5, color: '#ef4444' },
-          { label: 'Runway', value: '18 mo', change: 3, color: '#06b6d4' },
-        ].map(k => (
-          <div key={k.label} className="p-4 rounded-2xl bg-card/60 border border-border/20">
-            <span className="text-[9px] text-muted-foreground/50 font-medium">{k.label}</span>
-            <div className="text-[20px] font-bold text-foreground mt-1">{k.value}</div>
-            <span className={cn("text-[9px] font-bold flex items-center gap-0.5 mt-1", (k.label === 'Burn Rate' ? k.change <= 0 : k.change >= 0) ? "text-emerald-500" : "text-red-500")}>
-              {k.change >= 0 ? <ArrowUpRight className="h-2.5 w-2.5" /> : <ArrowDownRight className="h-2.5 w-2.5" />}{Math.abs(k.change)}%
-            </span>
-          </div>
-        ))}
-      </div>
+    <div className="space-y-4">
+      <FactLedger cols={2} facts={[
+        { label: 'Net cash', value: '£142k', change: 28, good: true },
+        { label: 'MRR', value: '£68k', change: 14, good: true },
+        { label: 'Burn rate', value: '£50.7k', change: -5, good: true },
+        { label: 'Runway', value: '18 mo', change: 3, good: true },
+      ]} />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {/* Cashflow */}
-        <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Cashflow Analysis</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">Inflow vs outflow with net position</p>
+        <ChartPanel title="Cashflow analysis" sub="Inflow against outflow with net position">
           <ResponsiveContainer width="100%" height={240}>
             <ComposedChart data={cashflow}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={formatCurrency} />
-              <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
-              <Bar dataKey="inflow" fill="#10b981" radius={[4, 4, 0, 0]} opacity={0.7} />
-              <Bar dataKey="outflow" fill="#ef4444" radius={[4, 4, 0, 0]} opacity={0.5} />
-              <Line type="monotone" dataKey="net" stroke="#6366f1" strokeWidth={2} dot={{ fill: '#6366f1', r: 3 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.border} opacity={0.4} />
+              <XAxis dataKey="month" tick={TICK} axisLine={false} tickLine={false} />
+              <YAxis tick={TICK} axisLine={false} tickLine={false} tickFormatter={formatCurrency} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Bar dataKey="inflow" fill={C.ok} radius={[2, 2, 0, 0]} opacity={0.6} />
+              <Bar dataKey="outflow" fill={C.risk} radius={[2, 2, 0, 0]} opacity={0.4} />
+              <Line type="monotone" dataKey="net" stroke={C.primary} strokeWidth={1.5} dot={{ fill: C.primary, r: 2.5 }} />
               <Legend wrapperStyle={{ fontSize: 10 }} />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
+        </ChartPanel>
 
-        {/* Expense Breakdown */}
-        <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-          <h3 className="text-[13px] font-bold text-foreground mb-1">Expense Breakdown</h3>
-          <p className="text-[10px] text-muted-foreground/50 mb-4">Monthly cost distribution</p>
+        {/* Expense breakdown */}
+        <ChartPanel title="Expense breakdown" sub="Monthly cost distribution">
           <div className="flex items-center gap-4">
             <ResponsiveContainer width="50%" height={200}>
               <RPieChart>
                 <Pie data={expenses} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value" nameKey="category">
                   {expenses.map(entry => <Cell key={entry.category} fill={entry.color} stroke="none" />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '11px' }} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} />
               </RPieChart>
             </ResponsiveContainer>
-            <div className="flex-1 space-y-2">
-              {expenses.map(d => (
-                <div key={d.category} className="flex items-center gap-2"><div className="h-2.5 w-2.5 rounded-sm" style={{ background: d.color }} /><span className="text-[10px] text-muted-foreground flex-1">{d.category}</span><span className="text-[10px] font-bold text-foreground">{d.value}%</span></div>
-              ))}
+            <div className="flex-1">
+              <PieLegend items={expenses.map(e => ({ name: e.category, value: e.value, color: e.color }))} />
             </div>
           </div>
-        </div>
+        </ChartPanel>
       </div>
 
-      {/* P&L Summary */}
-      <div className="rounded-2xl bg-card/60 border border-border/20 p-5">
-        <h3 className="text-[13px] font-bold text-foreground mb-4">P&L Summary (Last 6 Months)</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      {/* P&L summary */}
+      <Panel className="overflow-hidden">
+        <PanelHeader label="P&L summary (last 6 months)" />
+        <div className="grid grid-cols-1 gap-px bg-border/60 sm:grid-cols-3">
           {[
-            { label: 'Total Revenue', value: '£446K', sub: 'Up 22% YoY', color: '#10b981' },
-            { label: 'Total Expenses', value: '£304K', sub: 'Up 8% YoY', color: '#ef4444' },
-            { label: 'Net Profit', value: '£142K', sub: 'Margin: 31.8%', color: '#6366f1' },
+            { label: 'Total revenue', value: '£446k', sub: 'Up 22% YoY' },
+            { label: 'Total expenses', value: '£304k', sub: 'Up 8% YoY' },
+            { label: 'Net profit', value: '£142k', sub: 'Margin 31.8%' },
           ].map(item => (
-            <div key={item.label} className="text-center p-4 rounded-xl bg-background/50 border border-border/10">
-              <span className="text-[9px] text-muted-foreground/50 font-medium">{item.label}</span>
-              <div className="text-[22px] font-bold mt-1" style={{ color: item.color }}>{item.value}</div>
-              <span className="text-[9px] text-muted-foreground/40">{item.sub}</span>
+            <div key={item.label} className="flex items-center justify-between gap-3 bg-card px-4 py-3">
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{item.label}</span>
+              <span className="text-right">
+                <span className="block font-mono text-[15px] font-medium tabular-nums leading-tight text-foreground">{item.value}</span>
+                <span className="block font-mono text-[10px] tabular-nums text-muted-foreground">{item.sub}</span>
+              </span>
             </div>
           ))}
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }
@@ -731,11 +724,11 @@ export default function OfficeAnalyticsStudio() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [dashboards, setDashboards] = useState<DashboardItem[]>([
-    { id: 'overview', name: 'Executive Overview', icon: Layers, starred: true },
-    { id: 'sales', name: 'Sales Performance', icon: TrendingUp, starred: true },
-    { id: 'marketing', name: 'Marketing Analytics', icon: Globe, starred: false },
-    { id: 'product', name: 'Product Metrics', icon: Zap, starred: false },
-    { id: 'finance', name: 'Financial Dashboard', icon: DollarSign, starred: false },
+    { id: 'overview', name: 'Executive overview', icon: Layers, starred: true },
+    { id: 'sales', name: 'Sales performance', icon: TrendingUp, starred: true },
+    { id: 'marketing', name: 'Marketing analytics', icon: Globe, starred: false },
+    { id: 'product', name: 'Product metrics', icon: Zap, starred: false },
+    { id: 'finance', name: 'Financial dashboard', icon: DollarSign, starred: false },
   ]);
   const [newDashboardOpen, setNewDashboardOpen] = useState(false);
   const [newDashboardName, setNewDashboardName] = useState('');
@@ -797,104 +790,99 @@ export default function OfficeAnalyticsStudio() {
     }
   };
 
+  const timeRangeControl = (
+    <div className="flex items-center gap-0.5 rounded-lg border border-border/60 bg-sunken p-0.5">
+      {(['24h', '7d', '30d', '90d', '1y'] as TimeRange[]).map(r => (
+        <button key={r} onClick={() => setTimeRange(r)}
+          className={cn('rounded-md px-2.5 py-1 font-mono text-[10px] font-medium tabular-nums transition-colors duration-150',
+            timeRange === r ? 'bg-card text-foreground' : 'text-muted-foreground hover:text-foreground'
+          )}>{r}</button>
+      ))}
+    </div>
+  );
+
   return (
+    <TemperamentProvider value="office">
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      {/* Top Bar */}
-      <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-3 sm:px-5 gap-2 sm:gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
+      {/* Top bar */}
+      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 bg-background px-3 sm:gap-3 sm:px-5">
+        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
           <ArrowLeft className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Office</span>
         </Button>
-        <div className="h-4 w-px bg-border/40" />
-        <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-          <BarChart3 className="h-3.5 w-3.5 text-white" />
-        </div>
-        <span className="text-sm font-bold tracking-tight">Analytics Studio</span>
-        <span className="text-[10px] text-muted-foreground/50 hidden md:inline">— {dashboards.find(d => d.id === activeDashboard)?.name}</span>
+        <div className="h-4 w-px bg-border/60" />
+        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Analytics studio</span>
+        <span className="hidden text-[13px] font-[550] tracking-[-0.01em] text-foreground md:inline">{dashboards.find(d => d.id === activeDashboard)?.name}</span>
 
         <div className="flex-1" />
 
         {/* Time range selector */}
-        <div className="hidden sm:flex items-center gap-0.5 bg-muted/40 rounded-xl p-0.5 border border-border/20">
-          {(['24h', '7d', '30d', '90d', '1y'] as TimeRange[]).map(r => (
-            <button key={r} onClick={() => setTimeRange(r)}
-              className={cn("px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all",
-                timeRange === r ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/60"
-              )}>{r}</button>
-          ))}
-        </div>
+        <div className="hidden sm:block">{timeRangeControl}</div>
 
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={handleRefresh}>
-          <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={handleRefresh} aria-label="Refresh">
+          <RefreshCw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={handleDownload}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={handleDownload} aria-label="Export report">
           <Download className="h-3.5 w-3.5" />
         </Button>
       </header>
 
       {/* Mobile: dashboard selector + time range */}
-      <div className="md:hidden shrink-0 border-b border-border/20 bg-background/60 backdrop-blur-sm">
-        <div className="flex items-center gap-1 px-3 py-2 overflow-x-auto scrollbar-none">
+      <div className="md:hidden shrink-0 border-b border-border/60 bg-background">
+        <div className="flex items-center gap-1 overflow-x-auto px-3 py-2 scrollbar-none">
           {filteredDashboards.map(d => (
             <button key={d.id} onClick={() => setActiveDashboard(d.id)}
-              className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap transition-all shrink-0",
-                activeDashboard === d.id ? "bg-primary/10 text-primary" : "text-muted-foreground/60 hover:text-foreground"
+              className={cn('flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors duration-150',
+                activeDashboard === d.id ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground hover:text-foreground'
               )}>
               <d.icon className="h-3 w-3" />{d.name}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-0.5 bg-muted/40 rounded-xl p-0.5 border border-border/20 mx-3 mb-2 w-fit">
-          {(['24h', '7d', '30d', '90d', '1y'] as TimeRange[]).map(r => (
-            <button key={r} onClick={() => setTimeRange(r)}
-              className={cn("px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all",
-                timeRange === r ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground/60 hover:text-foreground"
-              )}>{r}</button>
-          ))}
-        </div>
+        <div className="mx-3 mb-2 w-fit">{timeRangeControl}</div>
       </div>
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="hidden md:flex w-56 border-r border-border/20 bg-card/20 backdrop-blur-sm shrink-0 flex-col overflow-hidden">
+        <div className="hidden w-56 shrink-0 flex-col overflow-hidden border-r border-border/60 bg-background md:flex">
           <div className="p-3">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/40" />
-              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search dashboards…" className="h-7 pl-7 text-[10px] bg-card/50 border-border/20 rounded-lg" />
+              <Search className="absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search dashboards…" className="h-7 rounded-md border-border/60 bg-card pl-7 text-[11px]" />
             </div>
           </div>
 
           <div className="px-3 pb-2">
-            <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">Dashboards</span>
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Dashboards</span>
           </div>
-          <div className="flex-1 overflow-auto px-2 space-y-0.5">
+          <div className="flex-1 space-y-0.5 overflow-auto px-2">
             {filteredDashboards.map(d => (
               <div key={d.id} className="group relative">
                 {renamingId === d.id ? (
                   <div className="flex items-center gap-1 px-2 py-1.5">
                     <Input value={renameValue} onChange={e => setRenameValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleRename(d.id)}
-                      className="h-6 text-[10px] flex-1" autoFocus />
-                    <button onClick={() => handleRename(d.id)} className="p-0.5"><Check className="h-3 w-3 text-emerald-500" /></button>
-                    <button onClick={() => setRenamingId(null)} className="p-0.5"><X className="h-3 w-3 text-muted-foreground" /></button>
+                      className="h-6 flex-1 text-[11px]" autoFocus />
+                    <button onClick={() => handleRename(d.id)} className="p-0.5" aria-label="Confirm rename"><Check className="h-3 w-3 text-ok" /></button>
+                    <button onClick={() => setRenamingId(null)} className="p-0.5" aria-label="Cancel rename"><X className="h-3 w-3 text-muted-foreground" /></button>
                   </div>
                 ) : (
                   <button onClick={() => setActiveDashboard(d.id)}
-                    className={cn("w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-left transition-all",
-                      activeDashboard === d.id ? "bg-primary/10 text-foreground" : "hover:bg-accent/30 text-muted-foreground"
+                    className={cn('flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left transition-colors duration-150',
+                      activeDashboard === d.id ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.025] hover:text-foreground'
                     )}>
-                    <d.icon className={cn("h-3.5 w-3.5", activeDashboard === d.id ? "text-primary" : "")} />
-                    <span className="text-[11px] font-medium flex-1 truncate">{d.name}</span>
-                    <button onClick={e => { e.stopPropagation(); toggleStar(d.id); }} className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Star className={cn("h-2.5 w-2.5", d.starred ? "fill-amber-400 text-amber-400 opacity-100" : "text-muted-foreground")} />
+                    <d.icon className={cn('h-3.5 w-3.5', activeDashboard === d.id ? 'text-foreground' : '')} />
+                    <span className="flex-1 truncate text-[12px] font-medium">{d.name}</span>
+                    <button onClick={e => { e.stopPropagation(); toggleStar(d.id); }} className="opacity-0 transition-opacity group-hover:opacity-100" aria-label="Star dashboard">
+                      <Star className={cn('h-2.5 w-2.5', d.starred ? 'fill-gold text-gold opacity-100' : 'text-muted-foreground')} />
                     </button>
-                    {d.starred && <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400 group-hover:hidden" />}
+                    {d.starred && <Star className="h-2.5 w-2.5 fill-gold text-gold group-hover:hidden" />}
                   </button>
                 )}
                 {/* Context actions */}
                 {activeDashboard === d.id && d.id !== 'overview' && renamingId !== d.id && (
-                  <div className="absolute right-1 top-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={e => { e.stopPropagation(); setRenamingId(d.id); setRenameValue(d.name); }} className="p-1 rounded hover:bg-muted/40"><Edit2 className="h-2.5 w-2.5 text-muted-foreground" /></button>
+                  <div className="absolute right-1 top-1 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button onClick={e => { e.stopPropagation(); setRenamingId(d.id); setRenameValue(d.name); }} className="rounded p-1 hover:bg-foreground/[0.05]" aria-label="Rename dashboard"><Edit2 className="h-2.5 w-2.5 text-muted-foreground" /></button>
                     {d.id.startsWith('custom-') && (
-                      <button onClick={e => { e.stopPropagation(); deleteDashboard(d.id); }} className="p-1 rounded hover:bg-red-500/10"><Trash2 className="h-2.5 w-2.5 text-red-500" /></button>
+                      <button onClick={e => { e.stopPropagation(); deleteDashboard(d.id); }} className="rounded p-1 hover:bg-risk/10" aria-label="Delete dashboard"><Trash2 className="h-2.5 w-2.5 text-risk" /></button>
                     )}
                   </div>
                 )}
@@ -902,28 +890,24 @@ export default function OfficeAnalyticsStudio() {
             ))}
           </div>
 
-          <div className="p-3 border-t border-border/15">
-            <Button variant="outline" size="sm" className="w-full h-8 text-[10px] gap-1.5 rounded-xl" onClick={() => setNewDashboardOpen(true)}>
-              <Plus className="h-3 w-3" /> New Dashboard
+          <div className="border-t border-border/60 p-3">
+            <Button variant="outline" size="sm" className="h-8 w-full gap-1.5 rounded-lg text-xs" onClick={() => setNewDashboardOpen(true)}>
+              <Plus className="h-3 w-3" /> New dashboard
             </Button>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto p-3 sm:p-6">
-          <AnimatePresence mode="wait">
-            <motion.div key={activeDashboard + timeRange} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-              {renderContent()}
-            </motion.div>
-          </AnimatePresence>
+        {/* Main content */}
+        <div className="flex-1 overflow-auto p-3 sm:p-5">
+          {renderContent()}
         </div>
       </div>
 
-      {/* New Dashboard Dialog */}
+      {/* New dashboard dialog */}
       <Dialog open={newDashboardOpen} onOpenChange={setNewDashboardOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Create New Dashboard</DialogTitle>
+            <DialogTitle>Create new dashboard</DialogTitle>
           </DialogHeader>
           <Input value={newDashboardName} onChange={e => setNewDashboardName(e.target.value)} placeholder="Dashboard name…" onKeyDown={e => e.key === 'Enter' && handleCreateDashboard()} autoFocus />
           <DialogFooter>
@@ -933,5 +917,6 @@ export default function OfficeAnalyticsStudio() {
         </DialogContent>
       </Dialog>
     </div>
+    </TemperamentProvider>
   );
 }
