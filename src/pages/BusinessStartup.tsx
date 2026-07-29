@@ -102,7 +102,7 @@ export default function BusinessStartup() {
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* What's Included */}
             <Card3D className="h-full">
-              <div className="bg-card border border-border rounded-2xl p-8 h-full">
+              <div className="border border-border/60 bg-background p-8 h-full">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
                     <Check className="w-6 h-6 text-green-500" />
@@ -129,7 +129,7 @@ export default function BusinessStartup() {
 
             {/* What It's Not */}
             <Card3D className="h-full">
-              <div className="bg-card border border-border rounded-2xl p-8 h-full">
+              <div className="border border-border/60 bg-background p-8 h-full">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
                     <X className="w-6 h-6 text-red-500" />
@@ -156,7 +156,7 @@ export default function BusinessStartup() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.4 }}
-                  className="mt-8 p-4 bg-primary/5 rounded-xl border border-primary/10"
+                  className="mt-8 border border-primary/25 bg-primary/[0.04] p-4"
                 >
                   <p className="text-foreground font-medium text-center">
                     You'll speak directly with the person building the systems — not a salesperson.
@@ -200,7 +200,7 @@ export default function BusinessStartup() {
                   transition={{ delay: index * 0.1 }}
                 >
                   <Card3D className="h-full">
-                    <div className="bg-card border border-border rounded-xl p-6 h-full flex items-start gap-4">
+                    <div className="border border-border/60 bg-background p-6 h-full flex items-start gap-4">
                       <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <Icon className="w-6 h-6 text-primary" />
                       </div>
@@ -247,8 +247,8 @@ export default function BusinessStartup() {
                   transition={{ delay: index * 0.1 }}
                 >
                   <Card3D className="h-full">
-                    <div className="bg-card border border-border rounded-xl p-6 h-full">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-4">
+                    <div className="border border-border/60 bg-background p-6 h-full">
+                      <div className="flex h-11 w-11 items-center justify-center border border-primary/25 bg-primary/[0.06] mb-4">
                         <Icon className="w-7 h-7 text-primary" />
                       </div>
                       <h3 className="text-lg font-semibold text-foreground mb-2">{topic.title}</h3>
@@ -264,7 +264,7 @@ export default function BusinessStartup() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center text-lg text-muted-foreground mt-12 max-w-2xl mx-auto"
+            className="text-lg font-light text-muted-foreground mt-12 max-w-2xl"
           >
             You'll leave with clarity, even if you decide not to move forward.
           </motion.p>
@@ -290,7 +290,7 @@ export default function BusinessStartup() {
             </motion.div>
 
             <Card3D>
-              <div className="bg-gradient-to-br from-primary/10 via-card to-card border border-primary/20 rounded-3xl p-8 md:p-12">
+              <div className="border border-primary/30 bg-background p-8 md:p-12">
                 <div className="mb-8">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -315,7 +315,7 @@ export default function BusinessStartup() {
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    className="flex items-center gap-4 p-4 bg-background/50 rounded-xl"
+                    className="flex items-center gap-4 border border-border/40 p-4"
                   >
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                       <X className="w-5 h-5 text-muted-foreground" />
@@ -326,7 +326,7 @@ export default function BusinessStartup() {
                     initial={{ opacity: 0, x: 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    className="flex items-center gap-4 p-4 bg-primary/5 rounded-xl border border-primary/10"
+                    className="flex items-center gap-4 border border-primary/25 bg-primary/[0.04] p-4"
                   >
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                       <Check className="w-5 h-5 text-primary" />
@@ -372,7 +372,7 @@ export default function BusinessStartup() {
 
           <div className="max-w-2xl mx-auto">
             <Card3D>
-              <div className="bg-card border border-border rounded-2xl p-8">
+              <div className="border border-border/60 bg-background p-8">
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -439,7 +439,7 @@ export default function BusinessStartup() {
               whileTap={{ scale: 0.98 }}
               className="inline-block"
             >
-              <Button size="lg" asChild className="text-lg px-12 py-8 rounded-2xl shadow-2xl shadow-primary/20">
+              <Button size="lg" asChild className="text-lg px-12 py-8 ">
                 <Link to="/get-started">
                   <Calendar className="w-6 h-6 mr-3" />
                   Book a Free Strategy Call

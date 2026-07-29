@@ -119,7 +119,7 @@ export default function PrivacyPolicy() {
               <p className="text-lg text-muted-foreground leading-relaxed">
                 Quooro Ltd ("we", "our", "us") is committed to protecting your privacy and ensuring the security of your personal data. This Privacy Policy explains how we collect, use, store, and protect your information in compliance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
               </p>
-              <div className="mt-6 p-4 bg-primary/5 rounded-xl border border-primary/20">
+              <div className="mt-6 border border-primary/25 bg-primary/[0.04] p-4">
                 <p className="text-sm text-foreground">
                   <strong>Data Security Notice:</strong> All data submitted through our website forms is encrypted using AES-256 encryption and transmitted via secure TLS 1.3 connections. Your information is fully protected at all times.
                 </p>
@@ -139,7 +139,7 @@ export default function PrivacyPolicy() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="border border-border/60 bg-background p-6 rounded-2xl"
+                  className="border border-border/60 bg-background p-6"
                 >
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">

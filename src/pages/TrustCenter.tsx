@@ -161,7 +161,7 @@ export default function TrustCenter() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex items-center gap-2 p-4 rounded-xl bg-secondary/50 border border-border"
+                    className="flex items-center gap-2 p-4 bg-secondary/50 border border-border"
                   >
                     <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
                     <span className="text-sm font-medium text-foreground">{cert}</span>
@@ -197,10 +197,10 @@ export default function TrustCenter() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="p-6 rounded-2xl border border-border bg-card hover:border-primary/30 transition-colors duration-300"
+                  className="p-6 border border-border bg-card hover:border-primary/30 transition-colors duration-300"
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <div className="w-12 h-12 bg-primary/10 flex items-center justify-center">
                       <measure.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
@@ -279,7 +279,7 @@ export default function TrustCenter() {
               viewport={{ once: true }}
               className="max-w-3xl mx-auto"
             >
-              <div className="p-8 rounded-2xl bg-primary/5 border border-primary/20">
+              <div className="p-8 bg-primary/5 border border-primary/20">
                 <h2 className="text-2xl font-display font-semibold text-foreground mb-4">
                   Form Data Security
                 </h2>

@@ -181,7 +181,7 @@ export default function QuooroOffice() {
                   whileHover={{ y: -8, transition: { duration: 0.3 } }}
                   className="p-6 sm:p-8 border-b border-r border-border/60 h-full text-center"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center mx-auto mb-5">
+                  <div className="w-14 h-14  bg-gradient-primary flex items-center justify-center mx-auto mb-5">
                     <item.icon className="w-7 h-7 text-primary-foreground" />
                   </div>
                   <h3 className="font-display font-bold text-lg sm:text-xl mb-3">{item.title}</h3>
@@ -242,7 +242,7 @@ export default function QuooroOffice() {
                   <motion.div
                     key={item.label}
                     whileHover={{ scale: 1.04 }}
-                    className={`p-6 sm:p-8 rounded-2xl bg-gradient-to-br ${item.color} border border-border/20 flex flex-col items-center justify-center gap-3 aspect-square`}
+                    className={`p-6 sm:p-8  bg-gradient-to-br ${item.color} border border-border/20 flex flex-col items-center justify-center gap-3 aspect-square`}
                   >
                     <item.icon className="w-8 h-8 text-foreground/80" />
                     <span className="text-sm font-medium text-foreground/70">{item.label}</span>

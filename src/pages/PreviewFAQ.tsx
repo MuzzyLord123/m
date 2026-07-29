@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, HelpCircle, MessageSquare } from "lucide-react";
+import { ArrowRight, MessageSquare } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { PreviewStrip, PreviewRail } from "@/components/marketing/PreviewSeries";
+import { Reveal } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -11,13 +13,18 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+/**
+ * Preview funnel 05 — sixteen questions in four numbered chapters, set as
+ * hairline accordions in the ledger voice (the Support page treatment).
+ */
+
 const faqCategories = [
   {
     title: "About Free Previews",
     questions: [
       {
         q: "What exactly is included in a free preview?",
-        a: "A free preview is a fully functional, custom-coded website matching your requirements. For sites under 5 pages (Starter and Growth tiers), we build a complete preview including responsive design, contact forms, and your branding - all at no cost."
+        a: "A free preview is a fully functional, custom-coded website matching your requirements. For sites under 5 pages (Starter and Business tiers), we build a complete preview including responsive design, contact forms, and your branding - all at no cost."
       },
       {
         q: "Is the free preview really completely free?",
@@ -46,7 +53,7 @@ const faqCategories = [
       },
       {
         q: "How fast is Fast-Track delivery?",
-        a: "Fast-Track previews are delivered in 3-5 days for Professional tier and 5-7 days for Enterprise tier, compared to the standard 1-week timeline."
+        a: "Fast-Track previews are delivered in 3-5 days for Growth tier and 5-7 days for Enterprise tier, compared to the standard 1-week timeline."
       },
       {
         q: "What's included in Fast-Track that isn't in free previews?",
@@ -122,109 +129,107 @@ const faqCategories = [
 export default function PreviewFAQ() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
-        eyebrow="Previews"
+        eyebrow="The preview funnel"
         index="46"
         crumbs={[{ label: "Home", href: "/" }, { label: "Preview FAQ" }]}
         title="Preview"
         highlight="questions"
         body="Everything people ask about the free preview, answered straight."
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "20", label: "Questions answered" },
+              { value: "05", label: "Chapters" },
+              { value: "£0", label: "To find out yourself" },
+            ]}
+          />
+        }
       />
 
-      {/* FAQ Sections */}
-      <section className="section-padding pt-8">
+      <PreviewStrip current="05" />
+
+      {/* FAQ chapters */}
+      <section className="section-padding">
         <div className="container-tight">
-          <div className="max-w-4xl mx-auto space-y-12">
-            {faqCategories.map((category, categoryIndex) => (
-              <motion.div
+          <div className="space-y-0">
+            {faqCategories.map((category, cIndex) => (
+              <Reveal
                 key={category.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: categoryIndex * 0.1 }}
+                className="grid gap-8 border-t border-border/60 py-12 first:border-t-0 first:pt-0 sm:py-14 lg:grid-cols-12 lg:gap-16"
               >
-                <h2 className="heading-sm mb-6 flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                    {categoryIndex + 1}
-                  </span>
-                  {category.title}
-                </h2>
-                <Accordion type="single" collapsible className="space-y-4">
-                  {category.questions.map((item, index) => (
-                    <AccordionItem
-                      key={index}
-                      value={`${categoryIndex}-${index}`}
-                      className="border border-border rounded-xl px-6 bg-card"
-                    >
-                      <AccordionTrigger className="text-left hover:no-underline py-4">
-                        <span className="font-medium pr-4">{item.q}</span>
-                      </AccordionTrigger>
-                      <AccordionContent className="pb-4 text-muted-foreground">
-                        {item.a}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </motion.div>
+                <div className="lg:col-span-4">
+                  <div className="mb-4 flex items-center gap-3">
+                    <span className="font-mono text-[11px] tabular-nums text-primary">
+                      {String(cIndex + 1).padStart(2, "0")}
+                    </span>
+                    <span className="h-px w-8 bg-primary" />
+                  </div>
+                  <h2 className="font-display text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
+                    {category.title}
+                  </h2>
+                </div>
+                <div className="lg:col-span-8">
+                  <Accordion type="single" collapsible className="border-t border-border/60">
+                    {category.questions.map((item, qIndex) => (
+                      <AccordionItem
+                        key={item.q}
+                        value={`${cIndex}-${qIndex}`}
+                        className="border-b border-border/60"
+                      >
+                        <AccordionTrigger className="gap-6 py-5 text-left font-display font-medium tracking-tight text-foreground hover:text-primary hover:no-underline">
+                          <span className="flex items-baseline gap-4">
+                            <span className="font-mono text-[11px] tabular-nums text-primary">
+                              {String(qIndex + 1).padStart(2, "0")}
+                            </span>
+                            {item.q}
+                          </span>
+                        </AccordionTrigger>
+                        <AccordionContent className="pl-8 text-sm font-light leading-relaxed text-muted-foreground">
+                          {item.a}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Still Have Questions */}
-      <section className="section-padding bg-card">
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-3xl border border-primary/30 bg-gradient-card text-center"
-          >
-            <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
-              <MessageSquare className="w-8 h-8 text-primary" />
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="mb-5 flex items-center gap-3">
+                <MessageSquare className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                <span className="eyebrow">Still curious?</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                The fastest answer is
+                <span className="block text-primary">a preview of your own.</span>
+              </h2>
             </div>
-            <h2 className="heading-md mb-4">
-              Still Have <span className="text-gradient">Questions?</span>
-            </h2>
-            <p className="body-lg max-w-2xl mx-auto mb-8">
-              We're here to help. Reach out and we'll get back to you within 24 hours.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Button variant="premium" size="xl" asChild>
-                <Link to="/get-started">
-                  Contact Us <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="outline" size="xl" asChild>
-                <Link to="/preview-process">View Process</Link>
-              </Button>
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+              <Magnetic className="inline-block">
+                <Button variant="premium" size="xl" asChild className="group">
+                  <Link to="/get-started">
+                    Request a preview
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              </Magnetic>
+              <Link to="/support" className="link-underline self-center text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Ask us directly
+              </Link>
             </div>
-          </motion.div>
+          </Reveal>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-padding">
-        <div className="container-tight">
-          <h2 className="heading-md mb-6">
-            Ready to Get <span className="text-gradient">Started?</span>
-          </h2>
-          <p className="body-lg max-w-2xl mx-auto mb-8">
-            Now that you know how it works, start your preview journey today.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button variant="premium" size="xl" asChild>
-              <Link to="/get-started">
-                Get Your Free Preview <ArrowRight className="w-5 h-5" />
-              </Link>
-            </Button>
-            <Button variant="outline" size="xl" asChild>
-              <Link to="/preview-pricing">View Pricing</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <PreviewRail current="05" />
     </Layout>
   );
 }

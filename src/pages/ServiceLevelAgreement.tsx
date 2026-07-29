@@ -207,7 +207,7 @@ export default function ServiceLevelAgreement() {
                     <TableHead className="text-center">Business</TableHead>
                     <TableHead className="text-center">eCommerce</TableHead>
                     <TableHead className="text-center bg-gold/5">
-                      <span className="text-gold">Custom Elite</span>
+                      <span className="text-[hsl(30_85%_30%)] dark:text-gold">Custom Elite</span>
                     </TableHead>
                   </TableRow>
                 </TableHeader>

@@ -6,6 +6,7 @@ import { LadderRow } from "@/components/marketing/Matrix";
 import { Reveal, RevealGroup, RevealItem } from "@/components/motion/Reveal";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
+import { PreviewStrip, PreviewRail } from "@/components/marketing/PreviewSeries";
 
 /**
  * Formerly six invented clients ("Sarah M., Artisan Bakery"…) with fabricated
@@ -35,7 +36,7 @@ const scenarios = [
     icon: ShoppingBag,
     kicker: "If you're launching a shop",
     title: "The catalogue, proven first",
-    tier: "Professional tier",
+    tier: "Growth tier",
     steps: [
       "You need variants, baskets and payments — the things template builders make painful.",
       "The preview arrives with your real products in it, checkout flow clickable end to end.",
@@ -61,7 +62,7 @@ export default function PreviewStories() {
   return (
     <Layout>
       <PageHero
-        eyebrow="Previews"
+        eyebrow="The preview funnel"
         index="45"
         crumbs={[{ label: "Home", href: "/" }, { label: "Preview stories" }]}
         title="How a preview"
@@ -84,6 +85,8 @@ export default function PreviewStories() {
           </>
         }
       />
+
+      <PreviewStrip current="04" />
 
       {/* The three walkthroughs */}
       <section className="section-padding">
@@ -165,6 +168,8 @@ export default function PreviewStories() {
           </Reveal>
         </div>
       </section>
+
+      <PreviewRail current="04" />
     </Layout>
   );
 }

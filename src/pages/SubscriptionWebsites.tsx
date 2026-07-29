@@ -169,7 +169,7 @@ export default function SubscriptionWebsites() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="flex items-center gap-3 p-4 rounded-xl bg-background border border-border hover:border-primary/30 transition-colors"
+                className="flex items-center gap-3 border border-border/60 p-4 hover:border-primary/30 transition-colors"
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <item.icon className="w-5 h-5 text-primary" />
@@ -183,7 +183,7 @@ export default function SubscriptionWebsites() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center mt-8 text-muted-foreground"
+            className="mt-8 text-muted-foreground"
           >
             If you want a fully bespoke, enterprise-level build from day one, our{" "}
             <Link to="/custom-elite" className="text-primary hover:underline">
@@ -262,9 +262,9 @@ export default function SubscriptionWebsites() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className={`relative p-6 rounded-2xl border transition-all duration-300 hover:shadow-xl ${
+                className={`relative p-6  border transition-all duration-300 ${
                   plan.popular
-                    ? "bg-gradient-to-br from-primary/5 to-primary/10 border-primary/30"
+                    ? "border-primary bg-primary/[0.04]"
                     : "bg-background border-border hover:border-primary/20"
                 }`}
               >
@@ -277,7 +277,7 @@ export default function SubscriptionWebsites() {
 
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06] mb-3">
                       <plan.icon className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="text-xl font-display font-bold">{plan.name}</h3>
@@ -324,10 +324,10 @@ export default function SubscriptionWebsites() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+            <div className="p-8 border border-gold/30 bg-background">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
-                  <Shield className="w-6 h-6 text-amber-500" />
+                <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center shrink-0">
+                  <Shield className="w-6 h-6 text-gold" />
                 </div>
                 <div>
                   <h3 className="text-xl font-display font-bold mb-3">
@@ -353,7 +353,7 @@ export default function SubscriptionWebsites() {
                     </div>
                   </div>
 
-                  <div className="mt-6 p-4 rounded-xl bg-background/50 border border-border">
+                  <div className="mt-6 border border-border/60 p-4">
                     <p className="text-sm font-medium mb-2">Why we take this approach:</p>
                     <p className="text-sm text-muted-foreground">
                       A fully custom-built booking system costs thousands, takes months, and requires a full 
@@ -423,7 +423,7 @@ export default function SubscriptionWebsites() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="p-8 rounded-2xl bg-background border border-border"
+              className="p-8 border border-border/60 bg-background"
             >
               <h3 className="text-xl font-display font-bold mb-6">
                 Hosting & Maintenance Included
@@ -464,22 +464,22 @@ export default function SubscriptionWebsites() {
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="p-6 rounded-2xl bg-destructive/5 border border-destructive/20"
+              className="p-6 border border-destructive/30 bg-background"
             >
-              <h3 className="text-lg font-bold mb-4 text-destructive">
+              <h3 className="text-lg font-bold mb-4 text-[hsl(0_72%_38%)] dark:text-[hsl(0_90%_70%)]">
                 Most Subscription Companies...
               </h3>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
-                  <span className="text-destructive">✕</span>
+                  <span className="text-[hsl(0_72%_38%)] dark:text-[hsl(0_90%_70%)]">✕</span>
                   Lock clients into long-term contracts
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-destructive">✕</span>
+                  <span className="text-[hsl(0_72%_38%)] dark:text-[hsl(0_90%_70%)]">✕</span>
                   Reuse the same templates endlessly
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-destructive">✕</span>
+                  <span className="text-[hsl(0_72%_38%)] dark:text-[hsl(0_90%_70%)]">✕</span>
                   Never allow real ownership
                 </li>
               </ul>
@@ -489,7 +489,7 @@ export default function SubscriptionWebsites() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="p-6 rounded-2xl bg-primary/5 border border-primary/20"
+              className="p-6  bg-primary/5 border border-primary/20"
             >
               <h3 className="text-lg font-bold mb-4 text-primary">
                 We Operate Differently

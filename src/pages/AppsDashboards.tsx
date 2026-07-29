@@ -146,7 +146,7 @@ export default function AppsDashboards() {
                   whileHover={{ y: -8 }}
                   className="p-8 border-b border-r border-border/60 h-full"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6">
+                  <div className="w-14 h-14  bg-gradient-primary flex items-center justify-center mb-6">
                     <app.icon className="w-7 h-7 text-primary-foreground" />
                   </div>
                   <h3 className="font-display font-bold text-xl mb-3">{app.title}</h3>
@@ -230,7 +230,7 @@ export default function AppsDashboards() {
                     transition={{ delay: index * 0.1 }}
                     className="flex items-start gap-4"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06] flex-shrink-0">
                       <benefit.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>

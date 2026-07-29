@@ -1,18 +1,26 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Check, Gift, Zap, Info, Shield, Heart } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { LadderRow } from "@/components/marketing/Matrix";
+import { ServicePlans, type ServicePlan } from "@/components/marketing/ServiceSeries";
+import { PreviewStrip, PreviewRail } from "@/components/marketing/PreviewSeries";
+import { Reveal, RevealGroup } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
 
-const previewTiers = [
+/**
+ * Preview funnel 02 — the three preview routes as shared-hairline plan
+ * columns, tier names aligned with the website-tier series (free covers
+ * Starter & Business; Growth and Enterprise carry a credited fee).
+ */
+
+const previewTiers: ServicePlan[] = [
   {
     name: "Free Preview",
-    price: "Free",
-    pages: "Up to 5 Pages",
-    timeline: "1 Week",
-    description: "Perfect for Starter & Business sites",
-    icon: Gift,
+    price: "Free — up to 5 pages",
+    note: "For Starter & Business sites · 1 week",
+    popular: true,
     features: [
       "Fully functional preview site",
       "Mobile responsive design",
@@ -20,20 +28,13 @@ const previewTiers = [
       "Professional design concepts",
       "1 week delivery",
       "No obligation to purchase",
-      "Full transparency throughout"
+      "Full transparency throughout",
     ],
-    eligible: ["Starter Site", "Business Site"],
-    cta: "Get Free Preview",
-    popular: true,
-    variant: "hero" as const
   },
   {
     name: "Growth Preview",
-    price: "Deposit Required",
-    pages: "6-10 Pages",
-    timeline: "3-5 Days",
-    description: "For Growth site projects",
-    icon: Zap,
+    price: "Deposit — credited on purchase",
+    note: "For Growth site projects · 3–5 days",
     features: [
       "Priority development queue",
       "Senior developer assigned",
@@ -41,19 +42,13 @@ const previewTiers = [
       "Advanced functionality demo",
       "Lead capture preview",
       "Fee credited on purchase",
-      "Dedicated project manager"
+      "Dedicated project manager",
     ],
-    eligible: ["Growth Site"],
-    cta: "Start Preview",
-    variant: "outline" as const
   },
   {
     name: "Enterprise Preview",
-    price: "Custom",
-    pages: "Complex projects",
-    timeline: "Variable",
-    description: "For enterprise & custom builds",
-    icon: Zap,
+    price: "Custom — credited on purchase",
+    note: "For enterprise & custom builds",
     features: [
       "Bespoke preview scope",
       "Full dedicated team",
@@ -61,12 +56,9 @@ const previewTiers = [
       "Complex functionality demo",
       "Advanced integrations",
       "Fee credited on purchase",
-      "White-glove service"
+      "White-glove service",
     ],
-    eligible: ["Enterprise & Custom"],
-    cta: "Contact Us to Discuss",
-    variant: "outline" as const
-  }
+  },
 ];
 
 const faqItems = [
@@ -91,9 +83,8 @@ const faqItems = [
 export default function PreviewPricing() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
-        eyebrow="Previews"
+        eyebrow="The preview funnel"
         index="43"
         crumbs={[{ label: "Home", href: "/" }, { label: "Preview packages" }]}
         title="Preview"
@@ -101,179 +92,108 @@ export default function PreviewPricing() {
         body="What the free preview includes, and what optional extras cost if you want to see more first."
         actions={
           <>
-            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
-              <Link to="/get-started">
-                Get started
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Get started
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
             <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
               <span className="link-underline">View packages</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </>
         }
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "£0", label: "Up to 5 pages" },
+              { value: "100%", label: "Fee credited on buy" },
+              { value: "3–7", label: "Days to deliver" },
+            ]}
+          />
+        }
       />
 
-      {/* Trust Signals */}
-      <section className="py-8 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-primary/[0.04] to-primary/[0.02]" />
-        <div className="container-tight relative z-10">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Shield className="w-4 h-4 text-primary" />
-              <span>No hidden fees</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Heart className="w-4 h-4 text-primary" />
-              <span>UK-based support</span>
-            </div>
-            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
-              <Check className="w-4 h-4 text-primary" />
-              <span>Preview fee credited on purchase</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PreviewStrip current="02" />
 
-      {/* Pricing Cards */}
+      {/* The three routes */}
       <section className="section-padding">
         <div className="container-tight">
-          <div className="grid md:grid-cols-3 gap-6">
-            {previewTiers.map((tier, index) => (
-              <motion.div
-                key={tier.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className={`relative p-6 rounded-2xl border transition-all duration-300 ${
-                  tier.popular
-                    ? "border-primary bg-primary/5 scale-105"
-                    : "border-border bg-card hover:border-primary/50"
-                }`}
-              >
-                {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                    Most Popular
-                  </div>
-                )}
-
-                <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
-                  <tier.icon className="w-6 h-6 text-primary" />
-                </div>
-
-                <h3 className="font-display font-bold text-lg mb-1">{tier.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{tier.description}</p>
-
-                <div className="text-3xl font-bold mb-1 text-gradient">
-                  {tier.price}
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">{tier.pages}</p>
-                <p className="text-sm text-primary font-medium mb-6">{tier.timeline} delivery</p>
-
-                <ul className="space-y-2 mb-6">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mb-6 p-3 rounded-lg bg-muted/30">
-                  <p className="text-xs text-muted-foreground mb-1">Eligible for:</p>
-                  {tier.eligible.map((t) => (
-                    <span key={t} className="text-xs font-medium text-primary block">{t}</span>
-                  ))}
-                </div>
-
-                <Button variant={tier.variant} className="w-full" asChild>
-                  <Link to="/get-started">{tier.cta}</Link>
-                </Button>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Credit Explanation */}
-      <section className="section-padding bg-card">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-3xl border border-primary/30 bg-gradient-card"
-          >
-            <div className="flex flex-col md:flex-row items-start gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <Info className="w-8 h-8 text-primary" />
-              </div>
-              <div>
-                <h3 className="heading-sm mb-4">
-                  How Preview <span className="text-gradient">Credits Work</span>
-                </h3>
-                <p className="body-md mb-4">
-                  When you pay for a preview and decide to proceed with the full site purchase, 
-                  your preview fee is <strong>fully credited</strong> toward the final invoice.
-                </p>
-                <p className="text-muted-foreground">
-                  <strong>Example:</strong> You pay a deposit for a Growth preview. 
-                  If you proceed with the full Growth Site, the deposit is credited toward your final invoice. 
-                  The preview was effectively free.
-                </p>
-              </div>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">Three routes</span>
             </div>
-          </motion.div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Pick how much you
+                <span className="block text-primary">want proven first.</span>
+              </h2>
+              <p className="max-w-sm text-sm font-light text-muted-foreground">
+                Free for most sites. Paid previews exist only where the build itself is a serious
+                piece of work — and the fee comes off your invoice.
+              </p>
+            </div>
+          </Reveal>
+          <ServicePlans plans={previewTiers} cta="Start a preview" />
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="section-padding">
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <h2 className="heading-md mb-12">
-            Preview Pricing <span className="text-gradient">FAQ</span>
-          </h2>
-          <div className="max-w-3xl mx-auto space-y-6">
-            {faqItems.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl border border-border bg-card"
-              >
-                <h3 className="font-display font-bold text-lg mb-2">{item.q}</h3>
-                <p className="text-muted-foreground">{item.a}</p>
-              </motion.div>
-            ))}
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">The fine print</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Read before
+                <span className="block text-primary">you ask.</span>
+              </h2>
+            </Reveal>
+            <RevealGroup className="lg:col-span-8">
+              {faqItems.map((item, i) => (
+                <LadderRow key={item.q} index={i} title={item.q}>
+                  {item.a}
+                </LadderRow>
+              ))}
+            </RevealGroup>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-padding bg-card">
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <h2 className="heading-md mb-6">
-            Ready to See Your <span className="text-gradient">Vision?</span>
-          </h2>
-          <p className="body-lg max-w-2xl mx-auto mb-8">
-            Start with a free preview for smaller sites, or get in touch to discuss complex builds.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button variant="premium" size="xl" asChild>
-              <Link to="/get-started">
-                Get Started <ArrowRight className="w-5 h-5" />
-              </Link>
-            </Button>
-            <Button variant="outline" size="xl" asChild>
-              <Link to="/packages">View All Packages</Link>
-            </Button>
-          </div>
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Start with the
+                <span className="block text-primary">free one.</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                Most projects qualify. If yours is bigger, we&rsquo;ll say so before anything
+                costs anything.
+              </p>
+            </div>
+            <Magnetic className="inline-block">
+              <Button variant="premium" size="xl" asChild className="group">
+                <Link to="/get-started">
+                  Request a preview
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
+          </Reveal>
         </div>
       </section>
+
+      <PreviewRail current="02" />
     </Layout>
   );
 }

@@ -131,3 +131,11 @@ recommend / 4.9/5). All removed. Success Stories now leads with verifiable
 claims and the real project journey; Preview Stories tells three
 second-person scenario walkthroughs explicitly framed as hypothetical.
 `[PLACEHOLDER: real client stories, with written permission, as they happen]`
+
+### P9 addendum — Preview Portfolio (removed 2026-07-29)
+
+Preview Portfolio carried six more invented preview clients ("Local
+Plumber", "Boutique Bakery"…) with testimonials and a stats band ("500+
+previews delivered", "94% preview-to-purchase", "100% satisfaction").
+Removed. The page is now a specimen sheet: the guaranteed contents of a
+preview at each tier, linking to the public reference builds.

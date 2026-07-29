@@ -158,7 +158,7 @@ export default function AssetStorage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-colors"
+                  className="p-6  bg-card border border-border/50 hover:border-primary/30 transition-colors"
                 >
                   <div className="mb-5 flex h-12 w-12 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                     <type.icon className="w-8 h-8 text-primary" />
@@ -198,7 +198,7 @@ export default function AssetStorage() {
                 <ScrollItem key={feature.title}>
                   <motion.div
                     whileHover={{ y: -4 }}
-                    className="p-6 rounded-2xl bg-card border border-border/50 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5 transition-all h-full"
+                    className="p-6  bg-card border border-border/50 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5 transition-all h-full"
                   >
                     <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
                       <feature.icon className="w-6 h-6 text-emerald-500" />
@@ -266,7 +266,7 @@ export default function AssetStorage() {
                       <ChevronRight className="w-4 h-4 ml-auto text-muted-foreground" />
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                      <Folder className="w-5 h-5 text-amber-500" />
+                      <Folder className="w-5 h-5 text-gold" />
                       <span className="font-medium">Brand Guidelines</span>
                       <ChevronRight className="w-4 h-4 ml-auto text-muted-foreground" />
                     </div>
@@ -319,9 +319,9 @@ export default function AssetStorage() {
                 <ScrollItem key={benefit.title}>
                   <motion.div
                     whileHover={{ y: -4 }}
-                    className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all h-full"
+                    className="p-6  bg-card border border-border/50 hover:border-primary/30 transition-all h-full"
                   >
-                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-14 h-14  bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <benefit.icon className="w-7 h-7 text-primary" />
                     </div>
                     <h3 className="font-semibold mb-2">{benefit.title}</h3>

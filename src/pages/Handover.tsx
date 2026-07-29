@@ -1,31 +1,27 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { 
-  ArrowRight, 
-  Check, 
-  Shield, 
-  Lock, 
-  Github, 
-  FileCode2, 
-  Download, 
+import {
+  ArrowRight,
+  Check,
+  Shield,
+  Lock,
+  Github,
+  FileCode2,
+  Download,
   Key,
   FileText,
-  Building2,
-  Server,
   Monitor,
   Smartphone,
   Database,
   Layers,
-  Package,
-  RefreshCw,
-  Clock,
-  Users,
   AlertCircle,
   CheckCircle2,
   FileArchive
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { Matrix, MatrixCell } from "@/components/marketing/Matrix";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -36,7 +32,13 @@ import {
 import { HandoverChecklist } from "@/components/handover/HandoverChecklist";
 import { generateHandoverAgreementPDF } from "@/lib/handoverPdfGenerator";
 
-// Handover methods
+/**
+ * The handover contract as a document a buyer can actually read: methods,
+ * per-project-type inventories, the six-step transfer ledger, agreement
+ * terms and security measures — all in the drafting-sheet voice. The
+ * interactive checklist and the PDF agreement generator are untouched.
+ */
+
 const handoverMethods = [
   {
     icon: Github,
@@ -68,7 +70,6 @@ const handoverMethods = [
   }
 ];
 
-// What's included in handover by project type
 const projectTypeHandovers = [
   {
     icon: Monitor,
@@ -132,7 +133,6 @@ const projectTypeHandovers = [
   }
 ];
 
-// Ownership rights
 const ownershipRights = [
   {
     title: "Full Source Code Ownership",
@@ -156,47 +156,39 @@ const ownershipRights = [
   }
 ];
 
-// Handover process steps
 const handoverSteps = [
   {
-    step: "01",
     title: "Project Completion Sign-off",
     description: "Final review meeting to confirm all deliverables meet requirements. Both parties sign off on completion.",
     timing: "1-2 days"
   },
   {
-    step: "02",
     title: "Documentation Package",
     description: "We prepare comprehensive documentation including technical specs, admin guides, and maintenance procedures.",
     timing: "2-3 days"
   },
   {
-    step: "03",
     title: "Credentials & Access Transfer",
     description: "Secure transfer of all credentials, API keys, and service access. We use encrypted channels for sensitive data.",
     timing: "1 day"
   },
   {
-    step: "04",
     title: "Repository Transfer",
     description: "GitHub repository transfer or encrypted file delivery. You gain full control of all source code.",
     timing: "Same day"
   },
   {
-    step: "05",
     title: "Knowledge Transfer Session",
     description: "Live walkthrough of the system architecture, codebase, and maintenance procedures with your team.",
     timing: "1-2 hours"
   },
   {
-    step: "06",
     title: "Support Transition",
     description: "30-day post-handover support period to address any questions or issues as you take ownership.",
     timing: "30 days"
   }
 ];
 
-// Agreement points
 const agreementPoints = [
   {
     category: "Ownership Transfer",
@@ -236,7 +228,6 @@ const agreementPoints = [
   }
 ];
 
-// Security measures
 const securityMeasures = [
   {
     icon: Shield,
@@ -260,637 +251,486 @@ const securityMeasures = [
   }
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-};
-
-const stagger = {
-  visible: {
-    transition: {
-      staggerChildren: 0.1
-    }
+const faqs = [
+  {
+    q: "When does the handover happen?",
+    a: "Handover begins immediately after final payment and project sign-off. The complete process typically takes 5-7 business days, including documentation preparation and knowledge transfer."
+  },
+  {
+    q: "What if I don't use GitHub?",
+    a: "No problem! We can deliver your project as an AES-256 encrypted archive. We'll send the files and password separately for security. We can also help you set up a GitHub account if you'd like to use it going forward."
+  },
+  {
+    q: "Can I hire my own developers to maintain the project?",
+    a: "Absolutely. You own the code completely. You can hire any developer, agency, or build an in-house team. Our documentation is designed to make onboarding new developers straightforward."
+  },
+  {
+    q: "What about ongoing hosting and domains?",
+    a: "We transfer all hosting credentials and domain registrations to your accounts. You'll have full control over your infrastructure. We also provide documentation on how to manage these services."
+  },
+  {
+    q: "Do you provide training?",
+    a: "Yes! Every handover includes a knowledge transfer session where we walk through the system architecture, codebase, and maintenance procedures. Additional training sessions can be arranged as needed."
+  },
+  {
+    q: "What if I find bugs after handover?",
+    a: "We provide a 30-day warranty for bugs in the delivered code. Issues that arise from changes you make are not covered, but we're happy to assist at our standard hourly rate."
   }
-};
+];
 
 export default function Handover() {
   return (
     <Layout>
-      {/* Hero Section */}
       <PageHero
-        eyebrow="Company"
+        eyebrow="The transfer"
         index="33"
         crumbs={[{ label: "Home", href: "/" }, { label: "Handover" }]}
-        title="A proper"
-        highlight="handover"
-        body="Credentials, documentation and a walkthrough — leaving is easy, which is exactly why clients stay."
+        title="Handover,"
+        highlight="in full"
+        body="How every asset, credential and line of code transfers to you — securely, documented, and on the record."
+        actions={
+          <>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Start your project
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
+            <Link to="/ownership" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">What you own</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "06", label: "Transfer steps" },
+              { value: "5–7", label: "Business days" },
+              { value: "30", label: "Days of support after" },
+            ]}
+          />
+        }
       />
 
-      {/* Trust Signals */}
-      <section className="py-8 border-y border-border/60">
-        <div className="container-tight">
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-            {[
-              { icon: Github, text: "GitHub Repository Transfer" },
-              { icon: Shield, text: "AES-256 Encryption" },
-              { icon: FileCode2, text: "100% Code Ownership" },
-              { icon: Lock, text: "No Vendor Lock-in" }
-            ].map((item) => (
-              <div key={item.text} className="flex items-center gap-2 border border-border/60 px-4 py-2">
-                <item.icon className="w-4 h-4 text-primary" />
-                <span>{item.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Handover Methods */}
+      {/* Transfer methods */}
       <section className="section-padding">
         <div className="container-tight">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="mb-12"
-          >
-            <motion.h2 variants={fadeUp} className="heading-md mb-4">
-              How We <span className="text-gradient">Deliver</span>
-            </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl">
-              Choose the handover method that works best for your team and infrastructure.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-0 border-l border-t border-border/60">
-            {handoverMethods.map((method, index) => (
-              <motion.div
-                key={method.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className={`p-8 border-b border-r border-border/60 border ${
-                  method.recommended ? "border-primary/50" : "border-border/50"
-                } relative overflow-visible`}
-              >
-                {method.recommended && (
-                  <div className="absolute -top-3 left-8 px-3 py-1 bg-gradient-primary rounded-full text-xs font-medium text-primary-foreground z-10">
-                    Recommended
-                  </div>
-                )}
-                <div className="w-14 h-14 rounded-2xl border border-border/60 flex items-center justify-center mb-6 mt-2">
-                  <method.icon className="w-7 h-7 text-primary" />
-                </div>
-                <h3 className="font-display font-bold text-2xl mb-3">{method.title}</h3>
-                <p className="text-muted-foreground mb-6">{method.description}</p>
-                <ul className="space-y-3">
-                  {method.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Project Type Handovers */}
-      <section className="section-padding relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.15)' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
-        <div className="container-tight">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="mb-12"
-          >
-            <motion.h2 variants={fadeUp} className="heading-md mb-4">
-              What's Included by <span className="text-gradient">Project Type</span>
-            </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl">
-              Every project type has specific deliverables tailored to its requirements.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-0 border-l border-t border-border/60">
-            {projectTypeHandovers.map((type, index) => (
-              <motion.div
-                key={type.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 border-b border-r border-border/60"
-              >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-xl border border-border/60 flex items-center justify-center flex-shrink-0">
-                    <type.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-display font-bold text-xl">{type.title}</h3>
-                    <p className="text-sm text-muted-foreground">{type.description}</p>
-                  </div>
-                </div>
-                <ul className="grid grid-cols-1 gap-2">
-                  {type.includes.map((item) => (
-                    <li key={item} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-muted-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Ownership Rights */}
-      <section className="section-padding">
-        <div className="container-tight">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="mb-12"
-          >
-            <motion.h2 variants={fadeUp} className="heading-md mb-4">
-              Your <span className="text-gradient">Ownership Rights</span>
-            </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl">
-              Crystal clear ownership from day one. No fine print, no surprises.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-0 border-l border-t border-border/60">
-            {ownershipRights.map((right, index) => (
-              <motion.div
-                key={right.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 border-b border-r border-border/60 text-center"
-              >
-                <div className="w-14 h-14 rounded-2xl border border-border/60 flex items-center justify-center mx-auto mb-4">
-                  <right.icon className="w-7 h-7 text-primary" />
-                </div>
-                <h3 className="font-display font-semibold text-lg mb-2">{right.title}</h3>
-                <p className="text-sm text-muted-foreground">{right.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Handover Process Timeline */}
-      <section className="section-padding relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.15)' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
-        <div className="container-tight">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="mb-12"
-          >
-            <motion.h2 variants={fadeUp} className="heading-md mb-4">
-              The Handover <span className="text-gradient">Process</span>
-            </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl">
-              A structured, secure process ensuring nothing is missed.
-            </motion.p>
-          </motion.div>
-
-          <div className="relative">
-            {/* Vertical line */}
-            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent" />
-
-            <div className="space-y-8">
-              {handoverSteps.map((step, index) => (
-                <motion.div
-                  key={step.step}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`relative md:grid md:grid-cols-2 md:gap-12 ${
-                    index % 2 === 0 ? "" : "md:direction-rtl"
-                  }`}
-                >
-                  {/* Timeline dot */}
-                  <div className="hidden md:flex absolute left-1/2 top-6 -translate-x-1/2 z-10">
-                    <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground font-bold text-sm shadow-lg">
-                      {step.step}
-                    </div>
-                  </div>
-
-                  <div
-                    className={`md:py-4 ${
-                      index % 2 === 0 ? "md:pr-12 md:text-right" : "md:col-start-2 md:pl-12 md:text-left"
-                    }`}
-                    style={{ direction: "ltr" }}
-                  >
-                    <div className="p-6 border border-border/60 bg-background">
-                      {/* Mobile step number */}
-                      <div className="flex items-center gap-3 mb-3 md:hidden">
-                        <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground font-bold text-xs">
-                          {step.step}
-                        </div>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> {step.timing}
-                        </span>
-                      </div>
-
-                      <div className={`hidden md:flex items-center gap-3 mb-3 ${
-                        index % 2 === 0 ? "justify-end" : "justify-start"
-                      }`}>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> {step.timing}
-                        </span>
-                      </div>
-
-                      <h3 className="font-display font-bold text-xl mb-2">{step.title}</h3>
-                      <p className="text-muted-foreground text-sm">{step.description}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">Two routes</span>
             </div>
-          </div>
-        </div>
-      </section>
+            <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+              How the code
+              <span className="block text-primary">reaches you.</span>
+            </h2>
+          </Reveal>
 
-      {/* Agreement Points */}
-      <section className="section-padding">
-        <div className="container-tight">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="mb-12"
-          >
-            <motion.h2 variants={fadeUp} className="heading-md mb-4">
-              Handover <span className="text-gradient">Agreement</span>
-            </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl">
-              Our standard handover agreement covers everything. Here's what's included.
-            </motion.p>
-          </motion.div>
-
-          <div className="max-w-3xl mx-auto">
-            <Accordion type="multiple" className="space-y-4">
-              {agreementPoints.map((section, index) => (
-                <AccordionItem 
-                  key={section.category} 
-                  value={section.category}
-                  className="border border-border/60 bg-background rounded-2xl px-6 data-[state=open]:border-primary/30"
-                >
-                  <AccordionTrigger className="hover:no-underline py-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <FileText className="w-4 h-4 text-primary" />
-                      </div>
-                      <span className="font-display font-semibold text-lg">{section.category}</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="pb-6">
-                    <ul className="space-y-3 pl-11">
-                      {section.points.map((point) => (
-                        <li key={point} className="flex items-start gap-3">
-                          <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                          <span className="text-muted-foreground">{point}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </div>
-      </section>
-
-      {/* Security Measures */}
-      <section className="section-padding relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.15)' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
-        <div className="container-tight">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="mb-12"
-          >
-            <motion.h2 variants={fadeUp} className="heading-md mb-4">
-              Security <span className="text-gradient">Measures</span>
-            </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl">
-              We take security seriously throughout the handover process.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-0 border-l border-t border-border/60">
-            {securityMeasures.map((measure, index) => (
-              <motion.div
-                key={measure.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 border-b border-r border-border/60"
+          <RevealGroup className="grid grid-cols-1 border-l border-t border-border/60 md:grid-cols-2">
+            {handoverMethods.map((method, i) => (
+              <RevealItem
+                key={method.title}
+                className="group relative overflow-hidden border-b border-r border-border/60 p-7 transition-colors duration-500 hover:bg-foreground/[0.02] sm:p-8"
               >
-                <div className="w-12 h-12 rounded-xl border border-border/60 flex items-center justify-center mb-4">
-                  <measure.icon className="w-6 h-6 text-primary" />
+                <span
+                  aria-hidden
+                  className={`absolute inset-x-0 top-0 h-px origin-left bg-primary transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+                    method.recommended ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                  }`}
+                />
+                <div className="mb-6 flex items-center justify-between">
+                  <method.icon className="h-5 w-5 text-primary" strokeWidth={1.5} />
+                  {method.recommended ? (
+                    <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-primary">
+                      Recommended
+                    </span>
+                  ) : (
+                    <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  )}
                 </div>
-                <h3 className="font-display font-semibold text-lg mb-2">{measure.title}</h3>
-                <p className="text-sm text-muted-foreground">{measure.description}</p>
-              </motion.div>
+                <h3 className="font-display text-xl font-semibold tracking-tight">{method.title}</h3>
+                <p className="mt-2 text-sm font-light leading-relaxed text-muted-foreground">
+                  {method.description}
+                </p>
+                <ul className="mt-5 border-t border-border/60">
+                  {method.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-center gap-2.5 border-b border-border/40 py-2.5 text-sm font-light text-muted-foreground last:border-b-0"
+                    >
+                      <Check className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2.2} />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </RevealItem>
             ))}
+          </RevealGroup>
+        </div>
+      </section>
+
+      {/* What's included by project type */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">The inventory</span>
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                What transfers,
+                <span className="block text-primary">by project type.</span>
+              </h2>
+              <p className="max-w-sm text-sm font-light text-muted-foreground">
+                Eight-line inventories — the exact contents of your handover package.
+              </p>
+            </div>
+          </Reveal>
+
+          <RevealGroup className="grid grid-cols-1 border-l border-t border-border/60 md:grid-cols-2">
+            {projectTypeHandovers.map((project, i) => (
+              <RevealItem
+                key={project.title}
+                className="group relative overflow-hidden border-b border-r border-border/60 p-7 transition-colors duration-500 hover:bg-foreground/[0.02] sm:p-8"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-primary transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100 motion-reduce:transition-none"
+                />
+                <div className="mb-6 flex items-center justify-between">
+                  <project.icon className="h-5 w-5 text-primary" strokeWidth={1.5} />
+                  <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <h3 className="font-display text-xl font-semibold tracking-tight">{project.title}</h3>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {project.description}
+                </p>
+                <ol className="mt-5 border-t border-border/60">
+                  {project.includes.map((item, j) => (
+                    <li
+                      key={item}
+                      className="flex items-baseline gap-3 border-b border-border/40 py-2 text-sm font-light text-muted-foreground last:border-b-0"
+                    >
+                      <span className="font-mono text-[10px] tabular-nums text-primary">
+                        {String(j + 1).padStart(2, "0")}
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ol>
+              </RevealItem>
+            ))}
+          </RevealGroup>
+        </div>
+      </section>
+
+      {/* Ownership rights */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">Your rights</span>
+            </div>
+            <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+              Ownership,
+              <span className="block text-primary">without asterisks.</span>
+            </h2>
+          </Reveal>
+
+          <Matrix cols={4}>
+            {ownershipRights.map((right, i) => (
+              <MatrixCell key={right.title} icon={right.icon} index={i} title={right.title}>
+                {right.description}
+              </MatrixCell>
+            ))}
+          </Matrix>
+        </div>
+      </section>
+
+      {/* The six-step transfer */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">Six steps</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                The transfer,
+                <span className="block text-primary">step by step.</span>
+              </h2>
+              <p className="mt-6 max-w-sm text-[15px] font-light leading-relaxed text-muted-foreground">
+                From sign-off to support transition — typically 5–7 business days end to end.
+              </p>
+            </Reveal>
+            <RevealGroup className="lg:col-span-8">
+              {handoverSteps.map((step, i) => (
+                <RevealItem
+                  key={step.title}
+                  className="grid grid-cols-[auto_1fr_auto] items-baseline gap-x-5 border-t border-border/60 py-6 last:border-b sm:gap-x-8"
+                >
+                  <span className="font-mono text-[11px] tabular-nums text-primary">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span>
+                    <span className="block font-display text-lg font-semibold tracking-tight sm:text-xl">
+                      {step.title}
+                    </span>
+                    <span className="mt-1.5 block text-sm font-light leading-relaxed text-muted-foreground">
+                      {step.description}
+                    </span>
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    {step.timing}
+                  </span>
+                </RevealItem>
+              ))}
+            </RevealGroup>
           </div>
         </div>
       </section>
 
-      {/* GitHub Section */}
-      <section className="section-padding">
+      {/* Agreement points */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-                <Github className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Preferred Method</span>
-              </div>
-              <h2 className="heading-md mb-4">
-                Why We Use <span className="text-gradient">GitHub</span>
-              </h2>
-              <p className="body-md mb-6">
-                GitHub is the industry standard for code hosting and version control. By transferring 
-                your project via GitHub, you get a secure, encrypted handover with complete history 
-                and the ability to collaborate with any developer worldwide.
-              </p>
-              <ul className="space-y-4 mb-8">
-                {[
-                  "Industry-standard encryption and security",
-                  "Complete version history preserved",
-                  "Easy collaboration with future developers",
-                  "Built-in issue tracking and documentation",
-                  "Seamless integration with CI/CD pipelines"
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="text-sm text-muted-foreground">
-                <strong>Don't have GitHub?</strong> We can help you set up an account or provide 
-                an alternative encrypted file delivery.
-              </p>
-            </motion.div>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">In the agreement</span>
+            </div>
+            <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+              Four clauses that
+              <span className="block text-primary">protect you.</span>
+            </h2>
+          </Reveal>
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              <div className="p-8 border border-border/60 bg-background">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-foreground flex items-center justify-center">
-                    <Github className="w-10 h-10 text-background" />
-                  </div>
-                  <div>
-                    <h3 className="font-display font-bold text-xl">Repository Transfer</h3>
-                    <p className="text-sm text-muted-foreground">Secure ownership transfer</p>
-                  </div>
+          <RevealGroup className="grid grid-cols-1 border-l border-t border-border/60 sm:grid-cols-2 xl:grid-cols-4">
+            {agreementPoints.map((section, i) => (
+              <RevealItem key={section.category} className="border-b border-r border-border/60 p-7 sm:p-8">
+                <div className="mb-5 flex items-baseline justify-between gap-4">
+                  <span className="font-mono text-[11px] tabular-nums text-primary">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                 </div>
+                <h3 className="font-display text-lg font-semibold tracking-tight">{section.category}</h3>
+                <ul className="mt-5 border-t border-border/60">
+                  {section.points.map((point) => (
+                    <li
+                      key={point}
+                      className="flex items-start gap-2.5 border-b border-border/40 py-2.5 text-sm font-light text-muted-foreground last:border-b-0"
+                    >
+                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2.2} />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </RevealItem>
+            ))}
+          </RevealGroup>
+        </div>
+      </section>
 
-                <div className="space-y-4 border-t border-border/50 pt-6">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                    <span className="text-sm font-medium">Transfer Status</span>
-                    <span className="flex items-center gap-2 text-sm text-green-500">
-                      <CheckCircle2 className="w-4 h-4" /> Completed
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                    <span className="text-sm font-medium">Commits</span>
-                    <span className="text-sm text-muted-foreground">247 commits transferred</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                    <span className="text-sm font-medium">Branches</span>
-                    <span className="text-sm text-muted-foreground">main, staging, develop</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                    <span className="text-sm font-medium">Documentation</span>
-                    <span className="text-sm text-muted-foreground">README, CHANGELOG included</span>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
-            </motion.div>
-          </div>
+      {/* Security measures */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">During transfer</span>
+            </div>
+            <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+              Security
+              <span className="block text-primary">measures.</span>
+            </h2>
+          </Reveal>
+
+          <Matrix cols={4}>
+            {securityMeasures.map((measure, i) => (
+              <MatrixCell key={measure.title} icon={measure.icon} index={i} title={measure.title}>
+                {measure.description}
+              </MatrixCell>
+            ))}
+          </Matrix>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="section-padding relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.15)' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="mb-12"
-          >
-            <motion.h2 variants={fadeUp} className="heading-md mb-4">
-              Handover <span className="text-gradient">FAQs</span>
-            </motion.h2>
-          </motion.div>
-
-          <div className="max-w-3xl mx-auto">
-            <Accordion type="single" collapsible className="space-y-4">
-              {[
-                {
-                  q: "When does the handover happen?",
-                  a: "Handover begins immediately after final payment and project sign-off. The complete process typically takes 5-7 business days, including documentation preparation and knowledge transfer."
-                },
-                {
-                  q: "What if I don't use GitHub?",
-                  a: "No problem! We can deliver your project as an AES-256 encrypted archive. We'll send the files and password separately for security. We can also help you set up a GitHub account if you'd like to use it going forward."
-                },
-                {
-                  q: "Can I hire my own developers to maintain the project?",
-                  a: "Absolutely. You own the code completely. You can hire any developer, agency, or build an in-house team. Our documentation is designed to make onboarding new developers straightforward."
-                },
-                {
-                  q: "What about ongoing hosting and domains?",
-                  a: "We transfer all hosting credentials and domain registrations to your accounts. You'll have full control over your infrastructure. We also provide documentation on how to manage these services."
-                },
-                {
-                  q: "Do you provide training?",
-                  a: "Yes! Every handover includes a knowledge transfer session where we walk through the system architecture, codebase, and maintenance procedures. Additional training sessions can be arranged as needed."
-                },
-                {
-                  q: "What if I find bugs after handover?",
-                  a: "We provide a 30-day warranty for bugs in the delivered code. Issues that arise from changes you make are not covered, but we're happy to assist at our standard hourly rate."
-                }
-              ].map((faq, index) => (
-                <AccordionItem 
-                  key={index} 
-                  value={`faq-${index}`}
-                  className="border border-border/60 bg-background rounded-2xl px-6 data-[state=open]:border-primary/30"
-                >
-                  <AccordionTrigger className="hover:no-underline py-6 text-left">
-                    <span className="font-display font-semibold">{faq.q}</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="pb-6">
-                    <p className="text-muted-foreground">{faq.a}</p>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">Straight answers</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Handover
+                <span className="block text-primary">questions.</span>
+              </h2>
+            </Reveal>
+            <Reveal className="lg:col-span-8">
+              <Accordion type="single" collapsible className="border-t border-border/60">
+                {faqs.map((faq, index) => (
+                  <AccordionItem
+                    key={index}
+                    value={`faq-${index}`}
+                    className="border-b border-border/60"
+                  >
+                    <AccordionTrigger className="gap-6 py-5 text-left font-display font-medium tracking-tight text-foreground hover:text-primary hover:no-underline">
+                      <span className="flex items-baseline gap-4">
+                        <span className="font-mono text-[11px] tabular-nums text-primary">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        {faq.q}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="pl-8 text-sm font-light leading-relaxed text-muted-foreground">
+                      {faq.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Interactive Handover Checklist */}
-      <section className="section-padding">
+      {/* Interactive handover checklist */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="mb-12"
-          >
-            <motion.h2 variants={fadeUp} className="heading-md mb-4">
-              Track Your <span className="text-gradient">Handover Progress</span>
-            </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl">
-              Use this interactive checklist to track your project handover in real-time. 
-              Your progress is saved automatically.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">Live tracker</span>
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Track your
+                <span className="block text-primary">handover progress.</span>
+              </h2>
+              <p className="max-w-sm text-sm font-light text-muted-foreground">
+                Use this interactive checklist during your handover — progress is saved
+                automatically.
+              </p>
+            </div>
+          </Reveal>
+          <Reveal>
             <HandoverChecklist />
-          </motion.div>
+          </Reveal>
         </div>
       </section>
 
-      {/* Download Agreement Section */}
-      <section className="section-padding relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.15)' }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
+      {/* Download agreement */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="border-t border-border/60 pt-12"
-          >
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <div className="w-14 h-14 rounded-2xl border border-border/60 flex items-center justify-center mb-6">
-                  <FileText className="w-7 h-7 text-primary" />
+          <Reveal className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+            <div>
+              <div className="mb-5 flex items-center gap-3">
+                <FileText className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                <span className="eyebrow">On paper</span>
+              </div>
+              <h3 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Download the
+                <span className="block text-primary">handover agreement.</span>
+              </h3>
+              <p className="mt-5 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                Review our complete handover agreement before starting your project. This document
+                outlines ownership transfer, deliverables, post-handover support, and
+                confidentiality terms.
+              </p>
+              <ul className="mt-6 space-y-2.5">
+                {[
+                  "Full ownership transfer terms",
+                  "Deliverables guarantee",
+                  "30-day support warranty",
+                  "Confidentiality & security measures"
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2.5 text-sm font-light text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary" strokeWidth={2.2} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                variant="premium"
+                size="lg"
+                onClick={() => generateHandoverAgreementPDF()}
+                className="mt-8 gap-2"
+              >
+                <Download className="h-5 w-5" />
+                Download PDF Agreement
+              </Button>
+            </div>
+            {/* Document motif — hairline page mock in the drafting voice */}
+            <div className="hidden md:block" aria-hidden>
+              <div className="relative border border-border/60 bg-background p-8">
+                <span className="absolute inset-x-0 top-0 h-px bg-primary" />
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="mono-label">Handover agreement</span>
+                  <span className="mono-label text-primary">PDF</span>
                 </div>
-                <h3 className="font-display font-bold text-2xl lg:text-3xl mb-4">
-                  Download Handover Agreement
-                </h3>
-                <p className="text-muted-foreground mb-6">
-                  Review our complete handover agreement before starting your project. 
-                  This document outlines ownership transfer, deliverables, post-handover 
-                  support, and confidentiality terms.
-                </p>
-                <ul className="space-y-3 mb-8">
-                  {[
-                    "Full ownership transfer terms",
-                    "Deliverables guarantee",
-                    "30-day support warranty",
-                    "Confidentiality & security measures"
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3">
-                      <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                      <span className="text-sm">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button 
-                  variant="premium" 
-                  size="lg"
-                  onClick={() => generateHandoverAgreementPDF()}
-                  className="gap-2"
-                >
-                  <Download className="w-5 h-5" />
-                  Download PDF Agreement
+                <div className="space-y-3">
+                  <div className="h-3 w-3/4 bg-foreground/[0.07]" />
+                  <div className="h-2 w-full bg-foreground/[0.05]" />
+                  <div className="h-2 w-5/6 bg-foreground/[0.05]" />
+                  <div className="h-2 w-4/5 bg-foreground/[0.05]" />
+                  <div className="h-5" />
+                  <div className="h-3 w-2/3 bg-foreground/[0.07]" />
+                  <div className="h-2 w-full bg-foreground/[0.05]" />
+                  <div className="h-2 w-3/4 bg-foreground/[0.05]" />
+                  <div className="h-5" />
+                  <div className="h-3 w-1/2 bg-foreground/[0.07]" />
+                  <div className="h-2 w-4/5 bg-foreground/[0.05]" />
+                  <div className="h-2 w-full bg-foreground/[0.05]" />
+                </div>
+                <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-4">
+                  <span className="mono-label">EST. Wales · United Kingdom</span>
+                  <span className="mono-label">quooro.com</span>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Build knowing
+                <span className="block text-primary">you'll own it all.</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                No lock-in, no surprises — just clean, well-documented code that&rsquo;s truly
+                yours.
+              </p>
+            </div>
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+              <Magnetic className="inline-block">
+                <Button variant="premium" size="xl" asChild className="group">
+                  <Link to="/get-started">
+                    Start your project
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
                 </Button>
-              </div>
-              <div className="hidden md:block">
-                <div className="p-8 rounded-2xl bg-muted/50 border border-border/50">
-                  <div className="space-y-4">
-                    <div className="h-4 bg-muted rounded w-3/4"></div>
-                    <div className="h-3 bg-muted rounded w-full"></div>
-                    <div className="h-3 bg-muted rounded w-5/6"></div>
-                    <div className="h-3 bg-muted rounded w-4/5"></div>
-                    <div className="h-6 mt-6"></div>
-                    <div className="h-4 bg-muted rounded w-2/3"></div>
-                    <div className="h-3 bg-muted rounded w-full"></div>
-                    <div className="h-3 bg-muted rounded w-3/4"></div>
-                    <div className="h-6 mt-6"></div>
-                    <div className="h-4 bg-muted rounded w-1/2"></div>
-                    <div className="h-3 bg-muted rounded w-4/5"></div>
-                    <div className="h-3 bg-muted rounded w-full"></div>
-                  </div>
-                </div>
-              </div>
+              </Magnetic>
+              <Link to="/packages" className="link-underline self-center text-sm text-muted-foreground transition-colors hover:text-foreground">
+                View our packages
+              </Link>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="section-padding">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-8 md:p-12 border border-primary/30 bg-background text-center"
-          >
-            <h2 className="heading-md mb-4">
-              Ready to Get <span className="text-gradient">Started</span>?
-            </h2>
-            <p className="body-lg mb-8 max-w-2xl">
-              Build your project with confidence knowing you'll own everything at the end. 
-              No lock-in, no surprises — just clean, well-documented code that's truly yours.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Button variant="premium" size="xl" asChild>
-                <Link to="/get-started">
-                  Start Your Project <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild>
-                <Link to="/packages">View Our Packages</Link>
-              </Button>
-            </div>
-          </motion.div>
+          </Reveal>
         </div>
       </section>
     </Layout>

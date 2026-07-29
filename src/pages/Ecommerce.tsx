@@ -120,7 +120,7 @@ export default function Ecommerce() {
                 transition={{ delay: i * 0.08 }}
                 className="relative group"
               >
-                <div className="h-full rounded-2xl border border-border/40 bg-card/60 hover:bg-card/80 p-6 transition-colors flex flex-col">
+                <div className="h-full  border border-border/40 bg-card/60 hover:bg-card/80 p-6 transition-colors flex flex-col">
                   {o.tag && (
                     <span className="absolute top-4 right-4 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">
                       {o.tag}
@@ -176,7 +176,7 @@ export default function Ecommerce() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                className="rounded-2xl border border-border/30 bg-card/50 p-5 hover:bg-card/70 transition-colors"
+                className=" border border-border/30 bg-card/50 p-5 hover:bg-card/70 transition-colors"
               >
                 <div className="flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06] mb-3">
                   <f.icon className="w-5 h-5 text-primary" />

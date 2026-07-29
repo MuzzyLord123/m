@@ -85,7 +85,7 @@ export default function CookiePolicy() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="border border-border rounded-2xl p-6 md:p-8"
+                  className="border border-border/60 p-6 md:p-8"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -97,11 +97,11 @@ export default function CookiePolicy() {
                       </h2>
                     </div>
                     {category.required ? (
-                      <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                      <span className="border border-primary/25 bg-primary/[0.06] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
                         Required
                       </span>
                     ) : (
-                      <span className="px-3 py-1 rounded-full bg-secondary text-muted-foreground text-xs font-medium">
+                      <span className="border border-border/60 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                         Optional
                       </span>
                     )}
@@ -183,7 +183,7 @@ export default function CookiePolicy() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="max-w-3xl mx-auto text-center"
+              className="max-w-3xl"
             >
               <h2 className="text-2xl font-display font-semibold text-foreground mb-4">
                 Questions About Cookies?

@@ -1,18 +1,28 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { 
-  ArrowRight, 
-  Shield, 
-  RefreshCw, 
-  Clock, 
-  FileCheck, 
-  MessageSquare,
+import {
+  ArrowRight,
+  Shield,
+  RefreshCw,
+  Clock,
+  FileCheck,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { PageHero } from "@/components/marketing/PageHero";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { Matrix, MatrixCell } from "@/components/marketing/Matrix";
+import { PreviewStrip, PreviewRail } from "@/components/marketing/PreviewSeries";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/button";
+
+/**
+ * Preview funnel 03 — the guarantee, set as terms a buyer can actually
+ * read: four commitments in a matrix, three outcomes as parallel columns
+ * (including the one where you walk away), and the revision policy as a
+ * two-column spec. Tier names aligned with the series (free = Starter &
+ * Business, paid = Growth & Enterprise).
+ */
 
 const guarantees = [
   {
@@ -39,53 +49,50 @@ const guarantees = [
 
 const whatHappens = [
   {
-    scenario: "You Love the Preview",
+    scenario: "You love the preview",
     icon: CheckCircle,
-    color: "text-green-400",
-    bgColor: "bg-green-500/10",
+    tone: "primary" as const,
     steps: [
       "Approve the preview and confirm your order",
       "For paid previews, fee is credited to final invoice",
       "We finalize the site with your feedback",
-      "Full handover with training and documentation"
-    ]
+      "Full handover with training and documentation",
+    ],
   },
   {
-    scenario: "You Want Changes",
+    scenario: "You want changes",
     icon: RefreshCw,
-    color: "text-primary",
-    bgColor: "bg-primary/10",
+    tone: "primary" as const,
     steps: [
       "Provide detailed feedback on what to adjust",
       "We implement agreed revisions (1-2 rounds)",
       "Review updated preview",
-      "Proceed when satisfied"
-    ]
+      "Proceed when satisfied",
+    ],
   },
   {
-    scenario: "You Don't Want to Proceed",
+    scenario: "You don't want to proceed",
     icon: AlertCircle,
-    color: "text-muted-foreground",
-    bgColor: "bg-muted/30",
+    tone: "muted" as const,
     steps: [
       "No obligation for free previews - walk away anytime",
       "For paid previews, fee is non-refundable",
       "We archive your files for 90 days",
-      "You can return anytime to reconsider"
-    ]
-  }
+      "You can return anytime to reconsider",
+    ],
+  },
 ];
 
 const revisionDetails = [
   {
     tier: "Free Previews",
-    description: "Starter & Growth tiers",
+    description: "Starter & Business tiers",
     revisions: "1 round",
     includes: ["Color/font adjustments", "Minor layout tweaks", "Text corrections", "Image swaps"]
   },
   {
     tier: "Paid Previews",
-    description: "Professional & Enterprise",
+    description: "Growth & Enterprise",
     revisions: "2 rounds",
     includes: ["All minor revisions", "Layout restructuring", "Feature adjustments", "Extended functionality tweaks"]
   }
@@ -94,9 +101,8 @@ const revisionDetails = [
 export default function PreviewGuarantee() {
   return (
     <Layout>
-      {/* Hero */}
       <PageHero
-        eyebrow="Previews"
+        eyebrow="The preview funnel"
         index="44"
         crumbs={[{ label: "Home", href: "/" }, { label: "Preview guarantee" }]}
         title="The preview"
@@ -104,193 +110,184 @@ export default function PreviewGuarantee() {
         body="No commitment, no obligation — the preview is free and the decision stays yours."
         actions={
           <>
-            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
-              <Link to="/get-started">
-                Get started
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-            </Button>
+            <Magnetic className="inline-block w-full sm:w-auto">
+              <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+                <Link to="/get-started">
+                  Get started
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
             <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
               <span className="link-underline">View packages</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </>
         }
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "04", label: "Commitments" },
+              { value: "10%", label: "Off if we're late" },
+              { value: "£0", label: "To walk away" },
+            ]}
+          />
+        }
       />
 
-      {/* Core Guarantees */}
-      <section className="section-padding pt-8">
+      <PreviewStrip current="03" />
+
+      {/* The four commitments */}
+      <section className="section-padding">
         <div className="container-tight">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {guarantees.map((item, index) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl border border-border/50 bg-card text-center group relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 relative z-10">
-                  <item.icon className="w-7 h-7 text-primary" />
-                </div>
-                <h3 className="font-display font-bold text-lg mb-2 relative z-10">{item.title}</h3>
-                <p className="text-sm text-muted-foreground relative z-10">{item.description}</p>
-              </motion.div>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">In writing</span>
+            </div>
+            <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+              Four commitments,
+              <span className="block text-primary">no fine print.</span>
+            </h2>
+          </Reveal>
+
+          <Matrix cols={4}>
+            {guarantees.map((item, i) => (
+              <MatrixCell key={item.title} icon={item.icon} index={i} title={item.title}>
+                {item.description}
+              </MatrixCell>
             ))}
-          </div>
+          </Matrix>
         </div>
       </section>
 
-      {/* What Happens Section */}
-      <section className="section-padding bg-card">
+      {/* The three outcomes */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              After Your <span className="text-gradient">Preview</span>
-            </h2>
-            <p className="body-lg max-w-2xl mx-auto">
-              Clear paths forward whether you love it, want changes, or decide not to proceed.
-            </p>
-          </motion.div>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">Every ending covered</span>
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                What happens next —
+                <span className="block text-primary">all three versions.</span>
+              </h2>
+              <p className="max-w-sm text-sm font-light text-muted-foreground">
+                Including the one where you walk away. A guarantee that skips that ending
+                isn&rsquo;t one.
+              </p>
+            </div>
+          </Reveal>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {whatHappens.map((scenario, index) => (
-              <motion.div
+          <RevealGroup className="grid grid-cols-1 border-l border-t border-border/60 lg:grid-cols-3">
+            {whatHappens.map((scenario, sIndex) => (
+              <RevealItem
                 key={scenario.scenario}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl border border-border bg-background"
+                className="border-b border-r border-border/60 p-7 sm:p-8"
               >
-                <div className={`w-12 h-12 rounded-xl ${scenario.bgColor} flex items-center justify-center mb-4`}>
-                  <scenario.icon className={`w-6 h-6 ${scenario.color}`} />
+                <div className="mb-6 flex items-center justify-between">
+                  <scenario.icon
+                    className={`h-5 w-5 ${scenario.tone === "muted" ? "text-muted-foreground" : "text-primary"}`}
+                    strokeWidth={1.5}
+                  />
+                  <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                    {String(sIndex + 1).padStart(2, "0")}
+                  </span>
                 </div>
-                <h3 className="font-display font-bold text-lg mb-4">{scenario.scenario}</h3>
-                <ol className="space-y-3">
+                <h3 className="font-display text-lg font-semibold tracking-tight">
+                  {scenario.scenario}
+                </h3>
+                <ol className="mt-5 border-t border-border/60">
                   {scenario.steps.map((step, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm">
-                      <span className={`w-5 h-5 rounded-full ${scenario.bgColor} flex items-center justify-center flex-shrink-0 text-xs font-bold ${scenario.color}`}>
+                    <li
+                      key={step}
+                      className="flex items-baseline gap-3 border-b border-border/40 py-2.5 text-sm font-light text-muted-foreground last:border-b-0"
+                    >
+                      <span className="font-mono text-[10px] tabular-nums text-primary">
                         {i + 1}
                       </span>
-                      <span className="text-muted-foreground">{step}</span>
+                      {step}
                     </li>
                   ))}
                 </ol>
-              </motion.div>
+              </RevealItem>
             ))}
-          </div>
+          </RevealGroup>
         </div>
       </section>
 
-      {/* Revision Policy */}
-      <section className="section-padding">
+      {/* Revision policy */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="heading-md mb-4">
-              Revision <span className="text-gradient">Policy</span>
+          <Reveal className="mb-10">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px w-8 bg-primary" />
+              <span className="eyebrow">The revision policy</span>
+            </div>
+            <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+              What a round
+              <span className="block text-primary">of changes covers.</span>
             </h2>
-            <p className="body-lg max-w-2xl mx-auto">
-              We want you to be satisfied. Here's what revisions include at each level.
-            </p>
-          </motion.div>
+          </Reveal>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {revisionDetails.map((tier, index) => (
-              <motion.div
-                key={tier.tier}
-                initial={{ opacity: 0, x: index === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="p-6 rounded-2xl border border-border bg-card"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="font-display font-bold text-lg">{tier.tier}</h3>
-                    <p className="text-sm text-muted-foreground">{tier.description}</p>
-                  </div>
-                  <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold">
-                    {tier.revisions}
+          <RevealGroup className="grid grid-cols-1 border-l border-t border-border/60 md:grid-cols-2">
+            {revisionDetails.map((detail, i) => (
+              <RevealItem key={detail.tier} className="border-b border-r border-border/60 p-7 sm:p-8">
+                <div className="mb-5 flex items-baseline justify-between gap-4">
+                  <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
                   </span>
+                  <span className="mono-label text-primary">{detail.revisions}</span>
                 </div>
-                <ul className="space-y-2">
-                  {tier.includes.map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary" />
-                      <span className="text-muted-foreground">{item}</span>
+                <h3 className="font-display text-lg font-semibold tracking-tight">{detail.tier}</h3>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {detail.description}
+                </p>
+                <ul className="mt-5 border-t border-border/60">
+                  {detail.includes.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-center gap-2.5 border-b border-border/40 py-2.5 text-sm font-light text-muted-foreground last:border-b-0"
+                    >
+                      <CheckCircle className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2} />
+                      {item}
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </RevealItem>
             ))}
-          </div>
+          </RevealGroup>
         </div>
       </section>
 
-      {/* Ownership Rights */}
-      <section className="section-padding bg-card">
+      {/* Close */}
+      <section className="section-padding border-t border-border/60">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-3xl border border-primary/30 bg-gradient-card"
-          >
-            <div className="flex flex-col md:flex-row items-start gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <FileCheck className="w-8 h-8 text-primary" />
-              </div>
-              <div>
-                <h3 className="heading-sm mb-4">
-                  Ownership <span className="text-gradient">Rights</span>
-                </h3>
-                <p className="body-md mb-4">
-                  When you purchase the final site, you receive <strong>100% ownership</strong> of all code, 
-                  design assets, and content. No vendor lock-in, no recurring license fees.
-                </p>
-                <p className="text-muted-foreground">
-                  For previews where you don't proceed: the preview code remains our property, 
-                  but we'll never use your branding or content for other clients.
-                </p>
-              </div>
+          <Reveal className="flex flex-col items-start gap-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                The risk is ours.
+                <span className="block text-primary">That&rsquo;s the point.</span>
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-muted-foreground">
+                If the preview doesn&rsquo;t earn the project, we haven&rsquo;t earned your money.
+              </p>
             </div>
-          </motion.div>
+            <Magnetic className="inline-block">
+              <Button variant="premium" size="xl" asChild className="group">
+                <Link to="/get-started">
+                  Start with a preview
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
+          </Reveal>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section-padding">
-        <div className="container-tight">
-          <h2 className="heading-md mb-6">
-            Confident in Our <span className="text-gradient">Quality?</span>
-          </h2>
-          <p className="body-lg max-w-2xl mx-auto mb-8">
-            Start your preview journey with complete confidence in our process and guarantees.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button variant="premium" size="xl" asChild>
-              <Link to="/get-started">
-                Get Your Preview <ArrowRight className="w-5 h-5" />
-              </Link>
-            </Button>
-            <Button variant="outline" size="xl" asChild>
-              <Link to="/preview-faq">More Questions?</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <PreviewRail current="03" />
     </Layout>
   );
 }

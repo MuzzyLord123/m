@@ -178,7 +178,7 @@ export default function TermsOfService() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="border border-border/60 bg-background p-6 rounded-2xl"
+                  className="border border-border/60 bg-background p-6"
                 >
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
@@ -206,7 +206,7 @@ export default function TermsOfService() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center max-w-2xl mx-auto"
+              className="max-w-2xl"
             >
               <h2 className="text-2xl font-display font-semibold text-foreground mb-4">
                 Questions About Our Terms?
