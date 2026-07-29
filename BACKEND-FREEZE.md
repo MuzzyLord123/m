@@ -99,3 +99,39 @@ entire page, no scroll"). Presentation only: new EnquiryBrandPanel
 right. Verified by sorted-diff of every logic-bearing line (supabase
 insert, handlers, validation, autosave, field names/values) against HEAD:
 zero non-className differences.
+
+## Recorded exception — 2026-07-29 (4) — BACKEND CHANGE, owner-mandated
+
+The owner's instruction "ensure account creation for customers works 100%"
+required a genuine backend fix — the frozen state was broken, not working:
+
+1. **Signup provisioning could never run.** With email confirmation on,
+   `signUp()` returns no session, so every post-signup write in
+   `CustomerLogin.tsx` (profile enrichment, customer ID, team creation,
+   membership, verification token) was silently rejected by RLS as anon.
+   Zero teams and zero memberships existed in production.
+2. **Team-code validation was impossible.** `client_teams` has no anon
+   SELECT policy, so the signup page's direct select always failed.
+3. **`team_memberships_member_role_check` rejected `'member'`** — the
+   column's own default and the value used by both signup and the lounge's
+   "View Only" role selector.
+
+Changes (applied as Supabase migrations `signup_server_side_provisioning`
+and `allow_member_role_in_team_memberships`):
+
+- `handle_new_user()` extended: provisions profile (company/phone/industry
+  from signup metadata), customer ID, client team + owner membership for
+  primary accounts, member membership for team-code signups. Team
+  provisioning is exception-guarded so it can never block account creation.
+- New `lookup_team_by_code(p_code)` SECURITY DEFINER fn (anon +
+  authenticated) returning only `(id, team_name)` for exact code match.
+- Check constraint widened to `owner|financial|project|member`.
+- `CustomerLogin.tsx`: team lookups now use the RPC, signup metadata
+  carries the profile fields, and the dead client-side provisioning block
+  was removed (it would double-create teams now that the trigger works).
+- `src/integrations/supabase/types.ts`: `lookup_team_by_code` added to
+  the `Functions` typings (matches the live schema).
+
+Verified by SQL simulation of both signup paths (primary → team + owner
+membership + customer ID; team_member → joins team as `member`), anon RPC
+execution, and cleanup. Both flows now provision correctly server-side.

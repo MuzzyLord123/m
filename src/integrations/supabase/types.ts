@@ -10760,6 +10760,10 @@ export type Database = {
       is_owner: { Args: { row_user_id: string }; Returns: boolean }
       is_team_member: { Args: { p_team_id: string }; Returns: boolean }
       is_team_owner: { Args: { _user_id: string }; Returns: boolean }
+      lookup_team_by_code: {
+        Args: { p_code: string }
+        Returns: { id: string; team_name: string }[]
+      }
       verify_email_token: { Args: { p_token: string }; Returns: Json }
     }
     Enums: {

@@ -47,13 +47,12 @@ export default function CustomerLogin() {
     
     setCheckingTeamCode(true);
     try {
+      // client_teams is not readable before authentication — validation goes
+      // through a SECURITY DEFINER lookup that returns only id + team name.
       const { data, error } = await supabase
-        .from('client_teams')
-        .select('id, team_name')
-        .eq('team_code', code.toUpperCase())
-        .single();
-      
-      if (error || !data) {
+        .rpc('lookup_team_by_code', { p_code: code.toUpperCase() });
+
+      if (error || !data || data.length === 0) {
         setTeamCodeValid(false);
       } else {
         setTeamCodeValid(true);
@@ -109,12 +108,9 @@ export default function CustomerLogin() {
       
       // Verify team exists
       const { data: teamData, error: teamError } = await supabase
-        .from('client_teams')
-        .select('id')
-        .eq('team_code', teamCode.toUpperCase())
-        .single();
-      
-      if (teamError || !teamData) {
+        .rpc('lookup_team_by_code', { p_code: teamCode.toUpperCase() });
+
+      if (teamError || !teamData || teamData.length === 0) {
         toast.error('Invalid team code. Please check and try again.');
         return;
       }
@@ -130,8 +126,13 @@ export default function CustomerLogin() {
         options: {
           // Ensure verification links land on our in-app handler
           emailRedirectTo: `${window.location.origin}/verify-email`,
-          data: { 
-            full_name: fullName.trim()
+          data: {
+            full_name: fullName.trim(),
+            company: company.trim(),
+            phone: phone.trim(),
+            industry,
+            account_type: accountType,
+            team_code: accountType === 'team_member' ? teamCode.trim().toUpperCase() : null
           }
         }
       });
@@ -177,97 +178,11 @@ export default function CustomerLogin() {
           return;
         }
         
-        // New user signup - proceed with full setup
-        // Generate customer ID
-        const { data: customerIdData, error: customerIdError } = await supabase
-          .rpc('generate_customer_id');
-        
-        if (customerIdError) {
-          console.error('Error generating customer ID:', customerIdError);
-        }
-        
-        // Ensure a profile row exists (trigger should create it, but don't rely on it)
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert(
-            {
-              user_id: authData.user.id,
-              email: signupEmail,
-              full_name: fullName.trim(),
-              company: company.trim() || null,
-              phone: phone.trim() || null,
-              industry: industry || null,
-              customer_id: customerIdData || null,
-              status: 'active',
-              website_status: accountType === 'primary' ? 'pending' : null,
-            },
-            { onConflict: 'user_id' }
-          );
-        
-        if (profileError) {
-          console.error('Error updating profile:', profileError);
-        }
-        
-        if (accountType === 'primary') {
-          // Create a new client team for primary accounts
-          const { data: teamCodeData } = await supabase.rpc('generate_team_code');
-          
-          const { data: newTeam, error: teamCreateError } = await supabase
-            .from('client_teams')
-            .insert({
-              primary_account_id: authData.user.id,
-              team_code: teamCodeData || `TEAM${Date.now().toString(36).toUpperCase()}`,
-              team_name: company.trim() || `${fullName.trim()}'s Team`
-            })
-            .select()
-            .single();
-          
-          if (teamCreateError) {
-            console.error('Error creating team:', teamCreateError);
-          } else if (newTeam) {
-            // Add primary account as owner in team_memberships
-            await supabase.from('team_memberships').insert({
-              team_id: newTeam.id,
-              user_id: authData.user.id,
-              member_role: 'owner',
-              display_name: fullName.trim()
-            });
-          }
-        } else {
-          // Join existing team as team member
-          const { data: teamData } = await supabase
-            .from('client_teams')
-            .select('id')
-            .eq('team_code', teamCode.toUpperCase())
-            .single();
-          
-          if (teamData) {
-            await supabase.from('team_memberships').insert({
-              team_id: teamData.id,
-              user_id: authData.user.id,
-              member_role: 'member',
-              display_name: fullName.trim()
-            });
-          }
-        }
-        
-        // Generate verification token and save to profile
-        const verificationToken = crypto.randomUUID();
-        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
-        
-        const { error: profileUpdateError } = await supabase
-          .from('profiles')
-          .update({
-            verification_token: verificationToken,
-            verification_expires_at: expiresAt,
-            email_verified: false
-          })
-          .eq('user_id', authData.user.id);
-        
-        if (profileUpdateError) {
-          console.error('Failed to save verification token:', profileUpdateError);
-        }
-        
+        // New user signup. The database provisions the account server-side
+        // from the signup metadata — profile, customer ID, team and
+        // membership. With email confirmation on there is no session yet,
+        // so the client cannot (and must not) write any of it here.
+
         // Send verification email via backend function (token generation happens server-side)
         try {
           const { error } = await supabase.functions.invoke('send-verification-email', {
