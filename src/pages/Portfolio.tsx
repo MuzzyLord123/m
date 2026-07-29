@@ -1,8 +1,10 @@
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ExternalLink, TrendingUp, ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { PageHero } from "@/components/marketing/PageHero";
+import { Reveal, RevealGroup, RevealItem } from "@/components/motion/Reveal";
+import { Magnetic } from "@/components/motion/Magnetic";
 
 const projects = [
   // These were captioned with invented outcomes — "+150% online orders",
@@ -10,65 +12,82 @@ const projects = [
   // are design studies, not client work, so the numbers describe results that
   // never happened. Replaced with what each build actually demonstrates, which
   // is true and still useful to a buyer. See PLACEHOLDERS.md P1.
-  { tier: "Starter", title: "Local Cafe Landing", result: "Menu, hours and directions above the fold", color: "primary", slug: "local-cafe-landing" },
-  { tier: "Growth", title: "Consulting Firm", result: "Service pages built around one enquiry route", color: "primary", slug: "consulting-firm" },
-  { tier: "Professional", title: "Fashion E-commerce", result: "Catalogue, variants and checkout flow", color: "primary", slug: "fashion-ecommerce" },
-  { tier: "Enterprise", title: "SaaS Platform", result: "Marketing site plus authenticated app shell", color: "primary", slug: "saas-platform" },
-  { tier: "Custom Elite", title: "Healthcare Portal", result: "Role-based access and records UI", color: "gold", slug: "healthcare-portal" },
-  { tier: "Starter", title: "Freelancer Portfolio", result: "Single-page case study layout", color: "primary", slug: "freelancer-portfolio" },
+  { tier: "Starter", title: "Local Cafe Landing", result: "Menu, hours and directions above the fold", slug: "local-cafe-landing" },
+  { tier: "Growth", title: "Consulting Firm", result: "Service pages built around one enquiry route", slug: "consulting-firm" },
+  { tier: "Professional", title: "Fashion E-commerce", result: "Catalogue, variants and checkout flow", slug: "fashion-ecommerce" },
+  { tier: "Enterprise", title: "SaaS Platform", result: "Marketing site plus authenticated app shell", slug: "saas-platform" },
+  { tier: "Custom Elite", title: "Healthcare Portal", result: "Role-based access and records UI", slug: "healthcare-portal" },
+  { tier: "Starter", title: "Freelancer Portfolio", result: "Single-page case study layout", slug: "freelancer-portfolio" },
 ];
 
+/**
+ * Rebuilt as an index of rows — the homepage practice-list pattern — rather
+ * than a grid of letter-initial thumbnail cards. A ledger of builds with tier,
+ * title and what each demonstrates reads as a studio's own record; six cards
+ * with a giant gradient initial in each read as filler. Honesty framing
+ * unchanged: these are design studies, labelled as such.
+ */
 export default function Portfolio() {
   return (
     <Layout>
-      <section className="section-padding pt-32">
+      <PageHero
+        eyebrow="Design studies"
+        index="05"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Reference builds" }]}
+        title="Reference"
+        highlight="builds"
+        body="Our own concepts, built to show how each tier is put together — labelled honestly as studies, not client work."
+      />
+
+      <section className="section-padding">
         <div className="container-tight">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mb-16">
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="heading-xl mb-6">Reference <span className="text-gradient">Builds</span></h1>
-            <p className="body-lg max-w-2xl">
-              Reference builds — design studies that show how each tier is put together.
-              These are our own concepts, not client projects.
-            </p>
-          </motion.div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <RevealGroup className="border-t border-border/60">
             {projects.map((project, i) => (
-              <Link to={`/portfolio/${project.slug}`} key={i}>
-                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                  className="group rounded-2xl liquid-glass-card overflow-hidden transition-all duration-300 relative"
-                  style={{ border: '1px solid hsl(var(--border) / 0.5)' }}
+              <RevealItem key={project.slug}>
+                <Link
+                  to={`/portfolio/${project.slug}`}
+                  className="group grid grid-cols-[auto_1fr_auto] items-center gap-x-5 border-b border-border/60 py-7 transition-colors duration-300 hover:bg-foreground/[0.02] sm:grid-cols-[3.5rem_8rem_1fr_2.5rem] sm:gap-x-8 sm:py-9"
                 >
-                  <div className="aspect-video bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
-                    <span className={`text-6xl font-display font-bold relative z-10 ${project.color === "gold" ? "text-gradient-gold" : "text-gradient"} transition-transform duration-500 group-hover:scale-110`}>{project.tier[0]}</span>
-                    <div className="absolute inset-0 flex items-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="flex items-center gap-2 text-white font-display font-bold text-sm">
-                        View Project <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <span className="text-xs font-medium text-primary liquid-glass-pill px-2 py-1 inline-block">{project.tier}</span>
-                    <h3 className="font-display font-bold text-xl mt-3 mb-2">{project.title}</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground"><TrendingUp className="w-4 h-4 text-primary" />{project.result}</div>
-                  </div>
-                  {/* Hover border glow */}
-                  <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: 'inset 0 0 0 1px hsl(var(--primary) / 0.3)' }} />
-                </motion.div>
-              </Link>
+                  <span className="font-mono text-[11px] tabular-nums tracking-[0.2em] text-primary sm:text-xs">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="mono-label hidden sm:block">{project.tier}</span>
+                  <span className="min-w-0">
+                    <span className="block font-display text-xl font-semibold tracking-tight transition-transform duration-500 group-hover:translate-x-1 sm:text-2xl">
+                      {project.title}
+                    </span>
+                    <span className="mt-1 block text-sm font-light text-muted-foreground">
+                      <span className="sm:hidden">{project.tier} · </span>
+                      {project.result}
+                    </span>
+                  </span>
+                  <ArrowUpRight
+                    className="h-5 w-5 text-primary opacity-0 transition-all duration-500 group-hover:opacity-100"
+                    strokeWidth={1.5}
+                  />
+                </Link>
+              </RevealItem>
             ))}
-          </div>
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            whileInView={{ opacity: 1, y: 0 }} 
-            viewport={{ once: true }}
-            className="mt-12 p-8 rounded-3xl liquid-glass-card border border-border/50"
-          >
-            <h3 className="font-display font-bold text-2xl mb-4">Want one of these built for you?</h3>
-            <p className="text-muted-foreground mb-6">Tell us what the business needs and we will show you a free preview first.</p>
-            <Button variant="premium" size="xl" asChild><Link to="/get-started">Start Your Project <ArrowRight className="w-4 h-4" /></Link></Button>
-          </motion.div>
+          </RevealGroup>
+
+          <Reveal className="mt-14 flex flex-col items-start gap-6 border-t border-border/60 pt-10 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-display text-xl font-semibold tracking-tight sm:text-2xl">
+                Want one of these built for you?
+              </h2>
+              <p className="mt-1 text-sm font-light text-muted-foreground">
+                Tell us what the business needs and we&rsquo;ll show you a free preview first.
+              </p>
+            </div>
+            <Magnetic className="inline-block shrink-0">
+              <Button variant="premium" size="xl" asChild className="group">
+                <Link to="/get-started">
+                  Start your project
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </Button>
+            </Magnetic>
+          </Reveal>
         </div>
       </section>
     </Layout>

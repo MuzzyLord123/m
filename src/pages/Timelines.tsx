@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Clock, Calendar, ArrowRight, Rocket, Shield, Check } from "lucide-react";
@@ -62,43 +63,29 @@ export default function Timelines() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-        <div className="container-tight relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Clock className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Development Timelines</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
-              Know Exactly <span className="text-gradient">When to Expect</span> Your Site
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Clear timelines for every package. From days for Starter sites to tailored schedules for enterprise builds.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Company"
+        index="31"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Timelines" }]}
+        title="Know exactly when"
+        highlight="to expect it"
+        body="Honest delivery windows for every tier — what happens in each week and what we need from you."
+      />
 
       {/* Trust Signals */}
       <section className="py-8 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
         <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-primary/[0.04] to-primary/[0.02]" />
         <div className="container-tight relative z-10">
           <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Shield className="w-4 h-4 text-primary" />
               <span>No hidden fees</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Check className="w-4 h-4 text-primary" />
               <span>UK-based support</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Clock className="w-4 h-4 text-primary" />
               <span>Clear timelines</span>
             </div>
@@ -117,7 +104,7 @@ export default function Timelines() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="glass-card p-8 group hover:border-primary/50 transition-all"
+                className="border border-border/60 bg-background p-8 group hover:border-primary/50 transition-all"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
                   <div className="flex items-center gap-4">
@@ -173,19 +160,19 @@ export default function Timelines() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass-card p-12 text-center"
+            className="border border-border/60 bg-background p-12 text-center"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Ready to Get Started?
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-muted-foreground max-w-2xl mb-8">
               Choose your package and let's get your project on the timeline.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="premium" size="lg" asChild>
                 <Link to="/get-started">Get Started <ArrowRight className="w-4 h-4" /></Link>
               </Button>
-              <Button variant="glass" size="lg" asChild>
+              <Button variant="outline" size="lg" asChild>
                 <Link to="/packages">Compare Packages</Link>
               </Button>
             </div>

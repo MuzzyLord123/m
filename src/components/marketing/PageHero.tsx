@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import { SplitText } from "@/components/motion/SplitText";
+import { LineDraw, DrawPath, DrawPoint } from "@/components/motion/LineDraw";
 import { EASE_OUT } from "@/lib/motion";
 
 export type Crumb = { label: string; href?: string };
@@ -44,14 +45,9 @@ export function PageHero({
 
   return (
     <section className="relative overflow-hidden border-b border-border/60 bg-background">
-      {/* A single ember wash off to one side. Not four blurred orbs. */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 40% 60% at 88% 20%, hsl(var(--primary) / 0.1) 0%, transparent 65%)",
-        }}
-      />
+      {/* The homepage's living layers, inherited by every interior page:
+          aurora light, drafting grid, and one drawn orbital arc. */}
+      <div className="hero-aurora" aria-hidden />
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -64,6 +60,14 @@ export function PageHero({
           WebkitMaskImage: "radial-gradient(ellipse 70% 100% at 70% 0%, black, transparent 75%)",
         }}
       />
+      <div className="pointer-events-none absolute inset-x-0 top-0 overflow-hidden" aria-hidden>
+        <LineDraw viewBox="0 0 1440 360" className="mx-auto h-auto w-full min-w-[900px]">
+          <DrawPath d="M -40 300 Q 720 60 1480 250" stroke="hsl(var(--foreground))" opacity={0.11} duration={1.6} />
+          <DrawPath d="M 900 140 Q 1120 84 1380 168" stroke="hsl(var(--primary))" strokeWidth={1.2} opacity={0.8} at={0.5} duration={0.9} />
+          <DrawPoint cx={900} cy={140} r={2.5} fill="hsl(var(--primary))" ring at={0.45} />
+          <DrawPoint cx={1380} cy={168} r={2} fill="hsl(var(--foreground))" at={1.2} />
+        </LineDraw>
+      </div>
 
       <div className="container-tight relative z-10 pb-16 pt-16 sm:pb-20 sm:pt-20 lg:pb-24 lg:pt-24">
         {crumbs.length > 0 && (

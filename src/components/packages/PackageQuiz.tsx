@@ -440,7 +440,8 @@ export function PackageQuiz() {
   };
 
   return (
-    <div className="p-6 md:p-8 rounded-3xl liquid-glass-card border border-border/50">
+    // Frame is provided by the page (hairline border) — no card chrome here.
+    <div className="p-2 md:p-4">
       <AnimatePresence mode="wait">
         {!showResult ? (
           <motion.div

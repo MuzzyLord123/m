@@ -11,6 +11,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const guarantees = [
@@ -94,28 +95,28 @@ export default function PreviewGuarantee() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Shield className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Our Guarantee</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="heading-xl mb-6">
-              Our Preview <span className="text-gradient">Guarantee</span>
-            </h1>
-            <p className="body-lg">
-              We stand behind every preview we create. Quality assurance, transparent policies, 
-              and fair revision terms - because your satisfaction is our priority.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Previews"
+        index="44"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Preview guarantee" }]}
+        title="The preview"
+        highlight="guarantee"
+        body="No commitment, no obligation — the preview is free and the decision stays yours."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Core Guarantees */}
       <section className="section-padding pt-8">
@@ -149,7 +150,7 @@ export default function PreviewGuarantee() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               After Your <span className="text-gradient">Preview</span>
@@ -196,7 +197,7 @@ export default function PreviewGuarantee() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               Revision <span className="text-gradient">Policy</span>
@@ -271,7 +272,7 @@ export default function PreviewGuarantee() {
 
       {/* CTA */}
       <section className="section-padding">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <h2 className="heading-md mb-6">
             Confident in Our <span className="text-gradient">Quality?</span>
           </h2>
@@ -284,7 +285,7 @@ export default function PreviewGuarantee() {
                 Get Your Preview <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button variant="glass" size="xl" asChild>
+            <Button variant="outline" size="xl" asChild>
               <Link to="/preview-faq">More Questions?</Link>
             </Button>
           </div>

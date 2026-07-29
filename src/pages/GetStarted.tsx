@@ -38,7 +38,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import heroWorkspace from "@/assets/hero-workspace.jpg";
 
 const TOTAL_STEPS = 5;
 
@@ -355,7 +354,7 @@ export default function GetStarted() {
       return `${baseClasses} border-destructive focus-visible:ring-destructive`;
     }
     if (isValid) {
-      return `${baseClasses} border-green-500/50 focus-visible:ring-green-500`;
+      return `${baseClasses} border-[hsl(var(--success))]/50 focus-visible:ring-[hsl(var(--success))]`;
     }
     return baseClasses;
   };
@@ -385,7 +384,7 @@ export default function GetStarted() {
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500"
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-[hsl(var(--success))]"
       >
         <CheckCircle2 className="w-5 h-5" />
       </motion.div>
@@ -418,34 +417,41 @@ export default function GetStarted() {
       </Dialog>
 
       <section className="min-h-screen pt-24 pb-16 relative overflow-hidden">
-        {/* Background Visual */}
-        <div className="absolute top-0 right-0 w-2/3 h-[60vh] opacity-15 pointer-events-none">
-          <img 
-            src={heroWorkspace} 
-            alt="" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-background/70 to-background" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
-        </div>
+        {/* Conversion zone: calm by design. The stock-photo wash is gone — just
+            the drafting grid, fading out before the form itself. No aurora, no
+            drawn arcs, nothing that competes with filling in a field. */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-[50vh]"
+          aria-hidden
+          style={{
+            backgroundImage: `
+              linear-gradient(hsl(var(--foreground) / 0.025) 1px, transparent 1px),
+              linear-gradient(90deg, hsl(var(--foreground) / 0.025) 1px, transparent 1px)
+            `,
+            backgroundSize: "72px 72px",
+            maskImage: "radial-gradient(ellipse 80% 90% at 50% 0%, black, transparent 78%)",
+            WebkitMaskImage: "radial-gradient(ellipse 80% 90% at 50% 0%, black, transparent 78%)",
+          }}
+        />
         <div className="container-tight max-w-3xl relative">
           {submitted ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="p-12 md:p-16 rounded-3xl bg-gradient-card border border-primary/30"
+              className="relative overflow-hidden border border-border/60 bg-background p-12 md:p-16"
             >
+              <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-primary" />
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="w-20 h-20 rounded-full bg-gradient-primary flex items-center justify-center mx-auto mb-8"
+                className="mb-8 flex h-16 w-16 items-center justify-center border border-primary bg-primary"
               >
-                <Check className="w-10 h-10 text-primary-foreground" />
+                <Check className="h-8 w-8 text-primary-foreground" strokeWidth={2.2} />
               </motion.div>
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-                Thank You, {formData.firstName}!
+              <h2 className="mb-4 font-display text-3xl font-semibold tracking-[-0.03em] md:text-4xl">
+                Thank you, {formData.firstName}.
               </h2>
               <p className="text-lg text-muted-foreground mb-8 max-w-md">
                 We've received your enquiry and will be in touch within 24 hours to discuss your project.
@@ -457,9 +463,14 @@ export default function GetStarted() {
             </motion.div>
           ) : (
             <>
-              {/* Progress Bar */}
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-4">
+              {/* Sheet header + progress rail — the drafting-index voice */}
+              <div className="mb-10">
+                <div className="mb-8 flex items-center justify-between">
+                  <span className="mono-label">Project enquiry</span>
+                  <span className="mono-label text-primary">Free preview first</span>
+                </div>
+
+                <div className="flex items-center gap-2" aria-hidden>
                   {stepTitles.map((s, i) => (
                     <div
                       key={i}
@@ -467,21 +478,23 @@ export default function GetStarted() {
                     >
                       <motion.div
                         animate={{
-                          scale: step === i + 1 ? 1.1 : 1,
-                          backgroundColor: step > i ? "hsl(var(--primary))" : step === i + 1 ? "hsl(var(--primary))" : "hsl(var(--muted))",
+                          backgroundColor: step > i ? "hsl(var(--primary))" : "transparent",
+                          borderColor: step > i ? "hsl(var(--primary))" : "hsl(var(--border))",
                         }}
-                        className={`relative w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-colors ${
-                          step > i ? "text-primary-foreground" : step === i + 1 ? "text-primary-foreground" : "text-muted-foreground"
+                        className={`relative flex h-8 w-8 items-center justify-center border transition-colors ${
+                          step > i ? "text-primary-foreground" : "text-muted-foreground"
                         }`}
                       >
                         {step > i + 1 ? (
-                          <Check className="w-5 h-5" />
+                          <Check className="h-3.5 w-3.5" strokeWidth={2.4} />
                         ) : (
-                          <span className="text-sm font-bold">{i + 1}</span>
+                          <span className="font-mono text-[11px] tabular-nums">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
                         )}
                       </motion.div>
                       {i < stepTitles.length - 1 && (
-                        <div className="flex-1 h-1 mx-2 bg-muted rounded-full overflow-hidden">
+                        <div className="mx-2 h-px flex-1 overflow-hidden bg-border">
                           <motion.div
                             initial={{ width: "0%" }}
                             animate={{ width: step > i + 1 ? "100%" : "0%" }}
@@ -493,17 +506,17 @@ export default function GetStarted() {
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
+                <div className="mt-3 flex items-center justify-between">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                     Step {step} of {TOTAL_STEPS}
                   </p>
                   {lastSaved && (
-                    <motion.p 
+                    <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-xs text-muted-foreground flex items-center gap-1"
+                      className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
                     >
-                      <Save className="w-3 h-3" />
+                      <Save className="h-3 w-3" />
                       Draft saved
                     </motion.p>
                   )}
@@ -513,19 +526,22 @@ export default function GetStarted() {
               {/* Step Header */}
               <motion.div
                 key={`header-${step}`}
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 className="mb-10"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6">
-                  <CurrentIcon className="w-8 h-8 text-primary" />
+                <div className="mb-5 flex items-center gap-3">
+                  <span className="font-mono text-[11px] tabular-nums text-primary">
+                    {String(step).padStart(2, "0")}
+                  </span>
+                  <span className="h-px w-8 bg-primary" />
+                  <CurrentIcon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
                 </div>
-                <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-                <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
+                <h1 className="font-display text-3xl font-semibold tracking-[-0.03em] md:text-4xl">
                   {stepTitles[step - 1].title}
                 </h1>
-                <p className="text-muted-foreground text-lg">
+                <p className="mt-2 text-lg font-light text-muted-foreground">
                   {stepTitles[step - 1].subtitle}
                 </p>
               </motion.div>
@@ -541,7 +557,7 @@ export default function GetStarted() {
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    className="p-6 md:p-10 rounded-3xl bg-card border border-border"
+                    className="border border-border/60 bg-background p-6 md:p-10"
                   >
                     {/* Step 1: Personal Info */}
                     {step === 1 && (
@@ -655,10 +671,10 @@ export default function GetStarted() {
                                   setFormData(prev => ({ ...prev, businessType: type }));
                                   validation.setFieldTouched("businessType");
                                 }}
-                                className={`p-3 rounded-xl text-sm font-medium text-left transition-all ${
+                                className={`rounded-lg border p-3 text-sm font-medium text-left transition-colors ${
                                   formData.businessType === type
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted/50 hover:bg-muted text-foreground"
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-border/60 text-foreground hover:border-primary/50"
                                 }`}
                               >
                                 {type}
@@ -740,10 +756,10 @@ export default function GetStarted() {
                                   setFormData(prev => ({ ...prev, selectedPackage: pkg.name }));
                                   validation.setFieldTouched("selectedPackage");
                                 }}
-                                className={`w-full p-4 rounded-2xl text-left transition-all border ${
+                                className={`w-full rounded-lg border p-4 text-left transition-colors ${
                                   formData.selectedPackage === pkg.name
-                                    ? "bg-primary/10 border-primary"
-                                    : "bg-muted/30 border-transparent hover:bg-muted/50"
+                                    ? "border-primary bg-primary/[0.06]"
+                                    : "border-border/60 hover:border-primary/50"
                                 }`}
                               >
                                 <div className="flex justify-between items-start">
@@ -771,10 +787,10 @@ export default function GetStarted() {
                                 key={budget}
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, budget }))}
-                                className={`p-3 rounded-xl text-sm font-medium transition-all ${
+                                className={`rounded-lg border p-3 text-sm font-medium transition-colors ${
                                   formData.budget === budget
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted/50 hover:bg-muted text-foreground"
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-border/60 text-foreground hover:border-primary/50"
                                 }`}
                               >
                                 {budget}
@@ -791,10 +807,10 @@ export default function GetStarted() {
                                 key={timeline}
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, timeline }))}
-                                className={`w-full p-3 rounded-xl text-sm font-medium text-left transition-all ${
+                                className={`w-full rounded-lg border p-3 text-sm font-medium text-left transition-colors ${
                                   formData.timeline === timeline
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted/50 hover:bg-muted text-foreground"
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-border/60 text-foreground hover:border-primary/50"
                                 }`}
                               >
                                 {timeline}
@@ -811,10 +827,10 @@ export default function GetStarted() {
                                 key={option}
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, hasExistingSite: option }))}
-                                className={`p-3 rounded-xl text-sm font-medium transition-all ${
+                                className={`rounded-lg border p-3 text-sm font-medium transition-colors ${
                                   formData.hasExistingSite === option
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted/50 hover:bg-muted text-foreground"
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-border/60 text-foreground hover:border-primary/50"
                                 }`}
                               >
                                 {option}
@@ -848,10 +864,10 @@ export default function GetStarted() {
                                   setFormData(prev => ({ ...prev, primaryGoal: goal }));
                                   validation.setFieldTouched("primaryGoal");
                                 }}
-                                className={`p-4 rounded-xl text-sm font-medium text-left transition-all ${
+                                className={`rounded-lg border p-4 text-sm font-medium text-left transition-colors ${
                                   formData.primaryGoal === goal
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted/50 hover:bg-muted text-foreground"
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-border/60 text-foreground hover:border-primary/50"
                                 }`}
                               >
                                 {goal}
@@ -884,10 +900,10 @@ export default function GetStarted() {
                                 key={feature}
                                 type="button"
                                 onClick={() => handleFeatureToggle(feature)}
-                                className={`p-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                                className={`flex items-center gap-2 rounded-lg border p-3 text-sm font-medium transition-colors ${
                                   formData.mustHaveFeatures.includes(feature)
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted/50 hover:bg-muted text-foreground"
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-border/60 text-foreground hover:border-primary/50"
                                 }`}
                               >
                                 {formData.mustHaveFeatures.includes(feature) && <Check className="w-4 h-4" />}
@@ -955,7 +971,7 @@ export default function GetStarted() {
                             <AnimatePresence>
                               <FieldError name="projectDescription" />
                             </AnimatePresence>
-                            <span className={`text-xs ${formData.projectDescription.length < 20 ? 'text-muted-foreground' : 'text-green-500'}`}>
+                            <span className={`text-xs ${formData.projectDescription.length < 20 ? 'text-muted-foreground' : 'text-[hsl(var(--success))]'}`}>
                               {formData.projectDescription.length}/20 min
                             </span>
                           </div>
@@ -969,10 +985,10 @@ export default function GetStarted() {
                                 key={source}
                                 type="button"
                                 onClick={() => setFormData(prev => ({ ...prev, howDidYouHear: source }))}
-                                className={`p-3 rounded-xl text-sm font-medium transition-all ${
+                                className={`rounded-lg border p-3 text-sm font-medium transition-colors ${
                                   formData.howDidYouHear === source
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted/50 hover:bg-muted text-foreground"
+                                    ? "border-primary bg-primary text-primary-foreground"
+                                    : "border-border/60 text-foreground hover:border-primary/50"
                                 }`}
                               >
                                 {source}
@@ -1008,10 +1024,10 @@ export default function GetStarted() {
                         </div>
 
                         {/* Summary Preview */}
-                        <div className="p-6 rounded-2xl bg-muted/30 border border-border">
-                          <h4 className="font-semibold mb-4 flex items-center gap-2">
-                            <Briefcase className="w-5 h-5 text-primary" />
-                            Quick Summary
+                        <div className="border border-border/60 p-6">
+                          <h4 className="mb-4 flex items-center gap-2.5 font-display font-semibold tracking-tight">
+                            <Briefcase className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                            Quick summary
                           </h4>
                           <div className="grid md:grid-cols-2 gap-4 text-sm">
                             <div>

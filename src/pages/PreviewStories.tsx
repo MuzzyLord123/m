@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Star, Quote, TrendingUp, Eye, Cake, Scale, ShoppingBag, Rocket, Dumbbell, Camera } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const clientStories = [
@@ -84,28 +85,28 @@ export default function PreviewStories() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Star className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Client Stories</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="heading-xl mb-6">
-              Preview <span className="text-gradient">Success Stories</span>
-            </h1>
-            <p className="body-lg">
-              Real businesses who experienced our preview process. From free previews to Fast-Track, 
-              see how our transparent approach builds lasting partnerships.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Previews"
+        index="45"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Preview stories" }]}
+        title="Preview"
+        highlight="stories"
+        body="How the preview-first process works for the people who use it."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Stats */}
       <section className="py-12 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
@@ -202,7 +203,7 @@ export default function PreviewStories() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               The <span className="text-gradient">Upgrade Journey</span>
@@ -251,7 +252,7 @@ export default function PreviewStories() {
 
       {/* CTA */}
       <section className="section-padding">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <h2 className="heading-md mb-6">
             Write Your <span className="text-gradient">Success Story</span>
           </h2>
@@ -264,7 +265,7 @@ export default function PreviewStories() {
                 Get Your Free Preview <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button variant="glass" size="xl" asChild>
+            <Button variant="outline" size="xl" asChild>
               <Link to="/preview-portfolio">View Preview Portfolio</Link>
             </Button>
           </div>

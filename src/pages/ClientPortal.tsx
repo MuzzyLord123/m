@@ -27,6 +27,7 @@ import {
   Key
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { ScrollSection, StaggeredScrollSection, ScrollItem } from "@/components/ScrollSection";
 
@@ -147,76 +148,33 @@ export default function ClientPortal() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="section-padding pt-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent" />
-        <div className="container-tight relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl"
-          >
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
-            >
-              <Database className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-foreground/80">Digital Operations Platform</span>
-            </motion.div>
-
-            <motion.h1 
-              className="heading-xl mb-6"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              Your Business. <span className="text-gradient">One Dashboard.</span>
-            </motion.h1>
-            
-            <motion.p 
-              className="body-lg mb-4 max-w-3xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              Every Quooro client receives access to a private digital operations dashboard. 
-              This is where your business runs — not just your website.
-            </motion.p>
-
-            <motion.p 
-              className="text-muted-foreground mb-8 max-w-2xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-            >
-              Manage websites, track app development, upload assets, communicate with our team, 
-              view analytics, and control your entire digital presence from one secure location.
-            </motion.p>
-
-            <motion.div 
-              className="flex flex-wrap gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Button variant="premium" size="xl" asChild>
-                <Link to="/customer-login">
-                  Client Login <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="glass" size="xl" asChild>
-                <Link to="/get-started">Become a Client</Link>
-              </Button>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Platform"
+        index="05"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Client portal" }]}
+        title="Your business."
+        highlight="One dashboard."
+        body="Every client gets a private operations dashboard — where the work, files, data and conversation live."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Platform Capabilities - New Section */}
       <section className="section-padding">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-16">
+          <ScrollSection direction="up" className="mb-16">
             <span className="text-primary text-sm font-semibold tracking-wider uppercase mb-4 block">
               Platform Capabilities
             </span>
@@ -228,12 +186,12 @@ export default function ClientPortal() {
             </p>
           </ScrollSection>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-0 border-l border-t border-border/60">
             {platformCapabilities.map((capability, index) => (
               <ScrollSection key={capability.title} direction={index % 2 === 0 ? "left" : "right"}>
                 <motion.div
                   whileHover={{ y: -4 }}
-                  className="p-8 rounded-2xl liquid-glass-card h-full"
+                  className="p-8 border-b border-r border-border/60 h-full"
                 >
                   <div className="flex items-start gap-4 mb-6">
                     <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center shrink-0">
@@ -262,7 +220,7 @@ export default function ClientPortal() {
       {/* Security First Section */}
       <section className="section-padding liquid-glass">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-16">
+          <ScrollSection direction="up" className="mb-16">
             <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <Shield className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Enterprise Security</span>
@@ -276,7 +234,7 @@ export default function ClientPortal() {
             </p>
           </ScrollSection>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-0 border-l border-t border-border/60 mb-12">
             {securityFeatures.map((feature, index) => (
               <motion.div
                 key={feature.title}
@@ -284,7 +242,7 @@ export default function ClientPortal() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="text-center p-6 rounded-2xl liquid-glass-card"
+                className="p-6 border-b border-r border-border/60"
               >
                 <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 mx-auto">
                   <feature.icon className="w-7 h-7 text-primary-foreground" />
@@ -314,7 +272,7 @@ export default function ClientPortal() {
       {/* Client Portal Features */}
       <section className="section-padding">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-16">
+          <ScrollSection direction="up" className="mb-16">
             <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <Users className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">For Clients</span>
@@ -327,14 +285,14 @@ export default function ClientPortal() {
             </p>
           </ScrollSection>
 
-          <StaggeredScrollSection className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StaggeredScrollSection className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
             {clientFeatures.map((feature) => (
               <ScrollItem key={feature.title}>
                 <motion.div
                   whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                  className="group p-6 rounded-2xl liquid-glass-card h-full"
+                  className="group p-6 border-b border-r border-border/60 h-full"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 transition-transform duration-500 group-hover:scale-110">
+                  <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary bg-primary transition-transform duration-500 group-hover:scale-110">
                     <feature.icon className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <h3 className="font-display font-bold text-lg mb-2">{feature.title}</h3>
@@ -376,7 +334,7 @@ export default function ClientPortal() {
                     transition={{ delay: index * 0.1 }}
                     className="flex items-start gap-4 p-4 rounded-xl liquid-glass-subtle"
                   >
-                    <div className="w-10 h-10 rounded-lg liquid-glass-pill flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg border border-border/60 flex items-center justify-center flex-shrink-0">
                       <feature.icon className="w-5 h-5 text-primary" />
                     </div>
                     <div>
@@ -391,7 +349,7 @@ export default function ClientPortal() {
             <ScrollSection direction="right">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent rounded-3xl" />
-                <div className="p-8 rounded-3xl liquid-glass-card border border-primary/20">
+                <div className="p-8 border border-border/60 bg-background border border-primary/20">
                   <div className="space-y-6">
                     {/* Mock Dashboard Preview */}
                     <div className="flex items-center gap-3 pb-4 border-b border-border/50">
@@ -440,7 +398,7 @@ export default function ClientPortal() {
       {/* Benefits Section */}
       <section className="section-padding liquid-glass">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-16">
+          <ScrollSection direction="up" className="mb-16">
             <h2 className="heading-lg mb-4">
               Why This <span className="text-gradient">Matters</span>
             </h2>
@@ -450,12 +408,12 @@ export default function ClientPortal() {
             </p>
           </ScrollSection>
 
-          <StaggeredScrollSection className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StaggeredScrollSection className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border-l border-t border-border/60">
             {benefits.map((benefit) => (
               <ScrollItem key={benefit.title}>
                 <motion.div
                   whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.3 } }}
-                  className="text-center p-6 rounded-2xl liquid-glass-card h-full"
+                  className="p-6 border-b border-r border-border/60 h-full"
                 >
                   <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 mx-auto">
                     <benefit.icon className="w-7 h-7 text-primary-foreground" />
@@ -472,7 +430,7 @@ export default function ClientPortal() {
       {/* Pricing Breakdown Section */}
       <section className="section-padding">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-16">
+          <ScrollSection direction="up" className="mb-16">
             <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
               <PoundSterling className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Transparent Pricing</span>
@@ -485,12 +443,12 @@ export default function ClientPortal() {
             </p>
           </ScrollSection>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-0 border-l border-t border-border/60 max-w-4xl mx-auto">
             {/* Per-Edit Pricing */}
             <ScrollSection direction="left">
               <motion.div
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                className="p-8 rounded-3xl liquid-glass-card border border-border/50 h-full"
+                className="p-8 border-b border-r border-border/60 h-full"
               >
                 <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6">
                   <Wrench className="w-7 h-7 text-primary-foreground" />
@@ -545,7 +503,7 @@ export default function ClientPortal() {
             <ScrollSection direction="right">
               <motion.div
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                className="p-8 rounded-3xl liquid-glass-card border border-primary/30 h-full relative overflow-hidden"
+                className="p-8 border border-primary/30 bg-background h-full relative overflow-hidden"
               >
                 <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium">
                   Best Value
@@ -617,7 +575,7 @@ export default function ClientPortal() {
       <section className="section-padding">
         <div className="container-tight">
           <ScrollSection direction="scale">
-            <div className="p-8 md:p-12 rounded-3xl liquid-glass-card border border-primary/20 text-center">
+            <div className="p-8 md:p-12 border border-border/60 bg-background border border-primary/20 text-center">
               <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6 mx-auto">
                 <Shield className="w-8 h-8 text-primary-foreground" />
               </div>
@@ -654,7 +612,7 @@ export default function ClientPortal() {
       {/* FAQ Section */}
       <section className="section-padding liquid-glass">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-12">
+          <ScrollSection direction="up" className="mb-12">
             <h2 className="heading-lg mb-4">
               Frequently Asked <span className="text-gradient">Questions</span>
             </h2>
@@ -712,7 +670,7 @@ export default function ClientPortal() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
-                className="p-6 rounded-2xl liquid-glass-card border border-border/50"
+                className="p-6 border border-border/60 bg-background"
               >
                 <h3 className="font-display font-semibold text-lg mb-2">{item.q}</h3>
                 <p className="text-muted-foreground">{item.a}</p>
@@ -724,7 +682,7 @@ export default function ClientPortal() {
 
       {/* CTA */}
       <section className="section-padding">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <ScrollSection direction="up">
             <h2 className="heading-lg mb-4">
               Ready to Experience the <span className="text-gradient">Difference?</span>
@@ -738,7 +696,7 @@ export default function ClientPortal() {
                   Get Started <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
-              <Button variant="glass" size="xl" asChild>
+              <Button variant="outline" size="xl" asChild>
                 <Link to="/customer-login">Existing Client Login</Link>
               </Button>
             </div>

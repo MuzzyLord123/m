@@ -138,7 +138,7 @@ export default function FashionEcommerce() {
 
       {/* Built by Quooro */}
       <section className="py-16 px-4 border-t border-border/30 bg-background">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <p className="text-sm font-medium text-brand mb-2">Built by Quooro</p>
           <p className="font-display text-2xl font-bold mb-2">+£50K Monthly Sales</p>
           <p className="text-muted-foreground mb-6">Real results from a Professional package website.</p>

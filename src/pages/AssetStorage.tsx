@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Layout } from '@/components/layout/Layout';
+import { PageHero } from "@/components/marketing/PageHero";
 import { ScrollSection, StaggeredScrollSection, ScrollItem } from '@/components/ScrollSection';
 
 const securityFeatures = [
@@ -128,59 +129,23 @@ export default function AssetStorage() {
     <Layout>
       <div className="relative overflow-hidden">
         {/* Hero Section */}
-        <section className="relative py-24 sm:py-32 lg:py-40">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-          
-          <div className="container px-4 sm:px-6 lg:px-8 relative">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-4xl"
-            >
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-                <Shield className="w-4 h-4" />
-                Enterprise-Grade Security
-              </div>
-              
-              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-                Secure Asset &{' '}
-                <span className="text-gradient">File Storage</span>
-              </h1>
-              
-              <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl">
-                Store, organize, and access your project files with military-grade encryption. 
-                Your assets are protected by the same security standards trusted by Fortune 500 companies.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <Button asChild size="lg" className="gap-2 shadow-lg shadow-primary/25">
-                  <Link to="/lounge/assets">
-                    <Cloud className="w-5 h-5" />
-                    Access Your Storage
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="gap-2">
-                  <Link to="/get-started">
-                    Get Started Free
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+        <PageHero
+          eyebrow="Platform"
+          index="36"
+          crumbs={[{ label: "Home", href: "/" }, { label: "Asset storage" }]}
+          title="Your files, in"
+          highlight="one place"
+          body="Logos, photography, documents and deliverables — versioned, permissioned and always findable."
+        />
 
         {/* File Types Supported */}
         <ScrollSection className="py-20 bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
+            <div className="mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                 All Your File Types, One Secure Home
               </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-muted-foreground max-w-2xl">
                 From images to documents, videos to archives—store any file type with confidence.
               </p>
             </div>
@@ -193,9 +158,9 @@ export default function AssetStorage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="text-center p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-colors"
+                  className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-colors"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                     <type.icon className="w-8 h-8 text-primary" />
                   </div>
                   <h3 className="font-semibold mb-1">{type.label}</h3>
@@ -209,7 +174,7 @@ export default function AssetStorage() {
         {/* Security Features */}
         <StaggeredScrollSection className="py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+            <div className="mb-16">
               <ScrollItem>
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium mb-6">
                   <Lock className="w-4 h-4" />
@@ -222,7 +187,7 @@ export default function AssetStorage() {
                 </h2>
               </ScrollItem>
               <ScrollItem>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
+                <p className="text-muted-foreground max-w-2xl">
                   We don't just store your files—we protect them with multiple layers of enterprise security.
                 </p>
               </ScrollItem>
@@ -340,11 +305,11 @@ export default function AssetStorage() {
         {/* Benefits */}
         <StaggeredScrollSection className="py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+            <div className="mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                 Built for Teams That Move Fast
               </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-muted-foreground max-w-2xl">
                 Every feature designed to help you work smarter, not harder.
               </p>
             </div>
@@ -354,7 +319,7 @@ export default function AssetStorage() {
                 <ScrollItem key={benefit.title}>
                   <motion.div
                     whileHover={{ y: -4 }}
-                    className="text-center p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all h-full"
+                    className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/30 transition-all h-full"
                   >
                     <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <benefit.icon className="w-7 h-7 text-primary" />

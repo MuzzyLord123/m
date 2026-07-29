@@ -93,3 +93,18 @@ photo if the owner wants a face on the site]`
 `og-quooro.jpg` predates this design system and will be off-brand once Night
 Shift lands.
 `[PLACEHOLDER: regenerate OG images in the new direction — 1200x630]`
+
+### P6. Placeholder WhatsApp number (removed 2026-07-29)
+
+The Packages page floating "Need Help?" button linked to
+`wa.me/447000000000` — an obviously fake number that would have dead-ended a
+real enquiry. It now routes to `/get-started`.
+`[PLACEHOLDER: if the studio wants WhatsApp contact, wire the real number]`
+
+### P7. Legal entity name
+
+The Support page and Terms of Service name **Echelon Sites Ltd** as the
+contracting entity while the brand everywhere else is Quooro. Left untouched —
+a legal name is not a design decision. `[PLACEHOLDER: owner to confirm the
+registered company name and whether Terms should read "Quooro (a trading name
+of …)" ]`

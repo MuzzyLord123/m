@@ -1,60 +1,56 @@
-import { motion } from "framer-motion";
 import { Shield, Heart, Clock, Award } from "lucide-react";
+import { RevealGroup, RevealItem } from "@/components/motion/Reveal";
 
 const badges = [
   {
     icon: Shield,
-    text: "100% Ownership Guaranteed",
+    text: "100% ownership guaranteed",
     description: "Full code & IP rights"
   },
   {
     icon: Heart,
-    text: "UK-Based Support",
+    text: "UK-based support",
     description: "Real humans, real help"
   },
   {
     icon: Clock,
-    text: "30-Day Warranty",
+    text: "30-day warranty",
     description: "Post-launch peace of mind"
   },
   {
     icon: Award,
-    text: "Satisfaction Guarantee",
+    text: "Satisfaction guarantee",
     description: "Love it or we fix it"
   },
 ];
 
+/**
+ * Restyled from floating rounded chips to a flush hairline strip — four cells
+ * sharing borders, mono ledger voice. These are commitments the studio makes,
+ * not borrowed credibility, so they stay.
+ */
 export function TrustBadgesRow() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="py-8 border-y border-border/30 bg-muted/20"
-    >
+    <div className="border-y border-border/60">
       <div className="container-tight">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <RevealGroup className="grid grid-cols-2 lg:grid-cols-4">
           {badges.map((badge, index) => {
             const Icon = badge.icon;
             return (
-              <motion.div
+              <RevealItem
                 key={badge.text}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="flex flex-col items-center text-center p-4 rounded-xl bg-background/50 border border-border/30"
+                className={`flex items-start gap-3.5 border-border/60 px-2 py-6 sm:px-4 ${index > 0 ? "lg:border-l" : ""} ${index % 2 === 1 ? "border-l lg:border-l" : ""}`}
               >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  <Icon className="w-5 h-5 text-primary" />
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={1.5} />
+                <div>
+                  <p className="text-sm font-medium tracking-tight">{badge.text}</p>
+                  <p className="mt-0.5 text-xs font-light text-muted-foreground">{badge.description}</p>
                 </div>
-                <p className="font-semibold text-sm">{badge.text}</p>
-                <p className="text-xs text-muted-foreground">{badge.description}</p>
-              </motion.div>
+              </RevealItem>
             );
           })}
-        </div>
+        </RevealGroup>
       </div>
-    </motion.div>
+    </div>
   );
 }

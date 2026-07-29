@@ -241,6 +241,9 @@ function AnimatedRoutes() {
           <Route path="/" element={<PageTransition><Index /></PageTransition>} />
           <Route path="/checkout" element={<PageTransition><StoreCheckout /></PageTransition>} />
           <Route path="/packages" element={<PageTransition><Packages /></PageTransition>} />
+          {/* Additive: Pricing.tsx was imported but never routed; the admin
+              visual editor already links to /pricing. */}
+          <Route path="/pricing" element={<PageTransition><Pricing /></PageTransition>} />
           <Route path="/starter" element={<PageTransition><Starter /></PageTransition>} />
           <Route path="/growth" element={<PageTransition><Growth /></PageTransition>} />
           <Route path="/professional" element={<PageTransition><Professional /></PageTransition>} />

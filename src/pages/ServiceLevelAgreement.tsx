@@ -3,6 +3,7 @@ import { Shield, Clock, CheckCircle, AlertTriangle, Zap, Server, HeadphonesIcon,
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import {
   Table,
   TableBody,
@@ -170,30 +171,14 @@ export default function ServiceLevelAgreement() {
   return (
     <Layout>
     <div className="min-h-screen bg-background">
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-        <div className="container px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl"
-          >
-            <Badge variant="outline" className="mb-6 px-4 py-2">
-              <Shield className="w-4 h-4 mr-2" />
-              Service Commitment
-            </Badge>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
-              Service Level <span className="text-gradient">Agreement</span>
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl">
-              Our commitment to reliability, responsiveness, and quality service. 
-              Clear expectations and guaranteed performance for all management plans.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Company"
+        index="34"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Service level agreement" }]}
+        title="The service"
+        highlight="agreement"
+        body="Response times, uptime and responsibilities — the commitments we put our name to."
+      />
 
       {/* Plan Comparison Table */}
       <section className="py-16 md:py-24 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.15)' }}>
@@ -205,10 +190,10 @@ export default function ServiceLevelAgreement() {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <motion.div variants={fadeUp} className="text-center mb-12">
+            <motion.div variants={fadeUp} className="mb-12">
               <TrendingUp className="w-12 h-12 text-primary mx-auto mb-4" />
               <h2 className="text-3xl font-display font-bold mb-4">Plan Comparison</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-2xl">
                 Compare all management plans side-by-side to find the right fit for your business.
               </p>
             </motion.div>
@@ -252,10 +237,10 @@ export default function ServiceLevelAgreement() {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <motion.div variants={fadeUp} className="text-center mb-12">
+            <motion.div variants={fadeUp} className="mb-12">
               <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
               <h2 className="text-3xl font-display font-bold mb-4">Response Time Guarantees</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-2xl">
                 We commit to these response times for all support requests based on your management plan.
               </p>
             </motion.div>
@@ -305,10 +290,10 @@ export default function ServiceLevelAgreement() {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <motion.div variants={fadeUp} className="text-center mb-12">
+            <motion.div variants={fadeUp} className="mb-12">
               <Server className="w-12 h-12 text-primary mx-auto mb-4" />
               <h2 className="text-3xl font-display font-bold mb-4">Uptime Guarantees</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-2xl">
                 We guarantee minimum uptime for websites hosted with us. If we fall short, you receive service credits.
               </p>
             </motion.div>
@@ -406,10 +391,10 @@ export default function ServiceLevelAgreement() {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <motion.div variants={fadeUp} className="text-center mb-12">
+            <motion.div variants={fadeUp} className="mb-12">
               <ArrowUp className="w-12 h-12 text-primary mx-auto mb-4" />
               <h2 className="text-3xl font-display font-bold mb-4">Escalation Policy</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-2xl">
                 How issues are escalated through our support tiers to ensure timely resolution.
               </p>
             </motion.div>
@@ -516,7 +501,7 @@ export default function ServiceLevelAgreement() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <motion.div variants={fadeUp} className="text-center mb-12">
+            <motion.div variants={fadeUp} className="mb-12">
               <HeadphonesIcon className="w-12 h-12 text-primary mx-auto mb-4" />
               <h2 className="text-3xl font-display font-bold mb-4">Support Channels</h2>
               <p className="text-lg text-muted-foreground">

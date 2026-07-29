@@ -85,7 +85,7 @@ export default function HealthcarePortal() {
           <div className="grid sm:grid-cols-2 gap-6">
             {services.map((s, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="rounded-2xl p-8 bg-white border hover:-translate-y-1 transition-all duration-300" style={{ borderColor: "hsl(200 20% 90%)" }}>
+                className="rounded-2xl p-8 bg-white border transition-all duration-300" style={{ borderColor: "hsl(200 20% 90%)" }}>
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: "hsl(170 40% 93%)" }}>
                   <s.icon className="w-6 h-6" style={{ color: "hsl(170 50% 40%)" }} />
                 </div>
@@ -134,7 +134,7 @@ export default function HealthcarePortal() {
 
       {/* Built by Quooro */}
       <section className="py-16 px-4 border-t border-border/50" style={{ background: "hsl(170 40% 95%)" }}>
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <p className="text-sm font-medium mb-2" style={{ color: "hsl(170 50% 40%)" }}>Built by Quooro</p>
           <p className="font-display text-2xl font-bold mb-2" style={{ color: "hsl(200 40% 20%)" }}>500K Patients Served</p>
           <p className="text-muted-foreground mb-6">Real results from a Custom Elite package website.</p>

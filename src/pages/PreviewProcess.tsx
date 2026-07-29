@@ -12,6 +12,7 @@ import {
   Zap
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const processSteps = [
@@ -86,34 +87,34 @@ export default function PreviewProcess() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Clock className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Our Process</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="heading-xl mb-6">
-              How We Build Your <span className="text-gradient">Preview</span>
-            </h1>
-            <p className="body-lg">
-              A transparent 1-week journey from concept to custom-built preview. 
-              Professional team, quality checkpoints, and complete transparency at every step.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Previews"
+        index="42"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Preview process" }]}
+        title="How we build"
+        highlight="your preview"
+        body="What happens between your enquiry and the preview landing in your inbox."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Timeline */}
       <section className="section-padding relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.2)' }}>
         <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
         <div className="container-tight relative z-10">
-          <h2 className="heading-md text-center mb-16">
+          <h2 className="heading-md mb-16">
             7-Day <span className="text-gradient">Preview Timeline</span>
           </h2>
 
@@ -167,7 +168,7 @@ export default function PreviewProcess() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               Your <span className="text-gradient">Dedicated Team</span>
@@ -187,7 +188,7 @@ export default function PreviewProcess() {
                 transition={{ delay: index * 0.1 }}
                 className="p-6 rounded-2xl border border-border bg-card text-center"
               >
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                   <Users className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="font-display font-bold text-lg mb-2">{member.role}</h3>
@@ -277,7 +278,7 @@ export default function PreviewProcess() {
 
       {/* CTA */}
       <section className="section-padding bg-card">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <h2 className="heading-md mb-6">
             Ready to Start Your <span className="text-gradient">Preview?</span>
           </h2>
@@ -290,7 +291,7 @@ export default function PreviewProcess() {
                 Get Your Free Preview <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button variant="glass" size="xl" asChild>
+            <Button variant="outline" size="xl" asChild>
               <Link to="/preview-faq">Common Questions</Link>
             </Button>
           </div>

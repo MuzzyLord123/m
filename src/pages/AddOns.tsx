@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { 
@@ -122,33 +123,14 @@ export default function AddOns() {
   return (
     <Layout>
       {/* Hero with AI Visual and Parallax */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <ParallaxBackground
-          src={aiNeural}
-          alt="AI neural network visualization"
-          parallaxSpeed={0.2}
-          overlayClassName="bg-gradient-to-b from-background via-background/85 to-background"
-        />
-        <div className="container-tight relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Plus className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Add-On Services</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
-              Enhance Your <span className="text-gradient">Project</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Additional services to complement your website and accelerate your business growth.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Packages"
+        index="29"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Add-ons" }]}
+        title="Add-ons &"
+        highlight="extras"
+        body="Extra pages, features and services that bolt onto any package when the project calls for them."
+      />
 
       {/* Branding Visual Section with 3D Hover */}
       <section className="py-0">
@@ -211,7 +193,7 @@ export default function AddOns() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">
               Bundle & Save
@@ -221,7 +203,7 @@ export default function AddOns() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-0 border-l border-t border-border/60">
             {bundles.map((bundle, index) => (
               <motion.div
                 key={bundle.name}
@@ -229,7 +211,7 @@ export default function AddOns() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className={`glass-card p-6 relative ${bundle.popular ? 'border-primary' : ''}`}
+                className={`border-b border-r border-border/60 p-6 relative ${bundle.popular ? 'border-primary' : ''}`}
               >
                 {bundle.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary rounded-full text-xs font-semibold text-primary-foreground">
@@ -271,9 +253,9 @@ export default function AddOns() {
               <h2 className="text-2xl font-display font-bold mb-8 text-primary">
                 {category.category}
               </h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
                 {category.items.map((item) => (
-                  <div key={item.name} className="glass-card p-6 group hover:border-primary/50 transition-all">
+                  <div key={item.name} className="border-b border-r border-border/60 p-6 group hover:border-primary/50 transition-all">
                     <div className="flex items-start justify-between mb-4">
                       <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                         <item.icon className="w-6 h-6 text-primary" />
@@ -307,12 +289,12 @@ export default function AddOns() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass-card p-12 text-center"
+            className="border border-border/60 bg-background p-12 text-center"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Need Something Custom?
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-muted-foreground max-w-2xl mb-8">
               Don't see what you need? Let's discuss your specific requirements.
             </p>
             <Button variant="premium" size="lg" asChild>

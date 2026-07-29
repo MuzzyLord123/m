@@ -64,7 +64,7 @@ export default function LocalCafeLanding() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {menuItems.map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="rounded-2xl p-6 border hover:-translate-y-1 transition-all duration-300"
+                className="rounded-2xl p-6 border transition-all duration-300"
                 style={{ background: "white", borderColor: "hsl(30 30% 88%)" }}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "hsl(25 60% 92%)" }}>
@@ -123,7 +123,7 @@ export default function LocalCafeLanding() {
 
       {/* Built by Quooro */}
       <section className="py-16 px-4 border-t border-border/50" style={{ background: "hsl(25 50% 95%)" }}>
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <p className="text-sm font-medium mb-2" style={{ color: "hsl(25 60% 40%)" }}>Built by Quooro</p>
           <p className="font-display text-2xl font-bold mb-2" style={{ color: "hsl(25 40% 25%)" }}>+150% Online Orders</p>
           <p className="text-muted-foreground mb-6">Real results from a Starter package website.</p>

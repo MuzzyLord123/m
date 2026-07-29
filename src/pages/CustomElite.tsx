@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, Crown, Infinity, Users, Rocket, Brain, Shield, Sparkles, ArrowRight } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const capabilities = [
@@ -26,59 +27,28 @@ export default function CustomElite() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32 overflow-hidden">
-        <div className="container-tight">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-                <Crown className="w-4 h-4 text-gold-foreground" />
-                <span className="text-sm font-medium text-gold-foreground">Premium Service</span>
-              </div>
-              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-              <h1 className="heading-xl mb-6">
-                Custom <span className="text-gradient-gold">Elite</span>
-              </h1>
-              <div className="text-4xl font-display font-bold text-muted-foreground mb-4">
-                Custom Pricing
-              </div>
-              <p className="text-lg text-muted-foreground mb-4">
-                Tailored to your business
-              </p>
-              <p className="body-lg mb-8">
-                For organisations requiring truly custom solutions. Complex web applications, 
-                SaaS platforms, enterprise systems — with a dedicated team and unlimited scope.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button variant="gold" size="lg" className="text-sm sm:text-base sm:px-8" asChild>
-                  <Link to="/get-started">Contact Us <ArrowRight className="w-4 h-4" /></Link>
-                </Button>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="relative"
-            >
-              <div className="rounded-3xl border-2 border-gold bg-gradient-card glow-gold p-8">
-                <h3 className="font-display font-bold text-2xl mb-6 text-gradient-gold">What We Build:</h3>
-                <ul className="space-y-4">
-                  {projectTypes.map((item) => (
-                    <li key={item} className="flex items-center gap-3">
-                      <Check className="w-5 h-5 text-gold flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="absolute -top-6 -right-6 w-32 h-32 bg-gold/20 rounded-full blur-3xl" />
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Packages"
+        index="25"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Custom Elite" }]}
+        title="Custom"
+        highlight="Elite"
+        body="Fully bespoke systems for one-of-a-kind requirements — designed and engineered from a blank page."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Trust Signals */}
       <section className="py-8 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
@@ -108,12 +78,12 @@ export default function CustomElite() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               Unlimited <span className="text-gradient-gold">Capabilities</span>
             </h2>
-            <p className="body-md max-w-2xl mx-auto">
+            <p className="body-md max-w-2xl">
               We build exactly what your organisation needs, with no limitations.
             </p>
           </motion.div>
@@ -218,7 +188,7 @@ export default function CustomElite() {
             <h2 className="heading-md mb-4">
               Let's Build Something <span className="text-gradient-gold">Extraordinary</span>
             </h2>
-            <p className="body-lg mb-8 max-w-2xl mx-auto">
+            <p className="body-lg mb-8 max-w-2xl">
               Get in touch to discuss your vision and receive a custom proposal 
               tailored to your organisation's needs.
             </p>

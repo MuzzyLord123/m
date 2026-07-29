@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
-import { Shield, Zap, Settings, CheckCircle, AlertTriangle, Server, CreditCard } from "lucide-react";
+import { Shield, Zap, Settings, CheckCircle, AlertTriangle, Server, CreditCard, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -77,31 +80,28 @@ export default function WebsiteManagement() {
   return (
     <Layout>
     <div className="min-h-screen bg-background">
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-        <div className="container px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl"
-          >
-            <Badge variant="outline" className="mb-6 px-4 py-2">
-              <Settings className="w-4 h-4 mr-2" />
-              Optional Service
-            </Badge>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
-              Website Management & <span className="text-gradient">Maintenance</span>
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl">
-              Our Website Management service ensures your site remains secure, fast, functional, 
-              and up to date long after launch. This service is optional, but strongly recommended 
-              for all websites hosted with us.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Development"
+        index="15"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Website management" }]}
+        title="Sites kept"
+        highlight="running"
+        body="Updates, monitoring, backups and fixes handled quietly — the part of ownership nobody wants to do alone."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Why Management Matters */}
       <section className="py-16 md:py-24">
@@ -113,7 +113,7 @@ export default function WebsiteManagement() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <motion.div variants={fadeUp} className="text-center mb-12">
+            <motion.div variants={fadeUp} className="mb-12">
               <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
               <h2 className="text-3xl font-display font-bold mb-4">Why Management Matters</h2>
               <p className="text-lg text-muted-foreground">
@@ -159,7 +159,7 @@ export default function WebsiteManagement() {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <motion.div variants={fadeUp} className="text-center mb-12">
+            <motion.div variants={fadeUp} className="mb-12">
               <h2 className="text-3xl font-display font-bold mb-4">Website Management Pricing</h2>
             </motion.div>
 
@@ -238,7 +238,7 @@ export default function WebsiteManagement() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <motion.div variants={fadeUp} className="text-center mb-12">
+            <motion.div variants={fadeUp} className="mb-12">
               <Server className="w-12 h-12 text-primary mx-auto mb-4" />
               <h2 className="text-3xl font-display font-bold mb-4">Hosting With Us (Netlify)</h2>
               <p className="text-lg text-muted-foreground">
@@ -289,7 +289,7 @@ export default function WebsiteManagement() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <motion.div variants={fadeUp} className="text-center mb-12">
+            <motion.div variants={fadeUp} className="mb-12">
               <h2 className="text-3xl font-display font-bold mb-4">If You Host the Website Yourself</h2>
               <p className="text-lg text-muted-foreground">
                 You are free to host your website independently.

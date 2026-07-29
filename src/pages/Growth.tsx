@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, FileText, BarChart, Rss, Settings, Users, ArrowRight, Shield, Zap, Palette } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const features = [
@@ -40,79 +41,42 @@ export default function Growth() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32 overflow-hidden">
-        <div className="container-tight">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-                <Zap className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Most Popular</span>
-              </div>
-              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-              <h1 className="heading-xl mb-6">
-                Business <span className="text-gradient">Site</span>
-              </h1>
-              <div className="text-5xl font-display font-bold text-gradient mb-4">Tailored Pricing</div>
-              <p className="body-lg mb-4">
-                For growing local businesses that want more credibility. 
-                A proper website that makes you look as professional as you are.
-              </p>
-              <p className="text-muted-foreground mb-8">
-                Bespoke design, CMS for easy edits, and built to convert visitors into customers.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button variant="premium" size="xl" asChild>
-                  <Link to="/get-started">Request a Quote <ArrowRight className="w-4 h-4" /></Link>
-                </Button>
-                <Button variant="glass" size="xl" asChild>
-                  <Link to="/packages">Compare Packages</Link>
-                </Button>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="relative"
-            >
-              <div className="rounded-3xl liquid-glass-card border border-primary/30 p-8">
-                <h3 className="font-display font-bold text-2xl mb-6">Typical Page Structure:</h3>
-                <div className="space-y-4">
-                  {pageStructure.map((page, index) => (
-                    <div key={page.name} className="flex gap-4">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <span className="text-sm font-bold text-primary">{index + 1}</span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">{page.name}</h4>
-                        <p className="text-sm text-muted-foreground">{page.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Packages"
+        index="22"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Business site" }]}
+        title="The Business"
+        highlight="site"
+        body="For businesses ready to look established — more pages, more structure, and a CMS you can run yourself."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Trust Signals */}
-      <section className="py-8 border-y border-border/50 liquid-glass">
+      <section className="py-8 border-y border-border/60">
         <div className="container-tight">
           <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Shield className="w-4 h-4 text-primary" />
               <span>No hidden fees</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Check className="w-4 h-4 text-primary" />
               <span>UK-based support</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Zap className="w-4 h-4 text-primary" />
               <span>1-2 week delivery</span>
             </div>
@@ -127,17 +91,17 @@ export default function Growth() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               Built for <span className="text-gradient">Credibility</span>
             </h2>
-            <p className="body-md max-w-2xl mx-auto">
+            <p className="body-md max-w-2xl">
               Everything you need to look professional and win more business.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
@@ -145,9 +109,9 @@ export default function Growth() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl liquid-glass-card border border-border/50 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1"
+                className="p-6 border-b border-r border-border/60 transition-colors duration-300 hover:bg-foreground/[0.02]"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                   <feature.icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="font-display font-semibold mb-2">{feature.title}</h3>
@@ -166,7 +130,7 @@ export default function Growth() {
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="p-8 rounded-3xl liquid-glass-card border border-border/50"
+              className="p-8 border border-border/60 bg-background"
             >
               <h2 className="heading-md mb-8">
                 Everything <span className="text-gradient">Included</span>
@@ -209,7 +173,7 @@ export default function Growth() {
                   ))}
                 </ul>
 
-                <div className="p-6 rounded-2xl liquid-glass-card border border-primary/30">
+                <div className="p-6 border border-primary/30 bg-background">
                   <h4 className="font-display font-semibold mb-2">Need More?</h4>
                   <p className="text-sm text-muted-foreground mb-4">
                     If you need 6-10 pages, a blog, or lead capture automation, 
@@ -227,21 +191,21 @@ export default function Growth() {
 
       {/* CTA */}
       <section className="section-padding">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-3xl liquid-glass-card border border-border/50"
+            className="border-t border-border/60 pt-12"
           >
             <h2 className="heading-md mb-4">
               Ready to Look <span className="text-gradient">Professional?</span>
             </h2>
-            <p className="body-lg mb-8 max-w-2xl mx-auto">
+            <p className="body-lg mb-8 max-w-2xl">
               Get a website that makes you look as good as your work. 
               Bespoke design, no templates, no fuss.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap gap-4">
               <Button variant="premium" size="xl" asChild>
                 <Link to="/get-started">Request a Quote <ArrowRight className="w-4 h-4" /></Link>
               </Button>

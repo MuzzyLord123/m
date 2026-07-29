@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { 
@@ -20,7 +21,8 @@ import {
   Target,
   Lightbulb,
   Shield,
-  Heart
+  Heart,
+  ArrowRight
 } from "lucide-react";
 import { Card3D } from "@/components/Card3D";
 
@@ -59,65 +61,28 @@ export default function BusinessStartup() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        
-        <div className="container px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-4xl"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6"
-            >
-              <Rocket className="w-4 h-4" />
-              Business Start-Up Support
-            </motion.div>
-            
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
-              Free Strategy Calls for{" "}
-              <span className="text-gradient">New & Early-Stage</span> Businesses
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl">
-              Start your business the right way — without costly mistakes.
-            </p>
-            
-            <p className="text-lg text-muted-foreground mb-12 max-w-2xl">
-              Launching a business can feel overwhelming. Choosing the wrong platform, missing essential setup steps, or spending money in the wrong places can cost you months of progress.
-            </p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-4"
-            >
-              <Button size="lg" asChild className="text-lg px-8 py-6">
-                <Link to="/get-started">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Book Your Free Strategy Call
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild className="text-lg px-8 py-6">
-                <a href="tel:07739346789">
-                  <Phone className="w-5 h-5 mr-2" />
-                  Call Now: 07739 346789
-                </a>
-              </Button>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Company"
+        index="28"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Start-up support" }]}
+        title="Built for"
+        highlight="day one"
+        body="Brand, site and systems for new businesses — the digital groundwork done right the first time."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* What's Included Section */}
       <section className="py-20 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.15)' }}>
@@ -127,7 +92,7 @@ export default function BusinessStartup() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               What the Free Call Is (and Isn't)
@@ -210,7 +175,7 @@ export default function BusinessStartup() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-16"
           >
             <span className="text-primary text-sm font-semibold tracking-wider uppercase mb-4 block">
               Ideal Candidates
@@ -257,7 +222,7 @@ export default function BusinessStartup() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-16"
           >
             <span className="text-primary text-sm font-semibold tracking-wider uppercase mb-4 block">
               Planning Topics
@@ -314,7 +279,7 @@ export default function BusinessStartup() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-12"
+              className="mb-12"
             >
               <span className="text-primary text-sm font-semibold tracking-wider uppercase mb-4 block">
                 Our Philosophy
@@ -326,7 +291,7 @@ export default function BusinessStartup() {
 
             <Card3D>
               <div className="bg-gradient-to-br from-primary/10 via-card to-card border border-primary/20 rounded-3xl p-8 md:p-12">
-                <div className="text-center mb-8">
+                <div className="mb-8">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
@@ -370,7 +335,7 @@ export default function BusinessStartup() {
                   </motion.div>
                 </div>
 
-                <div className="flex flex-wrap justify-center gap-4 text-muted-foreground">
+                <div className="flex flex-wrap gap-4 text-muted-foreground">
                   <span className="flex items-center gap-2">
                     <Shield className="w-4 h-4 text-green-500" /> No retainers
                   </span>
@@ -395,7 +360,7 @@ export default function BusinessStartup() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <span className="text-primary text-sm font-semibold tracking-wider uppercase mb-4 block">
               Scheduling

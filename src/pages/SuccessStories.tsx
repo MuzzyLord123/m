@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Star, TrendingUp, Users, ArrowUpRight, Quote, ArrowRight } from "lucide-react";
@@ -118,47 +119,14 @@ export default function SuccessStories() {
   return (
     <Layout>
       {/* Hero with Parallax Premium Image */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <ParallaxBackground
-          src={heroWorkspace}
-          alt="Premium workspace"
-          parallaxSpeed={0.2}
-          overlayClassName="bg-gradient-to-b from-background via-background/85 to-background"
-        />
-        <div className="container-tight relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <motion.div 
-              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Star className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Success Stories</span>
-            </motion.div>
-            <motion.h1 
-              className="text-4xl md:text-6xl font-display font-bold mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              Real Results, <span className="text-gradient">Real Businesses</span>
-            </motion.h1>
-            <motion.p 
-              className="text-xl text-muted-foreground mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              See how we've helped businesses across industries achieve their digital goals.
-            </motion.p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Company"
+        index="47"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Success stories" }]}
+        title="Success"
+        highlight="stories"
+        body="What working with the studio looks like in practice."
+      />
 
       {/* Stats Banner */}
       <section className="py-12 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
@@ -194,17 +162,17 @@ export default function SuccessStories() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Featured Case Studies
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl">
               Detailed success stories from clients across all our service tiers.
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-0 border-l border-t border-border/60">
             {stories.map((story, index) => (
               <motion.div
                 key={story.client}
@@ -212,7 +180,7 @@ export default function SuccessStories() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="glass-card overflow-hidden group hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
+                className="border-b border-r border-border/60 overflow-hidden group hover:shadow-premium transition-all duration-300"
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
@@ -266,12 +234,12 @@ export default function SuccessStories() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="text-3xl font-display font-bold mb-4">What Clients Say</h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-0 border-l border-t border-border/60">
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={testimonial.author}
@@ -279,7 +247,7 @@ export default function SuccessStories() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="glass-card p-6"
+                className="border-b border-r border-border/60 p-6"
               >
                 <Quote className="w-8 h-8 text-primary/30 mb-4" />
                 <p className="text-muted-foreground mb-4">"{testimonial.quote}"</p>
@@ -307,12 +275,12 @@ export default function SuccessStories() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass-card p-12 text-center"
+            className="border border-border/60 bg-background p-12 text-center"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Ready to Be Our Next Success Story?
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-muted-foreground max-w-2xl mb-8">
               Join hundreds of businesses that have transformed their digital presence with Quooro.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

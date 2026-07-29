@@ -93,7 +93,7 @@ export function ProcessSection() {
                         {step.step}
                       </span>
                       <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-border">
-                        <StepIcon className="h-4 w-4 text-primary" strokeWidth={1.6} />
+                        <StepIcon className="h-4 w-4 text-primary" />
                       </span>
                     </div>
                     <h3 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">

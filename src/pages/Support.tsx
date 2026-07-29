@@ -1,17 +1,14 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  MessageCircle, 
-  Phone, 
-  Clock, 
-  Calendar, 
-  ChevronDown, 
+import {
+  MessageCircle,
+  Phone,
+  Clock,
+  Calendar,
   Bot,
-  HelpCircle,
   CheckCircle,
   Shield,
   Lock,
@@ -27,6 +24,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { PageHero, PageHeroFacts } from "@/components/marketing/PageHero";
+import { Matrix, MatrixCell } from "@/components/marketing/Matrix";
+import { Reveal } from "@/components/motion/Reveal";
 
 const faqs = [
   {
@@ -61,6 +61,61 @@ const faqs = [
     question: "Do you provide hosting?",
     answer: "We can set up hosting for you on reliable platforms and manage it as part of our maintenance packages, or we can deploy to your existing hosting. First year hosting is often included in Professional and Enterprise packages."
   }
+];
+
+const policyItems = [
+  {
+    value: "privacy-policy",
+    icon: Lock,
+    title: "Privacy Policy",
+    body: "Our Privacy Policy explains how we collect, use, store, and protect your personal data in compliance with UK GDPR and the Data Protection Act 2018.",
+    points: [
+      "Data collection disclosure and lawful basis",
+      "Your rights: Access, Erasure, and Object",
+      "Data retention policy and deletion requests",
+    ],
+    href: "/privacy-policy",
+    linkLabel: "Read Full Privacy Policy",
+  },
+  {
+    value: "cookie-policy",
+    icon: Cookie,
+    title: "Cookie Policy",
+    body: "Our Cookie Policy explains what cookies we use, why we use them, and how you can manage your preferences.",
+    points: [
+      "Essential, Analytics, and Marketing cookies explained",
+      "Accept All or Reject All with equal ease",
+      "Manage preferences at any time",
+    ],
+    href: "/cookie-policy",
+    linkLabel: "Read Full Cookie Policy",
+  },
+  {
+    value: "trust-center",
+    icon: Shield,
+    title: "Trust Center",
+    body: "Our Trust Center details the technical safeguards we use to protect your data, including encryption, access controls, and incident response.",
+    points: [
+      "AES-256 encryption at rest, TLS 1.3 in transit",
+      "Multi-Factor Authentication for all admin access",
+      "72-hour breach notification protocol",
+    ],
+    href: "/trust-center",
+    linkLabel: "Visit Trust Center",
+  },
+  {
+    value: "terms-of-service",
+    icon: FileText,
+    title: "Terms of Service",
+    body: "Our Terms of Service outline the agreement between you and Echelon Sites Ltd when using our services.",
+    points: [
+      "Service agreements and project scope",
+      "Payment terms and refund policy",
+      "Intellectual property and liability",
+    ],
+    href: "/terms-of-service",
+    linkLabel: "Read Terms of Service",
+  },
 ];
 
 export default function Support() {
@@ -107,355 +162,206 @@ export default function Support() {
 
   return (
     <Layout>
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-3xl pointer-events-none" />
+      <PageHero
+        eyebrow="Customer support"
+        index="09"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Support" }]}
+        title="How can we"
+        highlight="help?"
+        body="Get answers instantly with our AI assistant, browse the FAQ, or speak directly with our team."
+        aside={
+          <PageHeroFacts
+            facts={[
+              { value: "24/7", label: "AI assistant" },
+              { value: "5–9PM", label: "Phone, daily" },
+              { value: "24h", label: "Callback window" },
+            ]}
+          />
+        }
+      />
+
+      {/* Three routes to a human (or near-human) */}
+      <section className="section-padding">
         <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-16"
-          >
-            <motion.span 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              className="inline-block px-4 py-2 rounded-full liquid-glass-pill text-primary text-sm font-medium mb-6"
-            >
-              Customer Support
-            </motion.span>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-6">
-              How Can We <span className="text-gradient">Help You?</span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl">
-              Get answers instantly with our AI assistant, browse FAQs, or speak directly with our team
-            </p>
-          </motion.div>
-
-          {/* Support Options Grid */}
-          <div className="grid md:grid-cols-3 gap-6 mb-16">
-            {/* AI Chatbot */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="glass-card p-8 hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
-            >
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                <Bot className="w-8 h-8 text-primary" />
+          <Matrix cols={3}>
+            <MatrixCell icon={Bot} index={0} title="AI customer support">
+              Chat with our dedicated AI assistant for instant answers about pricing, services,
+              timelines, and more. Available 24/7.
+              <div className="mt-6">
+                <Button variant="premium" onClick={openChatbot} className="w-full">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Chat now
+                </Button>
               </div>
-              <h3 className="text-xl font-display font-bold text-foreground mb-3">
-                AI Customer Support
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Chat with our dedicated AI assistant for instant answers about pricing, services, timelines, and more. Available 24/7.
+            </MatrixCell>
+            <MatrixCell icon={Phone} index={1} title="Call us directly">
+              Speak to a real person for complex questions or to discuss your project in detail.
+              <span className="mt-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <Clock className="h-3.5 w-3.5" />
+                Available 5PM – 9PM daily
+              </span>
+              <div className="mt-6">
+                <Button variant="outline" className="w-full" asChild>
+                  <a href="tel:07739346789">
+                    <Phone className="mr-2 h-4 w-4" />
+                    07739 346789
+                  </a>
+                </Button>
+              </div>
+            </MatrixCell>
+            <MatrixCell icon={Calendar} index={2} title="Request a callback">
+              Can&rsquo;t reach us? Book a callback and an agent will contact you within 24 hours.
+              <div className="mt-6">
+                <Button variant="outline" className="w-full" asChild>
+                  <a href="#callback-form">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Book callback
+                  </a>
+                </Button>
+              </div>
+            </MatrixCell>
+          </Matrix>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <div className="mb-6 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">Straight answers</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Frequently asked
+                <span className="block text-primary">questions.</span>
+              </h2>
+              <p className="mt-6 max-w-sm text-[15px] font-light leading-relaxed text-muted-foreground">
+                Quick answers to common questions.
               </p>
-              <Button variant="premium" onClick={openChatbot} className="w-full">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Chat Now
-              </Button>
-            </motion.div>
-
-            {/* Phone Support */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="glass-card p-8 hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
-            >
-              <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-6">
-                <Phone className="w-8 h-8 text-green-500" />
+              <div className="mt-8 border-t border-border/60 pt-6">
+                <p className="mb-4 text-sm font-light text-muted-foreground">
+                  Can&rsquo;t find what you&rsquo;re looking for?
+                </p>
+                <Button variant="outline" onClick={openChatbot}>
+                  <Bot className="mr-2 h-4 w-4" />
+                  Ask our AI assistant
+                </Button>
               </div>
-              <h3 className="text-xl font-display font-bold text-foreground mb-3">
-                Call Us Directly
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Speak to a real person for complex questions or to discuss your project in detail.
-              </p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-                <Clock className="w-4 h-4" />
-                <span>Available 5PM - 9PM Daily</span>
-              </div>
-              <Button variant="outline" className="w-full" asChild>
-                <a href="tel:07739346789">
-                  <Phone className="w-4 h-4 mr-2" />
-                  07739 346789
-                </a>
-              </Button>
-            </motion.div>
+            </Reveal>
 
-            {/* Book Callback */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="glass-card p-8 hover:shadow-premium hover:-translate-y-1 transition-all duration-300"
-            >
-              <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-6">
-                <Calendar className="w-8 h-8 text-blue-500" />
-              </div>
-              <h3 className="text-xl font-display font-bold text-foreground mb-3">
-                Request a Callback
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Can't reach us? Book a callback and an agent will contact you within 24 hours.
-              </p>
-              <Button variant="secondary" className="w-full" asChild>
-                <a href="#callback-form">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Book Callback
-                </a>
-              </Button>
-            </motion.div>
-          </div>
-
-          {/* FAQ Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mb-20"
-          >
-            <div className="mb-10">
-              <div className="flex items-center gap-2 mb-4">
-                <HelpCircle className="w-6 h-6 text-primary" />
-                <h2 className="text-3xl font-display font-bold text-foreground">
-                  Frequently Asked Questions
-                </h2>
-              </div>
-              <p className="text-muted-foreground">
-                Quick answers to common questions
-              </p>
-            </div>
-
-            <div className="max-w-3xl">
-              <Accordion type="single" collapsible className="space-y-4">
+            <Reveal className="lg:col-span-8">
+              <Accordion type="single" collapsible className="border-t border-border/60">
                 {faqs.map((faq, index) => (
-                  <AccordionItem 
-                    key={index} 
+                  <AccordionItem
+                    key={index}
                     value={`item-${index}`}
-                    className="glass-card px-6 border-none"
+                    className="border-b border-border/60"
                   >
-                    <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary">
-                      {faq.question}
+                    <AccordionTrigger className="gap-6 py-5 text-left font-display font-medium tracking-tight text-foreground hover:text-primary hover:no-underline">
+                      <span className="flex items-baseline gap-4">
+                        <span className="font-mono text-[11px] tabular-nums text-primary">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        {faq.question}
+                      </span>
                     </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">
+                    <AccordionContent className="pl-8 text-sm font-light leading-relaxed text-muted-foreground">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
-            </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
 
-            <div className="mt-8">
-              <p className="text-muted-foreground mb-4">
-                Can't find what you're looking for?
-              </p>
-              <Button variant="outline" onClick={openChatbot}>
-                <Bot className="w-4 h-4 mr-2" />
-                Ask Our AI Assistant
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* Security & Data Protection Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="mb-20"
-          >
-            <div className="mb-10">
-              <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-6 h-6 text-primary" />
-                <h2 className="text-3xl font-display font-bold text-foreground">
-                  Security & Data Protection
-                </h2>
+      {/* Security & data protection */}
+      <section className="section-padding border-t border-border/60">
+        <div className="container-tight">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-4">
+              <div className="mb-6 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">On the record</span>
               </div>
-              <p className="text-muted-foreground">
-                Learn how we protect your data and comply with UK GDPR
-              </p>
-            </div>
-
-            <div className="max-w-3xl">
-              <Accordion type="single" collapsible className="space-y-4">
-                <AccordionItem 
-                  value="privacy-policy"
-                  className="glass-card px-6 border-none"
-                >
-                  <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary">
-                    <div className="flex items-center gap-3">
-                      <Lock className="w-5 h-5 text-primary" />
-                      <span>Privacy Policy</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    <p className="mb-4">
-                      Our Privacy Policy explains how we collect, use, store, and protect your personal data in compliance with UK GDPR and the Data Protection Act 2018.
-                    </p>
-                    <ul className="space-y-2 mb-4 text-sm">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Data collection disclosure and lawful basis
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Your rights: Access, Erasure, and Object
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Data retention policy and deletion requests
-                      </li>
-                    </ul>
-                    <Link 
-                      to="/privacy-policy" 
-                      className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-                    >
-                      Read Full Privacy Policy →
-                    </Link>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem 
-                  value="cookie-policy"
-                  className="glass-card px-6 border-none"
-                >
-                  <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary">
-                    <div className="flex items-center gap-3">
-                      <Cookie className="w-5 h-5 text-primary" />
-                      <span>Cookie Policy</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    <p className="mb-4">
-                      Our Cookie Policy explains what cookies we use, why we use them, and how you can manage your preferences.
-                    </p>
-                    <ul className="space-y-2 mb-4 text-sm">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Essential, Analytics, and Marketing cookies explained
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Accept All or Reject All with equal ease
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Manage preferences at any time
-                      </li>
-                    </ul>
-                    <Link 
-                      to="/cookie-policy" 
-                      className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-                    >
-                      Read Full Cookie Policy →
-                    </Link>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem 
-                  value="trust-center"
-                  className="glass-card px-6 border-none"
-                >
-                  <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary">
-                    <div className="flex items-center gap-3">
-                      <Shield className="w-5 h-5 text-primary" />
-                      <span>Trust Center</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    <p className="mb-4">
-                      Our Trust Center details the technical safeguards we use to protect your data, including encryption, access controls, and incident response.
-                    </p>
-                    <ul className="space-y-2 mb-4 text-sm">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        AES-256 encryption at rest, TLS 1.3 in transit
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Multi-Factor Authentication for all admin access
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        72-hour breach notification protocol
-                      </li>
-                    </ul>
-                    <Link 
-                      to="/trust-center" 
-                      className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-                    >
-                      Visit Trust Center →
-                    </Link>
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem 
-                  value="terms-of-service"
-                  className="glass-card px-6 border-none"
-                >
-                  <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-primary" />
-                      <span>Terms of Service</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    <p className="mb-4">
-                      Our Terms of Service outline the agreement between you and Echelon Sites Ltd when using our services.
-                    </p>
-                    <ul className="space-y-2 mb-4 text-sm">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Service agreements and project scope
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Payment terms and refund policy
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary" />
-                        Intellectual property and liability
-                      </li>
-                    </ul>
-                    <Link 
-                      to="/terms-of-service" 
-                      className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
-                    >
-                      Read Terms of Service →
-                    </Link>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          </motion.div>
-
-          {/* Callback Form Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            id="callback-form"
-            className="max-w-2xl"
-          >
-            <div className="mb-10">
-              <h2 className="text-3xl font-display font-bold text-foreground mb-4">
-                Request a Callback
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                Security &amp; data
+                <span className="block text-primary">protection.</span>
               </h2>
-              <p className="text-muted-foreground">
-                Fill out the form below and an agent will contact you within 24 hours
+              <p className="mt-6 max-w-sm text-[15px] font-light leading-relaxed text-muted-foreground">
+                How we protect your data and comply with UK GDPR.
+              </p>
+            </Reveal>
+
+            <Reveal className="lg:col-span-8">
+              <Accordion type="single" collapsible className="border-t border-border/60">
+                {policyItems.map((item) => (
+                  <AccordionItem
+                    key={item.value}
+                    value={item.value}
+                    className="border-b border-border/60"
+                  >
+                    <AccordionTrigger className="gap-6 py-5 text-left font-display font-medium tracking-tight text-foreground hover:text-primary hover:no-underline">
+                      <span className="flex items-center gap-4">
+                        <item.icon className="h-4 w-4 text-primary" strokeWidth={1.5} />
+                        {item.title}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="pl-8 text-sm font-light leading-relaxed text-muted-foreground">
+                      <p className="mb-4">{item.body}</p>
+                      <ul className="mb-4 space-y-2">
+                        {item.points.map((point) => (
+                          <li key={point} className="flex items-center gap-2.5">
+                            <CheckCircle className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2} />
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                      <Link
+                        to={item.href}
+                        className="link-underline inline-flex items-center gap-2 text-sm font-medium text-primary"
+                      >
+                        {item.linkLabel} →
+                      </Link>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Callback form — conversion zone, kept calm */}
+      <section id="callback-form" className="section-padding scroll-mt-28 border-t border-border/60">
+        <div className="container-tight">
+          <Reveal className="max-w-2xl">
+            <div className="mb-10">
+              <div className="mb-6 flex items-center gap-3">
+                <span className="h-px w-8 bg-primary" />
+                <span className="eyebrow">Request a callback</span>
+              </div>
+              <h2 className="font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-4xl">
+                We&rsquo;ll call you.
+              </h2>
+              <p className="mt-4 text-[15px] font-light leading-relaxed text-muted-foreground">
+                Fill out the form below and an agent will contact you within 24 hours.
               </p>
             </div>
 
             {submitted ? (
-              <div className="glass-card p-12">
-                <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle className="w-10 h-10 text-green-500" />
+              <div className="relative overflow-hidden border border-border/60 bg-background p-12">
+                <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-primary" />
+                <div className="mb-6 flex h-14 w-14 items-center justify-center border border-[hsl(var(--success))]/40 bg-[hsl(var(--success))]/10">
+                  <CheckCircle className="h-7 w-7 text-[hsl(var(--success))]" strokeWidth={2} />
                 </div>
-                <h3 className="text-2xl font-display font-bold text-foreground mb-4">
-                  Callback Requested!
+                <h3 className="mb-3 font-display text-2xl font-semibold tracking-tight text-foreground">
+                  Callback requested
                 </h3>
-                <p className="text-muted-foreground mb-6">
+                <p className="mb-6 text-sm font-light leading-relaxed text-muted-foreground">
                   Thank you for reaching out. One of our team members will call you within 24 hours.
                 </p>
                 <Button variant="outline" onClick={() => setSubmitted(false)}>
@@ -463,7 +369,7 @@ export default function Support() {
                 </Button>
               </div>
             ) : (
-              <form onSubmit={handleCallbackSubmit} className="glass-card p-8 space-y-6">
+              <form onSubmit={handleCallbackSubmit} className="space-y-6 border border-border/60 bg-background p-8">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
@@ -526,10 +432,10 @@ export default function Support() {
                   />
                 </div>
 
-                <Button 
-                  type="submit" 
-                  variant="premium" 
-                  className="w-full" 
+                <Button
+                  type="submit"
+                  variant="premium"
+                  className="w-full"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Submitting..." : "Request Callback"}
@@ -544,7 +450,7 @@ export default function Support() {
                 </p>
               </form>
             )}
-          </motion.div>
+          </Reveal>
         </div>
       </section>
     </Layout>

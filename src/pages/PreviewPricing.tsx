@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Check, Gift, Zap, Info, Shield, Heart } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const previewTiers = [
@@ -91,43 +92,43 @@ export default function PreviewPricing() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Gift className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Preview Pricing</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="heading-xl mb-6">
-              See Before You <span className="text-gradient">Buy</span>
-            </h1>
-            <p className="body-lg">
-              Free previews for smaller sites, fair pricing for complex builds. 
-              All paid preview fees are credited toward your final purchase.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Previews"
+        index="43"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Preview packages" }]}
+        title="Preview"
+        highlight="packages"
+        body="What the free preview includes, and what optional extras cost if you want to see more first."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Trust Signals */}
       <section className="py-8 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
         <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.02] via-primary/[0.04] to-primary/[0.02]" />
         <div className="container-tight relative z-10">
           <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Shield className="w-4 h-4 text-primary" />
               <span>No hidden fees</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Heart className="w-4 h-4 text-primary" />
               <span>UK-based support</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Check className="w-4 h-4 text-primary" />
               <span>Preview fee credited on purchase</span>
             </div>
@@ -158,7 +159,7 @@ export default function PreviewPricing() {
                   </div>
                 )}
 
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                   <tier.icon className="w-6 h-6 text-primary" />
                 </div>
 
@@ -231,7 +232,7 @@ export default function PreviewPricing() {
       {/* FAQ */}
       <section className="section-padding">
         <div className="container-tight">
-          <h2 className="heading-md text-center mb-12">
+          <h2 className="heading-md mb-12">
             Preview Pricing <span className="text-gradient">FAQ</span>
           </h2>
           <div className="max-w-3xl mx-auto space-y-6">
@@ -254,7 +255,7 @@ export default function PreviewPricing() {
 
       {/* CTA */}
       <section className="section-padding bg-card">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <h2 className="heading-md mb-6">
             Ready to See Your <span className="text-gradient">Vision?</span>
           </h2>
@@ -267,7 +268,7 @@ export default function PreviewPricing() {
                 Get Started <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button variant="glass" size="xl" asChild>
+            <Button variant="outline" size="xl" asChild>
               <Link to="/packages">View All Packages</Link>
             </Button>
           </div>

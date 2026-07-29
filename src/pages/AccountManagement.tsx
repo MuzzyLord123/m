@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Shield, Eye, MessageSquare, Star, Users, Globe, Clock, CheckCircle, ArrowRight } from "lucide-react";
@@ -89,36 +90,28 @@ export default function AccountManagement() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-        <div className="container-tight relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Shield className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Account Management</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
-              Protect Your <span className="text-gradient">Digital Reputation</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Complete digital presence oversight, reputation management, and brand monitoring to keep your business thriving online.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="premium" size="lg" asChild>
-                <Link to="/get-started">Get Started <ArrowRight className="w-4 h-4" /></Link>
-              </Button>
-              <Button variant="glass" size="lg" asChild>
-                <Link to="/social-media">Social Media Services</Link>
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Marketing"
+        index="14"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Account management" }]}
+        title="One team on"
+        highlight="the whole estate"
+        body="Your digital presence looked after end to end — sites, listings, campaigns and reputation in one pair of hands."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Stats */}
       <section className="py-16 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
@@ -154,17 +147,17 @@ export default function AccountManagement() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Complete Account Management
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl">
               Everything you need to maintain a stellar online presence and protect your brand reputation.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
             {services.map((service, index) => (
               <motion.div
                 key={service.title}
@@ -172,7 +165,7 @@ export default function AccountManagement() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="glass-card p-8 group hover:border-primary/50 transition-all"
+                className="border-b border-r border-border/60 p-8 group hover:border-primary/50 transition-all"
               >
                 <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
                   <service.icon className="w-7 h-7 text-primary" />
@@ -200,14 +193,14 @@ export default function AccountManagement() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Account Management Packages
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-0 border-l border-t border-border/60">
             {packages.map((pkg, index) => (
               <motion.div
                 key={pkg.name}
@@ -215,7 +208,7 @@ export default function AccountManagement() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className={`glass-card p-8 relative ${pkg.popular ? 'border-primary' : ''}`}
+                className={`border-b border-r border-border/60 p-8 relative ${pkg.popular ? 'border-primary' : ''}`}
               >
                 {pkg.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary rounded-full text-xs font-semibold text-primary-foreground">
@@ -251,12 +244,12 @@ export default function AccountManagement() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass-card p-12 text-center"
+            className="border border-border/60 bg-background p-12 text-center"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Protect Your Online Reputation
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-muted-foreground max-w-2xl mb-8">
               Don't let negative reviews or unmanaged accounts hurt your business. Let us handle your digital presence.
             </p>
             <Button variant="premium" size="lg" asChild>

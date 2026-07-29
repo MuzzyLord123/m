@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, HelpCircle, MessageSquare } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -122,27 +123,14 @@ export default function PreviewFAQ() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <HelpCircle className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Preview FAQ</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="heading-xl mb-6">
-              Frequently Asked <span className="text-gradient">Questions</span>
-            </h1>
-            <p className="body-lg">
-              Everything you need to know about our preview process, pricing, timelines, and what to expect.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Previews"
+        index="46"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Preview FAQ" }]}
+        title="Preview"
+        highlight="questions"
+        body="Everything people ask about the free preview, answered straight."
+      />
 
       {/* FAQ Sections */}
       <section className="section-padding pt-8">
@@ -208,7 +196,7 @@ export default function PreviewFAQ() {
                   Contact Us <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
-              <Button variant="glass" size="xl" asChild>
+              <Button variant="outline" size="xl" asChild>
                 <Link to="/preview-process">View Process</Link>
               </Button>
             </div>
@@ -218,7 +206,7 @@ export default function PreviewFAQ() {
 
       {/* CTA */}
       <section className="section-padding">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <h2 className="heading-md mb-6">
             Ready to Get <span className="text-gradient">Started?</span>
           </h2>
@@ -231,7 +219,7 @@ export default function PreviewFAQ() {
                 Get Your Free Preview <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button variant="glass" size="xl" asChild>
+            <Button variant="outline" size="xl" asChild>
               <Link to="/preview-pricing">View Pricing</Link>
             </Button>
           </div>

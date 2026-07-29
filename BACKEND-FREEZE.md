@@ -70,3 +70,10 @@ git diff 0f6742e..HEAD --name-only -- \
 ```
 
 Verified empty at the end of Phase 2.
+
+## Recorded addition — 2026-07-29
+
+`/pricing` route added to `src/App.tsx` (additive only — no existing route
+renamed or removed). `Pricing.tsx` was imported but never routed; the admin
+visual editor already linked to `/pricing`, which 404'd. No payloads, forms,
+or backend surfaces touched.

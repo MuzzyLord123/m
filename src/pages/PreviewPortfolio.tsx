@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Eye, TrendingUp, Users, Star, Wrench, Camera, Cake, Dumbbell, ShoppingBag, Rocket } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const previewExamples = [
@@ -78,28 +79,28 @@ export default function PreviewPortfolio() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32">
-        <div className="container-tight">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Eye className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Preview Portfolio</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="heading-xl mb-6">
-              See Our <span className="text-gradient">Preview Work</span>
-            </h1>
-            <p className="body-lg">
-              Browse real examples of previews that became successful live sites. 
-              Every preview is hand-coded by our professional team - no templates, no shortcuts.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Previews"
+        index="41"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Preview portfolio" }]}
+        title="Preview"
+        highlight="portfolio"
+        body="Examples of the free previews we build — so you know what to expect before asking for yours."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Stats */}
       <section className="py-12 relative overflow-hidden" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
@@ -128,7 +129,7 @@ export default function PreviewPortfolio() {
       {/* Preview Examples */}
       <section className="section-padding">
         <div className="container-tight">
-          <h2 className="heading-md text-center mb-12">
+          <h2 className="heading-md mb-12">
             Previews That <span className="text-gradient">Converted</span>
           </h2>
 
@@ -205,7 +206,7 @@ export default function PreviewPortfolio() {
                   Get Your Free Preview <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
-              <Button variant="glass" size="xl" asChild>
+              <Button variant="outline" size="xl" asChild>
                 <Link to="/preview-process">Learn The Process</Link>
               </Button>
             </div>

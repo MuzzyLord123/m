@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, Database, Lock, Users, Globe, Code, Settings, Shield, Headphones, ArrowRight } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const capabilities = [
@@ -26,73 +27,42 @@ export default function Enterprise() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32 overflow-hidden">
-        <div className="container-tight">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-                <Settings className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Tailored to Your Business</span>
-              </div>
-              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-              <h1 className="heading-xl mb-6">
-                Enterprise & <span className="text-gradient">Custom Builds</span>
-              </h1>
-              <div className="text-4xl font-display font-bold text-muted-foreground mb-4">
-                Custom Pricing
-              </div>
-              <p className="text-lg text-muted-foreground mb-4">
-                Tailored to your business
-              </p>
-              <p className="body-lg mb-8">
-                For complex websites, web apps, custom integrations, and enterprise-scale platforms. 
-                We build exactly what you need.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button variant="premium" size="lg" className="text-sm sm:text-base sm:px-8" asChild>
-                  <Link to="/get-started">Contact Us <ArrowRight className="w-4 h-4" /></Link>
-                </Button>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="relative"
-            >
-              <div className="rounded-3xl liquid-glass-card border border-border/50 p-8">
-                <h3 className="font-display font-bold text-2xl mb-6">What We Build:</h3>
-                <ul className="space-y-4">
-                  {projectTypes.map((item) => (
-                    <li key={item} className="flex items-center gap-3">
-                      <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                      <span className="text-muted-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Packages"
+        index="24"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Enterprise" }]}
+        title="Enterprise"
+        highlight="builds"
+        body="Complex platforms, integrations and multi-site estates — scoped properly and delivered in stages."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Trust Signals */}
-      <section className="py-8 border-y border-border/50 liquid-glass">
+      <section className="py-8 border-y border-border/60">
         <div className="container-tight">
           <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Shield className="w-4 h-4 text-primary" />
               <span>No hidden fees</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Check className="w-4 h-4 text-primary" />
               <span>UK-based team</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Lock className="w-4 h-4 text-primary" />
               <span>Full code ownership</span>
             </div>
@@ -107,18 +77,18 @@ export default function Enterprise() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               What We Can <span className="text-gradient">Build</span>
             </h2>
-            <p className="body-md max-w-2xl mx-auto">
+            <p className="body-md max-w-2xl">
               From custom web applications to enterprise platforms — 
               we build solutions tailored to your specific needs.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
             {capabilities.map((item, index) => (
               <motion.div
                 key={item.title}
@@ -126,9 +96,9 @@ export default function Enterprise() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl liquid-glass-card border border-border/50 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1"
+                className="p-6 border-b border-r border-border/60 transition-colors duration-300 hover:bg-foreground/[0.02]"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                   <item.icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="font-display font-semibold text-lg mb-2">{item.title}</h3>
@@ -146,14 +116,14 @@ export default function Enterprise() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               How It <span className="text-gradient">Works</span>
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-0 border-l border-t border-border/60">
             {[
               { step: "1", title: "Discovery", desc: "We discuss your requirements and goals" },
               { step: "2", title: "Proposal", desc: "You receive a tailored quote and timeline" },
@@ -168,7 +138,7 @@ export default function Enterprise() {
                 transition={{ delay: index * 0.1 }}
                 className="relative"
               >
-                <div className="p-6 rounded-2xl liquid-glass-card border border-border/50 text-center">
+                <div className="p-6 border-b border-r border-border/60 text-center">
                   <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center mx-auto mb-4">
                     <span className="text-lg font-bold text-primary-foreground">{item.step}</span>
                   </div>
@@ -191,12 +161,12 @@ export default function Enterprise() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-3xl liquid-glass-card border border-primary/30 text-center"
+            className="p-8 md:p-12 border border-primary/30 bg-background text-center"
           >
             <h2 className="heading-md mb-4">
               Let's Discuss Your <span className="text-gradient">Project</span>
             </h2>
-            <p className="body-lg mb-8 max-w-2xl mx-auto">
+            <p className="body-lg mb-8 max-w-2xl">
               Every enterprise project is unique. Get in touch to discuss your requirements 
               and receive a tailored proposal.
             </p>

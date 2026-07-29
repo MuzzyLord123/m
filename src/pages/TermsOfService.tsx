@@ -1,4 +1,5 @@
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { motion } from "framer-motion";
 import { FileText, CreditCard, Shield, AlertCircle, Scale, Clock } from "lucide-react";
 
@@ -141,30 +142,14 @@ export default function TermsOfService() {
     <Layout>
       <div className="min-h-screen">
         {/* Hero Section */}
-        <section className="relative py-24 md:py-32 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-3xl pointer-events-none" />
-          <div className="container-tight relative">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl"
-            >
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-                <FileText className="w-4 h-4" />
-                <span className="text-sm font-medium">Legal Agreement</span>
-              </div>
-              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground mb-6">
-                Terms of Service
-              </h1>
-              <p className="text-lg text-muted-foreground">
-                Last updated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-              </p>
-            </motion.div>
-          </div>
-        </section>
+        <PageHero
+          eyebrow="Legal"
+          index="53"
+          crumbs={[{ label: "Home", href: "/" }, { label: "Terms of service" }]}
+          title="Terms of"
+          highlight="service"
+          body="The agreement that governs projects and platform use."
+        />
 
         {/* Introduction */}
         <section className="py-12 border-b border-border">
@@ -193,10 +178,10 @@ export default function TermsOfService() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="glass-card p-6 rounded-2xl"
+                  className="border border-border/60 bg-background p-6 rounded-2xl"
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <div className="flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                       <section.icon className="w-5 h-5 text-primary" />
                     </div>
                     <h2 className="text-2xl font-display font-semibold text-foreground">

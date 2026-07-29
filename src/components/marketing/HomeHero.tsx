@@ -275,7 +275,7 @@ export function HomeHero() {
                 key={badge.label}
                 className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-muted-foreground"
               >
-                <badge.icon className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
+                <badge.icon className="h-3.5 w-3.5 text-primary" />
                 <span>{badge.label}</span>
               </li>
             ))}

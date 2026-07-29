@@ -103,7 +103,7 @@ export function WhyQuooroSection() {
                   className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-primary transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100 motion-reduce:transition-none"
                 />
                 <div className="mb-7 flex items-center justify-between">
-                  <Icon className="h-5 w-5 text-primary" strokeWidth={1.5} />
+                  <Icon className="h-5 w-5 text-primary" />
                   <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
                     {String(i + 1).padStart(2, "0")}
                   </span>

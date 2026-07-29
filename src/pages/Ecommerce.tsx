@@ -5,6 +5,7 @@ import {
   Globe, Shield, Zap, RefreshCw, Check, Store, Sparkles, Server,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const offerings = [
@@ -63,54 +64,28 @@ export default function Ecommerce() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="relative min-h-[70vh] flex items-center pt-24 pb-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
-        <div className="absolute top-20 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-10 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
-
-        <div className="container-tight relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-4xl"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              E-commerce Services
-            </motion.div>
-
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6 leading-tight">
-              Sell online with a store{" "}
-              <span className="text-gradient-primary">that just works</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl">
-              From subscription websites to fully custom online stores — we design, build, and manage
-              e-commerce experiences that convert, without the technical headaches.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="premium" size="lg" asChild>
-                <Link to="/get-started">
-                  Start selling online <ArrowRight className="w-5 h-5 ml-2" />
-                </Link>
-              </Button>
-              <Button variant="glass" size="lg" asChild>
-                <Link to="/subscription-websites">
-                  View Subscription Websites
-                </Link>
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Development"
+        index="27"
+        crumbs={[{ label: "Home", href: "/" }, { label: "E-commerce" }]}
+        title="Shops built"
+        highlight="to sell"
+        body="Catalogue, checkout, payments and fulfilment — commerce that works as hard as a shop floor."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Offerings */}
       <section
@@ -124,7 +99,7 @@ export default function Ecommerce() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Choose your e-commerce path
@@ -151,7 +126,7 @@ export default function Ecommerce() {
                       {o.tag}
                     </span>
                   )}
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                     <o.icon className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="text-xl font-bold mb-2">{o.name}</h3>
@@ -164,7 +139,7 @@ export default function Ecommerce() {
                       </li>
                     ))}
                   </ul>
-                  <Button variant="glass" className="mt-auto w-full" asChild>
+                  <Button variant="outline" className="mt-auto w-full" asChild>
                     <Link to={o.href}>
                       Learn more <ArrowRight className="w-4 h-4 ml-1.5" />
                     </Link>
@@ -183,7 +158,7 @@ export default function Ecommerce() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Everything a modern store needs
@@ -203,7 +178,7 @@ export default function Ecommerce() {
                 transition={{ delay: i * 0.05 }}
                 className="rounded-2xl border border-border/30 bg-card/50 p-5 hover:bg-card/70 transition-colors"
               >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                <div className="flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06] mb-3">
                   <f.icon className="w-5 h-5 text-primary" />
                 </div>
                 <h3 className="font-semibold mb-1">{f.title}</h3>
@@ -233,7 +208,7 @@ export default function Ecommerce() {
                     Get Started <ArrowRight className="w-5 h-5 ml-2" />
                   </Link>
                 </Button>
-                <Button variant="glass" size="lg" asChild>
+                <Button variant="outline" size="lg" asChild>
                   <Link to="/subscription-websites">
                     <Server className="w-4 h-4 mr-2" /> Subscription Websites
                   </Link>

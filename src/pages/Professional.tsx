@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, FileText, TrendingUp, Rss, Settings, Zap, Search, ArrowRight, Shield } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 
 const features = [
@@ -35,87 +36,42 @@ export default function Professional() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="section-padding pt-32 overflow-hidden">
-        <div className="container-tight">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-                <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">For Businesses Ready to Scale</span>
-              </div>
-              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-              <h1 className="heading-xl mb-6">
-                Growth <span className="text-gradient">Site</span>
-              </h1>
-              <div className="text-5xl font-display font-bold text-gradient mb-4">Tailored Pricing</div>
-              <p className="body-lg mb-4">
-                For businesses ready to scale. More pages, advanced features, 
-                and everything you need to grow your online presence.
-              </p>
-              <p className="text-muted-foreground mb-8">
-                Lead capture, content hub, and performance optimisation included.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button variant="premium" size="xl" asChild>
-                  <Link to="/get-started">Book a Strategy Call <ArrowRight className="w-4 h-4" /></Link>
-                </Button>
-                <Button variant="glass" size="xl" asChild>
-                  <Link to="/packages">Compare Packages</Link>
-                </Button>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="relative"
-            >
-              <div className="rounded-3xl liquid-glass-card border border-border/50 p-8">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-3 h-3 rounded-full bg-primary animate-pulse" />
-                  <span className="text-sm font-medium text-primary">2-3 Week Delivery</span>
-                </div>
-                <h3 className="font-display font-bold text-2xl mb-6">Key Features:</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    "6-10 pages",
-                    "Lead capture",
-                    "Blog setup",
-                    "Advanced SEO",
-                    "Performance optimised",
-                    "CMS included",
-                    "Automation",
-                    "Full support",
-                  ].map((item) => (
-                    <div key={item} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span className="text-sm">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Packages"
+        index="23"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Growth site" }]}
+        title="The Growth"
+        highlight="site"
+        body="Custom design and deeper integrations for businesses whose website has to carry real weight."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Trust Signals */}
-      <section className="py-8 border-y border-border/50 liquid-glass">
+      <section className="py-8 border-y border-border/60">
         <div className="container-tight">
           <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Shield className="w-4 h-4 text-primary" />
               <span>No hidden fees</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Check className="w-4 h-4 text-primary" />
               <span>UK-based support</span>
             </div>
-            <div className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+            <div className="flex items-center gap-2 border border-border/60 px-4 py-2">
               <Zap className="w-4 h-4 text-primary" />
               <span>Built to convert</span>
             </div>
@@ -130,17 +86,17 @@ export default function Professional() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               Built for <span className="text-gradient">Growth</span>
             </h2>
-            <p className="body-md max-w-2xl mx-auto">
+            <p className="body-md max-w-2xl">
               Everything you need to scale your online presence and capture more leads.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
@@ -148,9 +104,9 @@ export default function Professional() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl liquid-glass-card border border-border/50 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1"
+                className="p-6 border-b border-r border-border/60 transition-colors duration-300 hover:bg-foreground/[0.02]"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="mb-5 flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                   <feature.icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="font-display font-semibold text-lg mb-2">{feature.title}</h3>
@@ -168,7 +124,7 @@ export default function Professional() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="heading-md mb-4">
               Everything <span className="text-gradient">Included</span>
@@ -183,7 +139,7 @@ export default function Professional() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.03 }}
-                className="flex items-center gap-3 p-3 rounded-lg liquid-glass-card border border-border/50"
+                className="flex items-center gap-3 p-3 rounded-lg border border-border/60 bg-background"
               >
                 <Check className="w-5 h-5 text-primary flex-shrink-0" />
                 <span className="text-sm">{item}</span>
@@ -200,7 +156,7 @@ export default function Professional() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-3xl liquid-glass-card border border-border/50"
+            className="border-t border-border/60 pt-12"
           >
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               <div>
@@ -238,21 +194,21 @@ export default function Professional() {
 
       {/* CTA */}
       <section className="section-padding">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-3xl liquid-glass-card border border-border/50"
+            className="border-t border-border/60 pt-12"
           >
             <h2 className="heading-md mb-4">
               Ready to <span className="text-gradient">Scale?</span>
             </h2>
-            <p className="body-lg mb-8 max-w-2xl mx-auto">
+            <p className="body-lg mb-8 max-w-2xl">
               Get a website built for growth with lead capture, content hub, 
               and everything you need to scale.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap gap-4">
               <Button variant="premium" size="xl" asChild>
                 <Link to="/get-started">Book a Strategy Call <ArrowRight className="w-4 h-4" /></Link>
               </Button>

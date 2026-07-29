@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { motion } from "framer-motion";
 import { Shield, Lock, Key, AlertTriangle, Server, CheckCircle2, Mail, Send } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -134,30 +135,14 @@ export default function TrustCenter() {
     <Layout>
       <div className="min-h-screen">
         {/* Hero Section */}
-        <section className="relative py-24 md:py-32 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-3xl pointer-events-none" />
-          <div className="container-tight relative">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl"
-            >
-              <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-                <Shield className="w-4 h-4" />
-                <span className="text-sm font-medium">Enterprise-Grade Security</span>
-              </div>
-              <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground mb-6">
-                Trust Center
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Your security is our priority. Learn about the technical safeguards we use to protect your data in 2026.
-              </p>
-            </motion.div>
-          </div>
-        </section>
+        <PageHero
+          eyebrow="Legal"
+          index="35"
+          crumbs={[{ label: "Home", href: "/" }, { label: "Trust center" }]}
+          title="Security &"
+          highlight="trust"
+          body="How your data is stored, encrypted and handled — stated plainly enough to be checked."
+        />
 
         {/* Security Overview */}
         <section className="py-12 border-b border-border">
@@ -194,12 +179,12 @@ export default function TrustCenter() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-12"
+              className="mb-12"
             >
               <h2 className="text-3xl font-display font-bold text-foreground mb-4">
                 Technical Safeguards
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-2xl">
                 We implement comprehensive security measures to protect your data and maintain your trust.
               </p>
             </motion.div>
@@ -249,7 +234,7 @@ export default function TrustCenter() {
               className="max-w-4xl mx-auto"
             >
               <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center border border-primary/25 bg-primary/[0.06]">
                   <Server className="w-5 h-5 text-primary" />
                 </div>
                 <h2 className="text-2xl font-display font-semibold text-foreground">
@@ -337,7 +322,7 @@ export default function TrustCenter() {
               viewport={{ once: true }}
               className="max-w-2xl mx-auto"
             >
-              <div className="text-center mb-10">
+              <div className="mb-10">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <Mail className="w-6 h-6 text-primary" />
                   <h2 className="text-3xl font-display font-bold text-foreground">
@@ -350,7 +335,7 @@ export default function TrustCenter() {
               </div>
 
               {submitted ? (
-                <div className="glass-card p-12 text-center">
+                <div className="border border-border/60 bg-background p-12 text-center">
                   <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-6">
                     <CheckCircle2 className="w-10 h-10 text-green-500" />
                   </div>
@@ -365,7 +350,7 @@ export default function TrustCenter() {
                   </Button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="glass-card p-8 space-y-6">
+                <form onSubmit={handleSubmit} className="border border-border/60 bg-background p-8 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">

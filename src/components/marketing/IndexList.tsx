@@ -34,8 +34,10 @@ export function IndexList({ entries }: { entries: IndexEntry[] }) {
       {entries.map((entry, i) => {
         const isHovered = hovered === i;
         const dimmed = hovered !== null && !isHovered;
-        const Row = entry.href ? Link : "div";
-        const rowProps = entry.href ? ({ to: entry.href } as const) : ({} as const);
+        // Polymorphic row: a Link when the entry navigates, a div otherwise.
+        // Widened to ElementType so the union doesn't demand Link's props.
+        const Row: React.ElementType = entry.href ? Link : "div";
+        const rowProps = entry.href ? { to: entry.href } : {};
 
         return (
           <motion.div
@@ -56,7 +58,7 @@ export function IndexList({ entries }: { entries: IndexEntry[] }) {
             />
 
             <Row
-              {...(rowProps as never)}
+              {...(rowProps as Record<string, unknown>)}
               onFocus={() => setHovered(i)}
               onBlur={() => setHovered(null)}
               className={`group grid grid-cols-[auto_1fr] items-start gap-x-5 gap-y-3 py-8 outline-none transition-opacity duration-500 sm:grid-cols-[3.5rem_3rem_1fr_2.5rem] sm:items-center sm:gap-x-8 sm:py-10 ${

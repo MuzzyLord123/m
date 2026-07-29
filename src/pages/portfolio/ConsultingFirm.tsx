@@ -91,7 +91,7 @@ export default function ConsultingFirm() {
           <motion.div className="grid sm:grid-cols-2 gap-6" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
             {services.map((s, i) => (
               <motion.div key={i} variants={fadeUp}
-                className="rounded-xl p-8 border border-border/50 bg-card hover:-translate-y-1 transition-all duration-200 hover:shadow-lg">
+                className="rounded-xl p-8 border border-border/50 bg-card transition-all duration-200 hover:shadow-lg">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-brand/10">
                   <s.icon className="w-6 h-6 text-brand" />
                 </div>
@@ -140,7 +140,7 @@ export default function ConsultingFirm() {
 
       {/* Built by Quooro */}
       <section className="py-16 px-4 border-t border-border/30 bg-foreground dark:bg-card">
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <p className="text-sm font-medium mb-2 text-brand">Built by Quooro</p>
           <p className="font-display text-2xl font-bold mb-2 text-background dark:text-foreground">+200% Leads Generated</p>
           <p className="mb-6 text-muted-foreground">Real results from a Growth package website.</p>

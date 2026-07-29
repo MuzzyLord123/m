@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ArrowRight, Clock, ChevronDown, ChevronUp, Users } from "lucide-react";
+import { Check, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,13 @@ interface EnhancedPackageCardProps {
   onEnterpriseClick?: (packageName: string) => void;
 }
 
+/**
+ * Restyled to the hairline-matrix language: cells share borders instead of
+ * floating as rounded glass cards, the popular tier carries a standing ember
+ * top rule, and labels are set in the mono ledger voice. All behaviour is
+ * unchanged — mobile collapsible features, enterprise click-through to the
+ * quote modal.
+ */
 export function EnhancedPackageCard({ pkg, index, onEnterpriseClick }: EnhancedPackageCardProps) {
   const [showFeatures, setShowFeatures] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -40,157 +47,134 @@ export function EnhancedPackageCard({ pkg, index, onEnterpriseClick }: EnhancedP
 
   return (
     <motion.div
-      initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 30 }}
+      initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      whileHover={prefersReducedMotion ? {} : { y: -4, transition: { duration: 0.3 } }}
-      className={cn(
-        "relative p-4 md:p-6 rounded-3xl border transition-all duration-300 h-full flex flex-col group",
-        pkg.popular 
-          ? "border-primary/50 shadow-xl shadow-primary/15 bg-gradient-to-b from-primary/5 to-transparent" 
-          : pkg.isEnterprise
-          ? "border-border/50 bg-gradient-to-br from-background to-muted/30"
-          : "border-border/50 hover:border-primary/30 hover:shadow-lg"
-      )}
+      transition={{ delay: index * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative flex h-full flex-col overflow-hidden border-b border-r border-border/60 bg-background p-6 transition-colors duration-500 hover:bg-foreground/[0.02] sm:p-7"
     >
-      {/* Most Popular Badge with Glow */}
+      {/* Ember top rule: standing for the popular tier, drawn on hover elsewhere */}
+      <span
+        aria-hidden
+        className={cn(
+          "absolute inset-x-0 top-0 h-px origin-left bg-primary transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
+          pkg.popular ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        )}
+      />
+
+      <div className="mb-5 flex items-baseline justify-between gap-4">
+        <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        {pkg.popular ? (
+          <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-primary">
+            Most popular
+          </span>
+        ) : (
+          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+            {pkg.timeline}
+          </span>
+        )}
+      </div>
+
+      <h3 className="font-display text-xl font-semibold tracking-tight">{pkg.name}</h3>
+      <p className="mt-0.5 text-xs font-medium text-primary">{pkg.subtitle}</p>
       {pkg.popular && (
-        <div className="absolute -top-3 left-4 md:left-6 z-10">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary blur-md opacity-50 rounded-full" />
-            <span className="relative px-4 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-lg">
-              Most Popular
-            </span>
-          </div>
-        </div>
+        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          {pkg.timeline}
+        </p>
       )}
 
-      {/* Timeline Badge - Top Right */}
-      <div className="absolute -top-2 right-4 md:right-6">
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted border border-border/50 text-xs">
-          <Clock className="w-3 h-3 text-primary" />
-          <span className="text-muted-foreground">{pkg.timeline}</span>
-        </div>
+      <p className="mt-3 text-sm font-light leading-relaxed text-muted-foreground">{pkg.description}</p>
+
+      {/* Ideal for */}
+      <div className="mt-5">
+        <p className="mono-label mb-2">Ideal for</p>
+        <p className="text-xs font-light leading-relaxed text-muted-foreground">
+          {pkg.idealFor.slice(0, 3).join(" · ")}
+          {pkg.idealFor.length > 3 && ` · +${pkg.idealFor.length - 3} more`}
+        </p>
       </div>
-      
-      <div className="flex flex-col h-full pt-4">
-        <h3 className="font-display font-bold text-xl md:text-2xl mb-1">{pkg.name}</h3>
-        <p className="text-sm text-primary font-medium mb-2">{pkg.subtitle}</p>
-        
-        {/* Price Indicator */}
-        {pkg.price && (
-          <p className="text-lg font-bold text-foreground mb-3">
-            {pkg.price}
-          </p>
-        )}
-        
-        <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{pkg.description}</p>
-        
-        {/* Ideal For - Pill Tags */}
-        <div className="mb-4">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Users className="w-3.5 h-3.5 text-primary" />
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ideal For</p>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {pkg.idealFor.slice(0, 3).map((item) => (
-              <span 
-                key={item} 
-                className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary border border-primary/20"
-              >
-                {item}
-              </span>
-            ))}
-            {pkg.idealFor.length > 3 && (
-              <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
-                +{pkg.idealFor.length - 3} more
-              </span>
+
+      {/* Collapsible features section on mobile */}
+      <div className="mt-5 flex-1">
+        <button
+          onClick={() => setShowFeatures(!showFeatures)}
+          className="flex w-full items-center justify-between text-left md:cursor-default"
+        >
+          <p className="mono-label">What&rsquo;s included</p>
+          <span className="md:hidden">
+            {showFeatures ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
             )}
-          </div>
-        </div>
-        
-        {/* Collapsible Features Section on Mobile */}
-        <div className="mb-4 flex-1">
-          <button
-            onClick={() => setShowFeatures(!showFeatures)}
-            className="flex items-center justify-between w-full text-left md:cursor-default"
+          </span>
+        </button>
+
+        {/* Always visible on desktop, collapsible on mobile */}
+        <AnimatePresence>
+          <motion.ul
+            initial={false}
+            animate={{
+              height: showFeatures ? "auto" : (typeof window !== 'undefined' && window.innerWidth >= 768) ? "auto" : 0,
+              opacity: showFeatures ? 1 : (typeof window !== 'undefined' && window.innerWidth >= 768) ? 1 : 0
+            }}
+            className={cn(
+              "mt-2 overflow-hidden",
+              "md:!h-auto md:!opacity-100" // Always show on desktop
+            )}
           >
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">What's Included</p>
-            <span className="md:hidden">
-              {showFeatures ? (
-                <ChevronUp className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-muted-foreground" />
-              )}
-            </span>
-          </button>
-          
-          {/* Always visible on desktop, collapsible on mobile */}
-          <AnimatePresence>
-            <motion.ul 
-              initial={false}
-              animate={{ 
-                height: showFeatures ? "auto" : (typeof window !== 'undefined' && window.innerWidth >= 768) ? "auto" : 0,
-                opacity: showFeatures ? 1 : (typeof window !== 'undefined' && window.innerWidth >= 768) ? 1 : 0
-              }}
-              className={cn(
-                "space-y-2 mt-3 overflow-hidden",
-                "md:!h-auto md:!opacity-100" // Always show on desktop
-              )}
-            >
-              {pkg.features.map((feature, idx) => (
-                <li 
-                  key={feature} 
-                  className={cn(
-                    "flex items-start gap-2 text-sm py-1.5 px-2 rounded-lg",
-                    idx % 2 === 0 ? "bg-muted/30" : "bg-transparent"
-                  )}
-                >
-                  <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-muted-foreground">{feature}</span>
-                </li>
-              ))}
-            </motion.ul>
-          </AnimatePresence>
-        </div>
-        
-        {/* Deliverables */}
-        <div className="mb-4 p-3 md:p-4 rounded-2xl bg-primary/5 border border-primary/10">
-          <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">Deliverables</p>
-          <ul className="space-y-1">
-            {pkg.deliverables.slice(0, 3).map((item) => (
-              <li key={item} className="flex items-center gap-2 text-xs text-muted-foreground">
-                <div className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />
-                <span className="line-clamp-1">{item}</span>
+            {pkg.features.map((feature) => (
+              <li
+                key={feature}
+                className="flex items-start gap-2.5 border-b border-border/40 py-2 text-sm last:border-b-0"
+              >
+                <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-primary" strokeWidth={2.2} />
+                <span className="font-light text-muted-foreground">{feature}</span>
               </li>
             ))}
-          </ul>
-        </div>
-        
-        {/* CTA Button with Hover Effect */}
+          </motion.ul>
+        </AnimatePresence>
+      </div>
+
+      {/* Deliverables */}
+      <div className="mt-5 border-t border-border/60 pt-4">
+        <p className="mono-label mb-2 text-primary">Deliverables</p>
+        <ul className="space-y-1.5">
+          {pkg.deliverables.slice(0, 3).map((item) => (
+            <li key={item} className="flex items-center gap-2 text-xs font-light text-muted-foreground">
+              <div className="h-1 w-1 flex-shrink-0 rounded-full bg-primary" />
+              <span className="line-clamp-1">{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* CTA */}
+      <div className="mt-6">
         {pkg.isEnterprise ? (
           <Button
             variant="outline"
-            className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300"
+            className="w-full transition-all duration-300 group-hover:border-primary/40"
             onClick={handleClick}
             aria-label={`Contact us about ${pkg.name}`}
           >
-            Get Package Details
-            <ArrowRight className="w-4 h-4 ml-2" />
+            Get package details
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Button>
         ) : (
           <Button
-            variant={pkg.popular ? "hero" : "outline"}
+            variant={pkg.popular ? "premium" : "outline"}
             className={cn(
               "w-full transition-all duration-300",
-              !pkg.popular && "group-hover:bg-primary group-hover:text-primary-foreground"
+              !pkg.popular && "group-hover:border-primary/40"
             )}
             asChild
           >
             <Link to={pkg.href} aria-label={`Get details for ${pkg.name}`}>
-              Get Package Details
-              <ArrowRight className="w-4 h-4 ml-2" />
+              Get package details
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </Button>
         )}

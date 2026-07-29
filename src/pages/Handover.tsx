@@ -25,6 +25,7 @@ import {
   FileArchive
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -276,45 +277,17 @@ export default function Handover() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="section-padding pt-32">
-        <div className="container-tight">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={stagger}
-            className="max-w-4xl"
-          >
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Package className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Complete Project Handover</span>
-            </motion.div>
-            
-            <motion.h1 variants={fadeUp} className="heading-xl mb-6">
-              Full Ownership, <span className="text-gradient">No Lock-in</span>
-            </motion.h1>
-            
-            <motion.p variants={fadeUp} className="body-lg mb-8">
-              We believe you should own what you pay for. Every project we deliver comes with 
-              complete source code, full documentation, and a seamless handover process. 
-              Your digital assets are truly yours.
-            </motion.p>
-
-            <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
-              <Button variant="premium" size="lg" asChild>
-                <Link to="/get-started">
-                  Start Your Project <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="glass" size="lg" asChild>
-                <Link to="/ownership">Learn About Ownership</Link>
-              </Button>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Company"
+        index="33"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Handover" }]}
+        title="A proper"
+        highlight="handover"
+        body="Credentials, documentation and a walkthrough — leaving is easy, which is exactly why clients stay."
+      />
 
       {/* Trust Signals */}
-      <section className="py-8 border-y border-border/50 liquid-glass">
+      <section className="py-8 border-y border-border/60">
         <div className="container-tight">
           <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
             {[
@@ -323,7 +296,7 @@ export default function Handover() {
               { icon: FileCode2, text: "100% Code Ownership" },
               { icon: Lock, text: "No Vendor Lock-in" }
             ].map((item) => (
-              <div key={item.text} className="flex items-center gap-2 liquid-glass-pill px-4 py-2">
+              <div key={item.text} className="flex items-center gap-2 border border-border/60 px-4 py-2">
                 <item.icon className="w-4 h-4 text-primary" />
                 <span>{item.text}</span>
               </div>
@@ -340,17 +313,17 @@ export default function Handover() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <motion.h2 variants={fadeUp} className="heading-md mb-4">
               How We <span className="text-gradient">Deliver</span>
             </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl mx-auto">
+            <motion.p variants={fadeUp} className="body-md max-w-2xl">
               Choose the handover method that works best for your team and infrastructure.
             </motion.p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-0 border-l border-t border-border/60">
             {handoverMethods.map((method, index) => (
               <motion.div
                 key={method.title}
@@ -358,7 +331,7 @@ export default function Handover() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className={`p-8 rounded-3xl liquid-glass-card border ${
+                className={`p-8 border-b border-r border-border/60 border ${
                   method.recommended ? "border-primary/50" : "border-border/50"
                 } relative overflow-visible`}
               >
@@ -367,7 +340,7 @@ export default function Handover() {
                     Recommended
                   </div>
                 )}
-                <div className="w-14 h-14 rounded-2xl liquid-glass-pill flex items-center justify-center mb-6 mt-2">
+                <div className="w-14 h-14 rounded-2xl border border-border/60 flex items-center justify-center mb-6 mt-2">
                   <method.icon className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="font-display font-bold text-2xl mb-3">{method.title}</h3>
@@ -395,17 +368,17 @@ export default function Handover() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <motion.h2 variants={fadeUp} className="heading-md mb-4">
               What's Included by <span className="text-gradient">Project Type</span>
             </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl mx-auto">
+            <motion.p variants={fadeUp} className="body-md max-w-2xl">
               Every project type has specific deliverables tailored to its requirements.
             </motion.p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-0 border-l border-t border-border/60">
             {projectTypeHandovers.map((type, index) => (
               <motion.div
                 key={type.title}
@@ -413,10 +386,10 @@ export default function Handover() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl liquid-glass-card border border-border/50"
+                className="p-6 border-b border-r border-border/60"
               >
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-xl liquid-glass-pill flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl border border-border/60 flex items-center justify-center flex-shrink-0">
                     <type.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>
@@ -446,17 +419,17 @@ export default function Handover() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <motion.h2 variants={fadeUp} className="heading-md mb-4">
               Your <span className="text-gradient">Ownership Rights</span>
             </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl mx-auto">
+            <motion.p variants={fadeUp} className="body-md max-w-2xl">
               Crystal clear ownership from day one. No fine print, no surprises.
             </motion.p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-0 border-l border-t border-border/60">
             {ownershipRights.map((right, index) => (
               <motion.div
                 key={right.title}
@@ -464,9 +437,9 @@ export default function Handover() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl liquid-glass-card border border-border/50 text-center"
+                className="p-6 border-b border-r border-border/60 text-center"
               >
-                <div className="w-14 h-14 rounded-2xl liquid-glass-pill flex items-center justify-center mx-auto mb-4">
+                <div className="w-14 h-14 rounded-2xl border border-border/60 flex items-center justify-center mx-auto mb-4">
                   <right.icon className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="font-display font-semibold text-lg mb-2">{right.title}</h3>
@@ -486,12 +459,12 @@ export default function Handover() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <motion.h2 variants={fadeUp} className="heading-md mb-4">
               The Handover <span className="text-gradient">Process</span>
             </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl mx-auto">
+            <motion.p variants={fadeUp} className="body-md max-w-2xl">
               A structured, secure process ensuring nothing is missed.
             </motion.p>
           </motion.div>
@@ -525,7 +498,7 @@ export default function Handover() {
                     }`}
                     style={{ direction: "ltr" }}
                   >
-                    <div className="p-6 rounded-2xl liquid-glass-card border border-border/50">
+                    <div className="p-6 border border-border/60 bg-background">
                       {/* Mobile step number */}
                       <div className="flex items-center gap-3 mb-3 md:hidden">
                         <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground font-bold text-xs">
@@ -563,12 +536,12 @@ export default function Handover() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <motion.h2 variants={fadeUp} className="heading-md mb-4">
               Handover <span className="text-gradient">Agreement</span>
             </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl mx-auto">
+            <motion.p variants={fadeUp} className="body-md max-w-2xl">
               Our standard handover agreement covers everything. Here's what's included.
             </motion.p>
           </motion.div>
@@ -579,7 +552,7 @@ export default function Handover() {
                 <AccordionItem 
                   key={section.category} 
                   value={section.category}
-                  className="liquid-glass-card border border-border/50 rounded-2xl px-6 data-[state=open]:border-primary/30"
+                  className="border border-border/60 bg-background rounded-2xl px-6 data-[state=open]:border-primary/30"
                 >
                   <AccordionTrigger className="hover:no-underline py-6">
                     <div className="flex items-center gap-3">
@@ -615,17 +588,17 @@ export default function Handover() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <motion.h2 variants={fadeUp} className="heading-md mb-4">
               Security <span className="text-gradient">Measures</span>
             </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl mx-auto">
+            <motion.p variants={fadeUp} className="body-md max-w-2xl">
               We take security seriously throughout the handover process.
             </motion.p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-0 border-l border-t border-border/60">
             {securityMeasures.map((measure, index) => (
               <motion.div
                 key={measure.title}
@@ -633,9 +606,9 @@ export default function Handover() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 rounded-2xl liquid-glass-card border border-border/50"
+                className="p-6 border-b border-r border-border/60"
               >
-                <div className="w-12 h-12 rounded-xl liquid-glass-pill flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-xl border border-border/60 flex items-center justify-center mb-4">
                   <measure.icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="font-display font-semibold text-lg mb-2">{measure.title}</h3>
@@ -693,7 +666,7 @@ export default function Handover() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="p-8 rounded-3xl liquid-glass-card border border-border/50">
+              <div className="p-8 border border-border/60 bg-background">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-16 h-16 rounded-2xl bg-foreground flex items-center justify-center">
                     <Github className="w-10 h-10 text-background" />
@@ -740,7 +713,7 @@ export default function Handover() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <motion.h2 variants={fadeUp} className="heading-md mb-4">
               Handover <span className="text-gradient">FAQs</span>
@@ -778,7 +751,7 @@ export default function Handover() {
                 <AccordionItem 
                   key={index} 
                   value={`faq-${index}`}
-                  className="liquid-glass-card border border-border/50 rounded-2xl px-6 data-[state=open]:border-primary/30"
+                  className="border border-border/60 bg-background rounded-2xl px-6 data-[state=open]:border-primary/30"
                 >
                   <AccordionTrigger className="hover:no-underline py-6 text-left">
                     <span className="font-display font-semibold">{faq.q}</span>
@@ -801,12 +774,12 @@ export default function Handover() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={stagger}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <motion.h2 variants={fadeUp} className="heading-md mb-4">
               Track Your <span className="text-gradient">Handover Progress</span>
             </motion.h2>
-            <motion.p variants={fadeUp} className="body-md max-w-2xl mx-auto">
+            <motion.p variants={fadeUp} className="body-md max-w-2xl">
               Use this interactive checklist to track your project handover in real-time. 
               Your progress is saved automatically.
             </motion.p>
@@ -830,11 +803,11 @@ export default function Handover() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-3xl liquid-glass-card border border-border/50"
+            className="border-t border-border/60 pt-12"
           >
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
-                <div className="w-14 h-14 rounded-2xl liquid-glass-pill flex items-center justify-center mb-6">
+                <div className="w-14 h-14 rounded-2xl border border-border/60 flex items-center justify-center mb-6">
                   <FileText className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="font-display font-bold text-2xl lg:text-3xl mb-4">
@@ -898,16 +871,16 @@ export default function Handover() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-3xl liquid-glass-card border border-primary/30 text-center"
+            className="p-8 md:p-12 border border-primary/30 bg-background text-center"
           >
             <h2 className="heading-md mb-4">
               Ready to Get <span className="text-gradient">Started</span>?
             </h2>
-            <p className="body-lg mb-8 max-w-2xl mx-auto">
+            <p className="body-lg mb-8 max-w-2xl">
               Build your project with confidence knowing you'll own everything at the end. 
               No lock-in, no surprises — just clean, well-documented code that's truly yours.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap gap-4">
               <Button variant="premium" size="xl" asChild>
                 <Link to="/get-started">
                   Start Your Project <ArrowRight className="w-5 h-5" />

@@ -21,6 +21,7 @@ import {
   Monitor,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { ScrollSection, StaggeredScrollSection, ScrollItem } from "@/components/ScrollSection";
 
@@ -104,76 +105,47 @@ export default function QuooroOffice() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="relative min-h-[60vh] lg:min-h-[70vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-hero" />
-        <div className="container-tight relative z-10 py-16 sm:py-20 lg:py-32">
-          <div className="max-w-4xl px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6"
-            >
-              <Layers className="w-4 h-4" />
-              Productivity Suite
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="heading-xl mb-6"
-            >
-              Quooro <span className="text-gradient">Office</span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mb-8 leading-relaxed"
-            >
-              An enterprise-grade productivity hub with 25+ tools — Docs, Sheets, Invoices, HR, Tasks, Wiki, and more —
-              all built into one seamless platform. No more juggling apps.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-            >
-              <Button variant="premium" size="xl" asChild className="w-full sm:w-auto">
-                <Link to="/get-started">
-                  Get Quooro Office <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="glass" size="xl" asChild className="w-full sm:w-auto">
-                <Link to="/client-portal">Explore the Platform</Link>
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Platform"
+        index="04"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Quooro Office" }]}
+        title="Quooro"
+        highlight="Office"
+        body="A productivity suite with 25+ tools built in — docs, sheets, invoices, tasks, and the rest."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* Apps Grid */}
       <section className="section-padding">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-12 sm:mb-16">
+          <ScrollSection direction="up" className="mb-12 sm:mb-16">
             <h2 className="heading-lg mb-4">
               Everything Your Team <span className="text-gradient">Needs</span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl">
               Over 25 professional applications designed to replace your scattered tool stack with one unified suite.
             </p>
           </ScrollSection>
 
-          <StaggeredScrollSection className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+          <StaggeredScrollSection className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-0 border-l border-t border-border/60">
             {officeApps.map((app) => (
               <ScrollItem key={app.title}>
                 <motion.div
                   whileHover={{ y: -6, transition: { duration: 0.3 } }}
-                  className="p-5 sm:p-6 rounded-2xl liquid-glass-card h-full text-center group relative overflow-hidden"
+                  className="p-5 sm:p-6 border-b border-r border-border/60 h-full text-center group relative overflow-hidden"
                 >
                   {/* Hover accent */}
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -193,21 +165,21 @@ export default function QuooroOffice() {
       {/* Benefits */}
       <section className="section-padding liquid-glass">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-12 sm:mb-16">
+          <ScrollSection direction="up" className="mb-12 sm:mb-16">
             <h2 className="heading-lg mb-4">
               Built for <span className="text-gradient">Business</span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl">
               Not just another productivity suite — Quooro Office is engineered for security, speed, and scale.
             </p>
           </ScrollSection>
 
-          <StaggeredScrollSection className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <StaggeredScrollSection className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-0 border-l border-t border-border/60">
             {benefits.map((item) => (
               <ScrollItem key={item.title}>
                 <motion.div
                   whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                  className="p-6 sm:p-8 rounded-2xl liquid-glass-card h-full text-center"
+                  className="p-6 sm:p-8 border-b border-r border-border/60 h-full text-center"
                 >
                   <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center mx-auto mb-5">
                     <item.icon className="w-7 h-7 text-primary-foreground" />
@@ -286,7 +258,7 @@ export default function QuooroOffice() {
       <section className="section-padding">
         <div className="container-tight">
           <ScrollSection direction="up">
-            <div className="text-center p-8 sm:p-12 lg:p-16 rounded-3xl liquid-glass-card">
+            <div className="p-8 sm:p-12 lg:p-16 border border-border/60 bg-background">
               <h2 className="heading-lg mb-4">
                 Ready to Streamline Your <span className="text-gradient">Operations?</span>
               </h2>
@@ -300,7 +272,7 @@ export default function QuooroOffice() {
                     Get Started Free <ArrowRight className="w-5 h-5" />
                   </Link>
                 </Button>
-                <Button variant="glass" size="xl" asChild>
+                <Button variant="outline" size="xl" asChild>
                   <Link to="/packages">View Packages</Link>
                 </Button>
               </div>

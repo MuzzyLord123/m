@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useScrollIdle } from "@/hooks/useScrollIdle";
 import { 
@@ -11,7 +12,6 @@ import {
   ChevronUp,
   MessageCircle
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const categories = [
@@ -80,33 +80,38 @@ export function PackagesStickyNav() {
 
   return (
     <>
-      {/* Centered Category Navigation */}
-      <nav 
-        className="py-6"
+      {/* Category index — a contents rail in the ledger voice, not pill chips */}
+      <nav
+        className="border-b border-border/60"
         aria-label="Package categories"
       >
         <div className="container-tight">
-          {/* Category Links - Centered */}
-          <div className="flex justify-center">
-            <div className="flex gap-2 flex-wrap justify-center px-1">
-              {categories.map((cat) => {
-                const Icon = cat.icon;
+          <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            <div className="flex min-w-max items-stretch gap-6 sm:gap-8">
+              {categories.map((cat, i) => {
                 const isActive = activeSection === cat.id;
-                
+
                 return (
                   <button
                     key={cat.id}
                     onClick={() => scrollToSection(cat.id)}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap",
-                      isActive 
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
-                        : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                      "group relative flex items-baseline gap-2 whitespace-nowrap py-4 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors duration-300 sm:text-[11px]",
+                      isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                     )}
                     aria-current={isActive ? "true" : undefined}
                   >
-                    <Icon className="w-4 h-4" />
+                    <span className={cn("tabular-nums", isActive ? "text-primary" : "text-muted-foreground")}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
                     <span>{cat.name}</span>
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "absolute inset-x-0 bottom-0 h-px origin-left bg-primary transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
+                        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                      )}
+                    />
                   </button>
                 );
               })}
@@ -141,16 +146,17 @@ export function PackagesStickyNav() {
         }}
         className="fixed bottom-6 left-1/2 z-50"
       >
-        <a 
-          href="https://wa.me/447000000000?text=Hi,%20I%20need%20help%20choosing%20a%20package" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          aria-label="Need help choosing? Contact us on WhatsApp"
+        {/* Was a placeholder WhatsApp number (wa.me/447000000000) — a contact
+            route that went nowhere. Points at the real enquiry form instead.
+            See PLACEHOLDERS.md. */}
+        <Link
+          to="/get-started"
+          aria-label="Need help choosing? Send us an enquiry"
           className="h-12 px-5 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/30 flex items-center gap-2 font-medium text-sm hover:opacity-90 transition-opacity"
         >
           <MessageCircle className="w-5 h-5" />
           <span>Need Help?</span>
-        </a>
+        </Link>
       </motion.div>
     </>
   );

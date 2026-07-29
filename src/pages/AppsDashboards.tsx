@@ -17,6 +17,7 @@ import {
   Lock
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { ScrollSection, StaggeredScrollSection, ScrollItem } from "@/components/ScrollSection";
 import dashboardImage from "@/assets/dashboard-ui.jpg";
@@ -102,67 +103,48 @@ export default function AppsDashboards() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative min-h-[70vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img 
-            src={dashboardImage} 
-            alt="" 
-            className="w-full h-full object-cover opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/40" />
-        </div>
-        <div className="container-tight py-20 md:py-32 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-2xl"
-          >
-            <span className="text-primary text-sm font-semibold tracking-wider uppercase mb-4 block">
-              Beyond Websites
-            </span>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="heading-xl mb-6">
-              Custom Apps Built for{" "}
-              <span className="text-gradient">How You Work</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              We design and build custom web applications, dashboards, databases, and internal systems 
-              for businesses of all sizes — from simple tools to enterprise-level platforms.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Button variant="premium" size="xl" asChild>
-                <Link to="/get-started">
-                  Start Your Project <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="glass" size="xl" asChild>
-                <Link to="/portfolio">View Our Work</Link>
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Development"
+        index="02"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Apps & dashboards" }]}
+        title="Custom apps built for"
+        highlight="how you work"
+        body="Applications, internal tools and dashboards shaped around how the business actually runs."
+        actions={
+          <>
+            <Button variant="premium" size="xl" asChild className="group w-full sm:w-auto">
+              <Link to="/get-started">
+                Get started
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </Button>
+            <Link to="/packages" className="group inline-flex items-center justify-center gap-2 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-foreground sm:justify-start">
+              <span className="link-underline">View packages</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </>
+        }
+      />
 
       {/* What We Build */}
       <section className="section-padding">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-16">
+          <ScrollSection direction="up" className="mb-16">
             <h2 className="heading-lg mb-4">
               What We <span className="text-gradient">Build</span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl">
               From simple internal tools to complex enterprise platforms, we create digital systems 
               tailored to your specific business requirements.
             </p>
           </ScrollSection>
 
-          <StaggeredScrollSection className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <StaggeredScrollSection className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border-l border-t border-border/60">
             {appTypes.map((app) => (
               <ScrollItem key={app.title}>
                 <motion.div
                   whileHover={{ y: -8 }}
-                  className="p-8 rounded-2xl liquid-glass-card h-full"
+                  className="p-8 border-b border-r border-border/60 h-full"
                 >
                   <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6">
                     <app.icon className="w-7 h-7 text-primary-foreground" />
@@ -179,17 +161,17 @@ export default function AppsDashboards() {
       {/* Complexity & Timeline */}
       <section className="section-padding liquid-glass">
         <div className="container-tight">
-          <ScrollSection direction="up" className="text-center mb-16">
+          <ScrollSection direction="up" className="mb-16">
             <h2 className="heading-lg mb-4">
               Scope & <span className="text-gradient">Timeline</span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl">
               From simple applications to systems that take months or years to develop — 
               we build with scalability in mind.
             </p>
           </ScrollSection>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-0 border-l border-t border-border/60">
             {complexityLevels.map((level, index) => (
               <motion.div
                 key={level.level}
@@ -198,7 +180,7 @@ export default function AppsDashboards() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.15 }}
                 whileHover={{ y: -4 }}
-                className="p-8 rounded-2xl liquid-glass-card"
+                className="p-8 border-b border-r border-border/60"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-display font-bold text-xl">{level.level}</h3>
@@ -263,7 +245,7 @@ export default function AppsDashboards() {
             <ScrollSection direction="right">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent rounded-3xl" />
-                <div className="p-8 rounded-3xl liquid-glass-card border border-primary/20">
+                <div className="p-8 border border-border/60 bg-background border border-primary/20">
                   <div className="flex items-center gap-3 pb-6 border-b border-border/50 mb-6">
                     <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
                       <Monitor className="w-6 h-6 text-primary-foreground" />
@@ -314,11 +296,11 @@ export default function AppsDashboards() {
       <section className="section-padding liquid-glass">
         <div className="container-tight">
           <ScrollSection direction="scale">
-            <div className="p-8 md:p-16 rounded-3xl liquid-glass-card text-center">
+            <div className="p-8 md:p-16 border border-border/60 bg-background text-center">
               <h2 className="heading-lg mb-6">
                 Ready to Build Something <span className="text-gradient">Amazing?</span>
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+              <p className="text-lg text-muted-foreground max-w-2xl mb-10 leading-relaxed">
                 Let's discuss your project requirements. Whether it's a simple internal tool 
                 or a complex enterprise platform, we're here to help.
               </p>

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
+import { PageHero } from "@/components/marketing/PageHero";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Key, FileCode, Server, GraduationCap, Shield, RefreshCw, CheckCircle, AlertTriangle, ArrowRight } from "lucide-react";
@@ -103,28 +104,14 @@ export default function Ownership() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-        <div className="container-tight relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground sm:text-[11px] mb-6">
-              <Key className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Ownership Rights</span>
-            </div>
-            <div className="mb-6 flex items-center gap-3"><span className="h-px w-8 bg-primary" /></div>
-            <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
-              Your Site, <span className="text-gradient">Your Property</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Complete code ownership, no vendor lock-in, and everything you need to run your site independently.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Company"
+        index="32"
+        crumbs={[{ label: "Home", href: "/" }, { label: "Ownership" }]}
+        title="You own"
+        highlight="everything"
+        body="Code, design, content, accounts — every asset we build for you is yours, in writing."
+      />
 
       {/* Key Promise */}
       <section className="py-12 border-y border-border bg-primary/5">
@@ -155,17 +142,17 @@ export default function Ownership() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               What Ownership Means
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl">
               Every site we build becomes your permanent business asset.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-0 border-l border-t border-border/60">
             {ownershipBenefits.map((benefit, index) => (
               <motion.div
                 key={benefit.title}
@@ -173,7 +160,7 @@ export default function Ownership() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="glass-card p-8 group hover:border-primary/50 transition-all"
+                className="border-b border-r border-border/60 p-8 group hover:border-primary/50 transition-all"
               >
                 <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
                   <benefit.icon className="w-7 h-7 text-primary" />
@@ -201,7 +188,7 @@ export default function Ownership() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Ownership Comparison
@@ -258,7 +245,7 @@ export default function Ownership() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               What You Receive
@@ -293,12 +280,12 @@ export default function Ownership() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass-card p-12 text-center"
+            className="border border-border/60 bg-background p-12 text-center"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Ready to Own Your Website?
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-muted-foreground max-w-2xl mb-8">
               Build a website that's truly yours - no strings, no lock-in, just complete ownership.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

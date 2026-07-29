@@ -82,7 +82,7 @@ export default function SaaSPlatform() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="rounded-xl p-8 bg-white border hover:-translate-y-1 transition-all duration-300" style={{ borderColor: "hsl(250 15% 90%)" }}>
+                className="rounded-xl p-8 bg-white border transition-all duration-300" style={{ borderColor: "hsl(250 15% 90%)" }}>
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: "hsl(250 60% 95%)" }}>
                   <f.icon className="w-6 h-6" style={{ color: "hsl(250 80% 65%)" }} />
                 </div>
@@ -123,9 +123,9 @@ export default function SaaSPlatform() {
 
       {/* Integrations */}
       <section className="py-16 px-4" style={{ background: "hsl(250 20% 97%)" }}>
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <h2 className="font-display text-2xl font-bold mb-8" style={{ color: "hsl(250 30% 15%)" }}>Integrations</h2>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap gap-4">
             {integrations.map((name, i) => (
               <span key={i} className="px-5 py-2.5 rounded-full text-sm font-medium bg-white border" style={{ borderColor: "hsl(250 15% 88%)" }}>{name}</span>
             ))}
@@ -135,7 +135,7 @@ export default function SaaSPlatform() {
 
       {/* Built by Quooro */}
       <section className="py-16 px-4 border-t border-border/50" style={{ background: "hsl(250 40% 8%)" }}>
-        <div className="container-tight text-center">
+        <div className="container-tight">
           <p className="text-sm font-medium mb-2" style={{ color: "hsl(250 80% 65%)" }}>Built by Quooro</p>
           <p className="font-display text-2xl font-bold mb-2 text-white">10K+ Active Users</p>
           <p className="mb-6" style={{ color: "hsl(250 20% 60%)" }}>Real results from an Enterprise package website.</p>
