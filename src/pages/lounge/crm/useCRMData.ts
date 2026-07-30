@@ -91,9 +91,13 @@ export function useCRMData() {
   const [opportunities, setOpportunities] = useState<CRMOpportunity[]>([]);
   const [stages, setStages] = useState<LifecycleStage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
+  // Only the very first load blanks the screen. Every refresh after that
+  // is silent: the data on screen stays put and is replaced when the new
+  // rows land, so changing a stage never tears the open record down.
   const refresh = useCallback(async () => {
-    setLoading(true);
+    setRefreshing(true);
     const [c, ct, o, sRes] = await Promise.all([
       fetchAll<CRMCompany>('crm_companies'),
       fetchAll<CRMContact>('crm_contacts'),
@@ -105,11 +109,12 @@ export function useCRMData() {
     setOpportunities(o);
     if (sRes.data) setStages(sRes.data as any);
     setLoading(false);
+    setRefreshing(false);
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  return { companies, contacts, opportunities, stages, loading, refresh };
+  return { companies, contacts, opportunities, stages, loading, refreshing, refresh };
 }
 
 export async function fetchTimeline(entityType: EntityType, entityId: string) {

@@ -79,17 +79,16 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
     return () => { cancelled = true; };
   }, [entityType, entity.id]);
 
+  // The timeline loads with the record rather than waiting for its tab,
+  // so opening Timeline is instant and a stage change is already on it.
   useEffect(() => {
     let cancelled = false;
-    async function load() {
-      if (tab !== 'timeline') return;
-      setLoadingTab(true);
-      const t = await fetchTimeline(entityType, entity.id);
+    setLoadingTab(true);
+    fetchTimeline(entityType, entity.id).then(t => {
       if (!cancelled) { setTimeline(t); setLoadingTab(false); }
-    }
-    load();
+    });
     return () => { cancelled = true; };
-  }, [tab, entityType, entity.id, activityToken]);
+  }, [entityType, entity.id, activityToken]);
 
   async function handleStageChange(newStageId: string) {
     setUpdating(true);
@@ -245,7 +244,12 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
             {admins && admins.length > 0 && (
               <div>
                 <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Assigned to</label>
-                <OwnerPicker entity={entity} entityType={entityType} admins={admins} onChanged={onChanged} />
+                <OwnerPicker
+                  entity={entity}
+                  entityType={entityType}
+                  admins={admins}
+                  onChanged={() => { setActivityToken(t => t + 1); onChanged(); }}
+                />
               </div>
             )}
 
@@ -411,6 +415,10 @@ function Field({ icon: Icon, label, value, href, external, onClick }: any) {
   return <div className="px-1.5 py-1">{content}</div>;
 }
 
+const FIELD_FOR_COMMS: Record<EntityType, 'company_id' | 'contact_id' | 'opportunity_id'> = {
+  company: 'company_id', contact: 'contact_id', opportunity: 'opportunity_id',
+};
+
 function StandingCell({ label, currency, amount, tone }: { label: string; currency?: string | null; amount: any; tone?: 'ok' | 'attend' }) {
   const color = tone === 'ok' ? 'text-ok' : tone === 'attend' ? 'text-attend' : 'text-foreground';
   return (
@@ -533,6 +541,20 @@ function OwnerPicker({ entity, entityType, admins, onChanged }: { entity: any; e
   async function set(userId: string | null) {
     setSaving(true);
     const { error } = await supabase.from(TABLE_FOR[entityType]).update({ owner_id: userId } as any).eq('id', entity.id);
+    // Recorded like any other activity, so the timeline shows who the
+    // lead was handed to and when.
+    if (!error && entity.org_id) {
+      const to = admins.find(a => a.user_id === userId);
+      await supabase.from('crm_communications').insert({
+        org_id: entity.org_id,
+        owner_id: userId ?? entity.owner_id ?? null,
+        kind: 'note' as any,
+        direction: 'internal' as any,
+        subject: userId ? `Assigned to ${to?.full_name || to?.email || 'an admin'}` : 'Unassigned',
+        occurred_at: new Date().toISOString(),
+        [FIELD_FOR_COMMS[entityType]]: entity.id,
+      } as any);
+    }
     setSaving(false);
     if (error) { toast({ title: 'Failed to assign', description: error.message, variant: 'destructive' }); return; }
     toast({ title: userId ? 'Assigned' : 'Unassigned' });

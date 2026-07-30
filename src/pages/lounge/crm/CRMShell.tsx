@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Building2, User, Target, LayoutDashboard, Workflow, Search, Plus,
@@ -304,7 +304,7 @@ export default function CRMShell() {
   const { role, isAdmin } = useUserRole();
   const { isOwner } = usePlatformOwner();
   const { toast } = useToast();
-  const { companies, contacts, opportunities, stages, loading, refresh } = useCRMData();
+  const { companies, contacts, opportunities, stages, loading, refreshing, refresh } = useCRMData();
   const { admins } = useAdmins();
   const [section, setSection] = useState<Section>('dashboard');
   const [query, setQuery] = useState('');
@@ -482,6 +482,15 @@ export default function CRMShell() {
     });
     return () => { cancelled = true; };
   }, [preview]);
+
+  // The overlay holds a row captured when it opened. After any refresh
+  // the live row is re-read from the freshly loaded list, so a stage or
+  // owner change shows on the record immediately instead of waiting for
+  // it to be closed and opened again.
+  const liveRow = useCallback((type: EntityType, row: any) => {
+    const src = type === 'company' ? companies : type === 'contact' ? contacts : opportunities;
+    return (src as any[]).find(r => r.id === row.id) || row;
+  }, [companies, contacts, opportunities]);
 
   function openRecord(r: any) {
     if (!currentEntity) return;
@@ -870,7 +879,7 @@ export default function CRMShell() {
                     <EntityDetail
                       key={selected.entity.id}
                       entityType={selected.type}
-                      entity={selected.entity}
+                      entity={liveRow(selected.type, selected.entity)}
                       stages={stages}
                       list={selected.type === currentEntity ? filtered : undefined}
                       admins={admins}
