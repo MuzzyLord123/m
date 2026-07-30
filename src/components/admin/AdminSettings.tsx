@@ -42,7 +42,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const LABEL_MAP: Record<string, string> = {
-  'command-center': 'Command Center', enquiries: 'Enquiries', leads: 'Leads', clients: 'Clients',
+  'command-center': 'Command Center', enquiries: 'Enquiries', leads: 'Business Relationships', clients: 'Clients',
   'client-accounts': 'Client Accounts', apps: 'App Projects', ads: 'Ad Campaigns', social: 'Social Media',
   content: 'Content', calendar: 'Calendar', websites: 'Websites', 'website-designer': 'Website Designer',
   'cad-studio': 'CAD Studio', office: 'Quooro Office', invoices: 'Invoices',

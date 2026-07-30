@@ -23,7 +23,7 @@ const MODULE_TO_NAV: Record<string, { label: string; icon: React.ComponentType<{
   'calendar': { label: 'Calendar', icon: Calendar },
   'assets': { label: 'Asset Storage', icon: HardDrive },
   'clients': { label: 'CRM', icon: Target },
-  'leads': { label: 'Leads', icon: Target },
+  'leads': { label: 'Business Relationships', icon: Target },
   'enquiries': { label: 'Enquiries', icon: Target },
   'client-accounts': { label: 'Client Accounts', icon: Users },
   'invoices': { label: 'Invoices', icon: CreditCard },

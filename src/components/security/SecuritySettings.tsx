@@ -69,10 +69,12 @@ export default function SecuritySettings({ onSetupComplete }: SecuritySettingsPr
   const fetchKnownIPs = async () => {
     setLoadingIPs(true);
     try {
-      const result = await getKnownIPs();
+      const result: any = await getKnownIPs();
       if (result) {
-        setKnownIPs(result.knownIPs);
-        setCurrentIP(result.currentIP);
+        // A response without the list must not blank the security
+        // screen: this renders straight into knownIPs.length.
+        setKnownIPs(Array.isArray(result.knownIPs) ? result.knownIPs : []);
+        setCurrentIP(result.currentIP ?? null);
       }
     } catch (err) {
       console.error('Failed to fetch known IPs:', err);

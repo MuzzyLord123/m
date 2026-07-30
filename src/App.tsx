@@ -74,8 +74,7 @@ const WebsiteManagement = lazy(() => import("./pages/WebsiteManagement"));
 const ServiceLevelAgreement = lazy(() => import("./pages/ServiceLevelAgreement"));
 const BusinessStartup = lazy(() => import("./pages/BusinessStartup"));
 const SubscriptionWebsites = lazy(() => import("./pages/SubscriptionWebsites"));
-const SubscriptionWebsitesPage = lazy(() => import("./pages/SubscriptionWebsitesPage"));
-const HostedWebsitesPage = lazy(() => import("./pages/HostedWebsitesPage"));
+const WebsitesEstatePage = lazy(() => import("./pages/WebsitesEstatePage"));
 const Ecommerce = lazy(() => import("./pages/Ecommerce"));
 const AppsDashboards = lazy(() => import("./pages/AppsDashboards"));
 const Handover = lazy(() => import("./pages/Handover"));
@@ -407,8 +406,9 @@ function AnimatedRoutes() {
           <Route path="/dashboard/planner" element={<ProtectedRoute><TeamGuard><PageTransition><DashboardPlanner /></PageTransition></TeamGuard></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><TeamGuard><PageTransition><Dashboard /></PageTransition></TeamGuard></ProtectedRoute>} />
           <Route path="/executive" element={<ProtectedRoute><Suspense fallback={<div className="min-h-screen bg-background" />}><ExecutiveGuard><PageTransition><ExecutiveDashboard /></PageTransition></ExecutiveGuard></Suspense></ProtectedRoute>} />
-          <Route path="/team/subscription-websites" element={<ProtectedRoute><TeamGuard><PageTransition><SubscriptionWebsitesPage /></PageTransition></TeamGuard></ProtectedRoute>} />
-          <Route path="/team/hosted-websites" element={<ProtectedRoute><TeamGuard><PageTransition><HostedWebsitesPage /></PageTransition></TeamGuard></ProtectedRoute>} />
+          <Route path="/team/websites" element={<ProtectedRoute><TeamGuard><PageTransition><WebsitesEstatePage /></PageTransition></TeamGuard></ProtectedRoute>} />
+          <Route path="/team/subscription-websites" element={<Navigate to="/team/websites" replace />} />
+          <Route path="/team/hosted-websites" element={<Navigate to="/team/websites" replace />} />
           
           <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
           <Route path="/cookie-policy" element={<PageTransition><CookiePolicy /></PageTransition>} />

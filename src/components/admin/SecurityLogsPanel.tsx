@@ -199,107 +199,67 @@ export default function SecurityLogsPanel() {
   const uniqueEventTypes = [...new Set(logs.map(l => l.event_type))];
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Total Events</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              {stats.total}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        
-        <Card className={stats.violations > 0 ? 'border-destructive/50' : ''}>
-          <CardHeader className="pb-2">
-            <CardDescription>Security Violations</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <ShieldX className={`h-5 w-5 ${stats.violations > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
-              {stats.violations}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Team Logins</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <LogIn className="h-5 w-5 text-muted-foreground" />
-              {stats.teamLogins}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Customer Logins</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <LogIn className="h-5 w-5 text-muted-foreground" />
-              {stats.customerLogins}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+    <div>
+      {/* The figures live on the desk above; this is the record itself. */}
+      <div className="flex flex-col gap-3 border-b border-border/60 px-4 py-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-4">
+          {[
+            ['Events', stats.total, ''],
+            ['Violations', stats.violations, stats.violations > 0 ? 'text-risk' : ''],
+            ['Team sign-ins', stats.teamLogins, ''],
+            ['Customer sign-ins', stats.customerLogins, ''],
+          ].map(([label, value, tone]) => (
+            <div key={String(label)} className="min-w-0">
+              <p className="font-mono text-[8.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+              <p className={`mt-0.5 font-mono text-[15px] font-semibold tabular-nums ${tone}`}>{value as number}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:justify-end">
+          <div className="relative sm:w-[210px]">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search email, name or IP"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-9 rounded-[10px] pl-8 text-[12.5px]"
+            />
+          </div>
+          <Select value={eventFilter} onValueChange={setEventFilter}>
+            <SelectTrigger className="h-9 rounded-[10px] text-[12.5px] sm:w-[165px]">
+              <Filter className="mr-2 h-3.5 w-3.5" />
+              <SelectValue placeholder="Event" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All events</SelectItem>
+              {uniqueEventTypes.map(type => (
+                <SelectItem key={type} value={type}>{eventTypeConfig[type]?.label || type}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={portalFilter} onValueChange={setPortalFilter}>
+            <SelectTrigger className="h-9 rounded-[10px] text-[12.5px] sm:w-[135px]">
+              <SelectValue placeholder="Portal" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All portals</SelectItem>
+              <SelectItem value="team">Team</SelectItem>
+              <SelectItem value="customer">Customer</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline" size="sm"
+            className="h-9 gap-1.5 rounded-[10px] text-xs"
+            onClick={fetchLogs}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
+      <div>
 
-      {/* Logs Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Security Event Log
-              </CardTitle>
-              <CardDescription>
-                Recent login attempts, access violations, and security events
-              </CardDescription>
-            </div>
-            <Button variant="outline" size="sm" onClick={fetchLogs} disabled={loading} className="gap-2">
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-          </div>
-          
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by email, name, IP..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select value={eventFilter} onValueChange={setEventFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Event Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Events</SelectItem>
-                {uniqueEventTypes.map(type => (
-                  <SelectItem key={type} value={type}>
-                    {eventTypeConfig[type]?.label || type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={portalFilter} onValueChange={setPortalFilter}>
-              <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Portal" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Portals</SelectItem>
-                <SelectItem value="team">Team Portal</SelectItem>
-                <SelectItem value="customer">Customer Portal</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
           <TooltipProvider>
             {loading ? (
               <SkeletonTable cols={5} rows={6} />
@@ -462,8 +422,7 @@ export default function SecurityLogsPanel() {
               </div>
             )}
           </TooltipProvider>
-        </CardContent>
-      </Card>
+      </div>
     </div>
   );
 }

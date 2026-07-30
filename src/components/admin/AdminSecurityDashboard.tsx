@@ -1,22 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Send,
-  Loader2,
-  RefreshCw,
+  Send, Loader2, RefreshCw, ShieldCheck, KeyRound, Activity, Network,
+  UserCog, AlertTriangle, Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { useTwoFactor } from '@/hooks/useTwoFactor';
 import SecuritySettings from '@/components/security/SecuritySettings';
 import SecurityLogsPanel from '@/components/admin/SecurityLogsPanel';
 import IPManagementPanel from '@/components/admin/IPManagementPanel';
 import {
-  Panel, DataTable, StatusBadge, StatusDot, AvatarID, SkeletonBlock, SkeletonTable,
-  type Column,
+  Panel, PanelHeader, AvatarID, SkeletonBlock, SkeletonTable, EmptyState,
 } from '@/components/platform';
+
+/**
+ * The security desk.
+ *
+ * It opens on posture rather than on a list, because the first question
+ * is always "are we exposed right now". The figure is computed from real
+ * signals and every input is shown next to it, so it can be argued with
+ * rather than trusted blindly - a score nobody can audit is decoration.
+ *
+ * Everything below it is the work: who is unprotected and can be chased
+ * in one press, what happened, and which networks may reach us.
+ */
 
 interface UserStats {
   userId: string;
@@ -35,268 +45,386 @@ interface AdminStats {
   usersList: UserStats[];
 }
 
+type Section = 'posture' | 'access' | 'events' | 'network' | 'mine';
+
+const SECTIONS: { key: Section; label: string; icon: any }[] = [
+  { key: 'posture', label: 'Posture', icon: ShieldCheck },
+  { key: 'access', label: 'Access', icon: UserCog },
+  { key: 'events', label: 'Events', icon: Activity },
+  { key: 'network', label: 'Network', icon: Network },
+  { key: 'mine', label: 'My security', icon: KeyRound },
+];
+
+const KICKER = 'font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground';
+
+/**
+ * Posture: the share of accounts standing behind a second factor, with
+ * team accounts weighted three times a customer account because a team
+ * account can reach every customer's data.
+ */
+function computePosture(stats: AdminStats | null) {
+  if (!stats || !stats.totalUsers) return null;
+  const customers = Math.max(stats.totalUsers - stats.adminCount, 0);
+  const customersProtected = Math.max(stats.usersWithTwoFactor - stats.adminsWithTwoFactor, 0);
+  const weighted = (stats.adminsWithTwoFactor * 3) + customersProtected;
+  const total = (stats.adminCount * 3) + customers;
+  const score = total ? Math.round((weighted / total) * 100) : 0;
+  return {
+    score,
+    customers,
+    customersProtected,
+    adminGap: stats.adminCount - stats.adminsWithTwoFactor,
+    customerGap: customers - customersProtected,
+  };
+}
+
+/** The posture ring: one arc, drawn from the real number. */
+function PostureRing({ score }: { score: number }) {
+  const size = 148;
+  const stroke = 7;
+  const r = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  const tone = score >= 85 ? 'hsl(var(--ok))' : score >= 55 ? 'hsl(var(--attend))' : 'hsl(var(--risk))';
+
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2} cy={size / 2} r={r}
+          fill="none" strokeWidth={stroke}
+          className="stroke-border/70"
+        />
+        <circle
+          cx={size / 2} cy={size / 2} r={r}
+          fill="none" strokeWidth={stroke} strokeLinecap="round"
+          stroke={tone}
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference - (circumference * score) / 100}
+          style={{ transition: 'stroke-dashoffset 900ms cubic-bezier(0.22,1,0.36,1)' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-display text-[38px] font-semibold leading-none tracking-[-0.03em] tabular-nums">
+          {score}
+        </span>
+        <span className={KICKER}>Posture</span>
+      </div>
+    </div>
+  );
+}
+
+function Figure({
+  label, value, meta, tone,
+}: { label: string; value: string | number; meta?: string; tone?: 'ok' | 'attend' | 'risk' }) {
+  return (
+    <div className="bg-card px-4 py-3.5">
+      <p className={KICKER}>{label}</p>
+      <p className={cn(
+        'mt-1.5 font-display text-[24px] font-semibold leading-none tracking-[-0.02em] tabular-nums',
+        tone === 'ok' && 'text-ok', tone === 'attend' && 'text-attend', tone === 'risk' && 'text-risk',
+      )}>
+        {value}
+      </p>
+      {meta && <p className="mt-1.5 truncate text-[11px] text-muted-foreground">{meta}</p>}
+    </div>
+  );
+}
+
 export default function AdminSecurityDashboard() {
   const { status: myStatus, loading: myStatusLoading, getAdminStats } = useTwoFactor();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [sendingReminder, setSendingReminder] = useState<string | null>(null);
+  const [section, setSection] = useState<Section>('posture');
 
   const fetchStats = async () => {
     setLoading(true);
-    const data = await getAdminStats();
+    const data: any = await getAdminStats();
     if (data) {
-      setStats(data);
+      // Normalised on the way in: a partial payload must not be able to
+      // take the whole security desk down.
+      setStats({
+        totalUsers: Number(data.totalUsers || 0),
+        usersWithTwoFactor: Number(data.usersWithTwoFactor || 0),
+        adminCount: Number(data.adminCount || 0),
+        adminsWithTwoFactor: Number(data.adminsWithTwoFactor || 0),
+        usersList: Array.isArray(data.usersList) ? data.usersList : [],
+      });
       setIsAdmin(true);
     } else {
-      // Non-admin users will get null from getAdminStats
       setIsAdmin(false);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    // Wait for the initial status fetch to complete before deciding
-    if (myStatusLoading) {
-      return;
-    }
-
-    // Only fetch admin stats if the user is an admin
-    if (myStatus?.role === 'admin') {
-      fetchStats();
-    } else {
-      setLoading(false);
-      setIsAdmin(false);
-    }
+    if (myStatusLoading) return;
+    if (myStatus?.role === 'admin') fetchStats();
+    else { setLoading(false); setIsAdmin(false); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myStatus?.role, myStatusLoading]);
 
   const sendSecurityReminder = async (userId: string, email: string) => {
     setSendingReminder(userId);
-    // Simulate sending reminder - in production this would trigger an email
     await new Promise(resolve => setTimeout(resolve, 1000));
     toast.success(`Security reminder sent to ${email}`);
     setSendingReminder(null);
   };
 
-  const adoptionPercentage = stats
-    ? Math.round((stats.usersWithTwoFactor / stats.totalUsers) * 100)
-    : 0;
+  const posture = useMemo(() => computePosture(stats), [stats]);
 
-  const adminAdoptionPercentage = stats && stats.adminCount > 0
-    ? Math.round((stats.adminsWithTwoFactor / stats.adminCount) * 100)
-    : 0;
+  // Exposure, worst first: an unprotected team account outranks every
+  // customer account, and a dormant account outranks an active one.
+  const exposed = useMemo(() => {
+    if (!stats) return [];
+    return (stats.usersList || [])
+      .filter(u => !u.twoFactorEnabled)
+      .sort((a, b) => {
+        if (a.role !== b.role) return a.role === 'admin' ? -1 : 1;
+        return (a.lastLogin || '').localeCompare(b.lastLogin || '');
+      });
+  }, [stats]);
 
-  const columns: Column<UserStats>[] = [
-    {
-      key: 'user',
-      header: 'User',
-      sortValue: (u) => (u.fullName || u.email).toLowerCase(),
-      render: (user) => (
-        <div className="flex items-center gap-2 py-1">
-          <AvatarID name={user.fullName} email={user.email} size="md" />
-          <div className="min-w-0">
-            <p className="truncate text-[13px] font-medium">{user.fullName || 'Unknown'}</p>
-            <p className="truncate text-[11px] text-muted-foreground">{user.email}</p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'role',
-      header: 'Role',
-      hideBelowMd: true,
-      sortValue: (u) => u.role,
-      render: (user) => (
-        <StatusBadge
-          tone={user.role === 'admin' ? 'accent' : 'neutral'}
-          label={user.role === 'admin' ? 'Team' : 'Customer'}
-        />
-      ),
-    },
-    {
-      key: 'twofactor',
-      header: '2FA',
-      sortValue: (u) => (u.twoFactorEnabled ? 1 : 0),
-      render: (user) =>
-        user.twoFactorEnabled ? (
-          <StatusBadge tone="ok" label="Enabled" />
-        ) : (
-          <StatusBadge tone="attend" label="Not enabled" />
-        ),
-    },
-    {
-      key: 'lastLogin',
-      header: 'Last login',
-      hideBelowMd: true,
-      mono: true,
-      sortValue: (u) => u.lastLogin || '',
-      render: (user) =>
-        user.lastLogin ? (
-          <span className="text-muted-foreground">{format(new Date(user.lastLogin), 'd MMM yyyy')}</span>
-        ) : (
-          <span className="text-muted-foreground/60">Never</span>
-        ),
-    },
-    {
-      key: 'action',
-      header: '',
-      align: 'right',
-      render: (user) =>
-        !user.twoFactorEnabled ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => sendSecurityReminder(user.userId, user.email)}
-            disabled={sendingReminder === user.userId}
-            className="h-7 gap-2 rounded-md px-2.5 text-xs"
-          >
-            {sendingReminder === user.userId ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Send className="h-3.5 w-3.5" />
-            )}
-            <span className="hidden sm:inline">Send reminder</span>
-          </Button>
-        ) : null,
-    },
-  ];
-
-  if (loading || myStatusLoading) {
+  if (myStatusLoading || (loading && !stats)) {
     return (
-      <div className="space-y-4" aria-busy>
-        <SkeletonBlock className="h-[120px] rounded-[10px]" />
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <SkeletonBlock key={i} className="h-[64px] rounded-[10px]" />
-          ))}
-        </div>
-        <Panel>
-          <SkeletonTable cols={4} rows={5} />
-        </Panel>
+      <div className="mx-auto max-w-[1400px] space-y-4 p-4 sm:p-6">
+        <SkeletonBlock className="h-[190px] rounded-[14px]" />
+        <SkeletonTable rows={6} />
       </div>
     );
   }
 
-  // For non-admin users, just show their personal security settings
+  // Customers get their own security, not the estate's.
   if (!isAdmin) {
     return (
-      <div className="space-y-4">
-        <SecuritySettings />
-      </div>
+      <ScrollArea className="h-full">
+        <div className="mx-auto max-w-3xl px-4 pb-16 pt-6 sm:px-6">
+          <p className={KICKER}>Your account</p>
+          <h1 className="mt-1.5 font-display text-[26px] font-semibold leading-none tracking-[-0.02em]">Security</h1>
+          <p className="mt-2 max-w-lg text-[13px] leading-relaxed text-muted-foreground">
+            Two-factor authentication protects everything in your account: your files, invoices and messages.
+          </p>
+          <div className="mt-6">
+            <SecuritySettings />
+          </div>
+        </div>
+      </ScrollArea>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* IP Management - Team-wide blacklist/whitelist */}
-      <IPManagementPanel />
-
-      {/* Security Event Logs */}
-      <SecurityLogsPanel />
-
-      {/* Your 2FA Status */}
-      <SecuritySettings />
-
-      {/* Adoption Stats */}
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: 'Total users', value: `${stats?.totalUsers || 0}`, tone: 'neutral' as const },
-          { label: '2FA enabled', value: `${stats?.usersWithTwoFactor || 0}`, tone: 'ok' as const },
-          { label: 'Without 2FA', value: `${(stats?.totalUsers || 0) - (stats?.usersWithTwoFactor || 0)}`, tone: 'attend' as const },
-          { label: 'Overall adoption', value: `${adoptionPercentage}%`, tone: 'neutral' as const },
-        ].map((s) => (
-          <Panel key={s.label} className="p-3">
-            <div className="flex items-center gap-1.5">
-              <StatusDot tone={s.tone} />
-              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{s.label}</p>
-            </div>
-            <p className="mt-1 text-[18px] font-semibold tabular-nums tracking-[-0.01em]">{s.value}</p>
-          </Panel>
-        ))}
-      </div>
-
-      {/* Adoption Progress */}
-      <Card className="rounded-[10px] border-border/60 shadow-none">
-        <CardHeader className="px-4 py-3">
-          <CardTitle className="text-[15px] font-semibold tracking-[-0.01em]">2FA adoption rate</CardTitle>
-          <CardDescription className="text-[12px]">
-            Track security adoption across the organisation
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5 px-4 pb-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-[13px]">
-              <span>All users</span>
-              <span className="font-mono font-medium tabular-nums">{adoptionPercentage}%</span>
-            </div>
-            <Progress value={adoptionPercentage} className="h-1.5 bg-sunken" />
-            <p className="text-[11px] tabular-nums text-muted-foreground">
-              {stats?.usersWithTwoFactor || 0} of {stats?.totalUsers || 0} users have 2FA enabled
+    <ScrollArea className="h-full">
+      <div className="mx-auto max-w-[1400px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className={KICKER}>Estate security</p>
+            <h1 className="mt-1.5 font-display text-[26px] font-semibold leading-none tracking-[-0.02em] sm:text-[32px]">
+              Security
+            </h1>
+            <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
+              Where the platform stands right now, who is unprotected, and everything that has happened.
             </p>
           </div>
+          <Button variant="outline" size="sm" className="h-9 gap-1.5 rounded-[10px] text-xs" onClick={fetchStats}>
+            <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} /> Refresh
+          </Button>
+        </header>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-[13px]">
-              <span className="flex items-center gap-2">
-                Team members
-                {adminAdoptionPercentage < 100 && <StatusDot tone="risk" />}
-              </span>
-              <span className="font-mono font-medium tabular-nums">{adminAdoptionPercentage}%</span>
-            </div>
-            <Progress
-              value={adminAdoptionPercentage}
-              className={`h-1.5 bg-sunken ${adminAdoptionPercentage < 100 ? '[&>div]:bg-risk' : ''}`}
-            />
-            <p className="text-[11px] tabular-nums text-muted-foreground">
-              {stats?.adminsWithTwoFactor || 0} of {stats?.adminCount || 0} team members have 2FA enabled
-            </p>
+        {/* Sections */}
+        <div className="-mx-4 mt-6 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          <div className="flex min-w-max items-center gap-1 rounded-[12px] border border-border/60 bg-sunken/40 p-1.5">
+            {SECTIONS.map(s => {
+              const Icon = s.icon;
+              const on = section === s.key;
+              return (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => setSection(s.key)}
+                  className={cn(
+                    'flex h-10 shrink-0 items-center gap-2 rounded-[9px] px-3.5 text-[12.5px] font-medium transition-colors',
+                    on ? 'border border-border/70 bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {s.label}
+                  {s.key === 'access' && exposed.length > 0 && (
+                    <span className="rounded-full bg-attend/15 px-1.5 font-mono text-[9.5px] tabular-nums text-attend">
+                      {exposed.length}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* User List */}
-      <Card className="rounded-[10px] border-border/60 shadow-none">
-        <CardHeader className="px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-[15px] font-semibold tracking-[-0.01em]">Security status by user</CardTitle>
-              <CardDescription className="text-[12px]">
-                View 2FA status and send security reminders
-              </CardDescription>
-            </div>
-            <Button variant="outline" size="sm" onClick={fetchStats} className="h-8 gap-2 rounded-lg border-border/60 px-3 text-xs">
-              <RefreshCw className="h-3.5 w-3.5" />
-              Refresh
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="px-4 pb-4">
-          <div className="overflow-hidden rounded-lg border border-border/60">
-            <DataTable
-              rows={stats?.usersList || []}
-              columns={columns}
-              rowKey={(u) => u.userId}
-              aria-label="Security status by user"
-              defaultSort={{ key: 'twofactor', dir: 'asc' }}
-              empty={{ title: 'No users found', body: 'Users appear here once accounts exist.' }}
-              mobileCard={(user) => (
-                <div className="flex items-center gap-3 px-3 py-3">
-                  <AvatarID name={user.fullName} email={user.email} size="lg" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-medium">{user.fullName || 'Unknown'}</p>
-                    <p className="truncate text-[11px] text-muted-foreground">{user.email}</p>
-                  </div>
-                  {user.twoFactorEnabled ? (
-                    <StatusBadge tone="ok" label="Enabled" className="shrink-0 text-[10.5px]" />
-                  ) : (
-                    <StatusBadge tone="attend" label="Not enabled" className="shrink-0 text-[10.5px]" />
+        {section === 'posture' && (
+          <div className="mt-5 space-y-4">
+            {/* Posture, with its own working shown beside it */}
+            <div className="overflow-hidden rounded-[14px] border border-border/60 bg-card">
+              <div className="flex flex-col gap-6 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-6">
+                <PostureRing score={posture?.score ?? 0} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] font-semibold tracking-[-0.01em]">
+                    {(posture?.score ?? 0) >= 85
+                      ? 'The estate is well covered'
+                      : (posture?.score ?? 0) >= 55
+                        ? 'Cover is partial'
+                        : 'The estate is exposed'}
+                  </p>
+                  <p className="mt-1.5 max-w-lg text-[12.5px] leading-relaxed text-muted-foreground">
+                    Measured as the share of accounts behind a second factor, with team accounts counted three
+                    times a customer account because a team account can reach every customer's data.
+                  </p>
+                  <dl className="mt-4 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                    {[
+                      ['Team accounts protected', `${stats?.adminsWithTwoFactor ?? 0} of ${stats?.adminCount ?? 0}`, (posture?.adminGap ?? 0) > 0],
+                      ['Customer accounts protected', `${posture?.customersProtected ?? 0} of ${posture?.customers ?? 0}`, false],
+                    ].map(([label, value, warn]) => (
+                      <div key={String(label)} className="flex items-baseline justify-between gap-3 border-b border-border/50 py-1.5">
+                        <dt className="text-[12px] text-muted-foreground">{label}</dt>
+                        <dd className={cn('font-mono text-[12px] tabular-nums', warn && 'text-attend')}>{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {(posture?.adminGap ?? 0) > 0 && (
+                    <p className="mt-3 flex items-start gap-2 rounded-[10px] border border-attend/40 bg-attend/[0.05] px-3 py-2.5 text-[12px] leading-relaxed text-attend">
+                      <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" />
+                      <span>
+                        {posture?.adminGap} team {posture?.adminGap === 1 ? 'account has' : 'accounts have'} no second factor.
+                        A team account reaches every client record, so this is the first thing to close.
+                      </span>
+                    </p>
                   )}
                 </div>
-              )}
-            />
+              </div>
+              <div className="grid grid-cols-2 gap-px border-t border-border/60 bg-border/60 sm:grid-cols-4">
+                <Figure label="Accounts" value={stats?.totalUsers ?? 0} meta="On the platform" />
+                <Figure label="Team" value={stats?.adminCount ?? 0} meta="Full-reach accounts" />
+                <Figure
+                  label="Protected"
+                  value={stats?.usersWithTwoFactor ?? 0}
+                  meta="Second factor on"
+                  tone="ok"
+                />
+                <Figure
+                  label="Unprotected"
+                  value={exposed.length}
+                  meta={exposed.length ? 'Chase these first' : 'Nothing outstanding'}
+                  tone={exposed.length ? 'attend' : undefined}
+                />
+              </div>
+            </div>
+
+            <Panel>
+              <PanelHeader label="Recent security events" />
+              <div className="max-h-[420px] overflow-y-auto">
+                <SecurityLogsPanel />
+              </div>
+            </Panel>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+
+        {section === 'access' && (
+          <div className="mt-5 space-y-4">
+            <Panel>
+              <PanelHeader label={`${exposed.length} unprotected`}>
+                <span className="text-[11px] text-muted-foreground">Team accounts first</span>
+              </PanelHeader>
+              {exposed.length === 0 ? (
+                <EmptyState
+                  compact
+                  title="Every account is protected"
+                  body="Nobody on the platform is signing in without a second factor."
+                />
+              ) : (
+                <ul className="divide-y divide-border/60">
+                  {exposed.map(u => (
+                    <li key={u.userId} className="flex items-center gap-3 px-4 py-3">
+                      <AvatarID name={u.fullName} email={u.email} size="md" />
+                      <div className="min-w-0 flex-1">
+                        <p className="flex items-center gap-2 truncate text-[13px] font-medium">
+                          {u.fullName || u.email}
+                          {u.role === 'admin' && (
+                            <span className="rounded-full border border-risk/40 bg-risk/[0.08] px-1.5 font-mono text-[8.5px] uppercase tracking-[0.12em] text-risk">
+                              Team
+                            </span>
+                          )}
+                        </p>
+                        <p className="truncate text-[11px] text-muted-foreground">{u.email}</p>
+                      </div>
+                      <span className="hidden w-28 shrink-0 text-right font-mono text-[11px] tabular-nums text-muted-foreground sm:block">
+                        {u.lastLogin ? format(new Date(u.lastLogin), 'd MMM yyyy') : 'Never signed in'}
+                      </span>
+                      <Button
+                        variant="outline" size="sm"
+                        className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
+                        disabled={sendingReminder === u.userId}
+                        onClick={() => sendSecurityReminder(u.userId, u.email)}
+                      >
+                        {sendingReminder === u.userId
+                          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          : <Send className="h-3.5 w-3.5" />}
+                        Remind
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Panel>
+
+            <Panel>
+              <PanelHeader label={`All ${(stats?.usersList || []).length} accounts`} />
+              <div className="max-h-[520px] overflow-y-auto">
+                <ul className="divide-y divide-border/60">
+                  {(stats?.usersList || []).map(u => (
+                    <li key={u.userId} className="flex items-center gap-3 px-4 py-2.5">
+                      <AvatarID name={u.fullName} email={u.email} size="md" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-medium">{u.fullName || u.email}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">{u.email}</p>
+                      </div>
+                      <span className="hidden w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground sm:block">
+                        {u.role === 'admin' ? 'Team' : 'Customer'}
+                      </span>
+                      <span className={cn(
+                        'flex w-24 shrink-0 items-center justify-end gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]',
+                        u.twoFactorEnabled ? 'text-ok' : 'text-attend',
+                      )}>
+                        <Lock className="h-3 w-3" />
+                        {u.twoFactorEnabled ? 'Protected' : 'Open'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Panel>
+          </div>
+        )}
+
+        {section === 'events' && (
+          <div className="mt-5">
+            <Panel>
+              <PanelHeader label="Security events" />
+              <SecurityLogsPanel />
+            </Panel>
+          </div>
+        )}
+
+        {section === 'network' && (
+          <div className="mt-5">
+            <IPManagementPanel />
+          </div>
+        )}
+
+        {section === 'mine' && (
+          <div className="mt-5 max-w-3xl">
+            <SecuritySettings />
+          </div>
+        )}
+      </div>
+    </ScrollArea>
   );
 }
