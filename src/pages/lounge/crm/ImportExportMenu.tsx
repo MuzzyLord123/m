@@ -4,19 +4,24 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from '@/hooks/use-toast';
 import type { EntityType } from './useCRMData';
-import CRMLeadImportDialog from './CRMLeadImportDialog';
 import { exportEntities, importEntities, EXPORT_COLUMNS, toCSV, downloadCSV } from './csvIO';
 
 interface Props {
   entity: EntityType;
   rows: any[];
   onImported: () => void;
+  /**
+   * Opens the rich lead-import dialog. The dialog itself is mounted by
+   * CRMShell at the shell root - NOT here - so a list refresh (which
+   * re-renders this toolbar) can never unmount an open dialog and swallow
+   * the import receipt (IMPORT-CONTRACT.md defect 1).
+   */
+  onOpenLeadImport?: () => void;
 }
 
-export function ImportExportMenu({ entity, rows, onImported }: Props) {
+export function ImportExportMenu({ entity, rows, onImported, onOpenLeadImport }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
-  const [leadDialogOpen, setLeadDialogOpen] = useState(false);
 
   const handleExport = () => {
     if (!rows.length) {
@@ -57,20 +62,17 @@ export function ImportExportMenu({ entity, rows, onImported }: Props) {
   return (
     <>
       <input ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={handleFile} />
-      {entity === 'contact' && (
-        <CRMLeadImportDialog open={leadDialogOpen} onOpenChange={setLeadDialogOpen} onImportComplete={onImported} />
-      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" disabled={busy}>
+          <Button size="sm" variant="ghost" className="h-11 sm:h-7 gap-1 text-xs shrink-0" disabled={busy}>
             {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
             Data
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
-          {entity === 'contact' && (
+          {entity === 'contact' && onOpenLeadImport && (
             <>
-              <DropdownMenuItem onClick={() => setLeadDialogOpen(true)}>
+              <DropdownMenuItem onClick={onOpenLeadImport}>
                 <Upload className="h-3.5 w-3.5 mr-2" /> Import leads (CSV, Excel, JSON, HTML, manual)
               </DropdownMenuItem>
               <DropdownMenuSeparator />

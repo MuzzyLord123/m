@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { X, Building2, User, Target, Mail, Phone, Globe, MapPin, PoundSterling, Clock, FileText, ExternalLink, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { X, Target, Mail, Phone, Globe, MapPin, PoundSterling, FileText, ExternalLink, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -17,7 +16,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { UserPlus } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { NotesPanel } from './NotesPanel';
-import { AvatarID, SkeletonLedger } from '@/components/platform';
+import { AvatarID, SkeletonLedger, statusTone, statusLabel } from '@/components/platform';
+import { RecordHeader, RecordTimeline, TagChips, type TimelineEvent } from '@/components/platform/crm';
 
 interface Props {
   entityType: EntityType;
@@ -29,8 +29,6 @@ interface Props {
   onClose: () => void;
   onChanged: () => void;
 }
-
-const REL_CHIP = 'text-[10px] font-medium px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground capitalize';
 
 export function EntityDetail({ entityType, entity, stages, list, admins, onNavigate, onClose, onChanged }: Props) {
   const { toast } = useToast();
@@ -56,7 +54,6 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
     entityType === 'contact' ? (entity.full_name || `${entity.first_name || ''} ${entity.last_name || ''}`.trim() || entity.email) :
     entity.title;
 
-  const Icon = entityType === 'company' ? Building2 : entityType === 'contact' ? User : Target;
   const currentStage = stages.find(s => s.id === entity.lifecycle_stage_id);
 
   useEffect(() => {
@@ -88,35 +85,41 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
     }
   }
 
+  // Presentation-only lines for the record header.
+  const companyLine =
+    entityType === 'company' ? (entity.industry || null) :
+    entityType === 'contact' ? (entity.job_title || null) :
+    null;
+  const metaLine =
+    entityType === 'company' ? ([entity.city, entity.country].filter(Boolean).join(', ') || null) :
+    entityType === 'opportunity' ? (entity.expected_close_date ? `Expected close ${format(new Date(entity.expected_close_date), 'd MMM yyyy')}` : null) :
+    null;
+
+  // The timeline rpc already merges notes, stage history and imports for
+  // this record - this maps the fetched rows only; no extra requests.
+  const timelineEvents: TimelineEvent[] = timeline.map((ev, i) => ({
+    id: `ev-${i}`,
+    text: (
+      <>
+        <span className="font-medium">{ev.subject || ev.title || statusLabel(ev.event_type || ev.kind) || 'Event'}</span>
+        {ev.body ? <span className="text-muted-foreground"> · {ev.body}</span> : null}
+      </>
+    ),
+    when: ev.occurred_at ? format(new Date(ev.occurred_at), 'd MMM yyyy · HH:mm') : '',
+    tone: String(ev.event_type || ev.kind || '').includes('stage') ? 'accent' : 'neutral',
+  }));
+
   return (
     <div className="flex flex-col h-full bg-card border-l border-border/60">
-      {/* Header */}
-      <div className="flex items-start gap-3 p-4 sm:p-5 border-b border-border/60">
-        <div className="h-9 w-9 rounded-[10px] border border-border/60 bg-sunken flex items-center justify-center shrink-0">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{entityType}</p>
-          <h2 className="text-[15px] font-semibold text-foreground truncate">{title || 'Untitled'}</h2>
-          <div className="flex flex-wrap gap-1.5 mt-1.5">
-            {(entity.relationship_type || []).map((r: string) => (
-              <span key={r} className={REL_CHIP}>
-                {r}
-              </span>
-            ))}
-            {currentStage && (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground">
-                <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: currentStage.color }} />
-                {currentStage.name}
-              </span>
-            )}
-          </div>
-        </div>
+      {/* Chrome bar: type kicker, pager, close */}
+      <div className="flex items-center gap-0.5 px-2 pt-2 sm:px-3">
+        <span className="ml-2 font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{entityType}</span>
+        <div className="flex-1" />
         {list && list.length > 1 && (
-          <div className="flex items-center gap-0.5 mr-1 shrink-0">
+          <div className="flex items-center gap-0.5 shrink-0">
             <Button
               variant="ghost" size="icon"
-              className="h-8 w-8"
+              className="h-11 w-11 sm:h-8 sm:w-8"
               disabled={!prev}
               onClick={() => prev && onNavigate?.(prev)}
               title="Previous"
@@ -128,7 +131,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
             </span>
             <Button
               variant="ghost" size="icon"
-              className="h-8 w-8"
+              className="h-11 w-11 sm:h-8 sm:w-8"
               disabled={!next}
               onClick={() => next && onNavigate?.(next)}
               title="Next"
@@ -137,14 +140,34 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
             </Button>
           </div>
         )}
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 shrink-0">
+        <Button variant="ghost" size="icon" onClick={onClose} className="h-11 w-11 sm:h-8 sm:w-8 shrink-0" aria-label="Close record">
           <X className="h-4 w-4" />
         </Button>
       </div>
 
+      {/* Record header: identity, stage, value, and real tel:/mailto:/site links */}
+      <RecordHeader
+        name={title || 'Untitled'}
+        company={companyLine}
+        meta={metaLine}
+        stage={currentStage?.name ?? null}
+        stageTone={currentStage ? statusTone(currentStage.slug) : undefined}
+        stageLabel={currentStage?.name}
+        value={entityType === 'opportunity' ? Number(entity.value || 0) : null}
+        phone={entity.phone || entity.mobile || null}
+        email={entity.email || null}
+        website={entity.website || null}
+      />
+      {(entity.relationship_type?.length ?? 0) > 0 && (
+        <div className="border-b border-border/60 px-4 py-2.5">
+          {/* relationship_type display only - no update endpoint exists, so the chips are read-only */}
+          <TagChips tags={entity.relationship_type} />
+        </div>
+      )}
+
       {/* Tabs */}
       <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col overflow-hidden">
-        <TabsList className="mx-4 sm:mx-5 mt-3 grid grid-cols-3 h-9">
+        <TabsList className="mx-4 sm:mx-5 mt-3 grid grid-cols-3 h-11 sm:h-9">
           <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
           <TabsTrigger value="timeline" className="text-xs">Timeline</TabsTrigger>
           <TabsTrigger value="financials" className="text-xs">Financials</TabsTrigger>
@@ -156,7 +179,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
             <div>
               <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Lifecycle stage</label>
               <Select value={entity.lifecycle_stage_id || ''} onValueChange={handleStageChange} disabled={updating}>
-                <SelectTrigger className="mt-1.5 h-9">
+                <SelectTrigger className="mt-1.5 h-11 sm:h-9">
                   <SelectValue placeholder="Set stage" />
                 </SelectTrigger>
                 <SelectContent>
@@ -202,11 +225,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
             {(entity.tags?.length ?? 0) > 0 && (
               <div>
                 <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Tags</label>
-                <div className="flex flex-wrap gap-1.5 mt-1.5">
-                  {entity.tags.map((t: string) => (
-                    <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
-                  ))}
-                </div>
+                <TagChips tags={entity.tags} className="mt-1.5" />
               </div>
             )}
 
@@ -217,27 +236,14 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
             </div>
           </TabsContent>
 
-          <TabsContent value="timeline" className="p-4 sm:p-5 mt-3">
+          <TabsContent value="timeline" className="mt-3 pb-4">
             {loadingTab ? (
-              <SkeletonLedger rows={3} />
-            ) : timeline.length === 0 ? (
-              <EmptyState icon={Clock} label="No timeline events yet" hint="Communications and stage changes will appear here." />
+              <SkeletonLedger rows={3} className="px-4 sm:px-5" />
             ) : (
-              <ol className="relative border-l border-border/60 ml-1.5 space-y-4">
-                {timeline.map((ev, i) => (
-                  <li key={i} className="ml-4 pl-1">
-                    <span className="absolute -left-[3.5px] w-1.5 h-1.5 mt-1 rounded-full bg-primary ring-4 ring-card" />
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{ev.event_type || ev.kind}</span>
-                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
-                        {ev.occurred_at ? format(new Date(ev.occurred_at), 'd MMM yyyy · HH:mm') : ''}
-                      </span>
-                    </div>
-                    <p className="text-sm font-medium text-foreground">{ev.subject || ev.title || ev.kind}</p>
-                    {ev.body && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-3">{ev.body}</p>}
-                  </li>
-                ))}
-              </ol>
+              <RecordTimeline
+                events={timelineEvents}
+                empty="No timeline events yet. Notes and stage changes appear here as they happen."
+              />
             )}
           </TabsContent>
 
@@ -358,7 +364,7 @@ function OwnerPicker({ entity, entityType, admins, onChanged }: { entity: any; e
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button disabled={saving} className="mt-1.5 w-full h-9 px-3 rounded-md border border-border/60 bg-background text-sm flex items-center gap-2 hover:bg-foreground/[0.025] transition-colors">
+        <button disabled={saving} className="mt-1.5 w-full h-11 sm:h-9 px-3 rounded-md border border-border/60 bg-background text-sm flex items-center gap-2 hover:bg-foreground/[0.025] transition-colors">
           {current ? (
             <>
               <AvatarID name={current.full_name} email={current.email} size="sm" />

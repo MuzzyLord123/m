@@ -1,6 +1,7 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import * as XLSX from 'xlsx';
-import { Upload, FileSpreadsheet, FileJson, Code, Plus, Check, Loader2, X, AlertCircle, FileText } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,10 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { ImportDropzone, ImportProgress, ImportReceipt, receiptSummaryText } from '@/components/platform/crm';
 
 interface Props {
   open: boolean;
@@ -103,16 +104,47 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
   const [progress, setProgress] = useState(0);
   const [processed, setProcessed] = useState(0);
   const [result, setResult] = useState<ImportResult | null>(null);
-  const csvRef = useRef<HTMLInputElement>(null);
-  const xlsxRef = useRef<HTMLInputElement>(null);
-  const jsonRef = useRef<HTMLInputElement>(null);
+  // Presentation-only state: file identity + client-side timing for the
+  // progress panel and receipt. The engine knows nothing about these.
+  const [fileName, setFileName] = useState('');
+  const [importTotal, setImportTotal] = useState(0);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [durationMs, setDurationMs] = useState(0);
 
   const reset = () => {
     setStep('input'); setRawRows([]); setHeaders([]); setMapping({});
     setLeads([]); setHtml(''); setManual(emptyLead()); setResult(null);
     setProgress(0); setProcessed(0);
+    setFileName(''); setImportTotal(0); setStartedAt(null); setDurationMs(0);
   };
   const close = (v: boolean) => { if (!v) reset(); onOpenChange(v); };
+
+  /* ---------- Shell: unified dropzone + timing (engine calls unchanged) ---------- */
+  const uiTab = tab === 'html' || tab === 'manual' ? tab : 'file';
+
+  // One dropzone, dispatched to the existing per-type handlers by extension.
+  // Setting `tab` keeps the engine's source string (`tab + '_import'`) exact.
+  const handleFilePicked = (file: File) => {
+    const ext = file.name.toLowerCase().split('.').pop() || '';
+    setFileName(file.name);
+    if (ext === 'csv') { setTab('csv'); handleCsv(file); }
+    else if (ext === 'xlsx' || ext === 'xls') { setTab('excel'); handleXlsx(file); }
+    else if (ext === 'json') { setTab('json'); handleJson(file); }
+    else toast.error('Unsupported file type. Use CSV, Excel or JSON.');
+  };
+
+  // Measures duration around the protected runImport call and records the
+  // real list length for display. The runImport call itself is unchanged.
+  const timedImport = async (list: ParsedLead[], source: string) => {
+    setImportTotal(list.length);
+    const t0 = Date.now();
+    setStartedAt(t0);
+    await runImport(list, source);
+    setDurationMs(Date.now() - t0);
+  };
+
+  const receiptFileName = fileName || (tab === 'manual' ? 'Manual entry' : tab === 'html' ? 'Pasted HTML' : 'Import');
+  const stamp = useMemo(() => format(new Date(), 'd MMM yyyy, HH:mm'), [result]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ---------- CSV ---------- */
   const handleCsv = (file: File) => {
@@ -292,29 +324,45 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
 
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className={cn('max-h-[90vh] overflow-y-auto', step === 'mapping' || step === 'preview' ? 'max-w-4xl' : 'max-w-xl')}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><Upload className="h-4 w-4 text-muted-foreground" /> Import leads</DialogTitle>
           <DialogDescription>Import from CSV, Excel, JSON, HTML tables, or add one manually. Duplicates (matching email, phone or name) are skipped automatically.</DialogDescription>
         </DialogHeader>
 
         {result ? (
-          <div className="py-8 text-center space-y-4">
-            <div className="mx-auto h-11 w-11 rounded-full border border-border/60 bg-ok/10 flex items-center justify-center">
-              <Check className="h-5 w-5 text-ok" />
-            </div>
-            <div className="text-lg font-semibold">Import complete</div>
-            <div className="flex justify-center gap-6 text-sm">
-              <div><div className="text-2xl font-semibold tabular-nums text-ok">{result.added}</div><div className="text-muted-foreground">Added</div></div>
-              <div><div className="text-2xl font-semibold tabular-nums text-attend">{result.duplicates}</div><div className="text-muted-foreground">Duplicates</div></div>
-              <div><div className="text-2xl font-semibold tabular-nums text-risk">{result.errors.length}</div><div className="text-muted-foreground">Errors</div></div>
-            </div>
-            <Button onClick={() => close(false)}>Done</Button>
-          </div>
+          <ImportReceipt
+            fileName={receiptFileName}
+            imported={result.added}
+            duplicates={result.duplicates}
+            failures={result.errors.length}
+            failureReasons={result.errors}
+            rowsDetected={importTotal}
+            durationMs={durationMs}
+            stamp={stamp}
+            onDone={() => close(false)}
+            onCopy={() => {
+              navigator.clipboard?.writeText(receiptSummaryText({
+                fileName: receiptFileName,
+                imported: result.added,
+                duplicates: result.duplicates,
+                failures: result.errors.length,
+                rowsDetected: importTotal,
+                durationMs,
+                stamp,
+              }));
+              toast.success('Summary copied');
+            }}
+          />
         ) : importing ? (
-          <div className="py-8 space-y-4">
-            <Progress value={progress} />
-            <div className="text-center font-mono text-xs tabular-nums text-muted-foreground">{processed} / {leads.length} · {progress}%</div>
+          <div aria-label={`${progress}% complete`}>
+            <ImportProgress
+              fileName={receiptFileName}
+              rowsDetected={importTotal}
+              processed={processed}
+              total={importTotal}
+              startedAt={startedAt ?? Date.now()}
+            />
           </div>
         ) : step === 'preview' ? (
           <div className="space-y-4">
@@ -343,8 +391,8 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
               {leads.length > 100 && <div className="p-2 text-center text-xs text-muted-foreground">…and {leads.length - 100} more</div>}
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={reset}>Back</Button>
-              <Button onClick={() => runImport(leads, tab + '_import')}>Import {leads.length} leads</Button>
+              <Button variant="outline" className="h-11 sm:h-9" onClick={reset}>Back</Button>
+              <Button className="h-11 sm:h-9" onClick={() => timedImport(leads, tab + '_import')}>Import {leads.length} leads</Button>
             </div>
           </div>
         ) : step === 'mapping' ? (
@@ -376,50 +424,29 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
             </div>
           </div>
         ) : (
-          <Tabs value={tab} onValueChange={v => setTab(v as any)}>
-            <TabsList className="grid grid-cols-5">
-              <TabsTrigger value="csv"><FileSpreadsheet className="h-3 w-3 mr-1" /> CSV</TabsTrigger>
-              <TabsTrigger value="excel"><FileSpreadsheet className="h-3 w-3 mr-1" /> Excel</TabsTrigger>
-              <TabsTrigger value="json"><FileJson className="h-3 w-3 mr-1" /> JSON</TabsTrigger>
-              <TabsTrigger value="html"><Code className="h-3 w-3 mr-1" /> HTML</TabsTrigger>
-              <TabsTrigger value="manual"><Plus className="h-3 w-3 mr-1" /> Manual</TabsTrigger>
+          <Tabs value={uiTab} onValueChange={v => setTab((v === 'file' ? 'csv' : v) as any)}>
+            <TabsList className="grid h-11 grid-cols-3">
+              <TabsTrigger value="file" className="h-9 text-xs">Upload file</TabsTrigger>
+              <TabsTrigger value="html" className="h-9 text-xs">Paste HTML</TabsTrigger>
+              <TabsTrigger value="manual" className="h-9 text-xs">Manual</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="csv" className="pt-4">
-              <div onClick={() => csvRef.current?.click()} className="border border-dashed border-border/60 rounded-[10px] p-10 text-center cursor-pointer transition-colors duration-150 hover:border-primary/40 hover:bg-muted/30">
-                <FileSpreadsheet className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-                <div className="font-medium">Choose CSV file</div>
-                <div className="text-xs text-muted-foreground">Columns are mapped in the next step</div>
-                <input ref={csvRef} type="file" accept=".csv,text/csv" className="hidden" onChange={e => e.target.files?.[0] && handleCsv(e.target.files[0])} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="excel" className="pt-4">
-              <div onClick={() => xlsxRef.current?.click()} className="border border-dashed border-border/60 rounded-[10px] p-10 text-center cursor-pointer transition-colors duration-150 hover:border-primary/40 hover:bg-muted/30">
-                <FileSpreadsheet className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-                <div className="font-medium">Choose Excel file (.xlsx / .xls)</div>
-                <div className="text-xs text-muted-foreground">First sheet, first row = headers</div>
-                <input ref={xlsxRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={e => e.target.files?.[0] && handleXlsx(e.target.files[0])} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="json" className="pt-4">
-              <div onClick={() => jsonRef.current?.click()} className="border border-dashed border-border/60 rounded-[10px] p-10 text-center cursor-pointer transition-colors duration-150 hover:border-primary/40 hover:bg-muted/30">
-                <FileJson className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-                <div className="font-medium">Choose JSON file</div>
-                <div className="text-xs text-muted-foreground">Array of objects, or {'{ leads: [...] }'}</div>
-                <input ref={jsonRef} type="file" accept=".json,application/json" className="hidden" onChange={e => e.target.files?.[0] && handleJson(e.target.files[0])} />
-              </div>
+            <TabsContent value="file" className="pt-4">
+              <ImportDropzone
+                onFile={handleFilePicked}
+                accept=".csv,text/csv,.xlsx,.xls,.json,application/json"
+                detail="CSV, Excel or JSON. Columns are mapped before anything is written."
+              />
             </TabsContent>
 
             <TabsContent value="html" className="pt-4 space-y-3">
               <Label className="text-xs">Paste HTML containing a &lt;table&gt;</Label>
               <Textarea value={html} onChange={e => setHtml(e.target.value)} rows={10} placeholder="<table>...</table>" className="font-mono text-xs" />
-              <Button onClick={parseHtml} disabled={!html.trim()}>Parse HTML</Button>
+              <Button className="h-11 sm:h-9" onClick={() => { setFileName('Pasted HTML'); parseHtml(); }} disabled={!html.trim()}>Parse HTML</Button>
             </TabsContent>
 
             <TabsContent value="manual" className="pt-4 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label className="text-xs">Business name</Label><Input value={manual.business_name || ''} onChange={e => setManual({ ...manual, business_name: e.target.value })} /></div>
                 <div><Label className="text-xs">Contact / personal name</Label><Input value={manual.personal_name || ''} onChange={e => setManual({ ...manual, personal_name: e.target.value })} /></div>
                 <div><Label className="text-xs">Email</Label><Input type="email" value={manual.email || ''} onChange={e => setManual({ ...manual, email: e.target.value })} /></div>
@@ -430,9 +457,10 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
                 <div><Label className="text-xs">Postcode</Label><Input value={manual.location_postcode || ''} onChange={e => setManual({ ...manual, location_postcode: e.target.value })} /></div>
               </div>
               <div className="flex justify-end">
-                <Button onClick={() => {
+                <Button className="h-11 sm:h-9" onClick={() => {
                   if (!manual.business_name && !manual.personal_name && !manual.email && !manual.phone) return toast.error('Enter at least a name, email, or phone');
-                  runImport([manual], 'manual');
+                  setFileName('Manual entry');
+                  timedImport([manual], 'manual');
                 }}>Add lead</Button>
               </div>
             </TabsContent>

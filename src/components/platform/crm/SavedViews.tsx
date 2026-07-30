@@ -77,7 +77,7 @@ export function SavedViewsBar<F>({
 }) {
   const chip = (on: boolean) =>
     cn(
-      'flex h-7 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors duration-150',
+      'flex h-7 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors duration-150 max-sm:h-10',
       on
         ? 'border-border bg-foreground/[0.05] text-foreground'
         : 'border-border/60 text-muted-foreground hover:text-foreground',
@@ -109,7 +109,7 @@ export function SavedViewsBar<F>({
         <button
           type="button"
           onClick={onSaveCurrent}
-          className="flex h-7 shrink-0 items-center rounded-lg border border-border/60 px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          className="flex h-7 shrink-0 items-center rounded-lg border border-border/60 px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground max-sm:h-10"
         >
           + Save view
         </button>

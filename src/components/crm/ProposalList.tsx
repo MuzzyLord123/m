@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, FileText, Search, Trash2, Send, Eye, Edit3, Check,
-  Clock, MoreHorizontal, Loader2, X, ChevronDown,
+  Plus, FileText, Search, Trash2, Send, Clock, X, ChevronDown,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { type Proposal, type TemplateType, PROPOSAL_TEMPLATES, useProposals } from '@/hooks/useProposals';
+import { type Proposal, type TemplateType, PROPOSAL_TEMPLATES } from '@/hooks/useProposals';
+import { cn } from '@/lib/utils';
+import {
+  EmptyState, Money, SkeletonLedger, StatusBadge, type Tone,
+} from '@/components/platform';
 
 interface ProposalListProps {
   proposals: Proposal[];
@@ -16,13 +18,15 @@ interface ProposalListProps {
   onSend: (id: string) => void;
 }
 
-const STATUS_STYLES: Record<string, { label: string; color: string; bg: string }> = {
-  draft: { label: 'Draft', color: '#888', bg: 'rgba(136,136,136,0.12)' },
-  sent: { label: 'Sent', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)' },
-  viewed: { label: 'Viewed', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' },
-  accepted: { label: 'Accepted', color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
-  declined: { label: 'Declined', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
-  expired: { label: 'Expired', color: '#6b7280', bg: 'rgba(107,114,128,0.12)' },
+/* Proposal statuses resolve to the platform tone vocabulary —
+   the old hex STATUS_STYLES rainbow is gone. */
+const STATUS_TONES: Record<string, { label: string; tone: Tone }> = {
+  draft: { label: 'Draft', tone: 'neutral' },
+  sent: { label: 'Sent', tone: 'accent' },
+  viewed: { label: 'Viewed', tone: 'attend' },
+  accepted: { label: 'Accepted', tone: 'ok' },
+  declined: { label: 'Declined', tone: 'risk' },
+  expired: { label: 'Expired', tone: 'neutral' },
 };
 
 export function ProposalList({ proposals, loading, onSelect, onCreateFromTemplate, onDelete, onSend }: ProposalListProps) {
@@ -42,71 +46,63 @@ export function ProposalList({ proposals, loading, onSelect, onCreateFromTemplat
   });
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: '#111' }}>
+    <div className="flex h-full flex-col bg-background">
       {/* Header */}
-      <div className="p-3 shrink-0" style={{ borderBottom: '1px solid #2a2a2a' }}>
-        <div className="flex items-center justify-between mb-2">
+      <div className="shrink-0 border-b border-border/60 p-3">
+        <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-[#0073E6]" />
-            <span className="text-[12px] font-semibold text-[#ccc]">Proposals</span>
-            <span className="text-[10px] text-[#666]">({proposals.length})</span>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            <span className="text-[12px] font-semibold text-foreground">Proposals</span>
+            <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{proposals.length}</span>
           </div>
           <div className="relative">
             <button
               onClick={() => setShowTemplateMenu(!showTemplateMenu)}
-              className="h-7 px-2.5 flex items-center gap-1 rounded-md text-[11px] font-medium bg-[#0073E6] text-white hover:bg-[#005bb5] transition-colors"
+              className="flex h-7 items-center gap-1 rounded-md bg-primary px-2.5 text-[11px] font-medium text-primary-foreground transition-[filter] duration-150 hover:brightness-105"
             >
-              <Plus className="h-3.5 w-3.5" /> New Proposal
+              <Plus className="h-3.5 w-3.5" /> New proposal
               <ChevronDown className="h-3 w-3" />
             </button>
-            <AnimatePresence>
-              {showTemplateMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  className="absolute right-0 top-full mt-1 w-56 rounded-lg shadow-xl z-50"
-                  style={{ backgroundColor: '#1e1e1e', border: '1px solid #333' }}
-                >
-                  <div className="p-1.5">
-                    <span className="text-[9px] font-medium text-[#666] uppercase tracking-wider px-2">Choose Template</span>
-                  </div>
-                  {(Object.entries(PROPOSAL_TEMPLATES) as [TemplateType, { label: string }][]).map(([key, tmpl]) => (
-                    <button
-                      key={key}
-                      onClick={() => { onCreateFromTemplate(key); setShowTemplateMenu(false); }}
-                      className="w-full text-left px-3 py-2 text-[11px] text-[#ccc] hover:bg-[#333] transition-colors flex items-center gap-2"
-                    >
-                      <FileText className="h-3.5 w-3.5 text-[#666]" />
-                      {tmpl.label}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {showTemplateMenu && (
+              <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-lg border border-border/60 bg-popover shadow-lg">
+                <div className="p-1.5">
+                  <span className="px-2 font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Choose template</span>
+                </div>
+                {(Object.entries(PROPOSAL_TEMPLATES) as [TemplateType, { label: string }][]).map(([key, tmpl]) => (
+                  <button
+                    key={key}
+                    onClick={() => { onCreateFromTemplate(key); setShowTemplateMenu(false); }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-[11px] text-foreground transition-colors duration-150 hover:bg-foreground/[0.04] last:rounded-b-lg"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                    {tmpl.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Search + filter */}
         <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
-            <Search className="h-3.5 w-3.5 text-[#555]" />
+          <div className="flex flex-1 items-center gap-1.5 rounded-lg border border-border/60 bg-foreground/[0.03] px-2 py-1.5 transition-colors duration-150 focus-within:border-primary/60">
+            <Search className="h-3.5 w-3.5 text-muted-foreground/70" />
             <input
               type="text"
               placeholder="Search proposals…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="bg-transparent text-[11px] text-[#ccc] placeholder:text-[#555] outline-none flex-1"
+              className="flex-1 bg-transparent text-[11px] text-foreground outline-none placeholder:text-muted-foreground/60"
             />
-            {search && <button onClick={() => setSearch('')}><X className="h-3 w-3 text-[#555]" /></button>}
+            {search && <button onClick={() => setSearch('')} aria-label="Clear search"><X className="h-3 w-3 text-muted-foreground/70" /></button>}
           </div>
           <select
             value={statusFilter || ''}
             onChange={e => setStatusFilter(e.target.value || null)}
-            className="bg-[#1e1e1e] text-[10px] text-[#888] border border-[#2a2a2a] rounded-md px-2 py-1.5 outline-none"
+            className="rounded-md border border-border/60 bg-foreground/[0.03] px-2 py-1.5 text-[10px] text-muted-foreground outline-none transition-colors duration-150 focus:border-primary/60"
           >
-            <option value="">All Status</option>
-            {Object.entries(STATUS_STYLES).map(([k, v]) => (
+            <option value="">All statuses</option>
+            {Object.entries(STATUS_TONES).map(([k, v]) => (
               <option key={k} value={k}>{v.label}</option>
             ))}
           </select>
@@ -116,68 +112,67 @@ export function ProposalList({ proposals, loading, onSelect, onCreateFromTemplat
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="flex items-center justify-center h-32">
-            <Loader2 className="h-4 w-4 animate-spin text-[#555]" />
-          </div>
+          <SkeletonLedger rows={5} />
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-40 text-[#555]">
-            <FileText className="h-6 w-6 mb-2" />
-            <span className="text-[11px]">No proposals yet</span>
-            <span className="text-[9px] mt-1">Create one from a template</span>
-          </div>
+          <EmptyState
+            compact
+            title="No proposals yet"
+            body="Create one from a template to send your first quote."
+          />
         ) : (
           filtered.map(p => {
-            const ss = STATUS_STYLES[p.status] || STATUS_STYLES.draft;
+            const ss = STATUS_TONES[p.status] || STATUS_TONES.draft;
             return (
               <button
                 key={p.id}
                 onClick={() => onSelect(p)}
-                className="w-full text-left px-3 py-3 hover:bg-[#1a1a1a] transition-colors border-b border-[#1a1a1a] group"
+                className="group w-full border-b border-border/60 px-3 py-2.5 text-left transition-colors duration-150 hover:bg-foreground/[0.025]"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[11px] font-medium text-[#ddd] truncate">{p.title}</span>
-                      <span
-                        className="text-[8px] font-medium px-1.5 py-0.5 rounded-full shrink-0"
-                        style={{ color: ss.color, backgroundColor: ss.bg }}
-                      >
-                        {ss.label}
-                      </span>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-0.5 flex items-center gap-2">
+                      <span className="truncate text-[12px] font-medium text-foreground">{p.title}</span>
+                      <StatusBadge tone={ss.tone} label={ss.label} className="shrink-0 text-[10px]" />
                     </div>
-                    <div className="flex items-center gap-2 text-[9px] text-[#666]">
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                       <span className="font-mono">{p.proposal_number}</span>
-                      <span>•</span>
-                      <span>{p.client_name || p.client_company || 'No client'}</span>
+                      <span aria-hidden>·</span>
+                      <span className="truncate">{p.client_name || p.client_company || 'No client'}</span>
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-[9px] text-[#555]">
-                      <span>£{p.total_amount.toLocaleString()}</span>
-                      <span>{format(new Date(p.created_at), 'dd MMM yyyy')}</span>
+                    <div className="mt-1 flex items-center gap-3 text-[10px] text-muted-foreground">
+                      <Money value={p.total_amount} whole className="font-mono tabular-nums text-ink-2" />
+                      <span>{format(new Date(p.created_at), 'd MMM yyyy')}</span>
                       {p.valid_until && (
                         <span className="flex items-center gap-0.5">
                           <Clock className="h-2.5 w-2.5" />
-                          Valid until {format(new Date(p.valid_until), 'dd MMM')}
+                          Valid until {format(new Date(p.valid_until), 'd MMM')}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
                     {p.status === 'draft' && (
-                      <button
+                      <span
+                        role="button"
+                        tabIndex={0}
                         onClick={e => { e.stopPropagation(); onSend(p.id); }}
-                        className="h-6 w-6 flex items-center justify-center rounded hover:bg-[#333]"
-                        title="Mark as Sent"
+                        onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); onSend(p.id); } }}
+                        className="flex h-6 w-6 items-center justify-center rounded transition-colors duration-150 hover:bg-foreground/[0.06]"
+                        title="Mark as sent"
                       >
-                        <Send className="h-3 w-3 text-[#60a5fa]" />
-                      </button>
+                        <Send className="h-3 w-3 text-primary" />
+                      </span>
                     )}
-                    <button
+                    <span
+                      role="button"
+                      tabIndex={0}
                       onClick={e => { e.stopPropagation(); onDelete(p.id); }}
-                      className="h-6 w-6 flex items-center justify-center rounded hover:bg-[#333]"
+                      onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); onDelete(p.id); } }}
+                      className="flex h-6 w-6 items-center justify-center rounded transition-colors duration-150 hover:bg-foreground/[0.06]"
                       title="Delete"
                     >
-                      <Trash2 className="h-3 w-3 text-[#ef4444]" />
-                    </button>
+                      <Trash2 className="h-3 w-3 text-risk" />
+                    </span>
                   </div>
                 </div>
               </button>

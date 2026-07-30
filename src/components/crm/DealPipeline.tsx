@@ -1,12 +1,28 @@
 import { useState, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, DollarSign, Calendar, TrendingUp, ChevronDown, X,
-  ArrowRight, Edit3, Trash2, BarChart3, Target, Clock,
-  CheckCircle2, XCircle, GripVertical, Building2, User,
+  Plus, Clock, CheckCircle2, XCircle, GripVertical, Building2,
 } from 'lucide-react';
-import { type CRMDeal, DEAL_STAGES, useCRMDeals } from '@/hooks/useCRMDeals';
-import { format, differenceInDays } from 'date-fns';
+import { type CRMDeal, DEAL_STAGES } from '@/hooks/useCRMDeals';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Money, StatusDot, type Tone } from '@/components/platform';
+
+/* Deal stages resolve to the platform tone vocabulary at the render site —
+   the DEAL_STAGES hex rainbow in the hook is no longer read for colour. */
+const STAGE_TONES: Record<string, Tone> = {
+  qualification: 'neutral',
+  discovery: 'neutral',
+  proposal: 'attend',
+  negotiation: 'attend',
+  closing: 'accent',
+  won: 'ok',
+  lost: 'risk',
+};
+
+const TONE_TEXT: Record<Tone, string> = {
+  ok: 'text-ok', attend: 'text-attend', risk: 'text-risk',
+  neutral: 'text-ink-2', accent: 'text-primary',
+};
 
 /* ─── Pipeline Board ─── */
 export function DealPipelineBoard({ deals, onUpdateDeal, onSelectDeal, onCreateDeal }: {
@@ -61,102 +77,87 @@ export function DealPipelineBoard({ deals, onUpdateDeal, onSelectDeal, onCreateD
     setDragOverStage(null);
   };
 
-  const formatValue = (v: number) => {
-    if (v >= 1000000) return `£${(v / 1000000).toFixed(1)}M`;
-    if (v >= 1000) return `£${(v / 1000).toFixed(1)}K`;
-    return `£${v.toFixed(0)}`;
-  };
-
   return (
-    <div className={`flex-1 ${isMobile ? 'flex flex-col overflow-y-auto' : 'flex overflow-x-auto'} gap-2 p-3`} style={{ minHeight: 0 }}>
+    <div className={cn('flex-1 gap-2 p-3', isMobile ? 'flex flex-col overflow-y-auto' : 'flex overflow-x-auto')} style={{ minHeight: 0 }}>
       {activeStages.map(stage => {
         const sDeals = stageDeals[stage.key] || [];
         const total = sDeals.reduce((s, d) => s + Number(d.deal_value), 0);
         const isOver = dragOverStage === stage.key;
+        const tone = STAGE_TONES[stage.key] ?? 'neutral';
 
         return (
           <div
             key={stage.key}
-            className={`flex flex-col rounded-xl ${isMobile ? 'w-full' : 'flex-shrink-0'} transition-all`}
-            style={{
-              width: isMobile ? '100%' : 240,
-              backgroundColor: isOver ? `${stage.color}08` : '#181818',
-              border: `1px solid ${isOver ? stage.color + '40' : '#2a2a2a'}`,
-            }}
+            className={cn(
+              'flex flex-col rounded-[10px] border transition-colors duration-150',
+              isMobile ? 'w-full' : 'w-[240px] flex-shrink-0',
+              isOver ? 'border-primary/50 bg-primary/[0.04]' : 'border-border/60 bg-card',
+            )}
             onDragOver={(e) => handleDragOver(e, stage.key)}
             onDragLeave={() => setDragOverStage(null)}
             onDrop={(e) => handleDrop(e, stage.key)}
           >
             {/* Stage header */}
-            <div className="px-3 py-2.5 border-b border-[#2a2a2a]">
-              <div className="flex items-center justify-between mb-1">
+            <div className="border-b border-border/60 px-3 py-2.5">
+              <div className="mb-1 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stage.color }} />
-                  <span className="text-[11px] font-semibold" style={{ color: stage.color }}>
-                    {stage.label}
-                  </span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ backgroundColor: `${stage.color}15`, color: stage.color }}>
-                    {sDeals.length}
-                  </span>
+                  <StatusDot tone={tone} />
+                  <span className="text-[11px] font-medium text-foreground">{stage.label}</span>
+                  <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{sDeals.length}</span>
                 </div>
-                <span className="text-[10px] font-medium text-[#666]">{stage.probability}%</span>
+                <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{stage.probability}%</span>
               </div>
-              <div className="text-[10px] text-[#888] font-medium">{formatValue(total)}</div>
+              <Money value={total} whole className="font-mono text-[10.5px] text-ink-2" />
             </div>
 
             {/* Cards */}
-            <div className="flex-1 overflow-y-auto p-2 space-y-1.5 min-h-0" style={{ maxHeight: isMobile ? 'none' : 'calc(100vh - 260px)' }}>
+            <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-2" style={{ maxHeight: isMobile ? 'none' : 'calc(100vh - 260px)' }}>
               {sDeals.map(deal => (
-                <motion.div
+                <div
                   key={deal.id}
-                  layout
                   draggable
-                  onDragStart={(e: any) => handleDragStart(e, deal.id)}
+                  onDragStart={(e) => handleDragStart(e, deal.id)}
                   onDragEnd={() => setDraggedId(null)}
                   onClick={() => onSelectDeal(deal)}
-                  className={`rounded-lg p-2.5 cursor-pointer transition-all group ${
-                    draggedId === deal.id ? 'opacity-40' : 'hover:border-[#444]'
-                  }`}
-                  style={{
-                    backgroundColor: '#222',
-                    border: '1px solid #2a2a2a',
-                  }}
-                  whileHover={{ scale: 1.01 }}
+                  className={cn(
+                    'group cursor-pointer rounded-lg border border-border/60 bg-background p-2.5 transition-colors duration-150',
+                    draggedId === deal.id ? 'opacity-40' : 'hover:border-primary/40',
+                  )}
                 >
-                  <div className="flex items-start justify-between mb-1.5">
-                    <span className="text-[11px] font-semibold text-[#ddd] truncate flex-1">{deal.deal_name}</span>
-                    <GripVertical className="h-3 w-3 text-[#444] opacity-0 group-hover:opacity-100 flex-shrink-0 cursor-grab" />
+                  <div className="mb-1.5 flex items-start justify-between">
+                    <span className="flex-1 truncate text-[11px] font-medium text-foreground">{deal.deal_name}</span>
+                    <GripVertical className="h-3 w-3 flex-shrink-0 cursor-grab text-muted-foreground/50 opacity-0 group-hover:opacity-100" />
                   </div>
                   {deal.company_name && (
-                    <div className="flex items-center gap-1 mb-1">
-                      <Building2 className="h-2.5 w-2.5 text-[#555]" />
-                      <span className="text-[9px] text-[#777] truncate">{deal.company_name}</span>
+                    <div className="mb-1 flex items-center gap-1">
+                      <Building2 className="h-2.5 w-2.5 text-muted-foreground/70" />
+                      <span className="truncate text-[9px] text-muted-foreground">{deal.company_name}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-[#22c55e]">{formatValue(Number(deal.deal_value))}</span>
+                    <Money value={Number(deal.deal_value)} whole className="font-mono text-[10.5px] text-foreground" />
                     {deal.expected_close_date && (
-                      <span className="text-[9px] text-[#666] flex items-center gap-0.5">
+                      <span className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
                         <Clock className="h-2.5 w-2.5" />
-                        {format(new Date(deal.expected_close_date), 'MMM d')}
+                        {format(new Date(deal.expected_close_date), 'd MMM')}
                       </span>
                     )}
                   </div>
-                  {/* Probability bar */}
-                  <div className="mt-1.5 h-1 rounded-full bg-[#333] overflow-hidden">
+                  {/* Probability meter */}
+                  <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-foreground/[0.06]">
                     <div
-                      className="h-full rounded-full transition-all"
-                      style={{ width: `${deal.probability}%`, backgroundColor: stage.color }}
+                      className="h-full rounded-full bg-primary/50 transition-[width] duration-150"
+                      style={{ width: `${deal.probability}%` }}
                     />
                   </div>
-                </motion.div>
+                </div>
               ))}
 
               <button
                 onClick={() => onCreateDeal(stage.key)}
-                className="w-full h-8 rounded-lg border border-dashed border-[#333] text-[10px] text-[#555] hover:text-[#888] hover:border-[#555] flex items-center justify-center gap-1 transition-colors"
+                className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-dashed border-border/60 text-[10px] text-muted-foreground transition-colors duration-150 hover:border-primary/40 hover:text-foreground"
               >
-                <Plus className="h-3 w-3" /> Add Deal
+                <Plus className="h-3 w-3" /> Add deal
               </button>
             </div>
           </div>
@@ -168,41 +169,39 @@ export function DealPipelineBoard({ deals, onUpdateDeal, onSelectDeal, onCreateD
         const stage = DEAL_STAGES.find(s => s.key === key)!;
         const sDeals = stageDeals[key] || [];
         const total = sDeals.reduce((s, d) => s + Number(d.deal_value), 0);
+        const tone = STAGE_TONES[key] ?? 'neutral';
         return (
           <div
             key={key}
-            className="flex flex-col rounded-xl flex-shrink-0"
-            style={{
-              width: 180,
-              backgroundColor: dragOverStage === key ? `${stage.color}08` : '#151515',
-              border: `1px solid ${dragOverStage === key ? stage.color + '40' : '#252525'}`,
-              opacity: 0.85,
-            }}
+            className={cn(
+              'flex flex-col rounded-[10px] border transition-colors duration-150',
+              isMobile ? 'w-full' : 'w-[180px] flex-shrink-0',
+              dragOverStage === key ? 'border-primary/50 bg-primary/[0.04]' : 'border-border/60 bg-sunken',
+            )}
             onDragOver={(e) => handleDragOver(e, key)}
             onDragLeave={() => setDragOverStage(null)}
             onDrop={(e) => handleDrop(e, key)}
           >
-            <div className="px-3 py-2 border-b border-[#252525]">
+            <div className="border-b border-border/60 px-3 py-2">
               <div className="flex items-center gap-1.5">
-                {key === 'won' ? <CheckCircle2 className="h-3 w-3 text-[#22c55e]" /> : <XCircle className="h-3 w-3 text-[#ef4444]" />}
-                <span className="text-[10px] font-semibold" style={{ color: stage.color }}>{stage.label}</span>
-                <span className="text-[9px] text-[#666]">{sDeals.length}</span>
+                {key === 'won' ? <CheckCircle2 className="h-3 w-3 text-ok" /> : <XCircle className="h-3 w-3 text-risk" />}
+                <span className={cn('text-[10px] font-medium', TONE_TEXT[tone])}>{stage.label}</span>
+                <span className="font-mono text-[9px] tabular-nums text-muted-foreground">{sDeals.length}</span>
               </div>
-              <div className="text-[10px] text-[#666] mt-0.5">{formatValue(total)}</div>
+              <Money value={total} whole className="mt-0.5 font-mono text-[10px] text-muted-foreground" />
             </div>
-            <div className="flex-1 overflow-y-auto p-1.5 space-y-1 min-h-0" style={{ maxHeight: 200 }}>
+            <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-1.5" style={{ maxHeight: 200 }}>
               {sDeals.slice(0, 8).map(deal => (
                 <div
                   key={deal.id}
                   onClick={() => onSelectDeal(deal)}
-                  className="rounded-md px-2 py-1.5 cursor-pointer hover:bg-[#222] transition-colors"
-                  style={{ backgroundColor: '#1a1a1a' }}
+                  className="cursor-pointer rounded-md border border-border/60 bg-background px-2 py-1.5 transition-colors duration-150 hover:border-primary/40"
                 >
-                  <div className="text-[10px] font-medium text-[#bbb] truncate">{deal.deal_name}</div>
-                  <div className="text-[9px] font-bold" style={{ color: stage.color }}>{formatValue(Number(deal.deal_value))}</div>
+                  <div className="truncate text-[10px] font-medium text-ink-2">{deal.deal_name}</div>
+                  <Money value={Number(deal.deal_value)} whole className={cn('font-mono text-[9px]', TONE_TEXT[tone])} />
                 </div>
               ))}
-              {sDeals.length > 8 && <div className="text-[9px] text-[#555] text-center">+{sDeals.length - 8} more</div>}
+              {sDeals.length > 8 && <div className="text-center text-[9px] text-muted-foreground">+{sDeals.length - 8} more</div>}
             </div>
           </div>
         );

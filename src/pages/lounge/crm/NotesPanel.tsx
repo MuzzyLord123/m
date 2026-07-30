@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { SkeletonLedger } from '@/components/platform';
 import type { EntityType } from './useCRMData';
 
 const FIELD_FOR: Record<EntityType, 'company_id' | 'contact_id' | 'opportunity_id'> = {
@@ -91,10 +92,7 @@ export function NotesPanel({ entityType, entityId, orgId }: { entityType: Entity
         </div>
 
         {loading ? (
-          <div className="space-y-1.5" aria-hidden>
-            <div className="h-14 rounded-md border border-border/60 bg-foreground/[0.04] animate-pulse" />
-            <div className="h-14 rounded-md border border-border/60 bg-foreground/[0.04] animate-pulse" />
-          </div>
+          <SkeletonLedger rows={2} className="rounded-md border border-border/60" />
         ) : notes.length === 0 ? (
           <p className="text-xs text-muted-foreground">No notes yet.</p>
         ) : (

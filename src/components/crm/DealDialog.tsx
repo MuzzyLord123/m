@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { X, DollarSign, Calendar, Percent, Building2, User, FileText, Tag } from 'lucide-react';
+import { X, PoundSterling, Calendar, Percent, Building2, User, FileText, Tag } from 'lucide-react';
 import { type CRMDeal, DEAL_STAGES } from '@/hooks/useCRMDeals';
-import { AnimatePresence, motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { StatusDot, type Tone } from '@/components/platform';
 
 interface DealDialogProps {
   open: boolean;
@@ -11,6 +12,33 @@ interface DealDialogProps {
   onSave: (data: Partial<CRMDeal>) => void;
   onDelete?: (id: string) => void;
 }
+
+/* Deal stages resolve to the platform tone vocabulary at the render site —
+   the DEAL_STAGES hex rainbow in the hook is no longer read for colour. */
+const STAGE_TONES: Record<string, Tone> = {
+  qualification: 'neutral',
+  discovery: 'neutral',
+  proposal: 'attend',
+  negotiation: 'attend',
+  closing: 'accent',
+  won: 'ok',
+  lost: 'risk',
+};
+
+const TONE_TEXT: Record<Tone, string> = {
+  ok: 'text-ok', attend: 'text-attend', risk: 'text-risk',
+  neutral: 'text-ink-2', accent: 'text-primary',
+};
+const TONE_BG: Record<Tone, string> = {
+  ok: 'bg-ok/10', attend: 'bg-attend/10', risk: 'bg-risk/10',
+  neutral: 'bg-foreground/[0.06]', accent: 'bg-primary/12',
+};
+
+/* Compact field recipe for the instrument surface */
+const FIELD_SM =
+  'w-full rounded-lg border border-border/60 bg-foreground/[0.03] px-3 py-2 text-[12px] text-foreground outline-none transition-colors duration-150 focus:border-primary/60 placeholder:text-muted-foreground/60';
+const LABEL_SM =
+  'mb-1 flex items-center gap-1 font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-muted-foreground';
 
 export function DealDialog({ open, onClose, deal, defaultStage, onSave, onDelete }: DealDialogProps) {
   const [form, setForm] = useState<Partial<CRMDeal>>(() => deal ? { ...deal } : {
@@ -41,203 +69,178 @@ export function DealDialog({ open, onClose, deal, defaultStage, onSave, onDelete
     setForm(prev => ({ ...prev, stage, probability: stageConfig?.probability ?? prev.probability }));
   };
 
-  const inputStyle = {
-    backgroundColor: '#222',
-    border: '1px solid #333',
-    borderRadius: 8,
-    color: '#ddd',
-    fontSize: 12,
-    padding: '8px 12px',
-    width: '100%',
-    outline: 'none',
-  } as const;
-
-  const labelStyle = {
-    fontSize: 10,
-    fontWeight: 600,
-    color: '#888',
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.05em',
-    marginBottom: 4,
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4,
-  };
-
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center"
-        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-        onClick={onClose}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={deal ? 'Edit deal' : 'New deal'}
+        className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border/60 bg-card"
+        onClick={e => e.stopPropagation()}
       >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
-          style={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#2a2a2a]">
-            <h3 className="text-[13px] font-bold text-[#eee]">{deal ? 'Edit Deal' : 'New Deal'}</h3>
-            <button onClick={onClose} className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors">
-              <X className="h-3.5 w-3.5 text-[#666]" />
-            </button>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
+          <h3 className="text-[13px] font-semibold text-foreground">{deal ? 'Edit deal' : 'New deal'}</h3>
+          <button onClick={onClose} aria-label="Close" className="flex h-6 w-6 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]">
+            <X className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
+        </div>
+
+        <div className="space-y-4 px-5 py-4">
+          {/* Deal name */}
+          <div>
+            <div className={LABEL_SM}><FileText className="h-3 w-3" />Deal name</div>
+            <input
+              className={FIELD_SM}
+              value={form.deal_name || ''}
+              onChange={e => setForm(prev => ({ ...prev, deal_name: e.target.value }))}
+              placeholder="e.g. Website redesign for Acme Corp"
+            />
           </div>
 
-          <div className="px-5 py-4 space-y-4">
-            {/* Deal Name */}
-            <div>
-              <div style={labelStyle}><FileText className="h-3 w-3" />Deal Name</div>
-              <input
-                style={inputStyle}
-                value={form.deal_name || ''}
-                onChange={e => setForm(prev => ({ ...prev, deal_name: e.target.value }))}
-                placeholder="e.g. Website Redesign for Acme Corp"
-              />
-            </div>
-
-            {/* Stage */}
-            <div>
-              <div style={labelStyle}><Tag className="h-3 w-3" />Stage</div>
-              <div className="flex flex-wrap gap-1">
-                {DEAL_STAGES.map(s => (
+          {/* Stage */}
+          <div>
+            <div className={LABEL_SM}><Tag className="h-3 w-3" />Stage</div>
+            <div className="flex flex-wrap gap-1.5">
+              {DEAL_STAGES.map(s => {
+                const tone = STAGE_TONES[s.key] ?? 'neutral';
+                const isActive = form.stage === s.key;
+                return (
                   <button
                     key={s.key}
                     onClick={() => handleStageChange(s.key)}
-                    className="px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all"
-                    style={{
-                      backgroundColor: form.stage === s.key ? `${s.color}20` : '#252525',
-                      color: form.stage === s.key ? s.color : '#777',
-                      border: `1px solid ${form.stage === s.key ? s.color + '40' : '#333'}`,
-                    }}
+                    className={cn(
+                      'flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-[10px] font-medium transition-colors duration-150',
+                      isActive
+                        ? cn(TONE_BG[tone], TONE_TEXT[tone], 'border-border/60')
+                        : 'border-transparent bg-sunken text-muted-foreground hover:text-foreground',
+                    )}
                   >
+                    {isActive && <StatusDot tone={tone} />}
                     {s.label}
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {/* Value */}
-              <div>
-                <div style={labelStyle}><DollarSign className="h-3 w-3" />Deal Value (£)</div>
-                <input
-                  style={inputStyle}
-                  type="number"
-                  value={form.deal_value || ''}
-                  onChange={e => setForm(prev => ({ ...prev, deal_value: parseFloat(e.target.value) || 0 }))}
-                  placeholder="0"
-                />
-              </div>
-
-              {/* Probability */}
-              <div>
-                <div style={labelStyle}><Percent className="h-3 w-3" />Probability (%)</div>
-                <input
-                  style={inputStyle}
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={form.probability ?? ''}
-                  onChange={e => setForm(prev => ({ ...prev, probability: parseInt(e.target.value) || 0 }))}
-                />
-              </div>
-
-              {/* Expected close */}
-              <div>
-                <div style={labelStyle}><Calendar className="h-3 w-3" />Expected Close</div>
-                <input
-                  style={inputStyle}
-                  type="date"
-                  value={form.expected_close_date || ''}
-                  onChange={e => setForm(prev => ({ ...prev, expected_close_date: e.target.value || null }))}
-                />
-              </div>
-
-              {/* Company */}
-              <div>
-                <div style={labelStyle}><Building2 className="h-3 w-3" />Company</div>
-                <input
-                  style={inputStyle}
-                  value={form.company_name || ''}
-                  onChange={e => setForm(prev => ({ ...prev, company_name: e.target.value || null }))}
-                  placeholder="Company name"
-                />
-              </div>
-            </div>
-
-            {/* Contact */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Value */}
             <div>
-              <div style={labelStyle}><User className="h-3 w-3" />Contact Name</div>
+              <div className={LABEL_SM}><PoundSterling className="h-3 w-3" />Deal value (£)</div>
               <input
-                style={inputStyle}
-                value={form.contact_name || ''}
-                onChange={e => setForm(prev => ({ ...prev, contact_name: e.target.value || null }))}
-                placeholder="Contact person"
+                className={FIELD_SM}
+                type="number"
+                value={form.deal_value || ''}
+                onChange={e => setForm(prev => ({ ...prev, deal_value: parseFloat(e.target.value) || 0 }))}
+                placeholder="0"
               />
             </div>
 
-            {/* Description */}
+            {/* Probability */}
             <div>
-              <div style={labelStyle}>Description</div>
-              <textarea
-                style={{ ...inputStyle, minHeight: 60, resize: 'vertical' as any }}
-                value={form.description || ''}
-                onChange={e => setForm(prev => ({ ...prev, description: e.target.value || null }))}
-                placeholder="Deal details..."
+              <div className={LABEL_SM}><Percent className="h-3 w-3" />Probability (%)</div>
+              <input
+                className={FIELD_SM}
+                type="number"
+                min={0}
+                max={100}
+                value={form.probability ?? ''}
+                onChange={e => setForm(prev => ({ ...prev, probability: parseInt(e.target.value) || 0 }))}
               />
             </div>
 
-            {/* Lost reason (if lost) */}
-            {form.stage === 'lost' && (
-              <div>
-                <div style={labelStyle}>Lost Reason</div>
-                <input
-                  style={inputStyle}
-                  value={form.lost_reason || ''}
-                  onChange={e => setForm(prev => ({ ...prev, lost_reason: e.target.value || null }))}
-                  placeholder="Why was this deal lost?"
-                />
-              </div>
+            {/* Expected close */}
+            <div>
+              <div className={LABEL_SM}><Calendar className="h-3 w-3" />Expected close</div>
+              <input
+                className={FIELD_SM}
+                type="date"
+                value={form.expected_close_date || ''}
+                onChange={e => setForm(prev => ({ ...prev, expected_close_date: e.target.value || null }))}
+              />
+            </div>
+
+            {/* Company */}
+            <div>
+              <div className={LABEL_SM}><Building2 className="h-3 w-3" />Company</div>
+              <input
+                className={FIELD_SM}
+                value={form.company_name || ''}
+                onChange={e => setForm(prev => ({ ...prev, company_name: e.target.value || null }))}
+                placeholder="Company name"
+              />
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <div className={LABEL_SM}><User className="h-3 w-3" />Contact name</div>
+            <input
+              className={FIELD_SM}
+              value={form.contact_name || ''}
+              onChange={e => setForm(prev => ({ ...prev, contact_name: e.target.value || null }))}
+              placeholder="Contact person"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <div className={LABEL_SM}>Description</div>
+            <textarea
+              className={cn(FIELD_SM, 'min-h-[60px] resize-y')}
+              value={form.description || ''}
+              onChange={e => setForm(prev => ({ ...prev, description: e.target.value || null }))}
+              placeholder="Deal details…"
+            />
+          </div>
+
+          {/* Lost reason (if lost) */}
+          {form.stage === 'lost' && (
+            <div>
+              <div className={LABEL_SM}>Lost reason</div>
+              <input
+                className={FIELD_SM}
+                value={form.lost_reason || ''}
+                onChange={e => setForm(prev => ({ ...prev, lost_reason: e.target.value || null }))}
+                placeholder="Why was this deal lost?"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between border-t border-border/60 px-5 py-3">
+          <div>
+            {deal && onDelete && (
+              <button
+                onClick={() => { onDelete(deal.id); onClose(); }}
+                className="h-8 rounded-lg px-3 text-[11px] font-medium text-risk transition-colors duration-150 hover:bg-risk/10"
+              >
+                Delete deal
+              </button>
             )}
           </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-between px-5 py-3 border-t border-[#2a2a2a]">
-            <div>
-              {deal && onDelete && (
-                <button
-                  onClick={() => { onDelete(deal.id); onClose(); }}
-                  className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors"
-                >
-                  Delete Deal
-                </button>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onClose}
-                className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-[#888] hover:bg-[#333] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !form.deal_name?.trim()}
-                className="px-4 py-1.5 rounded-lg text-[11px] font-semibold bg-[#0073E6] text-white hover:bg-[#005bb5] transition-colors disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : deal ? 'Update Deal' : 'Create Deal'}
-              </button>
-            </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="h-8 rounded-lg px-3 text-[11px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.06]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving || !form.deal_name?.trim()}
+              className="h-8 rounded-lg bg-primary px-4 text-[11px] font-medium text-primary-foreground transition-[filter] duration-150 hover:brightness-105 disabled:opacity-50"
+            >
+              {saving ? 'Saving…' : deal ? 'Update deal' : 'Create deal'}
+            </button>
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      </div>
+    </div>
   );
 }
