@@ -1,32 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Play,
-  Pause,
-  CheckCircle,
-  Clock,
-  Target,
-  Calendar,
-  Image,
-  Video,
-  FileText,
-  ArrowUpRight,
+  Play, Pause, CheckCircle, Clock, Target, Image as ImageIcon, Video, FileText,
+  ExternalLink, Megaphone,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import {
-  PageHeader,
-  Panel,
-  StatusBadge,
-  statusLabel,
-  DetailDrawer,
-  EmptyState,
-  Money,
-  RelativeTime,
-  SkeletonLedger,
-  type Tone,
+  Panel, PanelHeader, EmptyState, SkeletonLedger, RelativeTime,
 } from '@/components/platform';
+import { BottomSheet } from '@/components/platform/crm';
+
+/**
+ * The advertising your agency is running for you.
+ *
+ * Campaigns are grouped by what they are doing right now - live, paused,
+ * scheduled, finished - because that is the only question a client asks
+ * about their advertising. The creative sits with the campaign, and the
+ * money is stated plainly: a monthly budget is a monthly budget, never
+ * dressed up as a projection.
+ */
 
 interface AdCampaign {
   id: string;
@@ -44,39 +39,42 @@ interface AdCampaign {
 }
 
 const PLATFORM_LABEL: Record<string, string> = {
-  meta: 'Meta',
-  tiktok: 'TikTok',
-  google: 'Google',
-  linkedin: 'LinkedIn',
-  twitter: 'X / Twitter',
+  meta: 'Meta', tiktok: 'TikTok', google: 'Google', linkedin: 'LinkedIn', twitter: 'X',
 };
 
-const STATUS_META: Record<string, { tone: Tone; icon: typeof Play }> = {
-  running: { tone: 'ok', icon: Play },
-  paused: { tone: 'attend', icon: Pause },
-  completed: { tone: 'neutral', icon: CheckCircle },
-  scheduled: { tone: 'attend', icon: Clock },
+const STATUS_META: Record<string, { label: string; dot: string; text: string; icon: typeof Play }> = {
+  running: { label: 'Live', dot: 'bg-ok', text: 'text-ok', icon: Play },
+  paused: { label: 'Paused', dot: 'bg-attend', text: 'text-attend', icon: Pause },
+  scheduled: { label: 'Scheduled', dot: 'bg-primary', text: 'text-primary', icon: Clock },
+  completed: { label: 'Finished', dot: 'bg-muted-foreground/50', text: 'text-muted-foreground', icon: CheckCircle },
 };
+
+const CREATIVE_ICON: Record<string, typeof ImageIcon> = {
+  image: ImageIcon, video: Video, carousel: ImageIcon, text: FileText,
+};
+
+const KICKER = 'font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground';
+const ORDER = ['running', 'scheduled', 'paused', 'completed'];
+
+const money = (n: number | null) =>
+  n == null ? '–' : new Intl.NumberFormat('en-GB', {
+    style: 'currency', currency: 'GBP', minimumFractionDigits: 0,
+  }).format(n);
+
+const statusOf = (s: string) => STATUS_META[s] || STATUS_META.running;
 
 export default function LoungeAdManagement() {
   const { user } = useAuth();
   const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCampaign, setSelectedCampaign] = useState<AdCampaign | null>(null);
+  const [open, setOpen] = useState<AdCampaign | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchCampaigns();
-    }
-  }, [user]);
+  useEffect(() => { if (user) fetchCampaigns(); }, [user]);
 
   const fetchCampaigns = async () => {
     try {
       const { data, error } = await supabase
-        .from('ad_campaigns')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+        .from('ad_campaigns').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       setCampaigns(data || []);
     } catch (error) {
@@ -86,24 +84,33 @@ export default function LoungeAdManagement() {
     }
   };
 
-  const getStatusInfo = (status: string) => {
-    return STATUS_META[status] || STATUS_META.running;
-  };
+  const figures = useMemo(() => {
+    const live = campaigns.filter(c => c.status === 'running');
+    const monthly = live.reduce((s, c) => s + Number(c.monthly_budget || 0), 0);
+    return {
+      live: live.length,
+      monthly,
+      scheduled: campaigns.filter(c => c.status === 'scheduled').length,
+      platforms: new Set(campaigns.filter(c => c.status === 'running').map(c => c.platform)).size,
+    };
+  }, [campaigns]);
 
-  const getPlatformLabel = (platform: string) => {
-    return PLATFORM_LABEL[platform] || PLATFORM_LABEL.meta;
-  };
-
-  const runningCount = campaigns.filter(c => c.status === 'running').length;
-  const pausedCount = campaigns.filter(c => c.status === 'paused').length;
-  const completedCount = campaigns.filter(c => c.status === 'completed').length;
+  const grouped = useMemo(() => {
+    const map = new Map<string, AdCampaign[]>();
+    ORDER.forEach(s => map.set(s, []));
+    campaigns.forEach(c => {
+      const key = ORDER.includes(c.status) ? c.status : 'running';
+      map.get(key)!.push(c);
+    });
+    return ORDER.map(s => ({ status: s, items: map.get(s) || [] })).filter(g => g.items.length);
+  }, [campaigns]);
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8" aria-hidden>
-        <span className="block h-6 w-44 animate-pulse rounded bg-foreground/[0.06]" />
-        <span className="mt-2 block h-4 w-72 animate-pulse rounded bg-foreground/[0.05]" />
-        <div className="mt-7 rounded-[10px] border border-border/60">
+      <div className="mx-auto max-w-[1100px] px-5 py-7 lg:px-8">
+        <span className="block h-7 w-48 animate-pulse rounded bg-foreground/[0.06]" />
+        <span className="mt-2 block h-4 w-80 animate-pulse rounded bg-foreground/[0.05]" />
+        <div className="mt-7 rounded-[12px] border border-border/60">
           <SkeletonLedger rows={5} />
         </div>
       </div>
@@ -111,242 +118,160 @@ export default function LoungeAdManagement() {
   }
 
   return (
-    <div className="mx-auto max-w-[1024px] px-5 py-7 lg:px-8">
-      <PageHeader
-        kicker="Marketing"
-        title="Ad management"
-        description="Campaigns the studio runs for you, across every platform."
-      />
+    <ScrollArea className="h-full">
+      <div className="mx-auto max-w-[1100px] px-4 pb-16 pt-6 sm:px-6 lg:px-8">
+        <header>
+          <p className={KICKER}>Advertising</p>
+          <h1 className="mt-1.5 font-display text-[26px] font-semibold leading-none tracking-[-0.02em] sm:text-[32px]">
+            Campaigns
+          </h1>
+          <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
+            What is running for you right now, on which platforms, and what it costs each month.
+          </p>
+        </header>
 
-      {/* Summary strip */}
-      {campaigns.length > 0 && (
-        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-b border-border/60 pb-4">
-          <span className="font-mono text-[11px] tabular-nums text-ink-2">
-            {campaigns.length} {campaigns.length === 1 ? 'campaign' : 'campaigns'}
-          </span>
-          <StatusBadge tone="ok" label={`${runningCount} running`} />
-          <StatusBadge tone="attend" label={`${pausedCount} paused`} />
-          <StatusBadge tone="neutral" label={`${completedCount} completed`} />
-        </div>
-      )}
-
-      {/* Campaigns */}
-      {campaigns.length === 0 ? (
-        <Panel className="mt-5">
-          <EmptyState
-            title="No campaigns yet"
-            body="Your advertising campaigns will appear here once your account manager sets them up."
-          />
-        </Panel>
-      ) : (
-        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {campaigns.map(campaign => {
-            const statusInfo = getStatusInfo(campaign.status);
-            const platformLabel = getPlatformLabel(campaign.platform);
-
-            return (
-              <button
-                key={campaign.id}
-                type="button"
-                onClick={() => setSelectedCampaign(campaign)}
-                className="group flex flex-col overflow-hidden rounded-[10px] border border-border/60 bg-card text-left transition-colors duration-150 hover:border-primary/40 focus-visible:border-primary/60"
-              >
-                {/* Creative preview */}
-                {campaign.creative_url && (
-                  <div className="relative aspect-video overflow-hidden bg-sunken">
-                    {campaign.creative_type === 'video' ? (
-                      <video
-                        src={campaign.creative_url}
-                        className="h-full w-full object-cover"
-                        muted
-                      />
-                    ) : (
-                      <img
-                        src={campaign.creative_url}
-                        alt={campaign.campaign_name}
-                        className="h-full w-full object-cover"
-                      />
-                    )}
-                  </div>
-                )}
-
-                <div className="flex min-w-0 flex-1 flex-col gap-2.5 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      {platformLabel}
-                    </span>
-                    <StatusBadge tone={statusInfo.tone} label={statusLabel(campaign.status)} />
-                  </div>
-
-                  <span className="line-clamp-1 text-[14px] font-medium text-foreground">
-                    {campaign.campaign_name}
-                  </span>
-
-                  {campaign.objective && (
-                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Target className="h-3 w-3" />
-                      {statusLabel(campaign.objective)}
-                    </span>
-                  )}
-
-                  <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                    {campaign.start_date && (
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {format(new Date(campaign.start_date), 'd MMM yyyy')}
-                      </span>
-                    )}
-                    {campaign.monthly_budget && (
-                      <span className="flex items-center gap-1">
-                        <Money whole {...{ value: campaign.monthly_budget }} />
-                        <span>/ month</span>
-                      </span>
-                    )}
-                  </div>
-
-                  {campaign.notes && (
-                    <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                      {campaign.notes}
-                    </p>
-                  )}
-
-                  <div className="mt-auto flex items-center justify-between border-t border-border/60 pt-2.5">
-                    <span className="text-[11px] text-muted-foreground">
-                      Updated <RelativeTime date={campaign.last_updated_at} className="text-[11px]" />
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground transition-colors duration-150 group-hover:text-foreground">
-                      View details
-                      <ArrowUpRight className="h-3 w-3" />
-                    </span>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Campaign detail */}
-      <DetailDrawer
-        open={!!selectedCampaign}
-        onOpenChange={open => {
-          if (!open) setSelectedCampaign(null);
-        }}
-        kicker={selectedCampaign ? getPlatformLabel(selectedCampaign.platform) : undefined}
-        title={selectedCampaign?.campaign_name ?? ''}
-        description={
-          selectedCampaign ? (
-            <StatusBadge
-              tone={getStatusInfo(selectedCampaign.status).tone}
-              label={statusLabel(selectedCampaign.status)}
+        {campaigns.length === 0 ? (
+          <div className="mt-7">
+            <EmptyState
+              title="No campaigns yet"
+              body="When your advertising goes live it appears here, with the creative and the monthly spend."
             />
-          ) : undefined
-        }
-        footer={
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 rounded-lg px-3 text-xs"
-            onClick={() => setSelectedCampaign(null)}
-          >
-            Close
-          </Button>
-        }
+          </div>
+        ) : (
+          <>
+            <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[12px] border border-border/60 bg-border/60 sm:grid-cols-4">
+              {[
+                { label: 'Live now', value: String(figures.live), meta: `${figures.platforms} platform${figures.platforms === 1 ? '' : 's'}` },
+                { label: 'Monthly spend', value: money(figures.monthly), meta: 'Across live campaigns', tone: 'primary' as const },
+                { label: 'Scheduled', value: String(figures.scheduled), meta: 'Waiting to start' },
+                { label: 'All time', value: String(campaigns.length), meta: 'Campaigns run' },
+              ].map(f => (
+                <div key={f.label} className="bg-card px-4 py-3.5">
+                  <p className={KICKER}>{f.label}</p>
+                  <p className={cn(
+                    'mt-1.5 font-display text-[24px] font-semibold leading-none tracking-[-0.02em] tabular-nums',
+                    f.tone === 'primary' && 'text-primary',
+                  )}>
+                    {f.value}
+                  </p>
+                  <p className="mt-1.5 truncate text-[11px] text-muted-foreground">{f.meta}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 space-y-4">
+              {grouped.map(group => {
+                const meta = statusOf(group.status);
+                return (
+                  <Panel key={group.status}>
+                    <PanelHeader
+                      label={(
+                        <span className="flex items-center gap-2">
+                          <span aria-hidden className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} />
+                          {meta.label}
+                        </span>
+                      )}
+                    >
+                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                        {group.items.length}
+                      </span>
+                    </PanelHeader>
+                    <ul className="divide-y divide-border/60">
+                      {group.items.map(c => {
+                        const Creative = CREATIVE_ICON[c.creative_type] || ImageIcon;
+                        return (
+                          <li key={c.id}>
+                            <button
+                              type="button"
+                              onClick={() => setOpen(c)}
+                              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-foreground/[0.025]"
+                            >
+                              <span className="relative h-11 w-16 shrink-0 overflow-hidden rounded-[8px] border border-border/60 bg-sunken">
+                                {c.creative_url ? (
+                                  <img src={c.creative_url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                                ) : (
+                                  <span className="flex h-full w-full items-center justify-center">
+                                    <Creative className="h-3.5 w-3.5 text-muted-foreground/60" />
+                                  </span>
+                                )}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-[13.5px] font-medium">{c.campaign_name}</span>
+                                <span className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+                                  <span className="font-mono uppercase tracking-[0.1em]">
+                                    {PLATFORM_LABEL[c.platform] || c.platform}
+                                  </span>
+                                  {c.objective && <span className="truncate">· {c.objective}</span>}
+                                </span>
+                              </span>
+                              <span className="hidden shrink-0 text-right sm:block">
+                                <span className="block font-mono text-[12.5px] font-medium tabular-nums">
+                                  {money(c.monthly_budget)}
+                                </span>
+                                <span className="block font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+                                  per month
+                                </span>
+                              </span>
+                              <RelativeTime date={c.last_updated_at} className="w-20 shrink-0 text-right" />
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </Panel>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+
+      <BottomSheet
+        open={!!open}
+        onOpenChange={(v) => { if (!v) setOpen(null); }}
+        kicker={open ? (PLATFORM_LABEL[open.platform] || open.platform) : 'Campaign'}
+        title={open?.campaign_name || ''}
+        tall
       >
-        {selectedCampaign && (
+        {open && (
           <div className="space-y-4">
-            {selectedCampaign.creative_url && (
-              <div className="overflow-hidden rounded-[10px] border border-border/60 bg-sunken">
-                {selectedCampaign.creative_type === 'video' ? (
-                  <video
-                    src={selectedCampaign.creative_url}
-                    className="aspect-video w-full object-contain"
-                    controls
-                  />
-                ) : (
-                  <img
-                    src={selectedCampaign.creative_url}
-                    alt={selectedCampaign.campaign_name}
-                    className="aspect-video w-full object-contain"
-                  />
-                )}
+            {open.creative_url && (
+              <div className="overflow-hidden rounded-[12px] border border-border/60 bg-sunken">
+                <img src={open.creative_url} alt="" className="max-h-[300px] w-full object-contain" />
               </div>
             )}
-
-            <dl className="grid gap-px overflow-hidden rounded-[10px] border border-border/60 bg-border/60 sm:grid-cols-2">
-              {selectedCampaign.objective && (
-                <div className="flex items-center gap-3 bg-card p-3">
-                  <Target className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0">
-                    <dt className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
-                      Objective
-                    </dt>
-                    <dd className="text-[13px] font-medium text-foreground">
-                      {statusLabel(selectedCampaign.objective)}
-                    </dd>
-                  </div>
+            <dl>
+              {[
+                ['Status', statusOf(open.status).label],
+                ['Platform', PLATFORM_LABEL[open.platform] || open.platform],
+                ['Objective', open.objective || 'Not set'],
+                ['Monthly budget', money(open.monthly_budget)],
+                ['Started', open.start_date ? format(new Date(open.start_date), 'd MMM yyyy') : 'Not started'],
+                ['Creative', open.creative_type],
+              ].map(([k, v]) => (
+                <div key={k} className="flex items-baseline justify-between border-b border-border/50 py-2 text-xs last:border-b-0">
+                  <dt className="text-muted-foreground">{k}</dt>
+                  <dd className="font-mono text-[11.5px] tabular-nums">{v}</dd>
                 </div>
-              )}
-              {selectedCampaign.start_date && (
-                <div className="flex items-center gap-3 bg-card p-3">
-                  <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0">
-                    <dt className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
-                      Start date
-                    </dt>
-                    <dd className="text-[13px] font-medium tabular-nums text-foreground">
-                      {format(new Date(selectedCampaign.start_date), 'd MMMM yyyy')}
-                    </dd>
-                  </div>
-                </div>
-              )}
-              {selectedCampaign.monthly_budget && (
-                <div className="flex items-center gap-3 bg-card p-3">
-                  <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0">
-                    <dt className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
-                      Monthly budget
-                    </dt>
-                    <dd className="text-[13px] font-medium text-foreground">
-                      <Money whole {...{ value: selectedCampaign.monthly_budget }} />
-                    </dd>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center gap-3 bg-card p-3">
-                {selectedCampaign.creative_type === 'video' ? (
-                  <Video className="h-4 w-4 shrink-0 text-muted-foreground" />
-                ) : (
-                  <Image className="h-4 w-4 shrink-0 text-muted-foreground" />
-                )}
-                <div className="min-w-0">
-                  <dt className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
-                    Creative type
-                  </dt>
-                  <dd className="text-[13px] font-medium text-foreground">
-                    {statusLabel(selectedCampaign.creative_type)}
-                  </dd>
-                </div>
-              </div>
+              ))}
             </dl>
-
-            {selectedCampaign.notes && (
-              <div className="rounded-[10px] border border-border/60 p-4">
-                <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Notes from your team
-                </p>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-                  {selectedCampaign.notes}
-                </p>
+            {open.notes && (
+              <div>
+                <span className={KICKER}>Notes from your team</span>
+                <p className="mt-1.5 whitespace-pre-wrap text-[13px] leading-relaxed">{open.notes}</p>
               </div>
             )}
-
-            <p className="text-xs text-muted-foreground">
-              Last updated {format(new Date(selectedCampaign.last_updated_at), 'd MMMM yyyy, HH:mm')}
-            </p>
+            {open.creative_url && (
+              <a
+                href={open.creative_url} target="_blank" rel="noreferrer noopener"
+                className="flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-border/60 text-[12.5px]"
+              >
+                <ExternalLink className="h-3.5 w-3.5" /> Open the creative
+              </a>
+            )}
           </div>
         )}
-      </DetailDrawer>
-    </div>
+      </BottomSheet>
+    </ScrollArea>
   );
 }

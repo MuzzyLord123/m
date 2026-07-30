@@ -429,26 +429,33 @@ export default function AdminAdManagement() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Client Selector Section */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Users className="w-5 h-5 text-primary" />
-            Select Client
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Search */}
+    <div className="mx-auto max-w-[1200px] space-y-5 px-4 pb-16 pt-6 sm:px-6">
+      <header>
+        <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Advertising
+        </p>
+        <h1 className="mt-1.5 font-display text-[26px] font-semibold leading-none tracking-[-0.02em] sm:text-[30px]">
+          Ad campaigns
+        </h1>
+        <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
+          Pick the client whose advertising you are running, then manage what is live for them.
+        </p>
+      </header>
+
+      {/* Whose advertising */}
+      <div className="overflow-hidden rounded-[12px] border border-border/60 bg-card">
+        <div className="border-b border-border/60 p-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search clients by name, email, company, or ID..."
+              placeholder="Search client, email, company or ID"
               value={clientSearch}
               onChange={(e) => setClientSearch(e.target.value)}
-              className="pl-9"
+              className="h-9 rounded-[10px] pl-8 text-[12.5px]"
             />
           </div>
+        </div>
+        <div className="p-3">
 
           {/* Client List */}
           {loadingClients ? (
@@ -501,8 +508,8 @@ export default function AdminAdManagement() {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Campaign Management Section */}
       {selectedClient ? (
@@ -652,17 +659,13 @@ export default function AdminAdManagement() {
           )}
         </>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="p-4 rounded-full bg-muted mb-4">
-              <Megaphone className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Select a Client Above</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              Choose a client from the list above to view and manage their ad campaigns.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center rounded-[12px] border border-dashed border-border/70 px-6 py-14 text-center">
+          <Megaphone className="h-5 w-5 text-muted-foreground/60" />
+          <p className="mt-3 text-[14px] font-medium">Pick a client to begin</p>
+          <p className="mt-1.5 max-w-sm text-[12.5px] leading-relaxed text-muted-foreground">
+            Their live campaigns, creatives and monthly spend all sit behind their name.
+          </p>
+        </div>
       )}
 
       {/* Add/Edit Dialog */}

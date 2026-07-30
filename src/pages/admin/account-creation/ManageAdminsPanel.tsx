@@ -314,6 +314,36 @@ function AdminControlSheet({ admin, onClose, onRevoke, busy }: {
   const [membership, setMembership] = useState<Set<string>>(new Set());
   const [calls, setCalls] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [groupOpen, setGroupOpen] = useState(false);
+  const [groupName, setGroupName] = useState('');
+  const [groupDesc, setGroupDesc] = useState('');
+  const [creatingGroup, setCreatingGroup] = useState(false);
+
+  // Owners raise a comms group here and the admin being edited is put
+  // into it straight away, which is the reason for making it.
+  async function createGroup() {
+    const name = groupName.trim();
+    if (!name) return;
+    setCreatingGroup(true);
+    const { data, error } = await supabase.rpc('owner_create_comm_group' as any, {
+      _name: name,
+      _description: groupDesc.trim() || null,
+      _member_ids: [admin.user_id],
+    } as any);
+    setCreatingGroup(false);
+    if (error) {
+      toast({ title: 'Group not created', description: error.message, variant: 'destructive' });
+      return;
+    }
+    const id = data as unknown as string;
+    setChannels(prev => [...prev, { id, name, slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-') }]
+      .sort((a, b) => a.name.localeCompare(b.name)));
+    setMembership(prev => new Set([...prev, id]));
+    setGroupOpen(false);
+    setGroupName('');
+    setGroupDesc('');
+    toast({ title: 'Group created', description: `${admin.full_name || admin.email} is in it already.` });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -451,25 +481,39 @@ function AdminControlSheet({ admin, onClose, onRevoke, busy }: {
               </div>
             </div>
           ) : tab === 'comms' ? (
-            channels.length === 0 ? (
-              <EmptyState
-                compact
-                title="No comms groups yet"
-                body="Create a group in Team Comms and you can place admins into it from here."
-              />
-            ) : (
-              <div className="space-y-1">
-                {channels.map(ch => (
-                  <label key={ch.id} className="flex min-h-[44px] items-center justify-between gap-3 rounded-lg border border-border/60 px-3.5">
-                    <span className="flex min-w-0 items-center gap-2 text-[13px]">
-                      <Radio className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                      <span className="truncate">{ch.name}</span>
-                    </span>
-                    <Switch checked={membership.has(ch.id)} onCheckedChange={() => toggleChannel(ch.id)} />
-                  </label>
-                ))}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[12px] leading-relaxed text-muted-foreground">
+                  Which groups this admin can talk in.
+                </p>
+                <Button
+                  variant="outline" size="sm"
+                  className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
+                  onClick={() => setGroupOpen(true)}
+                >
+                  <Plus className="h-3.5 w-3.5" /> New group
+                </Button>
               </div>
-            )
+              {channels.length === 0 ? (
+                <EmptyState
+                  compact
+                  title="No comms groups yet"
+                  body="Create the first group and this admin joins it as you make it."
+                />
+              ) : (
+                <div className="space-y-1">
+                  {channels.map(ch => (
+                    <label key={ch.id} className="flex min-h-[44px] items-center justify-between gap-3 rounded-lg border border-border/60 px-3.5">
+                      <span className="flex min-w-0 items-center gap-2 text-[13px]">
+                        <Radio className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        <span className="truncate">{ch.name}</span>
+                      </span>
+                      <Switch checked={membership.has(ch.id)} onCheckedChange={() => toggleChannel(ch.id)} />
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
@@ -515,6 +559,56 @@ function AdminControlSheet({ admin, onClose, onRevoke, busy }: {
           </p>
         </div>
       </DialogContent>
+
+      {/* Raising a comms group, with this admin placed into it. */}
+      <Dialog open={groupOpen} onOpenChange={setGroupOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-[15px]">New comms group</DialogTitle>
+            <DialogDescription className="text-[12.5px]">
+              {admin.full_name || admin.email} joins it as it is made. Add anyone else from their own panel.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                Name
+              </label>
+              <Input
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+                placeholder="Sales floor"
+                className="mt-1.5 h-10 text-[13px]"
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                What it is for (optional)
+              </label>
+              <Input
+                value={groupDesc}
+                onChange={(e) => setGroupDesc(e.target.value)}
+                placeholder="Daily calling chatter"
+                className="mt-1.5 h-10 text-[13px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="h-10 rounded-[10px]" onClick={() => setGroupOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="h-10 gap-2 rounded-[10px]"
+              disabled={creatingGroup || !groupName.trim()}
+              onClick={createGroup}
+            >
+              {creatingGroup ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
