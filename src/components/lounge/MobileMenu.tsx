@@ -24,7 +24,7 @@ const SECTIONS: { label: string; ids: string[] }[] = [
   { label: 'Studio', ids: ['website', 'website-designer', 'products', 'apps', 'crm', 'workflows', 'office'] },
   { label: 'Growth', ids: ['content', 'seo', 'ads', 'social', 'calendar', 'bookings'] },
   { label: 'Files', ids: ['assets', 'uploads', 'inventory'] },
-  { label: 'Business', ids: ['team', 'billing', 'mail', 'messages', 'team-comms', 'tickets', 'notifications'] },
+  { label: 'Business', ids: ['team', 'billing', 'invoices', 'mail', 'messages', 'team-comms', 'tickets', 'notifications'] },
   { label: 'Platform', ids: ['white-label', 'automations-pro', 'planner', 'settings'] },
 ];
 

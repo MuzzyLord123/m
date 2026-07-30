@@ -18,9 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { NotesPanel } from './NotesPanel';
 import { AvatarID, SkeletonLedger, statusTone, statusLabel } from '@/components/platform';
 import { RecordHeader, RecordTimeline, TagChips, type TimelineEvent } from '@/components/platform/crm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { useUserRole } from '@/hooks/useUserRole';
+import { InvoiceStudio } from '@/components/invoicing/InvoiceStudio';
 
 interface Props {
   entityType: EntityType;
@@ -38,7 +36,6 @@ interface Props {
 
 export function EntityDetail({ entityType, entity, stages, list, admins, related, onOpenRelated, onNavigate, onClose, onChanged }: Props) {
   const { toast } = useToast();
-  const { isAdmin } = useUserRole();
   const [timeline, setTimeline] = useState<any[]>([]);
   const [financials, setFinancials] = useState<{ links: any[]; ltv: any } | null>(null);
   const [finLoading, setFinLoading] = useState(true);
@@ -289,16 +286,14 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
           </TabsContent>
 
           <TabsContent value="financials" className="p-4 sm:p-5 mt-3 space-y-4">
-            {isAdmin && (
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[11.5px] leading-relaxed text-muted-foreground">
-                  Won deals raise a draft invoice automatically. Post drafts from Quooro Office accounting.
-                </p>
-                <Button size="sm" className="h-8 shrink-0 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setInvoiceOpen(true)}>
-                  <FileText className="h-3.5 w-3.5" /> Generate invoice
-                </Button>
-              </div>
-            )}
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+                Won deals raise a draft invoice automatically. Build and send any invoice from here.
+              </p>
+              <Button size="sm" className="h-8 shrink-0 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setInvoiceOpen(true)}>
+                <FileText className="h-3.5 w-3.5" /> Generate invoice
+              </Button>
+            </div>
             {finLoading ? (
               <SkeletonLedger rows={3} />
             ) : (
@@ -334,21 +329,24 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
         </ScrollArea>
       </Tabs>
 
-      {isAdmin && (
-        <GenerateInvoiceDialog
-          open={invoiceOpen}
-          onOpenChange={setInvoiceOpen}
-          entityType={entityType}
-          entity={entity}
-          title={title || 'Untitled'}
-          onGenerated={async () => {
-            setFinLoading(true);
-            const f = await fetchFinancials(entityType, entity.id);
-            setFinancials(f);
-            setFinLoading(false);
-          }}
-        />
-      )}
+      <InvoiceStudio
+        open={invoiceOpen}
+        onOpenChange={setInvoiceOpen}
+        entityType={entityType}
+        entityId={entity.id}
+        billToName={title || 'Untitled'}
+        billToEmail={entity.email || null}
+        currency={entity.currency || 'GBP'}
+        defaultLines={entityType === 'opportunity' && entity.value != null
+          ? [{ description: entity.title || 'Services', quantity: 1, unit_price: Number(entity.value), tax_rate: 0.2 }]
+          : undefined}
+        onGenerated={async () => {
+          setFinLoading(true);
+          const f = await fetchFinancials(entityType, entity.id);
+          setFinancials(f);
+          setFinLoading(false);
+        }}
+      />
 
       <AlertDialog open={!!callTarget} onOpenChange={(open) => !open && setCallTarget(null)}>
         <AlertDialogContent>
@@ -388,149 +386,6 @@ function Field({ icon: Icon, label, value, href, external, onClick }: any) {
   if (onClick) return <button type="button" onClick={onClick} className="w-full text-left block hover:bg-accent/40 -mx-1.5 px-1.5 py-1 rounded transition-colors">{content}</button>;
   if (href) return <a href={href} target={external ? '_blank' : undefined} rel="noreferrer" className="block hover:bg-accent/40 -mx-1.5 px-1.5 py-1 rounded transition-colors">{content}</a>;
   return <div className="px-1.5 py-1">{content}</div>;
-}
-
-/**
- * Generate an AR invoice from what the CRM already knows about this
- * relationship: the deal's value and currency, the record's name, email
- * and phone. Calls the crm_generate_invoice rpc, which finds or creates
- * the accounting customer, writes the draft (or posts it) and links it
- * back to this record.
- */
-function GenerateInvoiceDialog({ open, onOpenChange, entityType, entity, title, onGenerated }: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  entityType: EntityType;
-  entity: any;
-  title: string;
-  onGenerated: () => void;
-}) {
-  const { toast } = useToast();
-  const prefill = entityType === 'opportunity' && entity.value != null ? String(entity.value) : '';
-  const [amount, setAmount] = useState(prefill);
-  const [taxRate, setTaxRate] = useState('0.20');
-  const [description, setDescription] = useState(entityType === 'opportunity' ? (entity.title || '') : '');
-  const [dueDate, setDueDate] = useState('');
-  const [saving, setSaving] = useState<'draft' | 'post' | null>(null);
-
-  const net = Number(amount) || 0;
-  const vat = Math.round(net * Number(taxRate) * 100) / 100;
-  const total = Math.round((net + vat) * 100) / 100;
-  const fmt = (n: number) => `${entity.currency || 'GBP'} ${n.toLocaleString('en-GB', { minimumFractionDigits: 2 })}`;
-
-  async function generate(post: boolean) {
-    if (net <= 0) {
-      toast({ title: 'Enter an amount', description: 'The invoice needs a value greater than zero.', variant: 'destructive' });
-      return;
-    }
-    setSaving(post ? 'post' : 'draft');
-    const { data, error } = await supabase.rpc('crm_generate_invoice' as any, {
-      _entity_type: entityType,
-      _entity_id: entity.id,
-      _amount: net,
-      _tax_rate: Number(taxRate),
-      _description: description.trim() || null,
-      _due_date: dueDate || null,
-      _post: post,
-    } as any);
-    setSaving(null);
-    if (error) {
-      toast({ title: 'Invoice not created', description: error.message, variant: 'destructive' });
-      return;
-    }
-    const row = (data as any[])?.[0];
-    toast({
-      title: post ? 'Invoice created and posted' : 'Draft invoice created',
-      description: row ? `${row.invoice_number} for ${fmt(Number(row.total))}.` : undefined,
-    });
-    onOpenChange(false);
-    onGenerated();
-  }
-
-  const label = 'font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]';
-
-  return (
-    <Dialog open={open} onOpenChange={(v) => { if (!saving) onOpenChange(v); }}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Generate invoice</DialogTitle>
-        </DialogHeader>
-        <p className="text-[12.5px] leading-relaxed text-muted-foreground">
-          Billed to <span className="font-medium text-foreground">{title}</span> using the details on this record.
-          The invoice appears here and in Quooro Office accounting.
-        </p>
-        <div className="space-y-3.5 pt-1">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={label}>Amount (net)</label>
-              <Input
-                inputMode="decimal"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))}
-                placeholder="0.00"
-                className="mt-1.5 h-10 font-mono tabular-nums"
-              />
-            </div>
-            <div>
-              <label className={label}>VAT</label>
-              <Select value={taxRate} onValueChange={setTaxRate}>
-                <SelectTrigger className="mt-1.5 h-10"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0.20">20% standard</SelectItem>
-                  <SelectItem value="0.05">5% reduced</SelectItem>
-                  <SelectItem value="0">0% zero rated</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div>
-            <label className={label}>Line description</label>
-            <Input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What is being billed"
-              className="mt-1.5 h-10"
-            />
-          </div>
-          <div>
-            <label className={label}>Due date</label>
-            <Input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="mt-1.5 h-10"
-            />
-            <p className="mt-1 text-[11px] text-muted-foreground">Leave empty for 14 days from today.</p>
-          </div>
-          <div className="rounded-[10px] border border-border/60 px-3.5 py-2.5">
-            <div className="flex items-baseline justify-between text-xs">
-              <span className="text-muted-foreground">Net</span>
-              <span className="font-mono tabular-nums">{fmt(net)}</span>
-            </div>
-            <div className="mt-1 flex items-baseline justify-between text-xs">
-              <span className="text-muted-foreground">VAT</span>
-              <span className="font-mono tabular-nums">{fmt(vat)}</span>
-            </div>
-            <div className="mt-1.5 flex items-baseline justify-between border-t border-border/60 pt-1.5 text-[13px] font-medium">
-              <span>Total</span>
-              <span className="font-mono tabular-nums">{fmt(total)}</span>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end">
-            <Button variant="outline" className="h-10 rounded-lg text-xs sm:h-9" disabled={!!saving} onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button variant="outline" className="h-10 rounded-lg text-xs sm:h-9" disabled={!!saving} onClick={() => generate(false)}>
-              {saving === 'draft' ? 'Creating draft' : 'Save as draft'}
-            </Button>
-            <Button className="h-10 rounded-lg text-xs sm:h-9" disabled={!!saving} onClick={() => generate(true)}>
-              {saving === 'post' ? 'Posting' : 'Create and post'}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 function StandingCell({ label, currency, amount, tone }: { label: string; currency?: string | null; amount: any; tone?: 'ok' | 'attend' }) {

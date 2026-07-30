@@ -98,6 +98,7 @@ const LoungeSEOChecker = lazy(() => import("./pages/lounge/LoungeSEOChecker"));
 const LoungeAdManagement = lazy(() => import("./pages/lounge/LoungeAdManagement"));
 const LoungeSocialMedia = lazy(() => import("./pages/lounge/LoungeSocialMedia"));
 const LoungeContentRequests = lazy(() => import("./pages/lounge/LoungeContentRequests"));
+const LoungeInvoices = lazy(() => import("./pages/lounge/LoungeInvoices"));
 const LoungeMarketingCalendar = lazy(() => import("./pages/lounge/LoungeMarketingCalendar"));
 const LoungeWebsiteManagement = lazy(() => import("./pages/lounge/LoungeWebsiteManagement"));
 const LoungeWebsiteDesigner = lazy(() => import("./pages/lounge/LoungeWebsiteDesigner"));
@@ -375,6 +376,7 @@ function AnimatedRoutes() {
             <Route path="ads" element={<LoungeAdManagement />} />
             <Route path="social" element={<LoungeSocialMedia />} />
             <Route path="content" element={<LoungeContentRequests />} />
+            <Route path="invoices" element={<LoungeInvoices />} />
             <Route path="calendar" element={<LoungeCalendar />} />
             <Route path="google-calendar-callback" element={<GoogleCalendarCallback />} />
             <Route path="marketing-calendar" element={<LoungeMarketingCalendar />} />

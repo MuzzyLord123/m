@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import { preloadRoute } from "@/lib/routePreloader";
-import { ChevronDown, LogIn, Phone, Bot, HelpCircle, Calendar, Layers, TrendingUp, MessageSquare, BarChart3, Users, Settings, FileText, Eye, Palette, Building2, Shield, Globe, Database, Rocket, Target, Sparkles, Package, Monitor, ArrowRight, ShoppingBag } from "lucide-react";
+import { ChevronDown, LogIn, Phone, Bot, HelpCircle, Calendar, Layers, TrendingUp, MessageSquare, BarChart3, Users, Settings, FileText, Eye, Palette, Building2, Shield, Globe, Database, Rocket, Target, Sparkles, Package, Monitor, ArrowRight, ShoppingBag, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
@@ -169,87 +169,107 @@ function BurgerIcon({ isOpen }: { isOpen: boolean }) {
   );
 }
 
-// Mobile Menu Dropdown Component
-function MobileDropdown({ 
-  title, 
-  items, 
-  isOpen, 
+// ── The website menu, phone and tablet ─────────────────────────────────
+// Built for Quooro rather than inherited: editorial primary links, mono
+// numbered sections over the same megaMenus data, a call strip and CTA
+// block anchored at the end. Sections expand in place; everything else
+// is one continuous scroll.
+
+function MenuSection({
+  index,
+  title,
+  items,
+  isOpen,
   onToggle,
   onItemClick,
-  index,
-}: { 
+}: {
+  index: number;
   title: string;
   items: any[];
   isOpen: boolean;
   onToggle: () => void;
   onItemClick: () => void;
-  index: number;
 }) {
   return (
-    <motion.div 
-      className="border-b border-border/10 last:border-b-0"
-      initial={{ opacity: 0, y: 8 }}
+    <motion.div
+      className="border-b border-border/40"
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        duration: 0.4, 
-        ease: [0.25, 0.1, 0.25, 1],
-        delay: 0.06 * index + 0.15,
-      }}
+      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 + index * 0.05 }}
     >
-      <motion.button
+      <button
         type="button"
         onClick={onToggle}
-        whileTap={{ scale: 0.98 }}
-        className="flex items-center justify-between w-full py-4 text-left"
+        aria-expanded={isOpen}
+        className="flex min-h-[56px] w-full items-center gap-4 py-3 text-left"
       >
-        <span className="text-lg font-medium text-foreground">{title}</span>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <ChevronDown className="w-5 h-5 text-muted-foreground" />
-        </motion.div>
-      </motion.button>
-      
+        <span className={`font-mono text-[10px] tabular-nums transition-colors ${isOpen ? 'text-primary' : 'text-muted-foreground/60'}`}>
+          {String(index + 2).padStart(2, '0')}
+        </span>
+        <span className="flex-1 font-display text-[22px] font-semibold tracking-[-0.02em] text-foreground">
+          {title}
+        </span>
+        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground/60">
+          {items.length}
+        </span>
+        <motion.span animate={{ rotate: isOpen ? 45 : 0 }} transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}>
+          <Plus className="h-4 w-4 text-muted-foreground" />
+        </motion.span>
+      </button>
+
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: "auto" }}
-            exit={{ height: 0 }}
-            transition={{ 
-              type: "spring",
-              stiffness: 400,
-              damping: 40,
-              mass: 0.8,
-            }}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 0.8 }}
             className="overflow-hidden"
           >
-            <motion.div 
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ 
-                duration: 0.2,
-                ease: [0.25, 0.1, 0.25, 1],
-                delay: 0.05,
-              }}
-              className="pb-4 pl-4 space-y-1"
-            >
-              {items.map((item: any, i: number) => (
-                <div key={item.name}>
+            <div className="grid gap-x-6 pb-4 pl-8 sm:grid-cols-2">
+              {items.map((item: any) => {
+                const isTel = typeof item.href === 'string' && item.href.startsWith('tel:');
+                const inner = (
+                  <>
+                    <span className="block text-[14px] font-medium leading-tight text-foreground">{item.name}</span>
+                    {item.description && (
+                      <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">{item.description}</span>
+                    )}
+                  </>
+                );
+                const cls = 'block min-h-[44px] border-l border-border/40 py-2.5 pl-4 transition-colors hover:border-primary/60 active:border-primary';
+                if (item.action === 'openChat') {
+                  return (
+                    <button
+                      key={item.name}
+                      type="button"
+                      onClick={() => { onItemClick(); window.dispatchEvent(new CustomEvent('openChatbot')); }}
+                      className={`${cls} text-left`}
+                    >
+                      {inner}
+                    </button>
+                  );
+                }
+                if (isTel) {
+                  return (
+                    <a key={item.name} href={item.href} onClick={onItemClick} className={cls}>
+                      {inner}
+                    </a>
+                  );
+                }
+                return (
                   <Link
+                    key={item.name}
                     to={item.href}
                     onClick={onItemClick}
                     onTouchStart={() => preloadRoute(item.href)}
-                    className="flex items-center gap-3 py-3 text-muted-foreground hover:text-foreground transition-colors active:scale-[0.98] active:translate-x-1"
+                    className={cls}
                   >
-                    {item.icon && <item.icon className="w-4 h-4 text-primary" />}
-                    <span>{item.name}</span>
+                    {inner}
                   </Link>
-                </div>
-              ))}
-            </motion.div>
+                );
+              })}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -257,165 +277,146 @@ function MobileDropdown({
   );
 }
 
-// Mobile Menu Component
-function MobileMenu({ 
-  isOpen, 
-  setIsOpen, 
+function MobileMenu({
+  isOpen,
+  setIsOpen,
   user,
   navHeight,
   dashboardPath,
-}: { 
+}: {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   user: any;
   navHeight: number;
   dashboardPath: string;
 }) {
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [openSection, setOpenSection] = useState<string | null>(null);
 
-  const toggleDropdown = (key: string) => {
-    setOpenDropdown(openDropdown === key ? null : key);
-  };
+  const close = () => setIsOpen(false);
+  const toggle = (key: string) => setOpenSection(openSection === key ? null : key);
 
-  const handleItemClick = () => {
-    setIsOpen(false);
-  };
-
-  // Flatten mega menu items for mobile
-  const developmentItems = megaMenus.development.columns.flatMap(col => col.items);
-  const marketingItems = megaMenus.marketing.columns.flatMap(col => col.items);
-  const companyItems = megaMenus.company.columns.flatMap(col => col.items);
+  const sections = [
+    { key: 'development', title: 'Development', items: megaMenus.development.columns.flatMap(c => c.items) },
+    { key: 'marketing', title: 'Marketing', items: megaMenus.marketing.columns.flatMap(c => c.items) },
+    { key: 'company', title: 'Company', items: megaMenus.company.columns.flatMap(c => c.items) },
+    { key: 'support', title: 'Support', items: supportItems },
+  ];
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Backdrop overlay with blur */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-            className="fixed inset-0 z-[39] bg-black/40 xl:hidden"
-            style={{ top: navHeight }}
-            onClick={() => setIsOpen(false)}
-          />
-          
-          {/* Menu panel - slides down from navbar */}
-          <motion.div
-            initial={{ clipPath: "inset(0 0 100% 0)" }}
-            animate={{ clipPath: "inset(0 0 0% 0)" }}
-            exit={{ clipPath: "inset(0 0 100% 0)" }}
-            transition={{ 
-              duration: 0.5, 
-              ease: [0.32, 0.72, 0, 1],
-            }}
-            className="fixed left-0 right-0 bottom-0 z-40 xl:hidden flex flex-col"
-            style={{ top: navHeight }}
+        <motion.div
+          initial={{ clipPath: 'inset(0 0 100% 0)' }}
+          animate={{ clipPath: 'inset(0 0 0% 0)' }}
+          exit={{ clipPath: 'inset(0 0 100% 0)' }}
+          transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
+          className="fixed left-0 right-0 bottom-0 z-40 flex flex-col xl:hidden"
+          style={{ top: navHeight }}
+        >
+          <div className="absolute inset-0 bg-background" />
+
+          <div
+            className="mobile-menu-scroll relative flex-1 px-6 pb-10 pt-5 sm:px-10"
+            style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
           >
-            <div className="absolute inset-0 bg-background" />
-            
+            {/* Signature line + kicker */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="mobile-menu-scroll relative flex-1 px-6 py-8"
-              style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+              transition={{ duration: 0.3, delay: 0.05 }}
             >
+              <div aria-hidden className="h-px bg-gradient-to-r from-primary/60 via-border to-transparent" />
+              <p className="flex items-baseline justify-between pt-3">
+                <span className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Menu</span>
+                <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground/50">Quooro</span>
+              </p>
+            </motion.div>
 
-              {/* Home link */}
-              <motion.div 
-                className="border-b border-border/10"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1], delay: 0.05 }}
-              >
-                <Link to="/" onClick={handleItemClick} className="flex items-center justify-between w-full py-4">
-                  <span className="text-lg font-medium text-foreground">Home</span>
-                </Link>
-              </motion.div>
-              
-              {/* View Packages link */}
-              <motion.div 
-                className="border-b border-border/10"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
-              >
-                <Link to="/packages" onClick={handleItemClick} className="flex items-center justify-between w-full py-4">
-                  <span className="text-lg font-medium text-foreground">View Packages</span>
-                </Link>
-              </motion.div>
+            {/* Primary destinations */}
+            <div className="pt-2">
+              {[
+                { label: 'Home', href: '/', accent: false },
+                { label: 'Packages', href: '/packages', accent: false },
+                { label: 'Get started', href: '/get-started', accent: true },
+              ].map((l, i) => (
+                <motion.div
+                  key={l.href}
+                  className="border-b border-border/40"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1], delay: 0.06 + i * 0.04 }}
+                >
+                  <Link
+                    to={l.href}
+                    onClick={close}
+                    onTouchStart={() => preloadRoute(l.href)}
+                    className="group flex min-h-[56px] items-center gap-4 py-3"
+                  >
+                    <span className="font-mono text-[10px] tabular-nums text-muted-foreground/60">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className={`flex-1 font-display text-[22px] font-semibold tracking-[-0.02em] ${l.accent ? 'text-primary' : 'text-foreground'}`}>
+                      {l.label}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground/40 transition-transform group-active:translate-x-1" />
+                  </Link>
+                </motion.div>
+              ))}
 
-              <div className="space-y-0">
-                <MobileDropdown
-                  title="Development"
-                  items={developmentItems}
-                  isOpen={openDropdown === "development"}
-                  onToggle={() => toggleDropdown("development")}
-                  onItemClick={handleItemClick}
-                  index={0}
+              {sections.map((s, i) => (
+                <MenuSection
+                  key={s.key}
+                  index={i + 2}
+                  title={s.title}
+                  items={s.items}
+                  isOpen={openSection === s.key}
+                  onToggle={() => toggle(s.key)}
+                  onItemClick={close}
                 />
-                
-                <MobileDropdown
-                  title="Marketing"
-                  items={marketingItems}
-                  isOpen={openDropdown === "marketing"}
-                  onToggle={() => toggleDropdown("marketing")}
-                  onItemClick={handleItemClick}
-                  index={1}
-                />
-                
-                <MobileDropdown
-                  title="Company"
-                  items={companyItems}
-                  isOpen={openDropdown === "company"}
-                  onToggle={() => toggleDropdown("company")}
-                  onItemClick={handleItemClick}
-                  index={2}
-                />
-                
-                <MobileDropdown
-                  title="Support"
-                  items={supportItems}
-                  isOpen={openDropdown === "support"}
-                  onToggle={() => toggleDropdown("support")}
-                  onItemClick={handleItemClick}
-                  index={3}
-                />
-              </div>
+              ))}
+            </div>
 
-              <motion.div 
-                className="mt-8 pt-8 border-t border-border/20 space-y-4"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1], delay: 0.35 }}
-              >
-                <Link to="/get-started" onClick={handleItemClick}>
-                  <Button className="w-full justify-center rounded-xl h-12 bg-primary text-primary-foreground">
-                    Get Started
+            {/* Account + contact */}
+            <motion.div
+              className="mt-8 space-y-3"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1], delay: 0.4 }}
+            >
+              <Link to="/get-started" onClick={close} className="block">
+                <Button className="h-12 w-full justify-center rounded-[12px] bg-primary text-primary-foreground">
+                  Start your project
+                </Button>
+              </Link>
+              {user ? (
+                <Link to={dashboardPath} onClick={close} className="block">
+                  <Button variant="outline" className="h-12 w-full justify-center rounded-[12px]">
+                    Open your dashboard
                   </Button>
                 </Link>
-                
-                {user ? (
-                  <Link to={dashboardPath} onClick={handleItemClick}>
-                    <Button variant="ghost" className="w-full justify-center rounded-xl h-12">
-                      Dashboard
-                    </Button>
-                  </Link>
-                ) : (
-                  <Link to="/sign-in" onClick={handleItemClick}>
-                    <Button variant="ghost" className="w-full justify-center rounded-xl h-12">
-                      <LogIn className="w-4 h-4 mr-2" />
-                      Sign In
-                    </Button>
-                  </Link>
-                )}
-              </motion.div>
+              ) : (
+                <Link to="/sign-in" onClick={close} className="block">
+                  <Button variant="outline" className="h-12 w-full justify-center rounded-[12px]">
+                    <LogIn className="mr-2 h-4 w-4" /> Sign in
+                  </Button>
+                </Link>
+              )}
+
+              <a
+                href="tel:07739346789"
+                onClick={close}
+                className="flex min-h-[44px] items-center justify-between rounded-[12px] border border-border/60 px-4 text-[12.5px] text-foreground/80 transition-colors hover:text-foreground"
+              >
+                <span className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> 07739 346789</span>
+                <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">5pm to 9pm</span>
+              </a>
+
+              <p className="pt-3 text-center font-mono text-[8.5px] uppercase tracking-[0.16em] text-muted-foreground/60">
+                Quooro · Built in Wales
+              </p>
             </motion.div>
-          </motion.div>
-        </>
+          </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
@@ -560,9 +561,8 @@ function FullWidthMegaMenu({
                         initial="hidden"
                         animate="visible"
                       >
-                        <h3
-                          className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.1em] mb-5"
-                        >
+                        <h3 className="mb-5 flex items-baseline gap-2 font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                          <span className="tabular-nums text-primary/70">{String(colIdx + 1).padStart(2, '0')}</span>
                           {column.title}
                         </h3>
                         <div className="space-y-1" role="group" aria-label={column.title}>
@@ -644,8 +644,8 @@ function FullWidthMegaMenu({
 
                 {/* Quick links sidebar */}
                 <div className="w-52 pl-12 lg:pl-16 border-l border-border/30">
-                  <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.1em] mb-5">
-                    Quick Links
+                  <h3 className="mb-5 font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                    Quick links
                   </h3>
                   <div className="space-y-3" role="group" aria-label="Quick Links">
                     {menu.quickLinks.map((link, i) => {
