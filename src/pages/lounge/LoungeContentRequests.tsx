@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FileText, Plus, Upload, X, Loader2, FileImage, Link as LinkIcon, ExternalLink, Calendar as CalendarIcon } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { FileText, Plus, Upload, X, Loader2, FileImage, Link as LinkIcon, ExternalLink, Calendar as CalendarIcon, Check, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -51,6 +51,24 @@ const STATUS_TABS = [
   { key: 'delivered', label: 'Delivered' },
 ] as const;
 
+/**
+ * Bulk upload queue. Every file is tracked individually - queued,
+ * uploading, done or failed - and a failed file is NEVER dropped
+ * silently: the request will not send while any file is unresolved.
+ * (The old uploader skipped failures with `continue`, which is how a
+ * 43-photo drop could arrive with photos missing.)
+ */
+interface QueuedFile {
+  id: string;
+  file: File;
+  preview: string | null;
+  status: 'queued' | 'uploading' | 'done' | 'failed';
+  url?: string;
+  error?: string;
+}
+
+const UPLOAD_CONCURRENCY = 4;
+
 export default function LoungeContentRequests() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<ContentRequest[]>([]);
@@ -58,7 +76,10 @@ export default function LoungeContentRequests() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [queue, setQueue] = useState<QueuedFile[]>([]);
+  const [dragOver, setDragOver] = useState(false);
+  const queueRef = useRef<QueuedFile[]>([]);
+  queueRef.current = queue;
   const [tab, setTab] = useState<(typeof STATUS_TABS)[number]['key']>('all');
   const [formData, setFormData] = useState({
     request_type: '' as string,
@@ -93,15 +114,38 @@ export default function LoungeContentRequests() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setSelectedFiles(prev => [...prev, ...newFiles]);
-    }
+  const addFiles = useCallback((files: FileList | File[]) => {
+    const arr = Array.from(files);
+    if (!arr.length) return;
+    setQueue(prev => {
+      const seen = new Set(prev.map(f => `${f.file.name}:${f.file.size}`));
+      const next = arr
+        .filter(f => !seen.has(`${f.name}:${f.size}`))
+        .map((file, i) => ({
+          id: `f-${Date.now().toString(36)}-${i}-${Math.random().toString(36).slice(2, 6)}`,
+          file,
+          preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+          status: 'queued' as const,
+        }));
+      return [...prev, ...next];
+    });
+  }, []);
+
+  const removeFile = (id: string) => {
+    setQueue(prev => {
+      const target = prev.find(f => f.id === id);
+      if (target?.preview) URL.revokeObjectURL(target.preview);
+      return prev.filter(f => f.id !== id);
+    });
   };
 
-  const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  const resetQueue = useCallback(() => {
+    queueRef.current.forEach(f => { if (f.preview) URL.revokeObjectURL(f.preview); });
+    setQueue([]);
+  }, []);
+
+  const patchFile = (id: string, patch: Partial<QueuedFile>) => {
+    setQueue(prev => prev.map(f => (f.id === id ? { ...f, ...patch } : f)));
   };
 
   const addUrlField = () => {
@@ -125,30 +169,37 @@ export default function LoungeContentRequests() {
     }));
   };
 
-  const uploadFiles = async (): Promise<string[]> => {
-    const uploadedUrls: string[] = [];
-
-    for (const file of selectedFiles) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('content-requests')
-        .upload(fileName, file);
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        continue;
+  /**
+   * Upload every unresolved file with a small worker pool. Each file is
+   * marked done or failed individually; the same storage path and call
+   * shape as before, just never a silent skip.
+   */
+  const uploadPending = async (): Promise<{ done: number; failed: number }> => {
+    const items = queueRef.current.filter(f => f.status === 'queued' || f.status === 'failed');
+    let cursor = 0;
+    let failed = 0;
+    const workers = Array.from({ length: Math.min(UPLOAD_CONCURRENCY, items.length) }, async () => {
+      while (cursor < items.length) {
+        const item = items[cursor++];
+        patchFile(item.id, { status: 'uploading', error: undefined });
+        const fileExt = item.file.name.split('.').pop();
+        const fileName = `${user?.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('content-requests')
+          .upload(fileName, item.file);
+        if (uploadError) {
+          failed += 1;
+          patchFile(item.id, { status: 'failed', error: uploadError.message });
+        } else {
+          const { data: { publicUrl } } = supabase.storage
+            .from('content-requests')
+            .getPublicUrl(fileName);
+          patchFile(item.id, { status: 'done', url: publicUrl });
+        }
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('content-requests')
-        .getPublicUrl(fileName);
-
-      uploadedUrls.push(publicUrl);
-    }
-
-    return uploadedUrls;
+    });
+    await Promise.all(workers);
+    return { done: items.length - failed, failed };
   };
 
   const handleSubmit = async () => {
@@ -159,14 +210,21 @@ export default function LoungeContentRequests() {
 
     setSubmitting(true);
     try {
-      let fileUrls: string[] = [];
-
-      if (selectedFiles.length > 0) {
+      const pendingCount = queue.filter(f => f.status === 'queued' || f.status === 'failed').length;
+      if (pendingCount > 0) {
         setUploading(true);
-        fileUrls = await uploadFiles();
+        const { failed } = await uploadPending();
         setUploading(false);
+        if (failed > 0) {
+          // Nothing is lost silently: the request holds until every file
+          // is either uploaded or removed by hand.
+          toast.error(`${failed} of ${pendingCount} files did not upload. Retry the failed files or remove them, then send again.`);
+          setSubmitting(false);
+          return;
+        }
       }
 
+      const fileUrls = queueRef.current.filter(f => f.status === 'done' && f.url).map(f => f.url!) ;
       const validUrls = formData.reference_urls.filter(url => url.trim() !== '');
 
       const { error } = await supabase.from('content_requests').insert({
@@ -182,10 +240,14 @@ export default function LoungeContentRequests() {
 
       if (error) throw error;
 
-      toast.success('Content request sent to the studio');
+      toast.success(
+        fileUrls.length > 0
+          ? `Content request sent with all ${fileUrls.length} ${fileUrls.length === 1 ? 'file' : 'files'} attached`
+          : 'Content request sent to the studio',
+      );
       setDialogOpen(false);
       setFormData({ request_type: '', title: '', description: '', reference_urls: [''], scheduled_date: null, priority: 'normal' });
-      setSelectedFiles([]);
+      resetQueue();
       fetchRequests();
     } catch (error) {
       console.error('Error submitting request:', error);
@@ -357,42 +419,120 @@ export default function LoungeContentRequests() {
             <div className="space-y-1.5">
               <Label className={FIELD_LABEL}>Reference files</Label>
               <div
-                className="cursor-pointer rounded-[10px] border border-dashed border-border p-4 text-center transition-colors duration-150 hover:border-primary/50 hover:bg-foreground/[0.02]"
+                role="button"
+                tabIndex={0}
+                aria-label="Add reference files"
+                className={cn(
+                  'cursor-pointer rounded-[10px] border border-dashed p-4 text-center transition-colors duration-150',
+                  dragOver
+                    ? 'border-primary/60 bg-primary/[0.04]'
+                    : 'border-border hover:border-primary/50 hover:bg-foreground/[0.02]',
+                )}
                 onClick={() => document.getElementById('reference-upload')?.click()}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && document.getElementById('reference-upload')?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files);
+                }}
               >
                 <input
                   id="reference-upload"
                   type="file"
                   multiple
                   className="hidden"
-                  onChange={handleFileChange}
+                  onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ''; }}
                   accept="image/*,.pdf,.doc,.docx"
                 />
                 <Upload className="mx-auto mb-2 h-5 w-5 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  Click to upload reference files
+                  Drop photos and files here, or tap to browse
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Images, PDFs and documents
+                  Add as many as you need in one go. Every file shows its own upload status.
                 </p>
               </div>
-              {selectedFiles.length > 0 && (
+
+              {queue.length > 0 && (
                 <div className="mt-2 space-y-2">
-                  {selectedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between rounded-lg border border-border/60 bg-foreground/[0.02] p-2">
-                      <div className="flex items-center gap-2 truncate">
-                        <FileImage className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                        <span className="truncate text-sm">{file.name}</span>
-                      </div>
-                      <Button
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                      {queue.length} {queue.length === 1 ? 'file' : 'files'}
+                      {queue.some(f => f.status === 'done') && ` · ${queue.filter(f => f.status === 'done').length} uploaded`}
+                      {queue.some(f => f.status === 'failed') && (
+                        <span className="text-risk"> · {queue.filter(f => f.status === 'failed').length} failed</span>
+                      )}
+                    </span>
+                    {queue.some(f => f.status === 'failed') && !uploading && (
+                      <button
                         type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => removeFile(index)}
+                        onClick={async () => { setUploading(true); await uploadPending(); setUploading(false); }}
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
                       >
-                        <X className="h-3 w-3" />
-                      </Button>
+                        <RotateCcw className="h-3 w-3" /> Retry failed
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Photos as a compact grid; other files as rows */}
+                  {queue.some(f => f.preview) && (
+                    <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-6">
+                      {queue.filter(f => f.preview).map(f => (
+                        <div key={f.id} className="group relative aspect-square overflow-hidden rounded-lg border border-border/60">
+                          <img src={f.preview!} alt={f.file.name} className="h-full w-full object-cover" />
+                          {f.status === 'uploading' && (
+                            <span className="absolute inset-0 flex items-center justify-center bg-black/45">
+                              <Loader2 className="h-4 w-4 animate-spin text-white" />
+                            </span>
+                          )}
+                          {f.status === 'done' && (
+                            <span className="absolute bottom-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-ok text-white">
+                              <Check className="h-2.5 w-2.5" />
+                            </span>
+                          )}
+                          {f.status === 'failed' && (
+                            <span className="absolute inset-0 flex items-center justify-center bg-risk/60" title={f.error}>
+                              <X className="h-4 w-4 text-white" />
+                            </span>
+                          )}
+                          {f.status !== 'uploading' && (
+                            <button
+                              type="button"
+                              aria-label={`Remove ${f.file.name}`}
+                              onClick={() => removeFile(f.id)}
+                              className="absolute right-1 top-1 hidden h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white group-hover:flex"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {queue.filter(f => !f.preview).map(f => (
+                    <div key={f.id} className="flex items-center justify-between rounded-lg border border-border/60 bg-foreground/[0.02] p-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {f.status === 'uploading' ? (
+                          <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-muted-foreground" />
+                        ) : f.status === 'done' ? (
+                          <Check className="h-4 w-4 flex-shrink-0 text-ok" />
+                        ) : f.status === 'failed' ? (
+                          <X className="h-4 w-4 flex-shrink-0 text-risk" />
+                        ) : (
+                          <FileImage className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                        )}
+                        <span className="truncate text-sm">{f.file.name}</span>
+                        {f.status === 'failed' && f.error && (
+                          <span className="truncate text-[11px] text-risk">{f.error}</span>
+                        )}
+                      </div>
+                      {f.status !== 'uploading' && (
+                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(f.id)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -407,7 +547,7 @@ export default function LoungeContentRequests() {
                 {uploading ? (
                   <>
                     <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                    Uploading
+                    Uploading {queue.filter(f => f.status === 'done').length}/{queue.length}
                   </>
                 ) : submitting ? (
                   <>

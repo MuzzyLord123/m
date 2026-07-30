@@ -19,7 +19,7 @@ import TwoFactorWarning from '@/components/security/TwoFactorWarning';
 import { EmailVerificationBanner } from '@/components/EmailVerificationBanner';
 import { PortalSidebar } from './PortalSidebar';
 import { MobileBottomNav } from './MobileBottomNav';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { MobileMenu } from './MobileMenu';
 import { GlobalSearch } from './GlobalSearch';
 import { FloatingDock } from './FloatingDock';
 import { useUIPreferences } from '@/hooks/useUIPreferences';
@@ -404,21 +404,18 @@ export default function LoungeLayout() {
           </>
         )}
 
-        {/* Mobile Drawer — uses same DnD/folder sidebar as desktop */}
-        <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
-          <SheetContent side="left" className="h-dvh max-h-dvh overflow-hidden p-0 w-[280px] sm:w-[300px] border-r-0 bg-transparent">
-            <PortalSidebar
-              collapsed={false}
-              onCollapsedChange={() => {}}
-              profile={profile}
-              user={user}
-              unreadCount={unreadCount}
-              show2FAWarning={show2FAWarning}
-              onSignOut={handleSignOut}
-              mobile
-            />
-          </SheetContent>
-        </Sheet>
+        {/* Mobile menu: the custom Lounge drawer (registry-driven sections,
+            identity header, swipe to dismiss) - no longer the desktop
+            sidebar squeezed into a sheet */}
+        <MobileMenu
+          open={mobileDrawerOpen}
+          onClose={() => setMobileDrawerOpen(false)}
+          profile={profile}
+          user={user}
+          unreadCount={unreadCount}
+          show2FAWarning={show2FAWarning}
+          onSignOut={handleSignOut}
+        />
       </div>
 
       <FloatingDock />

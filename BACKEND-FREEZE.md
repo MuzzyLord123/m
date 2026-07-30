@@ -183,3 +183,20 @@ behaviour; Phase 6 replays it and the numbers must match exactly.
 - src/pages/lounge/crm/ImportExportMenu.tsx — handleFile/handleExport
   logic (trigger chrome may be restyled)
 - src/components/admin/AdminEnquiries.tsx — convertToLead block
+
+# FREEZE LIFTED BY OWNER (2026-07-30)
+
+The owner instructed: "unfreze and finish the build." From this point
+backend work is permitted again. Changes made under this instruction:
+
+- Migration `crm_accounting_unification_seed`: owner accounting org,
+  chart of accounts (identical rows to acc_seed_default_coa), default
+  CRM lifecycle stage set (New/Contacted/Engaged/Proposal/Won/Lost).
+- Migration `crm_accounting_unification_engine`: crm_generate_invoice
+  rpc (+ core), auto draft invoice on won opportunities, invoice and
+  payment sync triggers into crm_financial_links, crm_timeline finance
+  events arm.
+
+The PROTECTED import engine sections above remain protected: the lead
+import behaviour is contract-locked (IMPORT-CONTRACT.md) and none of
+the unfreeze work touches those files.
