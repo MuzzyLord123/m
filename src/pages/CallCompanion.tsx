@@ -29,6 +29,34 @@ interface Push {
   created_at: string;
 }
 
+const CALL_KEY = 'quooro-active-call';
+
+/**
+ * The in-progress call is written to both stores: localStorage survives
+ * the tab being discarded and restored, sessionStorage covers private
+ * windows where localStorage is refused.
+ */
+function storeCall(payload: { push: Push; startedAt: number | null; transcript?: string }) {
+  const raw = JSON.stringify(payload);
+  try { localStorage.setItem(CALL_KEY, raw); } catch { /* refused */ }
+  try { sessionStorage.setItem(CALL_KEY, raw); } catch { /* refused */ }
+}
+
+function readStoredCall(): { push: Push; startedAt: number; transcript?: string } | null {
+  for (const store of [localStorage, sessionStorage]) {
+    try {
+      const raw = store.getItem(CALL_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch { /* unreadable */ }
+  }
+  return null;
+}
+
+function clearStoredCall() {
+  try { localStorage.removeItem(CALL_KEY); } catch { /* noop */ }
+  try { sessionStorage.removeItem(CALL_KEY); } catch { /* noop */ }
+}
+
 export default function CallCompanion() {
   const { user, loading: authLoading } = useAuth();
   const [params] = useSearchParams();
@@ -99,44 +127,89 @@ export default function CallCompanion() {
           device_label: help.browser,
         } as any);
       }
-      if (!cancelled) setState('connected');
+      if (!cancelled) {
+        setState('connected');
+        reconcileLiveCall();
+      }
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user, token]);
 
-  // An in-flight call survives the reload Android performs when you come
-  // back from the dialler - unless it was already finished at the desk,
-  // in which case there is nothing to restore.
+  // First paint after a reload: put the call screen straight back up
+  // from storage so there is never a flash of the idle screen. The
+  // database reconcile that follows is the authority on whether the
+  // call is still running.
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const raw = sessionStorage.getItem('quooro-active-call');
-        if (!raw) return;
-        const saved = JSON.parse(raw);
-        if (!saved?.push?.id || Date.now() - saved.startedAt >= 2 * 3600e3) {
-          sessionStorage.removeItem('quooro-active-call');
-          return;
-        }
-        handled.current.add(saved.push.id);
-        if (saved.push.call_id) {
-          const { data } = await supabase.from('crm_call_logs' as any)
-            .select('ended_at').eq('id', saved.push.call_id).limit(1);
-          if (((data as any[]) || [])[0]?.ended_at) {
-            sessionStorage.removeItem('quooro-active-call');
-            return;
-          }
-        }
-        if (cancelled) return;
-        setOnCall(saved.push);
-        setCallStarted(saved.startedAt);
-        setTranscript(saved.transcript || '');
-        setTimeout(() => { if (!recogRef.current) startTranscript(); }, 500);
-      } catch { /* unreadable */ }
-    })();
-    return () => { cancelled = true; };
+    const saved = readStoredCall();
+    if (!saved?.push?.id) return;
+    if (Date.now() - saved.startedAt >= 2 * 3600e3) { clearStoredCall(); return; }
+    handled.current.add(saved.push.id);
+    setOnCall(saved.push);
+    setCallStarted(saved.startedAt);
+    setTranscript(saved.transcript || '');
+    setTimeout(() => { if (!recogRef.current) startTranscript(); }, 500);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // The live call belongs to the database, not to this page's memory.
+  // Whatever happens to the tab - Opera reloading it on the way back
+  // from the dialler, the browser discarding it in the background, even
+  // opening the link fresh on another phone - the companion rejoins the
+  // call in progress here, with its real start time and the transcript
+  // captured so far. If nothing is live any more, the screen clears.
+  const reconcileLiveCall = useCallback(async () => {
+    if (!user) return;
+    const { data, error } = await supabase.from('crm_call_logs' as any)
+      .select('id, phone, entity_name, started_at')
+      .eq('admin_id', user.id)
+      .eq('source', 'phone')
+      .is('ended_at', null)
+      .gt('started_at', new Date(Date.now() - 2 * 3600e3).toISOString())
+      .order('started_at', { ascending: false })
+      .limit(1);
+    // A failed lookup says nothing about the call. Never clear the
+    // screen on a network blip - only on a clean "no live call".
+    if (error) return;
+    const log = ((data as any[]) || [])[0];
+    if (!log) {
+      if (onCallRef.current) finishFromDesk();
+      else clearStoredCall();
+      return;
+    }
+    if (onCallRef.current?.call_id === log.id) return;
+
+    const push: Push = {
+      id: `log-${log.id}`,
+      phone: log.phone,
+      entity_name: log.entity_name,
+      call_id: log.id,
+      created_at: log.started_at,
+    };
+    handled.current.add(push.id);
+    const startedAt = new Date(log.started_at).getTime();
+    const { data: t } = await supabase.from('crm_call_transcripts' as any)
+      .select('content').eq('call_id', log.id).limit(1);
+    const text = ((t as any[]) || [])[0]?.content || '';
+    lastSyncRef.current = text;
+    setOnCall(push);
+    setCallStarted(startedAt);
+    setTranscript(text);
+    storeCall({ push, startedAt, transcript: text });
+    setTimeout(() => { if (!recogRef.current) startTranscript(); }, 400);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Write the call down before the page goes away, so even an
+  // unexpected teardown loses nothing.
+  useEffect(() => {
+    const persist = () => {
+      if (onCallRef.current) {
+        storeCall({ push: onCallRef.current, startedAt: callStartedRef.current, transcript: transcriptRef.current });
+      }
+    };
+    window.addEventListener('pagehide', persist);
+    return () => window.removeEventListener('pagehide', persist);
   }, []);
 
   // Track the real microphone permission, live.
@@ -214,8 +287,18 @@ export default function CallCompanion() {
     if (r) { try { r.stop(); } catch { /* noop */ } }
   }
 
+  // Hand the number to the phone app through an anchor rather than a
+  // document navigation. Assigning location.href makes Opera treat the
+  // call as leaving the site, which is what reloaded this page and
+  // dropped the live call on the way back.
   const dial = (phone: string) => {
-    window.location.href = `tel:${phone.replace(/\s+/g, '')}`;
+    const a = document.createElement('a');
+    a.href = `tel:${phone.replace(/\s+/g, '')}`;
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 0);
   };
 
   // A push lands: go straight to the on-call screen, start the
@@ -235,7 +318,7 @@ export default function CallCompanion() {
     setElapsed(0);
     setTranscript('');
     lastSyncRef.current = '';
-    try { sessionStorage.setItem('quooro-active-call', JSON.stringify({ push, startedAt: Date.now() })); } catch { /* full */ }
+    storeCall({ push, startedAt: Date.now() });
     setTimeout(() => startTranscript(), 300);
     dial(push.phone);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -275,17 +358,22 @@ export default function CallCompanion() {
     };
   }, [state, user, token, receivePush]);
 
-  // Coming back from the dialler: pick the transcript straight back up.
+  // Coming back from the dialler: rejoin the call and pick the
+  // transcript straight back up.
   useEffect(() => {
     const onVis = () => {
-      if (document.visibilityState === 'visible' && onCallRef.current && !recogRef.current) {
-        startTranscript();
-      }
+      if (document.visibilityState !== 'visible') return;
+      if (onCallRef.current && !recogRef.current) startTranscript();
+      reconcileLiveCall();
     };
     document.addEventListener('visibilitychange', onVis);
-    return () => document.removeEventListener('visibilitychange', onVis);
+    window.addEventListener('pageshow', onVis);
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('pageshow', onVis);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [reconcileLiveCall]);
 
   // Call timer.
   useEffect(() => {
@@ -306,9 +394,7 @@ export default function CallCompanion() {
         supabase.from('crm_call_transcripts' as any).upsert({
           call_id: onCall.call_id, admin_id: user.id, content: text, updated_at: new Date().toISOString(),
         } as any);
-        try {
-          sessionStorage.setItem('quooro-active-call', JSON.stringify({ push: onCall, startedAt: callStarted, transcript: text }));
-        } catch { /* full */ }
+        storeCall({ push: onCall, startedAt: callStarted, transcript: text });
       }
       const { data } = await supabase.from('crm_call_logs' as any)
         .select('ended_at').eq('id', onCall.call_id!).limit(1);
@@ -432,7 +518,7 @@ export default function CallCompanion() {
   // log.
   function finishFromDesk() {
     if (!onCallRef.current) return;
-    try { sessionStorage.removeItem('quooro-active-call'); } catch { /* noop */ }
+    clearStoredCall();
     stopTranscript();
     closePip();
     const push = onCallRef.current;
@@ -450,7 +536,7 @@ export default function CallCompanion() {
   }
 
   async function finishCall() {
-    try { sessionStorage.removeItem('quooro-active-call'); } catch { /* noop */ }
+    clearStoredCall();
     stopTranscript();
     closePip();
     const push = onCall;
@@ -606,7 +692,7 @@ export default function CallCompanion() {
               <Phone className="h-5 w-5" /> Open dialler · {onCall.phone}
             </button>
             <p className="text-[10.5px] leading-relaxed text-muted-foreground">
-              Android shows the phone app while you dial. Put the call on speakerphone and come straight back here - the transcript resumes on its own.
+              Android shows the phone app while you dial. Put the call on speakerphone and come straight back - this screen and the transcript pick up exactly where they were, even if the browser reloads the page.
             </p>
             {pipSupported && (
               <button
