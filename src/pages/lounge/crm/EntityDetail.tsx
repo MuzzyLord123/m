@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { X, Target, Mail, Phone, Globe, MapPin, PoundSterling, FileText, ExternalLink, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Target, Mail, Phone, Globe, MapPin, PoundSterling, FileText, ExternalLink, Tag, ChevronLeft, ChevronRight, Building2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -25,15 +25,19 @@ interface Props {
   stages: LifecycleStage[];
   list?: any[];
   admins?: AdminUser[];
+  /** The already-fetched books, for client-side relationship links. */
+  related?: { companies: any[]; contacts: any[]; opportunities: any[] };
+  onOpenRelated?: (type: EntityType, entity: any) => void;
   onNavigate?: (entity: any) => void;
   onClose: () => void;
   onChanged: () => void;
 }
 
-export function EntityDetail({ entityType, entity, stages, list, admins, onNavigate, onClose, onChanged }: Props) {
+export function EntityDetail({ entityType, entity, stages, list, admins, related, onOpenRelated, onNavigate, onClose, onChanged }: Props) {
   const { toast } = useToast();
   const [timeline, setTimeline] = useState<any[]>([]);
   const [financials, setFinancials] = useState<{ links: any[]; ltv: any } | null>(null);
+  const [finLoading, setFinLoading] = useState(true);
   const [loadingTab, setLoadingTab] = useState(false);
   const [tab, setTab] = useState('overview');
   const [updating, setUpdating] = useState(false);
@@ -56,18 +60,26 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
 
   const currentStage = stages.find(s => s.id === entity.lifecycle_stage_id);
 
+  // Account standing loads with the record, not behind the tab: the same
+  // crm_entity_financials + crm_entity_lifetime_value rpcs the Financials
+  // tab has always called, fired once on open so the relationship's
+  // financial position is visible immediately.
+  useEffect(() => {
+    let cancelled = false;
+    setFinLoading(true);
+    fetchFinancials(entityType, entity.id).then(f => {
+      if (!cancelled) { setFinancials(f); setFinLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [entityType, entity.id]);
+
   useEffect(() => {
     let cancelled = false;
     async function load() {
+      if (tab !== 'timeline') return;
       setLoadingTab(true);
-      if (tab === 'timeline') {
-        const t = await fetchTimeline(entityType, entity.id);
-        if (!cancelled) setTimeline(t);
-      } else if (tab === 'financials') {
-        const f = await fetchFinancials(entityType, entity.id);
-        if (!cancelled) setFinancials(f);
-      }
-      if (!cancelled) setLoadingTab(false);
+      const t = await fetchTimeline(entityType, entity.id);
+      if (!cancelled) { setTimeline(t); setLoadingTab(false); }
     }
     load();
     return () => { cancelled = true; };
@@ -158,6 +170,20 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
         email={entity.email || null}
         website={entity.website || null}
       />
+      {/* Account standing: the relationship's financial position from the
+          existing per-entity rpcs, always visible with the record. */}
+      {!finLoading && financials?.ltv && (
+        <div className="grid grid-cols-3 divide-x divide-border/60 border-b border-border/60 bg-sunken/50">
+          <StandingCell label="Invoiced" currency={financials.ltv.currency} amount={financials.ltv.invoiced} />
+          <StandingCell label="Paid" currency={financials.ltv.currency} amount={financials.ltv.paid} tone="ok" />
+          <StandingCell
+            label="Outstanding"
+            currency={financials.ltv.currency}
+            amount={financials.ltv.outstanding}
+            tone={Number(financials.ltv.outstanding) > 0 ? 'attend' : undefined}
+          />
+        </div>
+      )}
       {(entity.relationship_type?.length ?? 0) > 0 && (
         <div className="border-b border-border/60 px-4 py-2.5">
           {/* relationship_type display only - no update endpoint exists, so the chips are read-only */}
@@ -229,6 +255,16 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
               </div>
             )}
 
+            {related && (
+              <RelatedRecords
+                entityType={entityType}
+                entity={entity}
+                related={related}
+                stages={stages}
+                onOpen={onOpenRelated}
+              />
+            )}
+
             <NotesPanel entityType={entityType} entityId={entity.id} orgId={entity.org_id ?? null} />
 
             <div className="pt-2 font-mono text-[10px] tabular-nums text-muted-foreground">
@@ -248,7 +284,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, onNavig
           </TabsContent>
 
           <TabsContent value="financials" className="p-4 sm:p-5 mt-3 space-y-4">
-            {loadingTab ? (
+            {finLoading ? (
               <SkeletonLedger rows={3} />
             ) : (
               <>
@@ -321,6 +357,96 @@ function Field({ icon: Icon, label, value, href, external, onClick }: any) {
   if (onClick) return <button type="button" onClick={onClick} className="w-full text-left block hover:bg-accent/40 -mx-1.5 px-1.5 py-1 rounded transition-colors">{content}</button>;
   if (href) return <a href={href} target={external ? '_blank' : undefined} rel="noreferrer" className="block hover:bg-accent/40 -mx-1.5 px-1.5 py-1 rounded transition-colors">{content}</a>;
   return <div className="px-1.5 py-1">{content}</div>;
+}
+
+function StandingCell({ label, currency, amount, tone }: { label: string; currency?: string | null; amount: any; tone?: 'ok' | 'attend' }) {
+  const color = tone === 'ok' ? 'text-ok' : tone === 'attend' ? 'text-attend' : 'text-foreground';
+  return (
+    <div className="px-4 py-2">
+      <p className="font-mono text-[8.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <p className={`mt-0.5 font-mono text-[12.5px] font-medium tabular-nums ${color}`}>
+        {currency || 'GBP'} {Number(amount || 0).toLocaleString()}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The rest of the business relationship: linked company, people and deals,
+ * joined client-side over the books the shell already fetched. Tapping a
+ * row opens that record in place - no extra requests.
+ */
+function RelatedRecords({ entityType, entity, related, stages, onOpen }: {
+  entityType: EntityType;
+  entity: any;
+  related: { companies: any[]; contacts: any[]; opportunities: any[] };
+  stages: LifecycleStage[];
+  onOpen?: (type: EntityType, entity: any) => void;
+}) {
+  const stageName = (id: string | null) => stages.find(s => s.id === id)?.name ?? null;
+  const money = (o: any) => (o.value != null ? `${o.currency || 'GBP'} ${Number(o.value).toLocaleString()}` : null);
+
+  type Item = { type: EntityType; rec: any; label: string; sub: string | null; amount: string | null };
+  const items: Item[] = [];
+  let overflow = 0;
+
+  if (entityType === 'contact') {
+    const comp = entity.company_id ? related.companies.find(c => c.id === entity.company_id) : null;
+    if (comp) items.push({ type: 'company', rec: comp, label: comp.name || 'Untitled', sub: comp.industry || 'Company', amount: null });
+    related.opportunities
+      .filter(o => o.contact_id === entity.id)
+      .forEach(o => items.push({ type: 'opportunity', rec: o, label: o.title || 'Untitled', sub: stageName(o.lifecycle_stage_id) || 'Deal', amount: money(o) }));
+  } else if (entityType === 'company') {
+    const people = related.contacts.filter(c => c.company_id === entity.id);
+    overflow = Math.max(0, people.length - 6);
+    people.slice(0, 6).forEach(c =>
+      items.push({ type: 'contact', rec: c, label: c.full_name || c.email || 'Unnamed', sub: c.job_title || c.email || null, amount: null }));
+    related.opportunities
+      .filter(o => o.company_id === entity.id)
+      .forEach(o => items.push({ type: 'opportunity', rec: o, label: o.title || 'Untitled', sub: stageName(o.lifecycle_stage_id) || 'Deal', amount: money(o) }));
+  } else {
+    const comp = entity.company_id ? related.companies.find(c => c.id === entity.company_id) : null;
+    if (comp) items.push({ type: 'company', rec: comp, label: comp.name || 'Untitled', sub: comp.industry || 'Company', amount: null });
+    const person = entity.contact_id ? related.contacts.find(c => c.id === entity.contact_id) : null;
+    if (person) items.push({ type: 'contact', rec: person, label: person.full_name || person.email || 'Unnamed', sub: person.job_title || person.email || null, amount: null });
+  }
+
+  if (items.length === 0) return null;
+
+  const ICON: Record<EntityType, any> = { company: Building2, contact: User, opportunity: Target };
+
+  return (
+    <div>
+      <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Relationships</label>
+      <div className="mt-1.5 divide-y divide-border/60 rounded-[10px] border border-border/60">
+        {items.map((it) => {
+          const Icon = ICON[it.type];
+          return (
+            <button
+              key={`${it.type}-${it.rec.id}`}
+              type="button"
+              disabled={!onOpen}
+              onClick={onOpen ? () => onOpen(it.type, it.rec) : undefined}
+              className="flex min-h-[44px] w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-foreground/[0.025] disabled:pointer-events-none"
+            >
+              <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-xs font-medium">{it.label}</span>
+                {it.sub && <span className="block truncate text-[10.5px] text-muted-foreground">{it.sub}</span>}
+              </span>
+              {it.amount && <span className="shrink-0 font-mono text-[11px] tabular-nums">{it.amount}</span>}
+              {onOpen && <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />}
+            </button>
+          );
+        })}
+        {overflow > 0 && (
+          <p className="px-3 py-2 text-[10.5px] text-muted-foreground">
+            {overflow} more {overflow === 1 ? 'person' : 'people'} at this company in the contacts list.
+          </p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: 'success' | 'warn' | 'muted' }) {

@@ -11,3 +11,5 @@ export { PipelineBoard, ReportTiles } from './PipelineBoard';
 export type { PipelineItem, PipelineStage } from './PipelineBoard';
 export { ImportDropzone, ImportProgress, ImportReceipt, receiptSummaryText, useCountUp } from './ImportShell';
 export { BottomSheet, TagChips } from './BottomSheet';
+export { VirtualTable } from './VirtualTable';
+export type { VirtualColumn } from './VirtualTable';

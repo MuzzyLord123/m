@@ -2,7 +2,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Building2, User, Target, LayoutDashboard, Workflow, Search, Plus,
-  Radar, Menu, Shield, UserPlus, ChevronDown, SlidersHorizontal,
+  Radar, Menu, Shield, UserPlus, ChevronDown, SlidersHorizontal, ArrowRightLeft, Download,
 } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { usePortalHome } from '@/hooks/usePortalHome';
@@ -24,6 +24,7 @@ import { format } from 'date-fns';
 import { useCRMData, fetchTimeline, setLifecycleStage, type EntityType, type LifecycleStage } from './useCRMData';
 import { EntityDetail } from './EntityDetail';
 import { ImportExportMenu } from './ImportExportMenu';
+import { exportEntities } from './csvIO';
 import { useAdmins, type AdminUser } from './useAdmins';
 import { NewEntityDialog } from './NewEntityDialog';
 import CRMLeadImportDialog from './CRMLeadImportDialog';
@@ -40,6 +41,7 @@ import {
   RecordHeader, RecordTimeline, type TimelineEvent,
   PipelineBoard, ReportTiles, type PipelineItem, type PipelineStage,
   BottomSheet,
+  VirtualTable, type VirtualColumn,
 } from '@/components/platform/crm';
 
 type Section = 'dashboard' | 'companies' | 'contacts' | 'opportunities' | 'workflows';
@@ -125,6 +127,151 @@ function factsFor(entity: EntityType, r: any): { label: string; value: string }[
     push('Expected close', r.expected_close_date ? format(new Date(r.expected_close_date), 'd MMM yyyy') : null);
   }
   return out;
+}
+
+/**
+ * Desktop power-table columns per entity. Every cell renders a field the
+ * row already carries (or a lookup over the already-fetched companies and
+ * admins) - nothing is invented, absent values show a quiet dash.
+ */
+function buildTableColumns(
+  entity: EntityType,
+  stages: LifecycleStage[],
+  companyById: Map<string, any>,
+  adminById: Map<string, AdminUser>,
+): VirtualColumn<any>[] {
+  const stageById = new Map(stages.map(s => [s.id, s]));
+  const dash = <span className="text-xs text-muted-foreground">–</span>;
+
+  const nameCol: VirtualColumn<any> = {
+    key: 'name',
+    header: 'Name',
+    track: 'minmax(220px,1.4fr)',
+    sortValue: (r) => (
+      entity === 'company' ? (r.name || '') :
+      entity === 'contact' ? (r.full_name || `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.email || '') :
+      (r.title || '')
+    ).toLowerCase(),
+    render: (r) => {
+      const primary =
+        entity === 'company' ? (r.name || 'Untitled') :
+        entity === 'contact' ? (r.full_name || `${r.first_name || ''} ${r.last_name || ''}`.trim() || r.email || 'Unnamed') :
+        (r.title || 'Untitled');
+      const secondary = entity === 'opportunity' ? null : (r.email || r.domain || null);
+      return (
+        <div className="min-w-0">
+          <p className="truncate text-[13px] font-medium leading-tight">{primary}</p>
+          {secondary && <p className="mt-0.5 truncate font-mono text-[10.5px] leading-tight text-muted-foreground">{secondary}</p>}
+        </div>
+      );
+    },
+  };
+
+  const stageCol: VirtualColumn<any> = {
+    key: 'stage',
+    header: 'Stage',
+    track: '148px',
+    sortValue: (r) => stageById.get(r.lifecycle_stage_id)?.order_index ?? 999,
+    render: (r) => {
+      const s = stageById.get(r.lifecycle_stage_id);
+      return s ? (
+        <span className="inline-flex items-center gap-1.5 text-xs">
+          <StatusDot tone={statusTone(s.slug)} />
+          <span className="truncate">{s.name}</span>
+        </span>
+      ) : <span className="text-xs text-muted-foreground">No stage</span>;
+    },
+  };
+
+  const ownerCol: VirtualColumn<any> = {
+    key: 'owner',
+    header: 'Owner',
+    track: '148px',
+    sortValue: (r) => {
+      const a = r.owner_id ? adminById.get(r.owner_id) : null;
+      return a ? (a.full_name || a.email || '').toLowerCase() : 'zzzz';
+    },
+    render: (r) => {
+      const a = r.owner_id ? adminById.get(r.owner_id) : null;
+      if (a) {
+        return (
+          <span className="flex min-w-0 items-center gap-2">
+            <AvatarID name={a.full_name} email={a.email} size="sm" />
+            <span className="truncate text-xs">{(a.full_name || a.email || '').split(' ')[0]}</span>
+          </span>
+        );
+      }
+      if (r.owner_id) return <span className="text-xs text-muted-foreground">Teammate</span>;
+      return (
+        <span className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span aria-hidden className="h-6 w-6 shrink-0 rounded-full border border-dashed border-border/60" />
+          Unassigned
+        </span>
+      );
+    },
+  };
+
+  const updatedCol: VirtualColumn<any> = {
+    key: 'updated',
+    header: 'Last activity',
+    track: '130px',
+    align: 'right',
+    sortValue: (r) => (r.updated_at ? new Date(r.updated_at).getTime() : 0),
+    render: (r) => <RelativeTime date={r.updated_at} />,
+  };
+
+  const companyCol: VirtualColumn<any> = {
+    key: 'company',
+    header: 'Company',
+    track: 'minmax(150px,1fr)',
+    sortValue: (r) => (companyById.get(r.company_id)?.name || '').toLowerCase(),
+    render: (r) => {
+      const c = r.company_id ? companyById.get(r.company_id) : null;
+      return c ? <span className="block truncate text-xs">{c.name}</span> : dash;
+    },
+  };
+
+  if (entity === 'company') {
+    return [
+      nameCol,
+      {
+        key: 'industry',
+        header: 'Industry',
+        track: 'minmax(130px,0.9fr)',
+        sortValue: (r) => (r.industry || '').toLowerCase(),
+        render: (r) => (r.industry ? <span className="block truncate text-xs">{r.industry}</span> : dash),
+      },
+      {
+        key: 'location',
+        header: 'Location',
+        track: 'minmax(120px,0.8fr)',
+        render: (r) => {
+          const loc = [r.city, r.country].filter(Boolean).join(', ');
+          return loc ? <span className="block truncate text-xs">{loc}</span> : dash;
+        },
+      },
+      stageCol, ownerCol, updatedCol,
+    ];
+  }
+  if (entity === 'contact') {
+    return [nameCol, companyCol, stageCol, ownerCol, updatedCol];
+  }
+  return [
+    nameCol,
+    companyCol,
+    stageCol,
+    {
+      key: 'value',
+      header: 'Value',
+      track: '110px',
+      align: 'right',
+      mono: true,
+      sortValue: (r) => Number(r.value || 0),
+      render: (r) => (r.value != null ? <Money value={Number(r.value)} whole /> : dash),
+    },
+    ownerCol,
+    updatedCol,
+  ];
 }
 
 function timelineEvents(rows: any[]): TimelineEvent[] {
@@ -240,6 +387,44 @@ export default function CRMShell() {
     companies.forEach(c => m.set(c.id, c));
     return m;
   }, [companies]);
+
+  const adminById = useMemo(() => {
+    const m = new Map<string, AdminUser>();
+    admins.forEach(a => m.set(a.user_id, a));
+    return m;
+  }, [admins]);
+
+  const desktopColumns = useMemo(
+    () => (currentEntity ? buildTableColumns(currentEntity, stages, companyById, adminById) : []),
+    [currentEntity, stages, companyById, adminById],
+  );
+
+  // Bulk stage move: the same crm_set_lifecycle_stage rpc EntityDetail
+  // fires per record, called once per selected id - no new endpoint.
+  async function bulkSetStage(stageId: string) {
+    if (!currentEntity) return;
+    const ids = Array.from(selectedIds);
+    if (!ids.length) return;
+    const results = await Promise.all(ids.map(id => setLifecycleStage(currentEntity, id, stageId)));
+    const failed = results.filter(r => r.error).length;
+    if (failed) {
+      toast({ title: 'Some stage moves failed', description: `${failed} of ${ids.length} records were not updated.`, variant: 'destructive' });
+    } else {
+      toast({ title: 'Stage updated', description: `${ids.length} record${ids.length === 1 ? '' : 's'} moved. Workflows may have fired automatically.` });
+    }
+    setSelectedIds(new Set());
+    refresh();
+  }
+
+  // Export the checked subset through the same client-side CSV writer the
+  // Data menu uses (exportEntities); nothing leaves the browser.
+  function exportSelection() {
+    if (!currentEntity) return;
+    const subset = filtered.filter((r: any) => selectedIds.has(r.id));
+    if (!subset.length) return;
+    exportEntities(currentEntity, subset);
+    toast({ title: 'Exported', description: `${subset.length} ${currentEntity}${subset.length === 1 ? '' : 's'} exported as CSV.` });
+  }
 
   const boardStages = useMemo<PipelineStage[]>(() => {
     const cols: PipelineStage[] = stages.map(s => ({ key: s.id, label: s.name, tone: statusTone(s.slug) }));
@@ -434,7 +619,7 @@ export default function CRMShell() {
             <WorkflowsView />
           ) : (
             <>
-              <div className={`${selected && isMobile ? 'hidden' : 'flex'} ${selected && !isMobile && viewMode === 'list' ? 'w-[380px] border-r border-border' : 'flex-1'} min-w-0 flex-col overflow-hidden bg-background`}>
+              <div className={`${selected && isMobile ? 'hidden' : 'flex'} flex-1 min-w-0 flex-col overflow-hidden bg-background`}>
                 {/* Mobile: sticky search row (44px targets) */}
                 {isMobile && (
                   <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
@@ -521,7 +706,7 @@ export default function CRMShell() {
                           />
                         )}
                         <Button size="sm" className="h-7 gap-1 text-xs" onClick={() => setNewDialogOpen(true)} disabled={!orgId}>
-                          <Plus className="h-3 w-3" /> New
+                          <Plus className="h-3 w-3" /> New {currentEntity}
                         </Button>
                       </div>
                     </div>
@@ -547,6 +732,23 @@ export default function CRMShell() {
                         <DropdownMenuItem onClick={() => assignTo(null)}>Unassign</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs"><ArrowRightLeft className="h-3 w-3" /> Change stage</Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-56">
+                        <DropdownMenuLabel className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">Move to stage</DropdownMenuLabel>
+                        {stages.map(s => (
+                          <DropdownMenuItem key={s.id} onClick={() => bulkSetStage(s.id)}>
+                            <span className="mr-2 inline-flex"><StatusDot tone={statusTone(s.slug)} /></span>
+                            {s.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={exportSelection}>
+                      <Download className="h-3 w-3" /> Export selection
+                    </Button>
                   </BulkBar>
                 )}
 
@@ -562,44 +764,77 @@ export default function CRMShell() {
                       onStageChange={handleBoardStageChange}
                     />
                   </div>
-                ) : (
+                ) : isMobile ? (
                   <VirtualList
                     rows={filtered}
                     stages={stages}
                     currentEntity={currentEntity!}
                     selectedId={selected?.entity?.id}
                     selectedIds={selectedIds}
-                    showSelect={!isMobile}
+                    showSelect={false}
                     onToggle={(id) => setSelectedIds(prev => {
                       const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s;
                     })}
                     onOpen={openRecord}
                   />
+                ) : (
+                  <>
+                    {/* The desktop power table: every column is a field the row
+                        already carries; row click opens the full relationship. */}
+                    <VirtualTable
+                      key={section}
+                      rows={filtered}
+                      columns={desktopColumns}
+                      rowKey={(r: any) => r.id}
+                      onRowClick={openRecord}
+                      activeId={selected?.entity?.id ?? null}
+                      selectable
+                      selected={selectedIds}
+                      onSelectedChange={setSelectedIds}
+                      defaultSort={currentEntity === 'opportunity' ? { key: 'value', dir: 'desc' } : { key: 'updated', dir: 'desc' }}
+                      aria-label={`${section} table`}
+                      empty={{ title: 'No records', body: 'Nothing matches the current filters.' }}
+                    />
+                    <div className="flex shrink-0 items-center justify-between border-t border-border/60 px-4 py-1.5">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                        {filtered.length.toLocaleString('en-GB')} {currentEntity}{filtered.length === 1 ? '' : 's'} · filtered from {rows.length.toLocaleString('en-GB')} · virtualised
+                      </span>
+                      <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground/70 lg:block">
+                        ⌘K jump · N new · / search · ? keys
+                      </span>
+                    </div>
+                  </>
                 )}
               </div>
 
               {selected && (
-                <div className={`${isMobile ? 'fixed inset-0 z-40 bg-background' : 'flex-1'} min-w-0 flex flex-col`}>
-                  <EntityDetail
-                    key={selected.entity.id}
-                    entityType={selected.type}
-                    entity={selected.entity}
-                    stages={stages}
-                    list={filtered}
-                    admins={admins}
-                    onNavigate={(e) => setSelected({ type: selected.type, entity: e })}
-                    onClose={() => setSelected(null)}
-                    onChanged={refresh}
-                  />
-                </div>
-              )}
-              {!selected && !isMobile && viewMode === 'list' && (
-                <div className="flex-1 flex flex-col justify-center">
-                  <EmptyState
-                    title="No record selected"
-                    body="Select a record to view details, timeline and financials."
-                  />
-                </div>
+                <>
+                  {/* Desktop: the record opens OVER the table as the full
+                      business relationship - scrim click or Esc-style X closes
+                      and the table is exactly where it was. */}
+                  {!isMobile && (
+                    <div
+                      aria-hidden
+                      className="fixed inset-0 z-40 bg-black/40"
+                      onClick={() => setSelected(null)}
+                    />
+                  )}
+                  <div className={`${isMobile ? 'fixed inset-0 z-40 bg-background' : 'fixed inset-y-0 right-0 z-50 w-[min(760px,calc(100vw-56px))] border-l border-border/60 bg-card shadow-2xl'} min-w-0 flex flex-col`}>
+                    <EntityDetail
+                      key={selected.entity.id}
+                      entityType={selected.type}
+                      entity={selected.entity}
+                      stages={stages}
+                      list={selected.type === currentEntity ? filtered : undefined}
+                      admins={admins}
+                      related={{ companies, contacts, opportunities }}
+                      onOpenRelated={(t, e) => setSelected({ type: t, entity: e })}
+                      onNavigate={(e) => setSelected({ type: selected.type, entity: e })}
+                      onClose={() => setSelected(null)}
+                      onChanged={refresh}
+                    />
+                  </div>
+                </>
               )}
             </>
           )}
@@ -714,9 +949,23 @@ export default function CRMShell() {
         open={paletteOpen}
         onOpenChange={setPaletteOpen}
         role={role}
-        extraActions={currentEntity && orgId ? [
-          { id: 'crm-new', label: `New ${currentEntity}`, run: () => setNewDialogOpen(true), keywords: 'create add record' },
-        ] : undefined}
+        extraActions={[
+          ...(currentEntity && orgId ? [{ id: 'crm-new', label: `New ${currentEntity}`, run: () => setNewDialogOpen(true), keywords: 'create add record' }] : []),
+          ...(section === 'contacts' ? [{ id: 'crm-import', label: 'Import leads', run: () => setLeadImportOpen(true), keywords: 'upload csv excel json html' }] : []),
+          ...(currentEntity && filtered.length ? [{ id: 'crm-export', label: `Export ${filtered.length} to CSV`, run: () => { exportEntities(currentEntity, filtered); }, keywords: 'download csv data' }] : []),
+          ...(section === 'opportunities' ? [{
+            id: 'crm-view',
+            label: viewMode === 'list' ? 'Switch to board view' : 'Switch to list view',
+            run: () => setViewMode(m => (m === 'list' ? 'board' : 'list')),
+            keywords: 'pipeline kanban table toggle',
+          }] : []),
+          ...NAV.filter(n => n.key !== section).map(n => ({
+            id: `crm-go-${n.key}`,
+            label: `Go to ${n.label}`,
+            run: () => setSection(n.key),
+            keywords: 'crm section open',
+          })),
+        ]}
       />
       <ShortcutOverlay open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </div>
