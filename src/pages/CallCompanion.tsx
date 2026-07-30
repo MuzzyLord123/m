@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Phone, Radar, Check, Loader2, Mic, RefreshCw, Copy } from 'lucide-react';
+import { Phone, Radar, Check, Loader2, Mic, RefreshCw, Copy, PictureInPicture2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { VoiceMeter } from '@/pages/lounge/crm/calls/VoiceMeter';
@@ -42,6 +43,8 @@ export default function CallCompanion() {
   const [interim, setInterim] = useState('');
   const [listening, setListening] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [deskFinished, setDeskFinished] = useState(false);
+  const [pip, setPip] = useState(false);
   const handled = useRef<Set<string>>(new Set());
   const recogRef = useRef<any>(null);
   const wakeRef = useRef<any>(null);
@@ -49,11 +52,20 @@ export default function CallCompanion() {
   const lastSyncRef = useRef('');
   const onCallRef = useRef<Push | null>(null);
   const loadedAtRef = useRef(Date.now());
+  const callStartedRef = useRef<number | null>(null);
+  const pipVideoRef = useRef<HTMLVideoElement>(null);
+  const pipCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const pipTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pipStreamRef = useRef<MediaStream | null>(null);
   transcriptRef.current = transcript;
   onCallRef.current = onCall;
+  callStartedRef.current = callStarted;
 
   const speechOk = typeof window !== 'undefined' && speechRecognitionSupported();
   const help = micUnblockHelp();
+  const pipSupported = typeof document !== 'undefined'
+    && (document as any).pictureInPictureEnabled
+    && typeof (HTMLCanvasElement.prototype as any).captureStream === 'function';
 
   // Connect. Being signed in on this page is the proof the phone is
   // yours, so the companion always connects: it claims the QR token when
@@ -94,22 +106,36 @@ export default function CallCompanion() {
   }, [authLoading, user, token]);
 
   // An in-flight call survives the reload Android performs when you come
-  // back from the dialler.
+  // back from the dialler - unless it was already finished at the desk,
+  // in which case there is nothing to restore.
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem('quooro-active-call');
-      if (!raw) return;
-      const saved = JSON.parse(raw);
-      if (saved?.push?.id && Date.now() - saved.startedAt < 2 * 3600e3) {
+    let cancelled = false;
+    (async () => {
+      try {
+        const raw = sessionStorage.getItem('quooro-active-call');
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (!saved?.push?.id || Date.now() - saved.startedAt >= 2 * 3600e3) {
+          sessionStorage.removeItem('quooro-active-call');
+          return;
+        }
         handled.current.add(saved.push.id);
+        if (saved.push.call_id) {
+          const { data } = await supabase.from('crm_call_logs' as any)
+            .select('ended_at').eq('id', saved.push.call_id).limit(1);
+          if (((data as any[]) || [])[0]?.ended_at) {
+            sessionStorage.removeItem('quooro-active-call');
+            return;
+          }
+        }
+        if (cancelled) return;
         setOnCall(saved.push);
         setCallStarted(saved.startedAt);
         setTranscript(saved.transcript || '');
         setTimeout(() => { if (!recogRef.current) startTranscript(); }, 500);
-      } else {
-        sessionStorage.removeItem('quooro-active-call');
-      }
-    } catch { /* unreadable */ }
+      } catch { /* unreadable */ }
+    })();
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -167,7 +193,14 @@ export default function CallCompanion() {
       }
       setInterim(interimText);
     };
-    r.onend = () => { if (recogRef.current === r) { try { r.start(); } catch { /* stopped */ } } };
+    // Restart with a short breather: recognition drops out whenever the
+    // OS borrows the mic (dialler up, screen off) and this loop brings
+    // it back the moment it can.
+    r.onend = () => {
+      setTimeout(() => {
+        if (recogRef.current === r) { try { r.start(); } catch { /* stopped */ } }
+      }, 400);
+    };
     r.onerror = () => setInterim('');
     recogRef.current = r;
     try { r.start(); setListening(true); } catch { /* running */ }
@@ -261,26 +294,165 @@ export default function CallCompanion() {
     return () => clearInterval(id);
   }, [onCall, callStarted]);
 
-  // Stream the transcript to the desktop every 3 seconds while it grows.
+  // Every 3 seconds while on a call: stream the transcript to the
+  // desktop, and watch for the call being finished at the desk - one
+  // Finish anywhere ends the call on both screens.
   useEffect(() => {
     if (!onCall?.call_id || !user) return;
-    const id = setInterval(() => {
+    const id = setInterval(async () => {
       const text = transcriptRef.current.trim();
-      if (!text || text === lastSyncRef.current) return;
-      lastSyncRef.current = text;
-      supabase.from('crm_call_transcripts' as any).upsert({
-        call_id: onCall.call_id, admin_id: user.id, content: text, updated_at: new Date().toISOString(),
-      } as any);
-      try {
-        sessionStorage.setItem('quooro-active-call', JSON.stringify({ push: onCall, startedAt: callStarted, transcript: text }));
-      } catch { /* full */ }
+      if (text && text !== lastSyncRef.current) {
+        lastSyncRef.current = text;
+        supabase.from('crm_call_transcripts' as any).upsert({
+          call_id: onCall.call_id, admin_id: user.id, content: text, updated_at: new Date().toISOString(),
+        } as any);
+        try {
+          sessionStorage.setItem('quooro-active-call', JSON.stringify({ push: onCall, startedAt: callStarted, transcript: text }));
+        } catch { /* full */ }
+      }
+      const { data } = await supabase.from('crm_call_logs' as any)
+        .select('ended_at').eq('id', onCall.call_id!).limit(1);
+      if (((data as any[]) || [])[0]?.ended_at) finishFromDesk();
     }, 3000);
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onCall?.call_id, user]);
+
+  // Show the live call on the lock screen and notification shade where
+  // the OS supports media metadata.
+  useEffect(() => {
+    if (!onCall) return;
+    try {
+      if ('mediaSession' in navigator && typeof (window as any).MediaMetadata === 'function') {
+        (navigator as any).mediaSession.metadata = new (window as any).MediaMetadata({
+          title: `${onCall.entity_name || 'Lead'} · live call`,
+          artist: 'Quooro',
+          artwork: [
+            { src: '/favicon.png', sizes: '196x196', type: 'image/png' },
+            { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+          ],
+        });
+      }
+    } catch { /* unsupported */ }
+    return () => {
+      try { (navigator as any).mediaSession.metadata = null; } catch { /* noop */ }
+    };
+  }, [onCall]);
+
+  // The floating call card: the call screen rendered to a canvas and
+  // popped out through picture-in-picture, so a movable always-on-top
+  // mini window keeps the timer in view while other apps are open.
+  function drawPipFrame() {
+    const canvas = pipCanvasRef.current;
+    if (!canvas) return;
+    const c = canvas.getContext('2d');
+    if (!c) return;
+    const w = canvas.width;
+    const h = canvas.height;
+    c.fillStyle = '#0A0A0D';
+    c.fillRect(0, 0, w, h);
+    c.fillStyle = 'rgba(194,65,12,0.9)';
+    c.fillRect(0, 0, w, 3);
+    c.fillStyle = 'rgba(160,160,168,0.9)';
+    c.font = '500 20px ui-monospace, SFMono-Regular, Menlo, monospace';
+    c.fillText('Q U O O R O   ·   L I V E   C A L L', 36, 64);
+    const t = Date.now() / 1000;
+    c.fillStyle = `rgba(194,65,12,${(0.55 + 0.45 * Math.abs(Math.sin(t * 2))).toFixed(2)})`;
+    c.beginPath();
+    c.arc(w - 48, 56, 9, 0, Math.PI * 2);
+    c.fill();
+    const name = onCallRef.current?.entity_name || 'Lead';
+    c.fillStyle = '#EDEDEF';
+    c.font = '600 40px system-ui, -apple-system, sans-serif';
+    c.fillText(name.length > 22 ? `${name.slice(0, 21)}…` : name, 36, 138);
+    const secs = callStartedRef.current ? Math.floor((Date.now() - callStartedRef.current) / 1000) : 0;
+    const mmp = String(Math.floor(secs / 60)).padStart(2, '0');
+    const ssp = String(secs % 60).padStart(2, '0');
+    c.font = '600 112px ui-monospace, SFMono-Regular, Menlo, monospace';
+    c.fillText(`${mmp}:${ssp}`, 36, 264);
+    c.fillStyle = 'rgba(160,160,168,0.75)';
+    c.font = '400 20px system-ui, -apple-system, sans-serif';
+    c.fillText('Tap to return · transcript keeps streaming', 36, 324);
+  }
+
+  function closePip() {
+    if (pipTimerRef.current) clearInterval(pipTimerRef.current);
+    pipTimerRef.current = null;
+    setPip(false);
+    const video = pipVideoRef.current;
+    if (video) {
+      try {
+        if ((document as any).pictureInPictureElement === video) (document as any).exitPictureInPicture();
+      } catch { /* already closed */ }
+      video.srcObject = null;
+    }
+    pipStreamRef.current?.getTracks().forEach(tr => tr.stop());
+    pipStreamRef.current = null;
+  }
+
+  async function enterPip() {
+    const video = pipVideoRef.current;
+    if (!video || pip) return;
+    if (!pipCanvasRef.current) {
+      const cv = document.createElement('canvas');
+      cv.width = 640;
+      cv.height = 360;
+      pipCanvasRef.current = cv;
+    }
+    drawPipFrame();
+    try {
+      const stream = (pipCanvasRef.current as any).captureStream(4) as MediaStream;
+      pipStreamRef.current = stream;
+      video.srcObject = stream;
+      await video.play();
+      await (video as any).requestPictureInPicture();
+      setPip(true);
+      pipTimerRef.current = setInterval(drawPipFrame, 500);
+    } catch {
+      closePip();
+    }
+  }
+
+  useEffect(() => {
+    const v = pipVideoRef.current;
+    if (!v) return;
+    const onLeave = () => closePip();
+    v.addEventListener('leavepictureinpicture', onLeave);
+    return () => v.removeEventListener('leavepictureinpicture', onLeave);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!onCall) closePip();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onCall]);
+
+  // The desk pressed End call and save: clear this screen too, keeping
+  // whatever transcript is newest, without touching the already-ended
+  // log.
+  function finishFromDesk() {
+    if (!onCallRef.current) return;
+    try { sessionStorage.removeItem('quooro-active-call'); } catch { /* noop */ }
+    stopTranscript();
+    closePip();
+    const push = onCallRef.current;
+    const text = transcriptRef.current.trim();
+    if (push?.call_id && user && text && text !== lastSyncRef.current) {
+      supabase.from('crm_call_transcripts' as any).upsert({
+        call_id: push.call_id, admin_id: user.id, content: text, updated_at: new Date().toISOString(),
+      } as any);
+    }
+    setOnCall(null);
+    setCallStarted(null);
+    setTranscript('');
+    setDeskFinished(true);
+    setTimeout(() => setDeskFinished(false), 6000);
+  }
 
   async function finishCall() {
     try { sessionStorage.removeItem('quooro-active-call'); } catch { /* noop */ }
     stopTranscript();
+    closePip();
     const push = onCall;
     const duration = callStarted ? Math.floor((Date.now() - callStarted) / 1000) : null;
     setOnCall(null);
@@ -391,6 +563,12 @@ export default function CallCompanion() {
           <p className="font-display text-[15px] font-semibold leading-tight tracking-[-0.01em]">Quooro</p>
           <p className={kicker}>Call companion</p>
         </div>
+        {user && state === 'connected' && (
+          <span className="ml-auto flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-2.5 py-1 font-mono text-[8.5px] font-medium uppercase tracking-[0.14em]">
+            <span aria-hidden className={cn('h-1.5 w-1.5 rounded-full', onCall ? 'animate-pulse bg-primary' : 'bg-ok')} />
+            {onCall ? 'Live call' : 'Linked'}
+          </span>
+        )}
       </header>
       <div aria-hidden className="mt-4 h-px bg-gradient-to-r from-primary/50 via-border to-transparent" />
 
@@ -430,7 +608,17 @@ export default function CallCompanion() {
             <p className="text-[10.5px] leading-relaxed text-muted-foreground">
               Android shows the phone app while you dial. Put the call on speakerphone and come straight back here - the transcript resumes on its own.
             </p>
-            {mic === 'granted' ? <VoiceMeter active={listening} /> : micSetup}
+            {pipSupported && (
+              <button
+                type="button"
+                onClick={() => (pip ? closePip() : enterPip())}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-[12px] border border-border/60 text-[12.5px] font-medium"
+              >
+                <PictureInPicture2 className="h-4 w-4" />
+                {pip ? 'Close the floating card' : 'Float this call over other apps'}
+              </button>
+            )}
+            {mic === 'granted' ? <VoiceMeter active /> : micSetup}
             {chromeNote}
             <div className="max-h-40 min-h-[80px] w-full overflow-y-auto rounded-[12px] border border-border/60 bg-card p-3.5 text-left text-[13px] leading-relaxed">
               {transcript || interim ? (
@@ -457,7 +645,7 @@ export default function CallCompanion() {
               <Check className="h-4 w-4" /> Finish and save
             </button>
             <p className="-mt-3 text-[10px] text-muted-foreground">
-              Hang up in your phone's call screen, then tap Finish.
+              One Finish is enough: end it here or at your desk and both screens clear themselves.
             </p>
           </div>
         ) : (
@@ -472,6 +660,11 @@ export default function CallCompanion() {
                 Keep this page open. Press Call on your desktop and this phone dials the lead straight away.
               </p>
             </div>
+            {deskFinished && (
+              <p className="flex items-center gap-1.5 rounded-full border border-ok/40 bg-ok/[0.06] px-3.5 py-1.5 text-[11.5px] text-ok">
+                <Check className="h-3.5 w-3.5" /> Call saved from your desk
+              </p>
+            )}
             {micSetup}
             {mic === 'granted' && (
               <p className="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-ok">
@@ -486,6 +679,9 @@ export default function CallCompanion() {
       <p className="pt-4 text-center font-mono text-[8.5px] uppercase tracking-[0.16em] text-muted-foreground/60">
         Quooro · Built in Wales
       </p>
+
+      {/* Off-screen sink for the picture-in-picture call card. */}
+      <video ref={pipVideoRef} muted playsInline className="pointer-events-none fixed left-0 top-0 h-px w-px opacity-0" />
     </div>
   );
 }

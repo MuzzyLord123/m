@@ -59,6 +59,7 @@ export function CallConsole({
   const [callId, setCallId] = useState<string | null>(null);
   const [pushId, setPushId] = useState<string | null>(null);
   const [pushHandled, setPushHandled] = useState(false);
+  const [remoteEnded, setRemoteEnded] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [outcome, setOutcome] = useState<string | null>(null);
@@ -76,7 +77,7 @@ export function CallConsole({
   // Reset per open; check for a paired phone.
   useEffect(() => {
     if (!open) return;
-    setPhase('choose'); setSource('desktop'); setCallId(null); setPushId(null); setPushHandled(false);
+    setPhase('choose'); setSource('desktop'); setCallId(null); setPushId(null); setPushHandled(false); setRemoteEnded(false);
     setStartedAt(null); setElapsed(0); setOutcome(null); setNotes('');
     setTranscript(''); setInterim(''); setPhoneTranscript(''); setListening(false);
     let cancelled = false;
@@ -90,15 +91,17 @@ export function CallConsole({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Call timer.
+  // Call timer. Freezes at the phone's duration once the handset has
+  // finished the call.
   useEffect(() => {
-    if (phase !== 'active' || !startedAt) return;
+    if (phase !== 'active' || !startedAt || remoteEnded) return;
     const id = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 1000);
     return () => clearInterval(id);
-  }, [phase, startedAt]);
+  }, [phase, startedAt, remoteEnded]);
 
-  // Phone calls: watch the push being picked up, and stream the
-  // transcript the phone is writing into this panel.
+  // Phone calls: watch the push being picked up, stream the transcript
+  // the phone is writing into this panel, and notice when the handset
+  // finishes the call so the desk only has to save the outcome.
   useEffect(() => {
     if (phase !== 'active' || source !== 'phone' || !callId) return;
     const id = setInterval(async () => {
@@ -111,9 +114,18 @@ export function CallConsole({
         .select('content').eq('call_id', callId).limit(1);
       const content = ((t as any[]) || [])[0]?.content;
       if (content) setPhoneTranscript(content);
+      if (!remoteEnded) {
+        const { data: log } = await supabase.from('crm_call_logs' as any)
+          .select('ended_at, duration_seconds').eq('id', callId).limit(1);
+        const row = ((log as any[]) || [])[0];
+        if (row?.ended_at) {
+          setRemoteEnded(true);
+          if (typeof row.duration_seconds === 'number') setElapsed(row.duration_seconds);
+        }
+      }
     }, 2000);
     return () => clearInterval(id);
-  }, [phase, source, callId, pushId, pushHandled]);
+  }, [phase, source, callId, pushId, pushHandled, remoteEnded]);
 
   async function startCall(via: 'desktop' | 'phone') {
     if (!user || !orgId) { toast({ title: 'Missing organisation context', variant: 'destructive' }); return; }
@@ -172,12 +184,16 @@ export function CallConsole({
     if (!callId || !user) return;
     setSaving(true);
     stopTranscript();
-    const duration = startedAt ? Math.floor((Date.now() - startedAt) / 1000) : null;
-    await supabase.from('crm_call_logs' as any).update({
-      ended_at: new Date().toISOString(),
-      duration_seconds: duration,
-      outcome, notes: notes.trim() || null,
-    } as any).eq('id', callId);
+    const duration = remoteEnded ? elapsed : (startedAt ? Math.floor((Date.now() - startedAt) / 1000) : null);
+    // If the phone already finished the call, its end time and duration
+    // are the truth - only the outcome and notes are added here.
+    await supabase.from('crm_call_logs' as any).update((remoteEnded
+      ? { outcome, notes: notes.trim() || null }
+      : {
+        ended_at: new Date().toISOString(),
+        duration_seconds: duration,
+        outcome, notes: notes.trim() || null,
+      }) as any).eq('id', callId);
 
     // Desktop calls own their local transcript; phone calls stream their
     // own row from the handset, which we never overwrite here.
@@ -263,7 +279,9 @@ export function CallConsole({
             <div className="flex items-baseline justify-between rounded-[10px] border border-border/60 bg-sunken/50 px-4 py-3">
               <span className={label}>
                 {source === 'phone'
-                  ? (pushHandled ? 'Ringing on your phone' : 'Sending to your phone…')
+                  ? (remoteEnded
+                    ? 'Finished on your phone · save the outcome'
+                    : pushHandled ? 'Ringing on your phone' : 'Sending to your phone…')
                   : 'On a call'}
               </span>
               <span className="font-mono text-[22px] font-semibold tabular-nums">{mm}:{ss}</span>
@@ -353,7 +371,7 @@ export function CallConsole({
 
             <Button className="h-11 w-full gap-2 rounded-[11px]" disabled={saving} onClick={endCall}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              End call and save
+              {remoteEnded ? 'Save outcome' : 'End call and save'}
             </Button>
           </div>
         )}
