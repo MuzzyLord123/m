@@ -104,3 +104,84 @@ Dishonourable mentions: `components/admin/AdminCommandCenter.tsx` (7-stage hex p
 - `ui/table.tsx` wrapper already provides the overflow container + muted header treatment — table quality issues are page-level, not primitive-level.
 
 Method note: OfficePasswordVault's 58 "marketing fluff" grep hits are the verb "unlock" for a password vault — excluded as false positives. Raw-hex counts include chart/canvas color constants (recharts fills, FigmaDesigner canvas), which are the least-bad hex uses but still bypass the palette.
+
+---
+
+# CRM AUDIT ADDENDUM — 2026-07-30
+
+# CRM Recon — Slop Audit, Inconsistencies, Mobile, Conceptual Model, Feature Inventory
+
+## 1. Post-platform-overhaul state: what got fixed vs what still reads template/default
+
+Fixed by platform overhaul (verified): LoungeCRM, AdminLeadManagement and AdminEnquiries now use the tone vocabulary (StatusDot/StatusBadge/Tone maps), SkeletonLedger, platform DataTable/DetailDrawer (enquiries); the old hex STATUS_CONFIG rainbows and emoji source icons are gone from those three files (AUDIT.md items 3/5/6 largely addressed). The crm/ workspace was built on platform components (Panel, EmptyState, AvatarID, SkeletonLedger) from the start.
+
+Still template/default:
+- **The whole `src/components/crm/` satellite family never got the overhaul.** FullScreenLeadView (18 shadow-theme hex hits), DealPipeline (~25), DealForecast, DealDialog, ProposalList, ProposalEditor all keep the hand-rolled `#111/#1a1a1a/#2a2a2a` private dark theme, the banned default-blue `#0073E6` accent, green `#22c55e` money text, and framer-motion wrappers. FullScreenLeadView additionally hardcodes `fontFamily: "'Inter', sans-serif"` (L189) overriding the brand font, and keeps its own hex STATUS_CONFIG rainbow (L64-72) with divergent labels ('Preview Wanted', 'Do Not Contact' vs 'Preview wanted', 'Do not contact'). These render INSIDE the token-converted LoungeCRM/AdminLeadManagement — visible theme break when opening Deals/Forecast/Proposals views or double-clicking a lead. None follow light mode.
+- **DEAL_STAGES hex rainbow** lives in the hook itself (`useCRMDeals.ts:39-47`: blue/purple/amber/orange/emerald/green/red) — data-layer file carrying presentation slop.
+- **LoungeCRM residue**: L800 and L847 still contain `text-[#ccc] placeholder:text-[#555]` under a `[&>textarea]:!text-foreground` override hack — patched over, not removed. Splash gate (CRMSplash/ExitSplash) on every legacy entry/exit remains.
+- **Proposal templates** (`useProposals.ts:66-127`): three fully canned proposals (£2,500 website, £499/mo SEO, £5,000 bundle, boilerplate intros/terms) — placeholder business content shipped as product data.
+- **CRMLeadImportDialog** duplicates ~85% of admin LeadImportDialog (autoMap, parseHtml heuristics, FIELD_OPTIONS, flow states) — freshly written copy-paste of legacy slop into the flagship workspace.
+- Unused imports linger (LeadDetailDialog: motion, Target, Tag, User…; CRMLeadImportDialog: AlertCircle, FileText, cn).
+
+## 2. Inconsistencies between the three CRM surfaces
+- **Identity**: workspace header says "Business relationships" with Radar icon; legacy + admin say "CRM" with Target icon; nav/registry calls it CRM; AdminLiveSessions labels /lounge/crm "CRM".
+- **Toast systems**: workspace uses use-toast in 5 files but sonner in CRMLeadImportDialog; admin files use sonner; legacy uses use-toast. Two toast stacks can appear on one screen.
+- **Stage models**: workspace = DB-driven `crm_lifecycle_stages` (colored dots from DB hex) set via RPC with server-side workflow side-effects; legacy/admin = hardcoded 7-status PIPELINE_ORDER written directly to `leads.status` + manual history insert; deals = third hardcoded DEAL_STAGES with probabilities. Three stage vocabularies, none mapped to each other.
+- **Duplicate constants**: STATUS_CONFIG/TONE_TEXT/TONE_BG/PIPELINE_ORDER duplicated verbatim in LoungeCRM + AdminLeadManagement (+ hex variant in FullScreenLeadView); SOURCE_CONFIG differs (legacy: 9 sources incl. referral/website/cold_outreach/social_media; admin type union: 5; workspace writes free-string `tab+'_import'` e.g. 'excel_import' which no config anywhere labels).
+- **Search capability**: server-side ilike + pagination (admin, dead) vs client-side over 10k rows (legacy) vs client-side name-only over up-to-50k prefetch (workspace, the survivor — a functional regression vs the dead admin one).
+- **Detail navigation**: keyboard arrows exist in LeadDetailDialog/FullScreenLeadView, absent in workspace EntityDetail (buttons only).
+- **PII**: admin lead/enquiry lists decrypt ENC: phone/email via rpc; legacy LoungeCRM and workspace CRM read the same kind of data with NO decrypt path (encrypted rows would render raw); csvIO/CRM imports write plaintext.
+- **Delete safety**: LeadDetailDialog wraps delete in AlertDialog confirm; legacy/admin panes and workspace NotesPanel delete instantly with no confirm.
+- **updated_at discipline**: admin edits stamp `updated_at` manually; legacy saveEdit does not; workspace relies on DB.
+- **Export scope**: legacy exports filtered set; admin exports only the loaded 50-row page while toasting "Exported N leads"; workspace exports current filtered view.
+
+## 3. Mobile behaviour problems
+- **Legacy + admin micro-type**: pervasive text-[8px]/[9px]/[10px] labels and h-5/h-6/h-7 (20-28px) tap targets — far below 44px; pagination buttons h-5 w-5 (admin desktop) and h-7 w-7 (mobile).
+- **Legacy fixed-width modals**: Add contact `w-[520px]`, Import `w-[640px]` in hand-rolled overlays — overflow a 390px viewport (horizontal clipping; import is desktop-hidden `sm:flex` but Add is reachable via... actually Add button visible on mobile with icon only).
+- **Deal board on touch**: HTML5 dragstart/drop only — no touch drag support, so mobile users cannot move deals; board columns stack vertically full-width (usable but drag-dead). Desktop board relies on horizontal overflow-x scroll.
+- **FullScreenLeadView isMobile** = `window.innerWidth < 768` read per render with no resize listener — wrong layout after rotation; whole component ignores safe-area/theme.
+- **Workspace CRMShell mobile**: solid pattern overall (Sheet nav, full-screen detail overlay, virtualised list) but: header search shrinks to `w-40` next to exit+title (cramped); Dashboard `grid-cols-3` KPI row squashes three cards on narrow phones; row checkboxes are small targets inside 84px rows; filter chip row is overflow-x-auto (fine) yet unlabeled for scroll.
+- **Import dialogs on mobile**: CRMLeadImportDialog `max-w-4xl` with 5-column TabsList (`grid-cols-5`) squeezes tab labels; mapping/preview tables scroll inside `overflow-auto` (fine); admin LeadImportDialog uses `w-[95vw]` (fine).
+- **Tables**: enquiries uses platform DataTable with mobileCard (good); import preview tables are min-width unconstrained `w-full text-xs` — long emails wrap/truncate acceptably.
+
+## 4. Conceptual-model notes (naming only, no fixes)
+- **Two disjoint lead universes**: legacy `leads` (flat row: business/personal/contact names, google_rating, source, status) vs workspace `crm_contacts`+`crm_companies`+`crm_opportunities` (relational, relationship_type[], lifecycle_stage_id). Nothing bridges them. Consequence: AdminEnquiries "Convert to lead → View it in the CRM" inserts into `leads`, but the only nav-reachable CRM reads `crm_contacts` — converted enquiries are invisible except via the orphan /lounge/crm-legacy URL or the unmounted admin panel.
+- **"Lead" vs "contact"**: workspace calls crm_contacts rows "Contacts" in nav but "My leads / Team total (All leads & contacts)" on the dashboard, and its import dialog is "Import leads" that creates contacts with `relationship_type:['lead']`. Legacy calls `leads` rows "contacts" in the list/view toggle ("Contacts", "Add contact", "Search contacts…") while the admin twin calls the same rows "Leads" ("Lead deleted", "Import Leads"). The word means the opposite thing on each side.
+- **"Company"**: legacy leads store company as a name string (business_name) + category; workspace has first-class crm_companies — but the workspace's own rich import discards company structure, flattening business_name/website/city/rating into the contact's `notes` string and mapping `category → job_title` (semantically wrong: a business category is not a person's job title).
+- **"Opportunity" vs "deal"**: crm_opportunities (org-scoped, contact/company FKs, lifecycle stage) vs crm_deals (user-scoped, free-text contact_name/company_name, own stage set, lead_id FK into the LEGACY leads table). Both mean "pipeline revenue object"; they never see each other. Proposals also FK lead_id → legacy leads.
+- **Ownership vocabulary**: owner_id (crm_*) vs assigned_to (leads) vs user_id-as-owner (crm_deals, proposals).
+- **org model**: workspace org_id = "first-created admin's user_id" resolved ad hoc in two import engines and inferred from row[0] in the shell — an implicit single-tenant assumption wearing multi-tenant clothes.
+- **Enquiry** is a fourth proto-lead entity with its own status pipeline (new/contacted/in-progress/completed/closed) overlapping but not matching lead statuses.
+
+## 5. Feature inventory vs enterprise CRM canon
+| Capability | Status | Where / gap |
+|---|---|---|
+| Records (companies/contacts/opps) | EXISTS (workspace) | crm_companies/contacts/opportunities + legacy leads in parallel |
+| Custom fields | ABSENT | fixed schemas everywhere; tags[] is the only extensibility |
+| Pipelines | PARTIAL | lifecycle stages DB-driven (workspace, no stage-editing UI); hardcoded status pipeline (legacy/admin); deal stages hardcoded |
+| Forecasting | PARTIAL | DealForecast (weighted pipeline, 6-mo projection, win/loss) — client-computed, legacy/admin views only; workspace shows raw pipeline £ "Not yet weighted" |
+| Activities / tasks / reminders | ABSENT | no task object, no due dates, no reminders anywhere; timeline is passive event log |
+| Notes | EXISTS | three systems: crm_communications(kind=note), lead_notes, enquiries.notes text |
+| Tags / segmentation | PARTIAL | tags columns rendered read-only in all detail views; settable only via import/LeadDetailDialog state (no tag editor UI); no segments/lists |
+| Saved views / filters | ABSENT | all filters ephemeral component state |
+| Global search | PARTIAL | per-section name-only (workspace); multi-field client (legacy); server ilike (dead admin). No cross-entity search |
+| Bulk operations | PARTIAL | workspace multi-select → assign/unassign only; no bulk stage/tag/delete/export-selected |
+| Import / export | EXISTS | 4 import engines + 3 CSV exports + template download (see contracts doc §5-6) |
+| Reporting | PARTIAL | workspace dashboard cards + DealForecast; no report builder, no date-ranged lead reports |
+| Assignment / ownership | EXISTS | workspace: bulk + per-record OwnerPicker + owner filters + per-admin dashboard; admin dialog select; legacy: implicit self-assign only |
+| Automations | PARTIAL | crm_workflows/crm_workflow_runs read-only list; RPC stage-change "may fire workflows" server-side; deal→won auto-creates client_onboarding; no builder UI |
+| Email / calendar integration | ABSENT (in CRM) | LoungeMail/Calendar exist platform-wide but no linkage to CRM records; timeline could surface crm_communications but nothing writes emails to it |
+| Audit trail | PARTIAL | lead_status_history, crm_deal_activities, lead_imports (admin engine only), crm_timeline RPC; no field-level audit, no workspace assignment/note history |
+| API / webhooks | ABSENT | no public API, no webhook config |
+| Permissions | PARTIAL | route guards (admin/user) + RLS assumed; no per-record sharing, no team scoping in workspace (everyone sees org-wide book); crm_deals/proposals silo per user_id |
+| Duplicate management | PARTIAL | import-time only (2 of 4 engines); no merge, no dedupe review UI |
+| Lead conversion | EXISTS (legacy chain) | enquiry→lead (AdminEnquiries), lead→client (LeadDetailDialog via create-client edge fn); NO conversion concept in workspace crm_* model |
+
+## 6. Notable functional traps found during recon (for the overhaul plan)
+- CRMShell "New" button disabled when book is empty (orgId derived from first fetched row) — cold-start cannot create records; import is the only bootstrap.
+- WorkflowsView fetches crm_workflow_runs and drops them (never rendered).
+- Legacy inline edit silently drops personal_name/postcode edits; name input writes personal-name edits into business_name.
+- Admin export exports the current 50-row page only; toast implies full export.
+- LeadImportDialog dupe `.or()` interpolates raw CSV values (commas/quotes in a business name break the filter string).
+- useCRMDeals fetch has no user filter while insert is user-scoped — cross-user visibility depends entirely on RLS.
+- AdminLeadManagement + LeadImportDialog + LeadDetailDialog + FullScreenLeadView(admin path) are currently unreachable (Dashboard leads tab redirects) — "protected" import engine #4 is dead code today but is also the ONLY audited import engine.

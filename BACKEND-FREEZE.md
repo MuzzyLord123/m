@@ -159,3 +159,27 @@ off:
 - Mixed data+render files: restyle rendering only, per the mixed-files
   rule above; re-verify data lines after every edit.
 - Flows in `FLOWS.md` must pass identically at the end of every phase.
+
+---
+
+# CRM OVERHAUL — PROTECTED IMPORT ENGINE (2026-07-30, branch crm-overhaul)
+
+The import engine is a GOLDEN FEATURE. The files/ranges below are
+PROTECTED: byte-identical through the CRM overhaul even though they are
+front-end code. Shell (dropzone visuals, progress display, results
+screen, copy) may be rebuilt around them; every parse/mapping/dedupe/
+insert/progress line is frozen. IMPORT-CONTRACT.md holds the recorded
+behaviour; Phase 6 replays it and the numbers must match exactly.
+
+- src/pages/lounge/crm/CRMLeadImportDialog.tsx — engine lines (parsers,
+  applyMapping, runImport, signature dedupe) per the ranges in the
+  DATA-CONTRACTS CRM addendum
+- src/pages/lounge/crm/csvIO.ts — whole file (workspace CSV import/export)
+- src/components/admin/LeadImportDialog.tsx — dormant but complete admin
+  engine (only writer of lead_imports); protected pending a decision on
+  reviving it (roadmap)
+- src/pages/lounge/LoungeCRM.tsx — legacy import block (parseCSV/
+  handleImportFile)
+- src/pages/lounge/crm/ImportExportMenu.tsx — handleFile/handleExport
+  logic (trigger chrome may be restyled)
+- src/components/admin/AdminEnquiries.tsx — convertToLead block

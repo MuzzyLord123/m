@@ -189,3 +189,77 @@ Guard for all rows: `ProtectedRoute` + `CustomerGuard` **shared-path carve-out**
 ## Marketing routes (counted, not listed)
 
 51 public marketing/legal routes + `*` NotFound catch-all: home, packages/pricing/plan pages (7), service pages (6, incl. `/account-management` — marketing despite the platform-sounding name), portfolio + 6 demos, preview-* (6), workshop marketing (3), legal/policy (5), plus features/comparison/support/etc.
+
+---
+
+# CRM OVERHAUL ADDENDUM — 2026-07-30 (branch crm-overhaul)
+
+# CRM Recon — Surfaces & Flows (Phase 0, branch crm-overhaul)
+
+## 1. Surface map
+
+### A. CRM workspace — `/lounge/crm` (FLAGSHIP, only nav-linked CRM)
+Route: `App.tsx:307` `ProtectedRoute > CustomerGuard > CRMShell` (lazy). `CustomerGuard` allows BOTH roles: `/lounge/crm` is on the shared-app path whitelist (`CustomerGuard.tsx:57`), so admins pass through; clients (`isUser`) pass normally. Treated as editor-route (no lounge chrome, `App.tsx:216`).
+Entry points: lounge sidebar/mobile drawer via `navRegistry.ts:33`; LoungeOverview quick links (`LoungeOverview.tsx:205,417,564`); ExecutiveDashboard "View CRM" (`ExecutiveDashboard.tsx:399`); **admin Dashboard "leads" tab is now `<Navigate to="/lounge/crm" replace />` (`Dashboard.tsx:772`)** — the workspace is the de-facto team lead surface too.
+Files: `src/pages/lounge/crm/` — CRMShell.tsx (600), useCRMData.ts (137), EntityDetail.tsx (388), NotesPanel.tsx (122), NewEntityDialog.tsx (259), ImportExportMenu.tsx (92), CRMLeadImportDialog.tsx (444), csvIO.ts (155), useAdmins.ts (53).
+
+Screens/views (single-page `section` state, no sub-routes):
+- **Dashboard** (default): 3 workload KPIs (My leads / Unassigned / Team total), 4 entity KPIs (Companies/Contacts/Opportunities/Pipeline £), "Leads assigned per admin" bars, "Lifecycle stages" bars (dedupe heuristic `max(contacts,companies)+opps`), "Recently updated" list (top 6 across entities).
+- **Companies / Contacts / Opportunities**: master list (virtualised, @tanstack/react-virtual, row est. 84px) + detail pane. Toolbar: owner filter chips (All/Mine/Unassigned/Teammate dropdown), count label, bulk-select Assign dropdown, ImportExportMenu ("Data"), New button (disabled until `orgId` derivable from an existing row — cold-start dead-end).
+- **Workflows**: read-only list from `crm_workflows` + fetches `crm_workflow_runs` (runs fetched but never rendered).
+Dialogs/sheets: mobile nav Sheet (left); NewEntityDialog; CRMLeadImportDialog (contacts only, 5 tabs: CSV/Excel/JSON/HTML/Manual → mapping → preview → progress → result); ImportExportMenu dropdown (Import leads / Export CSV / Quick CSV import / Download template); EntityDetail call-confirm AlertDialog (tel:).
+EntityDetail: header (type kicker, rel-type + stage chips, prev/next through filtered list, close), tabs Overview (stage Select → RPC, OwnerPicker dropdown, contact fields, notes text, tags read-only, NotesPanel CRUD) / Timeline (RPC `crm_timeline`) / Financials (RPC links + LTV stats).
+States: loading `SkeletonLedger`; empty `EmptyState` ("No record selected", "No records", timeline/financials empties, "No workflows configured"); error → toast (use-toast in siblings, **sonner in CRMLeadImportDialog**); import progress bar + result screen (Added/Duplicates/Errors).
+Mobile: sidebar → Sheet; list full-width; detail becomes `fixed inset-0 z-40` overlay; search shrinks to `w-40`.
+
+### B. Legacy client CRM — `/lounge/crm-legacy` (ORPHAN: no in-app link, URL-only)
+Route: `App.tsx:309` same guards → `src/pages/lounge/LoungeCRM.tsx` (1534). Gated by `CRMSplash` on entry and `ExitSplash` on back (splash pair unique to legacy).
+Data: `leads` table (NOT crm_*). Shares satellites with admin: FullScreenLeadView, DealPipelineBoard, DealForecast, DealDialog, ProposalList, ProposalEditor + hooks useCRMDeals, useProposals.
+Views (top-bar toggle): **Contacts** (list) / **Pipeline** (kanban mini-list, not a board) / **Deals** (drag-drop DealPipelineBoard on `crm_deals`) / **Forecast** (DealForecast, recharts) / **Proposals** (ProposalList → ProposalEditor).
+Desktop: 3-pane ResizablePanelGroup (list 28 / detail 44 / activity 28). Mobile: single view with back header + Details/Activity tabs.
+Dialogs: Add-contact modal (hand-rolled fixed overlay, `w-[520px]`, Business/Personal toggle, status+source selects); Import modal (hand-rolled, `w-[640px]`, CSV-only: file → auto-map → mapping grid → 5-row preview → import); DealDialog; FullScreenLeadView (double-click or Maximize icon; own hardcoded dark theme).
+Detail pane: header (initials chip, StatusBadge, source line, edit/delete/full-screen), Pipeline-stage button row (7 statuses), 2-col info grid (email/phone/website/category/location/rating; inline edit mode), tags, timestamps. Activity pane: note composer + notes + status-history feed.
+States: SkeletonLedger loading, icon empty-states, stat pills (Total/New/Engaged/Converted), collapsible filter bar (status × source chips).
+
+### C. Team side — Dashboard admin components
+- **AdminLeadManagement.tsx** (1092) — **DEAD CODE**: imported in `Dashboard.tsx:49` but never rendered (leads tab redirects to `/lounge/crm`). Was the admin twin of LoungeCRM: same 5 view modes, same 3-pane/mobile layout, but server-side paged `leads` query (50/page, ilike or-search, PII decrypt) + pagination footer; Add contact opens LeadDetailDialog; Import opens LeadImportDialog. Exports leadStatusConfig/sourceLabels consumed by LeadDetailDialog.
+- **LeadDetailDialog.tsx** (903) — reachable only via AdminLeadManagement. `w-[95vw] sm:max-w-4xl h-[90vh]` dialog; tabs Details / Enquiry (only if `enquiry_data`) / Notes / History; right action rail (Save, Convert to Client via `create-client` edge fn, Delete AlertDialog, Quick Info tel:/mailto:); prev/next + ArrowLeft/Right keyboard nav; doubles as "new lead" form.
+- **LeadImportDialog.tsx** (1007) — admin import engine (CSV/JSON/HTML/Manual tabs, mapping step, preview, batch-10 import with per-lead dupe query, progress + ETA, `lead_imports` audit log). Reachable only via AdminLeadManagement.
+- **AdminEnquiries.tsx** (660) — LIVE at Dashboard `enquiries` tab (`Dashboard.tsx:789`). Platform DataTable + DetailDrawer (Contact/Project/Business/Notes tabs). Actions: status select, **Convert to client** (password modal → `create-client` edge fn), **convert-to-lead** (`convertToLead()` L149-196: dupe-check by email → insert into `leads` with `tags:['from-enquiry']`, `enquiry_id`, `enquiry_data` → enquiry status 'in-progress'). NOTE: the resulting lead lands in the `leads` table, which the flagship `/lounge/crm` never reads — only orphaned surfaces show it.
+- **FullScreenLeadView.tsx** (461, src/components/crm/) — fixed z-50 overlay over `leads`; keyboard prev/next/Esc; own hex STATUS_CONFIG + `#111` theme.
+Hooks: `useCRMDeals` (crm_deals CRUD + activities + analytics/forecast math + auto `client_onboarding` insert on stage→won), `useProposals` (proposals CRUD, 3 canned templates, `generate_proposal_number` RPC). `useClientPricing` reviewed — billing-only (client_pricing/client_invoices/client_contracts for LoungeBilling), NOT CRM-relevant.
+
+### Role reachability summary
+| Surface | Client ('user') | Admin | Linked in nav? |
+|---|---|---|---|
+| /lounge/crm workspace | yes | yes (shared-app whitelist; Dashboard leads tab redirects here) | yes |
+| /lounge/crm-legacy | yes | yes (same whitelist prefix `/lounge/crm`) | no (URL only) |
+| AdminLeadManagement (+LeadImport/LeadDetail dialogs) | no | not mounted (dead) | no |
+| AdminEnquiries (convert-to-lead) | no | yes (Dashboard enquiries tab) | yes |
+
+## 2. Five core flows, as-built
+
+### Flow 1 — Find a lead
+- Workspace (both roles): open /lounge/crm → useCRMData prefetches ALL rows client-side (`crm_companies|contacts|opportunities` paged 1000/req up to 50k) → pick section → type in header search (client-side, name-ish field only, deferred) → owner chips (All/Mine/Unassigned/teammate) → click row → EntityDetail. No server search; email/phone/tag not searchable (contacts fall back to email only when nameless).
+- Legacy client: `leads` select limit 10000 → client-side filter across business/personal/contact name, email, category + status/source filter bar + sort select.
+- Admin (dead path): server query `from('leads').select('*',{count:'exact'}).or(6-field ilike).order(sort).range(page)` + `decryptPiiFields(phone,email)`.
+
+### Flow 2 — Add a lead
+- Workspace: "+ New" (needs orgId from an existing row) → NewEntityDialog → contact: `crm_contacts.insert({org_id, owner_id:user.id, full_name, email, phone, company_id?, relationship_type:['lead']})`; company/opportunity analogous. Or Data → Import leads → Manual tab → `runImport([manual],'manual')` (dedupe + insert crm_contacts).
+- Legacy: "Add contact" modal → `leads.insert({business/personal/contact_name, email, phone, website_url, category, location_*, status, source, is_personal, assigned_to:user.id})`.
+- Admin (dead): Add contact → LeadDetailDialog new-mode → `leads.insert({...fields, source:'manual', status:'new', assigned_to, tags}).select().single()`.
+- From enquiry (admin, live): AdminEnquiries convertToLead → dupe check → `leads.insert` with enquiry payload.
+
+### Flow 3 — Progress a lead through stages
+- Workspace: EntityDetail → Lifecycle stage Select → `rpc('crm_set_lifecycle_stage', {_entity_type,_entity_id,_new_stage_id,_note:null})` → toast "Workflows may have fired automatically" → refetch. Stages come from `crm_lifecycle_stages` (server-defined, colored, ordered).
+- Legacy/FullScreen/Admin: stage button row (hardcoded PIPELINE_ORDER new→contacted→engaged→live_preview_wanted→converted→lost→do_not_contact) → `leads.update({status})` + `lead_status_history.insert({lead_id, old_status, new_status, changed_by})` (two unwrapped writes, no transaction). LeadDetailDialog additionally auto-stamps `last_contacted_at` on →contacted and offers Convert-to-Client: `functions.invoke('create-client')` → `leads.update({status:'converted', converted_client_id})` → copy notes into `profiles.notes` → history insert.
+- Deals (legacy/admin views): drag card between DEAL_STAGES → `crm_deals.update({stage, probability, won?, actual_close_date?})` + `crm_deal_activities.insert` + auto `client_onboarding.insert` on won.
+
+### Flow 4 — Import a book (see contracts doc for engine-by-engine detail)
+- Workspace contacts: Data → "Import leads" → CRMLeadImportDialog (CSV/Excel(XLSX)/JSON/HTML/Manual → autoMap → mapping table → preview → org resolve → 20k-signature dedupe preload → 500-row chunk inserts into `crm_contacts` with business data flattened into `notes`) OR "Quick CSV import" → csvIO.importEntities (no preview/dedupe, 200-row chunks, per-entity column synonyms). Template download available.
+- Legacy client: Import modal → CSV only → parseCSV (regex, quote-fragile) → auto-map → editable mapping → 50-row chunk `leads.insert`, defaults status new/source csv_import/assigned_to me. No dedupe, no audit.
+- Admin (dead): LeadImportDialog → CSV/JSON/HTML/Manual → mapping/preview → batch-10 with per-lead `.or()` dupe query → `leads.insert` → progress %, ETA → `lead_imports` audit row. Only this engine logs imports.
+
+### Flow 5 — Review / report
+- Workspace: Dashboard section (workload + entity KPIs, per-admin lead distribution, lifecycle distribution, recent activity); Financials tab per record (invoiced/paid/outstanding via RPCs); Workflows list. Export current view to CSV.
+- Legacy/Admin: stat pills; Forecast view = DealForecast (pipeline value, weighted forecast, win rate, avg deal size, 6-mo projection + win/loss recharts from useCRMDeals.analytics — computed client-side); Deals board totals per column; Proposals list w/ status. Export CSV of filtered contacts (legacy) / current page (admin — exports only the 50 loaded rows).

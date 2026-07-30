@@ -853,3 +853,151 @@ Raw `fetch` to `${VITE_SUPABASE_URL}/functions/v1/<fn>` is marked (raw fetch) �
 - from('team_inbox_settings').update({is_available, last_active_at}).eq('id') or .insert({admin_id, is_available}) — availability
 - from('team_inbox_settings').update({is_primary:false}).neq('admin_id','placeholder') then .update({is_primary:true}).eq('id') or .insert({admin_id, is_primary:true, is_available:true}) — set primary
 
+
+---
+
+# CRM OVERHAUL ADDENDUM — 2026-07-30
+
+# CRM Recon — Exhaustive Data Contract + PROTECTED Import-Engine List
+
+Verified against DATA-CONTRACTS.md (§CRM WORKSPACE L395-420, §LoungeCRM L154-160, §hooks L451-457, §admin L725-753). Existing doc is accurate; additions/corrections marked (+).
+
+## 1. CRM workspace `/lounge/crm` (src/pages/lounge/crm)
+
+### useCRMData.ts
+- `from('crm_companies'|'crm_contacts'|'crm_opportunities').select('*').order('updated_at' desc).range(from, from+999)` — fetchAll loop, 1000/page, hard stop 50k (L70-86)
+- `from('crm_lifecycle_stages').select('*').order('order_index')` — stages {id, name, slug, color, order_index, category}
+- `rpc('crm_timeline', {entity_type, entity_id, limit_count:50})` — rows use {event_type|kind, occurred_at, subject|title, body}
+- `rpc('crm_entity_financials', {_entity_type, _entity_id})` — links [{finance_type, finance_id, reference, status, amount, currency}]
+- `rpc('crm_entity_lifetime_value', {_entity_type, _entity_id})` — [{invoiced, paid, outstanding, currency}]
+- `rpc('crm_set_lifecycle_stage', {_entity_type, _entity_id, _new_stage_id, _note:null})`
+- Row shapes: CRMCompany {id, owner_id, name, legal_name, domain, website, industry, phone, email, city, country, notes, tags[], relationship_type[], lifecycle_stage_id, created_at, updated_at}; CRMContact {id, owner_id, company_id, full_name, first_name, last_name, email, phone, mobile, job_title, tags[], relationship_type[], lifecycle_stage_id, ...}; CRMOpportunity {id, owner_id, company_id, contact_id, title, description, value, currency, stage, probability, expected_close_date, lifecycle_stage_id, ...}. (+) org_id present on rows (used for orgId derivation) though not in the TS interfaces.
+
+### CRMShell.tsx
+- `from('crm_companies'|'crm_contacts'|'crm_opportunities').update({owner_id: userId|null}).in('id', targetIds)` — bulk assign (L104)
+- WorkflowsView: `from('crm_workflows').select('*').order('priority')`; `from('crm_workflow_runs').select('*').order('created_at' desc).limit(20)` (L566-569; runs fetched, never rendered)
+
+### EntityDetail.tsx
+- `from(TABLE_FOR[entityType]).update({owner_id}).eq('id', entity.id)` — OwnerPicker (L351)
+- `window.location.href = 'tel:' + number` after confirm dialog (L293)
+
+### NotesPanel.tsx (notes = crm_communications rows)
+- `from('crm_communications').select('id, body, subject, occurred_at, owner_id').eq('kind','note').eq(company_id|contact_id|opportunity_id, entityId).order('occurred_at' desc).limit(100)`
+- `.insert({org_id, owner_id, kind:'note', direction:'internal', body, occurred_at, [entity fk]})`; `.delete().eq('id')`
+
+### NewEntityDialog.tsx
+- `from('crm_opportunities').insert({org_id, owner_id, title, value|null, currency:'GBP', description|null, contact_id|null, company_id|null})`
+- `from('crm_contacts').insert({org_id, owner_id, full_name, email|null, phone|null, company_id|null, relationship_type:['lead']})`
+- `from('crm_companies').insert({org_id, owner_id, name, email|null, phone|null, relationship_type:['lead']})`
+
+### useAdmins.ts
+- `from('user_roles').select('user_id').eq('role','admin')`; `from('profiles').select('user_id,email,full_name,is_owner').in('user_id', ids)`
+
+### csvIO.ts (quick import/export engine)
+- `supabase.auth.getUser()` — importer id
+- org resolve: `from('user_roles').select('user_id, created_at').eq('role','admin').order('created_at' asc).limit(1).maybeSingle()` → orgId = first-created admin
+- `from('crm_companies'|'crm_contacts'|'crm_opportunities').insert(rows, {count:'exact'})` — 200-row chunks; row keys per entity:
+  - company {org_id, owner_id, name(name|company|business_name|'(Unnamed)'), legal_name, domain, website(website|website_url), industry(industry|category), phone, email, city(city|location_city), country, notes, tags(split |,;), relationship_type(split)||['lead']}
+  - contact {org_id, owner_id, full_name(full_name|name|contact_name|personal_name), first_name, last_name, email, phone, mobile, job_title(job_title|title), notes, tags, relationship_type||['lead']}
+  - opportunity {org_id, owner_id, title(title|name|'(Untitled)'), description, value:Number, currency||'GBP', stage, probability:Number, expected_close_date}
+- Export: client-side toCSV over EXPORT_COLUMNS (no queries). No dedupe, no import audit row.
+
+### CRMLeadImportDialog.tsx (rich import engine → crm_contacts only)
+- `supabase.auth.getUser()`; org resolve same as csvIO (L224-227)
+- Dedupe preload: `from('crm_contacts').select('email, phone, full_name').eq('org_id', orgId).limit(20000)` → signature Set (`e:`email.lower, `p:`phone-no-spaces, `n:`name.lower) (L230-237)
+- `from('crm_contacts').insert(rows)` — 500-row chunks (L273); row = {org_id, owner_id, full_name(personal||contact||business), email, phone, job_title:category, source: tab+'_import'|'manual', relationship_type:['lead'], notes: 'Business: … • Web: … • City: … • Postcode: … • Rating: x (n) • Category: …'} — company/rating/location data FLATTENED into notes text (L255-270)
+- No lead_imports audit row. Progress = processed/total per chunk.
+
+## 2. Legacy client CRM `/lounge/crm-legacy` (LoungeCRM.tsx)
+- `from('leads').select('*').order('updated_at' desc).limit(10000)` — fetchContacts
+- Per selected: `from('lead_notes').select('*').eq('lead_id').order('created_at' desc)`; `from('lead_status_history').select('*').eq('lead_id').order('changed_at' desc)` (re-run after writes)
+- `from('leads').update({status})` + `from('lead_status_history').insert({lead_id, old_status, new_status, changed_by})` — stage change (L296-302)
+- `from('lead_notes').insert({lead_id, content, author_id})`
+- `from('leads').delete().eq('id')`
+- `from('leads').update({business_name, contact_name, email, phone, website_url, category, location_city}).eq('id')` — inline edit (personal_name/postcode NOT saved)
+- `from('leads').insert({business_name, personal_name, contact_name, email, phone, website_url, category, location_city, location_postcode, status, source, is_personal, assigned_to:user.id})` — add contact
+- Import: `from('leads').insert(chunk)` — 50-row chunks, mapped keys + defaults {status:'new', source:'csv_import', assigned_to:user.id} (L443-449). (+) No PII decrypt on this surface (admin twin decrypts).
+- via useCRMDeals / useProposals (below). Export: client-side CSV, no query.
+
+## 3. Shared satellites (src/components/crm + hooks)
+### FullScreenLeadView.tsx
+- `from('lead_notes')`/`from('lead_status_history')` selects as above (L112-114)
+- `from('leads').update({status})` + history insert (L126-132); `from('leads').update({business_name, contact_name, email, phone, website_url, category, location_city, location_postcode, updated_at})` (L141-151); `from('lead_notes').insert` (L165); `from('leads').delete()` (L177)
+### useCRMDeals.ts
+- `from('crm_deals').select('*').order('updated_at' desc)` — NOT user-filtered on read (RLS-dependent); insert IS user-scoped: `.insert({user_id, deal_name, stage, probability, deal_value, currency:'GBP', expected_close_date, contact_name, company_name, description, lead_id}).select().single()`
+- `from('crm_deals').update(updates).eq('id')`; `.delete().eq('id')`
+- `from('crm_deal_activities').insert({deal_id, user_id, activity_type:'created'|'stage_change', old_value?, new_value, description})`
+- On stage→'won': `from('client_onboarding').insert({user_id, deal_id, client_name, client_email:null, company_name, status:'pending', account_created:true, account_created_at})` (silent-fail)
+### useProposals.ts
+- `from('proposals').select('*').eq('user_id').order('created_at' desc)`; `rpc('generate_proposal_number')`
+- `.insert({user_id, proposal_number, template_type, status:'draft', lead_id, client_name, client_email, client_company, client_phone, title, introduction, scope_items(json), pricing_items(json), total_amount, currency:'GBP', valid_until, terms}).select().single()`; `.update(partial).eq('id')`; `.delete().eq('id')`; send = update {status:'sent', sent_at}
+### useClientPricing.ts — checked, NOT CRM (team_memberships/client_teams/client_pricing/client_invoices/client_contracts; LoungeBilling only)
+
+## 4. Team side (src/components/admin)
+### AdminLeadManagement.tsx (currently unmounted)
+- `from('leads').select('*', {count:'exact'})[.eq('status')][.or(business_name|personal_name|contact_name|email|phone|location_city .ilike.%q%)].order(sortField, asc only for name).range(page*50)` → `decryptPiiFields(rows, ['phone','email'])` (rpc `decrypt_pii` per unique ENC: value, cached)
+- `from('user_roles').select('user_id').eq('role','admin')` + `from('profiles').select('user_id, full_name, email').in('user_id')`
+- notes/history selects, status update + history insert, note insert, delete, inline edit update (+updated_at) — same shapes as legacy
+- Export CSV client-side (only the loaded page)
+### LeadDetailDialog.tsx
+- `from('lead_notes').select.eq('lead_id')` + `from('profiles').select('user_id, full_name').in('user_id', authorIds)`; same for history/changerIds
+- create: `from('leads').insert({business_name, personal_name, contact_name, is_personal, phone, email, website_url, location_city, location_postcode, google_rating, review_count, category, source:'manual', status:'new', assigned_to, tags}).select().single()`
+- update: same fields + {status, assigned_to, tags, last_contacted_at(auto on →contacted), updated_at}; `lead_status_history.insert` when status changed
+- `from('lead_notes').insert / .delete().eq('id')`; `from('leads').delete().eq('id')`
+- Convert: `supabase.functions.invoke('create-client', {body:{email|placeholder 'lead-XXXX@placeholder.com', password(random temp), fullName, company, phone, plan:'Preview Only', websiteStatus:'design'}})` → `from('leads').update({status:'converted', converted_client_id, updated_at})` → `from('profiles').update({notes:'Lead notes:…'}).eq('user_id', newClientId)` → history insert
+### LeadImportDialog.tsx
+- Dupe check per lead: `from('leads').select('id').or(phone.eq.X, email.ilike.Y, business_name.ilike.%Z%).limit(1)` (L367-382 — unescaped values into .or())
+- `from('leads').insert(leadsToInsert)` — batches of 10; row {business_name, personal_name, contact_name, is_personal, phone, email, website_url, location_city(street+city merge), location_postcode, google_rating, review_count, category, source: 'csv_import'|'json_import'|'html_import'|'manual', status:'new'}
+- Audit: `from('lead_imports').insert([{imported_by, source_type, total_count, added_count, skipped_count, duplicate_count, import_log(json per-lead status)}])` (L479-487) — ONLY import engine that logs
+### AdminEnquiries.tsx
+- `from('enquiries').select('*', {count:'exact'})[.eq('status')][.or(name|first_name|last_name|email|company|phone ilike)].order('created_at' desc).range` + decryptPiiFields(['phone'])
+- `from('enquiries').update({status}).eq('id')`; `.update({notes}).eq('id')`
+- convert→lead: `from('leads').select('id').eq('email').maybeSingle()`; `from('leads').insert({business_name|null, personal_name|null, contact_name, is_personal, phone|null, email, website_url|null, category(business_type|interest)|null, source:'manual', status:'new', tags:['from-enquiry'], enquiry_id, enquiry_data(whole enquiry json)})`; `from('enquiries').update({status:'in-progress'})`
+- convert→client: `auth.getSession()` + raw `fetch(${VITE_SUPABASE_URL}/functions/v1/create-client, POST, Bearer access_token, body:{email, password, fullName, company?, phone?, plan(selected_package)?, pageCount?, notes?, websiteStatus:'design', enquiryId, enquiryData})`
+No realtime channels anywhere in CRM scope. Edge functions used: `create-client` (2 call styles: functions.invoke + raw fetch); rpc: `crm_timeline`, `crm_entity_financials`, `crm_entity_lifetime_value`, `crm_set_lifecycle_stage`, `generate_proposal_number`, `decrypt_pii`.
+
+## 5. PROTECTED LIST — import-engine code (do not rewrite during overhaul)
+Every file containing parsing/extraction/mapping/dedupe/batching/progress logic, with engine vs shell split:
+
+### src/pages/lounge/crm/csvIO.ts — ENTIRE FILE ENGINE (L1-155)
+- csvEscape L5-10; toCSV L12-16; parseCSV L18-46 (stateful quote-aware char parser — the good one); downloadCSV L48-54; EXPORT_COLUMNS L57-61; exportEntities L64-68; splitArray L71-74; importEntities L76-155 (auth, org resolve, header-synonym mapping, 200-chunk insert, inserted/failed/errors accounting)
+
+### src/pages/lounge/crm/CRMLeadImportDialog.tsx (444)
+- ENGINE: ParsedLead/ImportResult types L23-37; FIELD_OPTIONS mapping vocab L39-52; emptyLead L54-59; autoMap L61-78; parseCSVText L80-91 (per-line quote toggle — cannot handle embedded newlines); handleCsv L118-127; handleXlsx L130-144 (XLSX.read sheet_to_json header:1); handleJson L147-172 (key-synonym extraction incl. Google-Maps export keys title/totalScore/reviewsCount/categoryName); parseHtml L175-199 (DOMParser tr/td + content-type heuristics: phone regex, @-email, url, rating, review count, fallback name); applyMapping L202-217; runImport L220-285 (org resolve, 20k dedupe signature set, 500-chunk build incl. notes flattening, insert, progress/processed state); previewCounts L287-291
+- SHELL: L293-444 (Dialog frame, result stats screen, Progress display, preview table, mapping table UI, tab dropzones + hidden file inputs, HTML textarea, manual form grid)
+
+### src/components/admin/LeadImportDialog.tsx (1007)
+- ENGINE: ParsedLead/ImportResult L39-60; fieldOptions L100-113; handleJsonUpload L146-194; handleCsvUpload L197-256 (line parser + autoMapping block L226-251); parseHtmlTable L259-326; processCsvMapping L329-364; checkDuplicate L367-382; formatTimeRemaining L385-390; importLeads L393-501 (BATCH_SIZE 10, Promise.all dupe checks, street+city merge, insert, importLog build, progress % + rolling ETA refs L77-82, lead_imports audit L479-487); handleManualSubmit L504-510
+- SHELL: L512-1007 (Dialog, result screen, tab dropzones w/ drag-drop handlers L586-607/726-748 — the onDrop file handoff is the engine boundary, visuals are shell — mapping grid, preview tables, progress panels, manual form)
+
+### src/pages/lounge/LoungeCRM.tsx (import engine embedded, L387-476)
+- ENGINE: parseCSV L388-398 (regex `(".*?"|[^,]+)` splitter — quote/comma fragile); handleImportFile L400-425 (FileReader + auto-map incl. dbFields normalization); runImport L427-457 (mapping application, defaults, 50-chunk insert, added count); exportCSV L460-476
+- SHELL: import modal JSX L1402-1519 (dropzone label, mapping grid, 5-row preview table, footer buttons)
+
+### src/pages/lounge/crm/ImportExportMenu.tsx (92) — thin adapter
+- Engine-adjacent: handleExport L21-28, handleTemplate L30-32, handleFile L36-55 (`file.text()` → importEntities → result toast). Menu JSX L57-92 = shell.
+
+### src/components/admin/AdminLeadManagement.tsx
+- Engine: exportCSV L327-344 (header list + escaping). Rest of file = shell/list logic.
+
+### src/components/admin/AdminEnquiries.tsx
+- Engine (ingestion pathway): convertToLead L149-196 (email dupe check, field mapping enquiry→lead, enquiry_data embed, status flip). convertToClient L198-253 is account-creation, not import — treat as protected contract regardless (edge-fn payload shape).
+
+### Supporting protected contracts (not import code but engines depend on them)
+- src/lib/piiDecrypt.ts (decrypt_pii rpc + cache) — read-side of admin lead lists
+- `lead_imports` insert shape (audit); `leads` insert shapes; `crm_contacts` insert shape + dedupe signature scheme
+
+### Explicitly SHELL (safe to restyle): all dropzone visuals, progress bars/ETA display markup, preview/mapping table styling, tab triggers, result-stat cards, buttons — in all three dialogs; the numbers they display come from engine state (progress, processed, currentLeadIndex, estimatedTimeRemaining, result counts) which must keep feeding them.
+
+## 6. Cross-engine divergence table (behavioural contract, keep in mind for any unification)
+| | csvIO (workspace quick) | CRMLeadImportDialog (workspace rich) | LoungeCRM legacy | Admin LeadImportDialog |
+|---|---|---|---|---|
+| Target table | crm_companies/contacts/opportunities | crm_contacts only | leads | leads |
+| Formats | CSV | CSV, XLSX, JSON, HTML, manual | CSV | CSV, JSON, HTML, manual |
+| CSV parser | char-state, quote+newline safe | per-line quote toggle | regex split | per-line quote toggle |
+| Mapping UI | none (header synonyms) | yes + autoMap | yes + autoMap | yes + autoMap |
+| Dedupe | none | preloaded 20k signature set (email/phone/name) | none | per-lead .or() query |
+| Chunk size | 200 | 500 | 50 | 10 (+parallel dupe checks) |
+| Audit log | no | no | no | lead_imports yes |
+| Progress UI | busy spinner only | % + processed | button label only | % + processed + ETA |
+| Owner default | owner_id = importer | owner_id = importer | assigned_to = importer | none (unassigned) |
