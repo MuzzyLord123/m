@@ -39,10 +39,10 @@ export function micUnblockHelp(): MicHelp {
     return {
       browser: 'Opera',
       steps: [
-        'Tap the shield or padlock next to the address bar',
-        'Open Site settings',
-        'Set Microphone to Allow',
-        'Come back here and tap Retry',
+        'Open the Opera menu (the O), then Settings',
+        'Privacy and security, then Site settings, then Microphone',
+        'Find this site under Blocked and remove it (or set Allow)',
+        'Come back and tap Retry - the popup appears again once removed',
       ],
     };
   }

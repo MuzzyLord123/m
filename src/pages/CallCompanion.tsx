@@ -48,29 +48,70 @@ export default function CallCompanion() {
   const transcriptRef = useRef('');
   const lastSyncRef = useRef('');
   const onCallRef = useRef<Push | null>(null);
+  const loadedAtRef = useRef(Date.now());
   transcriptRef.current = transcript;
   onCallRef.current = onCall;
 
   const speechOk = typeof window !== 'undefined' && speechRecognitionSupported();
   const help = micUnblockHelp();
 
-  // Claim the token for this signed-in account.
+  // Connect. Being signed in on this page is the proof the phone is
+  // yours, so the companion always connects: it claims the QR token when
+  // one is present (so the desktop's waiting card resolves) and
+  // self-registers a claimed link otherwise. Old unhandled pushes are
+  // swept first so a stale dial from an earlier session can never fire
+  // the moment the page opens.
   useEffect(() => {
     if (authLoading || !user) return;
     let cancelled = false;
     (async () => {
-      if (!token) { setState('invalid'); return; }
-      const { data, error } = await supabase.from('crm_phone_links' as any)
-        .update({ claimed_at: new Date().toISOString(), last_seen_at: new Date().toISOString(), device_label: help.browser } as any)
-        .eq('token', token)
-        .select('id');
-      if (cancelled) return;
-      if (error || !((data as any[]) || []).length) setState('invalid');
-      else setState('connected');
+      await supabase.from('crm_call_pushes' as any)
+        .update({ handled_at: new Date().toISOString() } as any)
+        .is('handled_at', null)
+        .lt('created_at', new Date(loadedAtRef.current - 5000).toISOString());
+
+      if (token) {
+        await supabase.from('crm_phone_links' as any)
+          .update({ claimed_at: new Date().toISOString(), last_seen_at: new Date().toISOString(), device_label: help.browser } as any)
+          .eq('token', token);
+      }
+
+      const { data: links } = await supabase.from('crm_phone_links' as any)
+        .select('id').not('claimed_at', 'is', null).limit(1);
+      if (!((links as any[]) || []).length) {
+        await supabase.from('crm_phone_links' as any).insert({
+          user_id: user.id,
+          token: crypto.randomUUID().replace(/-/g, ''),
+          claimed_at: new Date().toISOString(),
+          last_seen_at: new Date().toISOString(),
+          device_label: help.browser,
+        } as any);
+      }
+      if (!cancelled) setState('connected');
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user, token]);
+
+  // An in-flight call survives the reload Android performs when you come
+  // back from the dialler.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('quooro-active-call');
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved?.push?.id && Date.now() - saved.startedAt < 2 * 3600e3) {
+        handled.current.add(saved.push.id);
+        setOnCall(saved.push);
+        setCallStarted(saved.startedAt);
+        setTranscript(saved.transcript || '');
+        setTimeout(() => { if (!recogRef.current) startTranscript(); }, 500);
+      } else {
+        sessionStorage.removeItem('quooro-active-call');
+      }
+    } catch { /* unreadable */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Track the real microphone permission, live.
   useEffect(() => {
@@ -151,13 +192,17 @@ export default function CallCompanion() {
   const receivePush = useCallback((push: Push) => {
     if (handled.current.has(push.id)) return;
     handled.current.add(push.id);
-    try { navigator.vibrate?.([200, 90, 200, 90, 320]); } catch { /* unsupported */ }
     supabase.from('crm_call_pushes' as any).update({ handled_at: new Date().toISOString() } as any).eq('id', push.id);
+    // Never dial a push from before this page opened - that is a
+    // leftover from an earlier session, not a live request.
+    if (new Date(push.created_at).getTime() < loadedAtRef.current - 5000) return;
+    try { navigator.vibrate?.([200, 90, 200, 90, 320]); } catch { /* unsupported */ }
     setOnCall(push);
     setCallStarted(Date.now());
     setElapsed(0);
     setTranscript('');
     lastSyncRef.current = '';
+    try { sessionStorage.setItem('quooro-active-call', JSON.stringify({ push, startedAt: Date.now() })); } catch { /* full */ }
     setTimeout(() => startTranscript(), 300);
     dial(push.phone);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -187,7 +232,7 @@ export default function CallCompanion() {
     const heartbeat = setInterval(() => {
       supabase.from('crm_phone_links' as any)
         .update({ last_seen_at: new Date().toISOString() } as any)
-        .eq('token', token as string);
+        .not('claimed_at', 'is', null);
     }, 30000);
 
     return () => {
@@ -226,11 +271,15 @@ export default function CallCompanion() {
       supabase.from('crm_call_transcripts' as any).upsert({
         call_id: onCall.call_id, admin_id: user.id, content: text, updated_at: new Date().toISOString(),
       } as any);
+      try {
+        sessionStorage.setItem('quooro-active-call', JSON.stringify({ push: onCall, startedAt: callStarted, transcript: text }));
+      } catch { /* full */ }
     }, 3000);
     return () => clearInterval(id);
   }, [onCall?.call_id, user]);
 
   async function finishCall() {
+    try { sessionStorage.removeItem('quooro-active-call'); } catch { /* noop */ }
     stopTranscript();
     const push = onCall;
     const duration = callStarted ? Math.floor((Date.now() - callStarted) / 1000) : null;
@@ -365,10 +414,6 @@ export default function CallCompanion() {
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             <p className="text-[13px] text-muted-foreground">Connecting this phone…</p>
           </>
-        ) : state === 'invalid' ? (
-          <p className="max-w-xs text-[14px] leading-relaxed text-muted-foreground">
-            This link has expired or belongs to another account. Generate a fresh QR from Calls in the CRM and scan again.
-          </p>
         ) : onCall ? (
           /* One screen for the whole call: dial, meter, live transcript. */
           <div className="flex w-full max-w-sm flex-col items-center gap-4">
