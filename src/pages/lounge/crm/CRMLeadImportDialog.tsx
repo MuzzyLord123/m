@@ -19,6 +19,12 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onImportComplete: () => void;
+  /**
+   * Where imported leads land. Leads normally start life as companies
+   * and become contacts once they convert. Defaults to 'contact' so the
+   * contacts import behaves exactly as it always has.
+   */
+  target?: 'contact' | 'company';
 }
 
 interface ParsedLead {
@@ -91,7 +97,8 @@ function parseCSVText(text: string): string[][] {
   }).filter(r => r.some(c => c.length));
 }
 
-export default function CRMLeadImportDialog({ open, onOpenChange, onImportComplete }: Props) {
+export default function CRMLeadImportDialog({ open, onOpenChange, onImportComplete, target = 'contact' }: Props) {
+  const isCompany = target === 'company';
   const [tab, setTab] = useState<'csv' | 'excel' | 'json' | 'html' | 'manual'>('csv');
   const [step, setStep] = useState<'input' | 'mapping' | 'preview'>('input');
   const [rawRows, setRawRows] = useState<string[][]>([]);
@@ -258,14 +265,20 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
     const orgId = admin?.user_id;
     if (!orgId) return toast.error('No admin org');
 
-    // Load existing signatures for dedup (email/phone/full_name lowercased)
-    const { data: existing } = await supabase.from('crm_contacts')
-      .select('email, phone, full_name').eq('org_id', orgId).limit(20000);
+    // Load existing signatures for dedup (email/phone/name lowercased).
+    // Same three-part signature for both books; only the table and the
+    // name column differ.
+    const { data: existing } = isCompany
+      ? await supabase.from('crm_companies')
+          .select('email, phone, name').eq('org_id', orgId).limit(20000)
+      : await supabase.from('crm_contacts')
+          .select('email, phone, full_name').eq('org_id', orgId).limit(20000);
     const seen = new Set<string>();
-    (existing || []).forEach(e => {
+    (existing || []).forEach((e: any) => {
       if (e.email) seen.add('e:' + e.email.toLowerCase());
       if (e.phone) seen.add('p:' + e.phone.replace(/\s+/g, ''));
-      if (e.full_name) seen.add('n:' + e.full_name.toLowerCase());
+      const existingName = isCompany ? e.name : e.full_name;
+      if (existingName) seen.add('n:' + existingName.toLowerCase());
     });
 
     setImporting(true); setProgress(0); setProcessed(0);
@@ -276,7 +289,9 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
       const batch = list.slice(i, i + CHUNK);
       const rows: any[] = [];
       for (const l of batch) {
-        const name = l.personal_name || l.contact_name || l.business_name;
+        const name = isCompany
+          ? (l.business_name || l.personal_name || l.contact_name)
+          : (l.personal_name || l.contact_name || l.business_name);
         const sigs = [
           l.email && 'e:' + l.email.toLowerCase(),
           l.phone && 'p:' + l.phone.replace(/\s+/g, ''),
@@ -292,7 +307,18 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
           l.google_rating && `Rating: ${l.google_rating} (${l.review_count})`,
           l.category && `Category: ${l.category}`,
         ].filter(Boolean);
-        rows.push({
+        rows.push(isCompany ? {
+          org_id: orgId, owner_id: userId,
+          name: l.business_name || name,
+          email: l.email, phone: l.phone,
+          website: l.website_url,
+          industry: l.category,
+          city: l.location_city,
+          postal_code: l.location_postcode,
+          source,
+          relationship_type: ['lead'],
+          notes: notesParts.join(' • ') || null,
+        } : {
           org_id: orgId, owner_id: userId,
           full_name: name || l.business_name,
           email: l.email, phone: l.phone,
@@ -302,7 +328,7 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
         });
       }
       if (rows.length) {
-        const { error } = await supabase.from('crm_contacts').insert(rows as any);
+        const { error } = await supabase.from(isCompany ? 'crm_companies' : 'crm_contacts').insert(rows as any);
         if (error) res.errors.push(error.message);
         else res.added += rows.length;
       }
@@ -326,8 +352,14 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className={cn('max-h-[90vh] overflow-y-auto', step === 'mapping' || step === 'preview' ? 'max-w-4xl' : 'max-w-xl')}>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Upload className="h-4 w-4 text-muted-foreground" /> Import leads</DialogTitle>
-          <DialogDescription>Import from CSV, Excel, JSON, HTML tables, or add one manually. Duplicates (matching email, phone or name) are skipped automatically.</DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <Upload className="h-4 w-4 text-muted-foreground" />
+            {isCompany ? 'Import leads into companies' : 'Import leads into contacts'}
+          </DialogTitle>
+          <DialogDescription>
+            Import from CSV, Excel, JSON, HTML tables, or add one manually. Duplicates (matching email, phone or name) are skipped automatically.
+            {isCompany ? ' Convert a company to a contact once they are interested.' : ''}
+          </DialogDescription>
         </DialogHeader>
 
         {result ? (

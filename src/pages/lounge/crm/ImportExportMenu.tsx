@@ -70,7 +70,7 @@ export function ImportExportMenu({ entity, rows, onImported, onOpenLeadImport }:
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
-          {entity === 'contact' && onOpenLeadImport && (
+          {(entity === 'contact' || entity === 'company') && onOpenLeadImport && (
             <>
               <DropdownMenuItem onClick={onOpenLeadImport}>
                 <Upload className="h-3.5 w-3.5 mr-2" /> Import leads (CSV, Excel, JSON, HTML, manual)

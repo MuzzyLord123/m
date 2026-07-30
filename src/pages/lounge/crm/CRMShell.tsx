@@ -55,6 +55,12 @@ const NAV: { key: Section; label: string; icon: any; entity?: EntityType }[] = [
   { key: 'workflows', label: 'Workflows', icon: Workflow },
 ];
 
+/** English plurals for the entity nouns shown in counts. */
+function pluralise(entity: EntityType, n: number): string {
+  if (n === 1) return entity;
+  return entity === 'company' ? 'companies' : entity === 'opportunity' ? 'opportunities' : 'contacts';
+}
+
 const TABLE_FOR: Record<EntityType, 'crm_companies' | 'crm_contacts' | 'crm_opportunities'> = {
   company: 'crm_companies',
   contact: 'crm_contacts',
@@ -311,6 +317,8 @@ export default function CRMShell() {
   const [previewEvents, setPreviewEvents] = useState<any[]>([]);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [leadImportOpen, setLeadImportOpen] = useState(false);
+  // Leads can be imported into companies (where they start) or contacts.
+  const [leadImportTarget, setLeadImportTarget] = useState<'contact' | 'company'>('contact');
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const leadImportPending = useRef(false);
@@ -681,7 +689,10 @@ export default function CRMShell() {
                       entity={currentEntity}
                       rows={filtered}
                       onImported={refresh}
-                      onOpenLeadImport={() => setLeadImportOpen(true)}
+                      onOpenLeadImport={() => {
+                        setLeadImportTarget(currentEntity === 'company' ? 'company' : 'contact');
+                        setLeadImportOpen(true);
+                      }}
                     />
                   )}
                 </div>
@@ -694,7 +705,7 @@ export default function CRMShell() {
                     </div>
                     <div className="flex items-center justify-between px-4 py-2 border-b border-border/60">
                       <span className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
-                        {`${filtered.length} ${currentEntity}${filtered.length === 1 ? '' : 's'}`}
+                        {`${filtered.length} ${pluralise(currentEntity!, filtered.length)}`}
                       </span>
                       <div className="flex items-center gap-1">
                         {currentEntity && (
@@ -702,7 +713,10 @@ export default function CRMShell() {
                             entity={currentEntity}
                             rows={filtered}
                             onImported={refresh}
-                            onOpenLeadImport={() => setLeadImportOpen(true)}
+                            onOpenLeadImport={() => {
+                        setLeadImportTarget(currentEntity === 'company' ? 'company' : 'contact');
+                        setLeadImportOpen(true);
+                      }}
                           />
                         )}
                         <Button size="sm" className="h-7 gap-1 text-xs" onClick={() => setNewDialogOpen(true)} disabled={!orgId}>
@@ -797,7 +811,7 @@ export default function CRMShell() {
                     />
                     <div className="flex shrink-0 items-center justify-between border-t border-border/60 px-4 py-1.5">
                       <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
-                        {filtered.length.toLocaleString('en-GB')} {currentEntity}{filtered.length === 1 ? '' : 's'} · filtered from {rows.length.toLocaleString('en-GB')} · virtualised
+                        {filtered.length.toLocaleString('en-GB')} {pluralise(currentEntity!, filtered.length)} · filtered from {rows.length.toLocaleString('en-GB')} · virtualised
                       </span>
                       <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground/70 lg:block">
                         ⌘K jump · N new · / search · ? keys
@@ -859,6 +873,7 @@ export default function CRMShell() {
           calls onImportComplete exactly as before; the shell defers the actual
           refresh until the dialog closes (Done, Esc or backdrop). */}
       <CRMLeadImportDialog
+        target={leadImportTarget}
         open={leadImportOpen}
         onOpenChange={(v) => {
           setLeadImportOpen(v);
@@ -951,7 +966,15 @@ export default function CRMShell() {
         role={role}
         extraActions={[
           ...(currentEntity && orgId ? [{ id: 'crm-new', label: `New ${currentEntity}`, run: () => setNewDialogOpen(true), keywords: 'create add record' }] : []),
-          ...(section === 'contacts' ? [{ id: 'crm-import', label: 'Import leads', run: () => setLeadImportOpen(true), keywords: 'upload csv excel json html' }] : []),
+          ...(section === 'contacts' || section === 'companies' ? [{
+            id: 'crm-import',
+            label: section === 'companies' ? 'Import leads into companies' : 'Import leads into contacts',
+            run: () => {
+              setLeadImportTarget(section === 'companies' ? 'company' : 'contact');
+              setLeadImportOpen(true);
+            },
+            keywords: 'upload csv excel json html import',
+          }] : []),
           ...(currentEntity && filtered.length ? [{ id: 'crm-export', label: `Export ${filtered.length} to CSV`, run: () => { exportEntities(currentEntity, filtered); }, keywords: 'download csv data' }] : []),
           ...(section === 'opportunities' ? [{
             id: 'crm-view',

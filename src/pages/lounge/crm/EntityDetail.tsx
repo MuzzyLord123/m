@@ -19,6 +19,8 @@ import { NotesPanel } from './NotesPanel';
 import { AvatarID, SkeletonLedger, statusTone, statusLabel } from '@/components/platform';
 import { RecordHeader, RecordTimeline, TagChips, type TimelineEvent } from '@/components/platform/crm';
 import { InvoiceStudio } from '@/components/invoicing/InvoiceStudio';
+import { ConvertLeadDialog } from './ConvertLeadDialog';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface Props {
   entityType: EntityType;
@@ -36,10 +38,15 @@ interface Props {
 
 export function EntityDetail({ entityType, entity, stages, list, admins, related, onOpenRelated, onNavigate, onClose, onChanged }: Props) {
   const { toast } = useToast();
+  const { isAdmin } = useUserRole();
   const [timeline, setTimeline] = useState<any[]>([]);
   const [financials, setFinancials] = useState<{ links: any[]; ltv: any } | null>(null);
   const [finLoading, setFinLoading] = useState(true);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
+  const [convertOpen, setConvertOpen] = useState(false);
+  // Bumped after a stage change so the activity list and timeline reload
+  // without remounting the whole record.
+  const [activityToken, setActivityToken] = useState(0);
   const [loadingTab, setLoadingTab] = useState(false);
   const [tab, setTab] = useState('overview');
   const [updating, setUpdating] = useState(false);
@@ -85,7 +92,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
     }
     load();
     return () => { cancelled = true; };
-  }, [tab, entityType, entity.id]);
+  }, [tab, entityType, entity.id, activityToken]);
 
   async function handleStageChange(newStageId: string) {
     setUpdating(true);
@@ -94,7 +101,8 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
     if (error) {
       toast({ title: 'Failed to move stage', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Stage updated', description: 'Workflows may have fired automatically.' });
+      toast({ title: 'Stage updated', description: 'Logged to the timeline and activity for this lead.' });
+      setActivityToken(t => t + 1);
       onChanged();
     }
   }
@@ -203,6 +211,18 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
 
         <ScrollArea className="flex-1">
           <TabsContent value="overview" className="p-4 sm:p-5 space-y-4 mt-3">
+            {/* Leads live as companies until they are worth converting. */}
+            {entityType === 'company' && (
+              <div className="flex items-center justify-between gap-3 rounded-[10px] border border-border/60 bg-sunken/50 px-3.5 py-2.5">
+                <p className="min-w-0 text-[11.5px] leading-relaxed text-muted-foreground">
+                  Agreed to a preview or a website? Turn them into a contact{isAdmin ? ' and a client account' : ''} in one step.
+                </p>
+                <Button size="sm" className="h-8 shrink-0 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setConvertOpen(true)}>
+                  <UserPlus className="h-3.5 w-3.5" /> Convert
+                </Button>
+              </div>
+            )}
+
             {/* Lifecycle stage selector */}
             <div>
               <label className="font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Lifecycle stage</label>
@@ -267,7 +287,13 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
               />
             )}
 
-            <NotesPanel entityType={entityType} entityId={entity.id} orgId={entity.org_id ?? null} />
+            <NotesPanel
+              key={`notes-${entity.id}-${activityToken}`}
+              entityType={entityType}
+              entityId={entity.id}
+              orgId={entity.org_id ?? null}
+              stages={stages}
+            />
 
             <div className="pt-2 font-mono text-[10px] tabular-nums text-muted-foreground">
               Updated {formatDistanceToNow(new Date(entity.updated_at), { addSuffix: true })}
@@ -328,6 +354,17 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
           </TabsContent>
         </ScrollArea>
       </Tabs>
+
+      {entityType === 'company' && (
+        <ConvertLeadDialog
+          open={convertOpen}
+          onOpenChange={setConvertOpen}
+          company={entity}
+          stages={stages}
+          isAdmin={isAdmin}
+          onConverted={() => { setActivityToken(t => t + 1); onChanged(); }}
+        />
+      )}
 
       <InvoiceStudio
         open={invoiceOpen}
