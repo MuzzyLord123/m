@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Phone, Smartphone, Mic, MicOff, Check, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { VoiceMeter } from './VoiceMeter';
+import { CallNoteEditor } from './QuickNotes';
+import { OUTCOMES } from './callNotePresets';
+import { useTranscription, speechRecognitionAvailable, TRANSCRIPT_STATUS_LABEL } from './useTranscription';
 import type { EntityType } from '../useCRMData';
 
 /**
@@ -19,14 +21,6 @@ import type { EntityType } from '../useCRMData';
  * local microphone transcription and voice meter. Never a raw tel: link
  * on desktop, so Windows Phone Link stays out of the flow.
  */
-
-const OUTCOMES = [
-  { value: 'connected', label: 'Connected' },
-  { value: 'no_answer', label: 'No answer' },
-  { value: 'voicemail', label: 'Voicemail' },
-  { value: 'callback', label: 'Callback booked' },
-  { value: 'wrong_number', label: 'Wrong number' },
-];
 
 const FIELD_FOR: Record<EntityType, 'company_id' | 'contact_id' | 'opportunity_id'> = {
   company: 'company_id', contact: 'contact_id', opportunity: 'opportunity_id',
@@ -64,22 +58,21 @@ export function CallConsole({
   const [elapsed, setElapsed] = useState(0);
   const [outcome, setOutcome] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
-  const [transcript, setTranscript] = useState('');
-  const [interim, setInterim] = useState('');
   const [phoneTranscript, setPhoneTranscript] = useState('');
-  const [listening, setListening] = useState(false);
   const [saving, setSaving] = useState(false);
-  const recogRef = useRef<any>(null);
+  const speech = useTranscription();
+  const transcript = speech.text;
+  const interim = speech.interim;
+  const listening = speech.running;
 
-  const speechSupported = typeof window !== 'undefined' &&
-    !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+  const speechSupported = speechRecognitionAvailable();
 
   // Reset per open; check for a paired phone.
   useEffect(() => {
     if (!open) return;
     setPhase('choose'); setSource('desktop'); setCallId(null); setPushId(null); setPushHandled(false); setRemoteEnded(false);
     setStartedAt(null); setElapsed(0); setOutcome(null); setNotes('');
-    setTranscript(''); setInterim(''); setPhoneTranscript(''); setListening(false);
+    speech.reset(''); speech.stop(); setPhoneTranscript('');
     let cancelled = false;
     supabase.from('crm_phone_links' as any)
       .select('id, claimed_at')
@@ -87,7 +80,7 @@ export function CallConsole({
       .order('created_at', { ascending: false })
       .limit(1)
       .then(({ data }) => { if (!cancelled) setPhoneLinked(((data as any[]) || []).length > 0); });
-    return () => { cancelled = true; stopTranscript(); };
+    return () => { cancelled = true; speech.stop(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -152,38 +145,10 @@ export function CallConsole({
     }
   }
 
-  function startTranscript() {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return;
-    const r = new SR();
-    r.lang = 'en-GB';
-    r.continuous = true;
-    r.interimResults = true;
-    r.onresult = (e: any) => {
-      let interimText = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const res = e.results[i];
-        if (res.isFinal) setTranscript(prev => (prev ? prev + ' ' : '') + res[0].transcript.trim());
-        else interimText += res[0].transcript;
-      }
-      setInterim(interimText);
-    };
-    r.onend = () => { if (recogRef.current === r && listening) { try { r.start(); } catch { /* stopped */ } } };
-    r.onerror = () => setInterim('');
-    recogRef.current = r;
-    try { r.start(); setListening(true); } catch { /* already running */ }
-  }
-
-  function stopTranscript() {
-    setListening(false);
-    setInterim('');
-    if (recogRef.current) { try { recogRef.current.stop(); } catch { /* noop */ } recogRef.current = null; }
-  }
-
   async function endCall() {
     if (!callId || !user) return;
     setSaving(true);
-    stopTranscript();
+    speech.stop();
     const duration = remoteEnded ? elapsed : (startedAt ? Math.floor((Date.now() - startedAt) / 1000) : null);
     // If the phone already finished the call, its end time and duration
     // are the truth - only the outcome and notes are added here.
@@ -256,7 +221,7 @@ export function CallConsole({
   );
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!saving) { if (!v) stopTranscript(); onOpenChange(v); } }}>
+    <Dialog open={open} onOpenChange={(v) => { if (!saving) { if (!v) speech.stop(); onOpenChange(v); } }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -309,14 +274,14 @@ export function CallConsole({
                   {speechSupported ? (
                     <button
                       type="button"
-                      onClick={() => (listening ? stopTranscript() : startTranscript())}
+                      onClick={() => (listening ? speech.stop() : speech.start())}
                       className={cn(
                         'flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors',
                         listening ? 'border-risk/50 text-risk' : 'border-border/60 text-muted-foreground hover:text-foreground',
                       )}
                     >
                       {listening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
-                      {listening ? 'Stop' : 'Start'}
+                      {listening ? TRANSCRIPT_STATUS_LABEL[speech.status] : 'Start'}
                     </button>
                   ) : (
                     <span className="text-[10.5px] text-muted-foreground">Not supported in this browser</span>
@@ -331,7 +296,11 @@ export function CallConsole({
                     </>
                   ) : (
                     <span className="text-muted-foreground">
-                      {listening ? 'Listening…' : 'Captures speech from this device’s microphone. Put the call on speakerphone near this device.'}
+                      {speech.status === 'blocked'
+                        ? 'Microphone blocked for this site. Allow it in the padlock menu, then press Start again.'
+                        : listening
+                          ? 'Listening. Keep the call on speakerphone near this device.'
+                          : 'Captures speech from this device’s microphone. Put the call on speakerphone near this device.'}
                     </span>
                   )}
                 </div>
@@ -361,11 +330,11 @@ export function CallConsole({
 
             <div>
               <span className={label}>Notes</span>
-              <Textarea
+              <CallNoteEditor
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="What was agreed, next step"
-                className="mt-1.5 min-h-[64px] text-[13px]"
+                onChange={setNotes}
+                onOutcome={(o) => setOutcome(prev => prev ?? o)}
+                className="mt-1.5"
               />
             </div>
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Smartphone, PhoneCall, Unplug, FileText } from 'lucide-react';
+import { Smartphone, PhoneCall, Unplug, FileText, Loader2, Check, StickyNote } from 'lucide-react';
 import qrcode from 'qrcode-generator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import {
   Panel, PanelHeader, EmptyState, SkeletonLedger, RelativeTime, StatusBadge,
 } from '@/components/platform';
 import { ReportTiles, BottomSheet } from '@/components/platform/crm';
+import { CallNoteEditor } from './QuickNotes';
+import { OUTCOMES, OUTCOME_TONE, outcomeLabel } from './callNotePresets';
 
 /**
  * The Calls workspace: an admin's own calling desk. Connect a phone by
@@ -31,13 +33,6 @@ interface CallRow {
   notes: string | null;
 }
 
-const OUTCOME_TONE: Record<string, 'ok' | 'attend' | 'risk' | 'neutral'> = {
-  connected: 'ok', callback: 'attend', voicemail: 'neutral', no_answer: 'attend', wrong_number: 'risk',
-};
-
-const outcomeLabel = (o: string | null) =>
-  o ? o.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()) : 'Not set';
-
 function fmtDur(s: number | null) {
   if (s == null) return '–';
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -52,6 +47,9 @@ export function CallsWorkspace() {
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [openCall, setOpenCall] = useState<CallRow | null>(null);
   const [openTranscript, setOpenTranscript] = useState<string | null>(null);
+  const [draftNote, setDraftNote] = useState('');
+  const [draftOutcome, setDraftOutcome] = useState<string | null>(null);
+  const [savingNote, setSavingNote] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const load = useCallback(async () => {
@@ -121,9 +119,26 @@ export function CallsWorkspace() {
     return { today, week, total: calls.length, avg, rate: outcomes ? Math.round((connected / outcomes) * 100) : null };
   }, [calls]);
 
+  async function saveNote() {
+    if (!openCall) return;
+    setSavingNote(true);
+    const { error } = await supabase.from('crm_call_logs' as any).update({
+      notes: draftNote.trim() || null, outcome: draftOutcome,
+    } as any).eq('id', openCall.id);
+    setSavingNote(false);
+    if (error) { toast({ title: 'Note not saved', description: error.message, variant: 'destructive' }); return; }
+    setCalls(prev => prev.map(c => (
+      c.id === openCall.id ? { ...c, notes: draftNote.trim() || null, outcome: draftOutcome } : c
+    )));
+    setOpenCall(null);
+    toast({ title: 'Call note saved' });
+  }
+
   async function viewCall(c: CallRow) {
     setOpenCall(c);
     setOpenTranscript(null);
+    setDraftNote(c.notes || '');
+    setDraftOutcome(c.outcome);
     const { data } = await supabase.from('crm_call_transcripts' as any).select('content').eq('call_id', c.id).limit(1);
     setOpenTranscript(((data as any[]) || [])[0]?.content ?? '');
   }
@@ -208,32 +223,41 @@ export function CallsWorkspace() {
                 body="Press Call on any lead. The call is timed, its outcome recorded, and the transcript kept if you turn it on."
               />
             ) : (
-              <ul className="divide-y divide-border/60">
-                {calls.slice(0, 40).map(c => (
-                  <li key={c.id}>
-                    <button
-                      type="button"
-                      onClick={() => viewCall(c)}
-                      className="flex min-h-[52px] w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-foreground/[0.025]"
-                    >
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-border/60 bg-sunken">
-                        <PhoneCall className="h-3.5 w-3.5 text-muted-foreground" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[13px] font-medium">{c.entity_name || c.phone}</span>
-                        <span className="block font-mono text-[10.5px] tabular-nums text-muted-foreground">
-                          {c.phone} · {c.source}
+              /* A fixed window: the ledger scrolls inside its own panel
+                 rather than running the page down. */
+              <div className="max-h-[420px] overflow-y-auto">
+                <ul className="divide-y divide-border/60">
+                  {calls.map(c => (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        onClick={() => viewCall(c)}
+                        className="flex min-h-[52px] w-full items-start gap-3 px-4 py-2.5 text-left transition-colors hover:bg-foreground/[0.025]"
+                      >
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border border-border/60 bg-sunken">
+                          <PhoneCall className="h-3.5 w-3.5 text-muted-foreground" />
                         </span>
-                      </span>
-                      <StatusBadge tone={OUTCOME_TONE[c.outcome || ''] ?? 'neutral'} label={outcomeLabel(c.outcome)} />
-                      <span className="w-12 shrink-0 text-right font-mono text-[11px] tabular-nums text-muted-foreground">
-                        {fmtDur(c.duration_seconds)}
-                      </span>
-                      <RelativeTime date={c.started_at} className="w-20 shrink-0 text-right" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[13px] font-medium">{c.entity_name || c.phone}</span>
+                          <span className="block font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                            {c.phone} · {c.source} · {fmtDur(c.duration_seconds)}
+                          </span>
+                          {c.notes && (
+                            <span className="mt-1 flex items-start gap-1.5 text-[11.5px] leading-snug text-ink-2">
+                              <StickyNote className="mt-[2px] h-3 w-3 shrink-0 text-muted-foreground" />
+                              <span className="line-clamp-2">{c.notes}</span>
+                            </span>
+                          )}
+                        </span>
+                        <span className="flex shrink-0 flex-col items-end gap-1">
+                          <StatusBadge tone={OUTCOME_TONE[c.outcome || ''] ?? 'neutral'} label={outcomeLabel(c.outcome)} />
+                          <RelativeTime date={c.started_at} />
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </Panel>
         </div>
@@ -263,12 +287,36 @@ export function CallsWorkspace() {
                 </div>
               ))}
             </dl>
-            {openCall.notes && (
-              <div>
-                <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Notes</span>
-                <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed">{openCall.notes}</p>
+            <div>
+              <span className="font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Note</span>
+              <CallNoteEditor
+                value={draftNote}
+                onChange={setDraftNote}
+                onOutcome={(o) => setDraftOutcome(prev => prev ?? o)}
+                placeholder="Add detail to this call"
+                className="mt-1.5"
+              />
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {OUTCOMES.map(o => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => setDraftOutcome(o.value)}
+                    className={`h-7 rounded-lg border px-2.5 text-[11.5px] transition-colors ${
+                      draftOutcome === o.value
+                        ? 'border-primary/50 bg-primary/[0.08] text-primary'
+                        : 'border-border/60 text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
               </div>
-            )}
+              <Button className="mt-3 h-10 w-full gap-2 rounded-[10px]" disabled={savingNote} onClick={saveNote}>
+                {savingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                Save note
+              </Button>
+            </div>
             <div>
               <span className="flex items-center gap-1.5 font-mono text-[9.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                 <FileText className="h-3 w-3" /> Transcript

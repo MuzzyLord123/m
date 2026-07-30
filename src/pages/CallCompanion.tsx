@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { VoiceMeter } from '@/pages/lounge/crm/calls/VoiceMeter';
+import { CallNoteEditor } from '@/pages/lounge/crm/calls/QuickNotes';
+import { useTranscription, TRANSCRIPT_STATUS_LABEL } from '@/pages/lounge/crm/calls/useTranscription';
 import {
   type MicState, queryMicPermission, requestMic, micUnblockHelp, speechRecognitionSupported,
 } from '@/pages/lounge/crm/calls/micPermission';
@@ -36,13 +38,13 @@ const CALL_KEY = 'quooro-active-call';
  * the tab being discarded and restored, sessionStorage covers private
  * windows where localStorage is refused.
  */
-function storeCall(payload: { push: Push; startedAt: number | null; transcript?: string }) {
+function storeCall(payload: { push: Push; startedAt: number | null; transcript?: string; notes?: string }) {
   const raw = JSON.stringify(payload);
   try { localStorage.setItem(CALL_KEY, raw); } catch { /* refused */ }
   try { sessionStorage.setItem(CALL_KEY, raw); } catch { /* refused */ }
 }
 
-function readStoredCall(): { push: Push; startedAt: number; transcript?: string } | null {
+function readStoredCall(): { push: Push; startedAt: number; transcript?: string; notes?: string } | null {
   for (const store of [localStorage, sessionStorage]) {
     try {
       const raw = store.getItem(CALL_KEY);
@@ -50,6 +52,16 @@ function readStoredCall(): { push: Push; startedAt: number; transcript?: string 
     } catch { /* unreadable */ }
   }
   return null;
+}
+
+/**
+ * Supabase query builders are lazy: nothing is sent until the builder is
+ * awaited or thened. Writes that nobody waits on - marking a push
+ * handled, the heartbeat, streaming the transcript - must therefore be
+ * kicked off explicitly, or they silently never happen.
+ */
+function fire(query: PromiseLike<unknown>) {
+  void Promise.resolve(query).catch(() => { /* best effort */ });
 }
 
 function clearStoredCall() {
@@ -67,17 +79,15 @@ export default function CallCompanion() {
   const [onCall, setOnCall] = useState<Push | null>(null);
   const [callStarted, setCallStarted] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
-  const [transcript, setTranscript] = useState('');
-  const [interim, setInterim] = useState('');
-  const [listening, setListening] = useState(false);
+  const [notes, setNotes] = useState('');
+  const [outcome, setOutcome] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [deskFinished, setDeskFinished] = useState(false);
   const [pip, setPip] = useState(false);
   const handled = useRef<Set<string>>(new Set());
-  const recogRef = useRef<any>(null);
   const wakeRef = useRef<any>(null);
-  const transcriptRef = useRef('');
   const lastSyncRef = useRef('');
+  const notesRef = useRef('');
   const onCallRef = useRef<Push | null>(null);
   const loadedAtRef = useRef(Date.now());
   const callStartedRef = useRef<number | null>(null);
@@ -85,7 +95,11 @@ export default function CallCompanion() {
   const pipCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const pipTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pipStreamRef = useRef<MediaStream | null>(null);
-  transcriptRef.current = transcript;
+  const speech = useTranscription();
+  const transcript = speech.text;
+  const transcriptRef = speech.textRef;
+  const listening = speech.running;
+  notesRef.current = notes;
   onCallRef.current = onCall;
   callStartedRef.current = callStarted;
 
@@ -147,8 +161,9 @@ export default function CallCompanion() {
     handled.current.add(saved.push.id);
     setOnCall(saved.push);
     setCallStarted(saved.startedAt);
-    setTranscript(saved.transcript || '');
-    setTimeout(() => { if (!recogRef.current) startTranscript(); }, 500);
+    setNotes(saved.notes || '');
+    speech.reset(saved.transcript || '');
+    speech.start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -194,9 +209,9 @@ export default function CallCompanion() {
     lastSyncRef.current = text;
     setOnCall(push);
     setCallStarted(startedAt);
-    setTranscript(text);
-    storeCall({ push, startedAt, transcript: text });
-    setTimeout(() => { if (!recogRef.current) startTranscript(); }, 400);
+    speech.reset(text);
+    storeCall({ push, startedAt, transcript: text, notes: notesRef.current });
+    speech.start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -205,7 +220,10 @@ export default function CallCompanion() {
   useEffect(() => {
     const persist = () => {
       if (onCallRef.current) {
-        storeCall({ push: onCallRef.current, startedAt: callStartedRef.current, transcript: transcriptRef.current });
+        storeCall({
+          push: onCallRef.current, startedAt: callStartedRef.current,
+          transcript: transcriptRef.current, notes: notesRef.current,
+        });
       }
     };
     window.addEventListener('pagehide', persist);
@@ -250,43 +268,6 @@ export default function CallCompanion() {
     };
   }, [state]);
 
-  function startTranscript() {
-    if (!speechOk) return;
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const r = new SR();
-    r.lang = 'en-GB';
-    r.continuous = true;
-    r.interimResults = true;
-    r.onresult = (e: any) => {
-      let interimText = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const res = e.results[i];
-        if (res.isFinal) setTranscript(prev => (prev ? prev + ' ' : '') + res[0].transcript.trim());
-        else interimText += res[0].transcript;
-      }
-      setInterim(interimText);
-    };
-    // Restart with a short breather: recognition drops out whenever the
-    // OS borrows the mic (dialler up, screen off) and this loop brings
-    // it back the moment it can.
-    r.onend = () => {
-      setTimeout(() => {
-        if (recogRef.current === r) { try { r.start(); } catch { /* stopped */ } }
-      }, 400);
-    };
-    r.onerror = () => setInterim('');
-    recogRef.current = r;
-    try { r.start(); setListening(true); } catch { /* running */ }
-  }
-
-  function stopTranscript() {
-    const r = recogRef.current;
-    recogRef.current = null;
-    setListening(false);
-    setInterim('');
-    if (r) { try { r.stop(); } catch { /* noop */ } }
-  }
-
   // Hand the number to the phone app through an anchor rather than a
   // document navigation. Assigning location.href makes Opera treat the
   // call as leaving the site, which is what reloaded this page and
@@ -308,7 +289,9 @@ export default function CallCompanion() {
   const receivePush = useCallback((push: Push) => {
     if (handled.current.has(push.id)) return;
     handled.current.add(push.id);
-    supabase.from('crm_call_pushes' as any).update({ handled_at: new Date().toISOString() } as any).eq('id', push.id);
+    fire(supabase.from('crm_call_pushes' as any)
+      .update({ handled_at: new Date().toISOString() } as any)
+      .eq('id', push.id));
     // Never dial a push from before this page opened - that is a
     // leftover from an earlier session, not a live request.
     if (new Date(push.created_at).getTime() < loadedAtRef.current - 5000) return;
@@ -316,10 +299,12 @@ export default function CallCompanion() {
     setOnCall(push);
     setCallStarted(Date.now());
     setElapsed(0);
-    setTranscript('');
+    setNotes('');
+    setOutcome(null);
+    speech.reset('');
     lastSyncRef.current = '';
     storeCall({ push, startedAt: Date.now() });
-    setTimeout(() => startTranscript(), 300);
+    speech.start();
     dial(push.phone);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -346,9 +331,9 @@ export default function CallCompanion() {
     }, 2000);
 
     const heartbeat = setInterval(() => {
-      supabase.from('crm_phone_links' as any)
+      fire(supabase.from('crm_phone_links' as any)
         .update({ last_seen_at: new Date().toISOString() } as any)
-        .not('claimed_at', 'is', null);
+        .not('claimed_at', 'is', null));
     }, 30000);
 
     return () => {
@@ -363,7 +348,7 @@ export default function CallCompanion() {
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState !== 'visible') return;
-      if (onCallRef.current && !recogRef.current) startTranscript();
+      if (onCallRef.current) speech.start();
       reconcileLiveCall();
     };
     document.addEventListener('visibilitychange', onVis);
@@ -391,10 +376,10 @@ export default function CallCompanion() {
       const text = transcriptRef.current.trim();
       if (text && text !== lastSyncRef.current) {
         lastSyncRef.current = text;
-        supabase.from('crm_call_transcripts' as any).upsert({
+        await supabase.from('crm_call_transcripts' as any).upsert({
           call_id: onCall.call_id, admin_id: user.id, content: text, updated_at: new Date().toISOString(),
         } as any);
-        storeCall({ push: onCall, startedAt: callStarted, transcript: text });
+        storeCall({ push: onCall, startedAt: callStarted, transcript: text, notes: notesRef.current });
       }
       const { data } = await supabase.from('crm_call_logs' as any)
         .select('ended_at').eq('id', onCall.call_id!).limit(1);
@@ -519,25 +504,27 @@ export default function CallCompanion() {
   function finishFromDesk() {
     if (!onCallRef.current) return;
     clearStoredCall();
-    stopTranscript();
+    speech.stop();
     closePip();
     const push = onCallRef.current;
     const text = transcriptRef.current.trim();
     if (push?.call_id && user && text && text !== lastSyncRef.current) {
-      supabase.from('crm_call_transcripts' as any).upsert({
+      fire(supabase.from('crm_call_transcripts' as any).upsert({
         call_id: push.call_id, admin_id: user.id, content: text, updated_at: new Date().toISOString(),
-      } as any);
+      } as any));
     }
     setOnCall(null);
     setCallStarted(null);
-    setTranscript('');
+    speech.reset('');
+    setNotes('');
+    setOutcome(null);
     setDeskFinished(true);
     setTimeout(() => setDeskFinished(false), 6000);
   }
 
   async function finishCall() {
     clearStoredCall();
-    stopTranscript();
+    speech.stop();
     closePip();
     const push = onCall;
     const duration = callStarted ? Math.floor((Date.now() - callStarted) / 1000) : null;
@@ -551,10 +538,15 @@ export default function CallCompanion() {
         } as any);
       }
       await supabase.from('crm_call_logs' as any).update({
-        ended_at: new Date().toISOString(), duration_seconds: duration,
+        ended_at: new Date().toISOString(),
+        duration_seconds: duration,
+        notes: notesRef.current.trim() || null,
+        ...(outcome ? { outcome } : {}),
       } as any).eq('id', push.call_id).is('ended_at', null);
     }
-    setTranscript('');
+    speech.reset('');
+    setNotes('');
+    setOutcome(null);
   }
 
   async function copyLink() {
@@ -706,23 +698,56 @@ export default function CallCompanion() {
             )}
             {mic === 'granted' ? <VoiceMeter active /> : micSetup}
             {chromeNote}
-            <div className="max-h-40 min-h-[80px] w-full overflow-y-auto rounded-[12px] border border-border/60 bg-card p-3.5 text-left text-[13px] leading-relaxed">
-              {transcript || interim ? (
-                <>
-                  {transcript}
-                  {interim && <span className="text-muted-foreground"> {interim}</span>}
-                </>
-              ) : (
-                <span className="text-muted-foreground">
-                  {speechOk
-                    ? (mic === 'granted'
-                      ? (listening ? 'Listening. Speakerphone captures both sides.' : 'Transcription is starting…')
-                      : 'Enable the microphone above to start the transcript.')
-                    : 'No live transcript in this browser - the call still logs with its timer and outcome.'}
+            <div className="w-full">
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className={kicker}>Live transcript</span>
+                <span className={cn(
+                  'font-mono text-[8.5px] uppercase tracking-[0.14em]',
+                  speech.status === 'listening' ? 'text-ok'
+                    : speech.status === 'blocked' || speech.status === 'unsupported' ? 'text-attend'
+                      : 'text-muted-foreground',
+                )}>
+                  {speechOk ? TRANSCRIPT_STATUS_LABEL[speech.status] : 'Needs Chrome'}
                 </span>
-              )}
+              </div>
+              {/* A fixed height, so nothing below shifts under your
+                  thumb as speech arrives. */}
+              <div className="h-40 w-full overflow-y-auto rounded-[12px] border border-border/60 bg-card p-3.5 text-left text-[13px] leading-relaxed">
+                {transcript || speech.interim ? (
+                  <>
+                    {transcript}
+                    {speech.interim && <span className="text-muted-foreground"> {speech.interim}</span>}
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">
+                    {speechOk
+                      ? (mic === 'granted'
+                        ? (listening ? 'Listening. Speakerphone captures both sides.' : 'Transcription is starting…')
+                        : 'Enable the microphone above to start the transcript.')
+                      : 'No live transcript in this browser - the call still logs with its timer, notes and outcome.'}
+                  </span>
+                )}
+              </div>
             </div>
             <p className="text-[10.5px] text-muted-foreground">Streaming live to your desktop console.</p>
+
+            {/* Write the call up from the phone, one tap per verdict. */}
+            <div className="w-full text-left">
+              <span className={kicker}>Call note</span>
+              <CallNoteEditor
+                value={notes}
+                onChange={setNotes}
+                onOutcome={(o) => setOutcome(prev => prev ?? o)}
+                placeholder="Anything worth adding"
+                className="mt-1.5"
+              />
+              {outcome && (
+                <p className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Outcome · {outcome.replace(/_/g, ' ')}
+                </p>
+              )}
+            </div>
+
             <button
               type="button"
               onClick={finishCall}

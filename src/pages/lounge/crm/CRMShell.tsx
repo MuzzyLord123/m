@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Building2, User, Target, LayoutDashboard, Workflow, Search, Plus,
   Radar, Menu, Shield, UserPlus, ChevronDown, SlidersHorizontal, ArrowRightLeft, Download,
-  PhoneCall, Crown,
+  PhoneCall, Crown, Users,
 } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { usePortalHome } from '@/hooks/usePortalHome';
@@ -30,6 +30,7 @@ import { useAdmins, type AdminUser } from './useAdmins';
 import { NewEntityDialog } from './NewEntityDialog';
 import CRMLeadImportDialog from './CRMLeadImportDialog';
 import { CallsWorkspace } from './calls/CallsWorkspace';
+import { TeamCalls } from './calls/TeamCalls';
 import { OwnersDesk } from './OwnersDesk';
 import { usePlatformOwner } from '@/hooks/usePlatformOwner';
 import {
@@ -48,7 +49,7 @@ import {
   VirtualTable, type VirtualColumn,
 } from '@/components/platform/crm';
 
-type Section = 'dashboard' | 'companies' | 'contacts' | 'opportunities' | 'workflows' | 'calls' | 'team';
+type Section = 'dashboard' | 'companies' | 'contacts' | 'opportunities' | 'workflows' | 'calls' | 'team-calls' | 'team';
 type OwnerFilter = 'all' | 'mine' | 'unassigned' | string; // string = specific user id
 
 const NAV: { key: Section; label: string; icon: any; entity?: EntityType }[] = [
@@ -341,6 +342,7 @@ export default function CRMShell() {
   const navItems = useMemo(() => {
     const items: typeof NAV = [...NAV];
     if (isAdmin) items.splice(4, 0, { key: 'calls', label: 'Calls', icon: PhoneCall });
+    if (isAdmin) items.splice(5, 0, { key: 'team-calls', label: 'Team calls', icon: Users });
     if (isOwner) items.push({ key: 'team', label: 'Team desk', icon: Crown });
     return items;
   }, [isAdmin, isOwner]);
@@ -643,6 +645,8 @@ export default function CRMShell() {
             <WorkflowsView />
           ) : section === 'calls' ? (
             <CallsWorkspace />
+          ) : section === 'team-calls' ? (
+            <TeamCalls isOwner={isOwner} />
           ) : section === 'team' ? (
             <OwnersDesk
               companies={companies}
