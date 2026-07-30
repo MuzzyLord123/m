@@ -25,6 +25,8 @@ interface Props {
    * contacts import behaves exactly as it always has.
    */
   target?: 'contact' | 'company';
+  /** Owners' desk: import a file straight into this admin's book. */
+  assignOwnerId?: string | null;
 }
 
 interface ParsedLead {
@@ -97,7 +99,7 @@ function parseCSVText(text: string): string[][] {
   }).filter(r => r.some(c => c.length));
 }
 
-export default function CRMLeadImportDialog({ open, onOpenChange, onImportComplete, target = 'contact' }: Props) {
+export default function CRMLeadImportDialog({ open, onOpenChange, onImportComplete, target = 'contact', assignOwnerId = null }: Props) {
   const isCompany = target === 'company';
   const [tab, setTab] = useState<'csv' | 'excel' | 'json' | 'html' | 'manual'>('csv');
   const [step, setStep] = useState<'input' | 'mapping' | 'preview'>('input');
@@ -308,7 +310,7 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
           l.category && `Category: ${l.category}`,
         ].filter(Boolean);
         rows.push(isCompany ? {
-          org_id: orgId, owner_id: userId,
+          org_id: orgId, owner_id: assignOwnerId ?? userId,
           name: l.business_name || name,
           email: l.email, phone: l.phone,
           website: l.website_url,
@@ -319,7 +321,7 @@ export default function CRMLeadImportDialog({ open, onOpenChange, onImportComple
           relationship_type: ['lead'],
           notes: notesParts.join(' • ') || null,
         } : {
-          org_id: orgId, owner_id: userId,
+          org_id: orgId, owner_id: assignOwnerId ?? userId,
           full_name: name || l.business_name,
           email: l.email, phone: l.phone,
           job_title: l.category, source,

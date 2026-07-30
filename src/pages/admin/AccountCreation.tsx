@@ -5,6 +5,7 @@ import ManageAdminsPanel from './account-creation/ManageAdminsPanel';
 import AccountTypePresets from './account-creation/AccountTypePresets';
 import { cn } from '@/lib/utils';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAdminControls } from '@/hooks/useAdminControls';
 
 type Section = 'create' | 'admins' | 'presets';
 
@@ -16,6 +17,7 @@ const SECTIONS: { key: Section; label: string; icon: any; description: string }[
 
 export default function AccountCreation() {
   const { isAdmin, loading } = useUserRole();
+  const { canCreateAccounts } = useAdminControls();
   const [section, setSection] = useState<Section>('create');
 
   if (!loading && !isAdmin) {
@@ -48,7 +50,11 @@ export default function AccountCreation() {
       </aside>
 
       <section className="rounded-xl border border-border bg-card p-4 sm:p-6 min-h-[400px]">
-        {section === 'create' && <CreateAccountWizard />}
+        {section === 'create' && (canCreateAccounts ? <CreateAccountWizard /> : (
+          <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
+            Account creation is switched off for your admin account. An owner can enable it in Manage admins.
+          </div>
+        ))}
         {section === 'admins' && <ManageAdminsPanel />}
         {section === 'presets' && <AccountTypePresets />}
       </section>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Building2, User, Target, LayoutDashboard, Workflow, Search, Plus,
   Radar, Menu, Shield, UserPlus, ChevronDown, SlidersHorizontal, ArrowRightLeft, Download,
+  PhoneCall, Crown,
 } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { usePortalHome } from '@/hooks/usePortalHome';
@@ -28,6 +29,9 @@ import { exportEntities } from './csvIO';
 import { useAdmins, type AdminUser } from './useAdmins';
 import { NewEntityDialog } from './NewEntityDialog';
 import CRMLeadImportDialog from './CRMLeadImportDialog';
+import { CallsWorkspace } from './calls/CallsWorkspace';
+import { OwnersDesk } from './OwnersDesk';
+import { usePlatformOwner } from '@/hooks/usePlatformOwner';
 import {
   AvatarID, EmptyState, Panel, PanelHeader, SkeletonLedger,
   CommandPalette, ShortcutOverlay, usePlatformKeys,
@@ -44,7 +48,7 @@ import {
   VirtualTable, type VirtualColumn,
 } from '@/components/platform/crm';
 
-type Section = 'dashboard' | 'companies' | 'contacts' | 'opportunities' | 'workflows';
+type Section = 'dashboard' | 'companies' | 'contacts' | 'opportunities' | 'workflows' | 'calls' | 'team';
 type OwnerFilter = 'all' | 'mine' | 'unassigned' | string; // string = specific user id
 
 const NAV: { key: Section; label: string; icon: any; entity?: EntityType }[] = [
@@ -297,6 +301,7 @@ export default function CRMShell() {
   const isNarrowNav = useMediaQuery('(max-width: 1023px)');
   const { user } = useAuth();
   const { role, isAdmin } = useUserRole();
+  const { isOwner } = usePlatformOwner();
   const { toast } = useToast();
   const { companies, contacts, opportunities, stages, loading, refresh } = useCRMData();
   const { admins } = useAdmins();
@@ -319,6 +324,9 @@ export default function CRMShell() {
   const [leadImportOpen, setLeadImportOpen] = useState(false);
   // Leads can be imported into companies (where they start) or contacts.
   const [leadImportTarget, setLeadImportTarget] = useState<'contact' | 'company'>('contact');
+  // When the owners' desk imports a file FOR an admin, every imported
+  // lead lands already assigned to them.
+  const [assignOwnerId, setAssignOwnerId] = useState<string | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const leadImportPending = useRef(false);
@@ -328,6 +336,14 @@ export default function CRMShell() {
     const src: any = companies[0] || contacts[0] || opportunities[0];
     return src?.org_id ?? null;
   }, [companies, contacts, opportunities]);
+
+  // Calls appears for every admin; the Team desk only for the owners.
+  const navItems = useMemo(() => {
+    const items: typeof NAV = [...NAV];
+    if (isAdmin) items.splice(4, 0, { key: 'calls', label: 'Calls', icon: PhoneCall });
+    if (isOwner) items.push({ key: 'team', label: 'Team desk', icon: Crown });
+    return items;
+  }, [isAdmin, isOwner]);
 
   const currentEntity: EntityType | undefined = NAV.find(n => n.key === section)?.entity;
 
@@ -497,7 +513,7 @@ export default function CRMShell() {
 
   const nav = (
     <nav className="flex flex-col gap-0.5 p-2">
-      {NAV.map(item => {
+      {navItems.map(item => {
         const Icon = item.icon;
         const active = section === item.key;
         return (
@@ -625,6 +641,19 @@ export default function CRMShell() {
             />
           ) : section === 'workflows' ? (
             <WorkflowsView />
+          ) : section === 'calls' ? (
+            <CallsWorkspace />
+          ) : section === 'team' ? (
+            <OwnersDesk
+              companies={companies}
+              contacts={contacts}
+              onAssigned={refresh}
+              onImportForAdmin={(adminId, target) => {
+                setAssignOwnerId(adminId);
+                setLeadImportTarget(target);
+                setLeadImportOpen(true);
+              }}
+            />
           ) : (
             <>
               <div className={`${selected && isMobile ? 'hidden' : 'flex'} flex-1 min-w-0 flex-col overflow-hidden bg-background`}>
@@ -874,9 +903,11 @@ export default function CRMShell() {
           refresh until the dialog closes (Done, Esc or backdrop). */}
       <CRMLeadImportDialog
         target={leadImportTarget}
+        assignOwnerId={assignOwnerId}
         open={leadImportOpen}
         onOpenChange={(v) => {
           setLeadImportOpen(v);
+          if (!v) setAssignOwnerId(null);
           if (!v && leadImportPending.current) {
             leadImportPending.current = false;
             refresh();
@@ -982,7 +1013,7 @@ export default function CRMShell() {
             run: () => setViewMode(m => (m === 'list' ? 'board' : 'list')),
             keywords: 'pipeline kanban table toggle',
           }] : []),
-          ...NAV.filter(n => n.key !== section).map(n => ({
+          ...navItems.filter(n => n.key !== section).map(n => ({
             id: `crm-go-${n.key}`,
             label: `Go to ${n.label}`,
             run: () => setSection(n.key),

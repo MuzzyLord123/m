@@ -1,0 +1,302 @@
+import { useEffect, useRef, useState } from 'react';
+import { Phone, Smartphone, Mic, MicOff, Check, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import type { EntityType } from '../useCRMData';
+
+/**
+ * The call console. Every call pressed in the CRM is logged to
+ * crm_call_logs the moment it starts: dial on this device (tel:) or push
+ * to the paired phone. While the call runs you get a timer, outcome
+ * buttons, notes, and live transcription captured from this device's
+ * microphone (speakerphone recommended) - saved against the call and
+ * written to the record timeline as a call event when you wrap up.
+ */
+
+const OUTCOMES = [
+  { value: 'connected', label: 'Connected' },
+  { value: 'no_answer', label: 'No answer' },
+  { value: 'voicemail', label: 'Voicemail' },
+  { value: 'callback', label: 'Callback booked' },
+  { value: 'wrong_number', label: 'Wrong number' },
+];
+
+const FIELD_FOR: Record<EntityType, 'company_id' | 'contact_id' | 'opportunity_id'> = {
+  company: 'company_id', contact: 'contact_id', opportunity: 'opportunity_id',
+};
+
+export function CallConsole({
+  open,
+  onOpenChange,
+  number,
+  entityType,
+  entityId,
+  entityName,
+  orgId,
+  onLogged,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  number: string;
+  entityType: EntityType;
+  entityId: string;
+  entityName: string;
+  orgId: string | null;
+  onLogged?: () => void;
+}) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [phase, setPhase] = useState<'choose' | 'active'>('choose');
+  const [phoneLinked, setPhoneLinked] = useState(false);
+  const [callId, setCallId] = useState<string | null>(null);
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [outcome, setOutcome] = useState<string | null>(null);
+  const [notes, setNotes] = useState('');
+  const [transcript, setTranscript] = useState('');
+  const [interim, setInterim] = useState('');
+  const [listening, setListening] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const recogRef = useRef<any>(null);
+
+  const speechSupported = typeof window !== 'undefined' &&
+    !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+
+  // Reset per open; check for a paired phone.
+  useEffect(() => {
+    if (!open) return;
+    setPhase('choose'); setCallId(null); setStartedAt(null); setElapsed(0);
+    setOutcome(null); setNotes(''); setTranscript(''); setInterim(''); setListening(false);
+    let cancelled = false;
+    supabase.from('crm_phone_links' as any)
+      .select('id, claimed_at')
+      .not('claimed_at', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .then(({ data }) => { if (!cancelled) setPhoneLinked(((data as any[]) || []).length > 0); });
+    return () => { cancelled = true; stopTranscript(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Call timer.
+  useEffect(() => {
+    if (phase !== 'active' || !startedAt) return;
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [phase, startedAt]);
+
+  async function startCall(source: 'desktop' | 'phone') {
+    if (!user || !orgId) { toast({ title: 'Missing organisation context', variant: 'destructive' }); return; }
+    const { data, error } = await supabase.from('crm_call_logs' as any).insert({
+      org_id: orgId, admin_id: user.id,
+      entity_type: entityType, entity_id: entityId, entity_name: entityName,
+      phone: number, source,
+    } as any).select('id').single();
+    if (error) { toast({ title: 'Call not logged', description: error.message, variant: 'destructive' }); return; }
+    setCallId((data as any).id);
+    setStartedAt(Date.now());
+    setPhase('active');
+    if (source === 'phone') {
+      await supabase.from('crm_call_pushes' as any).insert({
+        user_id: user.id, phone: number, entity_type: entityType, entity_id: entityId, entity_name: entityName,
+      } as any);
+      toast({ title: 'Sent to your phone', description: 'The dialler opens on the connected phone.' });
+    } else {
+      window.location.href = `tel:${number.replace(/\s+/g, '')}`;
+    }
+  }
+
+  function startTranscript() {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    const r = new SR();
+    r.lang = 'en-GB';
+    r.continuous = true;
+    r.interimResults = true;
+    r.onresult = (e: any) => {
+      let interimText = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const res = e.results[i];
+        if (res.isFinal) setTranscript(prev => (prev ? prev + ' ' : '') + res[0].transcript.trim());
+        else interimText += res[0].transcript;
+      }
+      setInterim(interimText);
+    };
+    r.onend = () => { if (recogRef.current === r && listening) { try { r.start(); } catch { /* stopped */ } } };
+    r.onerror = () => setInterim('');
+    recogRef.current = r;
+    try { r.start(); setListening(true); } catch { /* already running */ }
+  }
+
+  function stopTranscript() {
+    setListening(false);
+    setInterim('');
+    if (recogRef.current) { try { recogRef.current.stop(); } catch { /* noop */ } recogRef.current = null; }
+  }
+
+  async function endCall() {
+    if (!callId || !user) return;
+    setSaving(true);
+    stopTranscript();
+    const duration = startedAt ? Math.floor((Date.now() - startedAt) / 1000) : null;
+    await supabase.from('crm_call_logs' as any).update({
+      ended_at: new Date().toISOString(),
+      duration_seconds: duration,
+      outcome, notes: notes.trim() || null,
+    } as any).eq('id', callId);
+
+    if (transcript.trim()) {
+      await supabase.from('crm_call_transcripts' as any).upsert({
+        call_id: callId, admin_id: user.id, content: transcript.trim(), updated_at: new Date().toISOString(),
+      } as any);
+    }
+
+    // The record timeline learns about the call as a communication.
+    if (orgId) {
+      const field = FIELD_FOR[entityType];
+      await supabase.from('crm_communications').insert({
+        org_id: orgId, owner_id: user.id,
+        kind: 'call' as any, direction: 'outbound' as any,
+        subject: `Call · ${OUTCOMES.find(o => o.value === outcome)?.label || 'logged'}`,
+        body: notes.trim() || (transcript ? transcript.slice(0, 300) : null),
+        occurred_at: new Date(startedAt || Date.now()).toISOString(),
+        duration_seconds: duration,
+        [field]: entityId,
+      } as any);
+    }
+
+    setSaving(false);
+    toast({ title: 'Call logged', description: 'Saved to this record and your call history.' });
+    onOpenChange(false);
+    onLogged?.();
+  }
+
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  const ss = String(elapsed % 60).padStart(2, '0');
+  const label = 'font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]';
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!saving) { if (!v) stopTranscript(); onOpenChange(v); } }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-muted-foreground" /> {entityName}
+          </DialogTitle>
+        </DialogHeader>
+
+        {phase === 'choose' ? (
+          <div className="space-y-3">
+            <p className="font-mono text-[13px] tabular-nums">{number}</p>
+            <div className="grid gap-2">
+              <Button className="h-12 justify-start gap-3 rounded-[11px]" onClick={() => startCall('desktop')}>
+                <Phone className="h-4 w-4" />
+                <span className="text-left">
+                  <span className="block text-[13px] font-medium">Call on this device</span>
+                  <span className="block text-[10.5px] opacity-80">Opens your dialler here</span>
+                </span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-12 justify-start gap-3 rounded-[11px]"
+                disabled={!phoneLinked}
+                onClick={() => startCall('phone')}
+              >
+                <Smartphone className="h-4 w-4" />
+                <span className="text-left">
+                  <span className="block text-[13px] font-medium">Send to your phone</span>
+                  <span className="block text-[10.5px] text-muted-foreground">
+                    {phoneLinked ? 'Rings from your connected phone' : 'Connect a phone in Calls first'}
+                  </span>
+                </span>
+              </Button>
+            </div>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              The call is logged either way: timer, outcome, notes and optional live transcript, all saved to this record.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-baseline justify-between rounded-[10px] border border-border/60 bg-sunken/50 px-4 py-3">
+              <span className={label}>On a call</span>
+              <span className="font-mono text-[22px] font-semibold tabular-nums">{mm}:{ss}</span>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between">
+                <span className={label}>Live transcript</span>
+                {speechSupported ? (
+                  <button
+                    type="button"
+                    onClick={() => (listening ? stopTranscript() : startTranscript())}
+                    className={cn(
+                      'flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors',
+                      listening ? 'border-risk/50 text-risk' : 'border-border/60 text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    {listening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+                    {listening ? 'Stop' : 'Start'}
+                  </button>
+                ) : (
+                  <span className="text-[10.5px] text-muted-foreground">Not supported in this browser</span>
+                )}
+              </div>
+              <div className="mt-1.5 max-h-32 min-h-[64px] overflow-y-auto rounded-[10px] border border-border/60 p-3 text-[12.5px] leading-relaxed">
+                {transcript || interim ? (
+                  <>
+                    {transcript}
+                    {interim && <span className="text-muted-foreground"> {interim}</span>}
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">
+                    {listening ? 'Listening…' : 'Captures speech from this device’s microphone. Put the call on speakerphone near this device.'}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <span className={label}>Outcome</span>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {OUTCOMES.map(o => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => setOutcome(o.value)}
+                    className={cn(
+                      'h-8 rounded-lg border px-2.5 text-xs transition-colors',
+                      outcome === o.value
+                        ? 'border-primary/50 bg-primary/[0.08] text-primary'
+                        : 'border-border/60 text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <span className={label}>Notes</span>
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="What was agreed, next step"
+                className="mt-1.5 min-h-[64px] text-[13px]"
+              />
+            </div>
+
+            <Button className="h-11 w-full gap-2 rounded-[11px]" disabled={saving} onClick={endCall}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              End call and save
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -4,10 +4,6 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { formatDistanceToNow, format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { fetchTimeline, fetchFinancials, setLifecycleStage, type EntityType, type LifecycleStage } from './useCRMData';
@@ -20,6 +16,7 @@ import { AvatarID, SkeletonLedger, statusTone, statusLabel } from '@/components/
 import { RecordHeader, RecordTimeline, TagChips, type TimelineEvent } from '@/components/platform/crm';
 import { InvoiceStudio } from '@/components/invoicing/InvoiceStudio';
 import { ConvertLeadDialog } from './ConvertLeadDialog';
+import { CallConsole } from './calls/CallConsole';
 import { useUserRole } from '@/hooks/useUserRole';
 
 interface Props {
@@ -385,28 +382,16 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
         }}
       />
 
-      <AlertDialog open={!!callTarget} onOpenChange={(open) => !open && setCallTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Would you like to call {callTarget?.label}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tap Call to open your phone dialler for <span className="font-medium text-foreground">{callTarget?.number}</span>.
-              You'll then choose how to place the call.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (callTarget) window.location.href = `tel:${callTarget.number.replace(/\s+/g, '')}`;
-                setCallTarget(null);
-              }}
-            >
-              <Phone className="h-4 w-4 mr-2" /> Call
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CallConsole
+        open={!!callTarget}
+        onOpenChange={(v) => { if (!v) setCallTarget(null); }}
+        number={callTarget?.number ?? ''}
+        entityType={entityType}
+        entityId={entity.id}
+        entityName={title || 'Untitled'}
+        orgId={entity.org_id ?? null}
+        onLogged={() => setActivityToken(t => t + 1)}
+      />
     </div>
   );
 }

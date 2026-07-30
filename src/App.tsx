@@ -99,6 +99,7 @@ const LoungeAdManagement = lazy(() => import("./pages/lounge/LoungeAdManagement"
 const LoungeSocialMedia = lazy(() => import("./pages/lounge/LoungeSocialMedia"));
 const LoungeContentRequests = lazy(() => import("./pages/lounge/LoungeContentRequests"));
 const LoungeInvoices = lazy(() => import("./pages/lounge/LoungeInvoices"));
+const CallCompanion = lazy(() => import("./pages/CallCompanion"));
 const LoungeMarketingCalendar = lazy(() => import("./pages/lounge/LoungeMarketingCalendar"));
 const LoungeWebsiteManagement = lazy(() => import("./pages/lounge/LoungeWebsiteManagement"));
 const LoungeWebsiteDesigner = lazy(() => import("./pages/lounge/LoungeWebsiteDesigner"));
@@ -307,6 +308,7 @@ function AnimatedRoutes() {
           <Route path="/admin/marketing-site/workshop/:siteId" element={<ProtectedRoute><AdminMarketingWorkshop /></ProtectedRoute>} />
           <Route path="/lounge/crm" element={<ProtectedRoute><CustomerGuard><CRMShell /></CustomerGuard></ProtectedRoute>} />
           <Route path="/admin/team" element={<Navigate to="/dashboard?tab=account-creation" replace />} />
+          <Route path="/call-companion" element={<CallCompanion />} />
           <Route path="/lounge/crm-legacy" element={<ProtectedRoute><CustomerGuard><LoungeCRM /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/ai-builder" element={<ProtectedRoute><CustomerGuard><LoungeAIBuilder /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/cad-studio/edit" element={<ProtectedRoute><CustomerGuard><LoungeCADEditor /></CustomerGuard></ProtectedRoute>} />

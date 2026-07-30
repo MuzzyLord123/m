@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAdminControls } from '@/hooks/useAdminControls';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DndContext,
@@ -340,8 +341,16 @@ export default function TeamSidebar({
     return user?.email ? user.email.substring(0, 2).toUpperCase() : 'A';
   };
 
+  // Owner-set controls: tabs hidden for this admin never render here.
+  const { hiddenTabs } = useAdminControls();
+  const visibleItem = (id: string) => {
+    const it = itemMap.get(id);
+    if (!it || hiddenTabs.has(it.id)) return undefined;
+    return it;
+  };
+
   const activeItem = activeId ? itemMap.get(activeId) : null;
-  const pinnedItems = PINNED_TOP.map((id) => itemMap.get(id)!).filter(Boolean);
+  const pinnedItems = PINNED_TOP.map((id) => visibleItem(id)!).filter(Boolean);
 
   return (
     <>
@@ -420,7 +429,7 @@ export default function TeamSidebar({
               {orderedRootEntries.map((entryId) => {
                 const folder = layout.folders.find((f) => f.id === entryId);
                 if (folder) {
-                  const folderItems = folder.itemIds.map((id) => itemMap.get(id)).filter(Boolean) as TeamNavItemDef[];
+                  const folderItems = folder.itemIds.map((id) => visibleItem(id)).filter(Boolean) as TeamNavItemDef[];
                   return (
                     <SidebarFolderComponent
                       key={folder.id}
@@ -443,7 +452,7 @@ export default function TeamSidebar({
 
 
                 }
-                const item = itemMap.get(entryId);
+                const item = visibleItem(entryId);
                 if (!item) return null;
                 return (
                   <SortableTeamNavItem key={item.id} item={item} collapsed={collapsed}
