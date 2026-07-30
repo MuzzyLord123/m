@@ -176,6 +176,7 @@ export function EntityDetail({ entityType, entity, stages, list, admins, related
         phone={entity.phone || entity.mobile || null}
         email={entity.email || null}
         website={entity.website || null}
+        onCall={(n) => setCallTarget({ label: title || 'Untitled', number: n })}
       />
       {/* Account standing: the relationship's financial position from the
           existing per-entity rpcs, always visible with the record. */}

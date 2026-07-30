@@ -7,15 +7,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { VoiceMeter } from './VoiceMeter';
 import type { EntityType } from '../useCRMData';
 
 /**
- * The call console. Every call pressed in the CRM is logged to
- * crm_call_logs the moment it starts: dial on this device (tel:) or push
- * to the paired phone. While the call runs you get a timer, outcome
- * buttons, notes, and live transcription captured from this device's
- * microphone (speakerphone recommended) - saved against the call and
- * written to the record timeline as a call event when you wrap up.
+ * The call console. Every Call press in the CRM comes through here and
+ * is logged from the first second. With a paired phone the primary route
+ * is "Call on your phone": the push rides realtime to the companion,
+ * the handset rings the number, and the transcript the phone captures
+ * streams back into this panel live. Calling on this device keeps the
+ * local microphone transcription and voice meter. Never a raw tel: link
+ * on desktop, so Windows Phone Link stays out of the flow.
  */
 
 const OUTCOMES = [
@@ -52,14 +54,18 @@ export function CallConsole({
   const { user } = useAuth();
   const { toast } = useToast();
   const [phase, setPhase] = useState<'choose' | 'active'>('choose');
+  const [source, setSource] = useState<'desktop' | 'phone'>('desktop');
   const [phoneLinked, setPhoneLinked] = useState(false);
   const [callId, setCallId] = useState<string | null>(null);
+  const [pushId, setPushId] = useState<string | null>(null);
+  const [pushHandled, setPushHandled] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [outcome, setOutcome] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [transcript, setTranscript] = useState('');
   const [interim, setInterim] = useState('');
+  const [phoneTranscript, setPhoneTranscript] = useState('');
   const [listening, setListening] = useState(false);
   const [saving, setSaving] = useState(false);
   const recogRef = useRef<any>(null);
@@ -70,8 +76,9 @@ export function CallConsole({
   // Reset per open; check for a paired phone.
   useEffect(() => {
     if (!open) return;
-    setPhase('choose'); setCallId(null); setStartedAt(null); setElapsed(0);
-    setOutcome(null); setNotes(''); setTranscript(''); setInterim(''); setListening(false);
+    setPhase('choose'); setSource('desktop'); setCallId(null); setPushId(null); setPushHandled(false);
+    setStartedAt(null); setElapsed(0); setOutcome(null); setNotes('');
+    setTranscript(''); setInterim(''); setPhoneTranscript(''); setListening(false);
     let cancelled = false;
     supabase.from('crm_phone_links' as any)
       .select('id, claimed_at')
@@ -90,22 +97,44 @@ export function CallConsole({
     return () => clearInterval(id);
   }, [phase, startedAt]);
 
-  async function startCall(source: 'desktop' | 'phone') {
+  // Phone calls: watch the push being picked up, and stream the
+  // transcript the phone is writing into this panel.
+  useEffect(() => {
+    if (phase !== 'active' || source !== 'phone' || !callId) return;
+    const id = setInterval(async () => {
+      if (pushId && !pushHandled) {
+        const { data } = await supabase.from('crm_call_pushes' as any)
+          .select('handled_at').eq('id', pushId).limit(1);
+        if (((data as any[]) || [])[0]?.handled_at) setPushHandled(true);
+      }
+      const { data: t } = await supabase.from('crm_call_transcripts' as any)
+        .select('content').eq('call_id', callId).limit(1);
+      const content = ((t as any[]) || [])[0]?.content;
+      if (content) setPhoneTranscript(content);
+    }, 2000);
+    return () => clearInterval(id);
+  }, [phase, source, callId, pushId, pushHandled]);
+
+  async function startCall(via: 'desktop' | 'phone') {
     if (!user || !orgId) { toast({ title: 'Missing organisation context', variant: 'destructive' }); return; }
     const { data, error } = await supabase.from('crm_call_logs' as any).insert({
       org_id: orgId, admin_id: user.id,
       entity_type: entityType, entity_id: entityId, entity_name: entityName,
-      phone: number, source,
+      phone: number, source: via,
     } as any).select('id').single();
     if (error) { toast({ title: 'Call not logged', description: error.message, variant: 'destructive' }); return; }
-    setCallId((data as any).id);
+    const newCallId = (data as any).id as string;
+    setCallId(newCallId);
+    setSource(via);
     setStartedAt(Date.now());
     setPhase('active');
-    if (source === 'phone') {
-      await supabase.from('crm_call_pushes' as any).insert({
-        user_id: user.id, phone: number, entity_type: entityType, entity_id: entityId, entity_name: entityName,
-      } as any);
-      toast({ title: 'Sent to your phone', description: 'The dialler opens on the connected phone.' });
+    if (via === 'phone') {
+      const { data: push, error: pushErr } = await supabase.from('crm_call_pushes' as any).insert({
+        user_id: user.id, phone: number, entity_type: entityType, entity_id: entityId,
+        entity_name: entityName, call_id: newCallId,
+      } as any).select('id').single();
+      if (pushErr) toast({ title: 'Push failed', description: pushErr.message, variant: 'destructive' });
+      else setPushId((push as any).id);
     } else {
       window.location.href = `tel:${number.replace(/\s+/g, '')}`;
     }
@@ -150,20 +179,21 @@ export function CallConsole({
       outcome, notes: notes.trim() || null,
     } as any).eq('id', callId);
 
-    if (transcript.trim()) {
+    // Desktop calls own their local transcript; phone calls stream their
+    // own row from the handset, which we never overwrite here.
+    if (source === 'desktop' && transcript.trim()) {
       await supabase.from('crm_call_transcripts' as any).upsert({
         call_id: callId, admin_id: user.id, content: transcript.trim(), updated_at: new Date().toISOString(),
       } as any);
     }
 
-    // The record timeline learns about the call as a communication.
     if (orgId) {
       const field = FIELD_FOR[entityType];
       await supabase.from('crm_communications').insert({
         org_id: orgId, owner_id: user.id,
         kind: 'call' as any, direction: 'outbound' as any,
         subject: `Call · ${OUTCOMES.find(o => o.value === outcome)?.label || 'logged'}`,
-        body: notes.trim() || (transcript ? transcript.slice(0, 300) : null),
+        body: notes.trim() || (source === 'phone' ? phoneTranscript.slice(0, 300) : transcript.slice(0, 300)) || null,
         occurred_at: new Date(startedAt || Date.now()).toISOString(),
         duration_seconds: duration,
         [field]: entityId,
@@ -180,6 +210,35 @@ export function CallConsole({
   const ss = String(elapsed % 60).padStart(2, '0');
   const label = 'font-mono text-[9.5px] font-medium text-muted-foreground uppercase tracking-[0.14em]';
 
+  const phoneButton = (
+    <Button
+      className="h-12 justify-start gap-3 rounded-[11px]"
+      disabled={!phoneLinked}
+      onClick={() => startCall('phone')}
+    >
+      <Smartphone className="h-4 w-4" />
+      <span className="text-left">
+        <span className="block text-[13px] font-medium">Call on your phone</span>
+        <span className="block text-[10.5px] opacity-80">
+          {phoneLinked ? 'Rings from your connected phone with a live transcript' : 'Connect a phone in Calls first'}
+        </span>
+      </span>
+    </Button>
+  );
+  const desktopButton = (
+    <Button
+      variant={phoneLinked ? 'outline' : 'default'}
+      className="h-12 justify-start gap-3 rounded-[11px]"
+      onClick={() => startCall('desktop')}
+    >
+      <Phone className="h-4 w-4" />
+      <span className="text-left">
+        <span className="block text-[13px] font-medium">Call on this device</span>
+        <span className="block text-[10.5px] text-muted-foreground">Uses this computer's calling app</span>
+      </span>
+    </Button>
+  );
+
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!saving) { if (!v) stopTranscript(); onOpenChange(v); } }}>
       <DialogContent className="max-w-md">
@@ -193,71 +252,73 @@ export function CallConsole({
           <div className="space-y-3">
             <p className="font-mono text-[13px] tabular-nums">{number}</p>
             <div className="grid gap-2">
-              <Button className="h-12 justify-start gap-3 rounded-[11px]" onClick={() => startCall('desktop')}>
-                <Phone className="h-4 w-4" />
-                <span className="text-left">
-                  <span className="block text-[13px] font-medium">Call on this device</span>
-                  <span className="block text-[10.5px] opacity-80">Opens your dialler here</span>
-                </span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-12 justify-start gap-3 rounded-[11px]"
-                disabled={!phoneLinked}
-                onClick={() => startCall('phone')}
-              >
-                <Smartphone className="h-4 w-4" />
-                <span className="text-left">
-                  <span className="block text-[13px] font-medium">Send to your phone</span>
-                  <span className="block text-[10.5px] text-muted-foreground">
-                    {phoneLinked ? 'Rings from your connected phone' : 'Connect a phone in Calls first'}
-                  </span>
-                </span>
-              </Button>
+              {phoneLinked ? (<>{phoneButton}{desktopButton}</>) : (<>{desktopButton}{phoneButton}</>)}
             </div>
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              The call is logged either way: timer, outcome, notes and optional live transcript, all saved to this record.
+              The call is logged either way: timer, outcome, notes and the transcript, all saved to this record.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="flex items-baseline justify-between rounded-[10px] border border-border/60 bg-sunken/50 px-4 py-3">
-              <span className={label}>On a call</span>
+              <span className={label}>
+                {source === 'phone'
+                  ? (pushHandled ? 'Ringing on your phone' : 'Sending to your phone…')
+                  : 'On a call'}
+              </span>
               <span className="font-mono text-[22px] font-semibold tabular-nums">{mm}:{ss}</span>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between">
-                <span className={label}>Live transcript</span>
-                {speechSupported ? (
-                  <button
-                    type="button"
-                    onClick={() => (listening ? stopTranscript() : startTranscript())}
-                    className={cn(
-                      'flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors',
-                      listening ? 'border-risk/50 text-risk' : 'border-border/60 text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {listening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
-                    {listening ? 'Stop' : 'Start'}
-                  </button>
-                ) : (
-                  <span className="text-[10.5px] text-muted-foreground">Not supported in this browser</span>
-                )}
+            {source === 'phone' ? (
+              <div>
+                <span className={label}>Live transcript from your phone</span>
+                <div className="mt-1.5 max-h-40 min-h-[72px] overflow-y-auto rounded-[10px] border border-border/60 p-3 text-[12.5px] leading-relaxed">
+                  {phoneTranscript ? (
+                    phoneTranscript
+                  ) : (
+                    <span className="text-muted-foreground">
+                      {pushHandled
+                        ? 'Waiting for speech. Put the call on speakerphone and keep the companion page open on your phone.'
+                        : 'Open the companion page on your phone if it has not popped up.'}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="mt-1.5 max-h-32 min-h-[64px] overflow-y-auto rounded-[10px] border border-border/60 p-3 text-[12.5px] leading-relaxed">
-                {transcript || interim ? (
-                  <>
-                    {transcript}
-                    {interim && <span className="text-muted-foreground"> {interim}</span>}
-                  </>
-                ) : (
-                  <span className="text-muted-foreground">
-                    {listening ? 'Listening…' : 'Captures speech from this device’s microphone. Put the call on speakerphone near this device.'}
-                  </span>
-                )}
+            ) : (
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className={label}>Live transcript</span>
+                  {speechSupported ? (
+                    <button
+                      type="button"
+                      onClick={() => (listening ? stopTranscript() : startTranscript())}
+                      className={cn(
+                        'flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors',
+                        listening ? 'border-risk/50 text-risk' : 'border-border/60 text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {listening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+                      {listening ? 'Stop' : 'Start'}
+                    </button>
+                  ) : (
+                    <span className="text-[10.5px] text-muted-foreground">Not supported in this browser</span>
+                  )}
+                </div>
+                <VoiceMeter active={listening} className="mt-2" />
+                <div className="mt-1.5 max-h-32 min-h-[64px] overflow-y-auto rounded-[10px] border border-border/60 p-3 text-[12.5px] leading-relaxed">
+                  {transcript || interim ? (
+                    <>
+                      {transcript}
+                      {interim && <span className="text-muted-foreground"> {interim}</span>}
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">
+                      {listening ? 'Listening…' : 'Captures speech from this device’s microphone. Put the call on speakerphone near this device.'}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             <div>
               <span className={label}>Outcome</span>

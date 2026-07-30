@@ -19,6 +19,7 @@ export function RecordHeader({
   stageLabel,
   value,
   phone,
+  onCall,
   email,
   website,
   right,
@@ -32,6 +33,8 @@ export function RecordHeader({
   stageLabel?: string;
   value?: number | null;
   phone?: string | null;
+  /** When set, Call routes through the app's call console instead of a raw tel: link. */
+  onCall?: (number: string) => void;
   email?: string | null;
   website?: string | null;
   right?: ReactNode;
@@ -72,11 +75,15 @@ export function RecordHeader({
       </div>
       {(phone || email || site) && (
         <div className="flex gap-2 px-4 pb-4">
-          {phone && (
+          {phone && (onCall ? (
+            <button type="button" onClick={() => onCall(phone)} className={act}>
+              <Phone className="h-[15px] w-[15px]" /> Call
+            </button>
+          ) : (
             <a href={`tel:${phone.replace(/\s+/g, '')}`} className={act}>
               <Phone className="h-[15px] w-[15px]" /> Call
             </a>
-          )}
+          ))}
           {email && (
             <a href={`mailto:${email}`} className={act}>
               <Mail className="h-[15px] w-[15px]" /> Email
