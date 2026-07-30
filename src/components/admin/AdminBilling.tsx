@@ -398,21 +398,48 @@ const AdminBilling = () => {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+    <div className="mx-auto max-w-[1400px] space-y-4 px-4 pb-16 pt-6 sm:px-6">
+      <header>
+        <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Recurring revenue
+        </p>
+        <h1 className="mt-1.5 font-display text-[26px] font-semibold leading-none tracking-[-0.02em] sm:text-[30px]">
+          Billing
+        </h1>
+        <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
+          What each client is on, what they owe, and what has been collected.
+        </p>
+      </header>
+
+      {/* The book: revenue leads, the rest supports it. */}
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[12px] border border-border/60 bg-border/60 lg:grid-cols-6">
+        <div className="bg-card px-4 py-3.5 lg:col-span-2">
+          <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            Monthly revenue
+          </p>
+          <p className="mt-1.5 font-display text-[30px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-primary">
+            <Money value={totalMonthlyRevenue} whole />
+          </p>
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
+            Across {clients.length} client{clients.length === 1 ? '' : 's'}
+          </p>
+        </div>
         {[
-          { label: 'Clients', value: String(clients.length) },
-          { label: 'Monthly revenue', value: <Money value={totalMonthlyRevenue} whole /> },
-          { label: 'Total collected', value: <Money value={totalRevenueMade} whole /> },
-          { label: 'Paid', value: String(paidClients) },
-          { label: 'Pending', value: String(pendingPayments) },
-          { label: 'In cart', value: String(clientsWithCart.length) },
+          { label: 'Collected', value: <Money value={totalRevenueMade} whole />, meta: 'All time' },
+          { label: 'Paid up', value: String(paidClients), meta: 'Settled accounts', tone: 'ok' },
+          { label: 'Pending', value: String(pendingPayments), meta: 'Awaiting payment', tone: pendingPayments ? 'attend' : undefined },
+          { label: 'In cart', value: String(clientsWithCart.length), meta: 'Unbilled items' },
         ].map((s) => (
-          <Panel key={s.label as string} className="p-3">
-            <p className="truncate font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{s.label}</p>
-            <p className="mt-1 text-[18px] font-semibold tabular-nums tracking-[-0.01em] text-foreground">{s.value}</p>
-          </Panel>
+          <div key={s.label} className="bg-card px-4 py-3.5">
+            <p className="truncate font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">{s.label}</p>
+            <p className={cn(
+              'mt-1.5 font-display text-[22px] font-semibold leading-none tracking-[-0.02em] tabular-nums',
+              s.tone === 'ok' && 'text-ok', s.tone === 'attend' && 'text-attend',
+            )}>
+              {s.value}
+            </p>
+            <p className="mt-1.5 truncate text-[11px] text-muted-foreground">{s.meta}</p>
+          </div>
         ))}
       </div>
 
