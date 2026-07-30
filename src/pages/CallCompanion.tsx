@@ -1,18 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Phone, Radar, Check, Loader2, PhoneOff } from 'lucide-react';
+import { Phone, Radar, Check, Loader2, Mic, RefreshCw, Copy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { VoiceMeter } from '@/pages/lounge/crm/calls/VoiceMeter';
+import {
+  type MicState, queryMicPermission, requestMic, micUnblockHelp, speechRecognitionSupported,
+} from '@/pages/lounge/crm/calls/micPermission';
 
 /**
- * The phone companion. Scan the QR from Calls while signed in on the
- * phone: the token is claimed, a wake lock keeps the screen alive, and
- * dial requests arrive over realtime (with a fast poll as backup). Each
- * push vibrates the phone and raises an incoming-call screen; tapping
- * Call opens the dialler, then the companion times the call, captures
- * the transcript through the phone's microphone (speakerphone) and
- * streams it live back to the desktop console every few seconds.
+ * The phone companion. Pairs by QR, keeps a wake lock, receives dial
+ * pushes over realtime and dials the moment one lands - the dialler is
+ * opened automatically where the browser allows it, with a one-tap
+ * fallback when it does not. Microphone permission is a first-class
+ * setup step: the page knows whether it is granted, promptable or
+ * blocked, and walks the user through their browser's own site settings
+ * when they denied it by accident. Transcripts stream to the desktop
+ * every few seconds and resume automatically when the user returns from
+ * the call screen.
  */
 
 interface Push {
@@ -28,22 +33,26 @@ export default function CallCompanion() {
   const [params] = useSearchParams();
   const token = params.get('token');
   const [state, setState] = useState<'claiming' | 'connected' | 'invalid'>('claiming');
-  const [incoming, setIncoming] = useState<Push | null>(null);
+  const [mic, setMic] = useState<MicState>('unknown');
+  const [micBusy, setMicBusy] = useState(false);
   const [onCall, setOnCall] = useState<Push | null>(null);
   const [callStarted, setCallStarted] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [transcript, setTranscript] = useState('');
   const [interim, setInterim] = useState('');
   const [listening, setListening] = useState(false);
+  const [copied, setCopied] = useState(false);
   const handled = useRef<Set<string>>(new Set());
   const recogRef = useRef<any>(null);
   const wakeRef = useRef<any>(null);
   const transcriptRef = useRef('');
   const lastSyncRef = useRef('');
+  const onCallRef = useRef<Push | null>(null);
   transcriptRef.current = transcript;
+  onCallRef.current = onCall;
 
-  const speechSupported = typeof window !== 'undefined' &&
-    !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+  const speechOk = typeof window !== 'undefined' && speechRecognitionSupported();
+  const help = micUnblockHelp();
 
   // Claim the token for this signed-in account.
   useEffect(() => {
@@ -52,7 +61,7 @@ export default function CallCompanion() {
     (async () => {
       if (!token) { setState('invalid'); return; }
       const { data, error } = await supabase.from('crm_phone_links' as any)
-        .update({ claimed_at: new Date().toISOString(), last_seen_at: new Date().toISOString(), device_label: 'phone' } as any)
+        .update({ claimed_at: new Date().toISOString(), last_seen_at: new Date().toISOString(), device_label: help.browser } as any)
         .eq('token', token)
         .select('id');
       if (cancelled) return;
@@ -60,9 +69,33 @@ export default function CallCompanion() {
       else setState('connected');
     })();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user, token]);
 
-  // Keep the screen awake while connected, re-acquiring after backgrounding.
+  // Track the real microphone permission, live.
+  useEffect(() => {
+    if (state !== 'connected') return;
+    let status: any;
+    let alive = true;
+    (async () => {
+      const s = await queryMicPermission();
+      if (alive) setMic(s);
+      try {
+        status = await (navigator.permissions as any)?.query({ name: 'microphone' });
+        if (status) status.onchange = () => { if (alive) setMic(status.state); };
+      } catch { /* no live updates */ }
+    })();
+    return () => { alive = false; if (status) status.onchange = null; };
+  }, [state]);
+
+  async function enableMic() {
+    setMicBusy(true);
+    const result = await requestMic();
+    setMic(result);
+    setMicBusy(false);
+  }
+
+  // Wake lock while connected, re-acquired after backgrounding.
   useEffect(() => {
     if (state !== 'connected') return;
     const acquire = async () => {
@@ -77,12 +110,57 @@ export default function CallCompanion() {
     };
   }, [state]);
 
+  function startTranscript() {
+    if (!speechOk) return;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const r = new SR();
+    r.lang = 'en-GB';
+    r.continuous = true;
+    r.interimResults = true;
+    r.onresult = (e: any) => {
+      let interimText = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const res = e.results[i];
+        if (res.isFinal) setTranscript(prev => (prev ? prev + ' ' : '') + res[0].transcript.trim());
+        else interimText += res[0].transcript;
+      }
+      setInterim(interimText);
+    };
+    r.onend = () => { if (recogRef.current === r) { try { r.start(); } catch { /* stopped */ } } };
+    r.onerror = () => setInterim('');
+    recogRef.current = r;
+    try { r.start(); setListening(true); } catch { /* running */ }
+  }
+
+  function stopTranscript() {
+    const r = recogRef.current;
+    recogRef.current = null;
+    setListening(false);
+    setInterim('');
+    if (r) { try { r.stop(); } catch { /* noop */ } }
+  }
+
+  const dial = (phone: string) => {
+    window.location.href = `tel:${phone.replace(/\s+/g, '')}`;
+  };
+
+  // A push lands: go straight to the on-call screen, start the
+  // transcript, and try to open the dialler with no tap at all. If the
+  // browser blocks the automatic jump, the big dial button is right
+  // there.
   const receivePush = useCallback((push: Push) => {
     if (handled.current.has(push.id)) return;
     handled.current.add(push.id);
-    setIncoming(push);
     try { navigator.vibrate?.([200, 90, 200, 90, 320]); } catch { /* unsupported */ }
     supabase.from('crm_call_pushes' as any).update({ handled_at: new Date().toISOString() } as any).eq('id', push.id);
+    setOnCall(push);
+    setCallStarted(Date.now());
+    setElapsed(0);
+    setTranscript('');
+    lastSyncRef.current = '';
+    setTimeout(() => startTranscript(), 300);
+    dial(push.phone);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Dial requests: realtime first, fast poll as the safety net.
@@ -119,6 +197,18 @@ export default function CallCompanion() {
     };
   }, [state, user, token, receivePush]);
 
+  // Coming back from the dialler: pick the transcript straight back up.
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === 'visible' && onCallRef.current && !recogRef.current) {
+        startTranscript();
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Call timer.
   useEffect(() => {
     if (!onCall || !callStarted) return;
@@ -140,49 +230,7 @@ export default function CallCompanion() {
     return () => clearInterval(id);
   }, [onCall?.call_id, user]);
 
-  function startTranscript() {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return;
-    const r = new SR();
-    r.lang = 'en-GB';
-    r.continuous = true;
-    r.interimResults = true;
-    r.onresult = (e: any) => {
-      let interimText = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const res = e.results[i];
-        if (res.isFinal) setTranscript(prev => (prev ? prev + ' ' : '') + res[0].transcript.trim());
-        else interimText += res[0].transcript;
-      }
-      setInterim(interimText);
-    };
-    r.onend = () => { if (recogRef.current === r) { try { r.start(); } catch { /* stopped */ } } };
-    r.onerror = () => setInterim('');
-    recogRef.current = r;
-    try { r.start(); setListening(true); } catch { /* running */ }
-  }
-
-  function stopTranscript() {
-    const r = recogRef.current;
-    recogRef.current = null;
-    setListening(false);
-    setInterim('');
-    if (r) { try { r.stop(); } catch { /* noop */ } }
-  }
-
-  function answer(push: Push) {
-    setIncoming(null);
-    setOnCall(push);
-    setCallStarted(Date.now());
-    setElapsed(0);
-    setTranscript('');
-    lastSyncRef.current = '';
-    // The tel: jump is on the same tap, so the dialler always opens; the
-    // companion stays behind it capturing the transcript.
-    setTimeout(() => startTranscript(), 400);
-  }
-
-  async function endCall() {
+  async function finishCall() {
     stopTranscript();
     const push = onCall;
     const duration = callStarted ? Math.floor((Date.now() - callStarted) / 1000) : null;
@@ -202,9 +250,87 @@ export default function CallCompanion() {
     setTranscript('');
   }
 
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch { /* clipboard unavailable */ }
+  }
+
   const kicker = 'font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground';
   const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
   const ss = String(elapsed % 60).padStart(2, '0');
+
+  const micSetup = mic !== 'granted' && (
+    <div className="w-full max-w-sm rounded-[14px] border border-attend/40 bg-attend/[0.05] p-4 text-left">
+      <p className="flex items-center gap-2 text-[13px] font-semibold">
+        <Mic className="h-4 w-4 text-attend" /> Microphone needed for transcripts
+      </p>
+      {mic === 'denied' ? (
+        <>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">
+            {help.browser} has this site's microphone blocked, and browsers never re-show the popup once blocked. Unblock it in {help.browser}'s site settings:
+          </p>
+          <ol className="mt-2 space-y-1">
+            {help.steps.map((s, i) => (
+              <li key={i} className="flex gap-2 text-[12px] leading-relaxed">
+                <span className="font-mono text-[10px] tabular-nums text-attend">{i + 1}.</span> {s}
+              </li>
+            ))}
+          </ol>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={enableMic}
+              disabled={micBusy}
+              className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-[10px] bg-primary text-[12.5px] font-medium text-primary-foreground"
+            >
+              {micBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />} Retry
+            </button>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="flex h-10 flex-1 items-center justify-center rounded-[10px] border border-border/60 text-[12.5px]"
+            >
+              Reload page
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">
+            Allow it once and it keeps working in {help.browser} on this phone from then on.
+          </p>
+          <button
+            type="button"
+            onClick={enableMic}
+            disabled={micBusy}
+            className="mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-primary text-[12.5px] font-medium text-primary-foreground"
+          >
+            {micBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mic className="h-3.5 w-3.5" />} Enable microphone
+          </button>
+        </>
+      )}
+    </div>
+  );
+
+  const chromeNote = !speechOk && (
+    <div className="w-full max-w-sm rounded-[14px] border border-border/60 bg-card p-4 text-left">
+      <p className="text-[13px] font-semibold">Live transcripts need Chrome</p>
+      <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">
+        {help.browser} cannot transcribe speech - it has never shipped that capability, no matter the permissions. The voice meter still works here; for live transcripts open this same link in Chrome and pair there.
+      </p>
+      <button
+        type="button"
+        onClick={copyLink}
+        className="mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-border/60 text-[12.5px]"
+      >
+        {copied ? <Check className="h-3.5 w-3.5 text-ok" /> : <Copy className="h-3.5 w-3.5" />}
+        {copied ? 'Link copied, paste it into Chrome' : 'Copy this page link for Chrome'}
+      </button>
+    </div>
+  );
 
   return (
     <div className="flex min-h-dvh flex-col bg-background px-6 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(24px,env(safe-area-inset-top))] text-foreground">
@@ -244,13 +370,24 @@ export default function CallCompanion() {
             This link has expired or belongs to another account. Generate a fresh QR from Calls in the CRM and scan again.
           </p>
         ) : onCall ? (
-          /* On a call: timer, voice meter, live transcript streaming to desktop. */
+          /* One screen for the whole call: dial, meter, live transcript. */
           <div className="flex w-full max-w-sm flex-col items-center gap-4">
             <p className={kicker}>On a call</p>
             <p className="truncate font-display text-xl font-semibold tracking-[-0.01em]">{onCall.entity_name || 'Lead'}</p>
             <p className="font-mono text-[34px] font-semibold tabular-nums">{mm}:{ss}</p>
-            <VoiceMeter active={listening} />
-            <div className="max-h-44 min-h-[88px] w-full overflow-y-auto rounded-[12px] border border-border/60 bg-card p-3.5 text-left text-[13px] leading-relaxed">
+            <button
+              type="button"
+              onClick={() => dial(onCall.phone)}
+              className="flex h-14 w-full items-center justify-center gap-2.5 rounded-[14px] bg-primary text-[15px] font-semibold text-primary-foreground"
+            >
+              <Phone className="h-5 w-5" /> Open dialler · {onCall.phone}
+            </button>
+            <p className="text-[10.5px] leading-relaxed text-muted-foreground">
+              Android shows the phone app while you dial. Put the call on speakerphone and come straight back here - the transcript resumes on its own.
+            </p>
+            {mic === 'granted' ? <VoiceMeter active={listening} /> : micSetup}
+            {chromeNote}
+            <div className="max-h-40 min-h-[80px] w-full overflow-y-auto rounded-[12px] border border-border/60 bg-card p-3.5 text-left text-[13px] leading-relaxed">
               {transcript || interim ? (
                 <>
                   {transcript}
@@ -258,53 +395,25 @@ export default function CallCompanion() {
                 </>
               ) : (
                 <span className="text-muted-foreground">
-                  {speechSupported
-                    ? (listening
-                      ? 'Listening. Put the call on speakerphone so both sides are captured.'
-                      : 'Transcription is starting…')
-                    : 'This browser cannot transcribe. Use Chrome on Android for live transcripts.'}
+                  {speechOk
+                    ? (mic === 'granted'
+                      ? (listening ? 'Listening. Speakerphone captures both sides.' : 'Transcription is starting…')
+                      : 'Enable the microphone above to start the transcript.')
+                    : 'No live transcript in this browser - the call still logs with its timer and outcome.'}
                 </span>
               )}
             </div>
             <p className="text-[10.5px] text-muted-foreground">Streaming live to your desktop console.</p>
-            <div className="flex w-full gap-2">
-              <a
-                href={`tel:${onCall.phone.replace(/\s+/g, '')}`}
-                className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] border border-border/60 text-[13px] font-medium"
-              >
-                <Phone className="h-4 w-4" /> Redial
-              </a>
-              <button
-                type="button"
-                onClick={endCall}
-                className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[12px] bg-risk text-[13px] font-medium text-white"
-              >
-                <PhoneOff className="h-4 w-4" /> End call
-              </button>
-            </div>
-          </div>
-        ) : incoming ? (
-          /* Incoming push: one tap places the call and starts the transcript. */
-          <div className="flex w-full max-w-sm flex-col items-center gap-5">
-            <p className={kicker}>Call from your desk</p>
-            <div>
-              <p className="font-display text-2xl font-semibold tracking-[-0.02em]">{incoming.entity_name || 'Lead'}</p>
-              <p className="mt-1 font-mono text-[15px] tabular-nums text-muted-foreground">{incoming.phone}</p>
-            </div>
-            <a
-              href={`tel:${incoming.phone.replace(/\s+/g, '')}`}
-              onClick={() => answer(incoming)}
-              className="flex h-16 w-full items-center justify-center gap-2.5 rounded-[16px] bg-primary text-[16px] font-semibold text-primary-foreground"
-            >
-              <Phone className="h-5 w-5" /> Call now
-            </a>
             <button
               type="button"
-              onClick={() => setIncoming(null)}
-              className="text-[12.5px] text-muted-foreground transition-colors hover:text-foreground"
+              onClick={finishCall}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-border/60 text-[13px] font-medium"
             >
-              Dismiss
+              <Check className="h-4 w-4" /> Finish and save
             </button>
+            <p className="-mt-3 text-[10px] text-muted-foreground">
+              Hang up in your phone's call screen, then tap Finish.
+            </p>
           </div>
         ) : (
           <>
@@ -315,9 +424,16 @@ export default function CallCompanion() {
             <div>
               <p className="font-display text-lg font-semibold tracking-[-0.01em]">Phone connected</p>
               <p className="mt-1 max-w-xs text-[13px] leading-relaxed text-muted-foreground">
-                Keep this page open. Press Call on your desktop and this phone rings the lead, with the transcript streaming back to your desk.
+                Keep this page open. Press Call on your desktop and this phone dials the lead straight away.
               </p>
             </div>
+            {micSetup}
+            {mic === 'granted' && (
+              <p className="flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-ok">
+                <Mic className="h-3 w-3" /> Microphone ready
+              </p>
+            )}
+            {chromeNote}
           </>
         )}
       </main>
