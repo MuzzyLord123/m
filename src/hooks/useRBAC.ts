@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const RBAC_MODULES = [
   { id: 'command-center', label: 'Command Center', group: 'Dashboard' },
   { id: 'enquiries', label: 'Enquiries', group: 'CRM' },
-  { id: 'leads', label: 'Leads', group: 'CRM' },
+  { id: 'leads', label: 'Business Relationships', group: 'CRM' },
   { id: 'clients', label: 'Clients', group: 'CRM' },
   { id: 'client-accounts', label: 'Client Accounts', group: 'CRM' },
   { id: 'apps', label: 'App Projects', group: 'Projects' },
@@ -17,7 +17,6 @@ export const RBAC_MODULES = [
   { id: 'calendar', label: 'Calendar', group: 'Tools' },
   { id: 'websites', label: 'Websites', group: 'Projects' },
   { id: 'website-designer', label: 'Website Designer', group: 'Projects' },
-  { id: 'cad-studio', label: 'CAD Studio', group: 'Tools' },
   { id: 'office', label: 'Quooro Office', group: 'Tools' },
   { id: 'invoices', label: 'Invoices', group: 'Finance' },
   { id: 'billing', label: 'Billing', group: 'Finance' },
