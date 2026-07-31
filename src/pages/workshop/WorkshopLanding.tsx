@@ -166,7 +166,7 @@ export default function WorkshopLanding() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="relative rounded-2xl border border-border/50 bg-card overflow-hidden shadow-2xl shadow-black/10"
+            className="relative rounded-2xl border border-border/50 bg-card overflow-hidden shadow-lg shadow-black/10"
           >
             {/* Browser chrome */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30">
@@ -297,7 +297,7 @@ export default function WorkshopLanding() {
                 transition={{ delay: i * 0.15 }}
                 className="text-center"
               >
-                <div className={`${device.w} ${device.h} rounded-xl border-2 border-border/50 bg-background flex items-center justify-center mb-3`}>
+                <div className={`${device.w} ${device.h} rounded-[10px] border border-border/50 bg-background flex items-center justify-center mb-3`}>
                   <device.icon className="w-8 h-8 text-muted-foreground/30" />
                 </div>
                 <span className="text-xs text-muted-foreground">{device.label}</span>

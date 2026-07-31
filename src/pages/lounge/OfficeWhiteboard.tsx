@@ -161,7 +161,7 @@ export default function OfficeWhiteboard() {
   return (
     <div className="fixed inset-0 z-50 bg-[#fafafa] dark:bg-[#1a1a1a] flex flex-col touch-none">
       {/* Top bar */}
-      <header className="h-12 border-b border-border/30 bg-background/90 backdrop-blur-2xl flex items-center px-3 sm:px-4 gap-2 sm:gap-3 shrink-0 overflow-hidden">
+      <header className="h-12 border-b border-border/30 bg-background/90 backdrop- flex items-center px-3 sm:px-4 gap-2 sm:gap-3 shrink-0 overflow-hidden">
         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl shrink-0" onClick={() => navigate('/lounge/office/whiteboard-home', { state: { fromOfficeApp: true } })}>
           <ArrowLeft className="h-4 w-4" />
         </Button>

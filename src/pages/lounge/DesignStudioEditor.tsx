@@ -867,7 +867,7 @@ export default function DesignStudio() {
 
               {/* Canvas */}
               <div style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(${panX}px, ${panY}px) translate(-50%, -50%) scale(${zoom})`, transformOrigin: 'center center' }}>
-                <div className="absolute -inset-2 bg-foreground/[0.04] rounded-xl blur-2xl" />
+                <div className="absolute -inset-2 bg-foreground/[0.04] rounded-xl" />
                 <div ref={canvasRef} data-canvas="true" className="relative rounded-sm"
                   style={{
                     width: canvasW, height: canvasH,

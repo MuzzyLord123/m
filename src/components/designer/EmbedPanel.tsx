@@ -174,7 +174,7 @@ export function EmbedPanel({ siteId }: { siteId?: string }) {
                   setActiveType(embed.type);
                   setDetailTab(embed.hasPreview ? 'preview' : 'code');
                 }}
-                className="w-full text-left p-3 rounded-xl transition-all hover:scale-[1.01] bg-card/60 border border-border/40 hover:border-brand/40"
+                className="w-full text-left p-3 rounded-xl transition-all bg-card/60 border border-border/40 hover:border-brand/40"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-brand/10">

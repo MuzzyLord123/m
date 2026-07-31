@@ -23,6 +23,8 @@ import {
 } from '@/components/platform';
 
 /* ─── App registry ─── */
+import { tileStyle, glyphStyle, accentOf } from '@/pages/lounge/office/officeIdentity';
+
 type AppItem = { id: string; name: string; desc: string; icon: any; route: string };
 
 const APPS: AppItem[] = [
@@ -219,8 +221,8 @@ export default function LoungeOffice() {
               title={app.name}
               className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-150 hover:bg-foreground/[0.04]"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/[0.04]">
-                <app.icon className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg" style={glyphStyle(app.id)}>
+                <app.icon className="h-4 w-4" strokeWidth={1.8} />
               </span>
             </button>
           ))}
@@ -392,8 +394,11 @@ function HomeView({
                           onClick={() => { go(app.route); setSearch(''); setSearchFocused(false); }}
                           className="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors duration-150 hover:bg-foreground/[0.025]"
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
-                            <app.icon className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.8} />
+                          <span
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                            style={glyphStyle(app.id)}
+                          >
+                            <app.icon className="h-3.5 w-3.5" strokeWidth={1.8} />
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-[13px] font-medium text-foreground">{app.name}</span>
@@ -449,20 +454,26 @@ function HomeView({
             <SectionHeader title="Create new" />
             <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">
               {[
-                { icon: FileText, label: 'Document', route: '/lounge/office/word-home' },
-                { icon: Sheet, label: 'Spreadsheet', route: '/lounge/office/sheets-home' },
-                { icon: Presentation, label: 'Presentation', route: '/lounge/office/powerpoint-home' },
-                { icon: BookOpen, label: 'Notebook', route: '/lounge/office/onenote-home' },
-                { icon: Receipt, label: 'Invoice', route: '/lounge/office/invoices' },
-                { icon: Palette, label: 'Design', route: '/lounge/office/design-studio' },
+                { id: 'docs', icon: FileText, label: 'Document', route: '/lounge/office/word-home' },
+                { id: 'sheets', icon: Sheet, label: 'Spreadsheet', route: '/lounge/office/sheets-home' },
+                { id: 'slides', icon: Presentation, label: 'Presentation', route: '/lounge/office/powerpoint-home' },
+                { id: 'notes', icon: BookOpen, label: 'Notebook', route: '/lounge/office/onenote-home' },
+                { id: 'invoices', icon: Receipt, label: 'Invoice', route: '/lounge/office/invoices' },
+                { id: 'design', icon: Palette, label: 'Design', route: '/lounge/office/design-studio' },
               ].map((item) => (
                 <button
                   key={item.label}
                   onClick={() => go(item.route)}
-                  className="flex flex-col items-center gap-2.5 rounded-[10px] border border-border/60 bg-card p-4 transition-colors duration-150 hover:bg-foreground/[0.025]"
+                  style={tileStyle(item.id)}
+                  className="group relative flex flex-col items-center gap-2.5 overflow-hidden rounded-[12px] border bg-card p-4 transition-all duration-200 hover:-translate-y-[2px]"
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-foreground/[0.04]">
-                    <item.icon className="h-[18px] w-[18px] text-ink-2" strokeWidth={1.7} />
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-0 top-0 h-[2px] opacity-70 transition-opacity duration-200 group-hover:opacity-100"
+                    style={{ background: accentOf(item.id) }}
+                  />
+                  <span className="flex h-10 w-10 items-center justify-center rounded-[11px]" style={glyphStyle(item.id)}>
+                    <item.icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
                   </span>
                   <span className="text-[11.5px] font-medium text-foreground">{item.label}</span>
                 </button>
@@ -589,10 +600,19 @@ function AppsView({ search, setSearch, filteredApps, go }: {
                 <button
                   key={app.id}
                   onClick={() => go(app.route)}
-                  className="flex flex-col items-center gap-2 rounded-[10px] border border-border/60 bg-card p-3 transition-colors duration-150 hover:bg-foreground/[0.025] sm:gap-2.5 sm:p-4"
+                  style={tileStyle(app.id)}
+                  className="group relative flex flex-col items-center gap-2 overflow-hidden rounded-[12px] border bg-card p-3 transition-all duration-200 hover:-translate-y-[2px] sm:gap-2.5 sm:p-4"
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-foreground/[0.04]">
-                    <app.icon className="h-[18px] w-[18px] text-ink-2" strokeWidth={1.7} />
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-0 top-0 h-[2px] opacity-70 transition-opacity duration-200 group-hover:opacity-100"
+                    style={{ background: accentOf(app.id) }}
+                  />
+                  <span
+                    className="flex h-10 w-10 items-center justify-center rounded-[11px]"
+                    style={glyphStyle(app.id)}
+                  >
+                    <app.icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
                   </span>
                   <span className="w-full min-w-0 text-center">
                     <span className="block truncate text-[13px] font-medium text-foreground">{app.name}</span>

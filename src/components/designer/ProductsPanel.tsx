@@ -241,7 +241,7 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
 
       <ScrollArea className="flex-1">
         {loading ? (
-          <div className="p-3 text-[11px] text-[#555]">Loading...</div>
+          <div className="p-3 text-[11px] text-[#555]">Loading</div>
         ) : products.length === 0 ? (
           <div className="p-4 text-center">
             <ShoppingBag className="h-8 w-8 mx-auto text-[#444] mb-2" />

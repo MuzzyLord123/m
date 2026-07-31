@@ -141,7 +141,7 @@ export function ScaledSlide({
 
   return (
     <div ref={containerRef} className={cn("relative overflow-hidden", className)} onClick={() => onDeselectAll?.()}>
-      <div style={slideStyle} className="slide-content shadow-2xl">
+      <div style={slideStyle} className="slide-content shadow-lg">
         {/* Snap guides */}
         {showGuides && snapLines.x != null && (
           <div className="absolute top-0 bottom-0 w-px bg-cyan-400/60 pointer-events-none z-[999]" style={{ left: snapLines.x }} />

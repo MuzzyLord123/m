@@ -226,7 +226,7 @@ export default function OfficePDF() {
   if (!pdfDoc) {
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col">
-        <header className="h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3 shrink-0">
+        <header className="h-[52px] border-b border-border/30 bg-background/80 backdrop- flex items-center px-5 gap-3 shrink-0">
           <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
             <ArrowLeft className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Back to Office</span>
@@ -261,7 +261,7 @@ export default function OfficePDF() {
   return (
     <div className="fixed inset-0 z-50 bg-muted flex flex-col">
       {/* Toolbar */}
-      <header className="min-h-[52px] border-b border-border/30 bg-background/90 backdrop-blur-2xl flex flex-wrap items-center px-3 sm:px-4 gap-1.5 sm:gap-2 py-2 shrink-0">
+      <header className="min-h-[52px] border-b border-border/30 bg-background/90 backdrop- flex flex-wrap items-center px-3 sm:px-4 gap-1.5 sm:gap-2 py-2 shrink-0">
         <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => { setPdfDoc(null); setFile(null); setAnnotations([]); }}>
           <ArrowLeft className="h-3.5 w-3.5" />
         </Button>
@@ -332,7 +332,7 @@ export default function OfficePDF() {
       <div className="flex-1 overflow-auto flex items-start justify-center p-2 sm:p-6">
         <div
           ref={containerRef}
-          className="relative shadow-2xl rounded-lg"
+          className="relative shadow-lg rounded-lg"
           style={{ width: pageSize.width, height: pageSize.height }}
           onClick={handleCanvasClick}
           onMouseDown={handleMouseDown}
