@@ -127,7 +127,9 @@ export function OfficeQuickActions() {
     : [];
 
   return (
-    <div className="fixed right-5 bottom-5 z-[60]">
+    /* On mobile the Office tab bar owns the bottom edge, so the launcher
+       sits clear of it rather than on top of the Recents tab. */
+    <div className="fixed right-5 z-[60] bottom-[calc(58px_+_env(safe-area-inset-bottom)_+_14px)] md:bottom-5">
       <AnimatePresence>
         {open && (
           <>
