@@ -136,23 +136,42 @@ export default function AdminSettings() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Sub-nav */}
-      <div className="flex items-center gap-1 rounded-lg p-0.5" style={{ backgroundColor: 'hsl(var(--muted))' }}>
-        {[
-          { key: 'ui' as const, icon: <Palette className="h-3 w-3" />, label: 'UI Preferences' },
-          { key: 'sidebar' as const, icon: <FolderOpen className="h-3 w-3" />, label: 'Sidebar Organization' },
-          { key: 'device' as const, icon: <Smartphone className="h-3 w-3" />, label: 'Device' },
-          { key: 'vaults' as const, icon: <KeyRound className="h-3 w-3" />, label: 'Vaults' },
-        ].map(t => (
-          <button key={t.key} onClick={() => setSettingsTab(t.key)}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all",
-              settingsTab === t.key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-            )}>
-            {t.icon}<span>{t.label}</span>
-          </button>
-        ))}
+    <div className="mx-auto max-w-[1100px] space-y-5 px-4 pb-16 pt-6 sm:px-6">
+      <header>
+        <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          Your workspace
+        </p>
+        <h1 className="mt-1.5 font-display text-[26px] font-semibold leading-none tracking-[-0.02em] sm:text-[30px]">
+          Settings
+        </h1>
+        <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
+          How Quooro looks and behaves for you. Changes apply to your account only.
+        </p>
+      </header>
+
+      <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        <div className="flex min-w-max items-center gap-1 rounded-[12px] border border-border/60 bg-sunken/40 p-1.5">
+          {[
+            { key: 'ui' as const, icon: <Palette className="h-3.5 w-3.5" />, label: 'Appearance' },
+            { key: 'sidebar' as const, icon: <FolderOpen className="h-3.5 w-3.5" />, label: 'Navigation' },
+            { key: 'device' as const, icon: <Smartphone className="h-3.5 w-3.5" />, label: 'Devices' },
+            { key: 'vaults' as const, icon: <KeyRound className="h-3.5 w-3.5" />, label: 'Vaults' },
+          ].map(t => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setSettingsTab(t.key)}
+              className={cn(
+                'flex h-10 shrink-0 items-center gap-2 rounded-[9px] px-3.5 text-[12.5px] font-medium transition-colors',
+                settingsTab === t.key
+                  ? 'border border-border/70 bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {t.icon}<span>{t.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {settingsTab === 'ui' && (
@@ -166,9 +185,9 @@ export default function AdminSettings() {
 
           {/* Dashboard Density */}
           <motion.div variants={cardVariants}>
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2"><Grip className="w-4 h-4" /> Dashboard Density</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-[14px] font-semibold tracking-[-0.01em]"><Grip className="w-4 h-4" /> Dashboard Density</CardTitle>
                 <CardDescription>Control the spacing and size of elements</CardDescription>
               </CardHeader>
               <CardContent>
@@ -179,8 +198,8 @@ export default function AdminSettings() {
                     { value: 'spacious' as const, label: 'Spacious', desc: 'Lots of space' },
                   ]).map(opt => (
                     <button key={opt.value} onClick={() => updatePreference('dashboardDensity', opt.value)}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 ${
-                        preferences.dashboardDensity === opt.value ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-[10px] border transition-colors duration-150 ${
+                        preferences.dashboardDensity === opt.value ? 'border-primary/50 bg-primary/[0.07]' : 'border-border/60 hover:border-border'
                       }`}>
                       <div className={`flex gap-0.5 ${opt.value === 'compact' ? 'gap-px' : opt.value === 'spacious' ? 'gap-1.5' : 'gap-1'}`}>
                         {[1,2,3].map(i => <div key={i} className={`rounded bg-muted-foreground/20 ${opt.value === 'compact' ? 'w-3 h-3' : opt.value === 'spacious' ? 'w-5 h-5' : 'w-4 h-4'}`} />)}
@@ -195,9 +214,9 @@ export default function AdminSettings() {
 
           {/* Card Style */}
           <motion.div variants={cardVariants}>
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2"><Square className="w-4 h-4" /> Card Style</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-[14px] font-semibold tracking-[-0.01em]"><Square className="w-4 h-4" /> Card Style</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -207,8 +226,8 @@ export default function AdminSettings() {
                     { value: 'flat' as const, label: 'Flat', cls: 'bg-muted/40 border-0' },
                   ]).map(opt => (
                     <button key={opt.value} onClick={() => updatePreference('cardStyle', opt.value)}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                        preferences.cardStyle === opt.value ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'
+                      className={`flex flex-col items-center gap-2 p-3 rounded-[10px] border transition-colors ${
+                        preferences.cardStyle === opt.value ? 'border-primary/50 bg-primary/[0.07]' : 'border-border/60 hover:border-border'
                       }`}>
                       <div className={`w-12 h-8 rounded-md ${opt.cls}`} />
                       <p className={`text-xs font-medium ${preferences.cardStyle === opt.value ? 'text-foreground' : 'text-muted-foreground'}`}>{opt.label}</p>
@@ -221,9 +240,9 @@ export default function AdminSettings() {
 
           {/* Card Radius */}
           <motion.div variants={cardVariants}>
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2"><RectangleHorizontal className="w-4 h-4" /> Card Corners</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-[14px] font-semibold tracking-[-0.01em]"><RectangleHorizontal className="w-4 h-4" /> Card Corners</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -234,8 +253,8 @@ export default function AdminSettings() {
                     { value: 'lg' as const, label: 'Large', r: 'rounded-xl' },
                   ]).map(opt => (
                     <button key={opt.value} onClick={() => updatePreference('cardRadius', opt.value)}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                        preferences.cardRadius === opt.value ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'
+                      className={`flex flex-col items-center gap-2 p-3 rounded-[10px] border transition-colors ${
+                        preferences.cardRadius === opt.value ? 'border-primary/50 bg-primary/[0.07]' : 'border-border/60 hover:border-border'
                       }`}>
                       <div className={`w-10 h-7 border-2 border-muted-foreground/30 ${opt.r}`} />
                       <p className={`text-xs font-medium ${preferences.cardRadius === opt.value ? 'text-foreground' : 'text-muted-foreground'}`}>{opt.label}</p>
@@ -248,9 +267,9 @@ export default function AdminSettings() {
 
           {/* Font Size */}
           <motion.div variants={cardVariants}>
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2"><Type className="w-4 h-4" /> Font Size</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-[14px] font-semibold tracking-[-0.01em]"><Type className="w-4 h-4" /> Font Size</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -260,8 +279,8 @@ export default function AdminSettings() {
                     { value: 'large' as const, label: 'Large', size: 'text-base' },
                   ]).map(opt => (
                     <button key={opt.value} onClick={() => updatePreference('fontSize', opt.value)}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                        preferences.fontSize === opt.value ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'
+                      className={`flex flex-col items-center gap-2 p-3 rounded-[10px] border transition-colors ${
+                        preferences.fontSize === opt.value ? 'border-primary/50 bg-primary/[0.07]' : 'border-border/60 hover:border-border'
                       }`}>
                       <span className={`font-medium ${opt.size} ${preferences.fontSize === opt.value ? 'text-foreground' : 'text-muted-foreground'}`}>Aa</span>
                       <p className={`text-xs font-medium ${preferences.fontSize === opt.value ? 'text-foreground' : 'text-muted-foreground'}`}>{opt.label}</p>
@@ -274,9 +293,9 @@ export default function AdminSettings() {
 
           {/* Animations */}
           <motion.div variants={cardVariants}>
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2"><Sparkles className="w-4 h-4" /> Animations</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-[14px] font-semibold tracking-[-0.01em]"><Sparkles className="w-4 h-4" /> Animations</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
@@ -296,9 +315,9 @@ export default function AdminSettings() {
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
           {/* Expand All Toggle */}
           <motion.div variants={cardVariants}>
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2"><FolderOpen className="w-4 h-4" /> Organization Settings</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-[14px] font-semibold tracking-[-0.01em]"><FolderOpen className="w-4 h-4" /> Organization Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -458,9 +477,9 @@ export default function AdminSettings() {
       {settingsTab === 'vaults' && (
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
           <motion.div variants={cardVariants}>
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2"><Lock className="w-4 h-4" /> Secure Vaults</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-[14px] font-semibold tracking-[-0.01em]"><Lock className="w-4 h-4" /> Secure Vaults</CardTitle>
                 <CardDescription>All secure file vaults created by users</CardDescription>
               </CardHeader>
               <CardContent>
@@ -502,9 +521,9 @@ export default function AdminSettings() {
           </motion.div>
 
           <motion.div variants={cardVariants}>
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2"><KeyRound className="w-4 h-4" /> Password Vaults</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-[14px] font-semibold tracking-[-0.01em]"><KeyRound className="w-4 h-4" /> Password Vaults</CardTitle>
                 <CardDescription>All password vaults created by users</CardDescription>
               </CardHeader>
               <CardContent>

@@ -92,8 +92,16 @@ const optionLabel = (active: boolean) =>
   cn('text-xs font-medium', active ? 'text-foreground' : 'text-muted-foreground');
 
 /** Quiet vertical settings-nav trigger */
+/**
+ * The settings rail. On a wide screen it stands down the side with a
+ * marker against the section you are in; on a phone it becomes a strip
+ * that scrolls. Either way the active row is stated by a hairline and a
+ * shift in weight rather than a filled block.
+ */
 const SETTINGS_TAB =
-  'shrink-0 justify-start rounded-lg px-3 py-1.5 text-[13px] text-muted-foreground data-[state=active]:bg-foreground/[0.05] data-[state=active]:text-foreground data-[state=active]:shadow-none lg:w-full';
+  'relative shrink-0 justify-start rounded-[9px] px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors '
+  + 'hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-none '
+  + 'data-[state=active]:border data-[state=active]:border-border/70 lg:w-full';
 
 export default function LoungeSettings() {
   const { user } = useAuth();
@@ -367,7 +375,7 @@ export default function LoungeSettings() {
 
         {/* Tabs: vertical layout */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col lg:flex-row gap-6">
-          <TabsList className="scrollbar-hide flex w-full shrink-0 justify-start gap-0.5 overflow-x-auto rounded-lg bg-transparent p-0 lg:h-auto lg:w-44 lg:flex-col">
+          <TabsList className="scrollbar-hide -mx-1 flex w-full shrink-0 justify-start gap-1 overflow-x-auto rounded-[12px] border border-border/60 bg-sunken/40 p-1.5 lg:mx-0 lg:h-auto lg:w-48 lg:flex-col">
             <TabsTrigger value="profile" className={SETTINGS_TAB}>Profile</TabsTrigger>
             <TabsTrigger value="security" className={SETTINGS_TAB}>Security</TabsTrigger>
             <TabsTrigger value="ui" className={SETTINGS_TAB}>Interface</TabsTrigger>
