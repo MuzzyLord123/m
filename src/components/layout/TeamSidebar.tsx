@@ -68,7 +68,6 @@ export const ALL_TEAM_NAV_ITEMS: TeamNavItemDef[] = [
 { id: 'websites', label: 'Websites', icon: Globe, tab: 'websites', path: '/dashboard?tab=websites' },
 { id: 'marketing-site', label: 'Marketing Site', icon: Sparkles, tab: 'marketing-site', path: '/admin/marketing-site' },
 { id: 'website-designer', label: 'Website Designer', icon: Paintbrush, tab: 'website-designer', path: '/dashboard?tab=website-designer' },
-{ id: 'cad-studio', label: 'CAD Studio', icon: PenTool, tab: 'cad-studio', path: '/dashboard?tab=cad-studio' },
 { id: 'office', label: 'Quooro Office', icon: FileSpreadsheet, tab: 'office', path: '/dashboard?tab=office' },
 { id: 'ecommerce', label: 'E-commerce', icon: ShoppingBag, tab: 'ecommerce', path: '/dashboard?tab=ecommerce' },
 { id: 'client-websites', label: 'Client Websites', icon: Server, tab: 'client-websites', path: '/team/websites' },

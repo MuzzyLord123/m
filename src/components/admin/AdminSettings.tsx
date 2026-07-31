@@ -34,7 +34,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   'command-center': BarChart3, enquiries: Mail, leads: Target, clients: Users,
   'client-accounts': Users, apps: Globe, ads: Megaphone, social: Share2,
   content: FileText, calendar: Calendar, websites: Globe, 'website-designer': Globe,
-  'cad-studio': Globe, office: Globe, invoices: FileText,
+  office: Globe, invoices: FileText,
   billing: CreditCard, messages: MessageSquare, assets: HardDrive, tickets: MessageSquare,
   security: Shield, announcements: Megaphone, workflows: Workflow, resources: BarChart3,
   'live-sessions': Monitor, settings: Settings, 'knowledge-base': FolderOpen,
@@ -45,7 +45,7 @@ const LABEL_MAP: Record<string, string> = {
   'command-center': 'Command Center', enquiries: 'Enquiries', leads: 'Business Relationships', clients: 'Clients',
   'client-accounts': 'Client Accounts', apps: 'App Projects', ads: 'Ad Campaigns', social: 'Social Media',
   content: 'Content', calendar: 'Calendar', websites: 'Websites', 'website-designer': 'Website Designer',
-  'cad-studio': 'CAD Studio', office: 'Quooro Office', invoices: 'Invoices',
+  office: 'Quooro Office', invoices: 'Invoices',
   billing: 'Billing', messages: 'Messages', assets: 'Assets', tickets: 'Tickets',
   security: 'Security', announcements: 'Announcements', workflows: 'Workflows', resources: 'Resources',
   'live-sessions': 'Live Sessions', settings: 'Settings', 'knowledge-base': 'Knowledge Base',
@@ -484,7 +484,7 @@ export default function AdminSettings() {
               </CardHeader>
               <CardContent>
                 {loadingVaults ? (
-                  <p className="text-sm text-muted-foreground">Loading...</p>
+                  <p className="text-sm text-muted-foreground">Loading</p>
                 ) : vaultConfigs.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No secure vaults created yet.</p>
                 ) : (
@@ -528,7 +528,7 @@ export default function AdminSettings() {
               </CardHeader>
               <CardContent>
                 {loadingVaults ? (
-                  <p className="text-sm text-muted-foreground">Loading...</p>
+                  <p className="text-sm text-muted-foreground">Loading</p>
                 ) : passwordVaultConfigs.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No password vaults created yet.</p>
                 ) : (

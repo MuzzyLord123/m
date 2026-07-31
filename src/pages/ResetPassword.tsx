@@ -81,8 +81,8 @@ export default function ResetPassword() {
   if (success) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 via-transparent to-primary/10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full" />
         
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -99,7 +99,7 @@ export default function ResetPassword() {
               <Check className="w-8 h-8 text-emerald-500" />
             </motion.div>
             <div>
-              <h1 className="text-2xl font-bold">Password Updated!</h1>
+              <h1 className="font-display text-[22px] font-semibold tabular-nums tracking-[-0.02em]">Password Updated!</h1>
               <p className="text-muted-foreground mt-2">
                 Your password has been successfully reset. Redirecting you to the lounge...
               </p>
@@ -113,7 +113,7 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+      <div className="absolute inset-0 via-transparent to-primary/10" />
       
       {/* Grid pattern overlay */}
       <div 
@@ -126,7 +126,7 @@ export default function ResetPassword() {
       />
       
       {/* Radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full" />
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}

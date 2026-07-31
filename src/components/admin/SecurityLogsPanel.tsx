@@ -360,7 +360,7 @@ export default function SecurityLogsPanel() {
                               ) : geo?.loading ? (
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <Globe className="h-4 w-4 animate-pulse" />
-                                  <span className="text-sm">Loading...</span>
+                                  <span className="text-sm">Loading</span>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">

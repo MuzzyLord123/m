@@ -568,13 +568,13 @@ export default function ConnectionsSettings() {
     <div className="space-y-6">
       {/* Header */}
       <motion.div variants={itemVariants}>
-        <Card>
+        <Card className="rounded-[12px] border-border/60 shadow-none">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Plug className="w-5 h-5" />
                 <div>
-                  <CardTitle className="text-lg">External Connections</CardTitle>
+                  <CardTitle className="text-[14px] font-semibold tracking-[-0.01em]">External Connections</CardTitle>
                   <CardDescription>
                     Connect third-party services for calling, messaging, email, payments and more
                   </CardDescription>
@@ -621,7 +621,7 @@ export default function ConnectionsSettings() {
                               </div>
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <CardTitle className="text-base">{provider.name}</CardTitle>
+                                  <CardTitle className="text-[14px] font-semibold tracking-[-0.01em]">{provider.name}</CardTitle>
                                   {isConnected && (
                                     <Badge variant="secondary" className="text-[10px] gap-1 bg-primary/10 text-primary border-0">
                                       <Check className="w-2.5 h-2.5" />

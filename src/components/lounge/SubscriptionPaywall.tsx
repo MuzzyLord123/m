@@ -25,22 +25,6 @@ export const SUBSCRIPTION_FEATURES = {
       'CSS export & production-ready code output',
     ],
   },
-  'cad-studio': {
-    productId: 'prod_U0gxhso93mCXOg',
-    priceId: 'price_1T2fZMRsdRM0b4FvF6LLq6VB',
-    name: 'CAD Studio',
-    tagline: 'Professional 2D/3D drafting and design tools',
-    gradient: 'from-emerald-600/20 via-teal-600/10 to-transparent',
-    accentColor: 'hsl(var(--primary))',
-    price: '£49.99',
-    includes: [
-      'Professional 2D/3D drafting canvas',
-      'Floor plan generator with room detection',
-      'Layer management & smart snap engine',
-      'Block library & material editor',
-      'Export to DXF, PDF & more',
-    ],
-  },
   'inventory': {
     productId: 'prod_U0gxb5PamIJenA',
     priceId: 'price_1T2fZtRsdRM0b4FvYHdsU3Mx',
@@ -206,8 +190,8 @@ export function SubscriptionPaywall({
           {/* Hero gradient section */}
           <div className={`relative bg-gradient-to-br ${feature.gradient} border-b border-border/40 px-8 pt-10 pb-8 overflow-hidden`}>
             {/* Decorative blobs */}
-            <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-primary/5 blur-2xl pointer-events-none" />
+            <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary/5 pointer-events-none" />
+            <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full bg-primary/5 pointer-events-none" />
 
             {/* PRO badge + icon row */}
             <div className="relative flex items-center gap-3 mb-5">

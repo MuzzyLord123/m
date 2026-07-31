@@ -272,61 +272,43 @@ export default function IPManagementPanel() {
   const manualBlocks = blockedIPs.filter(b => !b.is_auto_blocked);
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Blocked IPs</CardTitle>
-            <ShieldOff className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeBlocks.length}</div>
-            <p className="text-xs text-muted-foreground">Active blocks</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Auto-Blocked</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-attend" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{autoBlocks.length}</div>
-            <p className="text-xs text-muted-foreground">From failed attempts</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Manual Blocks</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{manualBlocks.length}</div>
-            <p className="text-xs text-muted-foreground">By team members</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Whitelisted</CardTitle>
-            <ShieldCheck className="h-4 w-4 text-ok" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{whitelistedIPs.length}</div>
-            <p className="text-xs text-muted-foreground">Trusted IPs</p>
-          </CardContent>
-        </Card>
+    <div className="space-y-4">
+      {/* The state of the door, in one strip. */}
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[12px] border border-border/60 bg-border/60 sm:grid-cols-4">
+        {[
+          { label: 'Blocked', value: activeBlocks.length, meta: 'Refused entry', tone: activeBlocks.length ? 'risk' : undefined },
+          { label: 'Auto-blocked', value: autoBlocks.length, meta: 'After failed attempts', tone: autoBlocks.length ? 'attend' : undefined },
+          { label: 'By hand', value: manualBlocks.length, meta: 'Blocked by the team' },
+          { label: 'Trusted', value: whitelistedIPs.length, meta: 'Always allowed', tone: 'ok' },
+        ].map(f => (
+          <div key={f.label} className="bg-card px-4 py-3.5">
+            <p className="font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground">{f.label}</p>
+            <p className={`mt-1.5 font-display text-[24px] font-semibold leading-none tracking-[-0.02em] tabular-nums ${
+              f.tone === 'risk' ? 'text-risk' : f.tone === 'attend' ? 'text-attend' : f.tone === 'ok' ? 'text-ok' : ''
+            }`}>
+              {f.value}
+            </p>
+            <p className="mt-1.5 truncate text-[11px] text-muted-foreground">{f.meta}</p>
+          </div>
+        ))}
       </div>
 
       <Tabs defaultValue="blocked" className="space-y-4">
         <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="blocked" className="flex items-center gap-2">
-              <ShieldOff className="h-4 w-4" />
-              Blocked IPs ({activeBlocks.length})
+          <TabsList className="h-auto gap-1 rounded-[12px] border border-border/60 bg-sunken/40 p-1.5">
+            <TabsTrigger
+              value="blocked"
+              className="flex h-9 items-center gap-2 rounded-[9px] px-3 text-[12.5px] font-medium data-[state=active]:border data-[state=active]:border-border/70 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <ShieldOff className="h-3.5 w-3.5" /> Blocked
+              <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{activeBlocks.length}</span>
             </TabsTrigger>
-            <TabsTrigger value="whitelisted" className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4" />
-              Whitelisted IPs ({whitelistedIPs.length})
+            <TabsTrigger
+              value="whitelisted"
+              className="flex h-9 items-center gap-2 rounded-[9px] px-3 text-[12.5px] font-medium data-[state=active]:border data-[state=active]:border-border/70 data-[state=active]:bg-card data-[state=active]:shadow-sm"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" /> Trusted
+              <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{whitelistedIPs.length}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -339,7 +321,7 @@ export default function IPManagementPanel() {
         </div>
 
         <TabsContent value="blocked" className="space-y-4">
-          <Card>
+          <Card className="rounded-[12px] border-border/60 shadow-none">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -467,7 +449,7 @@ export default function IPManagementPanel() {
                               ) : (
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <Globe className="h-4 w-4 animate-pulse" />
-                                  <span className="text-sm">Loading...</span>
+                                  <span className="text-[12.5px] text-muted-foreground">Loading</span>
                                 </div>
                               )}
                             </TableCell>
@@ -542,7 +524,7 @@ export default function IPManagementPanel() {
         </TabsContent>
 
         <TabsContent value="whitelisted" className="space-y-4">
-          <Card>
+          <Card className="rounded-[12px] border-border/60 shadow-none">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -658,7 +640,7 @@ export default function IPManagementPanel() {
                               ) : (
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <Globe className="h-4 w-4 animate-pulse" />
-                                  <span className="text-sm">Loading...</span>
+                                  <span className="text-[12.5px] text-muted-foreground">Loading</span>
                                 </div>
                               )}
                             </TableCell>

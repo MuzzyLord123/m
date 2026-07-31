@@ -217,9 +217,9 @@ export function FolderManagement({ userId }: FolderManagementProps) {
     >
       {/* Toggles */}
       <motion.div variants={cardVariants}>
-        <Card>
+        <Card className="rounded-[12px] border-border/60 shadow-none">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
               <FolderOpen className="w-4 h-4" />
               Organization Settings
             </CardTitle>
@@ -276,7 +276,7 @@ export function FolderManagement({ userId }: FolderManagementProps) {
                 layout
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
               >
-                <Card className="overflow-hidden border-border/60 bg-card hover:border-border transition-colors">
+                <Card className="rounded-[12px] border-border/60 shadow-none overflow-hidden border-border/60 bg-card hover:border-border transition-colors">
                   {/* Header */}
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -383,7 +383,7 @@ export function FolderManagement({ userId }: FolderManagementProps) {
       {/* Empty state */}
       {layout.folders.length === 0 && (
         <motion.div variants={cardVariants}>
-          <Card className="border-dashed">
+          <Card className="rounded-[12px] border-border/60 shadow-none border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-10 gap-3">
               <FolderOpen className="w-10 h-10 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">No folders yet. Create one to organize your sidebar.</p>
@@ -399,7 +399,7 @@ export function FolderManagement({ userId }: FolderManagementProps) {
       {/* Ungrouped items */}
       {ungroupedItems.length > 0 && (
         <motion.div variants={cardVariants}>
-          <Card className="border-border/40">
+          <Card className="rounded-[12px] border-border/60 shadow-none border-border/40">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2 text-muted-foreground">
                 Ungrouped Items

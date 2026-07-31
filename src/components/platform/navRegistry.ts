@@ -27,7 +27,6 @@ const SHARED_PREFIXES = [
   '/lounge/office',
   '/lounge/creative',
   '/lounge/editor',
-  '/lounge/cad-studio',
   '/lounge/ai-builder',
   '/lounge/site-settings',
   '/lounge/crm',
@@ -71,7 +70,6 @@ const appDestinations: Destination[] = [
   { id: 'app:wiki', label: 'Wiki', path: '/lounge/office/wiki', keywords: 'knowledge docs' },
   { id: 'app:design-studio', label: 'Design studio', path: '/lounge/office/design-studio', keywords: 'canva graphics' },
   { id: 'app:photo-studio', label: 'Photo studio', path: '/lounge/creative/photo-studio', keywords: 'images editing' },
-  { id: 'app:cad', label: 'CAD studio', path: '/lounge/cad-studio', keywords: 'drawing technical' },
   { id: 'app:ai-builder', label: 'AI builder', path: '/lounge/ai-builder', keywords: 'website generate' },
 ].map((d) => ({ ...d, group: 'Apps & studios' as const, roles: SHARED }));
 

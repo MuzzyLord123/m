@@ -124,7 +124,7 @@ export default function AdminAnnouncements() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Announcements</h2>
+          <h2 className="font-display text-[22px] font-semibold tabular-nums tracking-[-0.02em]">Announcements</h2>
           <p className="text-muted-foreground text-sm">Broadcast messages to all customers</p>
         </div>
         <Button onClick={() => setShowCreate(true)} className="gap-2">
@@ -134,9 +134,9 @@ export default function AdminAnnouncements() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading...</div>
+        <div className="text-center py-12 text-muted-foreground">Loading</div>
       ) : announcements.length === 0 ? (
-        <Card>
+        <Card className="rounded-[12px] border-border/60 shadow-none">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Megaphone className="w-12 h-12 text-muted-foreground/40 mb-4" />
             <p className="text-lg font-medium">No announcements yet</p>

@@ -134,8 +134,6 @@ const LoungeWorkflows = lazy(() => import("./pages/lounge/LoungeWorkflows"));
 const LoungeCalendar = lazy(() => import("./pages/lounge/LoungeCalendar"));
 const GoogleCalendarCallback = lazy(() => import("./pages/lounge/GoogleCalendarCallback"));
 const LoungeNotifications = lazy(() => import("./pages/lounge/LoungeNotifications"));
-const LoungeCADStudio = lazy(() => import("./pages/lounge/LoungeCADStudio"));
-const LoungeCADEditor = lazy(() => import("./pages/lounge/LoungeCADEditor"));
 const LoungeInventory = lazy(() => import("./pages/lounge/LoungeInventory"));
 const LoungeOffice = lazy(() => import("./pages/lounge/LoungeOffice"));
 const LoungeWordEditor = lazy(() => import("./pages/lounge/LoungeWordEditor"));
@@ -216,7 +214,7 @@ const queryClient = new QueryClient({
 function AnimatedRoutes() {
   const location = useLocation();
   const isLoungeRoute = location.pathname.startsWith('/lounge');
-  const isEditorRoute = location.pathname.startsWith('/lounge/editor') || location.pathname.startsWith('/lounge/site-settings') || location.pathname === '/lounge/crm' || location.pathname === '/lounge/ai-builder' || location.pathname.startsWith('/lounge/cad-studio/edit') || location.pathname.startsWith('/lounge/office') || location.pathname.startsWith('/lounge/creative/');
+  const isEditorRoute = location.pathname.startsWith('/lounge/editor') || location.pathname.startsWith('/lounge/site-settings') || location.pathname === '/lounge/crm' || location.pathname === '/lounge/ai-builder' || location.pathname.startsWith('/lounge/office') || location.pathname.startsWith('/lounge/creative/');
   const routeKey = isEditorRoute ? 'editor' : isLoungeRoute ? 'lounge' : location.pathname;
 
   return (
@@ -312,7 +310,6 @@ function AnimatedRoutes() {
           <Route path="/call-companion" element={<CallCompanion />} />
           <Route path="/lounge/crm-legacy" element={<ProtectedRoute><CustomerGuard><LoungeCRM /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/ai-builder" element={<ProtectedRoute><CustomerGuard><LoungeAIBuilder /></CustomerGuard></ProtectedRoute>} />
-          <Route path="/lounge/cad-studio/edit" element={<ProtectedRoute><CustomerGuard><LoungeCADEditor /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office" element={<ProtectedRoute><CustomerGuard><LoungeOffice /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/word/:docId" element={<ProtectedRoute><CustomerGuard><LoungeWordEditor /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/word-home" element={<ProtectedRoute><CustomerGuard><OfficeWordHome /></CustomerGuard></ProtectedRoute>} />
@@ -393,7 +390,6 @@ function AnimatedRoutes() {
             <Route path="settings" element={<LoungeSettings />} />
             <Route path="workflows" element={<LoungeWorkflows />} />
             <Route path="notifications" element={<LoungeNotifications />} />
-            <Route path="cad-studio" element={<LoungeCADStudio />} />
             <Route path="inventory" element={<LoungeInventory />} />
             
             <Route path="white-label" element={<LoungeWhiteLabel />} />

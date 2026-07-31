@@ -48,7 +48,6 @@ const mobileNavItems = [
 { label: 'Websites', icon: Globe, tab: 'websites' },
 { label: 'Marketing Site', icon: Sparkles, tab: 'marketing-site' },
 { label: 'Website Designer', icon: Paintbrush, tab: 'website-designer' },
-{ label: 'CAD Studio', icon: PenTool, tab: 'cad-studio' },
 { label: 'Quooro Office', icon: FileSpreadsheet, tab: 'office' },
 { label: 'E-commerce', icon: ShoppingBag, tab: 'ecommerce' },
 { label: 'Subscription Websites', icon: Globe, tab: 'subscription-sites' },

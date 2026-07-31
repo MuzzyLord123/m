@@ -70,7 +70,6 @@ const routeImportMap: Record<string, () => Promise<unknown>> = {
   '/lounge/team-comms': () => import('@/pages/lounge/LoungeTeamComms'),
   '/lounge/workflows': () => import('@/pages/lounge/LoungeWorkflows'),
   '/lounge/notifications': () => import('@/pages/lounge/LoungeNotifications'),
-  '/lounge/cad-studio': () => import('@/pages/lounge/LoungeCADStudio'),
   '/lounge/inventory': () => import('@/pages/lounge/LoungeInventory'),
   '/lounge/office': () => import('@/pages/lounge/LoungeOffice'),
   '/lounge/crm': () => import('@/pages/lounge/crm/CRMShell'),

@@ -378,11 +378,11 @@ export default function AdminRoleManagement() {
           {selectedRole && (
             <div className="space-y-4">
               {/* Role Summary */}
-              <Card>
+              <Card className="rounded-[12px] border-border/60 shadow-none">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-lg">{selectedRole.name}</CardTitle>
+                      <CardTitle className="text-[14px] font-semibold tracking-[-0.01em]">{selectedRole.name}</CardTitle>
                       {selectedRole.description && (
                         <CardDescription>{selectedRole.description}</CardDescription>
                       )}
@@ -525,7 +525,7 @@ export default function AdminRoleManagement() {
                 <Card key={role.id}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base flex items-center gap-2">
+                      <CardTitle className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
                         <Shield className="w-4 h-4 text-primary" />
                         {role.name}
                         <Badge variant="secondary" className="ml-1">{roleAssignments.length}</Badge>
@@ -570,9 +570,9 @@ export default function AdminRoleManagement() {
               const unassigned = allUsers.filter(u => !assignedUserIds.has(u.user_id));
               if (unassigned.length === 0) return null;
               return (
-                <Card>
+                <Card className="rounded-[12px] border-border/60 shadow-none">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2 text-muted-foreground">
+                    <CardTitle className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2 text-muted-foreground">
                       <Users className="w-4 h-4" />
                       Unassigned Users
                       <Badge variant="outline">{unassigned.length}</Badge>
@@ -610,9 +610,9 @@ export default function AdminRoleManagement() {
 
       {/* Audit Log Tab */}
       {activeTab === 'audit' && (
-        <Card>
+        <Card className="rounded-[12px] border-border/60 shadow-none">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Permission Change History</CardTitle>
+            <CardTitle className="text-[14px] font-semibold tracking-[-0.01em]">Permission Change History</CardTitle>
             <CardDescription>All role and permission modifications are logged</CardDescription>
           </CardHeader>
           <CardContent>

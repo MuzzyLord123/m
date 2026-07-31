@@ -31,7 +31,6 @@ const MODULE_TO_NAV: Record<string, { label: string; icon: React.ComponentType<{
   'messages': { label: 'Messages', icon: MessageSquare },
   'team-comms': { label: 'Team Comms', icon: Radio },
   'tickets': { label: 'Support Tickets', icon: Ticket },
-  'cad-studio': { label: 'CAD Studio', icon: PenTool },
   'office': { label: 'Quooro Office', icon: FileSpreadsheet },
   'workflows': { label: 'Workflows', icon: Workflow },
   'security': { label: 'Security', icon: Settings },

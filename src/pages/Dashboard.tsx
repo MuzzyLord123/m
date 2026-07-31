@@ -73,7 +73,6 @@ import AdminRoleManagement from '@/components/admin/AdminRoleManagement';
 
 
 const LoungeWebsiteDesigner = lazy(() => import("@/pages/lounge/LoungeWebsiteDesigner"));
-const LoungeCADStudio = lazy(() => import("@/pages/lounge/LoungeCADStudio"));
 const LoungeOffice = lazy(() => import("@/pages/lounge/LoungeOffice"));
 const OfficeEcommerce = lazy(() => import("@/pages/lounge/OfficeEcommerce"));
 const LoungeProducts = lazy(() => import("@/pages/lounge/LoungeProducts"));
@@ -1008,13 +1007,6 @@ export default function Dashboard() {
             </Suspense>
           )}
 
-          {/* CAD Studio Tab */}
-          {mainTab === 'cad-studio' && (
-            <Suspense fallback={<div className="rounded-[10px] border border-border/60 bg-card" aria-hidden><SkeletonLedger rows={6} /></div>}>
-              <LoungeCADStudio />
-            </Suspense>
-          )}
-
           {/* Quooro Office Tab */}
           {mainTab === 'office' && (
             <Suspense fallback={<div className="rounded-[10px] border border-border/60 bg-card" aria-hidden><SkeletonLedger rows={6} /></div>}>
@@ -1454,7 +1446,7 @@ export default function Dashboard() {
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4 space-y-4 sm:space-y-6">
               {/* Client Info Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <Card>
+                <Card className="rounded-[12px] border-border/60 shadow-none">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Users className="w-4 h-4 text-muted-foreground" />
@@ -1490,7 +1482,7 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="rounded-[12px] border-border/60 shadow-none">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Package className="w-4 h-4 text-muted-foreground" />
@@ -1554,7 +1546,7 @@ export default function Dashboard() {
 
               {/* Original Enquiry Submission */}
               {selectedClient.enquiry_data && typeof selectedClient.enquiry_data === 'object' && (
-                <Card>
+                <Card className="rounded-[12px] border-border/60 shadow-none">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <FileText className="w-4 h-4 text-muted-foreground" />
@@ -1691,7 +1683,7 @@ export default function Dashboard() {
               </Card>
 
               {/* Notes Section */}
-              <Card>
+              <Card className="rounded-[12px] border-border/60 shadow-none">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <FileText className="w-4 h-4 text-muted-foreground" />
@@ -1719,7 +1711,7 @@ export default function Dashboard() {
               )}
 
               {/* Client Uploads */}
-              <Card>
+              <Card className="rounded-[12px] border-border/60 shadow-none">
                 <CardHeader className="pb-3">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>

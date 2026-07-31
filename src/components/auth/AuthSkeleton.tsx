@@ -9,7 +9,7 @@ export function AuthSkeleton({ message = 'Verifying access...' }: AuthSkeletonPr
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+      <div className="absolute inset-0 via-transparent to-primary/10" />
       
       {/* Grid pattern overlay */}
       <div 
@@ -22,7 +22,7 @@ export function AuthSkeleton({ message = 'Verifying access...' }: AuthSkeletonPr
       />
       
       {/* Radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full" />
       
       <motion.div
         initial={{ opacity: 0, y: 10 }}

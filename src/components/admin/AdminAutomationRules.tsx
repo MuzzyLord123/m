@@ -214,8 +214,8 @@ export default function AdminAutomationRules() {
         </div>
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-          <Card>
-            <CardHeader><CardTitle className="text-base">Rule Details</CardTitle></CardHeader>
+          <Card className="rounded-[12px] border-border/60 shadow-none">
+            <CardHeader><CardTitle className="text-[14px] font-semibold tracking-[-0.01em]">Rule Details</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
                 <Label className="text-xs">Rule Name</Label>
@@ -245,9 +245,9 @@ export default function AdminAutomationRules() {
           </Card>
 
           {/* IF - Trigger */}
-          <Card className="border-border/60">
+          <Card className="rounded-[12px] border-border/60 shadow-none border-border/60">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
                 <span className="h-6 w-6 rounded-md bg-sunken flex items-center justify-center text-ink-2 font-mono text-[10px] font-semibold">IF</span>
                 When this happens…
               </CardTitle>
@@ -337,9 +337,9 @@ export default function AdminAutomationRules() {
           </div>
 
           {/* THEN - Action */}
-          <Card className="border-border/60">
+          <Card className="rounded-[12px] border-border/60 shadow-none border-border/60">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-[14px] font-semibold tracking-[-0.01em] flex items-center gap-2">
                 <span className="h-6 w-6 rounded-md bg-sunken flex items-center justify-center text-ink-2 font-mono text-[10px] font-semibold">DO</span>
                 Then do this…
               </CardTitle>
@@ -455,7 +455,7 @@ export default function AdminAutomationRules() {
                 <s.icon className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{s.value}</p>
+                <p className="font-display text-[22px] font-semibold tabular-nums tracking-[-0.02em]">{s.value}</p>
                 <p className="text-[11px] text-muted-foreground">{s.label}</p>
               </div>
             </CardContent>
@@ -489,7 +489,7 @@ export default function AdminAutomationRules() {
               ))}
             </div>
           ) : filteredRules.length === 0 ? (
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardContent className="py-16 text-center">
                 <Zap className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="text-muted-foreground font-medium">No automation rules yet</p>
@@ -584,7 +584,7 @@ export default function AdminAutomationRules() {
 
         <TabsContent value="logs" className="mt-4">
           {logs.length === 0 ? (
-            <Card>
+            <Card className="rounded-[12px] border-border/60 shadow-none">
               <CardContent className="py-16 text-center">
                 <Activity className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="text-muted-foreground font-medium">No executions yet</p>
