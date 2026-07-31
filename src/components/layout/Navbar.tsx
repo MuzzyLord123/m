@@ -440,12 +440,16 @@ function FullWidthMegaMenu({
   onClose,
   navHeight,
   onPanelHoverChange,
+  switching = false,
 }: {
   menu: typeof megaMenus.development;
   isActive: boolean;
   onClose: () => void;
   navHeight: number;
   onPanelHoverChange?: (hovered: boolean) => void;
+  /** Another panel was already open when this one took over: the panel
+      stays put and only its contents change, with no fade in between. */
+  switching?: boolean;
 }) {
   const menuRef = useRef<HTMLDivElement>(null);
   const focusableRefs = useRef<(HTMLAnchorElement | HTMLButtonElement)[]>([]);
@@ -523,12 +527,20 @@ function FullWidthMegaMenu({
         <motion.div
           key={menu.label}
           ref={menuRef}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          /* Moving between nav items must never show the page behind the
+             panel. The incoming panel appears already open and sits
+             above the outgoing one, which fades away underneath it, so
+             the panel reads as one surface whose contents changed. */
+          initial={switching ? false : { opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.12 }}
-          className="fixed left-0 right-0 z-[100]"
-          style={{ top: navHeight }}
+          transition={
+            switching
+              ? { duration: 0 }
+              : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }
+          }
+          className="fixed left-0 right-0"
+          style={{ top: navHeight, zIndex: isActive ? 101 : 100 }}
           onMouseEnter={() => {
             onPanelHoverChange?.(true);
           }}
@@ -771,6 +783,10 @@ const NavLink = memo(function NavLink({ to, label, pathname }: { to: string; lab
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<MenuKey | null>(null);
+  // Which panel was open a moment ago, so a hand-over can be told from
+  // a cold open and animated differently.
+  const prevOpenRef = useRef<MenuKey | null>(null);
+  const [switchingPanel, setSwitchingPanel] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
@@ -849,7 +865,13 @@ export function Navbar() {
   const handleDelayedClose = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     closeTimerRef.current = setTimeout(() => {
-      if (!isPanelHoveredRef.current) setActiveDropdown(null);
+      if (!isPanelHoveredRef.current) {
+        setActiveDropdown(null);
+        // A cold open next time, so the panel reveals rather than
+        // snapping in as if it had never left.
+        prevOpenRef.current = null;
+        setSwitchingPanel(false);
+      }
     }, 180);
   }, []);
 
@@ -859,6 +881,8 @@ export function Navbar() {
 
   const handleDropdownOpen = useCallback((key: MenuKey) => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setSwitchingPanel(prevOpenRef.current !== null && prevOpenRef.current !== key);
+    prevOpenRef.current = key;
     setActiveDropdown(key);
   }, []);
 
@@ -1029,11 +1053,12 @@ export function Navbar() {
           isActive={activeDropdown === key}
           onClose={handleDelayedClose}
           navHeight={currentNavHeight}
+          switching={switchingPanel}
           onPanelHoverChange={(hovered) => {
             if (activeDropdown === key) isPanelHoveredRef.current = hovered;
           }}
         />
-      )), [activeDropdown, handleDelayedClose, currentNavHeight])}
+      )), [activeDropdown, handleDelayedClose, currentNavHeight, switchingPanel])}
 
       {/* Mobile Menu */}
       <MobileMenu 

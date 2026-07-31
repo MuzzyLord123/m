@@ -1,8 +1,17 @@
-import { motion } from 'framer-motion';
-import { AlertTriangle, Shield, X, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Shield, X, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+
+/**
+ * The standing reminder that an account has no second factor.
+ *
+ * It is a fact about the account, not an alarm, so it is stated once in
+ * a hairline strip and gets out of the way. Team accounts read in the
+ * risk tone because a team account reaches every client record; a
+ * customer account reads in the attend tone, because the exposure is
+ * their own.
+ */
 
 interface TwoFactorWarningProps {
   role: 'admin' | 'user';
@@ -11,15 +20,19 @@ interface TwoFactorWarningProps {
   showDismiss?: boolean;
 }
 
-export default function TwoFactorWarning({ 
-  role, 
+export default function TwoFactorWarning({
+  role,
   variant = 'badge',
   onDismiss,
-  showDismiss = false
+  showDismiss = false,
 }: TwoFactorWarningProps) {
   const navigate = useNavigate();
   const isAdmin = role === 'admin';
-  
+
+  const tone = isAdmin
+    ? { text: 'text-risk', border: 'border-risk/35', wash: 'bg-risk/[0.05]', dot: 'bg-risk' }
+    : { text: 'text-attend', border: 'border-attend/35', wash: 'bg-attend/[0.05]', dot: 'bg-attend' };
+
   const handleClick = () => {
     navigate(isAdmin ? '/dashboard?tab=security' : '/lounge/settings?section=security');
   };
@@ -28,23 +41,21 @@ export default function TwoFactorWarning({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <motion.button
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            whileHover={{ scale: 1.05 }}
+          <button
+            type="button"
             onClick={handleClick}
-            className={`relative p-1.5 rounded-full transition-colors ${
-              isAdmin 
-                ? 'text-destructive hover:bg-destructive/10' 
-                : 'text-warning hover:bg-warning/10'
-            }`}
+            aria-label="Two-factor authentication is not enabled"
+            className={cn(
+              'relative flex h-8 w-8 items-center justify-center rounded-[9px] transition-colors hover:bg-foreground/[0.05]',
+              tone.text,
+            )}
           >
             <Shield className="h-4 w-4" />
-            <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
-          </motion.button>
+            <span aria-hidden className={cn('absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full', tone.dot)} />
+          </button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Enable 2FA to secure your account</p>
+          <p className="text-[12px]">No second factor on this account</p>
         </TooltipContent>
       </Tooltip>
     );
@@ -52,140 +63,83 @@ export default function TwoFactorWarning({
 
   if (variant === 'banner') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="group relative overflow-hidden"
+      <div
+        className={cn(
+          'flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[11px] border px-3.5 py-2.5 sm:flex-nowrap',
+          tone.border, tone.wash,
+        )}
       >
-        {/* Subtle animated gradient background */}
-        <div className={`absolute inset-0 opacity-[0.03] ${
-          isAdmin 
-            ? 'bg-gradient-to-r from-destructive via-destructive/60 to-destructive/30' 
-            : 'bg-gradient-to-r from-warning via-warning/60 to-warning/30'
-        }`} />
-        
-        <div className={`relative flex items-center gap-3 rounded-lg border backdrop-blur-sm px-4 py-2.5 transition-all duration-200 ${
-          isAdmin 
-            ? 'border-destructive/20 bg-destructive/[0.06] hover:border-destructive/30 hover:bg-destructive/[0.08]' 
-            : 'border-warning/20 bg-warning/[0.06] hover:border-warning/30 hover:bg-warning/[0.08]'
-        }`}>
-          {/* Icon with subtle pulse ring */}
-          <div className="relative flex-shrink-0">
-            <div className={`absolute inset-0 rounded-full animate-ping opacity-20 ${
-              isAdmin ? 'bg-destructive' : 'bg-warning'
-            }`} style={{ animationDuration: '3s' }} />
-            <div className={`relative p-1 rounded-full ${
-              isAdmin ? 'bg-destructive/10' : 'bg-warning/10'
-            }`}>
-              <Shield className={`h-3.5 w-3.5 ${isAdmin ? 'text-destructive' : 'text-warning'}`} />
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <span className={`text-xs font-medium tracking-wide ${
-              isAdmin ? 'text-destructive' : 'text-foreground'
-            }`}>
-              {isAdmin 
-                ? 'Security recommendation: Enable two-factor authentication'
-                : 'Recommended: Protect your account with 2FA'}
-            </span>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <Button 
-              size="sm" 
-              onClick={handleClick}
-              className={`h-7 px-3 text-[11px] font-medium gap-1.5 rounded-md transition-all duration-200 ${
-                isAdmin 
-                  ? 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 hover:border-destructive/30 shadow-none' 
-                  : 'bg-warning/10 text-warning border border-warning/20 hover:bg-warning/20 hover:border-warning/30 shadow-none'
-              }`}
-            >
-              <Shield className="h-3 w-3" />
-              Enable 2FA
-              <ChevronRight className="h-3 w-3 opacity-50 group-hover:opacity-100 transition-opacity" />
-            </Button>
-            {showDismiss && onDismiss && (
-              <button 
-                onClick={onDismiss}
-                className={`p-1 rounded-md transition-colors ${
-                  isAdmin 
-                    ? 'text-destructive/40 hover:text-destructive hover:bg-destructive/10' 
-                    : 'text-warning/40 hover:text-warning hover:bg-warning/10'
-                }`}
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
+        <span aria-hidden className={cn('h-1.5 w-1.5 shrink-0 rounded-full', tone.dot)} />
+        <div className="min-w-0 flex-1">
+          <p className="font-mono text-[8.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            Account security
+          </p>
+          <p className="mt-0.5 text-[12.5px] leading-snug">
+            {isAdmin
+              ? 'This team account has no second factor, and a team account reaches every client record.'
+              : 'Your account has no second factor yet.'}
+          </p>
         </div>
-      </motion.div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handleClick}
+            className={cn(
+              'flex h-8 items-center gap-1.5 rounded-[9px] border px-3 text-[12px] font-medium transition-colors',
+              tone.border, tone.text, 'hover:bg-foreground/[0.04]',
+            )}
+          >
+            Set it up <ArrowRight className="h-3 w-3" />
+          </button>
+          {showDismiss && onDismiss && (
+            <button
+              type="button"
+              onClick={onDismiss}
+              aria-label="Dismiss"
+              className="flex h-8 w-8 items-center justify-center rounded-[9px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
     );
   }
 
-  // Card variant
+  // Card: the same fact, given room to explain itself.
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`relative overflow-hidden p-5 rounded-xl border transition-all duration-200 ${
-        isAdmin 
-          ? 'bg-destructive/[0.04] border-destructive/15 hover:border-destructive/25' 
-          : 'bg-warning/[0.04] border-warning/15 hover:border-warning/25'
-      }`}
-    >
-      {/* Subtle corner accent */}
-      <div className={`absolute top-0 right-0 w-24 h-24 opacity-[0.03] ${
-        isAdmin ? 'bg-destructive' : 'bg-warning'
-      }`} style={{ borderRadius: '0 0 0 100%' }} />
-      
-      <div className="relative flex items-start gap-4">
-        <div className={`p-2.5 rounded-lg ${
-          isAdmin ? 'bg-destructive/10' : 'bg-warning/10'
-        }`}>
-          <Shield className={`h-5 w-5 ${
-            isAdmin ? 'text-destructive' : 'text-warning'
-          }`} />
-        </div>
-        <div className="flex-1 space-y-3">
-          <div>
-            <h3 className={`text-sm font-semibold ${
-              isAdmin ? 'text-destructive' : 'text-foreground'
-            }`}>
-              Enable Two-Factor Authentication
-            </h3>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              {isAdmin 
-                ? 'As a team member, 2FA is strongly recommended to protect sensitive data and client information.'
-                : 'Add an extra layer of security to your account to protect your data and projects.'}
-            </p>
-          </div>
-          <Button 
-            size="sm"
-            onClick={handleClick}
-            className={`h-8 text-xs font-medium gap-2 ${
-              isAdmin 
-                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' 
-                : 'bg-foreground text-background hover:bg-foreground/90'
-            }`}
-          >
-            <Shield className="h-3.5 w-3.5" />
-            Enable 2FA Now
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-        {showDismiss && onDismiss && (
-          <button 
-            onClick={onDismiss}
-            className="p-1 rounded-md text-muted-foreground/40 hover:text-muted-foreground transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-    </motion.div>
+    <div className={cn('relative rounded-[12px] border p-4 sm:p-5', tone.border, tone.wash)}>
+      {showDismiss && onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Dismiss"
+          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-[8px] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+      <p className="font-mono text-[8.5px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        Account security
+      </p>
+      <h3 className="mt-1.5 flex items-center gap-2 font-display text-[16px] font-semibold tracking-[-0.01em]">
+        <Shield className={cn('h-4 w-4', tone.text)} />
+        Add a second factor
+      </h3>
+      <p className="mt-1.5 max-w-md text-[12.5px] leading-relaxed text-muted-foreground">
+        {isAdmin
+          ? 'A team account reaches every client record on the platform. A second factor means a stolen password is not enough to open any of it.'
+          : 'A second factor means a stolen password on its own cannot open your files, invoices or messages.'}
+      </p>
+      <button
+        type="button"
+        onClick={handleClick}
+        className="mt-3.5 flex h-10 items-center gap-2 rounded-[10px] bg-primary px-4 text-[12.5px] font-medium text-primary-foreground transition-opacity hover:opacity-90"
+      >
+        <Shield className="h-3.5 w-3.5" /> Set it up
+        <ArrowRight className="h-3.5 w-3.5 opacity-70" />
+      </button>
+      <p className="mt-2.5 text-[11px] text-muted-foreground">Takes about a minute with any authenticator app.</p>
+    </div>
   );
 }
