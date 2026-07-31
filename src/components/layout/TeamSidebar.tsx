@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAdminControls } from '@/hooks/useAdminControls';
+import { usePlatformOwner } from '@/hooks/usePlatformOwner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DndContext,
@@ -71,6 +72,7 @@ export const ALL_TEAM_NAV_ITEMS: TeamNavItemDef[] = [
 { id: 'office', label: 'Quooro Office', icon: FileSpreadsheet, tab: 'office', path: '/dashboard?tab=office' },
 { id: 'ecommerce', label: 'E-commerce', icon: ShoppingBag, tab: 'ecommerce', path: '/dashboard?tab=ecommerce' },
 { id: 'client-websites', label: 'Client Websites', icon: Server, tab: 'client-websites', path: '/team/websites' },
+{ id: 'splash', label: 'Website Splash', icon: Sparkles, tab: 'splash', path: '/team/splash' },
 { id: 'invoices', label: 'Invoices', icon: FileText, tab: 'invoices', path: '/dashboard?tab=invoices' },
 { id: 'billing', label: 'Billing', icon: CreditCard, tab: 'billing', path: '/dashboard?tab=billing' },
 { id: 'messages', label: 'Messages', icon: MessageSquare, tab: 'messages', path: '/dashboard?tab=messages' },
@@ -342,9 +344,13 @@ export default function TeamSidebar({
 
   // Owner-set controls: tabs hidden for this admin never render here.
   const { hiddenTabs } = useAdminControls();
+  const { isOwner } = usePlatformOwner();
+  // The splash is the front door of the business, so only owners see it.
+  const OWNER_ONLY = new Set(['splash']);
   const visibleItem = (id: string) => {
     const it = itemMap.get(id);
     if (!it || hiddenTabs.has(it.id)) return undefined;
+    if (OWNER_ONLY.has(it.id) && !isOwner) return undefined;
     return it;
   };
 

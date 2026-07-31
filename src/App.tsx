@@ -13,6 +13,7 @@ import { CustomerGuard } from "@/components/guards/CustomerGuard";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CookieConsent } from "@/components/CookieConsent";
+import { ActiveWebsiteSplash } from "@/components/splash/ActiveWebsiteSplash";
 import { GuidedTour } from "@/components/GuidedTour";
 import { PageTransition } from "@/components/PageTransition";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -75,6 +76,7 @@ const ServiceLevelAgreement = lazy(() => import("./pages/ServiceLevelAgreement")
 const BusinessStartup = lazy(() => import("./pages/BusinessStartup"));
 const SubscriptionWebsites = lazy(() => import("./pages/SubscriptionWebsites"));
 const WebsitesEstatePage = lazy(() => import("./pages/WebsitesEstatePage"));
+const SplashStudioPage = lazy(() => import("./pages/SplashStudioPage"));
 const Ecommerce = lazy(() => import("./pages/Ecommerce"));
 const AppsDashboards = lazy(() => import("./pages/AppsDashboards"));
 const Handover = lazy(() => import("./pages/Handover"));
@@ -406,6 +408,7 @@ function AnimatedRoutes() {
           <Route path="/dashboard/planner" element={<ProtectedRoute><TeamGuard><PageTransition><DashboardPlanner /></PageTransition></TeamGuard></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><TeamGuard><PageTransition><Dashboard /></PageTransition></TeamGuard></ProtectedRoute>} />
           <Route path="/executive" element={<ProtectedRoute><Suspense fallback={<div className="min-h-screen bg-background" />}><ExecutiveGuard><PageTransition><ExecutiveDashboard /></PageTransition></ExecutiveGuard></Suspense></ProtectedRoute>} />
+          <Route path="/team/splash" element={<ProtectedRoute><TeamGuard><PageTransition><SplashStudioPage /></PageTransition></TeamGuard></ProtectedRoute>} />
           <Route path="/team/websites" element={<ProtectedRoute><TeamGuard><PageTransition><WebsitesEstatePage /></PageTransition></TeamGuard></ProtectedRoute>} />
           <Route path="/team/subscription-websites" element={<Navigate to="/team/websites" replace />} />
           <Route path="/team/hosted-websites" element={<Navigate to="/team/websites" replace />} />
@@ -445,7 +448,7 @@ const App = () => {
                   <Toaster />
                   <Sonner />
                   {showInitialSplash && (
-                    <SplashScreen onComplete={() => setShowInitialSplash(false)} />
+                    <ActiveWebsiteSplash onComplete={() => setShowInitialSplash(false)} />
                   )}
                   <BrowserRouter>
                     <ScrollToTop />
