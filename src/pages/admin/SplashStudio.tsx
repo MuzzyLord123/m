@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Monitor, Tablet, Smartphone, Sparkles, Check, Loader2, Trash2, RotateCcw, Radio,
+  Globe, Armchair, Building2, Brain,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,10 +28,20 @@ interface SplashRow {
   id: string;
   name: string;
   origin: string;
+  surface: Surface;
   config: SplashConfig;
   is_active: boolean;
   created_at: string;
 }
+
+type Surface = 'website' | 'lounge' | 'team';
+
+/** Every part of the platform that shows a splash. */
+const SURFACES: { key: Surface; label: string; icon: any; blurb: string }[] = [
+  { key: 'website', label: 'Website', icon: Globe, blurb: 'What the public sees first at quooro.co.uk' },
+  { key: 'lounge', label: 'Quooro Lounge', icon: Armchair, blurb: 'What a customer sees as their lounge opens' },
+  { key: 'team', label: 'Quooro Team', icon: Building2, blurb: 'What you and the admins see as the desk opens' },
+];
 
 type Device = 'desktop' | 'tablet' | 'phone';
 
@@ -61,23 +72,57 @@ const LINES = [
 const KICKER = 'font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground';
 
 /**
- * Each generated screen takes a different motif, palette, line and
- * pace, so no two arrive the same way. The name records what it is.
+ * The generator works from everything already saved, not from a fixed
+ * list. Each part of a design - the motif, the background, the ink, the
+ * accent, the line, the pace - is drawn from the pool of designs that
+ * exist, so a trait invented on one screen can turn up on another, and
+ * the more designs are kept the wider the pool it draws from. Seed
+ * material is used only to fill gaps when the pool is thin.
+ *
+ * It is recombination with variation rather than a model that has been
+ * trained: honest about what it is, and it genuinely gets richer every
+ * time something is saved.
  */
-function generateConfig(seed: number): { name: string; config: SplashConfig } {
-  const motif = MOTIFS[seed % MOTIFS.length];
-  const palette = PALETTES[(seed * 3 + 1) % PALETTES.length];
-  const line = LINES[(seed * 5 + 2) % LINES.length];
-  const durationMs = 1800 + ((seed * 137) % 900);
+function learnFrom(pool: SplashConfig[]) {
+  const take = <T,>(list: T[], fallback: T[]): T[] => (list.length ? list : fallback);
+  return {
+    motifs: take([...new Set(pool.map(c => c.motif).filter(Boolean))], MOTIFS),
+    bgs: take([...new Set(pool.map(c => c.bg).filter(Boolean))], PALETTES.map(p => p.bg)),
+    inks: take([...new Set(pool.map(c => c.ink).filter(Boolean))], PALETTES.map(p => p.ink)),
+    accents: take([...new Set(pool.map(c => c.accent).filter(Boolean))], PALETTES.map(p => p.accent)),
+    lines: take([...new Set(pool.map(c => c.line).filter(Boolean))], LINES),
+    subs: [...new Set(pool.map(c => c.sub).filter(Boolean))] as string[],
+    durations: take(pool.map(c => c.durationMs).filter(Boolean), [2000, 2200, 2400]),
+    grainShare: pool.length ? pool.filter(c => c.grain).length / pool.length : 0.6,
+  };
+}
+
+function generateConfig(
+  seed: number,
+  pool: SplashConfig[],
+  surface: Surface,
+): { name: string; config: SplashConfig } {
+  const learned = learnFrom(pool);
+  const pick = <T,>(list: T[], salt: number): T => list[(seed * salt) % list.length];
+
+  const motif = pick(learned.motifs, 7);
+  // The pace is the set's own average, nudged either side so it is
+  // familiar without being a copy.
+  const avg = Math.round(learned.durations.reduce((a, b) => a + b, 0) / learned.durations.length);
+  const durationMs = Math.max(1500, Math.min(3200, avg + (((seed * 53) % 700) - 350)));
+
   return {
     name: `${motif[0].toUpperCase()}${motif.slice(1)} ${String((seed % 90) + 10)}`,
     config: {
       ...DEFAULT_SPLASH,
       motif,
-      ...palette,
-      line,
+      bg: pick(learned.bgs, 3),
+      ink: pick(learned.inks, 5),
+      accent: pick(learned.accents, 11),
+      line: pick(learned.lines, 13),
+      sub: surface === 'website' ? undefined : (learned.subs.length ? pick(learned.subs, 17) : SURFACES.find(s => s.key === surface)?.label.replace('Quooro ', '')),
       durationMs,
-      grain: seed % 3 !== 0,
+      grain: ((seed * 29) % 100) / 100 < learned.grainShare,
     },
   };
 }
@@ -106,6 +151,7 @@ export default function SplashStudio() {
   const { isOwner, loading: ownerLoading } = usePlatformOwner();
   const navigate = useNavigate();
 
+  const [surface, setSurface] = useState<Surface>('website');
   const [rows, setRows] = useState<SplashRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -122,16 +168,26 @@ export default function SplashStudio() {
     if (error) toast.error('Could not load the splash screens', { description: error.message });
     const list = ((data as any[]) || []) as SplashRow[];
     setRows(list);
-    setSelectedId(prev => prev || list.find(r => r.is_active)?.id || list[0]?.id || null);
     setLoading(false);
   }, []);
 
   useEffect(() => { if (isOwner) load(); }, [isOwner, load]);
 
+  const surfaceRows = useMemo(() => rows.filter(r => (r.surface || 'website') === surface), [rows, surface]);
+
+  // Whenever the surface changes, land on whatever is live there.
+  useEffect(() => {
+    if (draft) return;
+    const live = surfaceRows.find(r => r.is_active) || surfaceRows[0];
+    setSelectedId(prev => (surfaceRows.some(r => r.id === prev) ? prev : live?.id || null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [surface, surfaceRows.length]);
+
   const selected = useMemo(
-    () => (draft ? { id: 'draft', name: draft.name, config: draft.config, is_active: false, origin: 'generated', created_at: '' } as SplashRow
-      : rows.find(r => r.id === selectedId) || null),
-    [rows, selectedId, draft],
+    () => (draft
+      ? { id: 'draft', name: draft.name, config: draft.config, is_active: false, origin: 'generated', surface, created_at: '' } as SplashRow
+      : surfaceRows.find(r => r.id === selectedId) || null),
+    [surfaceRows, selectedId, draft, surface],
   );
 
   async function makeLive(id: string) {
@@ -139,8 +195,10 @@ export default function SplashStudio() {
     const { error } = await supabase.rpc('set_active_splash' as any, { _id: id });
     setBusy(false);
     if (error) { toast.error('Not changed', { description: error.message }); return; }
-    setRows(prev => prev.map(r => ({ ...r, is_active: r.id === id })));
-    toast.success('Live on the website');
+    setRows(prev => prev.map(r => (
+      (r.surface || 'website') === surface ? { ...r, is_active: r.id === id } : r
+    )));
+    toast.success(`Live on ${SURFACES.find(x => x.key === surface)?.label}`);
   }
 
   async function saveDraft() {
@@ -149,6 +207,7 @@ export default function SplashStudio() {
     const { data, error } = await supabase.from('splash_screens' as any).insert({
       name: draftName.trim() || draft.name,
       origin: 'generated',
+      surface,
       config: draft.config as any,
       created_by: user?.id ?? null,
     } as any).select('*').single();
@@ -167,13 +226,15 @@ export default function SplashStudio() {
     setBusy(false);
     if (error) { toast.error('Not removed', { description: error.message }); return; }
     setRows(prev => prev.filter(r => r.id !== id));
-    if (selectedId === id) setSelectedId(rows.find(r => r.id !== id)?.id || null);
+    if (selectedId === id) setSelectedId(surfaceRows.find(r => r.id !== id)?.id || null);
     toast.success('Removed');
   }
 
   function generate() {
     const seed = Math.floor(Date.now() / 97) + rows.length;
-    const next = generateConfig(seed);
+    // Everything ever saved feeds the pool, across every surface, so a
+    // trait invented for the Lounge can appear on the website.
+    const next = generateConfig(seed, rows.map(r => r.config).filter(Boolean), surface);
     setDraft(next);
     setDraftName(next.name);
     setReplay(r => r + 1);
@@ -188,7 +249,7 @@ export default function SplashStudio() {
       <div className="flex min-h-[60vh] items-center justify-center p-6">
         <EmptyState
           title="Owners only"
-          body="The website splash is changed by Finley and Zak."
+          body="Splash screens are changed by Finley and Zak."
           action={{ label: 'Back to the dashboard', onClick: () => navigate('/dashboard') }}
         />
       </div>
@@ -200,12 +261,13 @@ export default function SplashStudio() {
       <div className="mx-auto max-w-[1400px] px-4 pb-16 pt-5 sm:px-6 sm:pt-7">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className={KICKER}>The website</p>
+            <p className={KICKER}>Splash screens</p>
             <h1 className="mt-1.5 font-display text-[26px] font-semibold leading-none tracking-[-0.02em] sm:text-[32px]">
-              Splash
+              {SURFACES.find(sf => sf.key === surface)?.label}
             </h1>
             <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
-              The first two seconds a visitor spends with Quooro. Try one at every size, then put it live.
+              The first seconds anyone spends with Quooro. Try a design at every size, then put it live.
+              The screen in use is always kept, so you can put it back at any time.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -218,10 +280,39 @@ export default function SplashStudio() {
           </div>
         </header>
 
-        <div className="mt-6 grid gap-5 lg:grid-cols-[260px_1fr]">
+        {/* Which part of the platform */}
+        <div className="-mx-4 mt-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          <div className="flex min-w-max items-center gap-1 rounded-[12px] border border-border/60 bg-sunken/40 p-1.5">
+            {SURFACES.map(sf => {
+              const Icon = sf.icon;
+              const on = surface === sf.key;
+              const count = rows.filter(r => (r.surface || 'website') === sf.key).length;
+              return (
+                <button
+                  key={sf.key}
+                  type="button"
+                  onClick={() => { setDraft(null); setSurface(sf.key); setReplay(r => r + 1); }}
+                  className={cn(
+                    'flex h-10 shrink-0 items-center gap-2 rounded-[9px] px-3.5 text-[12.5px] font-medium transition-colors',
+                    on ? 'border border-border/70 bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {sf.label}
+                  <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <p className="mt-2 text-[11.5px] text-muted-foreground">
+          {SURFACES.find(sf => sf.key === surface)?.blurb}
+        </p>
+
+        <div className="mt-4 grid gap-5 lg:grid-cols-[260px_1fr]">
           {/* The set */}
           <aside className="space-y-2">
-            <p className={KICKER}>{rows.length} designs</p>
+            <p className={KICKER}>{surfaceRows.length} designs</p>
             {loading ? (
               <SkeletonBlock className="h-[220px] rounded-[12px]" />
             ) : (
@@ -243,7 +334,7 @@ export default function SplashStudio() {
                     </button>
                   </li>
                 )}
-                {rows.map(r => (
+                {surfaceRows.map(r => (
                   <li key={r.id}>
                     <button
                       type="button"

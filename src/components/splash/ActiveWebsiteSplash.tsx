@@ -13,18 +13,29 @@ import { WebsiteSplash, DEFAULT_SPLASH, type SplashConfig } from './WebsiteSplas
  * where a swap would be visible and cheap-looking.
  */
 
-const CACHE_KEY = 'quooro-splash-config';
+const CACHE_PREFIX = 'quooro-splash-config';
 
-function cached(): SplashConfig {
+export type SplashSurface = 'website' | 'lounge' | 'team';
+
+const FALLBACK: Record<SplashSurface, Partial<SplashConfig>> = {
+  website: {},
+  lounge: { motif: 'aurora', sub: 'Lounge', line: 'Your lounge', ink: '#F4F4F5' },
+  team: { motif: 'console', sub: 'Team', line: 'Team portal', bg: '#08080B', grain: false },
+};
+
+function cached(surface: SplashSurface): SplashConfig {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (raw) return { ...DEFAULT_SPLASH, ...JSON.parse(raw) };
+    const raw = localStorage.getItem(`${CACHE_PREFIX}-${surface}`);
+    if (raw) return { ...DEFAULT_SPLASH, ...FALLBACK[surface], ...JSON.parse(raw) };
   } catch { /* unreadable */ }
-  return DEFAULT_SPLASH;
+  return { ...DEFAULT_SPLASH, ...FALLBACK[surface] } as SplashConfig;
 }
 
-export function ActiveWebsiteSplash({ onComplete }: { onComplete: () => void }) {
-  const [config] = useState<SplashConfig>(cached);
+export function ActiveWebsiteSplash({
+  onComplete,
+  surface = 'website',
+}: { onComplete: () => void; surface?: SplashSurface }) {
+  const [config] = useState<SplashConfig>(() => cached(surface));
 
   useEffect(() => {
     let cancelled = false;
@@ -33,15 +44,16 @@ export function ActiveWebsiteSplash({ onComplete }: { onComplete: () => void }) 
         .from('splash_screens' as any)
         .select('config')
         .eq('is_active', true)
+        .eq('surface', surface)
         .limit(1);
       if (cancelled) return;
       const next = ((data as any[]) || [])[0]?.config;
       if (next && typeof next === 'object') {
-        try { localStorage.setItem(CACHE_KEY, JSON.stringify(next)); } catch { /* refused */ }
+        try { localStorage.setItem(`${CACHE_PREFIX}-${surface}`, JSON.stringify(next)); } catch { /* refused */ }
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [surface]);
 
   return <WebsiteSplash config={config} onComplete={onComplete} />;
 }

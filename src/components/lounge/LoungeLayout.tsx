@@ -30,6 +30,7 @@ import { IncomingCallOverlay } from '@/components/comms/IncomingCallOverlay';
 import { AnimatePresence } from 'framer-motion';
 import GreetingBanner from './GreetingBanner';
 import { MainSplash } from '@/components/splash/MainSplash';
+import { ActiveWebsiteSplash } from '@/components/splash/ActiveWebsiteSplash';
 import {
   TemperamentProvider,
   CommandPalette,
@@ -216,7 +217,7 @@ export default function LoungeLayout() {
   if (showSplash) {
     return (
       <TooltipProvider>
-        <MainSplash onComplete={handleSplashComplete} />
+        <ActiveWebsiteSplash surface="lounge" onComplete={handleSplashComplete} />
       </TooltipProvider>
     );
   }

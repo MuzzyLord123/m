@@ -15,7 +15,7 @@ import { motion } from 'framer-motion';
  */
 
 export interface SplashConfig {
-  motif: 'sweep' | 'typeset' | 'lattice' | 'ember' | 'aperture';
+  motif: 'sweep' | 'typeset' | 'lattice' | 'ember' | 'aperture' | 'aurora' | 'console';
   bg: string;
   ink: string;
   accent: string;
@@ -23,6 +23,8 @@ export interface SplashConfig {
   line: string;
   durationMs: number;
   grain?: boolean;
+  /** Names the surface beneath the wordmark: Lounge, Team. */
+  sub?: string;
 }
 
 export const DEFAULT_SPLASH: SplashConfig = {
@@ -223,6 +225,69 @@ export function WebsiteSplash({
         />
       )}
 
+      {/* Aurora: a warm horizon rising, for the Lounge - the customer's
+          own room, so it should feel like a light coming on. */}
+      {c.motif === 'aurora' && (
+        <>
+          <motion.div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-[62%]"
+            style={{
+              background: `radial-gradient(120% 100% at 50% 100%, ${c.accent}3a 0%, ${c.accent}12 38%, transparent 70%)`,
+            }}
+            initial={draw ? { opacity: 0, y: '26%' } : false}
+            animate={{ opacity: 1, y: '0%' }}
+            transition={{ duration: 1.9, ease: EASE }}
+          />
+          <motion.div
+            aria-hidden
+            className="absolute inset-x-0 bottom-[38%] h-px"
+            style={{ background: `linear-gradient(90deg, transparent, ${c.accent}cc, transparent)` }}
+            initial={draw ? { scaleX: 0.2, opacity: 0 } : false}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 1.5, delay: 0.2, ease: EASE }}
+          />
+        </>
+      )}
+
+      {/* Console: instruments coming up, for the Team portal - the desk
+          you work from, so it should read as equipment waking. */}
+      {c.motif === 'console' && (
+        <>
+          <motion.div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `repeating-linear-gradient(0deg, ${c.ink}0a 0px, ${c.ink}0a 1px, transparent 1px, transparent ${Math.round(4 * scale) || 4}px)`,
+            }}
+            initial={draw ? { opacity: 0 } : false}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.1, ease: EASE }}
+          />
+          <div className="absolute inset-x-0 top-[18%] flex justify-center gap-[3px]">
+            {Array.from({ length: 28 }).map((_, i) => (
+              <motion.span
+                key={i}
+                aria-hidden
+                className="block w-px"
+                style={{ background: i % 7 === 0 ? c.accent : `${c.ink}55`, height: i % 7 === 0 ? 14 * scale : 7 * scale }}
+                initial={draw ? { scaleY: 0, opacity: 0 } : false}
+                animate={{ scaleY: 1, opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.15 + i * 0.022, ease: EASE }}
+              />
+            ))}
+          </div>
+          <motion.div
+            aria-hidden
+            className="absolute inset-x-[22%] bottom-[24%] h-px origin-left"
+            style={{ background: `${c.accent}` }}
+            initial={draw ? { scaleX: 0 } : false}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 1.2, delay: 0.4, ease: EASE }}
+          />
+        </>
+      )}
+
       {c.motif === 'aperture' && (
         <>
           {[0, 1].map(i => (
@@ -256,6 +321,17 @@ export function WebsiteSplash({
         >
           <Wordmark text={c.wordmark} ink={c.ink} accent={c.accent} motif={c.motif} still={still} />
         </div>
+        {c.sub && (
+          <motion.p
+            className="font-mono uppercase"
+            style={{ color: c.accent, fontSize: `${10 * scale}px`, letterSpacing: '0.36em', marginTop: `${-10 * scale}px` }}
+            initial={draw ? { opacity: 0, letterSpacing: '0.6em' } : false}
+            animate={{ opacity: 1, letterSpacing: '0.36em' }}
+            transition={{ duration: 0.8, delay: 0.6, ease: EASE }}
+          >
+            {c.sub}
+          </motion.p>
+        )}
         <motion.div
           className="flex items-center gap-2.5"
           initial={draw ? { opacity: 0 } : false}

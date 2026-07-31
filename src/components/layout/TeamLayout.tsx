@@ -22,6 +22,7 @@ import {
   ShortcutOverlay,
   usePlatformKeys,
 } from '@/components/platform';
+import { ActiveWebsiteSplash } from '@/components/splash/ActiveWebsiteSplash';
 
 // Mobile nav items for sheet menu
 import {
@@ -81,6 +82,10 @@ export default function TeamLayout({ activeTab, onTabChange, children }: TeamLay
   const { user } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // The desk opening: shown once per session, not on every navigation.
+  const [splashDone, setSplashDone] = useState(() => {
+    try { return sessionStorage.getItem('quooro-team-splash') === 'seen'; } catch { return true; }
+  });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('team-sidebar-collapsed');
     return saved === 'true';
@@ -158,6 +163,15 @@ export default function TeamLayout({ activeTab, onTabChange, children }: TeamLay
 
   return (
     <TooltipProvider>
+      {!splashDone && (
+        <ActiveWebsiteSplash
+          surface="team"
+          onComplete={() => {
+            try { sessionStorage.setItem('quooro-team-splash', 'seen'); } catch { /* refused */ }
+            setSplashDone(true);
+          }}
+        />
+      )}
       <TemperamentProvider value="office">
       <div className="h-screen overflow-hidden bg-background flex workshop-ui">
         {/* Desktop Sidebar */}
