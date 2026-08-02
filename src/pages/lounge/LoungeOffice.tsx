@@ -7,7 +7,7 @@ import {
   BarChart3, StickyNote, Globe,
   Briefcase, Receipt, Users, BookMarked, ClipboardList,
   TrendingUp, Clock, FileSignature, KeyRound,
-  Star, ChevronRight, Settings2,
+  Star, ChevronRight, Bookmark, PanelLeftClose, PanelLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { OfficeSplash } from '@/components/splash/OfficeSplash';
@@ -51,6 +51,17 @@ const APPS: AppItem[] = [
   { id: 'passwords', name: 'Passwords', desc: 'Vault', icon: KeyRound, route: '/lounge/office/passwords' },
   { id: 'calculator', name: 'Calculator', desc: 'Maths', icon: Calculator, route: '/lounge/office/calculator' },
   { id: 'pomodoro', name: 'Pomodoro', desc: 'Focus', icon: Timer, route: '/lounge/office/pomodoro' },
+  { id: 'bookmarks', name: 'Bookmarks', desc: 'Saved links', icon: Bookmark, route: '/lounge/office/bookmarks' },
+];
+
+/** Sidebar groups per OFFICE-IA.md - order of a working day. */
+const NAV_GROUPS: Array<{ label: string; ids: string[] }> = [
+  { label: 'Documents', ids: ['docs', 'notes', 'files', 'pdf', 'wiki'] },
+  { label: 'Money', ids: ['sheets', 'invoices', 'accounting', 'expenses', 'time-tracker'] },
+  { label: 'Build', ids: ['design', 'slides', 'whiteboard', 'ecommerce'] },
+  { label: 'Think', ids: ['analytics', 'forms', 'polls', 'sticky'] },
+  { label: 'Run', ids: ['operations', 'hr', 'tasks', 'contracts'] },
+  { label: 'Utilities', ids: ['passwords', 'calculator', 'pomodoro', 'bookmarks'] },
 ];
 
 /** The rail pins the daily drivers, the way a professional pins their tools. */
@@ -114,6 +125,16 @@ export default function LoungeOffice() {
 
   const backPath = isAdmin ? '/dashboard' : '/lounge';
 
+  /* Checkpoint-1 concept toggle - presentational only, removed in Phase 2.
+     ?chrome=ink shows the "instrument ink" shell; default is studio graphite. */
+  const ink = new URLSearchParams(location.search).get('chrome') === 'ink';
+
+  /** Sidebar collapse (a stated localStorage convenience; server persistence is roadmap). */
+  const [railMode, setRailMode] = useState(() => localStorage.getItem('office:rail') === '1');
+  useEffect(() => { localStorage.setItem('office:rail', railMode ? '1' : '0'); }, [railMode]);
+
+  const [userMenu, setUserMenu] = useState(false);
+
   /** Their office, addressed to them. */
   const firstName = ((user?.user_metadata as any)?.full_name || '').trim().split(/\s+/)[0] || '';
 
@@ -132,6 +153,20 @@ export default function LoungeOffice() {
     sessionStorage.setItem('office:lastView', activeView);
     navigate(route);
   }, [navigate, activeView]);
+
+  /** One command surface: the shortcut lands on the real command bar. */
+  const focusSearch = useCallback(() => {
+    setActiveView('home');
+    requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('office:focus-search')));
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); focusSearch(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [focusSearch]);
 
   // Fetch recent files from platform_files + office_documents
   useEffect(() => {
@@ -201,7 +236,11 @@ export default function LoungeOffice() {
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background">
       {/* ─── Title band ───
           A slim strip of chrome: the way out, the mark, the name. */}
-      <header className="flex h-12 shrink-0 items-center gap-2.5 border-b border-border/40 bg-card/80 px-2.5 backdrop-blur-xl sm:px-3.5">
+      <header className={cn(
+        'relative flex h-12 shrink-0 items-center gap-2.5 border-b px-2.5 sm:px-3.5',
+        ink ? 'border-border/60 bg-black/60' : 'border-border/40 bg-card/80 backdrop-blur-xl',
+      )}>
+        {ink && <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/60" />}
         <button
           onClick={() => setShowExitSplash(true)}
           aria-label="Leave Office"
@@ -218,77 +257,193 @@ export default function LoungeOffice() {
             Office
           </span>
         </div>
-        <div className="flex-1" />
+
+        {/* One command surface, reachable from anywhere in the suite. */}
         <button
-          aria-label="Office settings"
-          className="hidden h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground md:flex"
+          onClick={focusSearch}
+          className={cn(
+            'absolute left-1/2 hidden h-8 w-[300px] -translate-x-1/2 items-center gap-2.5 border px-3.5 text-[12.5px] text-muted-foreground transition-colors duration-150 hover:text-foreground lg:flex',
+            ink ? 'rounded-[7px] border-border/70 bg-black/40' : 'rounded-full border-border/50 bg-foreground/[0.035]',
+          )}
         >
-          <Settings2 className="h-4 w-4" />
+          <Search className="h-3.5 w-3.5 shrink-0" />
+          <span className="flex-1 text-left">Search your office</span>
+          <kbd className="rounded-[4px] border border-border/50 px-1 py-px font-mono text-[9px]">⌘K</kbd>
         </button>
+
+        <div className="flex-1" />
+        <div className="relative">
+          <button
+            onClick={() => setUserMenu(v => !v)}
+            aria-label="Account"
+            aria-expanded={userMenu}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/[0.07] text-[11px] font-semibold text-foreground transition-colors duration-150 hover:bg-foreground/[0.1]"
+          >
+            {(firstName || 'Q').slice(0, 1).toUpperCase()}
+          </button>
+          {userMenu && (
+            <>
+              <button aria-hidden className="fixed inset-0 z-40 cursor-default" onClick={() => setUserMenu(false)} />
+              <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-56 overflow-hidden rounded-[12px] border border-border/40 bg-card shadow-2xl">
+                <div className="border-b border-border/40 px-3.5 py-2.5">
+                  <p className="truncate text-[13px] font-medium">{(user?.user_metadata as any)?.full_name || 'Your account'}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">{user?.email}</p>
+                </div>
+                <button
+                  onClick={() => { setUserMenu(false); setShowExitSplash(true); }}
+                  className="flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-[12.5px] transition-colors hover:bg-foreground/[0.04]"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground" /> Leave Office
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* ─── Left rail (desktop) ─── */}
-        <aside className="hidden w-[64px] shrink-0 flex-col border-r border-border/40 bg-card md:flex">
-          <nav className="flex flex-col items-center gap-0.5 px-1.5 pt-2">
-            {NAVS.map(nav => {
-              const on = activeView === nav.view;
-              return (
-                <button
-                  key={nav.view}
-                  onClick={() => goView(nav.view)}
-                  aria-current={on ? 'page' : undefined}
-                  className={cn(
-                    'relative flex h-[46px] w-full flex-col items-center justify-center gap-[3px] rounded-[10px] transition-colors duration-150',
-                    on ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground',
-                  )}
-                >
-                  <nav.icon className="h-[17px] w-[17px]" strokeWidth={on ? 2 : 1.5} />
-                  <span className={cn('text-[8.5px] tracking-[0.04em]', on ? 'font-semibold' : 'font-medium')}>
-                    {nav.label}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
+        {/* ─── Left side: grouped sidebar, collapsible to the rail ─── */}
+        {!railMode ? (
+          <aside className={cn(
+            'hidden shrink-0 flex-col border-r md:flex',
+            ink ? 'w-[216px] border-border/60 bg-black/60' : 'w-[232px] border-border/40 bg-card',
+          )}>
+            <nav className="flex flex-col gap-0.5 px-2.5 pt-2.5">
+              {NAVS.map(nav => {
+                const on = activeView === nav.view;
+                const label = nav.view === 'home' ? 'Today' : nav.view === 'apps' ? 'Every app' : 'Recent work';
+                return (
+                  <button
+                    key={nav.view}
+                    onClick={() => goView(nav.view)}
+                    aria-current={on ? 'page' : undefined}
+                    className={cn(
+                      'relative flex items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[13px] transition-colors duration-150',
+                      ink ? 'h-8' : 'h-9',
+                      on
+                        ? cn('bg-foreground/[0.06] font-medium', ink ? 'text-primary' : 'text-foreground')
+                        : 'text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground',
+                    )}
+                  >
+                    {on && <span aria-hidden className="absolute left-[-10px] h-4 w-[2px] rounded-r-full bg-primary" />}
+                    <nav.icon className="h-4 w-4 shrink-0" strokeWidth={on ? 2 : 1.6} />
+                    {label}
+                  </button>
+                );
+              })}
+            </nav>
 
-          <div className="mx-3.5 my-2 h-px bg-border/50" />
+            <div className="scrollbar-none mt-2 flex-1 overflow-y-auto px-2.5 pb-2">
+              {NAV_GROUPS.map(group => (
+                <div key={group.label} className="pt-3">
+                  <p className={cn(LABEL, 'flex items-center gap-1.5 px-2.5 pb-1')}>
+                    {ink && <span aria-hidden className="h-px w-2 bg-primary/70" />}
+                    {group.label}
+                  </p>
+                  {group.ids.map(id => {
+                    const app = APPS.find(a => a.id === id);
+                    if (!app) return null;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => go(app.route)}
+                        className={cn(
+                          'flex w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12.5px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.03] hover:text-foreground',
+                          ink ? 'h-8' : 'h-9',
+                        )}
+                      >
+                        <AppTile id={id} icon={app.icon} size={20} />
+                        <span className="min-w-0 truncate">{app.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
 
-          {/* Pinned apps */}
-          <div className="scrollbar-none flex flex-1 flex-col items-center gap-1 overflow-y-auto px-1.5 pb-2">
-            {PINNED_IDS.map(id => {
-              const app = APPS.find(a => a.id === id);
-              if (!app) return null;
-              return (
-                <button
-                  key={id}
-                  onClick={() => go(app.route)}
-                  className="group relative flex h-10 w-full items-center justify-center rounded-[10px] transition-colors duration-150 hover:bg-foreground/[0.04]"
-                >
-                  <AppTile id={id} icon={app.icon} size={27} />
-                  <span className="pointer-events-none absolute left-full z-40 ml-1.5 whitespace-nowrap rounded-[7px] border border-border/50 bg-card px-2 py-1 text-[11px] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
-                    {app.name}
-                  </span>
-                </button>
-              );
-            })}
-            <button
-              onClick={() => goView('apps')}
-              className="group relative flex h-10 w-full items-center justify-center rounded-[10px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.04] hover:text-foreground"
-            >
-              <span className="flex h-[27px] w-[27px] items-center justify-center rounded-[8px] bg-foreground/[0.05]">
-                <Grid3X3 className="h-3.5 w-3.5" />
-              </span>
-              <span className="pointer-events-none absolute left-full z-40 ml-1.5 whitespace-nowrap rounded-[7px] border border-border/50 bg-card px-2 py-1 text-[11px] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
-                All apps
-              </span>
-            </button>
-          </div>
-        </aside>
+            {/* Collapse + the version line every real product carries */}
+            <div className={cn('flex items-center justify-between border-t px-3 py-2', ink ? 'border-border/60' : 'border-border/40')}>
+              <span className="font-mono text-[9.5px] tabular-nums text-muted-foreground/70">Quooro Office 2.0</span>
+              <button
+                onClick={() => setRailMode(true)}
+                aria-label="Collapse sidebar"
+                className="flex h-7 w-7 items-center justify-center rounded-[7px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground"
+              >
+                <PanelLeftClose className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </aside>
+        ) : (
+          <aside className={cn(
+            'hidden w-[64px] shrink-0 flex-col border-r md:flex',
+            ink ? 'border-border/60 bg-background' : 'border-border/40 bg-card',
+          )}>
+            <nav className="flex flex-col items-center gap-0.5 px-1.5 pt-2">
+              {NAVS.map(nav => {
+                const on = activeView === nav.view;
+                return (
+                  <button
+                    key={nav.view}
+                    onClick={() => goView(nav.view)}
+                    aria-current={on ? 'page' : undefined}
+                    className={cn(
+                      'relative flex h-[46px] w-full flex-col items-center justify-center gap-[3px] rounded-[10px] transition-colors duration-150',
+                      on ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground',
+                    )}
+                  >
+                    <nav.icon className="h-[17px] w-[17px]" strokeWidth={on ? 2 : 1.5} />
+                    <span className={cn('text-[8.5px] tracking-[0.04em]', on ? 'font-semibold' : 'font-medium')}>
+                      {nav.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
+            <div className="mx-3.5 my-2 h-px bg-border/50" />
+            <div className="scrollbar-none flex flex-1 flex-col items-center gap-1 overflow-y-auto px-1.5 pb-1">
+              {PINNED_IDS.map(id => {
+                const app = APPS.find(a => a.id === id);
+                if (!app) return null;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => go(app.route)}
+                    className="group relative flex h-10 w-full items-center justify-center rounded-[10px] transition-colors duration-150 hover:bg-foreground/[0.04]"
+                  >
+                    <AppTile id={id} icon={app.icon} size={27} />
+                    <span className="pointer-events-none absolute left-full z-40 ml-1.5 whitespace-nowrap rounded-[7px] border border-border/50 bg-card px-2 py-1 text-[11px] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                      {app.name}
+                    </span>
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => goView('apps')}
+                className="group relative flex h-10 w-full items-center justify-center rounded-[10px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.04] hover:text-foreground"
+              >
+                <span className="flex h-[27px] w-[27px] items-center justify-center rounded-[8px] bg-foreground/[0.05]">
+                  <Grid3X3 className="h-3.5 w-3.5" />
+                </span>
+                <span className="pointer-events-none absolute left-full z-40 ml-1.5 whitespace-nowrap rounded-[7px] border border-border/50 bg-card px-2 py-1 text-[11px] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                  All apps
+                </span>
+              </button>
+            </div>
+            <div className="flex items-center justify-center border-t border-border/40 py-2">
+              <button
+                onClick={() => setRailMode(false)}
+                aria-label="Expand sidebar"
+                className="flex h-7 w-7 items-center justify-center rounded-[7px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground"
+              >
+                <PanelLeft className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </aside>
+        )}
 
         {/* ─── Main column ─── */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex-1 overflow-auto">
+          <div className={cn('flex-1 overflow-auto', ink && 'bg-card/45')}>
             {activeView === 'home' && (
               <HomeView
                 search={search}
@@ -377,6 +532,14 @@ function HomeView({
 }) {
   const [searchFocused, setSearchFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // The shell's search affordance and ⌘K land here - one command surface.
+  useEffect(() => {
+    const focus = () => { inputRef.current?.focus(); setSearchFocused(true); };
+    window.addEventListener('office:focus-search', focus);
+    return () => window.removeEventListener('office:focus-search', focus);
+  }, []);
   const q = search.trim().toLowerCase();
   const isSearching = q.length > 0;
 
@@ -453,6 +616,7 @@ function HomeView({
         <div className={cn(PILL, searchFocused && 'border-primary/40 bg-foreground/[0.05]')}>
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
+            ref={inputRef}
             value={search}
             onChange={e => setSearch(e.target.value)}
             onFocus={() => setSearchFocused(true)}

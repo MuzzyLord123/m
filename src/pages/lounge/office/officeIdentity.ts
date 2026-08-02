@@ -60,6 +60,7 @@ export const OFFICE_IDENTITY: Record<string, OfficeIdentity> = {
   passwords: { hue: '210 12% 44%', family: 'Utilities' },
   calculator: { hue: '215 10% 42%', family: 'Utilities' },
   pomodoro: { hue: '206 12% 44%', family: 'Utilities' },
+  bookmarks: { hue: '218 12% 46%', family: 'Utilities' },
 };
 
 const FALLBACK: OfficeIdentity = { hue: '17 80% 44%', family: 'Utilities' };
