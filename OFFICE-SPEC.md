@@ -59,6 +59,40 @@ hr_time_off_requests · open office_polls · due localStorage tasks with
 index, Starred. Blocks self-remove when empty; the quiet state says
 "Nothing needs you right now."
 
+## 4a. The command system
+
+Office is driven from the keyboard, because that is what separates a
+tool people work in from a website they visit.
+
+- **Palette** - cmd-K, ctrl-K, `/` or `n`. Sections: Views, Create,
+  Apps, Recent work, **Commands**. Apps are ordered by how often the
+  operator opens them (`office:palette-freq`), so the palette learns.
+  Commands run shell state directly: density, sidebar, settings,
+  shortcuts.
+- **Jump keys** - `g` then a letter, with a 1.2s window: t Today,
+  a Apps, r Recent, d Docs, s Sheets, i Invoices, p Profitability,
+  e Expenses, m Mail, c Calendar, f Files, o Operations. Suppressed
+  while typing in any field.
+- **`?`** lists every one of them, generated from the same map that
+  implements them, so the overlay cannot drift from the behaviour.
+- **Focus rings**: a visible ember ring on every focusable element in
+  the shell. A keyboard-driven surface without them is unusable.
+
+## 4c. Density, preferences, and failure
+
+**Density** is a real setting, not a label: `data-office-density` on the
+shell root drives CSS that removes the air between rows while leaving
+type size untouched - roughly a third more rows per screen.
+
+**Office settings** (the band gear, restored now that something sits
+behind it): row density, opening screen, sidebar mode, and the keyboard
+map. Stored on the device and stated as such.
+
+**Failure is designed.** When both workspace queries fail, the ledger
+says the work could not be loaded, states that nothing was lost, and
+offers Try again which re-runs the fetch. An empty desk after a failed
+request is a lie.
+
 ## 4b. What the suite contains, and what it refuses to
 
 Office is a business toolkit, not an app store. Four apps were retired

@@ -8,7 +8,7 @@ import {
   Briefcase, Receipt, Users, BookMarked, ClipboardList,
   TrendingUp, Clock, FileSignature, KeyRound,
   Star, ChevronRight, PanelLeftClose, PanelLeft,
-  PoundSterling, Mail, CalendarDays, CalendarCheck, MessagesSquare, Boxes,
+  PoundSterling, Mail, CalendarDays, CalendarCheck, MessagesSquare, Boxes, Settings2, RefreshCw, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { OfficeSplash } from '@/components/splash/OfficeSplash';
@@ -111,6 +111,22 @@ const LABEL = 'text-[10px] font-medium uppercase tracking-[0.09em] text-muted-fo
 const GROUP = 'overflow-hidden rounded-[14px] border border-border/40 bg-card';
 const PILL = 'flex h-11 items-center gap-3 rounded-full border border-border/50 bg-foreground/[0.035] px-4 transition-colors';
 
+/** g then a letter. The jumps an operator uses fifty times a day. */
+const GO_KEYS: Record<string, { view?: ActiveView; route?: string; label: string }> = {
+  t: { view: 'home', label: 'Today' },
+  a: { view: 'apps', label: 'Every app' },
+  r: { view: 'recents', label: 'Recent work' },
+  d: { route: '/lounge/office/word-home', label: 'Docs' },
+  s: { route: '/lounge/office/sheets-home', label: 'Sheets' },
+  i: { route: '/lounge/office/invoices', label: 'Invoices' },
+  p: { route: '/lounge/office/profitability', label: 'Profitability' },
+  e: { route: '/lounge/office/expenses', label: 'Expenses' },
+  m: { route: '/lounge/mail', label: 'Mail' },
+  c: { route: '/lounge/calendar', label: 'Calendar' },
+  f: { route: '/lounge/office/onedrive', label: 'Files' },
+  o: { route: '/lounge/office/operations', label: 'Operations' },
+};
+
 /** Shared column grid for every file ledger: name, app, modified. */
 const LEDGER_COLS = 'grid-cols-[minmax(0,1fr)_88px] sm:grid-cols-[minmax(0,1fr)_120px_96px]';
 
@@ -125,14 +141,25 @@ export default function LoungeOffice() {
       const saved = sessionStorage.getItem('office:lastView') as ActiveView | null;
       if (saved === 'apps' || saved === 'recents' || saved === 'home') return saved;
     }
-    return 'home';
+    // Where the operator chose to land. Their office, their opening screen.
+    const landing = localStorage.getItem('office:landing') as ActiveView | null;
+    return landing === 'apps' || landing === 'recents' ? landing : 'home';
   });
+
+  /** Row density. Operators who live in a tool want more rows per screen. */
+  const [density, setDensity] = useState<'comfortable' | 'compact'>(
+    () => (localStorage.getItem('office:density') === 'compact' ? 'compact' : 'comfortable'),
+  );
+  useEffect(() => { localStorage.setItem('office:density', density); }, [density]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [appFamily, setAppFamily] = useState<string>('All');
   const [showExitSplash, setShowExitSplash] = useState(false);
   const [showSplash, setShowSplash] = useState(() => !fromOfficeApp);
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
   const [loadingRecents, setLoadingRecents] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
   const [briefing, setBriefing] = useState<Briefing>({ timeOff: [], polls: [], tasks: [] });
 
   const backPath = isAdmin ? '/dashboard' : '/lounge';
@@ -166,6 +193,10 @@ export default function LoungeOffice() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
+  /** g then a letter jumps, the way operators expect. */
+  const goPrefix = useRef(false);
+  const goTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     const typing = () => {
       const el = document.activeElement as HTMLElement | null;
@@ -173,18 +204,39 @@ export default function LoungeOffice() {
     };
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPaletteOpen(v => !v); return; }
-      if (typing()) return;
+      if (typing() || e.metaKey || e.ctrlKey || e.altKey) return;
+
+      if (goPrefix.current) {
+        const target = GO_KEYS[e.key.toLowerCase()];
+        goPrefix.current = false;
+        if (goTimer.current) clearTimeout(goTimer.current);
+        if (target) {
+          e.preventDefault();
+          if (target.view) { setAppFamily('All'); setActiveView(target.view); }
+          else if (target.route) { sessionStorage.setItem('office:lastView', 'home'); navigate(target.route); }
+        }
+        return;
+      }
+
+      if (e.key.toLowerCase() === 'g') {
+        goPrefix.current = true;
+        if (goTimer.current) clearTimeout(goTimer.current);
+        goTimer.current = setTimeout(() => { goPrefix.current = false; }, 1200);
+        return;
+      }
       if (e.key === '/') { e.preventDefault(); setPaletteOpen(true); }
       if (e.key === '?') { e.preventDefault(); setShortcutsOpen(true); }
+      if (e.key.toLowerCase() === 'n') { e.preventDefault(); setPaletteOpen(true); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [navigate]);
 
   // Fetch recent files from platform_files + office_documents
   useEffect(() => {
     if (!user?.id) { setLoadingRecents(false); return; }
     const fetchAll = async () => {
+      setLoadError(false);
       const [platformRes, docsRes] = await Promise.all([
         supabase
           .from('platform_files')
@@ -200,6 +252,13 @@ export default function LoungeOffice() {
           .order('updated_at', { ascending: false })
           .limit(30),
       ]);
+
+      if (platformRes.error && docsRes.error) {
+        // Both sides failed: say so plainly rather than showing an empty desk.
+        setLoadError(true);
+        setLoadingRecents(false);
+        return;
+      }
 
       const platformFiles: RecentFile[] = (platformRes.data || []);
       const docFiles: RecentFile[] = (docsRes.data || []).map(d => ({
@@ -243,7 +302,7 @@ export default function LoungeOffice() {
       setBriefing({ timeOff, polls, tasks });
     };
     fetchBriefing();
-  }, [user?.id]);
+  }, [user?.id, reloadToken]);
 
   const filteredApps = search.trim()
     ? APPS.filter(a => a.name.toLowerCase().includes(search.toLowerCase()) || a.desc.toLowerCase().includes(search.toLowerCase()))
@@ -267,7 +326,7 @@ export default function LoungeOffice() {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background">
+    <div data-office-density={density} className="office-shell fixed inset-0 z-50 flex flex-col overflow-hidden bg-background">
       {/* ─── Title band ───
           A slim strip of chrome: the way out, the mark, the name. */}
       <header className={cn(
@@ -310,6 +369,13 @@ export default function LoungeOffice() {
           className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground lg:hidden"
         >
           <Search className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => setSettingsOpen(true)}
+          aria-label="Office settings"
+          className="hidden h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground md:flex"
+        >
+          <Settings2 className="h-4 w-4" />
         </button>
         <div className="relative">
           <button
@@ -484,6 +550,8 @@ export default function LoungeOffice() {
                 setSearch={setSearch}
                 recentFiles={recentFiles}
                 loadingRecents={loadingRecents}
+                loadError={loadError}
+                onRetry={() => { setLoadingRecents(true); setReloadToken(t => t + 1); }}
                 go={go}
                 firstName={firstName}
                 briefing={briefing}
@@ -550,9 +618,27 @@ export default function LoungeOffice() {
           onClose={() => setPaletteOpen(false)}
           onGo={(route) => { setPaletteOpen(false); go(route); }}
           onView={(v) => { setPaletteOpen(false); goView(v); }}
+          commands={[
+            { key: 'cmd-density', label: density === 'compact' ? 'Switch to comfortable rows' : 'Switch to compact rows', run: () => setDensity(d => (d === 'compact' ? 'comfortable' : 'compact')) },
+            { key: 'cmd-rail', label: railMode ? 'Expand the sidebar' : 'Collapse the sidebar', run: () => setRailMode(v => !v) },
+            { key: 'cmd-settings', label: 'Office settings', run: () => setSettingsOpen(true) },
+            { key: 'cmd-keys', label: 'Keyboard shortcuts', run: () => setShortcutsOpen(true) },
+          ]}
         />
       )}
       {shortcutsOpen && <OfficeShortcuts onClose={() => setShortcutsOpen(false)} />}
+      {settingsOpen && (
+        <OfficeSettings
+          density={density}
+          setDensity={setDensity}
+          landing={(localStorage.getItem('office:landing') as ActiveView) || 'home'}
+          setLanding={(v) => localStorage.setItem('office:landing', v)}
+          railMode={railMode}
+          setRailMode={setRailMode}
+          onShortcuts={() => { setSettingsOpen(false); setShortcutsOpen(true); }}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
 
       <OfficeQuickActions />
     </div>
@@ -571,11 +657,12 @@ type PaletteItem = {
   run: () => void;
 };
 
-function OfficeCommandPalette({ recentFiles, onClose, onGo, onView }: {
+function OfficeCommandPalette({ recentFiles, onClose, onGo, onView, commands }: {
   recentFiles: RecentFile[];
   onClose: () => void;
   onGo: (route: string) => void;
   onView: (v: ActiveView) => void;
+  commands: Array<{ key: string; label: string; run: () => void }>;
 }) {
   const [q, setQ] = useState('');
   const [cursor, setCursor] = useState(0);
@@ -602,9 +689,28 @@ function OfficeCommandPalette({ recentFiles, onClose, onGo, onView }: {
       return { key: `c-${c.id}`, label: c.label, hint: 'Create', tile: { id: c.id, icon: app.icon }, run: () => onGo(c.route) };
     });
 
+  // The palette learns: apps you open often rise to the top.
+  const freq: Record<string, number> = (() => {
+    try { return JSON.parse(localStorage.getItem('office:palette-freq') || '{}'); } catch { return {}; }
+  })();
+  const remember = (id: string) => {
+    try {
+      const next = { ...freq, [id]: (freq[id] || 0) + 1 };
+      localStorage.setItem('office:palette-freq', JSON.stringify(next));
+    } catch { /* storage refused */ }
+  };
+
   const apps: PaletteItem[] = APPS
     .filter(a => match(a.name, a.desc))
-    .map(a => ({ key: `a-${a.id}`, label: a.name, hint: a.desc, tile: { id: a.id, icon: a.icon }, run: () => onGo(a.route) }));
+    .sort((x, y) => (freq[y.id] || 0) - (freq[x.id] || 0))
+    .map(a => ({
+      key: `a-${a.id}`, label: a.name, hint: a.desc, tile: { id: a.id, icon: a.icon },
+      run: () => { remember(a.id); onGo(a.route); },
+    }));
+
+  const cmds: PaletteItem[] = commands
+    .filter(c => match(c.label, 'settings', 'density', 'sidebar', 'keyboard'))
+    .map(c => ({ key: c.key, label: c.label, hint: 'Command', run: () => { onClose(); c.run(); } }));
 
   const files: PaletteItem[] = recentFiles
     .filter(f => match(f.file_name))
@@ -620,6 +726,7 @@ function OfficeCommandPalette({ recentFiles, onClose, onGo, onView }: {
     { title: 'Create', items: creates },
     { title: 'Apps', items: apps },
     { title: 'Recent work', items: files },
+    { title: 'Commands', items: cmds },
   ].filter(sec => sec.items.length > 0);
   const flat = sections.flatMap(sec => sec.items);
   const active = flat[Math.min(cursor, flat.length - 1)];
@@ -697,6 +804,104 @@ function OfficeCommandPalette({ recentFiles, onClose, onGo, onView }: {
 }
 
 /* ═══════════════════════════════════════════════
+   SETTINGS — the preferences an operator expects to own
+   ═══════════════════════════════════════════════ */
+
+function OfficeSettings({ density, setDensity, landing, setLanding, railMode, setRailMode, onShortcuts, onClose }: {
+  density: 'comfortable' | 'compact';
+  setDensity: (v: 'comfortable' | 'compact') => void;
+  landing: ActiveView;
+  setLanding: (v: ActiveView) => void;
+  railMode: boolean;
+  setRailMode: (v: boolean) => void;
+  onShortcuts: () => void;
+  onClose: () => void;
+}) {
+  const [land, setLand] = useState<ActiveView>(landing);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onClose(); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const Row = ({ title, note, children }: { title: string; note: string; children: React.ReactNode }) => (
+    <div className="flex items-center justify-between gap-6 border-b border-border/30 px-4 py-3 last:border-b-0">
+      <span className="min-w-0">
+        <span className="block text-[13px] font-medium">{title}</span>
+        <span className="block text-[11.5px] leading-relaxed text-muted-foreground">{note}</span>
+      </span>
+      <span className="shrink-0">{children}</span>
+    </div>
+  );
+
+  const Segment = <T extends string>({ value, options, onChange }: { value: T; options: Array<[T, string]>; onChange: (v: T) => void }) => (
+    <span className="flex items-center gap-0.5 rounded-[8px] border border-border/50 bg-black/30 p-0.5">
+      {options.map(([v, label]) => (
+        <button
+          key={v}
+          onClick={() => onChange(v)}
+          aria-pressed={value === v}
+          className={cn(
+            'rounded-[6px] px-2.5 py-1 text-[12px] transition-colors duration-150',
+            value === v ? 'bg-foreground/[0.09] font-medium text-foreground' : 'text-muted-foreground hover:text-foreground',
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </span>
+  );
+
+  return (
+    <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Office settings">
+      <button aria-hidden className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="absolute left-1/2 top-[12vh] w-[460px] max-w-[calc(100vw-28px)] -translate-x-1/2 overflow-hidden rounded-[14px] border border-border/60 bg-card shadow-2xl">
+        <div className="relative flex items-center justify-between border-b border-border/60 px-4 py-3">
+          <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/50" />
+          <p className="text-[13.5px] font-semibold">Office settings</p>
+          <button onClick={onClose} aria-label="Close settings" className="flex h-7 w-7 items-center justify-center rounded-[7px] text-muted-foreground transition-colors hover:bg-foreground/[0.05] hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div>
+          <Row title="Row density" note="Compact fits roughly a third more rows on screen.">
+            <Segment
+              value={density}
+              options={[['comfortable', 'Comfortable'], ['compact', 'Compact']]}
+              onChange={setDensity}
+            />
+          </Row>
+          <Row title="Opening screen" note="Where Office lands when you arrive.">
+            <Segment
+              value={land}
+              options={[['home', 'Today'], ['apps', 'Apps'], ['recents', 'Recent']]}
+              onChange={(v) => { setLand(v); setLanding(v); }}
+            />
+          </Row>
+          <Row title="Sidebar" note="The rail keeps your pinned apps without the labels.">
+            <Segment
+              value={railMode ? 'rail' : 'full'}
+              options={[['full', 'Full'], ['rail', 'Rail']]}
+              onChange={(v) => setRailMode(v === 'rail')}
+            />
+          </Row>
+          <Row title="Keyboard" note="Jump keys, the palette and the rest of the map.">
+            <button onClick={onShortcuts} className="rounded-[8px] border border-border/50 px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground">
+              View shortcuts
+            </button>
+          </Row>
+        </div>
+
+        <p className="border-t border-border/60 px-4 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
+          These preferences are kept on this device. Syncing them to your account is on the Office roadmap.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
    SHORTCUTS — only the keys that actually work
    ═══════════════════════════════════════════════ */
 
@@ -707,8 +912,8 @@ function OfficeShortcuts({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
   const ROWS: Array<[string, string]> = [
-    ['⌘K / Ctrl K', 'Command palette'],
-    ['/', 'Command palette'],
+    ['⌘K  ·  /', 'Command palette'],
+    ['n', 'Start something new'],
     ['?', 'This overlay'],
     ['Esc', 'Close panels'],
   ];
@@ -728,9 +933,17 @@ function OfficeShortcuts({ onClose }: { onClose: () => void }) {
             </li>
           ))}
         </ul>
-        <p className="border-t border-border/60 px-4 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
-          Module jump keys arrive as each module is rebuilt onto the shared anatomy.
-        </p>
+        <div className="border-t border-border/60 px-4 py-2.5">
+          <p className={cn(LABEL, 'pb-1.5')}>Jump — press g, then</p>
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-1">
+            {Object.entries(GO_KEYS).map(([k, v]) => (
+              <li key={k} className="flex items-center justify-between gap-2">
+                <span className="truncate text-[12px] text-muted-foreground">{v.label}</span>
+                <kbd className="shrink-0 rounded-[4px] border border-border/50 px-1 py-px font-mono text-[10px]">{k}</kbd>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -741,12 +954,14 @@ function OfficeShortcuts({ onClose }: { onClose: () => void }) {
    ═══════════════════════════════════════════════ */
 
 function HomeView({
-  search, setSearch, recentFiles, loadingRecents, go, firstName, briefing, onViewRecents, onViewApps,
+  search, setSearch, recentFiles, loadingRecents, loadError, onRetry, go, firstName, briefing, onViewRecents, onViewApps,
 }: {
   search: string;
   setSearch: (v: string) => void;
   recentFiles: RecentFile[];
   loadingRecents: boolean;
+  loadError: boolean;
+  onRetry: () => void;
   go: (r: string) => void;
   firstName: string;
   briefing: Briefing;
@@ -1002,6 +1217,20 @@ function HomeView({
 
           {loadingRecents ? (
             <div className={GROUP}><SkeletonLedger rows={5} /></div>
+          ) : loadError ? (
+            /* A failure states itself and offers the way out. */
+            <div className="rounded-[14px] border border-risk/30 bg-risk/[0.04] px-6 py-10 text-center">
+              <p className="text-[14px] font-medium">Your work could not be loaded</p>
+              <p className="mx-auto mt-1.5 max-w-sm text-[12.5px] leading-relaxed text-muted-foreground">
+                The connection to your workspace failed. Nothing has been lost — this screen just could not read it.
+              </p>
+              <button
+                onClick={onRetry}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-[8px] border border-border/50 px-3 py-1.5 text-[12.5px] font-medium transition-colors hover:bg-foreground/[0.04]"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Try again
+              </button>
+            </div>
           ) : recentFiles.length === 0 ? (
             <div className="rounded-[14px] bg-foreground/[0.025] px-6 py-12 text-center">
               <p className="text-[14px] font-medium">Nothing open yet</p>

@@ -1933,3 +1933,28 @@ body.perf-no-bg .lounge-bg-grid {
    ink on night, so the lightness rides a token. */
 :root { --office-glyph-l: 36%; }
 .dark { --office-glyph-l: 71%; }
+
+/* ─── Quooro Office: operator density ───
+   Compact is not a smaller font - the type stays legible and the air
+   between rows is what gives way, so roughly a third more work fits on
+   screen without anyone squinting. */
+.office-shell[data-office-density='compact'] li > button,
+.office-shell[data-office-density='compact'] li > div,
+.office-shell[data-office-density='compact'] ul > li > button {
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+.office-shell[data-office-density='compact'] nav button {
+  height: 1.85rem;
+}
+
+/* Keyboard users get a visible, on-brand focus ring everywhere in the
+   suite - the shell is driven by keys, so this is not optional. */
+.office-shell :focus-visible,
+.office-shell button:focus-visible,
+.office-shell input:focus-visible,
+.office-shell [role='option']:focus-visible {
+  outline: 2px solid hsl(var(--primary) / 0.75);
+  outline-offset: 1px;
+  border-radius: 7px;
+}
