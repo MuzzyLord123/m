@@ -88,20 +88,49 @@ serve(async (req) => {
     if (insertError) throw new Error(`Failed to create deployment: ${insertError.message}`);
     const deploymentId = deployment.id;
 
-    log("Compiling", "running", `Building ${pages.length} page(s)...`);
-
-    // Step 3: Compile pages
-    const compiledPages = compilePages(pages, siteName || "My Website");
-
-    // Step 4: Upload — try Cloudflare R2 first, fallback to Supabase Storage
-    log("Uploading", "running", "Uploading compiled assets...");
-
+    // Step 3: Work out where the site will answer from *before* compiling.
+    // Canonical tags, the sitemap and the social cards all have to name the
+    // real address, so the destination has to be known while the HTML is
+    // still being written rather than after it has been uploaded.
     const cfAccountId = await getCloudflareCredential(supabase, user.id, "account_id");
     const cfApiToken = await getCloudflareCredential(supabase, user.id, "api_token");
     const cfR2Bucket = await getCloudflareCredential(supabase, user.id, "r2_bucket_name");
     const cfCustomDomain = await getCloudflareCredential(supabase, user.id, "site_domain");
 
     const useCloudflare = !!(cfAccountId && cfApiToken && cfR2Bucket);
+
+    // A verified custom domain is the address people will actually see, so
+    // it outranks the generated subdomain everywhere the URL is written down.
+    const { data: verifiedDomain } = await supabase
+      .from("site_domains")
+      .select("domain_name")
+      .eq("site_id", siteId)
+      .eq("domain_type", "custom")
+      .eq("status", "active")
+      .eq("dns_verified", true)
+      .maybeSingle();
+
+    const onOwnDomain = !!verifiedDomain?.domain_name || !!(useCloudflare && cfCustomDomain);
+    let siteOrigin: string;
+    if (verifiedDomain?.domain_name) {
+      siteOrigin = `https://${verifiedDomain.domain_name}`;
+    } else if (useCloudflare && cfCustomDomain) {
+      siteOrigin = `https://${subdomain}.${cfCustomDomain}`;
+    } else if (useCloudflare) {
+      siteOrigin = `https://pub-${cfR2Bucket}.r2.dev/${storagePath}`;
+    } else {
+      siteOrigin = `${supabaseUrl}/storage/v1/object/public/site-files/${storagePath}`;
+    }
+
+    log("Compiling", "running", `Building ${pages.length} page(s)...`);
+
+    // Step 4: Compile pages
+    const compiledPages = compilePages(
+      pages, siteName || "My Website", siteOrigin, siteId, supabaseUrl,
+    );
+
+    // Step 5: Upload — try Cloudflare R2 first, fallback to Supabase Storage
+    log("Uploading", "running", "Uploading compiled assets...");
 
     let totalSize = 0;
     let fileCount = 0;
@@ -122,16 +151,9 @@ serve(async (req) => {
 
     log("Uploading", "complete", `${fileCount} files uploaded (${formatBytes(totalSize)})`);
 
-    // Step 5: Generate live URL
-    let liveUrl: string;
-    if (useCloudflare && cfCustomDomain) {
-      liveUrl = `https://${subdomain}.${cfCustomDomain}`;
-    } else if (useCloudflare) {
-      // R2 public URL via custom domain or pub bucket endpoint
-      liveUrl = `https://pub-${cfR2Bucket}.r2.dev/${storagePath}/index.html`;
-    } else {
-      liveUrl = `${supabaseUrl}/storage/v1/object/public/site-files/${storagePath}/index.html`;
-    }
+    // Step 6: The address to hand back. On a real domain the root serves the
+    // homepage; on a bare bucket the file has to be named.
+    const liveUrl = onOwnDomain ? siteOrigin : `${siteOrigin}/index.html`;
 
     log("Deploying", "running", "Activating deployment...");
 
@@ -182,6 +204,18 @@ serve(async (req) => {
       .neq("id", deploymentId)
       .eq("status", "live");
 
+    // Mark the site itself as published. The dashboard reads this to tell a
+    // draft from a live site, and the form endpoint refuses submissions that
+    // claim to come from a site which was never published.
+    await supabase
+      .from("designer_sites")
+      .update({
+        status: "published",
+        published_at: new Date().toISOString(),
+        published_url: liveUrl,
+      })
+      .eq("id", siteId);
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -228,6 +262,9 @@ interface CompiledOutput {
   sharedCSS: string;
   sharedJS: string;
   pageFiles: { filename: string; html: string }[];
+  /** sitemap.xml, robots.txt, 404.html — everything a real site needs that
+   *  is not one of its own pages. */
+  extraFiles: { path: string; content: string; contentType: string }[];
 }
 
 // ─── Cloudflare Credentials ─────────────────────────────
@@ -266,6 +303,11 @@ async function uploadToCloudflareR2(
       path: `${storagePath}/${p.filename}`,
       content: p.html,
       contentType: "text/html; charset=utf-8",
+    })),
+    ...compiled.extraFiles.map(f => ({
+      path: `${storagePath}/${f.path}`,
+      content: f.content,
+      contentType: f.contentType,
     })),
   ];
 
@@ -310,6 +352,11 @@ async function uploadToSupabaseStorage(
       path: `${storagePath}/${p.filename}`,
       content: p.html,
       contentType: "text/html",
+    })),
+    ...compiled.extraFiles.map(f => ({
+      path: `${storagePath}/${f.path}`,
+      content: f.content,
+      contentType: f.contentType,
     })),
   ];
 
@@ -404,32 +451,113 @@ function escapeHTML(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+/** For anything going inside an attribute. Single quotes matter here too -
+ *  an unescaped alt text or placeholder used to be able to close the
+ *  attribute and inject markup into the published page. */
+function escapeAttr(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+/** Only URL schemes that are safe to put behind a link or an image.
+ *  Blocks javascript: and data: (bar images) from user-entered fields. */
+function safeURL(value: unknown, allowData = false): string {
+  const url = String(value ?? "").trim();
+  if (!url) return "";
+  const scheme = url.match(/^([a-z][a-z0-9+.-]*):/i)?.[1]?.toLowerCase();
+  if (!scheme) return url; // relative path or anchor
+  if (["http", "https", "mailto", "tel"].includes(scheme)) return url;
+  if (allowData && scheme === "data" && /^data:image\//i.test(url)) return url;
+  return "";
+}
+
+/** A stable form field name derived from its label. */
+function fieldName(label: string, index: number): string {
+  const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 40);
+  return slug || `field_${index}`;
+}
+
+/**
+ * A "#something" link is ambiguous: it can mean jump to another page, or
+ * scroll to a section of this one. Previously every one of them was rewritten
+ * to "something.html", which silently broke every in-page anchor on every
+ * published site - and left the smooth-scroll handler with nothing to match.
+ * Now the page list decides: a slug that names a real page navigates, and
+ * anything else stays the anchor the author wrote.
+ */
+function resolveHref(href: string, pageSlugs: Set<string>): string {
+  if (!href.startsWith("#")) return safeURL(href);
+  const target = href.slice(1);
+  if (!target) return "index.html";
+  const slug = target.toLowerCase().replace(/^\/+/, "");
+  if (slug === "index" || slug === "home") return "index.html";
+  if (pageSlugs.has(slug)) return `${slug}.html`;
+  return `#${target}`;
+}
+
 // ─── Compiler ───────────────────────────────────────────
 
-function compilePages(pages: PageInput[], siteName: string): CompiledOutput {
+function compilePages(
+  pages: PageInput[],
+  siteName: string,
+  siteOrigin: string,
+  siteId: string,
+  supabaseUrl: string,
+): CompiledOutput {
   const allElements = pages.flatMap(p => p.elements);
   const sharedCSS = buildCSSFromElements(allElements);
-  const sharedJS = generateBasicJS();
+  const sharedJS = generateBasicJS(siteId, supabaseUrl);
+
+  const fileNameFor = (page: PageInput) => {
+    const cleanSlug = (page.slug || "").replace(/^\/+/, "");
+    return page.is_homepage || cleanSlug === "" || cleanSlug === "/" ? "index.html" : `${cleanSlug}.html`;
+  };
+
+  // Which "#slug" links are page navigation rather than in-page anchors.
+  const pageSlugs = new Set(
+    pages.map(p => (p.slug || "").replace(/^\/+/, "").toLowerCase()).filter(Boolean),
+  );
 
   const pageFiles = pages.map(page => {
-    const cleanSlug = (page.slug || "").replace(/^\/+/, "");
-    const filename = page.is_homepage || cleanSlug === "" || cleanSlug === "/" ? "index.html" : `${cleanSlug}.html`;
-    const bodyContent = page.elements.map((el: any) => elementToHTML(el, 2)).join("\n\n");
+    const filename = fileNameFor(page);
+    const bodyContent = page.elements.map((el: any) => elementToHTML(el, 2, pageSlugs)).join("\n\n");
     const title = page.seo_title || page.page_name;
     const desc = page.seo_description || `${page.page_name} — ${siteName}`;
     const ps = page.page_settings || {};
+    const canonical = `${siteOrigin}/${filename === "index.html" ? "" : filename}`;
+    const lang = ps.lang || "en";
+    // A social card needs an absolute image URL; a relative one renders blank.
+    const ogImage = absolutise(ps.og_image_url || ps.share_image_url || "", siteOrigin);
 
     let head = `    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="${escapeHTML(desc)}">
     <title>${escapeHTML(title)} — ${escapeHTML(siteName)}</title>
+    <meta name="description" content="${escapeHTML(desc)}">
+    <link rel="canonical" href="${escapeAttr(canonical)}">
+    <meta name="robots" content="${ps.no_index ? "noindex, nofollow" : "index, follow"}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="${escapeAttr(siteName)}">
+    <meta property="og:title" content="${escapeAttr(title)}">
+    <meta property="og:description" content="${escapeAttr(desc)}">
+    <meta property="og:url" content="${escapeAttr(canonical)}">${
+      ogImage ? `\n    <meta property="og:image" content="${escapeAttr(ogImage)}">` : ""
+    }
+
+    <meta name="twitter:card" content="${ogImage ? "summary_large_image" : "summary"}">
+    <meta name="twitter:title" content="${escapeAttr(title)}">
+    <meta name="twitter:description" content="${escapeAttr(desc)}">${
+      ogImage ? `\n    <meta name="twitter:image" content="${escapeAttr(ogImage)}">` : ""
+    }
+
     <link rel="stylesheet" href="styles.css">`;
 
-    if (ps.favicon_url) head += `\n    <link rel="icon" href="${escapeHTML(ps.favicon_url)}">`;
+    if (ps.favicon_url) head += `\n    <link rel="icon" href="${escapeAttr(ps.favicon_url)}">`;
     if (ps.head_code) head += `\n    ${ps.head_code}`;
 
     const html = `<!DOCTYPE html>
-<html lang="en">
+<html lang="${escapeAttr(lang)}">
 <head>
 ${head}
 </head>
@@ -444,7 +572,70 @@ ${bodyContent}
     return { filename, html };
   });
 
-  return { sharedCSS, sharedJS, pageFiles };
+  // Anything indexable goes in the sitemap; a page marked noindex does not.
+  const indexable = pages.filter(p => !(p.page_settings || {}).no_index);
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${indexable.map(p => {
+    const f = fileNameFor(p);
+    return `  <url>
+    <loc>${escapeHTML(`${siteOrigin}/${f === "index.html" ? "" : f}`)}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>${p.is_homepage ? "1.0" : "0.8"}</priority>
+  </url>`;
+  }).join("\n")}
+</urlset>`;
+
+  const robots = `User-agent: *
+Allow: /
+${pages.filter(p => (p.page_settings || {}).no_index).map(p => `Disallow: /${fileNameFor(p)}`).join("\n")}
+Sitemap: ${siteOrigin}/sitemap.xml`;
+
+  const notFound = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page not found — ${escapeHTML(siteName)}</title>
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+      .q404 { min-height: 70vh; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; text-align: center;
+        padding: 2rem; gap: .75rem; }
+      .q404 h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); }
+      .q404 p { color: #555; max-width: 34rem; }
+      .q404 a { display: inline-block; margin-top: .5rem; padding: .65rem 1.15rem;
+        border: 1px solid currentColor; border-radius: .5rem; }
+    </style>
+</head>
+<body>
+    <main class="q404">
+      <h1>That page isn't here</h1>
+      <p>The link may be out of date, or the page may have moved.</p>
+      <a href="/">Back to ${escapeHTML(siteName)}</a>
+    </main>
+</body>
+</html>`;
+
+  return {
+    sharedCSS,
+    sharedJS,
+    pageFiles,
+    extraFiles: [
+      { path: "sitemap.xml", content: sitemap, contentType: "application/xml" },
+      { path: "robots.txt", content: robots, contentType: "text/plain; charset=utf-8" },
+      { path: "404.html", content: notFound, contentType: "text/html; charset=utf-8" },
+    ],
+  };
+}
+
+/** Social cards need absolute URLs. A path is resolved against the site's
+ *  own origin; anything already absolute is left alone. */
+function absolutise(url: string, origin: string): string {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${origin}/${url.replace(/^\/+/, "")}`;
 }
 
 function buildCSSFromElements(elements: any[]): string {
@@ -454,6 +645,22 @@ function buildCSSFromElements(elements: any[]): string {
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; }
 img { max-width: 100%; height: auto; display: block; }
 a { text-decoration: none; color: inherit; }
+
+/* The bot trap. Off-screen rather than display:none, which some bots skip. */
+.quooro-hp { position: absolute !important; left: -9999px !important; top: auto !important;
+  width: 1px !important; height: 1px !important; overflow: hidden !important; }
+
+/* Where a form reports back. Empty until it has something to say. */
+.quooro-form-status { margin-top: .75rem; font-size: .925rem; line-height: 1.5; }
+.quooro-form-status:empty { display: none; }
+.quooro-form-status[data-state="ok"] { color: #15803d; }
+.quooro-form-status[data-state="error"] { color: #b91c1c; }
+form[data-quooro-form] button[disabled] { opacity: .65; cursor: progress; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
 `,
   ];
   collectCSS(elements, rules);
@@ -507,21 +714,51 @@ function getTag(el: any): string {
   return map[el.type] || "div";
 }
 
-function elementToHTML(el: any, indent: number): string {
+function elementToHTML(el: any, indent: number, pageSlugs: Set<string>): string {
   const pad = "  ".repeat(indent);
   const tag = getTag(el);
   const className = `el-${el.id?.replace(/[^a-zA-Z0-9-_]/g, "") || "unknown"}`;
   const selfClosing = ["img", "input", "hr"].includes(tag);
 
   let attrs = ` class="${className}"`;
-  if (el.type === "image") attrs += ` src="${el.props?.src || ""}" alt="${el.props?.alt || ""}" loading="lazy"`;
-  if (el.type === "video") attrs += ` src="${el.props?.src || ""}" controls playsinline`;
-  if ((el.type === "button" || el.type === "link") && el.props?.href) {
-    const href = el.props.href.startsWith("#") ? `${el.props.href.slice(1) || "index"}.html` : el.props.href;
-    attrs += ` href="${href}"`;
+  if (el.type === "image") {
+    attrs += ` src="${escapeAttr(safeURL(el.props?.src, true))}"` +
+             ` alt="${escapeAttr(el.props?.alt || "")}" loading="lazy" decoding="async"`;
   }
-  if (el.type === "input") attrs += ` type="${el.props?.inputType || "text"}" placeholder="${el.props?.placeholder || ""}"`;
-  if (el.props?.anchorId) attrs += ` id="${el.props.anchorId}"`;
+  if (el.type === "video") attrs += ` src="${escapeAttr(safeURL(el.props?.src))}" controls playsinline`;
+  if ((el.type === "button" || el.type === "link") && el.props?.href) {
+    attrs += ` href="${escapeAttr(resolveHref(String(el.props.href), pageSlugs))}"`;
+    // An off-site link opened in a new tab must not hand the opener over.
+    if (/^https?:\/\//i.test(String(el.props.href)) && el.props?.newTab) {
+      attrs += ` target="_blank" rel="noopener noreferrer"`;
+    }
+  }
+  if (el.type === "input") {
+    const label = String(el.props?.label || el.props?.placeholder || "Field");
+    attrs += ` type="${escapeAttr(el.props?.inputType || "text")}"` +
+             ` name="${escapeAttr(fieldName(label, 0))}"` +
+             ` placeholder="${escapeAttr(el.props?.placeholder || "")}"` +
+             ` aria-label="${escapeAttr(label)}"` +
+             (el.props?.required ? " required" : "");
+  }
+  if (el.type === "textarea") {
+    const label = String(el.props?.label || el.props?.placeholder || "Message");
+    attrs += ` name="${escapeAttr(fieldName(label, 0))}"` +
+             ` placeholder="${escapeAttr(el.props?.placeholder || "")}"` +
+             ` aria-label="${escapeAttr(label)}"` +
+             (el.props?.required ? " required" : "");
+  }
+  if (el.type === "form") {
+    // The handler in script.js takes over from here; method and action are
+    // still set so the markup is meaningful without JavaScript.
+    attrs += ` data-quooro-form` +
+             ` data-form-id="${escapeAttr(el.id || "")}"` +
+             ` data-form-name="${escapeAttr(el.props?.name || "Form")}"` +
+             (el.props?.successMessage ? ` data-success="${escapeAttr(el.props.successMessage)}"` : "") +
+             (el.props?.redirectUrl ? ` data-redirect="${escapeAttr(safeURL(el.props.redirectUrl))}"` : "") +
+             ` method="post"`;
+  }
+  if (el.props?.anchorId) attrs += ` id="${escapeAttr(el.props.anchorId)}"`;
 
   if (selfClosing) return `${pad}<${tag}${attrs} />`;
 
@@ -536,30 +773,127 @@ function elementToHTML(el: any, indent: number): string {
   }
 
   const children = el.children?.length
-    ? "\n" + el.children.map((c: any) => elementToHTML(c, indent + 1)).join("\n")
+    ? "\n" + el.children.map((c: any) => elementToHTML(c, indent + 1, pageSlugs)).join("\n")
+    : "";
+
+  // A form needs two things the author never draws: somewhere to announce
+  // the result, and a field only a bot will fill in.
+  const formExtras = el.type === "form"
+    ? `\n${pad}  <div class="quooro-hp" aria-hidden="true">` +
+      `<label>Company website<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></div>` +
+      `\n${pad}  <p class="quooro-form-status" role="status" aria-live="polite"></p>`
     : "";
 
   const inner = content ? `\n${pad}  ${content}` : "";
-  return `${pad}<${tag}${attrs}>${inner}${children}\n${pad}</${tag}>`;
+  return `${pad}<${tag}${attrs}>${inner}${children}${formExtras}\n${pad}</${tag}>`;
 }
 
-function generateBasicJS(): string {
+function generateBasicJS(siteId: string, supabaseUrl: string): string {
+  const endpoint = `${supabaseUrl}/functions/v1/site-form-submit`;
   return `// Quooro Site Engine
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
-    a.addEventListener('click', function(e) {
-      var target = document.querySelector(this.getAttribute('href'));
-      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+(function () {
+  'use strict';
+  var SITE_ID = ${JSON.stringify(siteId)};
+  var ENDPOINT = ${JSON.stringify(endpoint)};
+
+  function ready(fn) {
+    if (document.readyState !== 'loading') fn();
+    else document.addEventListener('DOMContentLoaded', fn);
+  }
+
+  ready(function () {
+    // Smooth scrolling for genuine in-page anchors.
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var id = this.getAttribute('href');
+        if (!id || id === '#') return;
+        var target = document.getElementById(id.slice(1));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (history.replaceState) history.replaceState(null, '', id);
+        }
+      });
+    });
+
+    // Reveal-on-scroll.
+    var animEls = document.querySelectorAll('[data-animate]');
+    if (animEls.length && 'IntersectionObserver' in window) {
+      var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      animEls.forEach(function (el) { obs.observe(el); });
+    }
+
+    // Forms. Every field is sent under the label the site owner gave it, so
+    // the inbox reads the way the form looks.
+    document.querySelectorAll('form[data-quooro-form]').forEach(function (form) {
+      var status = form.querySelector('.quooro-form-status');
+      var submitBtn = form.querySelector('button, input[type="submit"]');
+      var busy = false;
+
+      function say(message, kind) {
+        if (!status) return;
+        status.textContent = message;
+        status.setAttribute('data-state', kind);
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (busy) return;
+
+        if (typeof form.reportValidity === 'function' && !form.reportValidity()) return;
+
+        var fields = {};
+        var honeypot = '';
+        var data = new FormData(form);
+        data.forEach(function (value, key) {
+          if (key === 'company_website') { honeypot = String(value); return; }
+          var el = form.querySelector('[name="' + CSS.escape(key) + '"]');
+          var label = (el && (el.getAttribute('aria-label') || el.getAttribute('placeholder'))) || key;
+          // Checkbox groups arrive as repeats; keep them together.
+          fields[label] = fields[label] ? fields[label] + ', ' + value : String(value);
+        });
+
+        busy = true;
+        var originalLabel = submitBtn ? submitBtn.textContent : '';
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+        say('', 'sending');
+
+        fetch(ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            siteId: SITE_ID,
+            formId: form.getAttribute('data-form-id') || '',
+            formName: form.getAttribute('data-form-name') || 'Form',
+            pageSlug: location.pathname.replace(/^\\/+/, '') || 'index.html',
+            company_website: honeypot,
+            fields: fields
+          })
+        })
+          .then(function (res) { return res.json().then(function (b) { return { ok: res.ok, body: b }; }); })
+          .then(function (r) {
+            if (!r.ok) throw new Error((r.body && r.body.error) || 'Something went wrong.');
+            var redirect = form.getAttribute('data-redirect');
+            if (redirect) { location.href = redirect; return; }
+            form.reset();
+            say(form.getAttribute('data-success') || 'Thank you — we have received your message.', 'ok');
+          })
+          .catch(function (err) {
+            say(err.message || 'Could not send. Please try again.', 'error');
+          })
+          .then(function () {
+            busy = false;
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalLabel; }
+          });
+      });
     });
   });
-  var animEls = document.querySelectorAll('[data-animate]');
-  if (animEls.length > 0 && 'IntersectionObserver' in window) {
-    var obs = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) { entry.target.classList.add('is-visible'); obs.unobserve(entry.target); }
-      });
-    }, { threshold: 0.1 });
-    animEls.forEach(function(el) { obs.observe(el); });
-  }
-});`;
+})();`;
 }

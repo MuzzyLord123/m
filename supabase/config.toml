@@ -29,6 +29,12 @@ verify_jwt = false
 [functions.site-booking]
 verify_jwt = false
 
+# Published sites live on their own domains, so a form submission arrives
+# with no Quooro session to verify. The handler stands in for that: the site
+# must exist and be published, and one address cannot flood it.
+[functions.site-form-submit]
+verify_jwt = false
+
 [functions.google-calendar-auth]
 verify_jwt = false
 

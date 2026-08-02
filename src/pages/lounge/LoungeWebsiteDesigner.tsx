@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Paintbrush, Globe, Loader2, ExternalLink, Trash2, Download,
   MoreHorizontal, Layout, Pencil, Search, LayoutGrid, List, ArrowUpDown,
-  Eye, Wand2, Layers, Palette, Store,
+  Eye, Wand2, Layers, Palette, Store, Inbox,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,6 +37,7 @@ const loadTemplates = () => {
 };
 import { useUserRole } from '@/hooks/useUserRole';
 import { TemplatePreviewModal } from '@/components/designer/TemplatePreviewModal';
+import { SiteSubmissionsInbox } from '@/components/designer/SiteSubmissionsInbox';
 import { TemplateThumbnail } from '@/components/designer/TemplateThumbnail';
 import { cn } from '@/lib/utils';
 import {
@@ -61,7 +62,7 @@ interface DesignerSite {
 
 type SortOption = 'updated' | 'created' | 'name';
 type ViewMode = 'grid' | 'list';
-type DashTab = 'sites' | 'marketplace';
+type DashTab = 'sites' | 'marketplace' | 'submissions';
 
 /* ─── template categories for marketplace ─── */
 
@@ -121,6 +122,26 @@ export default function LoungeWebsiteDesigner() {
     if (activeTab !== 'marketplace') return;
     adoptTemplates();
   }, [activeTab, adoptTemplates]);
+
+  /* An enquiry nobody notices is the same as an enquiry that was never
+     received, so the count rides on the tab rather than waiting to be found. */
+  const [unreadSubmissions, setUnreadSubmissions] = useState(0);
+  useEffect(() => {
+    if (sites.length === 0) { setUnreadSubmissions(0); return; }
+    let alive = true;
+    // A GET with limit(1) rather than a HEAD: the count rides in the same
+    // content-range either way, and one row costs nothing, but a HEAD
+    // response loses that header to any proxy that strips it.
+    supabase
+      .from('site_form_submissions' as never)
+      .select('id', { count: 'exact' })
+      .in('site_id', sites.map(s => s.id))
+      .eq('is_read', false)
+      .eq('is_spam', false)
+      .limit(1)
+      .then(({ count }) => { if (alive) setUnreadSubmissions(count || 0); });
+    return () => { alive = false; };
+  }, [sites, activeTab]);
 
   /* Once the dashboard is up and the browser has nothing better to do,
      fetch the catalogue in the background. The dashboard never waits on
@@ -464,6 +485,23 @@ export default function LoungeWebsiteDesigner() {
             Template marketplace
           </button>
           <button
+            onClick={() => setActiveTab('submissions')}
+            className={cn(
+              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-150',
+              activeTab === 'submissions'
+                ? 'bg-foreground/[0.05] text-foreground'
+                : 'text-muted-foreground hover:bg-foreground/[0.025] hover:text-foreground',
+            )}
+          >
+            <Inbox className="h-3.5 w-3.5" />
+            Form submissions
+            {unreadSubmissions > 0 && (
+              <span className="ml-0.5 rounded-full bg-primary px-1.5 py-px text-[10px] font-semibold tabular-nums leading-[1.4] text-primary-foreground">
+                {unreadSubmissions > 99 ? '99+' : unreadSubmissions}
+              </span>
+            )}
+          </button>
+          <button
             onClick={() => navigate('/lounge/workshop-studio')}
             className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.025] hover:text-foreground"
           >
@@ -604,6 +642,11 @@ export default function LoungeWebsiteDesigner() {
             </Panel>
           )}
         </>
+      )}
+
+      {/* ─── Form submissions tab ─── */}
+      {activeTab === 'submissions' && (
+        <SiteSubmissionsInbox sites={sites.map(s => ({ id: s.id, site_name: s.site_name }))} />
       )}
 
       {/* ─── Marketplace tab ─── */}
