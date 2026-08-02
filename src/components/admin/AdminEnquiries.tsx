@@ -23,6 +23,8 @@ import {
   DataTable, DetailDrawer, StatusDot, StatusBadge, RelativeTime,
   type Column, type Tone,
 } from '@/components/platform';
+import { EnquiryPipeline } from './EnquiryPipeline';
+import { LayoutDashboard, Table2 } from 'lucide-react';
 
 interface Enquiry {
   id: string;
@@ -85,6 +87,7 @@ export default function AdminEnquiries() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [desk, setDesk] = useState<'list' | 'pipeline'>('list');
   const [selectedEnquiry, setSelectedEnquiry] = useState<Enquiry | null>(null);
   const [notes, setNotes] = useState('');
   const [convertTarget, setConvertTarget] = useState<Enquiry | null>(null);
@@ -412,6 +415,24 @@ export default function AdminEnquiries() {
           </div>
         </div>
         <div className="flex items-center gap-1">
+          <div className="mr-1 flex items-center gap-0.5 rounded-[8px] border border-border/50 bg-sunken p-0.5">
+            {([
+              { id: 'list' as const, label: 'Enquiries', icon: Table2 },
+              { id: 'pipeline' as const, label: 'Dashboard', icon: LayoutDashboard },
+            ]).map(v => (
+              <button
+                key={v.id}
+                onClick={() => setDesk(v.id)}
+                aria-pressed={desk === v.id}
+                className={cn(
+                  'flex h-6 items-center gap-1.5 rounded-[6px] px-2 text-[11px] transition-colors duration-150',
+                  desk === v.id ? 'bg-card font-medium text-foreground' : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <v.icon className="h-3 w-3" /> {v.label}
+              </button>
+            ))}
+          </div>
           <button onClick={fetchEnquiries} title="Refresh" className="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 hover:bg-foreground/[0.06]">
             <RefreshCw className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
@@ -428,7 +449,7 @@ export default function AdminEnquiries() {
       </div>
 
       {/* ── Filters Bar ── */}
-      {showFilters && (
+      {desk === 'list' && showFilters && (
         <div className="shrink-0 border-b border-border/60 bg-sunken">
           <div className="flex flex-wrap items-center gap-3 px-4 py-2">
             <div className="relative min-w-[200px] max-w-[300px] flex-1">
@@ -454,8 +475,15 @@ export default function AdminEnquiries() {
         </div>
       )}
 
+      {/* ── Pipeline desk ── */}
+      {desk === 'pipeline' && (
+        <div className="min-h-0 flex-1">
+          <EnquiryPipeline enquiries={enquiries as any} totalCount={totalCount} />
+        </div>
+      )}
+
       {/* ── Table ── */}
-      <div className="flex-1 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' as any }}>
+      <div className={cn('flex-1 overflow-y-auto overscroll-contain', desk !== 'list' && 'hidden')} style={{ WebkitOverflowScrolling: 'touch' as any }}>
         <DataTable
           rows={enquiries}
           columns={columns}
@@ -487,7 +515,7 @@ export default function AdminEnquiries() {
       </div>
 
       {/* ── Pagination ── */}
-      {totalCount > 0 && (
+      {desk === 'list' && totalCount > 0 && (
         <div className="flex h-10 shrink-0 items-center justify-between border-t border-border/60 bg-card px-4 lg:rounded-b-[10px]">
           <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
             {showingFrom.toLocaleString()} to {showingTo.toLocaleString()} of {totalCount.toLocaleString()}

@@ -8,12 +8,13 @@ import {
   Target, Palette, Instagram, DollarSign, Package,
   FileText, X, ExternalLink, Briefcase, Star,
   Plus, Eye, EyeOff, Image, Trash2, UserPlus, Download,
-  CreditCard, Hash, Edit2, Save, Upload, Key
-} from 'lucide-react';
+  CreditCard, Hash, Edit2, Save, Upload, Key, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { quickSignOut } from '@/hooks/useAuthSync';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { decryptPiiFields } from '@/lib/piiDecrypt';
 import { toast } from 'sonner';
@@ -206,6 +207,9 @@ const planOptions = [
   'Custom Elite',
   'Preview Only'
 ];
+
+/** Tabs that are working desks rather than documents - they take the glass. */
+const FULL_BLEED_TABS = ['enquiries', 'client-accounts', 'command-center'];
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -762,7 +766,13 @@ export default function Dashboard() {
 
   return (
     <TeamLayout activeTab={mainTab} onTabChange={(tab) => setMainTab(tab as typeof mainTab)}>
-      <div className="workshop-ui container mx-auto px-4 sm:px-5 lg:px-6 py-4 space-y-4">
+      <div className={cn(
+        'workshop-ui',
+        // A working desk uses the whole screen. Reading surfaces keep a measure.
+        FULL_BLEED_TABS.includes(mainTab)
+          ? 'h-[calc(100dvh-6.5rem)] px-2.5 py-2.5 sm:px-3.5 sm:py-3'
+          : 'container mx-auto px-4 py-4 space-y-4 sm:px-5 lg:px-6',
+      )}>
 
           {/* Command Center Tab */}
           {mainTab === 'command-center' && <AdminCommandCenter />}
@@ -783,11 +793,7 @@ export default function Dashboard() {
           {mainTab === 'apps' && <AdminAppManagement />}
 
           {/* Enquiries Tab */}
-          {mainTab === 'enquiries' && (
-            <div className="h-[calc(100dvh-8rem)] sm:h-[calc(100dvh-9rem)] lg:h-[calc(100vh-10rem)] min-h-[500px]">
-              <AdminEnquiries />
-            </div>
-          )}
+          {mainTab === 'enquiries' && <AdminEnquiries />}
 
           {/* Clients Tab */}
           {mainTab === 'clients' && (
@@ -851,87 +857,73 @@ export default function Dashboard() {
                   />
                 </div>
               ) : (
-                filteredClients.map((client, index) => (
-                  <div
-                    key={client.id}
-                    className="rounded-[10px] border border-border/60 bg-card p-3 sm:p-4 hover:bg-foreground/[0.025] transition-colors duration-150 cursor-pointer group"
-                    onClick={() => {
-                      setSelectedClient(client);
-                      setEditClientNotes(client.notes || '');
-                      setEditingClient(false);
-                      fetchClientUploads(client.user_id);
-                    }}
-                  >
-                    <div className="flex flex-col gap-3">
-                      <div className="space-y-2 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-[13.5px] font-[550] text-foreground">
-                            {client.full_name || 'No name'}
-                          </h3>
-                          {client.customer_id && (
-                            <Badge variant="outline" className="font-mono text-[10px] sm:text-xs">
-                              <Hash className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
-                              {client.customer_id}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                          {client.status && (
-                            <Badge 
-                              variant="outline" 
-                              className={`${clientStatusColors[client.status] || clientStatusColors.pending} border text-[10px] sm:text-xs`}
-                            >
-                              {client.status.charAt(0).toUpperCase() + client.status.slice(1)}
-                            </Badge>
-                          )}
-                          {client.plan && (
-                            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-[10px] sm:text-xs">
-                              <CreditCard className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
-                              {client.plan}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1.5 text-[11px] text-muted-foreground">
-                          <span className="flex items-center gap-1.5 truncate">
-                            <Mail className="w-3.5 h-3.5 shrink-0" />
-                            <span className="truncate">{client.email}</span>
-                          </span>
-                          {client.company && (
-                            <span className="flex items-center gap-1.5 truncate hidden sm:flex">
-                              <Building className="w-3.5 h-3.5 shrink-0" />
-                              <span className="truncate">{client.company}</span>
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1.5 font-mono tabular-nums">
-                            <Calendar className="w-3.5 h-3.5 shrink-0" />
-                            {new Date(client.created_at).toLocaleDateString('en-GB', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedClient(client);
-                            setEditClientNotes(client.notes || '');
-                            setEditingClient(false);
-                            fetchClientUploads(client.user_id);
-                          }}
-                        >
-                          <Eye className="w-3.5 h-3.5 mr-1.5" />
-                          View
-                        </Button>
-                      </div>
-                    </div>
+                <div className="overflow-hidden rounded-[12px] border border-border/40 bg-card">
+                  {/* A client book is a table. Names, state, plan, when they joined. */}
+                  <div className="hidden grid-cols-[minmax(0,2fr)_110px_minmax(0,1fr)_120px_92px] gap-3 border-b border-border/40 px-4 py-2 lg:grid">
+                    {['Client', 'Status', 'Company', 'Joined', ''].map((h, i) => (
+                      <span key={i} className="text-[10px] font-medium uppercase tracking-[0.09em] text-muted-foreground/90">{h}</span>
+                    ))}
                   </div>
-                ))
+                  <ul className="divide-y divide-border/30">
+                    {filteredClients.map((client) => {
+                      const initials = (client.full_name || client.email || '?')
+                        .split(/\s+/).map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+                      const tone = client.status === 'active' ? 'text-ok'
+                        : client.status === 'pending' ? 'text-attend' : 'text-muted-foreground';
+                      return (
+                        <li key={client.id}>
+                          <button
+                            onClick={() => {
+                              setSelectedClient(client);
+                              setEditClientNotes(client.notes || '');
+                              setEditingClient(false);
+                              fetchClientUploads(client.user_id);
+                            }}
+                            className="group grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-foreground/[0.03] lg:grid-cols-[minmax(0,2fr)_110px_minmax(0,1fr)_120px_92px]"
+                          >
+                            <span className="flex min-w-0 items-center gap-2.5">
+                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground/[0.06] text-[10.5px] font-semibold text-foreground">
+                                {initials}
+                              </span>
+                              <span className="min-w-0">
+                                <span className="flex items-center gap-1.5">
+                                  <span className="truncate text-[13px] font-medium">{client.full_name || 'No name'}</span>
+                                  {client.plan && (
+                                    <span className="hidden shrink-0 rounded-full bg-primary/10 px-1.5 py-px text-[10px] font-medium text-primary sm:inline">
+                                      {client.plan}
+                                    </span>
+                                  )}
+                                </span>
+                                <span className="block truncate text-[11.5px] text-muted-foreground">{client.email}</span>
+                              </span>
+                            </span>
+
+                            <span className={cn('hidden items-center gap-1.5 text-[12px] lg:flex', tone)}>
+                              <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                              {(client.status || 'pending').charAt(0).toUpperCase() + (client.status || 'pending').slice(1)}
+                            </span>
+                            <span className="hidden truncate text-[12px] text-muted-foreground lg:block">
+                              {client.company || '—'}
+                            </span>
+                            <span className="hidden text-[12px] tabular-nums text-muted-foreground lg:block">
+                              {client.created_at ? format(new Date(client.created_at), 'd MMM yyyy') : '—'}
+                            </span>
+
+                            <span className="flex items-center justify-end gap-2">
+                              <span className={cn('text-[11px] lg:hidden', tone)}>
+                                {(client.status || 'pending').charAt(0).toUpperCase() + (client.status || 'pending').slice(1)}
+                              </span>
+                              <span className="hidden text-[11.5px] font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100 lg:inline">
+                                Open
+                              </span>
+                              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               )}
             </div>
             </div>
