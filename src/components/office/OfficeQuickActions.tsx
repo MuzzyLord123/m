@@ -66,7 +66,7 @@ const STORAGE_KEY = 'office-quick-actions';
 const RECENT_KEY = 'office-recent-apps';
 const MAX_RECENT = 3;
 
-const KICK = 'font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground';
+const KICK = 'text-[10px] font-medium uppercase tracking-[0.09em] text-muted-foreground/90';
 
 function getIcon(iconName: string) {
   return ICON_MAP[iconName] || Plus;
@@ -160,7 +160,7 @@ export function OfficeQuickActions() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 6 }}
               transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute bottom-[60px] right-0 z-[60] w-[300px] overflow-hidden rounded-[12px] border border-border/60 bg-card shadow-2xl"
+              className="absolute bottom-[60px] right-0 z-[60] w-[300px] overflow-hidden rounded-[16px] border border-border/40 bg-card shadow-2xl"
             >
               {/* Panel header: search, or the manage title */}
               <div className="flex h-11 items-center gap-2.5 border-b border-border/60 px-3">

@@ -1926,3 +1926,10 @@ body.perf-no-bg .lounge-bg-grid {
   .acc-root .acc-tabbar button { min-height: 44px; }
 }
 
+
+/* ─── Quooro Office: app-mark glyph tone ───
+   The suite's marks are graphite with the glyph in a whisper of the
+   app's own hue. The whisper needs to be dark ink on paper and pale
+   ink on night, so the lightness rides a token. */
+:root { --office-glyph-l: 36%; }
+.dark { --office-glyph-l: 71%; }

@@ -53,7 +53,7 @@ const APPS: AppItem[] = [
   { id: 'pomodoro', name: 'Pomodoro', desc: 'Focus', icon: Timer, route: '/lounge/office/pomodoro' },
 ];
 
-/** The rail pins the daily drivers, the way a suite pins Word and Excel. */
+/** The rail pins the daily drivers, the way a professional pins their tools. */
 const PINNED_IDS = ['docs', 'sheets', 'slides', 'notes', 'files', 'invoices', 'accounting', 'operations', 'design', 'analytics'];
 
 type ActiveView = 'home' | 'apps' | 'recents';
@@ -81,7 +81,13 @@ interface RecentFile {
   is_starred: boolean;
 }
 
-const KICK = 'font-mono text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground';
+/* ─── The type system of the surface ───
+   Sections speak in normal case at a confident weight; tiny uppercase
+   survives only as table furniture. No mono outside of numbers. */
+const SECTION = 'text-[13.5px] font-semibold tracking-[-0.01em] text-foreground';
+const LABEL = 'text-[10px] font-medium uppercase tracking-[0.09em] text-muted-foreground/90';
+const GROUP = 'overflow-hidden rounded-[14px] border border-border/40 bg-card';
+const PILL = 'flex h-11 items-center gap-3 rounded-full border border-border/50 bg-foreground/[0.035] px-4 transition-colors';
 
 /** Shared column grid for every file ledger: name, app, modified. */
 const LEDGER_COLS = 'grid-cols-[minmax(0,1fr)_88px] sm:grid-cols-[minmax(0,1fr)_120px_96px]';
@@ -107,6 +113,9 @@ export default function LoungeOffice() {
   const [loadingRecents, setLoadingRecents] = useState(true);
 
   const backPath = isAdmin ? '/dashboard' : '/lounge';
+
+  /** Their office, addressed to them. */
+  const firstName = ((user?.user_metadata as any)?.full_name || '').trim().split(/\s+/)[0] || '';
 
   // Persist current view so returning from an office app lands on the same tab
   useEffect(() => {
@@ -191,39 +200,36 @@ export default function LoungeOffice() {
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background">
       {/* ─── Title band ───
-          The suite states itself once, in a slim strip of chrome, the way
-          every serious office product does. Identity left, nothing loud. */}
-      <header className="flex h-12 shrink-0 items-center gap-2.5 border-b border-border/60 bg-card px-2.5 sm:px-3.5">
+          A slim strip of chrome: the way out, the mark, the name. */}
+      <header className="flex h-12 shrink-0 items-center gap-2.5 border-b border-border/40 bg-card/80 px-2.5 backdrop-blur-xl sm:px-3.5">
         <button
           onClick={() => setShowExitSplash(true)}
           aria-label="Leave Office"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <span aria-hidden className="h-4 w-px bg-border/60" />
+        <span aria-hidden className="h-4 w-px bg-border/50" />
         <div className="flex min-w-0 items-center gap-2 pl-0.5">
-          <span className="flex h-[22px] w-[22px] items-center justify-center rounded-[6px] bg-primary text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.18)]">
+          <span className="flex h-[22px] w-[22px] items-center justify-center rounded-[7px] bg-primary text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.18)]">
             <span className="font-display text-[12px] font-bold leading-none">Q</span>
           </span>
           <span className="truncate text-[13.5px] font-semibold tracking-[-0.01em]">
-            Quooro <span className="font-normal text-muted-foreground">Office</span>
+            Office
           </span>
         </div>
         <div className="flex-1" />
         <button
           aria-label="Office settings"
-          className="hidden h-8 w-8 items-center justify-center rounded-[8px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground md:flex"
+          className="hidden h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground md:flex"
         >
           <Settings2 className="h-4 w-4" />
         </button>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* ─── Left rail (desktop) ───
-            Three destinations, then the pinned daily drivers as their own
-            product marks. Flat, quiet, no containers around containers. */}
-        <aside className="hidden w-[64px] shrink-0 flex-col border-r border-border/60 bg-card md:flex">
+        {/* ─── Left rail (desktop) ─── */}
+        <aside className="hidden w-[64px] shrink-0 flex-col border-r border-border/40 bg-card md:flex">
           <nav className="flex flex-col items-center gap-0.5 px-1.5 pt-2">
             {NAVS.map(nav => {
               const on = activeView === nav.view;
@@ -233,13 +239,10 @@ export default function LoungeOffice() {
                   onClick={() => goView(nav.view)}
                   aria-current={on ? 'page' : undefined}
                   className={cn(
-                    'relative flex h-[46px] w-full flex-col items-center justify-center gap-[3px] rounded-[8px] transition-colors duration-150',
+                    'relative flex h-[46px] w-full flex-col items-center justify-center gap-[3px] rounded-[10px] transition-colors duration-150',
                     on ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground',
                   )}
                 >
-                  {on && (
-                    <span aria-hidden className="absolute left-[-6px] top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-primary" />
-                  )}
                   <nav.icon className="h-[17px] w-[17px]" strokeWidth={on ? 2 : 1.5} />
                   <span className={cn('text-[8.5px] tracking-[0.04em]', on ? 'font-semibold' : 'font-medium')}>
                     {nav.label}
@@ -249,7 +252,7 @@ export default function LoungeOffice() {
             })}
           </nav>
 
-          <div className="mx-3.5 my-2 h-px bg-border/60" />
+          <div className="mx-3.5 my-2 h-px bg-border/50" />
 
           {/* Pinned apps */}
           <div className="scrollbar-none flex flex-1 flex-col items-center gap-1 overflow-y-auto px-1.5 pb-2">
@@ -260,10 +263,10 @@ export default function LoungeOffice() {
                 <button
                   key={id}
                   onClick={() => go(app.route)}
-                  className="group relative flex h-10 w-full items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-foreground/[0.04]"
+                  className="group relative flex h-10 w-full items-center justify-center rounded-[10px] transition-colors duration-150 hover:bg-foreground/[0.04]"
                 >
-                  <AppTile id={id} icon={app.icon} size={26} />
-                  <span className="pointer-events-none absolute left-full z-40 ml-1.5 whitespace-nowrap rounded-[6px] border border-border/60 bg-card px-2 py-1 text-[11px] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                  <AppTile id={id} icon={app.icon} size={27} />
+                  <span className="pointer-events-none absolute left-full z-40 ml-1.5 whitespace-nowrap rounded-[7px] border border-border/50 bg-card px-2 py-1 text-[11px] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
                     {app.name}
                   </span>
                 </button>
@@ -271,12 +274,12 @@ export default function LoungeOffice() {
             })}
             <button
               onClick={() => goView('apps')}
-              className="group relative flex h-10 w-full items-center justify-center rounded-[8px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.04] hover:text-foreground"
+              className="group relative flex h-10 w-full items-center justify-center rounded-[10px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.04] hover:text-foreground"
             >
-              <span className="flex h-[26px] w-[26px] items-center justify-center rounded-[6px] border border-dashed border-border">
+              <span className="flex h-[27px] w-[27px] items-center justify-center rounded-[8px] bg-foreground/[0.05]">
                 <Grid3X3 className="h-3.5 w-3.5" />
               </span>
-              <span className="pointer-events-none absolute left-full z-40 ml-1.5 whitespace-nowrap rounded-[6px] border border-border/60 bg-card px-2 py-1 text-[11px] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+              <span className="pointer-events-none absolute left-full z-40 ml-1.5 whitespace-nowrap rounded-[7px] border border-border/50 bg-card px-2 py-1 text-[11px] text-foreground opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
                 All apps
               </span>
             </button>
@@ -293,6 +296,7 @@ export default function LoungeOffice() {
                 recentFiles={recentFiles}
                 loadingRecents={loadingRecents}
                 go={go}
+                firstName={firstName}
                 onViewRecents={() => setActiveView('recents')}
                 onViewApps={(family) => { setAppFamily(family || 'All'); setActiveView('apps'); }}
               />
@@ -319,10 +323,10 @@ export default function LoungeOffice() {
           </div>
 
           {/* ─── Mobile tab bar ───
-              Three destinations at thumb height; the active one carries a
-              rule above it rather than a coloured pill. */}
+              Frosted, the way a native tab bar sits over content, with
+              the active destination tinted rather than boxed. */}
           <nav
-            className="shrink-0 border-t border-border/60 bg-card md:hidden"
+            className="shrink-0 border-t border-border/40 bg-card/85 backdrop-blur-xl md:hidden"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="grid grid-cols-3">
@@ -334,12 +338,11 @@ export default function LoungeOffice() {
                     onClick={() => goView(nav.view)}
                     aria-current={on ? 'page' : undefined}
                     className={cn(
-                      'relative flex h-[58px] flex-col items-center justify-center gap-1 transition-colors duration-150',
-                      on ? 'text-foreground' : 'text-muted-foreground',
+                      'flex h-[56px] flex-col items-center justify-center gap-1 transition-colors duration-150',
+                      on ? 'text-primary' : 'text-muted-foreground',
                     )}
                   >
-                    {on && <span aria-hidden className="absolute inset-x-6 top-0 h-[2px] rounded-b-full bg-primary" />}
-                    <nav.icon className="h-[18px] w-[18px]" strokeWidth={on ? 2 : 1.5} />
+                    <nav.icon className="h-[19px] w-[19px]" strokeWidth={on ? 2 : 1.6} />
                     <span className={cn('text-[10px] tracking-[0.01em]', on ? 'font-semibold' : 'font-medium')}>
                       {nav.label}
                     </span>
@@ -361,13 +364,14 @@ export default function LoungeOffice() {
    ═══════════════════════════════════════════════ */
 
 function HomeView({
-  search, setSearch, recentFiles, loadingRecents, go, onViewRecents, onViewApps,
+  search, setSearch, recentFiles, loadingRecents, go, firstName, onViewRecents, onViewApps,
 }: {
   search: string;
   setSearch: (v: string) => void;
   recentFiles: RecentFile[];
   loadingRecents: boolean;
   go: (r: string) => void;
+  firstName: string;
   onViewRecents: () => void;
   onViewApps: (family?: string) => void;
 }) {
@@ -419,24 +423,24 @@ function HomeView({
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[1240px] px-4 pb-16 pt-5 sm:px-7 sm:pt-7">
-      {/* Masthead: the workspace states the day and what is in it. */}
-      <header className="flex flex-wrap items-end justify-between gap-4">
+    <div className="mx-auto w-full max-w-[1180px] px-5 pb-16 pt-6 sm:px-8 sm:pt-9">
+      {/* Masthead: their office greets them by name. */}
+      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
         <div className="min-w-0">
-          <p className={KICK}>{today}</p>
-          <h1 className="mt-1.5 font-display text-[26px] font-semibold leading-none tracking-[-0.025em] sm:text-[31px]">
-            {greeting}
+          <p className={LABEL}>{today}</p>
+          <h1 className="mt-2 font-display text-[27px] font-semibold leading-none tracking-[-0.025em] sm:text-[32px]">
+            {greeting}{firstName ? `, ${firstName}` : ''}
           </h1>
         </div>
-        <div className="flex items-center gap-4 sm:gap-6">
+        <div className="flex items-center gap-5 sm:gap-7">
           {[
             ['Documents', String(recentFiles.length)],
             ['Edited today', String(editedToday)],
             ['Starred', String(starred.length)],
           ].map(([label, value]) => (
             <div key={label} className="text-right">
-              <p className={KICK}>{label}</p>
-              <p className="mt-1 font-display text-[18px] font-semibold tabular-nums leading-none tracking-[-0.02em]">
+              <p className="text-[11px] text-muted-foreground">{label}</p>
+              <p className="mt-0.5 font-display text-[18px] font-semibold tabular-nums leading-none tracking-[-0.02em]">
                 {value}
               </p>
             </div>
@@ -444,41 +448,38 @@ function HomeView({
         </div>
       </header>
 
-      {/* The command bar. */}
-      <div ref={searchRef} className="relative mt-5">
-        <div className={cn(
-          'flex h-11 items-center gap-3 rounded-[10px] border bg-card px-3.5 transition-colors',
-          searchFocused ? 'border-primary/50' : 'border-border/60',
-        )}>
+      {/* The command bar, as a pill. */}
+      <div ref={searchRef} className="relative mt-6">
+        <div className={cn(PILL, searchFocused && 'border-primary/40 bg-foreground/[0.05]')}>
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             onFocus={() => setSearchFocused(true)}
-            placeholder="Search everything: apps, documents, files"
+            placeholder="Search your office"
             className="min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-muted-foreground"
           />
-          <kbd className="hidden shrink-0 rounded border border-border/60 px-1.5 py-0.5 font-mono text-[9.5px] text-muted-foreground sm:block">
+          <kbd className="hidden shrink-0 rounded-[5px] border border-border/50 px-1.5 py-0.5 font-mono text-[9.5px] text-muted-foreground sm:block">
             ⌘K
           </kbd>
         </div>
 
         {searchFocused && isSearching && (
-          <div className="absolute inset-x-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-[10px] border border-border/60 bg-card shadow-2xl">
+          <div className="absolute inset-x-0 top-[calc(100%+8px)] z-30 overflow-hidden rounded-[16px] border border-border/40 bg-card shadow-2xl">
             {matchedApps.length === 0 && matchedFiles.length === 0 ? (
               <p className="px-4 py-5 text-center text-[13px] text-muted-foreground">Nothing matches that.</p>
             ) : (
               <div className="max-h-[380px] overflow-y-auto py-1.5">
                 {matchedApps.length > 0 && (
                   <>
-                    <p className={cn(KICK, 'px-4 py-2')}>Apps</p>
+                    <p className={cn(LABEL, 'px-4 py-2')}>Apps</p>
                     {matchedApps.map(app => (
                       <button
                         key={app.id}
                         onClick={() => { go(app.route); setSearch(''); setSearchFocused(false); }}
                         className="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-foreground/[0.03]"
                       >
-                        <AppTile id={app.id} icon={app.icon} size={26} />
+                        <AppTile id={app.id} icon={app.icon} size={28} />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-[13px] font-medium">{app.name}</span>
                           <span className="block text-[11px] text-muted-foreground">{app.desc}</span>
@@ -489,8 +490,8 @@ function HomeView({
                 )}
                 {matchedFiles.length > 0 && (
                   <>
-                    {matchedApps.length > 0 && <div className="mx-4 my-1 h-px bg-border/60" />}
-                    <p className={cn(KICK, 'px-4 py-2')}>Documents</p>
+                    {matchedApps.length > 0 && <div className="mx-4 my-1 h-px bg-border/50" />}
+                    <p className={cn(LABEL, 'px-4 py-2')}>Documents</p>
                     {matchedFiles.map(f => {
                       const Icon = getAppIcon(f.app_source);
                       return (
@@ -499,7 +500,7 @@ function HomeView({
                           onClick={() => { if (f.source_route) go(f.source_route); setSearch(''); setSearchFocused(false); }}
                           className="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-foreground/[0.03]"
                         >
-                          <AppTile id={f.app_source} icon={Icon} size={26} />
+                          <AppTile id={f.app_source} icon={Icon} size={28} />
                           <span className="min-w-0 flex-1 truncate text-[13px]">{f.file_name}</span>
                           <RelativeTime date={f.updated_at} className="shrink-0" />
                         </button>
@@ -513,24 +514,26 @@ function HomeView({
         )}
       </div>
 
-      {/* Create: the six things people actually make. Neutral cards, the
-          mark carries the colour. */}
-      <section className="mt-6">
-        <div className="mb-3 flex items-center gap-2.5">
-          <h2 className={KICK}>Create</h2>
-          <div className="h-px flex-1 bg-border/60" />
+      {/* Create: six instruments in a row, no boxes around boxes. */}
+      <section className="mt-8">
+        <div className="flex items-baseline justify-between">
+          <h2 className={SECTION}>Create</h2>
         </div>
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6">
+        <div className="scrollbar-none -mx-5 mt-4 flex gap-6 overflow-x-auto px-5 sm:mx-0 sm:gap-8 sm:px-0">
           {CREATE.map(item => (
             <button
               key={item.id}
               onClick={() => go(item.route)}
-              className="group flex w-[116px] shrink-0 flex-col items-start gap-2.5 rounded-[10px] border border-border/60 bg-card p-3 text-left transition-colors duration-150 hover:border-foreground/25 hover:bg-foreground/[0.02] sm:w-auto sm:flex-row sm:items-center"
+              className="group flex shrink-0 flex-col items-center gap-2.5"
             >
-              <AppTile id={item.id} icon={item.icon} size={30} />
-              <span className="min-w-0">
-                <span className="block truncate text-[12.5px] font-medium leading-tight">{item.label}</span>
-                <span className="text-[10.5px] text-muted-foreground">New</span>
+              <AppTile
+                id={item.id}
+                icon={item.icon}
+                size={54}
+                className="transition-all duration-200 group-hover:brightness-125"
+              />
+              <span className="text-[11.5px] font-medium text-muted-foreground transition-colors duration-200 group-hover:text-foreground">
+                {item.label}
               </span>
             </button>
           ))}
@@ -538,47 +541,45 @@ function HomeView({
       </section>
 
       {/* The workstation: work on the left, the suite on the right. */}
-      <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_290px]">
+      <div className="mt-9 grid gap-8 lg:grid-cols-[1fr_290px]">
         <section className="min-w-0">
-          <div className="mb-3 flex items-center gap-2.5">
-            <h2 className={KICK}>Pick up where you left off</h2>
-            <div className="h-px flex-1 bg-border/60" />
+          <div className="mb-3.5 flex items-baseline justify-between gap-3">
+            <h2 className={SECTION}>Continue working</h2>
             {recentFiles.length > 0 && (
-              <button onClick={onViewRecents} className="flex shrink-0 items-center gap-0.5 text-[11.5px] text-muted-foreground transition-colors hover:text-foreground">
-                All work <ChevronRight className="h-3 w-3" />
+              <button onClick={onViewRecents} className="shrink-0 text-[12px] font-medium text-primary transition-opacity hover:opacity-80">
+                All work
               </button>
             )}
           </div>
 
           {loadingRecents ? (
-            <div className="rounded-[10px] border border-border/60 bg-card"><SkeletonLedger rows={5} /></div>
+            <div className={GROUP}><SkeletonLedger rows={5} /></div>
           ) : recentFiles.length === 0 ? (
-            <div className="rounded-[10px] border border-dashed border-border/70 px-6 py-12 text-center">
+            <div className="rounded-[14px] bg-foreground/[0.025] px-6 py-12 text-center">
               <p className="text-[14px] font-medium">Nothing open yet</p>
               <p className="mx-auto mt-1.5 max-w-sm text-[12.5px] leading-relaxed text-muted-foreground">
                 Everything you make in Office lands here, newest first, so the work you were doing is always one press away.
               </p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
-              {/* Column headers, because a file list is a table. */}
-              <div className={cn('hidden gap-3 border-b border-border/60 px-3.5 py-2 sm:grid', LEDGER_COLS)}>
-                <span className={KICK}>Name</span>
-                <span className={KICK}>App</span>
-                <span className={cn(KICK, 'text-right')}>Modified</span>
+            <div className={GROUP}>
+              <div className={cn('hidden gap-3 border-b border-border/40 px-4 py-2 sm:grid', LEDGER_COLS)}>
+                <span className={LABEL}>Name</span>
+                <span className={LABEL}>App</span>
+                <span className={cn(LABEL, 'text-right')}>Modified</span>
               </div>
               <ul>
                 {recentFiles.slice(0, 8).map(f => {
                   const Icon = getAppIcon(f.app_source);
                   const app = APPS.find(a => a.id === f.app_source);
                   return (
-                    <li key={f.id} className="border-b border-border/50 last:border-b-0">
+                    <li key={f.id} className="border-b border-border/30 last:border-b-0">
                       <button
                         onClick={() => { if (f.source_route) go(f.source_route); }}
-                        className={cn('grid w-full items-center gap-3 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-foreground/[0.03]', LEDGER_COLS)}
+                        className={cn('grid w-full items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-foreground/[0.03]', LEDGER_COLS)}
                       >
-                        <span className="flex min-w-0 items-center gap-2.5">
-                          <AppTile id={f.app_source} icon={Icon} size={26} />
+                        <span className="flex min-w-0 items-center gap-3">
+                          <AppTile id={f.app_source} icon={Icon} size={28} />
                           <span className="min-w-0">
                             <span className="flex items-center gap-1.5">
                               <span className="truncate text-[13px] font-medium">{f.file_name}</span>
@@ -604,16 +605,15 @@ function HomeView({
           {/* The apps this workspace actually reaches for. */}
           {mostUsed.length > 0 && (
             <>
-              <div className="mb-3 mt-6 flex items-center gap-2.5">
-                <h2 className={KICK}>You work in these most</h2>
-                <div className="h-px flex-1 bg-border/60" />
+              <div className="mb-3.5 mt-8 flex items-baseline justify-between">
+                <h2 className={SECTION}>Frequent</h2>
               </div>
               <div className="flex flex-wrap gap-2">
                 {mostUsed.map(app => (
                   <button
                     key={app.id}
                     onClick={() => go(app.route)}
-                    className="flex items-center gap-2 rounded-[10px] border border-border/60 bg-card py-1.5 pl-1.5 pr-3 transition-colors duration-150 hover:border-foreground/25 hover:bg-foreground/[0.02]"
+                    className="flex items-center gap-2 rounded-full bg-foreground/[0.035] py-1.5 pl-1.5 pr-3.5 transition-colors duration-150 hover:bg-foreground/[0.06]"
                   >
                     <AppTile id={app.id} icon={app.icon} size={24} />
                     <span className="text-[12.5px] font-medium">{app.name}</span>
@@ -625,73 +625,71 @@ function HomeView({
         </section>
 
         {/* The workspace column */}
-        <aside className="space-y-4">
+        <aside className="space-y-5">
           {/* The suite by family, as an index. */}
-          <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
-            <div className="border-b border-border/60 px-4 py-2.5">
-              <p className={KICK}>The suite</p>
+          <div>
+            <div className="mb-3.5 flex items-baseline justify-between">
+              <h2 className={SECTION}>The suite</h2>
+              <button onClick={() => onViewApps()} className="text-[12px] font-medium text-primary transition-opacity hover:opacity-80">
+                Every app
+              </button>
             </div>
-            <ul className="divide-y divide-border/50">
-              {OFFICE_FAMILIES.map(family => {
-                const apps = APPS.filter(a => identityFor(a.id).family === family);
-                if (apps.length === 0) return null;
-                return (
-                  <li key={family}>
-                    <button
-                      onClick={() => onViewApps(family)}
-                      className="group flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-foreground/[0.025]"
-                    >
-                      <span className="flex -space-x-1">
-                        {apps.slice(0, 3).map(a => (
-                          <AppTile key={a.id} id={a.id} icon={a.icon} size={18} className="ring-2 ring-card" />
-                        ))}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate text-[12.5px]">{family}</span>
-                      <span className="font-mono text-[11px] tabular-nums text-muted-foreground">{apps.length}</span>
-                      <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            <button
-              onClick={() => onViewApps()}
-              className="flex w-full items-center justify-center gap-1.5 border-t border-border/60 py-2.5 text-[12.5px] font-medium transition-colors hover:bg-foreground/[0.03]"
-            >
-              <Grid3X3 className="h-3.5 w-3.5" /> Every app
-            </button>
-          </div>
-
-          {starred.length > 0 && (
-            <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
-              <div className="border-b border-border/60 px-4 py-2.5">
-                <p className={KICK}>Starred</p>
-              </div>
-              <ul className="divide-y divide-border/50">
-                {starred.slice(0, 5).map(f => {
-                  const Icon = getAppIcon(f.app_source);
+            <div className={GROUP}>
+              <ul className="divide-y divide-border/30">
+                {OFFICE_FAMILIES.map(family => {
+                  const apps = APPS.filter(a => identityFor(a.id).family === family);
+                  if (apps.length === 0) return null;
                   return (
-                    <li key={f.id}>
+                    <li key={family}>
                       <button
-                        onClick={() => { if (f.source_route) go(f.source_route); }}
-                        className="flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-foreground/[0.025]"
+                        onClick={() => onViewApps(family)}
+                        className="group flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-foreground/[0.025]"
                       >
-                        <AppTile id={f.app_source} icon={Icon} size={22} />
-                        <span className="min-w-0 flex-1 truncate text-[12.5px]">{f.file_name}</span>
+                        <span className="flex -space-x-1.5">
+                          {apps.slice(0, 3).map(a => (
+                            <AppTile key={a.id} id={a.id} icon={a.icon} size={20} className="ring-2 ring-card" />
+                          ))}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-[12.5px]">{family}</span>
+                        <span className="text-[11px] tabular-nums text-muted-foreground">{apps.length}</span>
+                        <ChevronRight className="h-3 w-3 text-muted-foreground/70" />
                       </button>
                     </li>
                   );
                 })}
               </ul>
             </div>
+          </div>
+
+          {starred.length > 0 && (
+            <div>
+              <div className="mb-3.5">
+                <h2 className={SECTION}>Starred</h2>
+              </div>
+              <div className={GROUP}>
+                <ul className="divide-y divide-border/30">
+                  {starred.slice(0, 5).map(f => {
+                    const Icon = getAppIcon(f.app_source);
+                    return (
+                      <li key={f.id}>
+                        <button
+                          onClick={() => { if (f.source_route) go(f.source_route); }}
+                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-foreground/[0.025]"
+                        >
+                          <AppTile id={f.app_source} icon={Icon} size={24} />
+                          <span className="min-w-0 flex-1 truncate text-[12.5px]">{f.file_name}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
           )}
 
-          <div className="rounded-[10px] border border-border/60 bg-sunken/40 px-4 py-3.5">
-            <p className={KICK}>Everything in one place</p>
-            <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">
-              Office runs inside Quooro, so a document, an invoice and the client it belongs to are never in different systems.
-            </p>
-          </div>
+          <p className="px-1 text-[11.5px] leading-relaxed text-muted-foreground">
+            Office runs inside Quooro, so a document, an invoice and the client it belongs to are never in different systems.
+          </p>
         </aside>
       </div>
     </div>
@@ -733,18 +731,18 @@ function AppsView({ search, setSearch, filteredApps, go, family, setFamily }: {
         .filter(s => s.apps.length > 0);
 
   return (
-    <div className="mx-auto w-full max-w-[920px] px-4 pb-16 pt-5 sm:px-7 sm:pt-7">
+    <div className="mx-auto w-full max-w-[860px] px-5 pb-16 pt-6 sm:px-8 sm:pt-9">
       <header className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-display text-[26px] font-semibold leading-none tracking-[-0.025em] sm:text-[31px]">
+        <h1 className="font-display text-[27px] font-semibold leading-none tracking-[-0.025em] sm:text-[32px]">
           Every app
         </h1>
-        <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
+        <p className="text-[12px] tabular-nums text-muted-foreground">
           {APPS.length} apps · {OFFICE_FAMILIES.length} families
         </p>
       </header>
 
       {/* Search, then the family shelves it files into. */}
-      <div className="mt-5 flex h-11 items-center gap-3 rounded-[10px] border border-border/60 bg-card px-3.5">
+      <div className={cn(PILL, 'mt-6')}>
         <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
         <input
           value={search}
@@ -753,14 +751,14 @@ function AppsView({ search, setSearch, filteredApps, go, family, setFamily }: {
           className="min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-muted-foreground"
         />
         {searching && (
-          <button onClick={() => setSearch('')} className="shrink-0 text-[11.5px] text-muted-foreground hover:text-foreground">
+          <button onClick={() => setSearch('')} className="shrink-0 text-[12px] font-medium text-primary transition-opacity hover:opacity-80">
             Clear
           </button>
         )}
       </div>
 
       {!searching && (
-        <div className="scrollbar-none -mx-4 mt-3 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
+        <div className="scrollbar-none -mx-5 mt-3.5 flex gap-1.5 overflow-x-auto px-5 sm:mx-0 sm:flex-wrap sm:px-0">
           {(['All', ...OFFICE_FAMILIES] as string[]).map(f => {
             const on = family === f;
             const count = f === 'All' ? APPS.length : APPS.filter(a => identityFor(a.id).family === f).length;
@@ -769,14 +767,14 @@ function AppsView({ search, setSearch, filteredApps, go, family, setFamily }: {
                 key={f}
                 onClick={() => setFamily(f)}
                 className={cn(
-                  'flex shrink-0 items-center gap-1.5 rounded-[8px] border px-2.5 py-1.5 text-[12px] transition-colors duration-150',
+                  'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] transition-colors duration-150',
                   on
-                    ? 'border-foreground/30 bg-foreground/[0.06] font-medium text-foreground'
-                    : 'border-border/60 text-muted-foreground hover:text-foreground',
+                    ? 'bg-foreground/[0.08] font-semibold text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 {f}
-                <span className="font-mono text-[10px] tabular-nums opacity-70">{count}</span>
+                <span className="text-[10.5px] tabular-nums opacity-60">{count}</span>
               </button>
             );
           })}
@@ -784,38 +782,36 @@ function AppsView({ search, setSearch, filteredApps, go, family, setFamily }: {
       )}
 
       {pool.length === 0 ? (
-        <div className="mt-6 rounded-[10px] border border-dashed border-border/70 px-6 py-14 text-center">
+        <div className="mt-7 rounded-[14px] bg-foreground/[0.025] px-6 py-14 text-center">
           <p className="text-[14px] font-medium">No app by that name</p>
           <p className="mt-1.5 text-[12.5px] text-muted-foreground">Try a shorter word, or clear the search to see all {APPS.length}.</p>
         </div>
       ) : (
         shelves.map(shelf => (
-          <section key={shelf.title} className="mt-5 overflow-hidden rounded-[10px] border border-border/60 bg-card">
-            <div className="flex items-baseline gap-2.5 border-b border-border/60 px-4 py-2.5">
-              <h2 className={KICK}>{shelf.title}</h2>
-              <span className="min-w-0 truncate text-[11.5px] text-muted-foreground">{shelf.note}</span>
-              <span className="ml-auto shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">{shelf.apps.length}</span>
+          <section key={shelf.title} className="mt-7">
+            <div className="mb-3 flex items-baseline gap-2.5 px-1">
+              <h2 className={SECTION}>{shelf.title}</h2>
+              <span className="min-w-0 truncate text-[12px] text-muted-foreground">{shelf.note}</span>
             </div>
-            <ul className="divide-y divide-border/50">
-              {shelf.apps.map(app => (
-                <li key={app.id}>
-                  <button
-                    onClick={() => go(app.route)}
-                    className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-foreground/[0.03]"
-                  >
-                    <AppTile id={app.id} icon={app.icon} size={30} />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-medium text-foreground">{app.name}</span>
-                      <span className="block truncate text-[11.5px] text-muted-foreground">{app.desc}</span>
-                    </span>
-                    <span className="hidden shrink-0 text-[11.5px] font-medium text-primary opacity-0 transition-opacity duration-150 group-hover:opacity-100 sm:block">
-                      Open
-                    </span>
-                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground sm:hidden" />
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className={GROUP}>
+              <ul className="divide-y divide-border/30">
+                {shelf.apps.map(app => (
+                  <li key={app.id}>
+                    <button
+                      onClick={() => go(app.route)}
+                      className="group flex w-full items-center gap-3.5 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-foreground/[0.03]"
+                    >
+                      <AppTile id={app.id} icon={app.icon} size={32} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13.5px] font-medium text-foreground">{app.name}</span>
+                        <span className="block truncate text-[11.5px] text-muted-foreground">{app.desc}</span>
+                      </span>
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-muted-foreground" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
         ))
       )}
@@ -854,17 +850,17 @@ function RecentsView({ search, setSearch, recentFiles, loadingRecents, go }: {
     .filter(b => b.files.length > 0);
 
   return (
-    <div className="mx-auto w-full max-w-[920px] px-4 pb-16 pt-5 sm:px-7 sm:pt-7">
+    <div className="mx-auto w-full max-w-[860px] px-5 pb-16 pt-6 sm:px-8 sm:pt-9">
       <header className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-display text-[26px] font-semibold leading-none tracking-[-0.025em] sm:text-[31px]">
+        <h1 className="font-display text-[27px] font-semibold leading-none tracking-[-0.025em] sm:text-[32px]">
           Recent work
         </h1>
-        <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
+        <p className="text-[12px] tabular-nums text-muted-foreground">
           {shown.length} {shown.length === 1 ? 'item' : 'items'}
         </p>
       </header>
 
-      <div className="mt-5 flex h-11 items-center gap-3 rounded-[10px] border border-border/60 bg-card px-3.5">
+      <div className={cn(PILL, 'mt-6')}>
         <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
         <input
           value={search}
@@ -876,8 +872,8 @@ function RecentsView({ search, setSearch, recentFiles, loadingRecents, go }: {
           onClick={() => setStarredOnly(v => !v)}
           aria-pressed={starredOnly}
           className={cn(
-            'flex shrink-0 items-center gap-1.5 rounded-[8px] border px-2.5 py-1 text-[11.5px] transition-colors duration-150',
-            starredOnly ? 'border-foreground/30 bg-foreground/[0.06] text-foreground' : 'border-border/60 text-muted-foreground hover:text-foreground',
+            'flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] transition-colors duration-150',
+            starredOnly ? 'bg-foreground/[0.08] font-medium text-foreground' : 'text-muted-foreground hover:text-foreground',
           )}
         >
           <Star className={cn('h-3 w-3', starredOnly && 'fill-attend text-attend')} /> Starred
@@ -885,9 +881,9 @@ function RecentsView({ search, setSearch, recentFiles, loadingRecents, go }: {
       </div>
 
       {loadingRecents ? (
-        <div className="mt-6 rounded-[10px] border border-border/60 bg-card"><SkeletonLedger rows={6} /></div>
+        <div className={cn(GROUP, 'mt-7')}><SkeletonLedger rows={6} /></div>
       ) : buckets.length === 0 ? (
-        <div className="mt-6 rounded-[10px] border border-dashed border-border/70 px-6 py-14 text-center">
+        <div className="mt-7 rounded-[14px] bg-foreground/[0.025] px-6 py-14 text-center">
           <p className="text-[14px] font-medium">
             {search.trim() ? 'Nothing matches that' : starredOnly ? 'Nothing starred yet' : 'No work yet'}
           </p>
@@ -901,30 +897,29 @@ function RecentsView({ search, setSearch, recentFiles, loadingRecents, go }: {
         </div>
       ) : (
         buckets.map(bucket => (
-          <section key={bucket.name} className="mt-6">
-            <div className="mb-2.5 flex items-baseline gap-2.5">
-              <h2 className={KICK}>{bucket.name}</h2>
-              <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{bucket.files.length}</span>
-              <div className="h-px flex-1 bg-border/60" />
+          <section key={bucket.name} className="mt-7">
+            <div className="mb-3 flex items-baseline gap-2.5 px-1">
+              <h2 className={SECTION}>{bucket.name}</h2>
+              <span className="text-[11.5px] tabular-nums text-muted-foreground">{bucket.files.length}</span>
             </div>
-            <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
-              <div className={cn('hidden gap-3 border-b border-border/60 px-3.5 py-2 sm:grid', LEDGER_COLS)}>
-                <span className={KICK}>Name</span>
-                <span className={KICK}>App</span>
-                <span className={cn(KICK, 'text-right')}>Modified</span>
+            <div className={GROUP}>
+              <div className={cn('hidden gap-3 border-b border-border/40 px-4 py-2 sm:grid', LEDGER_COLS)}>
+                <span className={LABEL}>Name</span>
+                <span className={LABEL}>App</span>
+                <span className={cn(LABEL, 'text-right')}>Modified</span>
               </div>
               <ul>
                 {bucket.files.map(file => {
                   const Icon = getAppIcon(file.app_source);
                   const app = APPS.find(a => a.id === file.app_source);
                   return (
-                    <li key={file.id} className="border-b border-border/50 last:border-b-0">
+                    <li key={file.id} className="border-b border-border/30 last:border-b-0">
                       <button
                         onClick={() => file.source_route && go(file.source_route)}
-                        className={cn('grid w-full items-center gap-3 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-foreground/[0.03]', LEDGER_COLS)}
+                        className={cn('grid w-full items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-foreground/[0.03]', LEDGER_COLS)}
                       >
-                        <span className="flex min-w-0 items-center gap-2.5">
-                          <AppTile id={file.app_source} icon={Icon} size={26} />
+                        <span className="flex min-w-0 items-center gap-3">
+                          <AppTile id={file.app_source} icon={Icon} size={28} />
                           <span className="min-w-0">
                             <span className="flex items-center gap-1.5">
                               <span className="truncate text-[13px] font-medium text-foreground">{file.file_name}</span>

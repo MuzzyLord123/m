@@ -3,15 +3,18 @@ import { cn } from '@/lib/utils';
 import { identityFor } from './officeIdentity';
 
 /**
- * The app's mark: a solid tile of the app's own colour with the glyph
- * knocked out in white, the way real product icons are pressed - a
- * Word square, an Excel square. The faint top highlight and inner
- * hairline are what make it read as a manufactured object instead of
- * an icon sitting in a tinted box.
+ * The app's mark: a graphite squircle with the glyph drawn in a
+ * whisper of the app's own hue.
  *
- * This is the only component in Office allowed to paint an app colour.
- * Everything around it stays neutral chrome, which is precisely why
- * twenty-five colours read as one product line rather than a paintbox.
+ * Loud solid tiles read as a toy; no colour at all reads as a wireframe.
+ * The premium register sits between: the surface is neutral - a quiet
+ * lift off the page with a pressed highlight - and identity arrives
+ * only through the ink of the glyph, desaturated to the point of
+ * suggestion. Twenty-five of these sit together like a set of
+ * instruments rather than a bag of sweets.
+ *
+ * This is still the only component in Office allowed to reference an
+ * app's colour.
  */
 export function AppTile({ id, icon: Icon, size = 32, className }: {
   id: string;
@@ -20,20 +23,23 @@ export function AppTile({ id, icon: Icon, size = 32, className }: {
   className?: string;
 }) {
   const { hue } = identityFor(id);
-  const glyph = Math.round(size * 0.54);
+  const [h, s] = hue.split(' ');
+  const sat = Math.min(parseInt(s, 10) || 0, 34);
+  const glyph = Math.round(size * 0.5);
   return (
     <span
       aria-hidden
-      className={cn('flex shrink-0 items-center justify-center text-white', className)}
+      className={cn('flex shrink-0 items-center justify-center', className)}
       style={{
         width: size,
         height: size,
-        borderRadius: Math.max(5, Math.round(size * 0.24)),
-        background: `hsl(${hue})`,
-        boxShadow: 'inset 0 1px 0 hsl(0 0% 100% / 0.16), inset 0 0 0 1px hsl(0 0% 100% / 0.06)',
+        borderRadius: Math.max(6, Math.round(size * 0.28)),
+        background: 'linear-gradient(180deg, hsl(var(--foreground) / 0.085), hsl(var(--foreground) / 0.04))',
+        boxShadow: 'inset 0 1px 0 hsl(var(--foreground) / 0.07), inset 0 0 0 1px hsl(var(--foreground) / 0.06)',
+        color: `hsl(${h} ${sat}% var(--office-glyph-l, 70%))`,
       }}
     >
-      <Icon style={{ width: glyph, height: glyph }} strokeWidth={size < 26 ? 2.2 : 1.9} />
+      <Icon style={{ width: glyph, height: glyph }} strokeWidth={size < 26 ? 2 : 1.7} />
     </span>
   );
 }
