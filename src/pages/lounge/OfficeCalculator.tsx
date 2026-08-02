@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calculator, Delete, RotateCcw, History, Copy, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -157,17 +158,7 @@ export default function OfficeCalculator() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      <header className="h-[52px] border-b border-border/60 bg-card flex items-center px-3 sm:px-5 gap-2 sm:gap-3 shrink-0">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Back to Office</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60" />
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
-          <Calculator className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-        </span>
-        <span className="text-sm font-semibold tracking-tight">Calculator</span>
-        <div className="flex-1" />
+      <OfficeModuleBand appId="calculator" icon={Calculator} title="Calculator">
         {/* Mode toggle — hide labels on very small screens */}
         <div className="flex items-center gap-0.5 rounded-lg border border-border/60 bg-card p-0.5 shrink-0">
           {(['standard', 'scientific'] as const).map(m => (
@@ -179,7 +170,7 @@ export default function OfficeCalculator() {
         <Button variant="ghost" size="icon" aria-label="History" className="h-8 w-8 rounded-lg shrink-0" onClick={() => setShowHistory(!showHistory)}>
           <History className="h-3.5 w-3.5" />
         </Button>
-      </header>
+      </OfficeModuleBand>
 
       <div className="flex-1 overflow-auto flex items-start sm:items-center justify-center p-4 sm:p-6">
         {/* Stack vertically on mobile, side by side on sm+ */}

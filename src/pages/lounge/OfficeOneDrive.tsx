@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import VaultContent from '@/components/vault/VaultContent';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { PageHeader, EmptyState, RelativeTime, SkeletonLedger, FIELD } from '@/components/platform';
 
 // Unified file type across all Quooro apps
@@ -299,13 +300,11 @@ export default function OfficeOneDrive() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
+      <OfficeModuleBand appId="files" icon={Cloud} title="Files" />
       {/* Header */}
       <div className="shrink-0 border-b border-border/60">
         <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-4">
           <div className="flex items-start gap-2 sm:gap-3">
-            <Button variant="ghost" size="icon" aria-label="Back to Office" className="mt-0.5 h-8 w-8 shrink-0 rounded-lg text-muted-foreground hover:text-foreground" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
             {isMobile && (
               <Button variant="ghost" size="icon" aria-label="Categories" className="mt-0.5 h-8 w-8 shrink-0 rounded-lg" onClick={() => setShowSidebar(true)}>
                 <Menu className="h-4 w-4" />
@@ -313,7 +312,6 @@ export default function OfficeOneDrive() {
             )}
             <PageHeader
               className="min-w-0 flex-1"
-              kicker="Quooro Office · Files"
               title="Files"
               description="All your work across the platform"
               actions={

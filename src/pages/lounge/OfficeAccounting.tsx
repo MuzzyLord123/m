@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { StatusBadge, SkeletonLedger } from '@/components/platform';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -186,65 +187,7 @@ export default function OfficeAccounting() {
       isAccountant ? "flex-1 min-h-0 flex flex-col overflow-hidden bg-background"
                    : "fixed inset-0 z-50 bg-background flex flex-col overflow-hidden"
     )}>
-      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 bg-background px-3 sm:gap-3 sm:px-5">
-        {!isAccountant && (
-          <>
-            <Button variant="ghost" size="sm" className="h-8 gap-1.5 rounded-lg px-2 text-xs sm:px-3"
-              onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-              <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
-            </Button>
-            <div className="hidden h-4 w-px bg-border/60 sm:block" />
-          </>
-        )}
-
-        {/* Mobile menu trigger */}
-        {orgs.length > 0 && (
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg md:hidden">
-                <Menu className="h-4 w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[260px] p-0 flex flex-col bg-background">
-              <div className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 px-4">
-                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Accounting</span>
-              </div>
-              <nav className="flex-1 overflow-y-auto p-2">
-                {visibleTabs.map(t => (
-                  <button key={t.id}
-                    onClick={() => { setTab(t.id); setMobileMenuOpen(false); }}
-                    className={cn(
-                      "w-full flex items-center gap-2.5 px-3 h-10 rounded-lg text-[13px] font-medium transition-colors",
-                      tab === t.id
-                        ? "bg-foreground/[0.05] text-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.025]"
-                    )}>
-                    <t.icon className="h-4 w-4 shrink-0" />
-                    {t.label}
-                  </button>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
-        )}
-
-        {/* Desktop sidebar toggle */}
-        {orgs.length > 0 && (
-          <Button variant="ghost" size="icon" className="hidden h-8 w-8 rounded-lg md:inline-flex"
-            onClick={() => setSidebarCollapsed(v => !v)} title="Toggle menu">
-            <Menu className="h-4 w-4" />
-          </Button>
-        )}
-        <span className="hidden font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground xs:inline sm:inline">Accounting</span>
-        {isAccountant && (
-          <span className="ml-1 inline-flex items-center gap-1.5 whitespace-nowrap text-[10px] text-attend">
-            <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-attend" />
-            <span className="sm:hidden">Accountant</span>
-            <span className="hidden sm:inline">Read-only · accountant</span>
-          </span>
-        )}
-
-        <div className="flex-1" />
+      <OfficeModuleBand appId="accounting" icon={Calculator} title="Accounting">
 
         {orgs.length > 0 && (
           <Select value={orgId} onValueChange={handleOrgChange}>
@@ -257,7 +200,7 @@ export default function OfficeAccounting() {
             </SelectContent>
           </Select>
         )}
-      </header>
+      </OfficeModuleBand>
 
       <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Desktop left sidebar */}

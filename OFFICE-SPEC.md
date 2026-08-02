@@ -61,12 +61,31 @@ index, Starred. Blocks self-remove when empty; the quiet state says
 
 ## 5. Module status (rollout ledger)
 
-On the anatomy: **Expenses** (proof module — band, LABEL furniture,
-honest empty, real monthly buckets, Reports tab removed as it filtered
-nothing), **Polls home** (rebuilt on real office_polls), **Forms home**
-+ **Whiteboard home** (honest launchers — their fake seeded lists are
-gone), **Sticky wall home** (band + system cards), **Bookmarks** (band,
-fake seeds removed, initials marks).
-Swept but not yet on the band: Docs editor chrome (gradients/glass/
-purple removed, marks via AppTile), PDF hub radii, Whiteboard editor
-glass. Remaining modules queue in OFFICE-ROADMAP.md §1.
+**On the band (OfficeModuleBand):** Expenses, Docs home, Sheets home,
+Slides home, Files, PDF hub + PDF editor + PDF creator, Tasks, Time,
+Contracts, Operations, Calculator, Pomodoro, Passwords, Invoices,
+Accounting, HR, Analytics, Polls home + Polls workspace, Sticky wall
+home + editor, Wiki (band on index; internal page header carries the
+ink signature), Forms home + builder, Whiteboard home, Bookmarks, and
+the whole Design studio (its shell mounts the band above its section
+rail - one fix, five screens; its dead More button removed).
+
+**De-faked during rollout:** Sheets and Slides homes shipped seeded
+demo files ("Budget 2026", "Revenue Tracker") - both now start honest
+and empty. Time's dead Reports button removed.
+
+**Written deviations:**
+1. E-commerce keeps its own header - it is a dual-context surface also
+   mounted in the Lounge (`embedded` prop); its back targets the Lounge
+   when standalone. Adopting the band would break the second context.
+   Queued for a context-aware band.
+2. The Sheets (excel-home) and Slides (slides/edit) canvas editors keep
+   their working toolbars as chrome; both were tell-swept previously.
+   Band adoption queued with their next functional pass.
+3. Notes (OneNote) keeps its Apple-Notes-style per-view headers - they
+   carry view controls the band cannot hold; they wear the ink surface
+   (bg-black/60) so they read as the same instrument.
+
+**Rollout verification:** 22 routes × 1440 + 390 - band present, no
+legacy back-chrome text, no horizontal overflow, no crashes, zero page
+errors.

@@ -11,6 +11,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { PageHeader, EmptyState, FIELD } from '@/components/platform';
 import { THEMES, type SlideTheme } from '@/components/slides/types';
 
@@ -51,7 +52,7 @@ type FilterMode = 'all' | 'starred' | 'recent';
 
 export default function SlidesHome() {
   const navigate = useNavigate();
-  const [presentations, setPresentations] = useState<SavedPresentation[]>(DEMO_PRESENTATIONS);
+  const [presentations, setPresentations] = useState<SavedPresentation[]>([]);
   const [search, setSearch] = useState('');
   const [view, setView] = useState<ViewMode>('grid');
   const [sortField, setSortField] = useState<SortField>('lastModified');
@@ -100,21 +101,14 @@ export default function SlidesHome() {
 
   return (
     <div className="h-full flex flex-col overflow-auto bg-background">
+      <div className="sticky top-0 z-30 bg-background">
+        <OfficeModuleBand appId="slides" icon={Presentation} title="Slides" />
+      </div>
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-8">
         {/* Header */}
         <div className="flex items-start gap-3 pt-5 sm:pt-7">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Back to Office"
-            className="mt-0.5 h-8 w-8 shrink-0 rounded-lg text-muted-foreground hover:text-foreground"
-            onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
           <PageHeader
             className="min-w-0 flex-1"
-            kicker="Quooro Office · Slides"
             title="Presentations"
             description="Decks, pitches and talks"
             actions={

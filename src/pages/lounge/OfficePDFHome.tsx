@@ -4,6 +4,7 @@ import { ArrowLeft, FileCheck, Plus, Upload, Star, Trash2, File, FileText, Layou
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import { PDF_TEMPLATES, PDF_TEMPLATE_CATEGORIES, PDFTemplate } from '@/components/pdf/pdfTemplates';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,24 +88,14 @@ export default function OfficePDFHome() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="flex h-[52px] shrink-0 items-center gap-3 border-b border-border/60 bg-card px-5">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Back to Office</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60" />
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
-          <FileCheck className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-        </span>
-        <span className="text-sm font-semibold tracking-tight">PDF Studio</span>
-        <div className="flex-1" />
+      <OfficeModuleBand appId="pdf" icon={FileCheck} title="PDF">
         <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={openEditor}>
           <Upload className="h-3.5 w-3.5" /> Open PDF
         </Button>
         <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => openCreator()}>
           <Plus className="h-3.5 w-3.5" /> Create PDF
         </Button>
-      </header>
+      </OfficeModuleBand>
 
       <div className="flex-1 overflow-auto">
         <div className="mx-auto max-w-5xl px-6 sm:px-10">

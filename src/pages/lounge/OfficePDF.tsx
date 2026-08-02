@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileCheck, Upload, Download, ZoomIn, ZoomOut, Type, Pen, Square, Highlighter, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
@@ -226,17 +227,7 @@ export default function OfficePDF() {
   if (!pdfDoc) {
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col">
-        <header className="h-[52px] border-b border-border/30 bg-background/80 backdrop- flex items-center px-5 gap-3 shrink-0">
-          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-            <ArrowLeft className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Back to Office</span>
-          </Button>
-          <div className="h-4 w-px bg-border/40" />
-          <div className="flex items-center gap-2">
-            <FileCheck className="h-4 w-4 text-destructive" />
-            <span className="text-sm font-semibold tracking-tight">PDF Studio</span>
-          </div>
-        </header>
+        <OfficeModuleBand appId="pdf" icon={FileCheck} title="PDF" />
         <div className="flex-1 flex items-center justify-center p-6"
           onDragOver={e => e.preventDefault()} onDrop={handleDrop}>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}

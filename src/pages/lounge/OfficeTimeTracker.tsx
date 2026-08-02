@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -133,18 +134,9 @@ export default function OfficeTimeTracker() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="shrink-0 h-[52px] border-b border-border/60 bg-card flex items-center px-5 gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60" />
-        <div className="h-7 w-7 rounded-lg bg-foreground/[0.04] flex items-center justify-center">
-          <Clock className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-        </div>
-        <span className="text-sm font-semibold tracking-tight">Time Tracker</span>
-        <div className="flex-1" />
+      <OfficeModuleBand appId="time-tracker" icon={Clock} title="Time">
         <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs"><BarChart3 className="h-3.5 w-3.5" /> Reports</Button>
-      </header>
+      </OfficeModuleBand>
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">

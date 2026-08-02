@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import {
   AreaChart, Area, BarChart, Bar, PieChart as RPieChart, Pie, Cell,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -805,16 +806,7 @@ export default function OfficeAnalyticsStudio() {
     <TemperamentProvider value="office">
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
       {/* Top bar */}
-      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 bg-background px-3 sm:gap-3 sm:px-5">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Office</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60" />
-        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Analytics studio</span>
-        <span className="hidden text-[13px] font-[550] tracking-[-0.01em] text-foreground md:inline">{dashboards.find(d => d.id === activeDashboard)?.name}</span>
-
-        <div className="flex-1" />
+      <OfficeModuleBand appId="analytics" icon={TrendingUp} title="Analytics">
 
         {/* Time range selector */}
         <div className="hidden sm:block">{timeRangeControl}</div>
@@ -825,7 +817,7 @@ export default function OfficeAnalyticsStudio() {
         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={handleDownload} aria-label="Export report">
           <Download className="h-3.5 w-3.5" />
         </Button>
-      </header>
+      </OfficeModuleBand>
 
       {/* Mobile: dashboard selector + time range */}
       <div className="md:hidden shrink-0 border-b border-border/60 bg-background">

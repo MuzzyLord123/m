@@ -391,7 +391,7 @@ export default function OfficeOneNoteHome() {
           {mobileView === 'sections' && (
             <div className="flex flex-col h-full">
               {/* Mobile header */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-border/60 bg-card shrink-0">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-border/60 bg-black/60 shrink-0">
                 <Button variant="ghost" size="icon" aria-label="Back to Office" className="h-9 w-9 rounded-lg" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
@@ -454,7 +454,7 @@ export default function OfficeOneNoteHome() {
           {/* Mobile: Pages list */}
           {mobileView === 'pages' && section && (
             <div className="flex flex-col h-full">
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-border/60 bg-card shrink-0">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-border/60 bg-black/60 shrink-0">
                 <Button variant="ghost" size="icon" aria-label="Back to sections" className="h-9 w-9 rounded-lg" onClick={() => setMobileView('sections')}>
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
@@ -541,7 +541,7 @@ export default function OfficeOneNoteHome() {
           {mobileView === 'editor' && page && (
             <div className="flex flex-col h-full">
               {/* Editor header */}
-              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60 bg-card shrink-0">
+              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60 bg-black/60 shrink-0">
                 <Button variant="ghost" size="icon" aria-label="Back to pages" className="h-9 w-9 rounded-lg" onClick={() => setMobileView('pages')}>
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
@@ -571,7 +571,7 @@ export default function OfficeOneNoteHome() {
 
               {/* Mobile formatting toolbar */}
               {!previewMode && !page.locked && (
-                <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border/60 bg-card shrink-0 overflow-x-auto scrollbar-hide">
+                <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border/60 bg-black/60 shrink-0 overflow-x-auto scrollbar-hide">
                   {[
                     { icon: Bold, action: () => insertAtCursor('**', '**') },
                     { icon: Italic, action: () => insertAtCursor('*', '*') },
@@ -624,7 +624,7 @@ export default function OfficeOneNoteHome() {
           {/* Mobile: No page selected edge case */}
           {mobileView === 'editor' && !page && (
             <div className="flex flex-col h-full">
-              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60 bg-card shrink-0">
+              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60 bg-black/60 shrink-0">
                 <Button variant="ghost" size="icon" aria-label="Back to pages" className="h-9 w-9 rounded-lg" onClick={() => setMobileView('pages')}>
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
@@ -813,7 +813,7 @@ export default function OfficeOneNoteHome() {
               {page ? (
                 <>
                   {/* Enhanced Editor toolbar */}
-                  <div className="flex items-center gap-0.5 px-4 h-10 border-b border-border/60 bg-card shrink-0 overflow-x-auto">
+                  <div className="flex items-center gap-0.5 px-4 h-10 border-b border-border/60 bg-black/60 shrink-0 overflow-x-auto">
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={undo} disabled={undoStack.length === 0} title="Undo (Ctrl+Z)"><Undo2 className="h-3.5 w-3.5" /></Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={redo} disabled={redoStack.length === 0} title="Redo (Ctrl+Y)"><Redo2 className="h-3.5 w-3.5" /></Button>
                     <div className="w-px h-5 bg-border/60 mx-1" />

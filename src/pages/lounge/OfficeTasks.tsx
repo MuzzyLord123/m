@@ -4,6 +4,7 @@ import { ArrowLeft, Layout, Plus, CheckCircle2, Circle, Clock, MoreHorizontal, C
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
@@ -90,19 +91,7 @@ export default function OfficeTasks() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 bg-card px-3 sm:gap-3 sm:px-5">
-        <Button variant="ghost" size="sm" className="h-8 shrink-0 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Back to Office</span>
-        </Button>
-        <div className="hidden h-4 w-px bg-border/60 sm:block" />
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
-            <Layout className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-          </span>
-          <span className="text-xs font-semibold tracking-tight sm:text-sm">Tasks</span>
-        </div>
-        <div className="flex-1" />
+      <OfficeModuleBand appId="tasks" icon={Layout} title="Tasks">
 
         <div className="flex gap-0.5 rounded-lg border border-border/60 bg-card p-0.5">
           <button onClick={() => setView('board')} className={cn('flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium transition-colors duration-150 sm:px-2.5', view === 'board' ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground')}>
@@ -116,7 +105,7 @@ export default function OfficeTasks() {
         <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => openNew()}>
           <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Add task</span>
         </Button>
-      </header>
+      </OfficeModuleBand>
 
       <div className="flex-1 overflow-auto p-3 sm:p-5">
         {tasks.length === 0 ? (

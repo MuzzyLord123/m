@@ -4,6 +4,7 @@ import { ArrowLeft, StickyNote, Plus, Trash2, Palette, GripVertical, Save } from
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -193,28 +194,7 @@ export default function OfficeStickyWall() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col touch-none" onMouseMove={handlePointerMove} onMouseUp={handlePointerUp} onTouchMove={handlePointerMove} onTouchEnd={handlePointerUp}>
-      <header className="h-auto min-h-[52px] border-b border-border/60 bg-card flex flex-wrap items-center px-3 sm:px-5 gap-2 sm:gap-3 py-2 shrink-0">
-        <Button variant="ghost" size="sm" aria-label="Back to sticky walls" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office/sticky-wall-home', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-        </Button>
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
-          <StickyNote className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-        </span>
-        {editingName ? (
-          <Input
-            autoFocus
-            value={wallName}
-            onChange={e => setWallName(e.target.value)}
-            onBlur={() => setEditingName(false)}
-            onKeyDown={e => { if (e.key === 'Enter') setEditingName(false); }}
-            className="h-7 w-32 sm:w-48 text-sm font-medium border-border/60 rounded-lg"
-          />
-        ) : (
-          <button onClick={() => setEditingName(true)} className="text-sm font-medium tracking-tight hover:text-primary transition-colors duration-150 truncate max-w-[120px] sm:max-w-none">
-            {wallName}
-          </button>
-        )}
-        <div className="flex-1" />
+      <OfficeModuleBand appId="sticky" icon={StickyNote} title="Sticky wall">
         <span className="font-mono text-[10px] tabular-nums text-muted-foreground hidden sm:inline">{notes.length} notes</span>
         <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => saveWall(true)} disabled={saving}>
           <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{saving ? 'Saving' : 'Save'}</span>
@@ -225,7 +205,7 @@ export default function OfficeStickyWall() {
         <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={addNote}>
           <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Add note</span>
         </Button>
-      </header>
+      </OfficeModuleBand>
 
       {/* Canvas */}
       <div className="flex-1 relative overflow-hidden bg-sunken" style={{ backgroundImage: 'radial-gradient(hsl(var(--border) / 0.5) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>

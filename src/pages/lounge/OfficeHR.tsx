@@ -4,6 +4,7 @@ import { ArrowLeft, Users, Plus, Trash2, Mail, Phone, MapPin, Calendar, Search, 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -201,20 +202,11 @@ export default function OfficeHR() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 bg-background px-3 sm:gap-3 sm:px-5">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
-        </Button>
-        <div className="hidden h-4 w-px bg-border/60 sm:block" />
-        <div className="min-w-0">
-          <span className="block truncate font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">HR and people</span>
-          <span className="-mt-0.5 hidden font-mono text-[9.5px] tabular-nums text-muted-foreground sm:block">{employees.length} employees · {DEPARTMENTS.length} departments</span>
-        </div>
-        <div className="flex-1" />
+      <OfficeModuleBand appId="hr" icon={Users} title="HR">
         <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs shrink-0" onClick={() => setShowAddEmployee(true)}>
           <Plus className="h-3.5 w-3.5" /><span className="hidden sm:inline"> Add employee</span>
         </Button>
-      </header>
+      </OfficeModuleBand>
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-10">

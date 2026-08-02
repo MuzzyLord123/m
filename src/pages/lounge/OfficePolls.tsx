@@ -4,6 +4,7 @@ import { ArrowLeft, BarChart3, Plus, Trash2, Check, Users, ArrowRight, Send, Has
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -242,26 +243,13 @@ export default function OfficePolls() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      <header className="h-[52px] border-b border-border/60 bg-card flex items-center px-3 sm:px-5 gap-3 shrink-0 flex-wrap">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => {
-          if (view !== 'list') { setView('list'); setSelectedPoll(null); }
-          else navigate('/lounge/office', { state: { fromOfficeApp: true } });
-        }}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">{view !== 'list' ? 'Back' : 'Back to Office'}</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60" />
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
-          <BarChart3 className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-        </span>
-        <span className="text-sm font-semibold tracking-tight">Polls</span>
-        <div className="flex-1" />
+      <OfficeModuleBand appId="polls" icon={BarChart3} title="Polls">
         {view === 'list' && (
           <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setView('create')}>
             <Plus className="h-3.5 w-3.5" /> New poll
           </Button>
         )}
-      </header>
+      </OfficeModuleBand>
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-2xl mx-auto px-4 sm:px-8 py-6 sm:py-8">

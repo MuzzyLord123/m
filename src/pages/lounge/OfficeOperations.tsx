@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import { StatusBadge, type Tone } from '@/components/platform';
 import { useReminders } from '@/hooks/useReminders';
@@ -132,13 +133,7 @@ export default function OfficeOperations() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="shrink-0 h-[52px] border-b border-border/60 bg-background flex items-center px-3 sm:px-5 gap-2 sm:gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60" />
-        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Operations</span>
-        <div className="flex-1" />
+      <OfficeModuleBand appId="operations" icon={Briefcase} title="Operations">
         {tab === 'meetings' ? (
           <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => setShowAddMeeting(true)}>
             <Plus className="h-3.5 w-3.5" /><span className="hidden sm:inline"> New meeting</span>
@@ -148,7 +143,7 @@ export default function OfficeOperations() {
             <Plus className="h-3.5 w-3.5" /><span className="hidden sm:inline"> New job</span>
           </Button>
         )}
-      </header>
+      </OfficeModuleBand>
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-6xl mx-auto px-3 sm:px-6">

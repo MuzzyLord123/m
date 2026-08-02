@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import {
   Panel, PanelHeader, PanelRow, StatusBadge, Money, EmptyState,
@@ -515,14 +516,8 @@ export default function OfficeInvoices() {
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 bg-background px-3 sm:gap-3 sm:px-5">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
-        </Button>
-        <div className="hidden h-4 w-px bg-border/60 sm:block" />
-        <span className="truncate font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Invoices and expenses</span>
-        <div className="flex-1" />
-      </header>
+      <OfficeModuleBand appId="invoices" icon={Receipt} title="Invoices">
+      </OfficeModuleBand>
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-10">

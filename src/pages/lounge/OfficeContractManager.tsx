@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 type ContractStatus = 'draft' | 'sent' | 'negotiating' | 'signed' | 'active' | 'expiring' | 'expired' | 'cancelled';
@@ -82,15 +83,9 @@ export default function OfficeContractManager() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="shrink-0 h-[52px] border-b border-border/60 bg-background flex items-center px-3 sm:px-5 gap-2 sm:gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60" />
-        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Contract manager</span>
-        <div className="flex-1" />
+      <OfficeModuleBand appId="contracts" icon={FileSignature} title="Contracts">
         <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs" onClick={() => setShowAdd(true)}><Plus className="h-3.5 w-3.5" /> New contract</Button>
-      </header>
+      </OfficeModuleBand>
 
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-5 sm:space-y-6">

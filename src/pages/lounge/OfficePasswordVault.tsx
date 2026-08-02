@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { SkeletonLedger } from '@/components/platform';
 import {
   ArrowLeft, ArrowRight, KeyRound, Plus, Search, Copy, Eye, EyeOff,
@@ -474,17 +475,12 @@ export default function OfficePasswordVault() {
   if (phase === 'list') {
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-        <header className="shrink-0 h-[52px] border-b border-border/60 bg-background flex items-center px-5 gap-3">
-          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-            <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
-          </Button>
-          <div className="h-4 w-px bg-border/60" />
-          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Password vault</span>
-          <span className="ml-2 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.1em] text-ok">
+        <OfficeModuleBand appId="passwords" icon={KeyRound} title="Passwords">
+          <span className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.1em] text-ok">
             <Lock className="h-2.5 w-2.5" />
             AES-256-GCM
           </span>
-        </header>
+        </OfficeModuleBand>
 
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="max-w-lg w-full">

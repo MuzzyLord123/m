@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
@@ -643,19 +644,7 @@ export default function OfficePDFCreator() {
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 min-h-[52px] border-b border-border/60 bg-card flex flex-wrap items-center px-3 sm:px-5 gap-2 sm:gap-3 py-2">
-        <Button variant="ghost" size="sm" aria-label="Back to PDF Studio" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office/pdf-home', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-        </Button>
-        <span className="hidden h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04] sm:flex">
-          <FileCheck className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-        </span>
-        <Input
-          value={docTitle}
-          onChange={e => setDocTitle(e.target.value)}
-          className="max-w-[140px] sm:max-w-[240px] h-8 text-sm font-medium bg-transparent border-border/60 rounded-lg"
-        />
-        <div className="flex-1" />
+      <OfficeModuleBand appId="pdf" icon={FileCheck} title="PDF">
 
         <div className="flex items-center gap-1.5 flex-wrap">
           <Button variant="ghost" size="sm" className={cn("h-8 gap-1.5 rounded-lg text-xs", previewMode && "bg-primary/10 text-primary")} onClick={() => setPreviewMode(!previewMode)}>
@@ -679,7 +668,7 @@ export default function OfficePDFCreator() {
             <Download className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Export PDF</span>
           </Button>
         </div>
-      </header>
+      </OfficeModuleBand>
 
       <SaveToFilesDialog {...saveDialogProps} />
 

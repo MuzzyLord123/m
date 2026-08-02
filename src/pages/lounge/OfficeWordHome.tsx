@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { PageHeader, EmptyState, RelativeTime, FIELD } from '@/components/platform';
 
 interface OfficeDocument {
@@ -161,21 +162,14 @@ export default function OfficeWordHome() {
 
   return (
     <div className="h-full flex flex-col overflow-auto bg-background">
+      <div className="sticky top-0 z-30 bg-background">
+        <OfficeModuleBand appId="docs" icon={FileText} title="Docs" context={documents.length ? `${documents.length} documents` : undefined} />
+      </div>
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-8">
         {/* Header */}
         <div className="flex items-start gap-3 pt-5 sm:pt-7">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Back to Office"
-            className="mt-0.5 h-8 w-8 shrink-0 rounded-lg text-muted-foreground hover:text-foreground"
-            onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
           <PageHeader
             className="min-w-0 flex-1"
-            kicker="Quooro Office · Docs"
             title="Documents"
             description="Write, edit and manage your documents"
             actions={

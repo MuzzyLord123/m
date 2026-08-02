@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -99,23 +100,11 @@ export default function OfficeForms() {
   if (view === 'list') {
     return (
       <div className="fixed inset-0 z-50 bg-background flex flex-col">
-        <header className="h-[52px] border-b border-border/60 bg-card flex items-center px-5 gap-3 shrink-0">
-          <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-            <ArrowLeft className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Back to Office</span>
-          </Button>
-          <div className="h-4 w-px bg-border/60" />
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/[0.04]">
-              <ClipboardList className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-            </span>
-            <span className="text-sm font-semibold tracking-tight">Forms</span>
-          </div>
-          <div className="flex-1" />
+        <OfficeModuleBand appId="forms" icon={ClipboardList} title="Forms">
           <Button size="sm" className="h-8 gap-1.5 rounded-lg px-3 text-xs" onClick={() => { setFields([]); setFormName('Untitled Form'); setView('builder'); }}>
             <Plus className="h-3.5 w-3.5" /> New form
           </Button>
-        </header>
+        </OfficeModuleBand>
 
         <div className="flex-1 overflow-auto">
           <div className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 sm:pt-8 pb-10">

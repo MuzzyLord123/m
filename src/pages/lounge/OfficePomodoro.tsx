@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Timer, Play, Pause, RotateCcw, Coffee, Brain, Zap, Check, Target, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -93,16 +94,7 @@ export default function OfficePomodoro() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      <header className="h-[52px] border-b border-border/60 bg-card flex items-center px-4 gap-3 shrink-0">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Back to Office</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60" />
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
-          <Timer className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-        </span>
-        <span className="text-sm font-semibold tracking-tight">Pomodoro</span>
-      </header>
+      <OfficeModuleBand appId="pomodoro" icon={Timer} title="Pomodoro" />
 
       <div className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-auto">
         <div className="flex flex-col items-center gap-6 sm:gap-8 max-w-lg w-full">

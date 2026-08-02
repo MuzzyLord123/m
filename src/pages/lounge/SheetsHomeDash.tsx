@@ -14,6 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { PageHeader, EmptyState, FIELD } from '@/components/platform';
 
 interface SavedSpreadsheet {
@@ -49,7 +50,7 @@ type ViewMode = 'grid' | 'list';
 
 export default function SheetsHomeDash() {
   const navigate = useNavigate();
-  const [spreadsheets, setSpreadsheets] = useState(DEMO_SPREADSHEETS);
+  const [spreadsheets, setSpreadsheets] = useState<SavedSpreadsheet[]>([]);
   const [search, setSearch] = useState('');
   const [view, setView] = useState<ViewMode>('grid');
   const [sortField, setSortField] = useState<SortField>('lastModified');
@@ -87,21 +88,14 @@ export default function SheetsHomeDash() {
 
   return (
     <div className="h-full flex flex-col overflow-auto bg-background">
+      <div className="sticky top-0 z-30 bg-background">
+        <OfficeModuleBand appId="sheets" icon={Sheet} title="Sheets" />
+      </div>
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-8">
         {/* Header */}
         <div className="flex items-start gap-3 pt-5 sm:pt-7">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Back to Office"
-            className="mt-0.5 h-8 w-8 shrink-0 rounded-lg text-muted-foreground hover:text-foreground"
-            onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
           <PageHeader
             className="min-w-0 flex-1"
-            kicker="Quooro Office · Sheets"
             title="Spreadsheets"
             description="Create, analyse and manage your data"
             actions={
