@@ -23,9 +23,10 @@ import {
   Clock, FileText, Sparkles, GripVertical, X, Eye, EyeOff,
   Download, Upload, Table2, Minus, Type, Columns, LayoutGrid, Save,
   Tag, FileUp, Link, Printer, Undo2, Redo2, Strikethrough,
-  Maximize2, Lock as LockIcon, Unlock as UnlockIcon
+  Maximize2, Lock as LockIcon, Unlock as UnlockIcon, Folder, ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 
@@ -271,6 +272,15 @@ export default function OfficeOneNoteHome() {
     ).map((p) => ({ sectionIdx: si, pageIdx: s.pages.indexOf(p), page: p, section: s }))
   ) : [];
 
+  const noteDate = (d: Date) => {
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const y = new Date(now); y.setDate(now.getDate() - 1);
+    if (d.toDateString() === y.toDateString()) return 'Yesterday';
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  };
+  const snippet = (p: Page) => p.content.split('\n').find(l => l && !l.startsWith('#'))?.slice(0, 90) || 'No additional text';
+
   const wordCount = page ? page.content.split(/\s+/).filter(Boolean).length : 0;
   const charCount = page ? page.content.length : 0;
   const lineCount = page ? page.content.split('\n').length : 0;
@@ -382,228 +392,256 @@ export default function OfficeOneNoteHome() {
     }
   }, [user, page, sections]);
 
+  const LABEL = 'text-[10px] font-medium uppercase tracking-[0.09em] text-muted-foreground/90';
+
+  /* The condensed toolbar: every capability, few buttons. */
+  const InlineTools = ({ size = 'h-7 w-7' }: { size?: string }) => (
+    <>
+      <Button variant="ghost" size="icon" className={cn(size, 'rounded-[7px]')} onClick={undo} disabled={undoStack.length === 0} title="Undo (Ctrl+Z)"><Undo2 className="h-3.5 w-3.5" /></Button>
+      <Button variant="ghost" size="icon" className={cn(size, 'rounded-[7px]')} onClick={redo} disabled={redoStack.length === 0} title="Redo (Ctrl+Y)"><Redo2 className="h-3.5 w-3.5" /></Button>
+      <div className="mx-1 h-4 w-px bg-border/50" />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-7 gap-1 rounded-[7px] px-2 text-[12px] font-semibold" title="Text style">
+            Aa <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-40 rounded-[12px]" align="start">
+          <DropdownMenuItem onClick={() => insertAtCursor('# ')} className="gap-2 text-sm"><Heading1 className="h-3.5 w-3.5" /> Title</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => insertAtCursor('## ')} className="gap-2 text-sm"><Heading2 className="h-3.5 w-3.5" /> Heading</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => insertAtCursor('### ')} className="gap-2 text-sm"><Heading3 className="h-3.5 w-3.5" /> Subheading</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => insertAtCursor('~~', '~~')} className="gap-2 text-sm"><Strikethrough className="h-3.5 w-3.5" /> Strikethrough</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => insertAtCursor('`', '`')} className="gap-2 text-sm"><Code className="h-3.5 w-3.5" /> Monospaced</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Button variant="ghost" size="icon" className={cn(size, 'rounded-[7px]')} onClick={() => insertAtCursor('**', '**')} title="Bold (Ctrl+B)"><Bold className="h-3.5 w-3.5" /></Button>
+      <Button variant="ghost" size="icon" className={cn(size, 'rounded-[7px]')} onClick={() => insertAtCursor('*', '*')} title="Italic (Ctrl+I)"><Italic className="h-3.5 w-3.5" /></Button>
+      <div className="mx-1 h-4 w-px bg-border/50" />
+      <Button variant="ghost" size="icon" className={cn(size, 'rounded-[7px]')} onClick={() => insertMarkdown('- ')} title="Bulleted list"><List className="h-3.5 w-3.5" /></Button>
+      <Button variant="ghost" size="icon" className={cn(size, 'rounded-[7px]')} onClick={() => insertMarkdown('1. ')} title="Numbered list"><ListOrdered className="h-3.5 w-3.5" /></Button>
+      <Button variant="ghost" size="icon" className={cn(size, 'rounded-[7px]')} onClick={() => insertMarkdown('- [ ] ')} title="Checklist"><CheckSquare className="h-3.5 w-3.5" /></Button>
+      <div className="mx-1 h-4 w-px bg-border/50" />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-7 gap-1 rounded-[7px] px-2 text-[11.5px]" title="Insert">
+            Insert <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-44 rounded-[12px]" align="start">
+          <DropdownMenuItem onClick={() => insertMarkdown('> ')} className="gap-2 text-sm"><Quote className="h-3.5 w-3.5" /> Quote</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => insertMarkdown('```\n', '\n```')} className="gap-2 text-sm"><Code className="h-3.5 w-3.5" /> Code block</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => insertMarkdown('---')} className="gap-2 text-sm"><Minus className="h-3.5 w-3.5" /> Divider</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => insertMarkdown('[text](url)')} className="gap-2 text-sm"><Link2 className="h-3.5 w-3.5" /> Link</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowImageDialog(true)} className="gap-2 text-sm"><Image className="h-3.5 w-3.5" /> Image</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => insertTable(3, 3)} className="gap-2 text-sm"><Table2 className="h-3.5 w-3.5" /> Table 3 × 3</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => insertTable(5, 4)} className="gap-2 text-sm"><Table2 className="h-3.5 w-3.5" /> Table 5 × 4</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  );
+
+  const PageMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="Note actions" className="h-7 w-7 rounded-[7px]"><MoreHorizontal className="h-3.5 w-3.5" /></Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-44 rounded-[12px]" align="end">
+        <DropdownMenuItem onClick={saveNote} className="gap-2 text-sm"><Save className="h-3.5 w-3.5" /> {saving ? 'Saving…' : 'Save now'}</DropdownMenuItem>
+        <DropdownMenuItem onClick={duplicatePage} className="gap-2 text-sm"><Copy className="h-3.5 w-3.5" /> Duplicate</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setShowExport(true)} className="gap-2 text-sm"><Download className="h-3.5 w-3.5" /> Export</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => page && updatePage({ locked: !page.locked })} className="gap-2 text-sm">
+          {page?.locked ? <><UnlockIcon className="h-3.5 w-3.5" /> Unlock</> : <><LockIcon className="h-3.5 w-3.5" /> Lock</>}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => { deletePage(); if (isMobile) setMobileView('pages'); }} className="gap-2 text-sm text-destructive"><Trash2 className="h-3.5 w-3.5" /> Delete</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
-    <div className={cn("h-full flex flex-col overflow-hidden bg-background", fullscreen && "fixed inset-0 z-50")}>
-      {/* ─── MOBILE LAYOUT ─── */}
+    <div className={cn('h-full flex flex-col overflow-hidden bg-background', fullscreen && 'fixed inset-0 z-50')}>
+      {/* ─── MOBILE ─── */}
       {isMobile ? (
         <>
-          {/* Mobile: Sections list (like Apple Notes folders) */}
+          {/* Folders */}
           {mobileView === 'sections' && (
-            <div className="flex flex-col h-full">
-              {/* Mobile header */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-border/60 bg-black/60 shrink-0">
-                <Button variant="ghost" size="icon" aria-label="Back to Office" className="h-9 w-9 rounded-lg" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div className="h-9 w-9 rounded-lg bg-foreground/[0.04] flex items-center justify-center">
-                  <BookOpen className="h-4.5 w-4.5 text-ink-2" strokeWidth={1.7} />
-                </div>
-                <span className="text-base font-semibold tracking-tight text-foreground">Notes</span>
-                <div className="flex-1" />
-                <Button variant="ghost" size="icon" aria-label="New section" className="h-9 w-9 rounded-lg" onClick={addSection}>
+            <div className="flex h-full flex-col">
+              <OfficeModuleBand appId="notes" icon={BookOpen} title="Notes">
+                <Button variant="ghost" size="icon" aria-label="New folder" className="h-8 w-8 rounded-full" onClick={addSection}>
                   <FolderPlus className="h-4 w-4" />
                 </Button>
-              </div>
+              </OfficeModuleBand>
 
-              {/* Search */}
-              <div className="px-4 py-2 shrink-0">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                  <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search all notes" className="pl-10 h-10 text-sm border-border/60 rounded-lg" />
-                  {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-4 w-4 text-muted-foreground" /></button>}
-                </div>
-              </div>
+              <div className="flex-1 overflow-y-auto bg-card/45">
+                <div className="px-4 pb-10 pt-5">
+                  <h1 className="font-display text-[27px] font-semibold leading-none tracking-[-0.025em]">Notes</h1>
+                  <p className="mt-1.5 text-[12.5px] text-muted-foreground">
+                    {totalPages} {totalPages === 1 ? 'note' : 'notes'} in {sections.length} {sections.length === 1 ? 'folder' : 'folders'}
+                  </p>
 
-              {/* Search results */}
-              {search && searchResults.length > 0 && (
-                <div className="px-4 pb-2 space-y-1">
-                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.13em] tabular-nums text-muted-foreground">{searchResults.length} results</span>
-                  {searchResults.map((r, i) => (
-                    <button key={i} onClick={() => { setActiveSection(r.sectionIdx); setActivePage(r.pageIdx); setSearch(''); setMobileView('editor'); }}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-[10px] border border-border/60 bg-card hover:bg-foreground/[0.025] text-left transition-colors duration-150">
-                      <div className="h-4 w-4 rounded-md shrink-0" style={{ background: r.section.color }} />
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm font-semibold text-foreground block truncate">{r.page.title}</span>
-                        <span className="text-xs text-muted-foreground">{r.section.name}</span>
+                  <div className="relative mt-4">
+                    <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search all notes"
+                      className="h-10 rounded-full border-border/50 bg-foreground/[0.035] pl-10 text-[14px]" />
+                    {search && <button aria-label="Clear search" onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="h-4 w-4 text-muted-foreground" /></button>}
+                  </div>
+
+                  {search && (
+                    <div className="mt-4">
+                      <p className={cn(LABEL, 'pb-1.5')}>{searchResults.length} {searchResults.length === 1 ? 'result' : 'results'}</p>
+                      <div className="overflow-hidden rounded-[14px] border border-border/40 bg-card">
+                        {searchResults.length === 0 ? (
+                          <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">Nothing matches that.</p>
+                        ) : searchResults.map((r, i) => (
+                          <button key={i} onClick={() => { setActiveSection(r.sectionIdx); setActivePage(r.pageIdx); setSearch(''); setMobileView('editor'); }}
+                            className="flex w-full items-center gap-3 border-b border-border/30 px-4 py-3 text-left last:border-b-0">
+                            <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: r.section.color }} />
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-[14.5px] font-medium">{r.page.title}</span>
+                              <span className="block text-[12px] text-muted-foreground">{r.section.name}</span>
+                            </span>
+                            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                          </button>
+                        ))}
                       </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+                    </div>
+                  )}
 
-              {/* Sections list */}
-              <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
-                {sections.map((s, i) => (
-                  <button key={s.id} onClick={() => { setActiveSection(i); setActivePage(0); setMobileView('pages'); }}
-                    className={cn("w-full flex items-center gap-3 px-4 py-3.5 rounded-[10px] text-left transition-colors duration-150",
-                      i === activeSection ? "bg-foreground/[0.05]" : "hover:bg-foreground/[0.025]")}>
-                    <div className="h-10 w-10 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: s.color }}>
-                      <Notebook className="h-5 w-5 text-white" />
+                  {!search && (
+                    <div className="mt-5 overflow-hidden rounded-[14px] border border-border/40 bg-card">
+                      {sections.map((s, i) => (
+                        <button key={s.id} onClick={() => { setActiveSection(i); setActivePage(0); setMobileView('pages'); }}
+                          className="flex w-full items-center gap-3 border-b border-border/30 px-4 py-3 text-left transition-colors last:border-b-0 active:bg-foreground/[0.04]">
+                          <Folder className="h-[19px] w-[19px] shrink-0" strokeWidth={1.7} style={{ color: s.color }} />
+                          <span className="min-w-0 flex-1 truncate text-[15px]">{s.name}</span>
+                          <span className="shrink-0 text-[13px] tabular-nums text-muted-foreground">{s.pages.length}</span>
+                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                        </button>
+                      ))}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm font-semibold text-foreground block truncate">{s.name}</span>
-                      <span className="text-xs text-muted-foreground">{s.pages.length} note{s.pages.length !== 1 ? 's' : ''}</span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                  </button>
-                ))}
+                  )}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Mobile: Pages list */}
+          {/* Notes in a folder */}
           {mobileView === 'pages' && section && (
-            <div className="flex flex-col h-full">
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-border/60 bg-black/60 shrink-0">
-                <Button variant="ghost" size="icon" aria-label="Back to sections" className="h-9 w-9 rounded-lg" onClick={() => setMobileView('sections')}>
-                  <ArrowLeft className="h-4 w-4" />
+            <div className="flex h-full flex-col">
+              <header className="relative flex h-12 shrink-0 items-center gap-1.5 border-b border-border/60 bg-black/60 px-1.5">
+                <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/60" />
+                <Button variant="ghost" size="sm" className="h-8 gap-0.5 rounded-full px-2 text-[13.5px] text-primary" onClick={() => setMobileView('sections')}>
+                  <ArrowLeft className="h-4 w-4" /> Folders
                 </Button>
-                <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: section.color }}>
-                  <Notebook className="h-3.5 w-3.5 text-white" />
-                </div>
-                <span className="text-base font-semibold tracking-tight text-foreground truncate flex-1">{section.name}</span>
+                <div className="min-w-0 flex-1" />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" aria-label="Section actions" className="h-9 w-9 rounded-lg"><MoreHorizontal className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" aria-label="Folder actions" className="h-8 w-8 rounded-full"><MoreHorizontal className="h-4 w-4" /></Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="rounded-[10px] w-44" align="end">
-                    <DropdownMenuItem onClick={() => { setEditingSectionId(section.id); setSectionNameValue(section.name); }} className="text-sm gap-2"><Edit3 className="h-3.5 w-3.5" /> Rename</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowColorPicker(section.id)} className="text-sm gap-2"><Palette className="h-3.5 w-3.5" /> Change colour</DropdownMenuItem>
+                  <DropdownMenuContent className="w-44 rounded-[12px]" align="end">
+                    <DropdownMenuItem onClick={() => { setEditingSectionId(section.id); setSectionNameValue(section.name); }} className="gap-2 text-sm"><Edit3 className="h-3.5 w-3.5" /> Rename</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowColorPicker(section.id)} className="gap-2 text-sm"><Palette className="h-3.5 w-3.5" /> Colour</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => { deleteSection(activeSection); setMobileView('sections'); }} className="text-sm gap-2 text-destructive"><Trash2 className="h-3.5 w-3.5" /> Delete</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { deleteSection(activeSection); setMobileView('sections'); }} className="gap-2 text-sm text-destructive"><Trash2 className="h-3.5 w-3.5" /> Delete folder</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
+              </header>
 
-              {/* Color picker inline */}
               {showColorPicker === section.id && (
-                <div className="px-4 py-2 border-b border-border/60 bg-card">
-                  <div className="flex items-center gap-2">
+                <div className="border-b border-border/40 bg-card px-4 py-2.5">
+                  <div className="flex items-center gap-2.5">
                     {SECTION_COLORS.map(c => (
-                      <button key={c.value} onClick={() => changeSectionColor(activeSection, c.value)}
-                        className={cn("h-8 w-8 rounded-full", section.color === c.value && "ring-2 ring-foreground ring-offset-2 ring-offset-background")}
+                      <button key={c.value} aria-label={c.name} onClick={() => changeSectionColor(activeSection, c.value)}
+                        className={cn('h-7 w-7 rounded-full', section.color === c.value && 'ring-2 ring-foreground ring-offset-2 ring-offset-background')}
                         style={{ background: c.value }} />
                     ))}
                   </div>
                 </div>
               )}
-
-              {/* Rename inline */}
               {editingSectionId === section.id && (
-                <div className="px-4 py-2 border-b border-border/60 bg-card">
+                <div className="border-b border-border/40 bg-card px-4 py-2.5">
                   <Input autoFocus value={sectionNameValue} onChange={e => setSectionNameValue(e.target.value)}
                     onBlur={() => renameSection(activeSection, sectionNameValue)}
                     onKeyDown={e => { if (e.key === 'Enter') renameSection(activeSection, sectionNameValue); }}
-                    className="h-10 text-sm rounded-lg border-border/60" placeholder="Section name" />
+                    className="h-10 rounded-[10px] border-border/50 text-[14px]" placeholder="Folder name" />
                 </div>
               )}
 
-              {/* Pages */}
-              <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
-                {section.pages.map((p, i) => (
-                    <button key={p.id}
-                      onClick={() => { setActivePage(i); setMobileView('editor'); }}
-                      className={cn("w-full flex flex-col gap-1 px-4 py-3.5 rounded-[10px] text-left transition-colors duration-150",
-                        i === activePage ? "bg-foreground/[0.05]" : "hover:bg-foreground/[0.025]")}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-foreground truncate flex-1">{p.title}</span>
-                        {p.starred && <Star className="h-3.5 w-3.5 fill-gold text-gold shrink-0" />}
-                        {p.locked && <LockIcon className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />}
-                      </div>
-                      <span className="text-xs text-muted-foreground truncate">{p.content.split('\n').find(l => l && !l.startsWith('#'))?.slice(0, 100) || 'Empty page'}</span>
-                      <span className="font-mono text-[10px] tabular-nums text-muted-foreground/60">{p.updatedAt.toLocaleDateString()}</span>
-                    </button>
-                  ))}
-
-                {section.pages.length === 0 && (
-                  <div className="text-center py-16">
-                    <Notebook className="h-12 w-12 text-muted-foreground/15 mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground/50 mb-3">No pages yet</p>
-                    <Button variant="outline" size="sm" className="h-10 text-sm rounded-lg gap-2" onClick={() => addPage()}>
-                      <Plus className="h-4 w-4" /> Add page
-                    </Button>
+              <div className="flex-1 overflow-y-auto bg-card/45">
+                <div className="px-4 pb-24 pt-5">
+                  <div className="flex items-baseline gap-2.5">
+                    <h1 className="min-w-0 truncate font-display text-[27px] font-semibold leading-none tracking-[-0.025em]">{section.name}</h1>
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: section.color }} />
                   </div>
-                )}
+                  <p className="mt-1.5 text-[12.5px] text-muted-foreground">{section.pages.length} {section.pages.length === 1 ? 'note' : 'notes'}</p>
+
+                  {section.pages.length === 0 ? (
+                    <div className="mt-6 rounded-[14px] bg-foreground/[0.025] px-6 py-14 text-center">
+                      <p className="text-[14px] font-medium">No notes here yet</p>
+                      <p className="mx-auto mt-1.5 max-w-sm text-[12.5px] leading-relaxed text-muted-foreground">Write the first one - it saves to your workspace as you type.</p>
+                    </div>
+                  ) : (
+                    <div className="mt-5 overflow-hidden rounded-[14px] border border-border/40 bg-card">
+                      {section.pages.map((p, i) => (
+                        <button key={p.id} onClick={() => { setActivePage(i); setMobileView('editor'); }}
+                          className="w-full border-b border-border/30 px-4 py-3 text-left transition-colors last:border-b-0 active:bg-foreground/[0.04]">
+                          <span className="flex items-center gap-1.5">
+                            <span className="min-w-0 flex-1 truncate text-[15px] font-medium">{p.title}</span>
+                            {p.starred && <Star className="h-3.5 w-3.5 shrink-0 fill-attend text-attend" />}
+                            {p.locked && <LockIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />}
+                          </span>
+                          <span className="mt-0.5 flex items-baseline gap-2">
+                            <span className="shrink-0 text-[12.5px] tabular-nums text-muted-foreground">{noteDate(p.updatedAt)}</span>
+                            <span className="min-w-0 truncate text-[12.5px] text-muted-foreground/80">{snippet(p)}</span>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Mobile FAB to add page */}
-              <Button
-                onClick={() => { addPage(); setMobileView('editor'); }}
-                className="fixed bottom-20 right-4 z-40 h-14 w-14 rounded-full"
-                size="icon"
-              >
-                <Plus className="h-5 w-5" />
+              <Button onClick={() => { addPage(); setMobileView('editor'); }} aria-label="New note" size="icon"
+                className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-[14px] shadow-[inset_0_1px_0_hsl(0_0%_100%/0.18),0_8px_20px_-8px_hsl(17_88%_40%/0.5)]">
+                <PenLine className="h-5 w-5" />
               </Button>
             </div>
           )}
 
-          {/* Mobile: Editor */}
+          {/* Editor */}
           {mobileView === 'editor' && page && (
-            <div className="flex flex-col h-full">
-              {/* Editor header */}
-              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60 bg-black/60 shrink-0">
-                <Button variant="ghost" size="icon" aria-label="Back to pages" className="h-9 w-9 rounded-lg" onClick={() => setMobileView('pages')}>
-                  <ArrowLeft className="h-4 w-4" />
+            <div className="flex h-full flex-col">
+              <header className="relative flex h-12 shrink-0 items-center gap-1.5 border-b border-border/60 bg-black/60 px-1.5">
+                <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/60" />
+                <Button variant="ghost" size="sm" className="h-8 gap-0.5 rounded-full px-2 text-[13.5px] text-primary" onClick={() => setMobileView('pages')}>
+                  <ArrowLeft className="h-4 w-4" /> {section?.name || 'Notes'}
                 </Button>
-                <span className="text-sm font-semibold text-foreground truncate flex-1">{page.title}</span>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => updatePage({ starred: !page.starred })}>
-                  {page.starred ? <Star className="h-4 w-4 fill-gold text-gold" /> : <StarOff className="h-4 w-4 text-muted-foreground/40" />}
+                <div className="min-w-0 flex-1" />
+                <Button variant="ghost" size="icon" aria-label={page.starred ? 'Unstar' : 'Star'} className="h-8 w-8 rounded-full" onClick={() => updatePage({ starred: !page.starred })}>
+                  {page.starred ? <Star className="h-4 w-4 fill-attend text-attend" /> : <Star className="h-4 w-4 text-muted-foreground" />}
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setPreviewMode(v => !v)}>
+                <Button variant="ghost" size="icon" aria-label="Toggle preview" className="h-8 w-8 rounded-full" onClick={() => setPreviewMode(v => !v)}>
                   {previewMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg"><MoreHorizontal className="h-4 w-4" /></Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="rounded-[10px] w-44" align="end">
-                    <DropdownMenuItem onClick={saveNote} className="text-sm gap-2"><Save className="h-3.5 w-3.5" /> Save</DropdownMenuItem>
-                    <DropdownMenuItem onClick={duplicatePage} className="text-sm gap-2"><Copy className="h-3.5 w-3.5" /> Duplicate</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowExport(true)} className="text-sm gap-2"><Download className="h-3.5 w-3.5" /> Export</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => updatePage({ locked: !page.locked })} className="text-sm gap-2">
-                      {page.locked ? <><UnlockIcon className="h-3.5 w-3.5" /> Unlock</> : <><LockIcon className="h-3.5 w-3.5" /> Lock</>}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => { deletePage(); setMobileView('pages'); }} className="text-sm gap-2 text-destructive"><Trash2 className="h-3.5 w-3.5" /> Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                <PageMenu />
+              </header>
 
-              {/* Mobile formatting toolbar */}
               {!previewMode && !page.locked && (
-                <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border/60 bg-black/60 shrink-0 overflow-x-auto scrollbar-hide">
-                  {[
-                    { icon: Bold, action: () => insertAtCursor('**', '**') },
-                    { icon: Italic, action: () => insertAtCursor('*', '*') },
-                    { icon: Strikethrough, action: () => insertAtCursor('~~', '~~') },
-                    { icon: Heading1, action: () => insertAtCursor('# ') },
-                    { icon: Heading2, action: () => insertAtCursor('## ') },
-                    { icon: List, action: () => insertMarkdown('- ') },
-                    { icon: ListOrdered, action: () => insertMarkdown('1. ') },
-                    { icon: CheckSquare, action: () => insertMarkdown('- [ ] ') },
-                    { icon: Quote, action: () => insertMarkdown('> ') },
-                    { icon: Code, action: () => insertAtCursor('`', '`') },
-                    { icon: Link2, action: () => insertMarkdown('[text](url)') },
-                    { icon: Image, action: () => setShowImageDialog(true) },
-                  ].map(({ icon: Icon, action }, i) => (
-                    <Button key={i} variant="ghost" size="icon" className="h-9 w-9 rounded-lg shrink-0" onClick={action}>
-                      <Icon className="h-4 w-4" />
-                    </Button>
-                  ))}
+                <div className="scrollbar-none flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-border/40 bg-black/40 px-2 py-1">
+                  <InlineTools size="h-9 w-9" />
                 </div>
               )}
 
-              {/* Title + content */}
-              <div className="flex-1 overflow-auto">
-                <div className="px-4 py-4">
+              <div className="flex-1 overflow-auto bg-card/45">
+                <div className="px-5 py-5">
                   <Input value={page.title} onChange={e => updatePage({ title: e.target.value })}
-                    className="text-xl font-bold bg-transparent border-none shadow-none focus-visible:ring-0 p-0 h-auto text-foreground mb-2"
-                    placeholder="Page title" disabled={page.locked} />
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{page.updatedAt.toLocaleString()}</span>
-                    <span className="text-[11px] text-muted-foreground/30" aria-hidden>·</span>
-                    <span className="font-mono text-[10px] tabular-nums text-muted-foreground">{wordCount} words</span>
-                  </div>
+                    className="h-auto border-none bg-transparent p-0 font-display text-[23px] font-semibold tracking-[-0.02em] shadow-none focus-visible:ring-0"
+                    placeholder="Title" disabled={page.locked} />
+                  <p className="mb-4 mt-1 text-[11.5px] tabular-nums text-muted-foreground">
+                    {noteDate(page.updatedAt)} · {wordCount} {wordCount === 1 ? 'word' : 'words'}
+                  </p>
 
                   {previewMode ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -613,7 +651,7 @@ export default function OfficeOneNoteHome() {
                     <Textarea ref={textareaRef} value={page.content}
                       onChange={e => { pushUndo(); updatePage({ content: e.target.value }); }}
                       onKeyDown={handleKeyDown}
-                      className="min-h-[60vh] bg-transparent border-none shadow-none focus-visible:ring-0 p-0 text-sm text-foreground/80 leading-relaxed resize-none"
+                      className="min-h-[60vh] resize-none border-none bg-transparent p-0 text-[16px] leading-[1.7] text-foreground/90 shadow-none focus-visible:ring-0"
                       placeholder="Start writing" disabled={page.locked} />
                   )}
                 </div>
@@ -621,21 +659,19 @@ export default function OfficeOneNoteHome() {
             </div>
           )}
 
-          {/* Mobile: No page selected edge case */}
           {mobileView === 'editor' && !page && (
-            <div className="flex flex-col h-full">
-              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60 bg-black/60 shrink-0">
-                <Button variant="ghost" size="icon" aria-label="Back to pages" className="h-9 w-9 rounded-lg" onClick={() => setMobileView('pages')}>
-                  <ArrowLeft className="h-4 w-4" />
+            <div className="flex h-full flex-col">
+              <header className="relative flex h-12 shrink-0 items-center gap-1.5 border-b border-border/60 bg-black/60 px-1.5">
+                <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/60" />
+                <Button variant="ghost" size="sm" className="h-8 gap-0.5 rounded-full px-2 text-[13.5px] text-primary" onClick={() => setMobileView('pages')}>
+                  <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
-                <span className="text-sm font-semibold text-foreground">Notes</span>
-              </div>
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center px-8">
-                  <PenLine className="h-12 w-12 text-muted-foreground/15 mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-muted-foreground/60 mb-2">No page selected</p>
-                  <Button variant="outline" size="sm" className="h-10 text-sm rounded-lg gap-2" onClick={() => { addPage(); }}>
-                    <Plus className="h-4 w-4" /> New page
+              </header>
+              <div className="flex flex-1 items-center justify-center bg-card/45 px-8">
+                <div className="w-full rounded-[14px] bg-foreground/[0.025] px-6 py-14 text-center">
+                  <p className="text-[14px] font-medium">No note selected</p>
+                  <Button variant="outline" size="sm" className="mt-4 h-10 gap-2 rounded-[10px] text-sm" onClick={() => { addPage(); }}>
+                    <PenLine className="h-4 w-4" /> New note
                   </Button>
                 </div>
               </div>
@@ -643,112 +679,76 @@ export default function OfficeOneNoteHome() {
           )}
         </>
       ) : (
-        /* ─── DESKTOP LAYOUT (unchanged) ─── */
+        /* ─── DESKTOP: three quiet panes under the band ─── */
         <>
-          {/* Title Bar */}
-          <div className="flex items-center gap-2 px-3 h-11 bg-card border-b border-border/60 shrink-0">
-            <Button variant="ghost" size="icon" aria-label="Back" className="h-8 w-8 rounded-lg" onClick={() => { if (fullscreen) { setFullscreen(false); } else { navigate('/lounge/office', { state: { fromOfficeApp: true } }); } }}>
-              <ArrowLeft className="h-3.5 w-3.5" />
+          <OfficeModuleBand appId="notes" icon={BookOpen} title="Notes" context={`${totalPages} ${totalPages === 1 ? 'note' : 'notes'} · ${starredPages} starred`}>
+            <div className="relative w-56">
+              <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notes"
+                className="h-8 rounded-[7px] border-border/70 bg-black/40 pl-9 text-[12.5px]" />
+              {search && <button aria-label="Clear search" onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2"><X className="h-3.5 w-3.5 text-muted-foreground" /></button>}
+            </div>
+            <div className="mx-1 h-4 w-px bg-border/50" />
+            <Button variant="ghost" size="sm" className={cn('h-8 gap-1.5 rounded-[7px] px-2.5 text-[12px]', splitView && 'bg-foreground/[0.06] text-primary')} onClick={() => { setSplitView(v => !v); setPreviewMode(false); }}>
+              <Columns className="h-3.5 w-3.5" /> Split
             </Button>
-            <div className="h-8 w-8 rounded-lg bg-foreground/[0.04] flex items-center justify-center">
-              <BookOpen className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
-            </div>
-            <span className="text-xs font-semibold text-foreground">Notes</span>
-            
-            <div className="hidden md:flex items-center gap-3 ml-4 font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
-              <span className="tabular-nums">{sections.length} notebooks</span>
-              <span className="tabular-nums">{totalPages} pages</span>
-              <span className="tabular-nums">{starredPages} starred</span>
-            </div>
+            <Button variant="ghost" size="sm" className={cn('h-8 gap-1.5 rounded-[7px] px-2.5 text-[12px]', previewMode && 'bg-foreground/[0.06] text-primary')} onClick={() => { setPreviewMode(v => !v); setSplitView(false); }}>
+              <Eye className="h-3.5 w-3.5" /> Preview
+            </Button>
+            <Button variant="ghost" size="icon" aria-label="Focus mode" className="h-8 w-8 rounded-[7px]" onClick={() => setFullscreen(v => !v)}>
+              <Maximize2 className="h-3.5 w-3.5" />
+            </Button>
+          </OfficeModuleBand>
 
-            <div className="flex-1" />
-            
-            {/* View toggles */}
-            <Button variant={splitView ? 'secondary' : 'ghost'} size="sm" className="h-7 text-[10px] gap-1 rounded-lg" onClick={() => { setSplitView(v => !v); setPreviewMode(false); }}>
-              <Columns className="h-3 w-3" /> Split
-            </Button>
-            <Button variant={previewMode ? 'secondary' : 'ghost'} size="sm" className="h-7 text-[10px] gap-1 rounded-lg" onClick={() => { setPreviewMode(v => !v); setSplitView(false); }}>
-              <Eye className="h-3 w-3" /> Preview
-            </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setFullscreen(v => !v)} title="Focus mode">
-              <Maximize2 className="h-3 w-3" />
-            </Button>
-            
-            <div className="relative w-52">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
-              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search all notes" className="pl-8 h-8 text-[10px] border-border/60 rounded-lg" />
-              {search && <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2"><X className="h-3 w-3 text-muted-foreground" /></button>}
-            </div>
-          </div>
-
-          {/* Search Results */}
-          {search && searchResults.length > 0 && (
-            <div className="px-3 py-2 bg-card border-b border-border/60 max-h-48 overflow-y-auto">
-              <span className="font-mono text-[9px] font-medium text-muted-foreground uppercase tracking-[0.13em] tabular-nums mb-1 block">{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</span>
-              {searchResults.map((r, i) => (
-                <button key={i} onClick={() => { setActiveSection(r.sectionIdx); setActivePage(r.pageIdx); setSearch(''); }}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-foreground/[0.025] transition-colors duration-150 text-left">
-                  <div className="h-3 w-3 rounded-sm shrink-0" style={{ background: r.section.color }} />
-                  <span className="text-[10px] font-semibold text-foreground truncate">{r.page.title}</span>
-                  <span className="text-[9px] text-muted-foreground/50 ml-auto">{r.section.name}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Main area */}
-          <div className="flex-1 flex overflow-hidden">
-            {/* Sections sidebar */}
-            <div className="w-52 border-r border-border/60 bg-card shrink-0 flex flex-col">
-              <div className="p-2.5 flex items-center justify-between border-b border-border/60">
-                <span className="font-mono text-[9px] font-medium text-muted-foreground uppercase tracking-[0.14em]">Notebooks</span>
-                <Button variant="ghost" size="icon" aria-label="New section" className="h-6 w-6 rounded-lg" onClick={addSection}>
+          <div className="flex flex-1 overflow-hidden">
+            {/* Folders */}
+            <div className="flex w-[216px] shrink-0 flex-col border-r border-border/60 bg-black/60">
+              <div className="flex items-center justify-between px-3.5 pb-1 pt-3">
+                <span className={LABEL}>Folders</span>
+                <Button variant="ghost" size="icon" aria-label="New folder" className="h-6 w-6 rounded-[6px]" onClick={addSection}>
                   <Plus className="h-3 w-3" />
                 </Button>
               </div>
-              <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5">
+              <div className="flex-1 space-y-px overflow-y-auto px-2 pb-3">
                 {sections.map((s, i) => (
                   <div key={s.id} className="group relative">
                     {editingSectionId === s.id ? (
-                      <div className="flex items-center gap-1 px-2 py-1.5">
-                        <div className="h-3.5 w-3.5 rounded-sm shrink-0" style={{ background: s.color }} />
+                      <div className="px-1 py-1">
                         <Input autoFocus value={sectionNameValue} onChange={e => setSectionNameValue(e.target.value)}
                           onBlur={() => renameSection(i, sectionNameValue)}
                           onKeyDown={e => { if (e.key === 'Enter') renameSection(i, sectionNameValue); if (e.key === 'Escape') setEditingSectionId(null); }}
-                          className="h-6 text-[10px] bg-transparent border-border/40 rounded-md flex-1" />
+                          className="h-7 rounded-[7px] border-border/50 text-[12px]" />
                       </div>
                     ) : (
                       <button onClick={() => { setActiveSection(i); setActivePage(0); }}
-                        className={cn("w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors duration-150",
-                          i === activeSection ? "bg-foreground/[0.05]" : "hover:bg-foreground/[0.025]")}>
-                        <div className="h-4 w-4 rounded-md shrink-0 flex items-center justify-center" style={{ background: s.color }}>
-                          <Notebook className="h-2.5 w-2.5 text-white" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-foreground truncate flex-1">{s.name}</span>
-                        <span className="text-[9px] text-muted-foreground/50 tabular-nums">{s.pages.length}</span>
-                        
+                        className={cn('flex h-8 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left transition-colors duration-150',
+                          i === activeSection ? 'bg-foreground/[0.07] text-foreground' : 'text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground')}>
+                        <Folder className="h-4 w-4 shrink-0" strokeWidth={1.7} style={{ color: s.color }} />
+                        <span className="min-w-0 flex-1 truncate text-[12.5px]">{s.name}</span>
+                        <span className="text-[11px] tabular-nums text-muted-foreground/80">{s.pages.length}</span>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button aria-label="Section actions" className="h-5 w-5 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-foreground/[0.04] transition-opacity duration-150" onClick={e => e.stopPropagation()}>
+                            <span role="button" tabIndex={0} aria-label="Folder actions"
+                              className="flex h-5 w-5 items-center justify-center rounded-[5px] opacity-0 transition-opacity duration-150 hover:bg-foreground/[0.06] group-hover:opacity-100"
+                              onClick={e => e.stopPropagation()}>
                               <MoreHorizontal className="h-3 w-3 text-muted-foreground" />
-                            </button>
+                            </span>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="rounded-[10px] w-40" align="end">
-                            <DropdownMenuItem onClick={() => { setEditingSectionId(s.id); setSectionNameValue(s.name); }} className="text-xs gap-2"><Edit3 className="h-3 w-3" /> Rename</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setShowColorPicker(s.id)} className="text-xs gap-2"><Palette className="h-3 w-3" /> Change colour</DropdownMenuItem>
+                          <DropdownMenuContent className="w-40 rounded-[12px]" align="end">
+                            <DropdownMenuItem onClick={() => { setEditingSectionId(s.id); setSectionNameValue(s.name); }} className="gap-2 text-xs"><Edit3 className="h-3 w-3" /> Rename</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setShowColorPicker(s.id)} className="gap-2 text-xs"><Palette className="h-3 w-3" /> Colour</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => deleteSection(i)} className="text-xs gap-2 text-destructive"><Trash2 className="h-3 w-3" /> Delete</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => deleteSection(i)} className="gap-2 text-xs text-destructive"><Trash2 className="h-3 w-3" /> Delete</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </button>
                     )}
-
                     {showColorPicker === s.id && (
-                      <div className="absolute left-2 top-full mt-1 z-30 bg-popover border border-border/60 rounded-[10px] p-2 shadow-md">
+                      <div className="absolute left-2 top-full z-30 mt-1 rounded-[12px] border border-border/50 bg-popover p-2 shadow-xl">
                         <div className="grid grid-cols-4 gap-1.5">
                           {SECTION_COLORS.map(c => (
-                            <button key={c.value} onClick={() => changeSectionColor(i, c.value)}
-                              className={cn("h-6 w-6 rounded-lg", s.color === c.value && "ring-2 ring-foreground ring-offset-1")}
+                            <button key={c.value} aria-label={c.name} onClick={() => changeSectionColor(i, c.value)}
+                              className={cn('h-6 w-6 rounded-full', s.color === c.value && 'ring-2 ring-foreground ring-offset-1 ring-offset-popover')}
                               style={{ background: c.value }} title={c.name} />
                           ))}
                         </div>
@@ -759,168 +759,108 @@ export default function OfficeOneNoteHome() {
               </div>
             </div>
 
-            {/* Pages list */}
-            <div className="w-60 border-r border-border/60 bg-card shrink-0 flex flex-col">
-              <div className="p-2.5 flex items-center justify-between border-b border-border/60">
-                <div className="flex items-center gap-1.5">
-                  {section && <div className="h-2.5 w-2.5 rounded-sm" style={{ background: section.color }} />}
-                  <span className="font-mono text-[9px] font-medium text-muted-foreground uppercase tracking-[0.14em]">{section?.name || 'Pages'}</span>
-                </div>
-                <div className="flex items-center gap-0.5">
-                  <Button variant="ghost" size="icon" aria-label="New from template" className="h-6 w-6 rounded-lg" onClick={() => setShowTemplates(true)} title="New from template">
+            {/* Notes list */}
+            <div className="flex w-[264px] shrink-0 flex-col border-r border-border/60 bg-card/70">
+              <div className="flex items-center justify-between px-3.5 pb-1 pt-3">
+                <span className="flex min-w-0 items-center gap-1.5">
+                  {section && <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: section.color }} />}
+                  <span className={cn(LABEL, 'truncate normal-case text-[11.5px] tracking-normal text-foreground')}>{section?.name || 'Notes'}</span>
+                </span>
+                <span className="flex items-center gap-0.5">
+                  <Button variant="ghost" size="icon" aria-label="New from template" className="h-6 w-6 rounded-[6px]" onClick={() => setShowTemplates(true)} title="New from template">
                     <LayoutGrid className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="icon" aria-label="New page" className="h-6 w-6 rounded-lg" onClick={() => addPage()}>
-                    <Plus className="h-3 w-3" />
+                  <Button variant="ghost" size="icon" aria-label="New note" className="h-6 w-6 rounded-[6px]" onClick={() => addPage()} title="New note">
+                    <PenLine className="h-3 w-3" />
                   </Button>
-                </div>
+                </span>
               </div>
-              <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5">
-                {section?.pages.map((p, i) => (
-                    <button key={p.id}
-                      onClick={() => setActivePage(i)}
-                      className={cn("w-full flex flex-col gap-1 px-3 py-2.5 rounded-lg text-left transition-colors duration-150",
-                        i === activePage ? "bg-foreground/[0.05]" : "hover:bg-foreground/[0.025]")}>
-                      <div className="flex items-center gap-1.5">
-                        <StickyNote className="h-3 w-3 text-muted-foreground/40 shrink-0" />
-                        <span className="text-[11px] font-semibold text-foreground truncate flex-1">{p.title}</span>
-                        {p.starred && <Star className="h-2.5 w-2.5 fill-gold text-gold shrink-0" />}
-                        {p.locked && <LockIcon className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0" />}
-                      </div>
-                      <span className="text-[9px] text-muted-foreground/50 pl-[18px] truncate line-clamp-2">{p.content.split('\n').find(l => l && !l.startsWith('#'))?.slice(0, 80) || 'Empty page'}</span>
-                      <div className="flex items-center gap-2 pl-[18px] mt-0.5">
-                        <span className="font-mono text-[8px] tabular-nums text-muted-foreground/60">{p.updatedAt.toLocaleDateString()}</span>
-                        {p.tags?.map(t => (
-                          <span key={t} className="font-mono text-[7px] px-1 py-0.5 rounded bg-foreground/[0.04] text-muted-foreground/60">{t}</span>
-                        ))}
-                      </div>
+              <div className="flex-1 space-y-px overflow-y-auto px-2 pb-3">
+                {search && (
+                  <p className={cn(LABEL, 'px-1.5 pb-1 pt-1')}>{searchResults.length} {searchResults.length === 1 ? 'result' : 'results'}</p>
+                )}
+                {search ? (
+                  searchResults.map((r, i) => (
+                    <button key={i} onClick={() => { setActiveSection(r.sectionIdx); setActivePage(r.pageIdx); setSearch(''); }}
+                      className="w-full rounded-[8px] px-2.5 py-2 text-left transition-colors duration-150 hover:bg-foreground/[0.04]">
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: r.section.color }} />
+                        <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{r.page.title}</span>
+                      </span>
+                      <span className="block truncate pl-3 text-[11px] text-muted-foreground">{r.section.name}</span>
                     </button>
-                  ))}
-                {(!section || section.pages.length === 0) && (
-                  <div className="text-center py-12">
-                    <Notebook className="h-10 w-10 text-muted-foreground/15 mx-auto mb-3" />
-                    <p className="text-[10px] text-muted-foreground/40 mb-2">No pages yet</p>
-                    <Button variant="ghost" size="sm" className="h-7 text-[10px] rounded-lg" onClick={() => addPage()}>
-                      <Plus className="h-3 w-3 mr-1" /> Add page
+                  ))
+                ) : section?.pages.map((p, i) => (
+                  <button key={p.id} onClick={() => setActivePage(i)}
+                    className={cn('w-full rounded-[8px] px-2.5 py-2 text-left transition-colors duration-150',
+                      i === activePage ? 'bg-foreground/[0.07]' : 'hover:bg-foreground/[0.03]')}>
+                    <span className="flex items-center gap-1.5">
+                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{p.title}</span>
+                      {p.starred && <Star className="h-3 w-3 shrink-0 fill-attend text-attend" />}
+                      {p.locked && <LockIcon className="h-3 w-3 shrink-0 text-muted-foreground/50" />}
+                    </span>
+                    <span className="mt-0.5 flex items-baseline gap-1.5">
+                      <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{noteDate(p.updatedAt)}</span>
+                      <span className="min-w-0 truncate text-[11px] text-muted-foreground/70">{snippet(p)}</span>
+                    </span>
+                  </button>
+                ))}
+                {!search && (!section || section.pages.length === 0) && (
+                  <div className="px-2 pt-6 text-center">
+                    <p className="text-[12.5px] font-medium">No notes here yet</p>
+                    <p className="mt-1 text-[11.5px] leading-relaxed text-muted-foreground">Notes save to your workspace as you type.</p>
+                    <Button variant="outline" size="sm" className="mt-3 h-8 gap-1.5 rounded-[8px] text-xs" onClick={() => addPage()}>
+                      <PenLine className="h-3 w-3" /> New note
                     </Button>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Page editor */}
-            <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Editor */}
+            <div className="flex flex-1 flex-col overflow-hidden bg-card/45">
               {page ? (
                 <>
-                  {/* Enhanced Editor toolbar */}
-                  <div className="flex items-center gap-0.5 px-4 h-10 border-b border-border/60 bg-black/60 shrink-0 overflow-x-auto">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={undo} disabled={undoStack.length === 0} title="Undo (Ctrl+Z)"><Undo2 className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={redo} disabled={redoStack.length === 0} title="Redo (Ctrl+Y)"><Redo2 className="h-3.5 w-3.5" /></Button>
-                    <div className="w-px h-5 bg-border/60 mx-1" />
-                    
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertAtCursor('# ')} title="Heading 1"><Heading1 className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertAtCursor('## ')} title="Heading 2"><Heading2 className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertAtCursor('### ')} title="Heading 3"><Heading3 className="h-3.5 w-3.5" /></Button>
-                    <div className="w-px h-5 bg-border/60 mx-1" />
-                    
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertAtCursor('**', '**')} title="Bold (Ctrl+B)"><Bold className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertAtCursor('*', '*')} title="Italic (Ctrl+I)"><Italic className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertAtCursor('~~', '~~')} title="Strikethrough"><Strikethrough className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertAtCursor('`', '`')} title="Inline code"><Code className="h-3.5 w-3.5" /></Button>
-                    <div className="w-px h-5 bg-border/60 mx-1" />
-                    
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertMarkdown('- ')} title="Bullet list"><List className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertMarkdown('1. ')} title="Numbered list"><ListOrdered className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertMarkdown('- [ ] ')} title="Checklist"><CheckSquare className="h-3.5 w-3.5" /></Button>
-                    <div className="w-px h-5 bg-border/60 mx-1" />
-                    
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertMarkdown('> ')} title="Quote"><Quote className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertMarkdown('```\n', '\n```')} title="Code block"><Code className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertMarkdown('---')} title="Horizontal rule"><Minus className="h-3.5 w-3.5" /></Button>
-                    <div className="w-px h-5 bg-border/60 mx-1" />
-                    
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => insertMarkdown('[text](url)')} title="Link"><Link2 className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setShowImageDialog(true)} title="Insert image"><Image className="h-3.5 w-3.5" /></Button>
-                    
-                    {/* Insert table */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" title="Insert table"><Table2 className="h-3.5 w-3.5" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="rounded-[10px] w-32">
-                        <DropdownMenuItem onClick={() => insertTable(3, 3)} className="text-xs gap-2">3 × 3 table</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => insertTable(5, 4)} className="text-xs gap-2">5 × 4 table</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => insertTable(10, 5)} className="text-xs gap-2">10 × 5 table</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    
+                  <div className="scrollbar-none flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-border/40 px-3 py-1.5">
+                    <InlineTools />
                     <div className="flex-1" />
-                    
-                    {/* Save */}
-                    <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 rounded-lg" onClick={saveNote} disabled={saving}>
-                      <Save className="h-3 w-3" /> {saving ? 'Saving' : 'Save'}
+                    <span className="mr-1 hidden text-[10.5px] text-muted-foreground lg:block">{saving ? 'Saving…' : 'Saved to workspace'}</span>
+                    <Button variant="ghost" size="icon" aria-label={page.starred ? 'Unstar' : 'Star'} className="h-7 w-7 rounded-[7px]" onClick={() => updatePage({ starred: !page.starred })}>
+                      {page.starred ? <Star className="h-3.5 w-3.5 fill-attend text-attend" /> : <Star className="h-3.5 w-3.5 text-muted-foreground" />}
                     </Button>
-                    {/* Export */}
-                    <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 rounded-lg" onClick={() => setShowExport(true)}>
-                      <Download className="h-3 w-3" /> Export
-                    </Button>
-
-                    {/* Page actions */}
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => updatePage({ starred: !page.starred })}>
-                      {page.starred ? <Star className="h-3.5 w-3.5 fill-gold text-gold" /> : <StarOff className="h-3.5 w-3.5 text-muted-foreground/40" />}
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg"><MoreHorizontal className="h-3.5 w-3.5" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="rounded-[10px] w-40" align="end">
-                        <DropdownMenuItem onClick={duplicatePage} className="text-xs gap-2"><Copy className="h-3 w-3" /> Duplicate</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => updatePage({ locked: !page.locked })} className="text-xs gap-2">{page.locked ? <><UnlockIcon className="h-3 w-3" /> Unlock</> : <><LockIcon className="h-3 w-3" /> Lock</>}</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={deletePage} className="text-xs gap-2 text-destructive"><Trash2 className="h-3 w-3" /> Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <PageMenu />
                   </div>
 
-                  {/* Page title & content */}
                   <div className="flex-1 overflow-auto">
-                    <div className={cn("mx-auto px-8 py-6", splitView ? "max-w-full flex gap-4" : "max-w-3xl")}>
+                    <div className={cn('mx-auto px-10 py-8', splitView ? 'flex max-w-full gap-6' : 'max-w-[720px]')}>
                       {!splitView && (
                         <>
                           <Input value={page.title} onChange={e => updatePage({ title: e.target.value })}
-                            className="text-2xl font-bold bg-transparent border-none shadow-none focus-visible:ring-0 p-0 h-auto text-foreground mb-1"
-                            placeholder="Page title" disabled={page.locked} />
-                          <div className="flex items-center gap-2 mb-4 font-mono text-[9px] tabular-nums text-muted-foreground">
-                            <span>{page.updatedAt.toLocaleString()}</span>
-                            <span aria-hidden>·</span>
-                            <span>{wordCount} words</span>
-                            <span aria-hidden>·</span>
-                            <span>{charCount} chars</span>
-                            <span aria-hidden>·</span>
-                            <span>{lineCount} lines</span>
-                            <span aria-hidden>·</span>
-                            <span>{readingTime} min read</span>
-                          </div>
+                            className="h-auto border-none bg-transparent p-0 font-display text-[26px] font-semibold tracking-[-0.02em] shadow-none focus-visible:ring-0"
+                            placeholder="Title" disabled={page.locked} />
+                          <p className="mb-6 mt-1.5 text-[11.5px] tabular-nums text-muted-foreground">
+                            {page.updatedAt.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })} · {wordCount} {wordCount === 1 ? 'word' : 'words'} · {readingTime} min read
+                          </p>
                         </>
                       )}
-                      
+
                       {previewMode ? (
                         <div className="prose prose-sm dark:prose-invert max-w-none">
                           <ReactMarkdown>{page.content}</ReactMarkdown>
                         </div>
                       ) : splitView ? (
                         <>
-                          <div className="flex-1">
+                          <div className="min-w-0 flex-1">
                             <Input value={page.title} onChange={e => updatePage({ title: e.target.value })}
-                              className="text-xl font-bold bg-transparent border-none shadow-none focus-visible:ring-0 p-0 h-auto text-foreground mb-2"
-                              placeholder="Page title" disabled={page.locked} />
+                              className="mb-3 h-auto border-none bg-transparent p-0 font-display text-[20px] font-semibold tracking-[-0.02em] shadow-none focus-visible:ring-0"
+                              placeholder="Title" disabled={page.locked} />
                             <Textarea ref={textareaRef} value={page.content}
                               onChange={e => { pushUndo(); updatePage({ content: e.target.value }); }}
                               onKeyDown={handleKeyDown}
-                              className="min-h-[600px] bg-transparent border border-border/60 rounded-lg shadow-none focus-visible:ring-1 focus-visible:ring-ring p-4 text-sm text-foreground/80 leading-relaxed resize-none font-mono"
-                              placeholder="Start writing. Supports markdown." disabled={page.locked} />
+                              className="min-h-[600px] resize-none rounded-[12px] border border-border/40 bg-background/40 p-4 font-mono text-[13px] leading-relaxed text-foreground/90 shadow-none focus-visible:ring-1 focus-visible:ring-primary/40"
+                              placeholder="Write in markdown" disabled={page.locked} />
                           </div>
-                          <div className="flex-1 border border-border/60 rounded-lg p-4 overflow-auto bg-card">
+                          <div className="min-w-0 flex-1 overflow-auto rounded-[12px] border border-border/40 bg-card p-5">
                             <div className="prose prose-sm dark:prose-invert max-w-none">
                               <ReactMarkdown>{page.content}</ReactMarkdown>
                             </div>
@@ -930,23 +870,23 @@ export default function OfficeOneNoteHome() {
                         <Textarea ref={textareaRef} value={page.content}
                           onChange={e => { pushUndo(); updatePage({ content: e.target.value }); }}
                           onKeyDown={handleKeyDown}
-                          className="min-h-[600px] bg-transparent border-none shadow-none focus-visible:ring-0 p-0 text-sm text-foreground/80 leading-relaxed resize-none font-mono"
-                          placeholder="Start writing. Supports markdown for rich formatting." disabled={page.locked} />
+                          className="min-h-[600px] resize-none border-none bg-transparent p-0 text-[15px] leading-[1.75] text-foreground/90 shadow-none focus-visible:ring-0"
+                          placeholder="Start writing" disabled={page.locked} />
                       )}
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex flex-1 items-center justify-center">
                   <div className="text-center">
                     <span aria-hidden className="mx-auto mb-4 block h-px w-8 bg-primary" />
-                    <p className="font-display text-[15px] font-semibold tracking-[-0.02em] text-foreground mb-1">Select or create a page</p>
-                    <p className="text-xs text-muted-foreground mb-4">Choose a page from the sidebar or create a new one</p>
-                    <div className="flex items-center gap-2 justify-center">
-                      <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg gap-1.5" onClick={() => addPage()}>
-                        <Plus className="h-3 w-3" /> Blank page
+                    <p className="mb-1 font-display text-[15px] font-semibold tracking-[-0.02em]">Choose a note, or start one</p>
+                    <p className="mb-4 text-[12px] text-muted-foreground">Everything here saves to your workspace as you type.</p>
+                    <div className="flex items-center justify-center gap-2">
+                      <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-[8px] text-xs" onClick={() => addPage()}>
+                        <PenLine className="h-3 w-3" /> New note
                       </Button>
-                      <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg gap-1.5" onClick={() => setShowTemplates(true)}>
+                      <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-[8px] text-xs" onClick={() => setShowTemplates(true)}>
                         <LayoutGrid className="h-3 w-3" /> From template
                       </Button>
                     </div>
@@ -958,63 +898,63 @@ export default function OfficeOneNoteHome() {
         </>
       )}
 
-      {/* Templates Dialog */}
+      {/* Templates */}
       <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
-        <DialogContent className="sm:max-w-lg rounded-[10px]">
-          <DialogHeader><DialogTitle className="text-sm font-semibold flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-ink-2" /> Page templates</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-2 gap-2 mt-2">
+        <DialogContent className="rounded-[14px] sm:max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2 text-sm font-semibold"><LayoutGrid className="h-4 w-4 text-muted-foreground" /> Start from a template</DialogTitle></DialogHeader>
+          <div className="mt-2 grid grid-cols-2 gap-2">
             {PAGE_TEMPLATES.map(tmpl => (
               <button key={tmpl.name} onClick={() => { addPage(tmpl.name); if (isMobile) setMobileView('editor'); }}
-                className="p-4 rounded-[10px] border border-border/60 hover:border-border hover:bg-foreground/[0.02] transition-colors duration-150 text-left group">
-                <FileText className="h-5 w-5 text-ink-2 mb-2" />
-                <p className="text-xs font-medium text-foreground">{tmpl.name}</p>
-                <p className="text-[9px] text-muted-foreground/60 mt-0.5 line-clamp-2">{tmpl.content.split('\n')[0].replace(/^#+\s*/, '') || 'Empty page'}</p>
+                className="rounded-[12px] border border-border/40 bg-card p-4 text-left transition-colors duration-150 hover:bg-foreground/[0.03]">
+                <FileText className="mb-2 h-5 w-5 text-muted-foreground" strokeWidth={1.7} />
+                <p className="text-[13px] font-medium">{tmpl.name}</p>
+                <p className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">{tmpl.content.split('\n')[0].replace(/^#+\s*/, '') || 'A clean page'}</p>
               </button>
             ))}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Image Upload Dialog */}
+      {/* Insert image */}
       <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
-        <DialogContent className="sm:max-w-md rounded-[10px]">
-          <DialogHeader><DialogTitle className="text-sm font-semibold flex items-center gap-2"><Image className="h-4 w-4 text-ink-2" /> Insert image</DialogTitle></DialogHeader>
+        <DialogContent className="rounded-[14px] sm:max-w-md">
+          <DialogHeader><DialogTitle className="flex items-center gap-2 text-sm font-semibold"><Image className="h-4 w-4 text-muted-foreground" /> Insert image</DialogTitle></DialogHeader>
           <Tabs defaultValue="upload" className="mt-1">
-            <TabsList className="grid w-full grid-cols-2 h-8 rounded-lg">
-              <TabsTrigger value="upload" className="text-[11px] rounded-md gap-1.5"><Upload className="h-3 w-3" /> From computer</TabsTrigger>
-              <TabsTrigger value="url" className="text-[11px] rounded-md gap-1.5"><Link2 className="h-3 w-3" /> From URL</TabsTrigger>
+            <TabsList className="grid h-8 w-full grid-cols-2 rounded-[8px]">
+              <TabsTrigger value="upload" className="gap-1.5 rounded-[6px] text-[11px]"><Upload className="h-3 w-3" /> From computer</TabsTrigger>
+              <TabsTrigger value="url" className="gap-1.5 rounded-[6px] text-[11px]"><Link2 className="h-3 w-3" /> From URL</TabsTrigger>
             </TabsList>
             <TabsContent value="upload" className="mt-3">
               <div onClick={() => fileInputRef.current?.click()}
-                className="border border-dashed border-border/60 rounded-[10px] p-8 text-center cursor-pointer hover:border-border hover:bg-foreground/[0.02] transition-colors duration-150">
-                <FileUp className="h-8 w-8 text-ink-2 mx-auto mb-2" />
-                <p className="text-xs font-medium">Click to upload an image</p>
-                <p className="text-[10px] text-muted-foreground mt-1">PNG, JPG, GIF, WebP, SVG</p>
+                className="cursor-pointer rounded-[12px] bg-foreground/[0.025] p-8 text-center transition-colors duration-150 hover:bg-foreground/[0.04]">
+                <FileUp className="mx-auto mb-2 h-7 w-7 text-muted-foreground" strokeWidth={1.6} />
+                <p className="text-xs font-medium">Choose an image</p>
+                <p className="mt-1 text-[10.5px] text-muted-foreground">PNG, JPG, GIF, WebP, SVG</p>
               </div>
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleImageFile(f); }} />
             </TabsContent>
             <TabsContent value="url" className="mt-3 space-y-3">
-              <Input placeholder="https://example.com/image.png" className="text-xs rounded-lg"
+              <Input placeholder="https://example.com/image.png" className="rounded-[8px] text-xs"
                 onKeyDown={e => { if (e.key === 'Enter') { insertMarkdown(`![image](${(e.target as HTMLInputElement).value})`); setShowImageDialog(false); } }} />
-              <p className="text-[10px] text-muted-foreground">Press Enter to insert</p>
+              <p className="text-[10.5px] text-muted-foreground">Press Enter to insert</p>
             </TabsContent>
           </Tabs>
         </DialogContent>
       </Dialog>
 
-      {/* Export Dialog */}
+      {/* Export */}
       <Dialog open={showExport} onOpenChange={setShowExport}>
-        <DialogContent className="sm:max-w-sm rounded-[10px]">
-          <DialogHeader><DialogTitle className="text-sm font-semibold flex items-center gap-2"><Download className="h-4 w-4 text-ink-2" /> Export page</DialogTitle></DialogHeader>
-          <div className="space-y-2 mt-2">
-            <Button variant="outline" className="w-full justify-start text-xs gap-2 rounded-lg h-10" onClick={() => exportPage('md')}>
-              <FileText className="h-4 w-4 text-ink-2" /> Markdown (.md)
+        <DialogContent className="rounded-[14px] sm:max-w-sm">
+          <DialogHeader><DialogTitle className="flex items-center gap-2 text-sm font-semibold"><Download className="h-4 w-4 text-muted-foreground" /> Export note</DialogTitle></DialogHeader>
+          <div className="mt-2 space-y-2">
+            <Button variant="outline" className="h-10 w-full justify-start gap-2 rounded-[10px] text-xs" onClick={() => exportPage('md')}>
+              <FileText className="h-4 w-4 text-muted-foreground" /> Markdown (.md)
             </Button>
-            <Button variant="outline" className="w-full justify-start text-xs gap-2 rounded-lg h-10" onClick={() => exportPage('txt')}>
-              <Type className="h-4 w-4 text-ink-2" /> Plain text (.txt)
+            <Button variant="outline" className="h-10 w-full justify-start gap-2 rounded-[10px] text-xs" onClick={() => exportPage('txt')}>
+              <Type className="h-4 w-4 text-muted-foreground" /> Plain text (.txt)
             </Button>
-            <Button variant="outline" className="w-full justify-start text-xs gap-2 rounded-lg h-10" onClick={() => exportPage('html')}>
-              <Code className="h-4 w-4 text-ink-2" /> HTML (.html)
+            <Button variant="outline" className="h-10 w-full justify-start gap-2 rounded-[10px] text-xs" onClick={() => exportPage('html')}>
+              <Code className="h-4 w-4 text-muted-foreground" /> HTML (.html)
             </Button>
           </div>
         </DialogContent>
