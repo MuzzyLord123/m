@@ -29,10 +29,10 @@ const COMMANDS: CommandItem[] = [
   { title: 'Bullet List', description: 'Unordered list', icon: List, color: 'text-orange-500', category: 'Lists', action: (e) => e.chain().focus().toggleBulletList().run() },
   { title: 'Numbered List', description: 'Ordered list', icon: ListOrdered, color: 'text-orange-400', category: 'Lists', action: (e) => e.chain().focus().toggleOrderedList().run() },
   { title: 'Task List', description: 'Checklist items', icon: CheckSquare, color: 'text-green-500', category: 'Lists', action: (e) => e.chain().focus().toggleTaskList().run() },
-  { title: 'Block Quote', description: 'Indented quote block', icon: Quote, color: 'text-purple-500', category: 'Blocks', action: (e) => e.chain().focus().toggleBlockquote().run() },
+  { title: 'Block Quote', description: 'Indented quote block', icon: Quote, color: 'text-muted-foreground', category: 'Blocks', action: (e) => e.chain().focus().toggleBlockquote().run() },
   { title: 'Code Block', description: 'Code with syntax highlighting', icon: Code2, color: 'text-emerald-500', category: 'Blocks', action: (e) => e.chain().focus().toggleCodeBlock().run() },
   { title: 'Divider', description: 'Horizontal separator', icon: Minus, color: 'text-muted-foreground', category: 'Blocks', action: (e) => e.chain().focus().setHorizontalRule().run() },
-  { title: 'Table', description: 'Insert a 3×3 table', icon: TableIcon, color: 'text-indigo-500', category: 'Blocks', action: (e) => e.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
+  { title: 'Table', description: 'Insert a 3×3 table', icon: TableIcon, color: 'text-muted-foreground', category: 'Blocks', action: (e) => e.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
   { title: 'Callout', description: 'Info callout block', icon: AlertCircle, color: 'text-amber-500', category: 'Blocks', action: (e) => e.chain().focus().toggleBlockquote().run() },
   { title: 'Date', description: 'Insert current date', icon: Calendar, color: 'text-cyan-500', category: 'Inline', action: (e) => e.chain().focus().insertContent(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })).run() },
   { title: 'Time', description: 'Insert current time', icon: Clock, color: 'text-cyan-400', category: 'Inline', action: (e) => e.chain().focus().insertContent(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })).run() },
@@ -165,7 +165,7 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
   return (
     <div
       ref={menuRef}
-      className="absolute z-50 w-64 max-h-80 overflow-auto bg-popover border border-border/50 rounded-xl shadow-2xl backdrop-blur-xl"
+      className="absolute z-50 w-64 max-h-80 overflow-auto bg-popover border border-border/50 rounded-[12px] shadow-2xl"
       style={{ top: position.top, left: Math.max(8, position.left) }}
     >
       <div className="p-1.5">

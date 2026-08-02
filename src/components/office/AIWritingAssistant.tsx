@@ -17,13 +17,13 @@ interface AIWritingAssistantProps {
 }
 
 const AI_ACTIONS = [
-  { id: 'rewrite', label: 'Rewrite', icon: Wand2, desc: 'Improve clarity & flow', color: 'text-violet-500' },
+  { id: 'rewrite', label: 'Rewrite', icon: Wand2, desc: 'Improve clarity & flow', color: 'text-primary' },
   { id: 'expand', label: 'Expand', icon: Expand, desc: 'Add more detail', color: 'text-blue-500' },
   { id: 'shorten', label: 'Shorten', icon: Scissors, desc: 'Make concise', color: 'text-amber-500' },
   { id: 'fix_grammar', label: 'Fix Grammar', icon: CheckCircle, desc: 'Correct errors', color: 'text-emerald-500' },
   { id: 'summarize', label: 'Summarize', icon: Type, desc: '2-3 sentence summary', color: 'text-cyan-500' },
   { id: 'continue', label: 'Continue Writing', icon: ArrowRight, desc: 'Continue from cursor', color: 'text-pink-500' },
-  { id: 'formal', label: 'Make Formal', icon: MessageCircle, desc: 'Professional tone', color: 'text-indigo-500' },
+  { id: 'formal', label: 'Make Formal', icon: MessageCircle, desc: 'Professional tone', color: 'text-muted-foreground' },
   { id: 'casual', label: 'Make Casual', icon: MessageCircle, desc: 'Conversational tone', color: 'text-orange-500' },
 ];
 
@@ -117,7 +117,7 @@ export function AIWritingAssistant({ editor }: AIWritingAssistantProps) {
                 loading && "animate-pulse"
               )}
             >
-              <Sparkles className="h-3.5 w-3.5 text-violet-500" />
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
               {loading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-[6px]">
                   <Loader2 className="h-3 w-3 animate-spin text-primary" />

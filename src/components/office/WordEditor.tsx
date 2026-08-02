@@ -36,6 +36,7 @@ import { SlashCommandMenu } from './SlashCommandMenu';
 import { TableOfContents } from './TableOfContents';
 import { MarkdownImport } from './MarkdownImport';
 import { cn } from '@/lib/utils';
+import { AppTile } from '@/pages/lounge/office/AppTile';
 import {
   ArrowLeft, FileText, Loader2, Cloud, CloudOff, Share2, Clock,
   ChevronRight, ChevronDown, Keyboard, X, List as ListIcon,
@@ -692,9 +693,7 @@ export function WordEditor({ documentId }: WordEditorProps) {
             className="absolute inset-0 z-50 flex items-center justify-center bg-background"
           >
             <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
+              <AppTile id="docs" icon={FileText} size={48} />
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               <span className="text-xs text-muted-foreground">Loading document…</span>
             </div>
@@ -705,13 +704,11 @@ export function WordEditor({ documentId }: WordEditorProps) {
       {/* Title Bar */}
       {showTitleBar && (
         <div className="shrink-0">
-          <div className="flex items-center gap-2 px-3 h-10 bg-card/80 backdrop-blur-sm border-b border-border/30 select-none">
+          <div className="flex items-center gap-2 px-3 h-10 bg-card border-b border-border/30 select-none">
             <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-secondary/80" onClick={() => navigate('/lounge/office/word-home')}>
               <ArrowLeft className="h-3.5 w-3.5" />
             </Button>
-            <div className="h-6 w-6 rounded-[7px] bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-sm">
-              <FileText className="h-3.5 w-3.5 text-white" />
-            </div>
+            <AppTile id="docs" icon={FileText} size={24} />
             {isEditingTitle ? (
               <Input value={title} onChange={(e) => setTitle(e.target.value)} onBlur={handleTitleBlur} onKeyDown={(e) => e.key === 'Enter' && handleTitleBlur()} autoFocus className="h-6 text-[12px] font-medium w-64 rounded-md bg-secondary/60 border-border/40" />
             ) : (
@@ -808,7 +805,7 @@ export function WordEditor({ documentId }: WordEditorProps) {
                   <FileText className="h-3.5 w-3.5 text-blue-500" /> Markdown (.md)
                 </button>
                 <button onClick={handleExportDocx} className="flex items-center gap-2 w-full px-3 py-2 text-xs rounded-lg hover:bg-muted transition-colors text-foreground">
-                  <FileText className="h-3.5 w-3.5 text-indigo-500" /> Word (.docx)
+                  <FileText className="h-3.5 w-3.5 text-muted-foreground" /> Word (.docx)
                 </button>
                 <button onClick={handleExportTxt} className="flex items-center gap-2 w-full px-3 py-2 text-xs rounded-lg hover:bg-muted transition-colors text-foreground">
                   <FileText className="h-3.5 w-3.5 text-muted-foreground" /> Plain Text (.txt)
@@ -883,7 +880,7 @@ export function WordEditor({ documentId }: WordEditorProps) {
       {/* Focus mode escape hint */}
       {(focusMode || readingMode) && (
         <div className="absolute top-2 right-2 z-50">
-          <Button variant="secondary" size="sm" className="h-6 text-[9px] rounded-lg shadow-lg bg-card/90 backdrop-blur-sm border border-border/40" onClick={() => { setFocusMode(false); setReadingMode(false); }}>
+          <Button variant="secondary" size="sm" className="h-6 text-[9px] rounded-lg shadow-lg bg-card border border-border/40" onClick={() => { setFocusMode(false); setReadingMode(false); }}>
             Exit {focusMode ? 'Focus' : 'Reading'} Mode — Esc
           </Button>
         </div>
@@ -997,7 +994,7 @@ export function WordEditor({ documentId }: WordEditorProps) {
 
       {/* Status Bar with word goal mini */}
       {!focusMode && (
-        <div className="flex items-center justify-between px-3 h-6 bg-card/80 backdrop-blur-sm border-t border-border/30 text-[9px] text-muted-foreground/70 shrink-0 select-none font-medium">
+        <div className="flex items-center justify-between px-3 h-6 bg-card border-t border-border/30 text-[9px] text-muted-foreground/70 shrink-0 select-none font-medium">
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1">
               <FileText className="h-2.5 w-2.5" />
@@ -1055,7 +1052,7 @@ export function WordEditor({ documentId }: WordEditorProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-12 right-4 z-50 w-64 bg-card/95 backdrop-blur-xl border border-border/40 rounded-xl shadow-2xl overflow-hidden"
+            className="absolute bottom-12 right-4 z-50 w-64 bg-card border border-border/40 rounded-[12px] shadow-2xl overflow-hidden"
           >
             <div className="flex items-center justify-between px-3 py-2 border-b border-border/30">
               <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Keyboard Shortcuts</h3>

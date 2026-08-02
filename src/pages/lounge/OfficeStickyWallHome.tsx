@@ -4,6 +4,7 @@ import { ArrowLeft, StickyNote, Plus, Clock, Star, Grid3X3, Trash2, MoreHorizont
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -69,25 +70,18 @@ export default function OfficeStickyWallHome() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
-      <header className="shrink-0 h-[52px] border-b border-border/30 bg-background/80 backdrop-blur-2xl flex items-center px-5 gap-3">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-xl text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Back to Office</span>
+      <OfficeModuleBand appId="sticky" icon={StickyNote} title="Sticky wall" context={walls.length ? `${walls.length} ${walls.length === 1 ? 'wall' : 'walls'}` : undefined}>
+        <Button size="sm" className="h-8 gap-1.5 rounded-[8px] text-xs" onClick={createNewWall}>
+          <Plus className="h-3.5 w-3.5" /> New wall
         </Button>
-        <div className="h-4 w-px bg-border/40" />
-        <StickyNote className="h-4 w-4 text-yellow-500" />
-        <span className="text-sm font-semibold tracking-tight">Sticky Wall</span>
-        <div className="flex-1" />
-        <Button size="sm" className="h-8 gap-1.5 rounded-xl text-xs" onClick={createNewWall}>
-          <Plus className="h-3.5 w-3.5" /> New Wall
-        </Button>
-      </header>
+      </OfficeModuleBand>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto bg-card/45">
         <div className="max-w-5xl mx-auto px-6 sm:px-10">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-6">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Sticky Wall</h1>
-            <p className="text-sm text-muted-foreground/60 mt-1">Visual notes and spatial thinking boards.</p>
-          </motion.div>
+          <div className="pb-6 pt-7">
+            <h1 className="font-display text-[24px] font-semibold leading-tight tracking-[-0.02em]">Your walls</h1>
+            <p className="mt-1 text-[13px] text-muted-foreground">Visual notes and spatial thinking, saved to your workspace.</p>
+          </div>
 
           {/* Quick actions */}
           <section className="mb-8">
@@ -99,9 +93,9 @@ export default function OfficeStickyWallHome() {
               ].map((action, i) => (
                 <motion.button key={action.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                   onClick={createNewWall}
-                  className="group flex items-center gap-4 p-5 rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all">
-                  <div className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${action.color}15` }}>
-                    <action.icon className="h-5 w-5" style={{ color: action.color }} />
+                  className="group flex items-center gap-4 p-5 rounded-[14px] border border-border/40 bg-card transition-colors hover:bg-foreground/[0.03]">
+                  <div className="h-10 w-10 rounded-[10px] flex items-center justify-center shrink-0 bg-foreground/[0.05]">
+                    <action.icon className="h-4 w-4 text-muted-foreground" strokeWidth={1.7} />
                   </div>
                   <div className="text-left">
                     <span className="text-[12px] font-semibold text-foreground block">{action.label}</span>
@@ -114,7 +108,7 @@ export default function OfficeStickyWallHome() {
 
           {loading ? (
             <div className="space-y-3">
-              {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-2xl bg-muted/20 animate-pulse" />)}
+              {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-[14px] bg-foreground/[0.04] animate-pulse" />)}
             </div>
           ) : walls.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground/50 text-sm">
@@ -164,11 +158,11 @@ function WallCard({ wall, onClick, onToggleStar, onDelete, getPreviewColors }: {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={onClick}
-      className="group p-5 rounded-2xl bg-card/50 border border-border/20 hover:border-border/40 hover:shadow-lg transition-all text-left cursor-pointer relative">
+      className="group p-5 rounded-[14px] border border-border/40 bg-card transition-colors hover:bg-foreground/[0.03] text-left cursor-pointer relative">
       {/* Actions */}
       <div className="absolute top-3 right-3 flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
         <button onClick={e => onToggleStar(e, wall)} className="h-6 w-6 rounded-md hover:bg-accent/40 flex items-center justify-center">
-          <Star className={cn("h-3 w-3", wall.is_starred ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground")} />
+          <Star className={cn("h-3 w-3", wall.is_starred ? "fill-attend text-attend" : "text-muted-foreground")} />
         </button>
         <button onClick={e => onDelete(e, wall.id)} className="h-6 w-6 rounded-md hover:bg-destructive/10 flex items-center justify-center">
           <Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" />

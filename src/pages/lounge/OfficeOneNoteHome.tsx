@@ -62,9 +62,9 @@ const PAGE_TEMPLATES = [
   { name: 'Blank', content: '' },
   { name: 'Meeting Notes', content: '# Meeting Notes\n\n**Date:** \n**Attendees:** \n\n## Agenda\n1. \n2. \n3. \n\n## Discussion\n\n\n## Action Items\n- [ ] \n- [ ] \n\n## Key Decisions\n- \n\n---\n*Next meeting:*' },
   { name: 'Project Plan', content: '# Project: \n\n## Overview\n\n\n## Goals\n1. \n2. \n3. \n\n## Timeline\n| Phase | Start | End | Status |\n|-------|-------|-----|--------|\n| Planning | | | ⏳ |\n| Development | | | |\n| Testing | | | |\n| Launch | | | |\n\n## Resources\n- \n\n## Risks & Mitigations\n- **Risk:** \n  - Mitigation: ' },
-  { name: 'Daily Journal', content: '# Journal — \n\n## 🌅 Morning\n**Mood:** \n**Top 3 priorities:**\n1. \n2. \n3. \n\n## 📝 Notes\n\n\n## 🌙 Evening Reflection\n**What went well:**\n- \n\n**What to improve:**\n- \n\n**Grateful for:**\n- ' },
+  { name: 'Daily Journal', content: '# Journal — \n\n## Morning\n**Mood:** \n**Top 3 priorities:**\n1. \n2. \n3. \n\n## Notes\n\n\n## Evening Reflection\n**What went well:**\n- \n\n**What to improve:**\n- \n\n**Grateful for:**\n- ' },
   { name: 'Research Notes', content: '# Research: \n\n## Summary\n\n\n## Key Findings\n1. \n2. \n3. \n\n## Sources\n- [Source 1]()\n- [Source 2]()\n\n## Quotes\n> \n\n## Open Questions\n- [ ] \n- [ ] \n\n## Next Steps\n- ' },
-  { name: 'Weekly Review', content: '# Weekly Review — Week of \n\n## ✅ Accomplished\n- \n- \n\n## 📊 Metrics\n| Metric | Target | Actual |\n|--------|--------|--------|\n| | | |\n\n## 🚧 In Progress\n- \n\n## 🔜 Next Week\n1. \n2. \n3. \n\n## 💡 Ideas & Insights\n- ' },
+  { name: 'Weekly Review', content: '# Weekly Review — Week of \n\n## ✅ Accomplished\n- \n- \n\n## Metrics\n| Metric | Target | Actual |\n|--------|--------|--------|\n| | | |\n\n## In Progress\n- \n\n## Next Week\n1. \n2. \n3. \n\n## Ideas & Insights\n- ' },
 ];
 
 let nextId = 1;

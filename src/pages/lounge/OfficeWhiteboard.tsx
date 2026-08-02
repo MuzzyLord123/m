@@ -194,7 +194,7 @@ export default function OfficeWhiteboard() {
       <div className="flex-1 flex overflow-hidden">
         {/* Tool Rail — vertical on desktop, horizontal bottom bar on mobile */}
         {isMobile ? (
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/30 flex items-center px-2 py-2 gap-1 overflow-x-auto scrollbar-none" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95  border-t border-border/30 flex items-center px-2 py-2 gap-1 overflow-x-auto scrollbar-none" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
             {TOOLS.map(tool => (
               <button key={tool.id}
                 onClick={() => setActiveTool(tool.id)}
@@ -215,7 +215,7 @@ export default function OfficeWhiteboard() {
             ))}
           </div>
         ) : (
-          <div className="w-12 border-r border-border/20 bg-background/60 backdrop-blur-xl flex flex-col items-center py-3 gap-1 shrink-0">
+          <div className="w-12 border-r border-border/20 bg-background/60  flex flex-col items-center py-3 gap-1 shrink-0">
             {TOOLS.map(tool => (
               <Tooltip key={tool.id}>
                 <TooltipTrigger asChild>
@@ -234,7 +234,7 @@ export default function OfficeWhiteboard() {
 
             <div className="flex flex-col gap-1">
               {COLORS.slice(0, 5).map(c => (
-                <button key={c} onClick={() => setActiveColor(c)} className={cn("h-5 w-5 rounded-full border-2 transition-all", activeColor === c ? "border-foreground scale-110" : "border-transparent hover:scale-105")} style={{ background: c }} />
+                <button key={c} onClick={() => setActiveColor(c)} className={cn("h-5 w-5 rounded-full border-2 transition-all", activeColor === c ? "border-foreground scale-110" : "border-transparent ")} style={{ background: c }} />
               ))}
             </div>
           </div>

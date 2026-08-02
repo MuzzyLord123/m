@@ -1,0 +1,72 @@
+<!-- Office overhaul · shell + anatomy spec · 2026-08-02 -->
+# OFFICE-SPEC.md
+
+The chosen chrome is **Instrument ink** (Checkpoint 1): black chrome
+under a lifted content plane, one ember accent, whispered-tint app
+marks. This document is the contract every module is held to.
+
+## 1. The shell (src/pages/lounge/LoungeOffice.tsx)
+
+- **Title band** — h-12, bg-black/60, hairline bottom + 1px ember
+  scanline (bg-primary/60). Contents: exit (round ghost), divider,
+  Q mark (22px primary tile), "Office", centre command affordance
+  (lg+, 300px, rounded-[7px]), mobile search icon, account button
+  (initials, real profile menu). No dead affordances: the settings
+  gear and notifications bell ship only when wired to real surfaces.
+- **Sidebar** — 216px, bg-black/60. Workspace (Today / Every app /
+  Recent work, active = ember text + left bar) then the six IA groups,
+  each label ember-ticked, app rows h-8 with 20px marks. Footer:
+  "Quooro Office 2.0" + collapse. Collapses to the 64px pinned rail
+  (localStorage `office:rail`).
+- **Command palette** — ⌘K / Ctrl K / `/`, and both search
+  affordances. Sections: Views, Create, Apps, Recent work. Arrow keys,
+  Enter, Esc; listbox semantics. It is the only global search surface.
+- **Shortcut overlay** — `?`. Lists only keys that work.
+- **Mobile** — frosted tab bar (Home/Apps/Recents, active tinted
+  ember), launcher clear of the tab bar, palette from the band icon.
+
+## 2. Page anatomy (src/pages/lounge/office/ModuleShell.tsx)
+
+Every module mounts: **OfficeModuleBand** (back → Office with
+fromOfficeApp state; AppTile 22 + module name; optional context count;
+right-side actions) → toolbar (module's own filters/search) →
+**OfficeContent** (bg-card/45 plane, max-w 1000/1240) → detail
+(drawer/sheet per module). **OfficeEmpty** is the only empty state.
+Editors (Docs, Sheets canvas, Design, Whiteboard, PDF) may run
+full-bleed under the band — the band itself is non-negotiable.
+
+Deviating from the anatomy requires a written reason here. Current
+deviations: none.
+
+## 3. Type + surface system
+
+- SECTION `text-[13.5px] font-semibold tracking-[-0.01em]`
+- LABEL `text-[10px] uppercase tracking-[0.09em]` (table furniture only)
+- GROUP `rounded-[14px] border-border/40 bg-card`; PILL for search
+- AppTile (office/AppTile.tsx): graphite squircle, glyph in the app hue
+  desaturated ≤34% sat, lightness via --office-glyph-l (36% light /
+  71% dark). The ONLY place app colour exists.
+- One accent (ember) for intent: active states, primary buttons,
+  scanline, text links.
+- No gradients, glass, scale-hovers, emoji, or purple outside tokens.
+
+## 4. Today briefing (home)
+
+Composed only from sources the census proved: greeting + counts
+(merged recents), operational line, **Needs you** (pending
+hr_time_off_requests · open office_polls · due localStorage tasks with
+"saved on this device"), Continue working, Create, Frequent, suite
+index, Starred. Blocks self-remove when empty; the quiet state says
+"Nothing needs you right now."
+
+## 5. Module status (rollout ledger)
+
+On the anatomy: **Expenses** (proof module — band, LABEL furniture,
+honest empty, real monthly buckets, Reports tab removed as it filtered
+nothing), **Polls home** (rebuilt on real office_polls), **Forms home**
++ **Whiteboard home** (honest launchers — their fake seeded lists are
+gone), **Sticky wall home** (band + system cards), **Bookmarks** (band,
+fake seeds removed, initials marks).
+Swept but not yet on the band: Docs editor chrome (gradients/glass/
+purple removed, marks via AppTile), PDF hub radii, Whiteboard editor
+glass. Remaining modules queue in OFFICE-ROADMAP.md §1.

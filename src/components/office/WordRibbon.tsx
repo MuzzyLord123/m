@@ -724,7 +724,7 @@ export function WordRibbon({ editor, onExportPdf, onExportTxt, onExportHtml, onE
 
   return (
     <TooltipProvider>
-      <div className="bg-card/95 backdrop-blur-sm border-b border-border/40 shrink-0">
+      <div className="bg-card border-b border-border/40 shrink-0">
         {/* Tab row */}
         <div className="flex items-center px-1 bg-muted/30 overflow-x-auto scrollbar-none flex-nowrap">
           {TABS.map((tab) => (

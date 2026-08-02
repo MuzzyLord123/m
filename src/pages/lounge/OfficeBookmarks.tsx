@@ -4,6 +4,7 @@ import { ArrowLeft, Bookmark, Plus, Trash2, ExternalLink, Search, Star, Grid3X3,
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
 import { EmptyState, FIELD } from '@/components/platform';
 
@@ -29,16 +30,7 @@ function InitialMark({ title, size = 'md' }: { title: string; size?: 'sm' | 'md'
 
 export default function OfficeBookmarks() {
   const navigate = useNavigate();
-  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([
-    { id: '1', title: 'GitHub', url: 'https://github.com', category: 'Development', favicon: '🐙', isStarred: true, createdAt: new Date() },
-    { id: '2', title: 'Figma', url: 'https://figma.com', category: 'Design', favicon: '🎨', isStarred: true, createdAt: new Date() },
-    { id: '3', title: 'MDN Web Docs', url: 'https://developer.mozilla.org', category: 'Development', favicon: '📚', isStarred: false, createdAt: new Date() },
-    { id: '4', title: 'Google Analytics', url: 'https://analytics.google.com', category: 'Work', favicon: '📊', isStarred: false, createdAt: new Date() },
-    { id: '5', title: 'Stack Overflow', url: 'https://stackoverflow.com', category: 'Development', favicon: '💡', isStarred: true, createdAt: new Date() },
-    { id: '6', title: 'Dribbble', url: 'https://dribbble.com', category: 'Design', favicon: '🏀', isStarred: false, createdAt: new Date() },
-    { id: '7', title: 'Notion', url: 'https://notion.so', category: 'Work', favicon: '📝', isStarred: false, createdAt: new Date() },
-    { id: '8', title: 'ArXiv Papers', url: 'https://arxiv.org', category: 'Research', favicon: '🔬', isStarred: false, createdAt: new Date() },
-  ]);
+  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -49,7 +41,7 @@ export default function OfficeBookmarks() {
 
   const addBookmark = () => {
     if (!newTitle.trim() || !newUrl.trim()) { toast.error('Fill in title and URL'); return; }
-    const bm: BookmarkItem = { id: Date.now().toString(), title: newTitle, url: newUrl.startsWith('http') ? newUrl : `https://${newUrl}`, category: newCategory, favicon: '🔗', isStarred: false, createdAt: new Date() };
+    const bm: BookmarkItem = { id: Date.now().toString(), title: newTitle, url: newUrl.startsWith('http') ? newUrl : `https://${newUrl}`, category: newCategory, favicon: '', isStarred: false, createdAt: new Date() };
     setBookmarks(prev => [bm, ...prev]);
     setNewTitle(''); setNewUrl(''); setShowAdd(false);
     toast.success('Bookmark added');
@@ -64,17 +56,7 @@ export default function OfficeBookmarks() {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-border/60 bg-card px-3 sm:gap-3 sm:px-5">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Back to Office</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60" />
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-foreground/[0.04]">
-          <Bookmark className="h-3.5 w-3.5 text-ink-2" strokeWidth={1.7} />
-        </span>
-        <span className="text-sm font-semibold tracking-tight">Bookmarks</span>
-        <div className="flex-1" />
+      <OfficeModuleBand appId="bookmarks" icon={Bookmark} title="Bookmarks" context={bookmarks.length ? `${bookmarks.length} saved` : undefined}>
         <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-border/60 bg-card p-0.5">
           <button aria-label="Grid view" onClick={() => setViewMode('grid')} className={cn('flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150', viewMode === 'grid' ? 'bg-foreground/[0.05] text-foreground' : 'text-muted-foreground')}>
             <Grid3X3 className="h-3.5 w-3.5" />
@@ -86,9 +68,9 @@ export default function OfficeBookmarks() {
         <Button size="sm" className="h-8 shrink-0 gap-1.5 rounded-lg px-3 text-xs" onClick={() => setShowAdd(!showAdd)}>
           <Plus className="h-3.5 w-3.5" /> Add
         </Button>
-      </header>
+      </OfficeModuleBand>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto bg-card/45">
         <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
           <span className="mb-1 block font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Quooro Office · Bookmarks</span>
           <h1 className="mb-0.5 text-[17px] font-semibold tracking-[-0.015em] text-foreground">Bookmarks</h1>

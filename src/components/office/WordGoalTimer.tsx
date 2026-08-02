@@ -112,7 +112,7 @@ export function WordGoalTimer({ wordCount, open, onOpenChange }: WordGoalTimerPr
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm rounded-2xl p-0 overflow-hidden">
-        <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6">
+        <div className="bg-foreground/[0.03] p-6">
           <DialogHeader>
             <DialogTitle className="text-sm font-bold flex items-center gap-2">
               <Target className="h-4 w-4 text-primary" />

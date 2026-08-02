@@ -71,7 +71,7 @@ export function WordStatusBar({ wordCount, charCount, pageCount, zoom, onZoomCha
   const wpmColor = wpm >= 40 ? 'text-emerald-400' : wpm >= 15 ? 'text-primary/70' : 'text-muted-foreground/50';
 
   return (
-    <div className="flex items-center justify-between px-3 h-6 bg-card/80 backdrop-blur-sm border-t border-border/30 text-[9px] text-muted-foreground/70 shrink-0 select-none font-medium">
+    <div className="flex items-center justify-between px-3 h-6 bg-card border-t border-border/30 text-[9px] text-muted-foreground/70 shrink-0 select-none font-medium">
       {/* Left */}
       <div className="flex items-center gap-2.5">
         <div className="flex items-center gap-1">

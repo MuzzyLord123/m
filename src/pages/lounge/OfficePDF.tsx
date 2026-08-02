@@ -242,7 +242,7 @@ export default function OfficePDF() {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="max-w-md w-full p-10 rounded-3xl border-2 border-dashed border-border/30 bg-card/30 flex flex-col items-center gap-4 hover:border-primary/30 transition-all cursor-pointer"
             onClick={() => fileInputRef.current?.click()}>
-            <div className="h-16 w-16 rounded-2xl bg-destructive/10 flex items-center justify-center">
+            <div className="h-16 w-16 rounded-[14px] bg-destructive/10 flex items-center justify-center">
               <Upload className="h-8 w-8 text-destructive" />
             </div>
             <div className="text-center">
