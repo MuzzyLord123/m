@@ -12,6 +12,7 @@ import {
   Upload, Link2, ImagePlus, FileUp, Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import {
   Slide, SlideElement, SLIDE_LAYOUTS, THEMES, uid, SlideTheme,
@@ -271,15 +272,14 @@ export default function OfficePowerPointHome() {
   if (showGrid) {
     return (
       <div className="h-full flex flex-col overflow-hidden bg-background">
-        <div className="flex items-center gap-2 px-4 h-12 bg-card border-b border-border/60 shrink-0">
-          <Button variant="ghost" size="icon" aria-label="Back to editor" className="h-8 w-8 rounded-lg" onClick={() => setShowGrid(false)}>
-            <ArrowLeft className="h-4 w-4" />
+        <div className="relative flex h-12 shrink-0 items-center gap-2.5 border-b border-border/60 bg-black/60 px-3.5">
+          <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/60" />
+          <Button variant="ghost" size="sm" className="h-8 gap-0.5 rounded-full px-2 text-[13px] text-primary" onClick={() => setShowGrid(false)}>
+            <ArrowLeft className="h-4 w-4" /> Editor
           </Button>
-          <div className="h-8 w-8 rounded-lg bg-foreground/[0.04] flex items-center justify-center">
-            <Presentation className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
-          </div>
-          <span className="text-sm font-semibold tracking-tight text-foreground">Slide overview</span>
-          <span className="font-mono text-[10px] tabular-nums text-muted-foreground ml-1">{slides.length} slides</span>
+          <span aria-hidden className="h-4 w-px bg-border/50" />
+          <span className="text-[13.5px] font-semibold tracking-[-0.01em]">Slide overview</span>
+          <span className="text-[11.5px] tabular-nums text-muted-foreground">{slides.length} slides</span>
           <div className="flex-1" />
           <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg" onClick={() => setShowGrid(false)}>
             <X className="h-3.5 w-3.5 mr-1" /> Close
@@ -322,15 +322,7 @@ export default function OfficePowerPointHome() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
-      {/* Title Bar */}
-      <div className="flex items-center gap-2 px-3 h-11 bg-card border-b border-border/60 shrink-0 select-none">
-        <Button variant="ghost" size="icon" aria-label="Back to Slides" className="h-8 w-8 rounded-lg" onClick={() => navigate('/lounge/office/powerpoint-home')}>
-          <ArrowLeft className="h-3.5 w-3.5" />
-        </Button>
-        <div className="h-8 w-8 rounded-lg bg-foreground/[0.04] flex items-center justify-center">
-          <Presentation className="h-4 w-4 text-ink-2" strokeWidth={1.7} />
-        </div>
-
+      <OfficeModuleBand appId="slides" icon={Presentation} title="Slides">
         {isEditingTitle ? (
           <Input
             value={title}
@@ -338,21 +330,22 @@ export default function OfficePowerPointHome() {
             onBlur={() => setIsEditingTitle(false)}
             onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
             autoFocus
-            className="h-7 text-xs font-medium w-64 rounded-lg border-border/60"
+            className="h-8 w-56 rounded-[7px] border-border/70 bg-black/40 text-[12.5px]"
           />
         ) : (
-          <button onClick={() => setIsEditingTitle(true)} className="text-xs font-medium text-foreground hover:bg-foreground/[0.04] transition-colors duration-150 truncate max-w-sm px-2 py-1 rounded-lg">
+          <button onClick={() => setIsEditingTitle(true)}
+            className="max-w-[34vw] truncate rounded-[7px] px-2 py-1 text-[12.5px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground">
             {title}
           </button>
         )}
-        <span className="font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">· Slides</span>
-        <div className="flex-1" />
+        <div className="mx-1 hidden h-4 w-px bg-border/50 sm:block" />
+
 
         {/* Transition picker */}
-        <div className="hidden sm:flex items-center gap-1.5">
-          <span className="font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">Transition</span>
+        <div className="hidden items-center gap-1.5 sm:flex">
+          <span className="text-[11.5px] text-muted-foreground">Transition</span>
           <Select value={slide?.transition || 'fade'} onValueChange={(v) => updateSlideTransition(v as Slide['transition'])}>
-            <SelectTrigger className="h-6 w-20 text-[10px] rounded-lg border-border/60">
+            <SelectTrigger className="h-7 w-20 rounded-[7px] border-border/70 bg-black/40 text-[11.5px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="rounded-[10px]">
@@ -363,8 +356,8 @@ export default function OfficePowerPointHome() {
           </Select>
         </div>
 
-        <span className="hidden sm:block font-mono text-[10px] text-muted-foreground tabular-nums ml-3">Slide {currentSlide + 1} of {slides.length}</span>
-      </div>
+        <span className="ml-2 hidden text-[11.5px] tabular-nums text-muted-foreground sm:block">Slide {currentSlide + 1} of {slides.length}</span>
+      </OfficeModuleBand>
 
       {/* Toolbar */}
       <SlideToolbar

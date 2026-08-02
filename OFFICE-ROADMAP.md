@@ -1,15 +1,17 @@
 <!-- Office overhaul · honest gaps + rollout queue · 2026-08-02 -->
 # OFFICE-ROADMAP.md
 
-## 1. Anatomy rollout queue (band + toolbar + content + empty states)
-word-home, sheets-home/excel editor, powerpoint/slides editor,
-onenote, onedrive, design-studio (5 screens - NOTE: its editor
-gradients are canvas features, chrome only), pdf trio, tasks,
-calculator, pomodoro, polls workspace, sticky wall editor, operations,
-accounting, ecommerce, invoices, hr, wiki, forms builder, analytics,
-time-tracker, contracts, passwords. Each: same band, LABEL furniture,
-OfficeEmpty, mobile card transformation where tables exist
-(accounting, HR, ecommerce flagged at 390 in AUDIT Part O).
+## 1. Anatomy rollout - COMPLETE
+Every routed Office screen now carries the band or a written deviation
+(OFFICE-SPEC §5), including the three canvas editors. Remaining
+polish, not structure:
+- Sheets: mobile ribbon could collapse further at 390 (currently
+  scrolls); column/row resize handles unstyled.
+- Design editor: the Templates panel plates are neutral placeholders -
+  real template thumbnails need a template source.
+- Accounting/HR/E-commerce wide tables scroll horizontally inside
+  their own wrappers (by design); card transformation would suit 390
+  better.
 
 ## 2. Missing data sources (blocks that could not ship honestly)
 - Movement/activity feed: no unified activity source in Office.

@@ -74,17 +74,30 @@ rail - one fix, five screens; its dead More button removed).
 demo files ("Budget 2026", "Revenue Tracker") - both now start honest
 and empty. Time's dead Reports button removed.
 
+**Canvas editors (done):** Sheets and Slides now mount the band, with
+the document name and their own commands (Find/Export; title +
+transition + slide position) as band furniture. Sheets' 25-button
+ribbon condenses to core formatting plus a **Data** menu (sort,
+conditional formatting, freeze) and **Formulas**; its toolbar, formula
+bar, grid gutters and sheet-tab strip wear the ink surface, and the
+9px mono furniture rises to a legible 10.5px. Slides' overview
+sub-view carries the ink header with a labelled back control. The
+Design editor loses its gradient app mark (now the real Design mark),
+its gradient template plates, glass panels and scale-hovers; the
+canvas dot-grid is a feature and stays.
+
 **Written deviations:**
 1. E-commerce keeps its own header - it is a dual-context surface also
    mounted in the Lounge (`embedded` prop); its back targets the Lounge
    when standalone. Adopting the band would break the second context.
    Queued for a context-aware band.
-2. The Sheets (excel-home) and Slides (slides/edit) canvas editors keep
-   their working toolbars as chrome; both were tell-swept previously.
-   Band adoption queued with their next functional pass.
-3. Notes (OneNote) keeps its Apple-Notes-style per-view headers - they
-   carry view controls the band cannot hold; they wear the ink surface
-   (bg-black/60) so they read as the same instrument.
+2. Notes keeps its per-view headers on mobile (Folders → Notes →
+   Editor) - they carry the labelled back controls the drill needs;
+   they wear the ink surface and scanline so they read as one
+   instrument. Desktop Notes mounts the band.
+3. The Design editor keeps its own top bar (File/Edit/View menus, zoom,
+   share, save, export) - a canvas menubar the band cannot hold; it
+   wears the ink surface and scanline.
 
 **Rollout verification:** 22 routes × 1440 + 390 - band present, no
 legacy back-chrome text, no horizontal overflow, no crashes, zero page

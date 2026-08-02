@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { AppTile } from '@/pages/lounge/office/AppTile';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, MousePointer2, Type, Square, Circle, Minus,
@@ -81,18 +82,18 @@ const CANVAS_PRESETS = [
 ];
 
 const TEMPLATE_ITEMS = [
-  { name: 'Minimal Pitch', cat: 'Presentation', color: 'from-slate-200 to-slate-100' },
-  { name: 'Bold Social', cat: 'Social Media', color: 'from-pink-200 to-rose-100' },
-  { name: 'Modern Resume', cat: 'Resume', color: 'from-blue-200 to-indigo-100' },
-  { name: 'Event Poster', cat: 'Poster', color: 'from-orange-200 to-amber-100' },
-  { name: 'Business Flyer', cat: 'Flyer', color: 'from-green-200 to-emerald-100' },
-  { name: 'Newsletter', cat: 'Email', color: 'from-cyan-200 to-sky-100' },
-  { name: 'Brand Identity', cat: 'Branding', color: 'from-violet-200 to-purple-100' },
-  { name: 'YouTube Cover', cat: 'Video', color: 'from-red-200 to-rose-100' },
-  { name: 'Thank You Card', cat: 'Card', color: 'from-amber-200 to-yellow-100' },
-  { name: 'Menu Design', cat: 'Print', color: 'from-teal-200 to-emerald-100' },
-  { name: 'Infographic', cat: 'Presentation', color: 'from-indigo-200 to-blue-100' },
-  { name: 'Photo Collage', cat: 'Photo', color: 'from-fuchsia-200 to-pink-100' },
+  { name: 'Minimal Pitch', cat: 'Presentation' },
+  { name: 'Bold Social', cat: 'Social Media' },
+  { name: 'Modern Resume', cat: 'Resume' },
+  { name: 'Event Poster', cat: 'Poster' },
+  { name: 'Business Flyer', cat: 'Flyer' },
+  { name: 'Newsletter', cat: 'Email' },
+  { name: 'Brand Identity', cat: 'Branding' },
+  { name: 'YouTube Cover', cat: 'Video' },
+  { name: 'Thank You Card', cat: 'Card' },
+  { name: 'Menu Design', cat: 'Print' },
+  { name: 'Infographic', cat: 'Presentation' },
+  { name: 'Photo Collage', cat: 'Photo' },
 ];
 
 const SHAPE_ELEMENTS = [
@@ -484,7 +485,8 @@ export default function DesignStudio() {
       <div className="h-screen w-screen flex flex-col bg-muted/30 text-foreground overflow-hidden select-none" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
 
         {/* ═══════ Top Bar ═══════ */}
-        <header className="h-12 bg-background/95 backdrop-blur-xl border-b border-border/50 flex items-center px-3 gap-1.5 shrink-0 z-50">
+        <header className="relative z-50 flex h-12 shrink-0 items-center gap-1.5 border-b border-border/60 bg-black/60 px-3">
+          <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/60" />
           <Tooltip><TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground" onClick={() => navigate('/lounge/office/design-studio')}>
               <ArrowLeft className="h-4 w-4" />
@@ -495,9 +497,7 @@ export default function DesignStudio() {
 
           {/* Design name */}
           <div className="flex items-center gap-2 mr-2">
-            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shadow-sm">
-              <Sparkles className="h-3 w-3 text-white" />
-            </div>
+            <AppTile id="design" icon={Palette} size={22} />
             <input value={designName} onChange={e => setDesignName(e.target.value)}
               className="text-[11px] font-semibold text-foreground bg-transparent border-none outline-none w-32 hover:bg-muted/50 focus:bg-muted/50 rounded px-1 py-0.5 transition-colors" />
           </div>
@@ -624,8 +624,8 @@ export default function DesignStudio() {
                     <div className="grid grid-cols-2 gap-2">
                       {TEMPLATE_ITEMS.map(t => (
                         <button key={t.name} onClick={() => {}} className="group rounded-xl overflow-hidden text-left">
-                          <div className={cn("aspect-[3/4] bg-gradient-to-br flex items-center justify-center", t.color)}>
-                            <FileText className="h-6 w-6 text-foreground/20" />
+                          <div className="flex aspect-[3/4] items-center justify-center rounded-[8px] border border-border/40 bg-foreground/[0.04]">
+                            <FileText className="h-6 w-6 text-muted-foreground/50" strokeWidth={1.5} />
                           </div>
                           <p className="text-[10px] font-medium text-foreground mt-1.5 truncate px-0.5">{t.name}</p>
                           <p className="text-[9px] text-muted-foreground px-0.5">{t.cat}</p>
@@ -728,7 +728,7 @@ export default function DesignStudio() {
                       <SectionLabel>Brand Colors</SectionLabel>
                       <div className="flex flex-wrap gap-2">
                         {PALETTE.slice(0, 12).map(c => (
-                          <button key={c} className="h-8 w-8 rounded-lg shadow-sm hover:scale-110 transition-transform" style={{ backgroundColor: c }} />
+                          <button key={c} className="h-8 w-8 rounded-[8px] transition-shadow hover:ring-2 hover:ring-foreground/20" style={{ backgroundColor: c }} />
                         ))}
                       </div>
                     </div>
@@ -772,7 +772,7 @@ export default function DesignStudio() {
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Contextual toolbar */}
             {selected && (
-              <div className="h-10 bg-background/90 backdrop-blur border-b border-border/30 flex items-center px-3 gap-1 shrink-0">
+              <div className="h-10 bg-black/40 border-b border-border/40 flex items-center px-3 gap-1 shrink-0">
                 <span className="text-[10px] text-muted-foreground font-medium mr-2">{selected.name}</span>
 
                 {/* Position inputs */}
@@ -841,7 +841,7 @@ export default function DesignStudio() {
               {/* Rulers */}
               {showRulers && (
                 <>
-                  <div className="absolute top-0 left-0 right-0 h-5 bg-background/80 backdrop-blur border-b border-border/20 z-30 flex items-end overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-5 bg-black/40 border-b border-border/30 z-30 flex items-end overflow-hidden">
                     {Array.from({ length: Math.ceil((window.innerWidth) / (50 * zoom)) + 10 }, (_, i) => {
                       const pos = (i * 50 * zoom) + panX + window.innerWidth / 2 - canvasW * zoom / 2;
                       return pos > -50 && pos < window.innerWidth + 50 ? (
@@ -852,7 +852,7 @@ export default function DesignStudio() {
                       ) : null;
                     })}
                   </div>
-                  <div className="absolute top-5 left-0 bottom-0 w-5 bg-background/80 backdrop-blur border-r border-border/20 z-30 flex flex-col items-end overflow-hidden">
+                  <div className="absolute top-5 left-0 bottom-0 w-5 bg-black/40 border-r border-border/30 z-30 flex flex-col items-end overflow-hidden">
                     {Array.from({ length: Math.ceil((window.innerHeight) / (50 * zoom)) + 10 }, (_, i) => {
                       const pos = (i * 50 * zoom) + panY + window.innerHeight / 2 - canvasH * zoom / 2;
                       return pos > -50 && pos < window.innerHeight + 50 ? (
@@ -891,7 +891,7 @@ export default function DesignStudio() {
               </div>
 
               {/* Status pill */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur-xl text-muted-foreground text-[10px] font-mono px-3 py-1 rounded-full border border-border/40 shadow-sm z-20">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/70 text-muted-foreground text-[11px] font-mono px-3 py-1 rounded-full border border-border/50 z-20">
                 Page {activePageIdx + 1}/{pages.length} · {canvasW}×{canvasH} · {elements.length} element{elements.length !== 1 ? 's' : ''} · {Math.round(zoom * 100)}%
               </div>
             </main>
@@ -1047,7 +1047,7 @@ export default function DesignStudio() {
                         {PALETTE.map(c => (
                           <button key={c} onClick={() => { updateElement(selected.id, { fill: c }); commitUpdate(); }}
                             className={cn("h-5 w-5 rounded-md transition-all duration-150",
-                              selected.fill === c ? 'ring-2 ring-primary ring-offset-1 ring-offset-background scale-110' : 'hover:scale-110 border border-border/20'
+                              selected.fill === c ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : 'border border-border/30 hover:ring-2 hover:ring-foreground/20'
                             )}
                             style={{ backgroundColor: c }} />
                         ))}
