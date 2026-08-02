@@ -18,7 +18,7 @@ function getSessionId(): string {
 }
 
 // Do not track authenticated portal areas
-const EXCLUDED_PREFIXES = ['/dashboard', '/lounge', '/admin', '/executive', '/sign-in', '/verify', '/reset-password', '/customer-login'];
+const EXCLUDED_PREFIXES = ['/dashboard', '/lounge', '/admin', '/sign-in', '/verify', '/reset-password', '/customer-login'];
 
 export function useMarketingPageTracker() {
   const location = useLocation();

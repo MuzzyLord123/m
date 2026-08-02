@@ -188,8 +188,6 @@ const LoungePlanner = lazy(() => import("./pages/lounge/LoungePlanner"));
 const LoungeBookings = lazy(() => import("./pages/lounge/LoungeBookings"));
 const BookingPage = lazy(() => import("./pages/BookingPage"));
 const DashboardPlanner = lazy(() => import("./pages/DashboardPlanner"));
-const ExecutiveDashboard = lazy(() => import("./pages/ExecutiveDashboard"));
-const ExecutiveGuard = lazy(() => import("./components/guards/ExecutiveGuard").then(m => ({ default: m.ExecutiveGuard })));
 
 // Optimized QueryClient with caching, dedup, and retry
 const queryClient = new QueryClient({
@@ -395,7 +393,6 @@ function AnimatedRoutes() {
           
           <Route path="/dashboard/planner" element={<ProtectedRoute><TeamGuard><PageTransition><DashboardPlanner /></PageTransition></TeamGuard></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><TeamGuard><PageTransition><Dashboard /></PageTransition></TeamGuard></ProtectedRoute>} />
-          <Route path="/executive" element={<ProtectedRoute><Suspense fallback={<div className="min-h-screen bg-background" />}><ExecutiveGuard><PageTransition><ExecutiveDashboard /></PageTransition></ExecutiveGuard></Suspense></ProtectedRoute>} />
           <Route path="/team/splash" element={<ProtectedRoute><TeamGuard><PageTransition><SplashStudioPage /></PageTransition></TeamGuard></ProtectedRoute>} />
           <Route path="/team/websites" element={<ProtectedRoute><TeamGuard><PageTransition><WebsitesEstatePage /></PageTransition></TeamGuard></ProtectedRoute>} />
           <Route path="/team/subscription-websites" element={<Navigate to="/team/websites" replace />} />

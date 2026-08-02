@@ -53,7 +53,6 @@ export interface TeamNavItemDef {
 
 export const ALL_TEAM_NAV_ITEMS: TeamNavItemDef[] = [
 { id: 'command-center', label: 'Command Center', icon: BarChart3, tab: 'command-center', path: '/dashboard?tab=command-center' },
-{ id: 'executive', label: 'Executive Dashboard', icon: Crown, tab: 'executive', path: '/executive' },
 { id: 'enquiries', label: 'Enquiries', icon: Mail, tab: 'enquiries', path: '/dashboard?tab=enquiries' },
 { id: 'leads', label: 'Business Relationships', icon: Target, tab: 'leads', path: '/dashboard?tab=leads' },
 { id: 'clients', label: 'Clients', icon: Users, tab: 'clients', path: '/dashboard?tab=clients' },

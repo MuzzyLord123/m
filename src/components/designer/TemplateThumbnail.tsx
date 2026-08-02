@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { DesignerTemplate } from './types';
-import { exportToHTML } from './utils/htmlExporter';
+
 
 interface TemplateThumbnailProps {
   template: DesignerTemplate;
@@ -22,22 +22,29 @@ export function TemplateThumbnail({ template, className = '' }: TemplateThumbnai
     return () => obs.disconnect();
   }, []);
 
-  const srcDoc = useMemo(() => {
-    if (!isVisible) return '';
-    const elements = template.pages && template.pages.length > 0
-      ? template.pages[0].elements
-      : template.elements;
-
-    const { html, css, js } = exportToHTML(elements, template.name);
-
-    return html
-      .replace('<link rel="stylesheet" href="styles.css">', `<style>${css}\n* { cursor: default !important; } body { overflow: hidden !important; pointer-events: none !important; } ::-webkit-scrollbar { display: none; }</style>`)
-      .replace('<script src="script.js" defer></script>', `<script>${js}</script>`);
+  /* The HTML export engine is only needed once a card is actually on
+     screen, so it is fetched then rather than shipped with the gallery. */
+  const [srcDoc, setSrcDoc] = useState('');
+  useEffect(() => {
+    if (!isVisible) return;
+    let alive = true;
+    (async () => {
+      const { exportToHTML } = await import('./utils/htmlExporter');
+      const elements = template.pages && template.pages.length > 0
+        ? template.pages[0].elements
+        : template.elements;
+      const { html, css, js } = exportToHTML(elements, template.name);
+      const doc = html
+        .replace('<link rel="stylesheet" href="styles.css">', `<style>${css}\n* { cursor: default !important; } body { overflow: hidden !important; pointer-events: none !important; } ::-webkit-scrollbar { display: none; }</style>`)
+        .replace('<script src="script.js" defer></script>', `<script>${js}</script>`);
+      if (alive) setSrcDoc(doc);
+    })();
+    return () => { alive = false; };
   }, [template, isVisible]);
 
   return (
     <div ref={ref} className={`relative w-full h-full overflow-hidden ${className}`}>
-      {isVisible && (
+      {isVisible && srcDoc && (
         <iframe
           srcDoc={srcDoc}
           title={template.name}

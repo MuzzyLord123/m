@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { DesignerSplash } from '@/components/splash/DesignerSplash';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,7 +20,21 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { TEMPLATES } from '@/components/designer/constants/templates';
+import type { DesignerTemplate } from '@/components/designer/types';
+
+/* The template catalogue is ~200KB of definitions - a third of everything
+   the Workshop downloads. Parsing it before the dashboard could paint is
+   what made opening the Workshop feel slow, so it is fetched only when
+   the marketplace is actually opened (warmed on hover, so the click still
+   feels instant) and cached for the rest of the session. */
+let TEMPLATE_CACHE: DesignerTemplate[] | null = null;
+let TEMPLATE_INFLIGHT: Promise<DesignerTemplate[]> | null = null;
+const loadTemplates = () => {
+  if (TEMPLATE_CACHE) return Promise.resolve(TEMPLATE_CACHE);
+  TEMPLATE_INFLIGHT ??= import('@/components/designer/constants/templates')
+    .then(mod => (TEMPLATE_CACHE = mod.TEMPLATES as DesignerTemplate[]));
+  return TEMPLATE_INFLIGHT;
+};
 import { useUserRole } from '@/hooks/useUserRole';
 import { TemplatePreviewModal } from '@/components/designer/TemplatePreviewModal';
 import { TemplateThumbnail } from '@/components/designer/TemplateThumbnail';
@@ -50,7 +64,7 @@ type ViewMode = 'grid' | 'list';
 type DashTab = 'sites' | 'marketplace';
 
 /* ─── template categories for marketplace ─── */
-const TEMPLATE_CATEGORIES = ['All', ...Array.from(new Set(TEMPLATES.map(t => t.category)))];
+
 
 /* ─────────────── component ─────────────── */
 export default function LoungeWebsiteDesigner() {
@@ -85,10 +99,50 @@ export default function LoungeWebsiteDesigner() {
   // Marketplace state
   const [marketplaceCategory, setMarketplaceCategory] = useState('All');
   const [marketplaceSearch, setMarketplaceSearch] = useState('');
-  const [selectedTemplate, setSelectedTemplate] = useState<typeof TEMPLATES[0] | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<DesignerTemplate | null>(null);
   const [templateSiteName, setTemplateSiteName] = useState('');
   const [creatingFromTemplate, setCreatingFromTemplate] = useState(false);
-  const [previewTemplate, setPreviewTemplate] = useState<typeof TEMPLATES[0] | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<DesignerTemplate | null>(null);
+  const [templates, setTemplates] = useState<DesignerTemplate[]>(() => TEMPLATE_CACHE || []);
+  // Starts pending so the marketplace can never flash "0 templates" in the
+  // frame between the tab opening and the catalogue arriving.
+  const [templatesLoading, setTemplatesLoading] = useState(!TEMPLATE_CACHE);
+
+  /* One place decides when the catalogue lands in state, so a background
+     prefetch and an opened tab can never disagree about what is loaded. */
+  const adoptTemplates = useCallback(() => {
+    if (TEMPLATE_CACHE) { setTemplates(TEMPLATE_CACHE); setTemplatesLoading(false); return; }
+    setTemplatesLoading(true);
+    loadTemplates().then(t => { setTemplates(t); setTemplatesLoading(false); });
+  }, []);
+
+  // Opening the marketplace is the moment the catalogue is definitely needed.
+  useEffect(() => {
+    if (activeTab !== 'marketplace') return;
+    adoptTemplates();
+  }, [activeTab, adoptTemplates]);
+
+  /* Once the dashboard is up and the browser has nothing better to do,
+     fetch the catalogue in the background. The dashboard never waits on
+     it, and the marketplace is already there by the time it is opened. */
+  useEffect(() => {
+    if (!subscribed || TEMPLATE_CACHE) return;
+    const idle = (window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    });
+    if (idle.requestIdleCallback) {
+      const h = idle.requestIdleCallback(() => { void loadTemplates(); }, { timeout: 4000 });
+      return () => idle.cancelIdleCallback?.(h);
+    }
+    const t = window.setTimeout(() => { void loadTemplates(); }, 1500);
+    return () => window.clearTimeout(t);
+  }, [subscribed]);
+
+  const TEMPLATE_CATEGORIES = useMemo(
+    () => ['All', ...Array.from(new Set(templates.map(t => t.category)))],
+    [templates],
+  );
 
   const { isAdmin, loading: roleLoading } = useUserRole();
 
@@ -167,7 +221,7 @@ export default function LoungeWebsiteDesigner() {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error('Not authenticated');
 
-      const template = templateId ? TEMPLATES.find(t => t.id === templateId) : null;
+      const template = templateId ? (await loadTemplates()).find(t => t.id === templateId) : null;
 
       const { data, error } = await supabase
         .from('designer_sites')
@@ -263,7 +317,7 @@ export default function LoungeWebsiteDesigner() {
   );
 
   /* ── marketplace filtering ── */
-  const filteredTemplates = TEMPLATES.filter(t => {
+  const filteredTemplates = templates.filter(t => {
     const matchCat = marketplaceCategory === 'All' || t.category === marketplaceCategory;
     const matchSearch = !marketplaceSearch || t.name.toLowerCase().includes(marketplaceSearch.toLowerCase()) || t.description.toLowerCase().includes(marketplaceSearch.toLowerCase());
     return matchCat && matchSearch;
@@ -395,6 +449,10 @@ export default function LoungeWebsiteDesigner() {
           </button>
           <button
             onClick={() => setActiveTab('marketplace')}
+            /* Warm the catalogue on approach so the tab opens instantly. */
+            onMouseEnter={() => { void loadTemplates(); }}
+            onFocus={() => { void loadTemplates(); }}
+            onTouchStart={() => { void loadTemplates(); }}
             className={cn(
               'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors duration-150',
               activeTab === 'marketplace'
@@ -556,7 +614,9 @@ export default function LoungeWebsiteDesigner() {
             <div>
               <h2 className="text-[13.5px] font-[550] tracking-[-0.01em] text-foreground">Template marketplace</h2>
               <p className="mt-0.5 text-[11.5px] text-muted-foreground">
-                {TEMPLATES.length} professionally designed templates across {TEMPLATE_CATEGORIES.length - 1} industries
+                {templatesLoading
+                  ? 'Opening the catalogue…'
+                  : `${templates.length} professionally designed templates across ${Math.max(0, TEMPLATE_CATEGORIES.length - 1)} industries`}
               </p>
             </div>
             <div className="relative w-full max-w-[240px]">
@@ -590,7 +650,13 @@ export default function LoungeWebsiteDesigner() {
           </div>
 
           {/* Template grid */}
-          {filteredTemplates.length === 0 ? (
+          {templatesLoading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <SkeletonBlock key={i} className="h-[236px] rounded-xl" />
+              ))}
+            </div>
+          ) : filteredTemplates.length === 0 ? (
             <Panel>
               <EmptyState compact title="No matching templates" body="Try a different search or category." />
             </Panel>
@@ -874,7 +940,7 @@ function SiteTable({
 function TemplateCard({
   template, onSelect, onPreview,
 }: {
-  template: typeof TEMPLATES[0]; onSelect: () => void; onPreview: () => void;
+  template: DesignerTemplate; onSelect: () => void; onPreview: () => void;
 }) {
   return (
     <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
