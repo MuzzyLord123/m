@@ -66,7 +66,7 @@ drivers; ⌘K jumps to everything.
 | Greeting + counts | profile name, merged recents | SHIPS (live now) |
 | Needs you: approvals | hr_time_off_requests status=pending | SHIPS Phase 3 |
 | Needs you: open polls | office_polls not yet voted by user | SHIPS Phase 3 |
-| Needs you: running timer | time_entries with no end | SHIPS Phase 3 |
+| Needs you: running timer | — time_entries stores completed durations only; no running state exists | OMITTED → OFFICE-ROADMAP |
 | Today: due tasks | localStorage office-tasks | SHIPS Phase 3, "this device" caveat |
 | Today: edited today | merged recents (exists) | SHIPS (live now) |
 | Movement feed | no unified activity source | OMITTED → OFFICE-ROADMAP |

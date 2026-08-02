@@ -14,9 +14,12 @@ import { PieChart as RPieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChar
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { OfficeModuleBand, OfficeEmpty } from '@/pages/lounge/office/ModuleShell';
+
+const LABEL = 'text-[10px] font-medium uppercase tracking-[0.09em] text-muted-foreground/90';
 
 type ExpenseStatus = 'pending' | 'approved' | 'rejected' | 'reimbursed';
-type TabId = 'all' | 'pending' | 'approved' | 'reports';
+type TabId = 'all' | 'pending' | 'approved';
 
 interface Expense {
   id: string;
@@ -154,28 +157,32 @@ export default function OfficeExpenseManager() {
 
   const categorySums = expenses.reduce((acc, e) => { acc[e.category] = (acc[e.category] || 0) + e.amount; return acc; }, {} as Record<string, number>);
   const CATEGORIES_PIE = Object.entries(categorySums).map(([name, value]) => ({ name, value, color: CATEGORY_COLORS[name] || '#94a3b8' }));
-  const MONTHLY_DATA = [{ month: 'Current', amount: expenses.reduce((s, e) => s + e.amount, 0) }];
+  // Real months from real expense dates - the last six, oldest first.
+  const MONTHLY_DATA = (() => {
+    const now = new Date();
+    return Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+      const amount = expenses
+        .filter(e => { const ed = new Date(e.date); return ed.getFullYear() === d.getFullYear() && ed.getMonth() === d.getMonth(); })
+        .reduce((sum, e) => sum + e.amount, 0);
+      return { month: d.toLocaleDateString('en-GB', { month: 'short' }), amount };
+    });
+  })();
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col overflow-x-hidden overflow-y-hidden">
-      <header className="shrink-0 h-[52px] border-b border-border/60 bg-background flex items-center px-3 sm:px-5 gap-2 sm:gap-3 overflow-hidden">
-        <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg text-xs shrink-0" onClick={() => navigate('/lounge/office', { state: { fromOfficeApp: true } })}>
-          <ArrowLeft className="h-3.5 w-3.5" /><span className="hidden sm:inline">Office</span>
-        </Button>
-        <div className="h-4 w-px bg-border/60 shrink-0" />
-        <span className="whitespace-nowrap font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Expense manager</span>
-        <div className="flex-1 min-w-0" />
+      <OfficeModuleBand appId="expenses" icon={Receipt} title="Expenses" context={expenses.length ? `${expenses.length} this period` : undefined}>
         <input ref={fileInputRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleReceiptUpload} />
-        <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-lg text-xs shrink-0" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+        <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-[8px] text-xs shrink-0" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
           {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
           <span className="hidden sm:inline">{uploading ? 'Scanning…' : 'Upload receipt'}</span>
         </Button>
-        <Button size="sm" className="h-8 gap-1.5 rounded-lg text-xs shrink-0" onClick={() => setShowAdd(true)}>
+        <Button size="sm" className="h-8 gap-1.5 rounded-[8px] text-xs shrink-0" onClick={() => setShowAdd(true)}>
           <Plus className="h-3.5 w-3.5" /><span className="hidden sm:inline">New expense</span>
         </Button>
-      </header>
+      </OfficeModuleBand>
 
-      <div className="flex-1 overflow-x-hidden overflow-y-auto">
+      <div className="flex-1 overflow-x-hidden overflow-y-auto bg-card/45">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
           {/* Position ledger */}
           <div className="overflow-hidden rounded-[10px] border border-border/60 bg-card">
@@ -187,7 +194,7 @@ export default function OfficeExpenseManager() {
                 { label: 'Reimbursed', value: `£${totalReimbursed.toLocaleString()}`, sub: 'Completed' },
               ].map(card => (
                 <div key={card.label} className="flex items-center justify-between gap-3 bg-card px-4 py-3">
-                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{card.label}</span>
+                  <span className={LABEL}>{card.label}</span>
                   <span className="text-right">
                     <span className="block font-mono text-[15px] font-medium tabular-nums leading-tight text-foreground">{card.value}</span>
                     {card.sub && <span className="block font-mono text-[10px] tabular-nums text-muted-foreground">{card.sub}</span>}
@@ -202,7 +209,7 @@ export default function OfficeExpenseManager() {
             <div
               className="lg:col-span-2 rounded-[10px] bg-card border border-border/60 p-3 sm:p-4">
               <h3 className="text-[13px] font-[550] tracking-[-0.01em] text-foreground mb-1">Monthly spending trend</h3>
-              <p className="text-[10px] text-muted-foreground mb-4">Current overview</p>
+              <p className="text-[10px] text-muted-foreground mb-4">Last six months</p>
               <ResponsiveContainer width="100%" height={160}>
                 <BarChart data={MONTHLY_DATA}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
@@ -252,7 +259,6 @@ export default function OfficeExpenseManager() {
                   { id: 'all' as TabId, label: 'All expenses' },
                   { id: 'pending' as TabId, label: 'Pending' },
                   { id: 'approved' as TabId, label: 'Approved' },
-                  { id: 'reports' as TabId, label: 'Reports' },
                 ]).map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                     className={cn("px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors duration-150 whitespace-nowrap",
@@ -289,20 +295,23 @@ export default function OfficeExpenseManager() {
             <div className="rounded-[10px] border border-border/60 bg-card overflow-hidden">
               <div className="hidden sm:grid grid-cols-[1fr_100px_120px_100px_100px_120px] gap-2 px-4 py-2.5 bg-sunken border-b border-border/60">
                 {['Expense', 'Amount', 'Category', 'Date', 'Status', 'Actions'].map(h => (
-                  <span key={h} className="font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground">{h}</span>
+                  <span key={h} className={LABEL}>{h}</span>
                 ))}
               </div>
               <div className="sm:hidden flex items-center gap-3 px-3 py-2.5 bg-sunken border-b border-border/60">
                 {['Expense', 'Amount', 'Category', 'Date'].map(h => (
-                  <span key={h} className={cn("font-mono text-[9.5px] font-medium uppercase tracking-[0.13em] text-muted-foreground", h === 'Expense' ? 'flex-1' : 'shrink-0')}>{h}</span>
+                  <span key={h} className={cn(LABEL, h === 'Expense' ? 'flex-1' : 'shrink-0')}>{h}</span>
                 ))}
               </div>
 
               {filtered.length === 0 ? (
-                <div className="py-16 text-center">
-                  <Receipt className="h-10 w-10 text-muted-foreground/15 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">No expenses yet</p>
-                  <p className="text-xs text-muted-foreground mt-1">Choose "New expense" to add your first entry</p>
+                <div className="p-3">
+                  <OfficeEmpty
+                    title={search.trim() ? 'Nothing matches that' : 'No expenses yet'}
+                    body={search.trim()
+                      ? 'Try a shorter word, or clear the search.'
+                      : 'Add one with New expense, or photograph a receipt and let the scanner fill the form.'}
+                  />
                 </div>
               ) : (
               <div className="divide-y divide-border/60">

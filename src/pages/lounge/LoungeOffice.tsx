@@ -83,6 +83,13 @@ function getAppIcon(source: string) {
   return APP_SOURCE_ICON[key] || FileText;
 }
 
+interface BriefTask { id: string; title: string; due: string }
+interface Briefing {
+  timeOff: any[];   // hr_time_off_requests rows, status=pending
+  polls: any[];     // office_polls rows, is_active
+  tasks: BriefTask[]; // localStorage office-tasks, due today or overdue
+}
+
 interface RecentFile {
   id: string;
   file_name: string;
@@ -122,12 +129,9 @@ export default function LoungeOffice() {
   const [showSplash, setShowSplash] = useState(() => !fromOfficeApp);
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
   const [loadingRecents, setLoadingRecents] = useState(true);
+  const [briefing, setBriefing] = useState<Briefing>({ timeOff: [], polls: [], tasks: [] });
 
   const backPath = isAdmin ? '/dashboard' : '/lounge';
-
-  /* Checkpoint-1 concept toggle - presentational only, removed in Phase 2.
-     ?chrome=ink shows the "instrument ink" shell; default is studio graphite. */
-  const ink = new URLSearchParams(location.search).get('chrome') === 'ink';
 
   /** Sidebar collapse (a stated localStorage convenience; server persistence is roadmap). */
   const [railMode, setRailMode] = useState(() => localStorage.getItem('office:rail') === '1');
@@ -154,19 +158,24 @@ export default function LoungeOffice() {
     navigate(route);
   }, [navigate, activeView]);
 
-  /** One command surface: the shortcut lands on the real command bar. */
-  const focusSearch = useCallback(() => {
-    setActiveView('home');
-    requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('office:focus-search')));
-  }, []);
+  /** The spine: one palette that jumps to any view, app, or recent file. */
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   useEffect(() => {
+    const typing = () => {
+      const el = document.activeElement as HTMLElement | null;
+      return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+    };
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); focusSearch(); }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPaletteOpen(v => !v); return; }
+      if (typing()) return;
+      if (e.key === '/') { e.preventDefault(); setPaletteOpen(true); }
+      if (e.key === '?') { e.preventDefault(); setShortcutsOpen(true); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [focusSearch]);
+  }, []);
 
   // Fetch recent files from platform_files + office_documents
   useEffect(() => {
@@ -209,6 +218,27 @@ export default function LoungeOffice() {
       setLoadingRecents(false);
     };
     fetchAll();
+
+    /* The Today briefing reads the same tables the modules already read
+       (same select shapes, user-scoped) - never invented numbers. */
+    const fetchBriefing = async () => {
+      const [toRes, pollRes] = await Promise.all([
+        supabase.from('hr_time_off_requests' as any).select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('office_polls' as any).select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      ]);
+      const timeOff = ((toRes.data as any[]) || []).filter(r => r.status === 'pending');
+      const polls = ((pollRes.data as any[]) || []).filter(pl => pl.is_active);
+      let tasks: BriefTask[] = [];
+      try {
+        const raw = JSON.parse(localStorage.getItem('office-tasks') || '[]');
+        const today = new Date(); today.setHours(23, 59, 59, 999);
+        tasks = (Array.isArray(raw) ? raw : [])
+          .filter((t: any) => t && t.status !== 'done' && t.due && new Date(t.due) <= today)
+          .map((t: any) => ({ id: String(t.id), title: String(t.title || 'Untitled task'), due: String(t.due) }));
+      } catch { /* unreadable local tasks */ }
+      setBriefing({ timeOff, polls, tasks });
+    };
+    fetchBriefing();
   }, [user?.id]);
 
   const filteredApps = search.trim()
@@ -237,10 +267,9 @@ export default function LoungeOffice() {
       {/* ─── Title band ───
           A slim strip of chrome: the way out, the mark, the name. */}
       <header className={cn(
-        'relative flex h-12 shrink-0 items-center gap-2.5 border-b px-2.5 sm:px-3.5',
-        ink ? 'border-border/60 bg-black/60' : 'border-border/40 bg-card/80 backdrop-blur-xl',
+        'relative flex h-12 shrink-0 items-center gap-2.5 border-b border-border/60 bg-black/60 px-2.5 sm:px-3.5',
       )}>
-        {ink && <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/60" />}
+        <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/60" />
         <button
           onClick={() => setShowExitSplash(true)}
           aria-label="Leave Office"
@@ -260,10 +289,9 @@ export default function LoungeOffice() {
 
         {/* One command surface, reachable from anywhere in the suite. */}
         <button
-          onClick={focusSearch}
+          onClick={() => setPaletteOpen(true)}
           className={cn(
-            'absolute left-1/2 hidden h-8 w-[300px] -translate-x-1/2 items-center gap-2.5 border px-3.5 text-[12.5px] text-muted-foreground transition-colors duration-150 hover:text-foreground lg:flex',
-            ink ? 'rounded-[7px] border-border/70 bg-black/40' : 'rounded-full border-border/50 bg-foreground/[0.035]',
+            'absolute left-1/2 hidden h-8 w-[300px] -translate-x-1/2 items-center gap-2.5 rounded-[7px] border border-border/70 bg-black/40 px-3.5 text-[12.5px] text-muted-foreground transition-colors duration-150 hover:text-foreground lg:flex',
           )}
         >
           <Search className="h-3.5 w-3.5 shrink-0" />
@@ -272,6 +300,13 @@ export default function LoungeOffice() {
         </button>
 
         <div className="flex-1" />
+        <button
+          onClick={() => setPaletteOpen(true)}
+          aria-label="Search your office"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.05] hover:text-foreground lg:hidden"
+        >
+          <Search className="h-4 w-4" />
+        </button>
         <div className="relative">
           <button
             onClick={() => setUserMenu(v => !v)}
@@ -305,8 +340,7 @@ export default function LoungeOffice() {
         {/* ─── Left side: grouped sidebar, collapsible to the rail ─── */}
         {!railMode ? (
           <aside className={cn(
-            'hidden shrink-0 flex-col border-r md:flex',
-            ink ? 'w-[216px] border-border/60 bg-black/60' : 'w-[232px] border-border/40 bg-card',
+            'hidden w-[216px] shrink-0 flex-col border-r border-border/60 bg-black/60 md:flex',
           )}>
             <nav className="flex flex-col gap-0.5 px-2.5 pt-2.5">
               {NAVS.map(nav => {
@@ -318,10 +352,9 @@ export default function LoungeOffice() {
                     onClick={() => goView(nav.view)}
                     aria-current={on ? 'page' : undefined}
                     className={cn(
-                      'relative flex items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[13px] transition-colors duration-150',
-                      ink ? 'h-8' : 'h-9',
+                      'relative flex h-8 items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[13px] transition-colors duration-150',
                       on
-                        ? cn('bg-foreground/[0.06] font-medium', ink ? 'text-primary' : 'text-foreground')
+                        ? 'bg-foreground/[0.06] font-medium text-primary'
                         : 'text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground',
                     )}
                   >
@@ -337,7 +370,7 @@ export default function LoungeOffice() {
               {NAV_GROUPS.map(group => (
                 <div key={group.label} className="pt-3">
                   <p className={cn(LABEL, 'flex items-center gap-1.5 px-2.5 pb-1')}>
-                    {ink && <span aria-hidden className="h-px w-2 bg-primary/70" />}
+                    <span aria-hidden className="h-px w-2 bg-primary/70" />
                     {group.label}
                   </p>
                   {group.ids.map(id => {
@@ -347,10 +380,8 @@ export default function LoungeOffice() {
                       <button
                         key={id}
                         onClick={() => go(app.route)}
-                        className={cn(
-                          'flex w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12.5px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.03] hover:text-foreground',
-                          ink ? 'h-8' : 'h-9',
-                        )}
+                        className="flex h-8 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[12.5px] text-muted-foreground transition-colors duration-150 hover:bg-foreground/[0.03] hover:text-foreground"
+
                       >
                         <AppTile id={id} icon={app.icon} size={20} />
                         <span className="min-w-0 truncate">{app.name}</span>
@@ -362,7 +393,7 @@ export default function LoungeOffice() {
             </div>
 
             {/* Collapse + the version line every real product carries */}
-            <div className={cn('flex items-center justify-between border-t px-3 py-2', ink ? 'border-border/60' : 'border-border/40')}>
+            <div className="flex items-center justify-between border-t border-border/60 px-3 py-2">
               <span className="font-mono text-[9.5px] tabular-nums text-muted-foreground/70">Quooro Office 2.0</span>
               <button
                 onClick={() => setRailMode(true)}
@@ -375,8 +406,7 @@ export default function LoungeOffice() {
           </aside>
         ) : (
           <aside className={cn(
-            'hidden w-[64px] shrink-0 flex-col border-r md:flex',
-            ink ? 'border-border/60 bg-background' : 'border-border/40 bg-card',
+            'hidden w-[64px] shrink-0 flex-col border-r border-border/60 bg-black/60 md:flex',
           )}>
             <nav className="flex flex-col items-center gap-0.5 px-1.5 pt-2">
               {NAVS.map(nav => {
@@ -443,7 +473,7 @@ export default function LoungeOffice() {
 
         {/* ─── Main column ─── */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          <div className={cn('flex-1 overflow-auto', ink && 'bg-card/45')}>
+          <div className="flex-1 overflow-auto bg-card/45">
             {activeView === 'home' && (
               <HomeView
                 search={search}
@@ -452,6 +482,7 @@ export default function LoungeOffice() {
                 loadingRecents={loadingRecents}
                 go={go}
                 firstName={firstName}
+                briefing={briefing}
                 onViewRecents={() => setActiveView('recents')}
                 onViewApps={(family) => { setAppFamily(family || 'All'); setActiveView('apps'); }}
               />
@@ -509,7 +540,194 @@ export default function LoungeOffice() {
         </div>
       </div>
 
+      {paletteOpen && (
+        <OfficeCommandPalette
+          recentFiles={recentFiles}
+          onClose={() => setPaletteOpen(false)}
+          onGo={(route) => { setPaletteOpen(false); go(route); }}
+          onView={(v) => { setPaletteOpen(false); goView(v); }}
+        />
+      )}
+      {shortcutsOpen && <OfficeShortcuts onClose={() => setShortcutsOpen(false)} />}
+
       <OfficeQuickActions />
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   COMMAND PALETTE — the spine of the suite
+   ═══════════════════════════════════════════════ */
+
+type PaletteItem = {
+  key: string;
+  label: string;
+  hint: string;
+  tile?: { id: string; icon: any };
+  run: () => void;
+};
+
+function OfficeCommandPalette({ recentFiles, onClose, onGo, onView }: {
+  recentFiles: RecentFile[];
+  onClose: () => void;
+  onGo: (route: string) => void;
+  onView: (v: ActiveView) => void;
+}) {
+  const [q, setQ] = useState('');
+  const [cursor, setCursor] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const needle = q.trim().toLowerCase();
+  const match = (...hay: string[]) => !needle || hay.some(h => h.toLowerCase().includes(needle));
+
+  const views: PaletteItem[] = [
+    { key: 'v-home', label: 'Today', hint: 'View', run: () => onView('home') },
+    { key: 'v-apps', label: 'Every app', hint: 'View', run: () => onView('apps') },
+    { key: 'v-recents', label: 'Recent work', hint: 'View', run: () => onView('recents') },
+  ].filter(i => match(i.label, 'view'));
+
+  const creates: PaletteItem[] = [
+    { id: 'docs', label: 'New document', route: '/lounge/office/word-home' },
+    { id: 'sheets', label: 'New spreadsheet', route: '/lounge/office/sheets-home' },
+    { id: 'slides', label: 'New presentation', route: '/lounge/office/powerpoint-home' },
+    { id: 'invoices', label: 'New invoice', route: '/lounge/office/invoices' },
+  ]
+    .filter(c => match(c.label, 'new', 'create'))
+    .map(c => {
+      const app = APPS.find(a => a.id === c.id)!;
+      return { key: `c-${c.id}`, label: c.label, hint: 'Create', tile: { id: c.id, icon: app.icon }, run: () => onGo(c.route) };
+    });
+
+  const apps: PaletteItem[] = APPS
+    .filter(a => match(a.name, a.desc))
+    .map(a => ({ key: `a-${a.id}`, label: a.name, hint: a.desc, tile: { id: a.id, icon: a.icon }, run: () => onGo(a.route) }));
+
+  const files: PaletteItem[] = recentFiles
+    .filter(f => match(f.file_name))
+    .slice(0, 6)
+    .map(f => ({
+      key: `f-${f.id}`, label: f.file_name, hint: APPS.find(a => a.id === f.app_source)?.name || f.app_source,
+      tile: { id: f.app_source, icon: getAppIcon(f.app_source) },
+      run: () => { if (f.source_route) onGo(f.source_route); },
+    }));
+
+  const sections: Array<{ title: string; items: PaletteItem[] }> = [
+    { title: 'Views', items: views },
+    { title: 'Create', items: creates },
+    { title: 'Apps', items: apps },
+    { title: 'Recent work', items: files },
+  ].filter(sec => sec.items.length > 0);
+  const flat = sections.flatMap(sec => sec.items);
+  const active = flat[Math.min(cursor, flat.length - 1)];
+
+  useEffect(() => { setCursor(0); }, [needle]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); setCursor(c => Math.min(c + 1, flat.length - 1)); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); setCursor(c => Math.max(c - 1, 0)); }
+      if (e.key === 'Enter' && active) { e.preventDefault(); active.run(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [flat.length, active, onClose]);
+
+  useEffect(() => {
+    listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
+  }, [cursor]);
+
+  return (
+    <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Command palette">
+      <button aria-hidden className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="absolute left-1/2 top-[10vh] w-[560px] max-w-[calc(100vw-28px)] -translate-x-1/2 overflow-hidden rounded-[12px] border border-border/60 bg-card shadow-2xl">
+        <div className="relative flex h-12 items-center gap-3 border-b border-border/60 px-4">
+          <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/50" />
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <input
+            autoFocus
+            value={q}
+            onChange={e => setQ(e.target.value)}
+            placeholder="Jump to an app, a file, a view"
+            className="min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-muted-foreground"
+          />
+          <kbd className="shrink-0 rounded-[4px] border border-border/50 px-1 py-px font-mono text-[9px] text-muted-foreground">esc</kbd>
+        </div>
+        <div ref={listRef} className="max-h-[46vh] overflow-y-auto py-1.5" role="listbox">
+          {flat.length === 0 ? (
+            <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">Nothing in the office matches that.</p>
+          ) : (
+            sections.map(sec => (
+              <div key={sec.title}>
+                <p className={cn(LABEL, 'px-4 pb-1 pt-2')}>{sec.title}</p>
+                {sec.items.map(item => {
+                  const isActive = item === active;
+                  return (
+                    <button
+                      key={item.key}
+                      role="option"
+                      aria-selected={isActive}
+                      data-active={isActive || undefined}
+                      onMouseEnter={() => setCursor(flat.indexOf(item))}
+                      onClick={item.run}
+                      className={cn(
+                        'flex w-full items-center gap-3 px-4 py-2 text-left transition-colors duration-100',
+                        isActive ? 'bg-foreground/[0.06]' : 'hover:bg-foreground/[0.03]',
+                      )}
+                    >
+                      {item.tile
+                        ? <AppTile id={item.tile.id} icon={item.tile.icon} size={24} />
+                        : <span className="flex h-6 w-6 items-center justify-center"><ChevronRight className="h-3.5 w-3.5 text-muted-foreground" /></span>}
+                      <span className="min-w-0 flex-1 truncate text-[13px]">{item.label}</span>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">{item.hint}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   SHORTCUTS — only the keys that actually work
+   ═══════════════════════════════════════════════ */
+
+function OfficeShortcuts({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onClose(); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  const ROWS: Array<[string, string]> = [
+    ['⌘K / Ctrl K', 'Command palette'],
+    ['/', 'Command palette'],
+    ['?', 'This overlay'],
+    ['Esc', 'Close panels'],
+  ];
+  return (
+    <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+      <button aria-hidden className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="absolute left-1/2 top-[18vh] w-[380px] max-w-[calc(100vw-28px)] -translate-x-1/2 overflow-hidden rounded-[12px] border border-border/60 bg-card shadow-2xl">
+        <div className="relative border-b border-border/60 px-4 py-3">
+          <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-primary/50" />
+          <p className="text-[13.5px] font-semibold">Keyboard</p>
+        </div>
+        <ul className="divide-y divide-border/30">
+          {ROWS.map(([k, v]) => (
+            <li key={k} className="flex items-center justify-between px-4 py-2.5">
+              <span className="text-[12.5px] text-muted-foreground">{v}</span>
+              <kbd className="rounded-[5px] border border-border/50 px-1.5 py-0.5 font-mono text-[10px]">{k}</kbd>
+            </li>
+          ))}
+        </ul>
+        <p className="border-t border-border/60 px-4 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
+          Module jump keys arrive as each module is rebuilt onto the shared anatomy.
+        </p>
+      </div>
     </div>
   );
 }
@@ -519,7 +737,7 @@ export default function LoungeOffice() {
    ═══════════════════════════════════════════════ */
 
 function HomeView({
-  search, setSearch, recentFiles, loadingRecents, go, firstName, onViewRecents, onViewApps,
+  search, setSearch, recentFiles, loadingRecents, go, firstName, briefing, onViewRecents, onViewApps,
 }: {
   search: string;
   setSearch: (v: string) => void;
@@ -527,19 +745,13 @@ function HomeView({
   loadingRecents: boolean;
   go: (r: string) => void;
   firstName: string;
+  briefing: Briefing;
   onViewRecents: () => void;
   onViewApps: (family?: string) => void;
 }) {
   const [searchFocused, setSearchFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // The shell's search affordance and ⌘K land here - one command surface.
-  useEffect(() => {
-    const focus = () => { inputRef.current?.focus(); setSearchFocused(true); };
-    window.addEventListener('office:focus-search', focus);
-    return () => window.removeEventListener('office:focus-search', focus);
-  }, []);
   const q = search.trim().toLowerCase();
   const isSearching = q.length > 0;
 
@@ -611,6 +823,17 @@ function HomeView({
         </div>
       </header>
 
+      {/* The operational line: what the day actually holds, or honest quiet. */}
+      <p className="mt-2 text-[13px] text-muted-foreground">
+        {(() => {
+          const parts: string[] = [];
+          if (briefing.timeOff.length) parts.push(`${briefing.timeOff.length} ${briefing.timeOff.length === 1 ? 'approval' : 'approvals'} waiting`);
+          if (briefing.polls.length) parts.push(`${briefing.polls.length} ${briefing.polls.length === 1 ? 'poll' : 'polls'} open`);
+          if (briefing.tasks.length) parts.push(`${briefing.tasks.length} ${briefing.tasks.length === 1 ? 'task' : 'tasks'} due`);
+          return parts.length ? parts.join(' · ') : 'Nothing needs you right now.';
+        })()}
+      </p>
+
       {/* The command bar, as a pill. */}
       <div ref={searchRef} className="relative mt-6">
         <div className={cn(PILL, searchFocused && 'border-primary/40 bg-foreground/[0.05]')}>
@@ -677,6 +900,63 @@ function HomeView({
           </div>
         )}
       </div>
+
+      {/* Needs you: actionable rows, straight into the module. Absent when empty. */}
+      {(briefing.timeOff.length > 0 || briefing.polls.length > 0 || briefing.tasks.length > 0) && (
+        <section className="mt-7">
+          <div className="mb-3 flex items-baseline gap-2">
+            <h2 className={SECTION}>Needs you</h2>
+            <span className="text-[11.5px] tabular-nums text-muted-foreground">
+              {briefing.timeOff.length + briefing.polls.length + briefing.tasks.length}
+            </span>
+          </div>
+          <div className={GROUP}>
+            <ul className="divide-y divide-border/30">
+              {briefing.timeOff.map((r: any) => (
+                <li key={`to-${r.id}`}>
+                  <button onClick={() => go('/lounge/office/hr')} className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-foreground/[0.03]">
+                    <AppTile id="hr" icon={Users} size={26} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[13px] font-medium">
+                        Time off — {r.employee_name || 'request'}{r.days ? ` · ${r.days} ${Number(r.days) === 1 ? 'day' : 'days'}` : ''}
+                      </span>
+                      <span className="block text-[11px] text-muted-foreground">Waiting for your approval</span>
+                    </span>
+                    <span className="shrink-0 text-[11.5px] font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">Review</span>
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                  </button>
+                </li>
+              ))}
+              {briefing.polls.map((pl: any) => (
+                <li key={`pl-${pl.id}`}>
+                  <button onClick={() => go('/lounge/office/polls')} className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-foreground/[0.03]">
+                    <AppTile id="polls" icon={BarChart3} size={26} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[13px] font-medium">{pl.question}</span>
+                      <span className="block text-[11px] text-muted-foreground">Poll still open</span>
+                    </span>
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                  </button>
+                </li>
+              ))}
+              {briefing.tasks.map(t => (
+                <li key={`tk-${t.id}`}>
+                  <button onClick={() => go('/lounge/office/tasks')} className="group flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-foreground/[0.03]">
+                    <AppTile id="tasks" icon={Layout} size={26} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[13px] font-medium">{t.title}</span>
+                      <span className="block text-[11px] text-muted-foreground">
+                        Due {new Date(t.due).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · saved on this device
+                      </span>
+                    </span>
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* Create: six instruments in a row, no boxes around boxes. */}
       <section className="mt-8">
