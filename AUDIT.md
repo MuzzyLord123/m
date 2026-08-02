@@ -185,3 +185,47 @@ Still template/default:
 - LeadImportDialog dupe `.or()` interpolates raw CSV values (commas/quotes in a business name break the filter string).
 - useCRMDeals fetch has no user filter while insert is user-scoped — cross-user visibility depends entirely on RLS.
 - AdminLeadManagement + LeadImportDialog + LeadDetailDialog + FullScreenLeadView(admin path) are currently unreachable (Dashboard leads tab redirects) — "protected" import engine #4 is dead code today but is also the ONLY audited import engine.
+
+---
+
+# PART O — QUOORO OFFICE COHERENCE AUDIT (office overhaul Phase 0 · 2026-08-02)
+
+Scan: 53 files (42 routed screens + office components), automated tell
+scan + census cross-read. The shell (LoungeOffice, OfficeQuickActions,
+AppTile, officeIdentity) was rebuilt this cycle and is clean; the
+findings below are the interiors.
+
+## O.1 The structural finding — bolted-together, not ugly
+Every module home carries its own chrome: its own back button style, its
+own header block, its own paddings/radii/table treatment. 12 modules use
+`rounded-2xl/3xl` cards while the platform kit is 10-14px; 17 files
+still use `backdrop-blur` glass; 19 gradient washes survive inside
+editors; 17 purple/indigo hits contradict the token palette (worst:
+DesignStudioEditor 14 gradients + 6 indigo, WordEditor 4 + 3). No two
+modules share a toolbar. This is the "separate generated modules"
+diagnosis - the anatomy (header → toolbar → content → detail) does not
+exist anywhere yet.
+
+## O.2 Tell inventory (automated, per worst offender)
+- DesignStudioEditor.tsx: 27 tells (gradients, glass, indigo, scale-hover)
+- WordEditor.tsx: 12 (gradients, glass, purple)
+- OfficePollsHome / StickyWallHome / FormsHome / WhiteboardHome: glass +
+  rounded-3xl template homes, near-identical to each other and to any
+  Lovable starter (Section 2 fail)
+- OfficeBookmarks: 9 emoji in UI copy; OfficeOneNoteHome: 7
+- EmojiPicker.tsx: 341 emoji are DATA (its picker set), not slop - exempt
+- SlashCommandMenu / AIWritingAssistant / WordRibbon: purple accents,
+  glass, scale-hovers inside the Docs editor
+- 6 scale-hovers, 0 animate-ping (swept previously)
+
+## O.3 Coherence breaks beyond styling
+- Back navigation: four different exit affordances across module homes
+  (ghost button, plain arrow, breadcrumb text, none-just-browser-back).
+- Empty states: five different patterns (some dashed boxes, some emoji
+  headlines, some nothing).
+- Search: per-module search inputs restyle themselves; none open a
+  shared surface. No ⌘K anywhere in Office yet.
+- Mobile: several module homes overflow at 390 (tables without card
+  transformation: OfficeAccounting, OfficeHR review table, OfficeEcommerce).
+- Stateless modules present fake-looking sample chrome instead of honest
+  empty states (Operations board, Analytics Studio, Contracts).
