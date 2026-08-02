@@ -3,11 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   FileText, Sheet, Presentation, BookOpen, Cloud, Search,
   Palette, ArrowLeft, Home, Grid3X3,
-  PenLine, FileCheck, Layout, Calculator, Timer,
-  BarChart3, StickyNote, Globe,
+  PenLine, FileCheck, Layout, Calculator,
+  BarChart3, Globe,
   Briefcase, Receipt, Users, BookMarked, ClipboardList,
   TrendingUp, Clock, FileSignature, KeyRound,
-  Star, ChevronRight, Bookmark, PanelLeftClose, PanelLeft,
+  Star, ChevronRight, PanelLeftClose, PanelLeft,
+  PoundSterling, Mail, CalendarDays, CalendarCheck, MessagesSquare, Boxes,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { OfficeSplash } from '@/components/splash/OfficeSplash';
@@ -32,40 +33,43 @@ const APPS: AppItem[] = [
   { id: 'files', name: 'Files', desc: 'Cloud storage', icon: Cloud, route: '/lounge/office/onedrive' },
   { id: 'operations', name: 'Operations', desc: 'Jobs and meetings', icon: Briefcase, route: '/lounge/office/operations' },
   { id: 'invoices', name: 'Invoices', desc: 'Billing', icon: Receipt, route: '/lounge/office/invoices' },
-  { id: 'accounting', name: 'Accounting', desc: 'Ledger and reports', icon: Calculator, route: '/lounge/office/accounting' },
+  { id: 'accounting', name: 'Accounting', desc: 'Ledger, VAT, payroll, banking', icon: Calculator, route: '/lounge/office/accounting' },
   { id: 'ecommerce', name: 'E-commerce', desc: 'Client sites and hosting', icon: Globe, route: '/lounge/office/ecommerce' },
 
-  { id: 'hr', name: 'HR', desc: 'People', icon: Users, route: '/lounge/office/hr' },
+  { id: 'hr', name: 'HR', desc: 'People and leave', icon: Users, route: '/lounge/office/hr' },
   { id: 'tasks', name: 'Tasks', desc: 'To-dos', icon: Layout, route: '/lounge/office/tasks' },
   { id: 'expenses', name: 'Expenses', desc: 'Receipts', icon: Receipt, route: '/lounge/office/expenses' },
-  { id: 'contracts', name: 'Contracts', desc: 'CLM', icon: FileSignature, route: '/lounge/office/contracts' },
-  { id: 'time-tracker', name: 'Time', desc: 'Billable hours', icon: Clock, route: '/lounge/office/time-tracker' },
-  { id: 'analytics', name: 'Analytics', desc: 'BI', icon: TrendingUp, route: '/lounge/office/analytics' },
+  { id: 'contracts', name: 'Contracts', desc: 'Agreements and renewals', icon: FileSignature, route: '/lounge/office/contracts' },
+  { id: 'time-tracker', name: 'Time', desc: 'Billable time', icon: Clock, route: '/lounge/office/time-tracker' },
+  { id: 'analytics', name: 'Analytics', desc: 'Reports and dashboards', icon: TrendingUp, route: '/lounge/office/analytics' },
   { id: 'wiki', name: 'Wiki', desc: 'Knowledge', icon: BookMarked, route: '/lounge/office/wiki' },
   { id: 'forms', name: 'Forms', desc: 'Surveys', icon: ClipboardList, route: '/lounge/office/forms-home' },
   { id: 'polls', name: 'Polls', desc: 'Voting', icon: BarChart3, route: '/lounge/office/polls-home' },
   { id: 'pdf', name: 'PDF', desc: 'Edit and sign', icon: FileCheck, route: '/lounge/office/pdf-home' },
+  { id: 'profitability', name: 'Profitability', desc: 'What each job earned', icon: PoundSterling, route: '/lounge/office/profitability' },
+  { id: 'mail', name: 'Mail', desc: 'Shared inbox', icon: Mail, route: '/lounge/mail' },
+  { id: 'calendar', name: 'Calendar', desc: 'Schedule and events', icon: CalendarDays, route: '/lounge/calendar' },
+  { id: 'bookings', name: 'Bookings', desc: 'Appointments and availability', icon: CalendarCheck, route: '/lounge/bookings' },
+  { id: 'team-comms', name: 'Team chat', desc: 'Channels and messages', icon: MessagesSquare, route: '/lounge/team-comms' },
+  { id: 'inventory', name: 'Inventory', desc: 'Stock, counts and movements', icon: Boxes, route: '/lounge/inventory' },
+  { id: 'passwords', name: 'Passwords', desc: 'Credential vault', icon: KeyRound, route: '/lounge/office/passwords' },
   { id: 'design', name: 'Design', desc: 'Graphics', icon: Palette, route: '/lounge/office/design-studio' },
   { id: 'whiteboard', name: 'Whiteboard', desc: 'Sketch', icon: PenLine, route: '/lounge/office/whiteboard-home' },
-  { id: 'sticky', name: 'Sticky wall', desc: 'Visual notes', icon: StickyNote, route: '/lounge/office/sticky-wall-home' },
-  { id: 'passwords', name: 'Passwords', desc: 'Vault', icon: KeyRound, route: '/lounge/office/passwords' },
-  { id: 'calculator', name: 'Calculator', desc: 'Maths', icon: Calculator, route: '/lounge/office/calculator' },
-  { id: 'pomodoro', name: 'Pomodoro', desc: 'Focus', icon: Timer, route: '/lounge/office/pomodoro' },
-  { id: 'bookmarks', name: 'Bookmarks', desc: 'Saved links', icon: Bookmark, route: '/lounge/office/bookmarks' },
 ];
 
 /** Sidebar groups per OFFICE-IA.md - order of a working day. */
 const NAV_GROUPS: Array<{ label: string; ids: string[] }> = [
   { label: 'Documents', ids: ['docs', 'notes', 'files', 'pdf', 'wiki'] },
-  { label: 'Money', ids: ['sheets', 'invoices', 'accounting', 'expenses', 'time-tracker'] },
+  { label: 'Money', ids: ['invoices', 'accounting', 'expenses', 'time-tracker', 'profitability', 'sheets'] },
+  { label: 'Communicate', ids: ['mail', 'calendar', 'bookings', 'team-comms'] },
   { label: 'Build', ids: ['design', 'slides', 'whiteboard', 'ecommerce'] },
-  { label: 'Think', ids: ['analytics', 'forms', 'polls', 'sticky'] },
-  { label: 'Run', ids: ['operations', 'hr', 'tasks', 'contracts'] },
-  { label: 'Utilities', ids: ['passwords', 'calculator', 'pomodoro', 'bookmarks'] },
+  { label: 'Think', ids: ['analytics', 'forms', 'polls'] },
+  { label: 'Run', ids: ['operations', 'hr', 'tasks', 'contracts', 'inventory'] },
+  { label: 'Utilities', ids: ['passwords'] },
 ];
 
 /** The rail pins the daily drivers, the way a professional pins their tools. */
-const PINNED_IDS = ['docs', 'sheets', 'slides', 'notes', 'files', 'invoices', 'accounting', 'operations', 'design', 'analytics'];
+const PINNED_IDS = ['mail', 'calendar', 'docs', 'sheets', 'files', 'invoices', 'accounting', 'profitability', 'operations', 'design'];
 
 type ActiveView = 'home' | 'apps' | 'recents';
 
@@ -1149,10 +1153,11 @@ function HomeView({
 const FAMILY_NOTE: Record<string, string> = {
   Documents: 'Write it, store it, send it',
   Money: 'Everything that ends in a number',
+  Communicate: 'Reaching clients and each other',
   Build: 'Make the thing',
   Think: 'Shape a decision',
   Run: 'The business itself',
-  Utilities: 'Small tools, always to hand',
+  Utilities: 'Kept under lock',
 };
 
 function AppsView({ search, setSearch, filteredApps, go, family, setFamily }: {

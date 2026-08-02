@@ -6,7 +6,8 @@ import {
   FileText, Sheet, Presentation, BookOpen, Cloud,
   Briefcase, Receipt, Users, Layout, Clock, FileSignature,
   TrendingUp, BookMarked, ClipboardList, BarChart3, FileCheck,
-  Palette, PenLine, StickyNote, KeyRound, Calculator, Timer,
+  Palette, PenLine, KeyRound,
+  PoundSterling, Mail, CalendarDays, CalendarCheck, MessagesSquare, Boxes,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AppTile } from '@/pages/lounge/office/AppTile';
@@ -32,7 +33,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FileText, Sheet, Presentation, BookOpen, Cloud,
   Briefcase, Receipt, Users, Layout, Clock, FileSignature,
   TrendingUp, BookMarked, ClipboardList, BarChart3, FileCheck,
-  Palette, PenLine, StickyNote, KeyRound, Calculator, Timer,
+  Palette, PenLine, KeyRound,
+  PoundSterling, Mail, CalendarDays, CalendarCheck, MessagesSquare, Boxes,
 };
 
 const ALL_OFFICE_APPS: QuickApp[] = [
@@ -54,14 +56,17 @@ const ALL_OFFICE_APPS: QuickApp[] = [
   { id: 'polls', name: 'Polls', route: '/lounge/office/polls-home', icon: 'BarChart3' },
   { id: 'pdf', name: 'PDF', route: '/lounge/office/pdf-home', icon: 'FileCheck' },
   { id: 'design', name: 'Design', route: '/lounge/office/design-studio', icon: 'Palette' },
-  { id: 'whiteboard', name: 'Whiteboard', route: '/lounge/office/whiteboard-home', icon: 'PenLine' },
-  { id: 'sticky', name: 'Sticky Wall', route: '/lounge/office/sticky-wall-home', icon: 'StickyNote' },
+  { id: 'profitability', name: 'Profitability', route: '/lounge/office/profitability', icon: 'PoundSterling' },
+  { id: 'mail', name: 'Mail', route: '/lounge/mail', icon: 'Mail' },
+  { id: 'calendar', name: 'Calendar', route: '/lounge/calendar', icon: 'CalendarDays' },
+  { id: 'bookings', name: 'Bookings', route: '/lounge/bookings', icon: 'CalendarCheck' },
+  { id: 'team-comms', name: 'Team chat', route: '/lounge/team-comms', icon: 'MessagesSquare' },
+  { id: 'inventory', name: 'Inventory', route: '/lounge/inventory', icon: 'Boxes' },
   { id: 'passwords', name: 'Passwords', route: '/lounge/office/passwords', icon: 'KeyRound' },
-  { id: 'calculator', name: 'Calculator', route: '/lounge/office/calculator', icon: 'Calculator' },
-  { id: 'pomodoro', name: 'Pomodoro', route: '/lounge/office/pomodoro', icon: 'Timer' },
+  { id: 'whiteboard', name: 'Whiteboard', route: '/lounge/office/whiteboard-home', icon: 'PenLine' },
 ];
 
-const DEFAULT_IDS = ['docs', 'sheets', 'tasks', 'analytics', 'files'];
+const DEFAULT_IDS = ['mail', 'docs', 'invoices', 'profitability', 'calendar'];
 const STORAGE_KEY = 'office-quick-actions';
 const RECENT_KEY = 'office-recent-apps';
 const MAX_RECENT = 3;

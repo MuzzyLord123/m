@@ -20,7 +20,7 @@ export interface OfficeIdentity {
   /** HSL triplet, no wrapper: "214 58% 44%". */
   hue: string;
   /** What the app is for, in the family it belongs to. */
-  family: 'Documents' | 'Money' | 'Build' | 'Think' | 'Run' | 'Utilities';
+  family: 'Documents' | 'Money' | 'Communicate' | 'Build' | 'Think' | 'Run' | 'Utilities';
 }
 
 export const OFFICE_IDENTITY: Record<string, OfficeIdentity> = {
@@ -37,6 +37,13 @@ export const OFFICE_IDENTITY: Record<string, OfficeIdentity> = {
   accounting: { hue: '142 42% 38%', family: 'Money' },
   expenses: { hue: '168 45% 34%', family: 'Money' },
   'time-tracker': { hue: '174 48% 32%', family: 'Money' },
+  profitability: { hue: '156 54% 30%', family: 'Money' },
+
+  // Communicate - the outside world reaching in
+  mail: { hue: '206 58% 44%', family: 'Communicate' },
+  calendar: { hue: '198 52% 40%', family: 'Communicate' },
+  bookings: { hue: '192 50% 38%', family: 'Communicate' },
+  'team-comms': { hue: '212 46% 46%', family: 'Communicate' },
 
   // Build - warm, the making end
   design: { hue: '22 78% 46%', family: 'Build' },
@@ -48,19 +55,16 @@ export const OFFICE_IDENTITY: Record<string, OfficeIdentity> = {
   analytics: { hue: '262 46% 52%', family: 'Think' },
   forms: { hue: '272 44% 50%', family: 'Think' },
   polls: { hue: '286 40% 48%', family: 'Think' },
-  sticky: { hue: '300 38% 47%', family: 'Think' },
 
   // Run - the business itself
   operations: { hue: '246 44% 54%', family: 'Run' },
   hr: { hue: '330 48% 46%', family: 'Run' },
   contracts: { hue: '344 52% 45%', family: 'Run' },
   tasks: { hue: '236 46% 54%', family: 'Run' },
+  inventory: { hue: '260 40% 50%', family: 'Run' },
 
   // Utilities - slate, deliberately quiet
   passwords: { hue: '210 12% 44%', family: 'Utilities' },
-  calculator: { hue: '215 10% 42%', family: 'Utilities' },
-  pomodoro: { hue: '206 12% 44%', family: 'Utilities' },
-  bookmarks: { hue: '218 12% 46%', family: 'Utilities' },
 };
 
 const FALLBACK: OfficeIdentity = { hue: '17 80% 44%', family: 'Utilities' };
@@ -73,5 +77,5 @@ export function accentOf(id: string) {
 }
 
 export const OFFICE_FAMILIES = [
-  'Documents', 'Money', 'Build', 'Think', 'Run', 'Utilities',
+  'Documents', 'Money', 'Communicate', 'Build', 'Think', 'Run', 'Utilities',
 ] as const;

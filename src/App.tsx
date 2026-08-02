@@ -158,11 +158,7 @@ const OfficePDF = lazy(() => import("./pages/lounge/OfficePDF"));
 const OfficePDFHome = lazy(() => import("./pages/lounge/OfficePDFHome"));
 const OfficePDFCreator = lazy(() => import("./pages/lounge/OfficePDFCreator"));
 const OfficeTasks = lazy(() => import("./pages/lounge/OfficeTasks"));
-const OfficeCalculator = lazy(() => import("./pages/lounge/OfficeCalculator"));
-const OfficePomodoro = lazy(() => import("./pages/lounge/OfficePomodoro"));
 const OfficePolls = lazy(() => import("./pages/lounge/OfficePolls"));
-const OfficeBookmarks = lazy(() => import("./pages/lounge/OfficeBookmarks"));
-const OfficeStickyWall = lazy(() => import("./pages/lounge/OfficeStickyWall"));
 const OfficeOperations = lazy(() => import("./pages/lounge/OfficeOperations"));
 const OfficeAccounting = lazy(() => import("./pages/lounge/OfficeAccounting"));
 const OfficeEcommerce = lazy(() => import("./pages/lounge/OfficeEcommerce"));
@@ -175,10 +171,10 @@ const OfficeInvoices = lazy(() => import("./pages/lounge/OfficeInvoices"));
 const OfficeHR = lazy(() => import("./pages/lounge/OfficeHR"));
 const OfficeWiki = lazy(() => import("./pages/lounge/OfficeWiki"));
 const OfficePollsHome = lazy(() => import("./pages/lounge/OfficePollsHome"));
-const OfficeStickyWallHome = lazy(() => import("./pages/lounge/OfficeStickyWallHome"));
 const OfficeFormsHome = lazy(() => import("./pages/lounge/OfficeFormsHome"));
 const OfficeAnalyticsStudio = lazy(() => import("./pages/lounge/OfficeAnalyticsStudio"));
 const OfficeExpenseManager = lazy(() => import("./pages/lounge/OfficeExpenseManager"));
+const OfficeProfitability = lazy(() => import("./pages/lounge/OfficeProfitability"));
 const OfficeTimeTracker = lazy(() => import("./pages/lounge/OfficeTimeTracker"));
 const OfficeContractManager = lazy(() => import("./pages/lounge/OfficeContractManager"));
 const OfficePasswordVault = lazy(() => import("./pages/lounge/OfficePasswordVault"));
@@ -332,14 +328,9 @@ function AnimatedRoutes() {
           <Route path="/lounge/office/pdf-home" element={<ProtectedRoute><CustomerGuard><OfficePDFHome /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/pdf-creator" element={<ProtectedRoute><CustomerGuard><OfficePDFCreator /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/tasks" element={<ProtectedRoute><CustomerGuard><OfficeTasks /></CustomerGuard></ProtectedRoute>} />
-          <Route path="/lounge/office/calculator" element={<ProtectedRoute><CustomerGuard><OfficeCalculator /></CustomerGuard></ProtectedRoute>} />
-          <Route path="/lounge/office/pomodoro" element={<ProtectedRoute><CustomerGuard><OfficePomodoro /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/polls" element={<ProtectedRoute><CustomerGuard><OfficePolls /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/polls-create" element={<ProtectedRoute><CustomerGuard><OfficePolls /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/polls-home" element={<ProtectedRoute><CustomerGuard><OfficePollsHome /></CustomerGuard></ProtectedRoute>} />
-          <Route path="/lounge/office/bookmarks" element={<ProtectedRoute><CustomerGuard><OfficeBookmarks /></CustomerGuard></ProtectedRoute>} />
-          <Route path="/lounge/office/sticky-wall" element={<ProtectedRoute><CustomerGuard><OfficeStickyWall /></CustomerGuard></ProtectedRoute>} />
-          <Route path="/lounge/office/sticky-wall-home" element={<ProtectedRoute><CustomerGuard><OfficeStickyWallHome /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/operations" element={<ProtectedRoute><CustomerGuard><OfficeOperations /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/accounting" element={<ProtectedRoute><CustomerGuard><OfficeAccounting /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/ecommerce" element={<ProtectedRoute><CustomerGuard><OfficeEcommerce /></CustomerGuard></ProtectedRoute>} />
@@ -354,6 +345,7 @@ function AnimatedRoutes() {
           <Route path="/lounge/office/wiki" element={<ProtectedRoute><CustomerGuard><OfficeWiki /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/forms-home" element={<ProtectedRoute><CustomerGuard><OfficeFormsHome /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/analytics" element={<ProtectedRoute><CustomerGuard><OfficeAnalyticsStudio /></CustomerGuard></ProtectedRoute>} />
+          <Route path="/lounge/office/profitability" element={<ProtectedRoute><CustomerGuard><OfficeProfitability /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/expenses" element={<ProtectedRoute><CustomerGuard><OfficeExpenseManager /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/time-tracker" element={<ProtectedRoute><CustomerGuard><OfficeTimeTracker /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/contracts" element={<ProtectedRoute><CustomerGuard><OfficeContractManager /></CustomerGuard></ProtectedRoute>} />

@@ -59,6 +59,37 @@ hr_time_off_requests · open office_polls · due localStorage tasks with
 index, Starred. Blocks self-remove when empty; the quiet state says
 "Nothing needs you right now."
 
+## 4b. What the suite contains, and what it refuses to
+
+Office is a business toolkit, not an app store. Four apps were retired
+because no enterprise suite ships them and their presence undercut
+everything around them: **Pomodoro** (a personal focus timer),
+**Calculator** (an operating-system accessory), **Bookmarks** (a
+browser feature, and in-memory), and **Sticky wall** (duplicated
+Whiteboard). Routes, registry entries and files are gone; their tables
+(calculator_history, pomodoro_sessions, sticky_walls) are orphaned and
+should be dropped once the backend freeze lifts.
+
+Six modules that were already built but reachable only from the Lounge
+now appear in the suite: **Mail**, **Calendar**, **Bookings**, **Team
+chat**, **Inventory**, and a new seventh family, **Communicate**.
+Accounting's description was rewritten from "Ledger and reports" to
+"Ledger, VAT, payroll, banking" because that is what it actually
+contains.
+
+**Profitability** is new and is the suite's argument for existing: it
+reads billable time (hours x the rate on each entry) and expenses
+tagged to the same project, and states the margin per job. It invents
+nothing, excludes rejected expenses, and gathers untagged work under
+"Untagged" rather than flattering the total by dropping it.
+
+The **opening splash** was replaced. The old one ran four seconds of
+orbiting 3D tiles, a particle burst and a white flash over a progress
+bar narrating "Loading modules...", painted in Microsoft's and Canva's
+registered brand colours. It is now the mark, the wordmark and a
+hairline that fills while the app mounts - 820ms, no 3D engine, and it
+exits immediately under prefers-reduced-motion.
+
 ## 5. Module status (rollout ledger)
 
 **On the band (OfficeModuleBand):** Expenses, Docs home, Sheets home,
