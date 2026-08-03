@@ -130,7 +130,11 @@ export function ProductsPanel({ siteId }: { siteId?: string }) {
             el.props.text = el.props.text
               .replace(/\$PRODUCT_NAME/g, product.name)
               .replace(/\$PRODUCT_PRICE/g, formatPrice(product.price, product.currency))
-              .replace(/\$PRODUCT_DESC/g, product.description || 'Premium quality product with exceptional craftsmanship.')
+              // An unwritten description leaves an empty space to fill, not
+              // invented marketing copy. "Premium quality product with
+              // exceptional craftsmanship" was being published onto real
+              // shops about real products nobody had described yet.
+              .replace(/\$PRODUCT_DESC/g, product.description || '')
               .replace(/\$COMPARE_PRICE/g, product.compare_at_price ? formatPrice(product.compare_at_price, product.currency) : '');
           }
           if (el.props?.src && product.images?.[0]?.url) {

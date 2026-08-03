@@ -215,6 +215,23 @@ check('quote becomes <blockquote>', /<blockquote/.test(rich));
 check('code becomes <pre>', /<pre/.test(rich));
 check('behaviour JS shipped for them', /accordion|tabs/i.test(richOut.sharedJS));
 
+console.log('\n── charts ──');
+const CHARTS = [
+  { id: 'bar', type: 'bar-chart', props: { data: [65, 80, 45], labels: ['Mon', 'Tue', 'Wed'], color: '#b45309', title: 'Loaves sold' }, children: [] },
+  { id: 'line', type: 'line-chart', props: { data: [30, 45, 60], labels: ['Jan', 'Feb', 'Mar'], color: '#15803d' }, children: [] },
+  { id: 'pie', type: 'pie-chart', props: { data: [5, 3, 2], labels: ['Sourdough', 'Bara brith', 'Tin'] }, children: [] },
+  { id: 'bad', type: 'bar-chart', props: { data: [1], labels: ['x'], color: 'url(javascript:alert(1))' }, children: [] },
+];
+const chartOut = compilePages([{ page_name: 'C', slug: '', is_homepage: true, page_settings: {}, elements: CHARTS }],
+  'C', ORIGIN, SITE_ID, 'https://ref.supabase.co');
+const ch = chartOut.pageFiles[0].html;
+check('bar chart draws real bars', (ch.match(/<rect /g) || []).length >= 3, 'charts used to publish as an empty box');
+check('line chart draws a polyline', /<polyline /.test(ch));
+check('pie chart draws slices', (ch.match(/<path d="M/g) || []).length >= 3);
+check('figures also given as text', /<table class="chart-data"/.test(ch) && /Sourdough/.test(ch));
+check('chart labelled for assistive tech', /role="group" aria-label="Loaves sold"/.test(ch));
+check('a hostile colour cannot reach the svg', !/javascript:/.test(ch));
+
 console.log('\n── robustness ──');
 const ROUGH = [
   { id: 'a', type: 'section' },                                  // no props, styles or children

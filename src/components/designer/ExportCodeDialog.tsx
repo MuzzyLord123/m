@@ -189,12 +189,54 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
       })), null, 2));
     }
 
-    // README
-    zip.file('README.md', `# ${siteName}\n\nExported from Workshop.\n\n## Structure\n\n${
-      exportMode === 'multi' && pages.length > 1
-        ? pages.map(p => `- \`${p.is_homepage ? 'index' : p.slug.replace(/^\/+/, '')}.html\` — ${p.page_name}`).join('\n')
-        : '- `index.html` — Main page'
-    }\n- \`styles.css\` — All styles\n- \`script.js\` — Interactive functionality\n- \`assets/\` — Images & media\n\n## Usage\n\nOpen \`index.html\` in any browser or deploy to any static hosting provider.\n`);
+    // A handover note, not a stub. Somebody opening this zip - a developer
+    // taking the site on, or the owner years later - should be able to tell
+    // what it is, how to run it, and what depends on what, without asking.
+    const fileList = exportMode === 'multi' && pages.length > 1
+      ? pages.map(p => {
+          const f = p.is_homepage ? 'index' : p.slug.replace(/^\/+/, '');
+          return `| \`${f}.html\` | ${p.page_name} |`;
+        }).join('\n')
+      : '| `index.html` | The site |';
+
+    zip.file('README.md', `# ${siteName}
+
+A static website. No build step, no dependencies, no framework — open
+\`index.html\` in a browser and it works, or upload the folder to any static
+host (Netlify, Vercel, Cloudflare Pages, S3, a plain Apache box).
+
+## What is in here
+
+| File | What it is |
+| --- | --- |
+${fileList}
+| \`styles.css\` | Every style for every page |
+| \`script.js\` | Behaviour: navigation, accordions, tabs, modals, forms |
+${assets.length > 0 ? '| `assets/manifest.json` | The media this site references, by URL |\n' : ''}
+## Class names
+
+Classes come from what each element was named in the Workshop, so
+\`.site-header\` is the element called "Site header". Elements that were never
+named get a short suffix instead. Renaming an element changes its class, so
+if you are editing this by hand, edit the CSS rather than renaming upstream.
+
+## Forms
+
+Forms post to Quooro and appear under **Form submissions** in the Workshop.
+If you are self-hosting this export and want submissions to go somewhere
+else, change the \`fetch\` target in \`script.js\` — the markup is standard
+\`<form>\` and needs no other change.
+
+${assets.length > 0 ? `## Media
+
+\`assets/manifest.json\` lists ${assets.length} referenced file${assets.length === 1 ? '' : 's'}. They are
+linked at their original URLs rather than bundled, so download them and
+update the paths if you need this to work offline.
+
+` : ''}---
+
+Exported from Quooro Workshop on ${new Date().toISOString().slice(0, 10)}.
+`);
 
     const blob = await zip.generateAsync({ type: 'blob' });
     const url = URL.createObjectURL(blob);

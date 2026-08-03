@@ -22,19 +22,47 @@ export function getResolvedStyles(el: EditorElement, bp: Breakpoint): StyleMap {
 }
 
 /** Generate a semantic CSS class name */
+/**
+ * The class name an element carries into exported and published code.
+ *
+ * This is the single most visible thing about generated code. Names like
+ * "h1-h1" and "nav-nav1" are a machine stamp, and they were the reason the
+ * export read as generated rather than written by somebody.
+ *
+ * So: if you named the element, that name IS the class - `.hero-banner`,
+ * no suffix, no id fragment. Two elements sharing a name deliberately share
+ * a class, which is how a class is supposed to work and how Webflow treats
+ * them. Only unnamed elements get a short stable suffix, and only because
+ * they have nothing else to be called.
+ */
 export function generateClassName(el: EditorElement): string {
-  // Use semantic names based on element type for cleaner output
   const semanticMap: Record<string, string> = {
-    section: 'section', container: 'div', columns: 'columns', grid: 'grid',
-    heading: (el.props || {}).level as string || 'heading', text: 'text', button: 'btn',
-    image: 'img', video: 'video', navbar: 'nav', footer: 'footer',
-    link: 'link', form: 'form', input: 'input', card: 'card',
-    spacer: 'spacer', divider: 'divider',
+    section: 'section', container: 'container', columns: 'columns', grid: 'grid',
+    heading: ((el.props || {}).level as string) || 'heading', text: 'text', button: 'button',
+    image: 'image', video: 'video', navbar: 'navbar', footer: 'footer',
+    link: 'link', form: 'form', input: 'input', textarea: 'textarea',
+    select: 'select', checkbox: 'checkbox', radio: 'radio', card: 'card',
+    spacer: 'spacer', divider: 'divider', list: 'list', quote: 'quote',
   };
-  const base = el.name?.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '-').toLowerCase() 
-    || semanticMap[el.type] || el.type;
-  const shortId = el.id.slice(-6);
-  return `${base}-${shortId}`;
+
+  const authored = el.name
+    ?.trim()
+    .replace(/[^a-zA-Z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase();
+
+  // A name the author chose is the whole class. Nothing appended.
+  if (authored) return authored;
+
+  const base = semanticMap[el.type] || el.type.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+  // Unnamed elements still need to be distinguishable. Four base-36
+  // characters off a hash of the id: stable across builds, short enough to
+  // read past.
+  let h = 0;
+  for (let i = 0; i < el.id.length; i++) h = (h * 31 + el.id.charCodeAt(i)) >>> 0;
+  return `${base}-${h.toString(36).slice(0, 4)}`;
 }
 
 /** CSS Reset + Base — Production-grade */

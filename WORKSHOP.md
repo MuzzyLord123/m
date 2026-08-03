@@ -107,6 +107,11 @@ Notes that matter:
 | Submission emails | Not wired | Sent, with reply-to set to the enquirer |
 | CSS / JS | Shipped unminified | Minified (quote- and selector-aware) |
 | Images | No dimensions; the page jumped as they loaded | `width`/`height` emitted when known |
+| Rich elements | 75 of 102 types published as an empty `div` | One shared compiler; the published site is the exported site |
+| Charts | A styled empty box on the live page | Inline SVG, plus the figures as a table |
+| Class names | `h1-h1`, `nav-nav1` — a machine stamp | The name you gave the element: `.site-header`, `.hero` |
+| Submit buttons | `type="button"` — every exported form was dead on click | `type="submit"` inside a form |
+| Product descriptions | Invented marketing copy published onto real shops | Blank until somebody writes one |
 
 ## Rollback
 
@@ -137,9 +142,9 @@ Stated plainly so nobody assumes otherwise:
   timer, so a customer who fixes their DNS overnight must press the button.
 - **HTML is not minified.** Only CSS and JS are. Whitespace between inline
   elements is significant, and gzip on the wire recovers most of it anyway.
-- **Charts** (bar, line, pie) still render as a styled container rather than
-  a drawn chart on the published page. Everything else in the library now
-  carries its real markup and behaviour.
+- **The deep panels** — Animation, Interactions, CMS — use the studio palette
+  but have not been re-composed the way the style panel was. They work; they
+  are denser than they need to be.
 
 ## Verifying changes to the compiler
 
@@ -159,3 +164,14 @@ node supabase/functions/deploy-site/test-published-site.mjs
 ```
 
 Run both after any change to `deploy-site/index.ts`.
+
+## What exported code looks like
+
+Class names come from what you named the element, so an element called
+"Site header" becomes `.site-header` with no id fragment appended. Two
+elements sharing a name deliberately share a class — that is what a class is
+for. Only unnamed elements get a short stable suffix.
+
+The zip carries a README that says what each file is, how class names work,
+where forms post and how to repoint them. It is written for whoever opens
+the zip in two years, not as a placeholder.

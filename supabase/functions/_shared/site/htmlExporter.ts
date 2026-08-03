@@ -302,12 +302,97 @@ function renderChoice(el: EditorElement, pad: string, cls: string): string | nul
   return null;
 }
 
+/**
+ * Charts, drawn as inline SVG.
+ *
+ * They used to publish as an empty styled box - the editor showed a chart,
+ * the live site showed nothing. Inline SVG is the right answer for a static
+ * export: no library to load, no runtime to fail, it scales, it prints, and
+ * a screen reader gets the figures from the accompanying table.
+ */
+function renderChart(el: EditorElement, pad: string, cls: string): string | null {
+  if (!['bar-chart', 'line-chart', 'pie-chart'].includes(el.type)) return null;
+  const props = el.props || {};
+  const data = (Array.isArray(props.data) ? props.data : []).map(Number).filter(n => !isNaN(n));
+  const labels = (Array.isArray(props.labels) ? props.labels : []).map(String);
+  const colour = safeColour(props.color) || 'currentColor';
+  const title = String(props.title || el.name || 'Chart');
+
+  if (data.length === 0) {
+    return `${pad}<figure class="${cls}"><figcaption>${escapeHTML(title)}</figcaption></figure>`;
+  }
+
+  const W = 600, H = 300, PADX = 36, PADY = 24;
+  const max = Math.max(...data, 1);
+  let svg = '';
+
+  if (el.type === 'bar-chart') {
+    const slot = (W - PADX * 2) / data.length;
+    const bw = Math.max(4, slot * 0.62);
+    svg = data.map((v, i) => {
+      const h = ((H - PADY * 2) * v) / max;
+      const x = PADX + i * slot + (slot - bw) / 2;
+      const y = H - PADY - h;
+      const label = labels[i] ? `<title>${escapeHTML(labels[i])}: ${v}</title>` : '';
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${colour}">${label}</rect>`;
+    }).join('');
+  } else if (el.type === 'line-chart') {
+    const step = data.length > 1 ? (W - PADX * 2) / (data.length - 1) : 0;
+    const pts = data.map((v, i) => {
+      const x = PADX + i * step;
+      const y = H - PADY - ((H - PADY * 2) * v) / max;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+    svg = `<polyline points="${pts.join(' ')}" fill="none" stroke="${colour}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>` +
+      data.map((v, i) => {
+        const [x, y] = pts[i].split(',');
+        return `<circle cx="${x}" cy="${y}" r="3.5" fill="${colour}"><title>${escapeHTML(labels[i] || String(i + 1))}: ${v}</title></circle>`;
+      }).join('');
+  } else {
+    const total = data.reduce((a, b) => a + b, 0) || 1;
+    const cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - PADY;
+    let angle = -Math.PI / 2;
+    svg = data.map((v, i) => {
+      const sweep = (v / total) * Math.PI * 2;
+      const x1 = cx + r * Math.cos(angle), y1 = cy + r * Math.sin(angle);
+      angle += sweep;
+      const x2 = cx + r * Math.cos(angle), y2 = cy + r * Math.sin(angle);
+      const large = sweep > Math.PI ? 1 : 0;
+      // Slices share one hue at descending opacity: readable in print and
+      // to most colour-blind readers, unlike an arbitrary rainbow.
+      const op = (1 - (i / Math.max(data.length, 1)) * 0.62).toFixed(2);
+      return `<path d="M${cx} ${cy} L${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 ${large} 1 ${x2.toFixed(1)} ${y2.toFixed(1)} Z" fill="${colour}" fill-opacity="${op}">` +
+        `<title>${escapeHTML(labels[i] || String(i + 1))}: ${v}</title></path>`;
+    }).join('');
+  }
+
+  // The figures in text as well as in the drawing, so the chart is readable
+  // without sight of it and survives with images off.
+  const table = labels.length
+    ? `\n${pad}  <table class="chart-data"><caption>${escapeHTML(title)}</caption><tbody>` +
+      data.map((v, i) => `<tr><th scope="row">${escapeHTML(labels[i] || String(i + 1))}</th><td>${v}</td></tr>`).join('') +
+      `</tbody></table>`
+    : '';
+
+  return `${pad}<figure class="${cls}" role="group" aria-label="${escapeAttr(title)}">\n` +
+    `${pad}  <svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${svg}</svg>` +
+    `${table}\n${pad}</figure>`;
+}
+
+/** A colour value safe to drop into an SVG attribute. */
+function safeColour(value: unknown): string {
+  const v = String(value ?? '').trim();
+  return /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%/]+\)|hsla?\([\d\s.,%/]+\)|[a-z]+)$/i.test(v) ? v : '';
+}
+
 function elementToHTML(el: EditorElement, indent: number = 0, inForm = false): string {
   if (el.hidden) return ''; // Skip hidden elements
   const pad = '  '.repeat(indent);
   const cls = generateClassName(el);
   const choice = renderChoice(el, pad, cls);
   if (choice) return choice;
+  const chart = renderChart(el, pad, cls);
+  if (chart) return chart;
 
   const tag = getTag(el);
   const attrs = getAttrs(el, inForm);
