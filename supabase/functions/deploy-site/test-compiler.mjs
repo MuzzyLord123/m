@@ -19,9 +19,9 @@ src = src.slice(0, serveStart) + src.slice(typesStart);
 
 const js = transformSync(src, { loader: 'ts', format: 'cjs', target: 'es2022' }).code;
 const module_ = { exports: {} };
-const fn = new Function('module', 'exports', 'require', 'crypto', js + '\nmodule.exports = { compilePages, elementToHTML, resolveHref, escapeAttr, safeURL, generateBasicJS };');
+const fn = new Function('module', 'exports', 'require', 'crypto', js + '\nmodule.exports = { compilePages, elementToHTML, resolveHref, escapeAttr, safeURL, generateBasicJS, minifyCSS, minifyJS, intrinsicPx };');
 fn(module_, module_.exports, () => ({}), globalThis.crypto);
-const { compilePages, resolveHref, escapeAttr, safeURL } = module_.exports;
+const { compilePages, resolveHref, escapeAttr, safeURL, minifyCSS } = module_.exports;
 
 // ── a page tree that exercises the things that used to be broken ──
 const PAGES = [
@@ -44,8 +44,13 @@ const PAGES = [
         { id: 'i1', type: 'input', props: { label: 'Full name', inputType: 'text', required: true } },
         { id: 'i2', type: 'input', props: { label: 'Email', inputType: 'email', required: true } },
         { id: 't1', type: 'textarea', props: { label: 'What do you need?' } },
+        { id: 's1', type: 'select', props: { label: 'Which practice', options: ['Caerphilly', 'Bargoed'], required: true } },
+        { id: 'c1', type: 'checkbox', props: { label: 'Which days suit you', options: ['Monday', 'Tuesday'] } },
+        { id: 'c2', type: 'checkbox', props: { text: 'Send me reminders' } },
+        { id: 'r1', type: 'radio', props: { label: 'Preferred contact', options: ['Phone', 'Email'] } },
         { id: 'b1', type: 'button', props: { text: 'Request a call' } },
       ]},
+      { id: 'img3', type: 'image', props: { src: '/surgery.jpg', alt: 'Reception', width: 640, height: 360 } },
     ],
   },
   {
@@ -128,6 +133,43 @@ check('script guards in-page anchors by id', out.sharedJS.includes('getElementBy
 check('honeypot excluded from payload', out.sharedJS.includes("key === 'company_website'"));
 check('css hides the honeypot', out.sharedCSS.includes('.quooro-hp'));
 check('reduced motion respected', out.sharedCSS.includes('prefers-reduced-motion'));
+
+console.log('\n── choices (select / checkbox / radio) ──');
+check('select renders as a select', /<select class="el-s1"[^>]*name="which_practice"/.test(home),
+  'select fell back to a div and its answer would be lost');
+check('select carries its options', home.includes('<option value="Caerphilly">Caerphilly</option>'));
+check('select has a placeholder option', home.includes('<option value="">Choose…</option>'));
+check('select honours required', /<select[^>]*required/.test(home));
+check('checkbox group renders a fieldset', home.includes('quooro-choice-group') && home.includes('<legend>Which days suit you</legend>'));
+check('checkbox group options are real inputs',
+  /<input type="checkbox" name="which_days_suit_you" value="Monday"/.test(home));
+check('group controls carry the group label',
+  /data-field-label="Which days suit you"/.test(home),
+  'without this the inbox would say which_days_suit_you');
+check('lone checkbox renders with its own text',
+  /<input type="checkbox" name="send_me_reminders" value="Send me reminders"/.test(home));
+check('radio group renders radios', /<input type="radio" name="preferred_contact" value="Phone"/.test(home));
+check('choice CSS shipped', out.sharedCSS.includes('.quooro-choice'));
+
+console.log('\n── images ──');
+check('intrinsic width emitted', home.includes('width="640"'), 'no width means the page jumps as images load');
+check('intrinsic height emitted', home.includes('height="360"'));
+check('no dimensions invented when unknown', !/team\.jpg" alt="[^"]*" loading="lazy" decoding="async" width=/.test(home));
+
+console.log('\n── minification ──');
+check('css has no newlines', !out.sharedCSS.includes('\n'));
+check('css banner comment removed', !out.sharedCSS.includes('Auto-generated'));
+check('css still valid-ish', out.sharedCSS.includes('.quooro-hp{') && out.sharedCSS.includes('box-sizing:border-box'));
+check('js comments stripped', !out.sharedJS.includes('// Smooth scrolling'));
+check('js still functional', out.sharedJS.includes('site-form-submit') && out.sharedJS.includes('addEventListener'));
+// the reason minifyCSS walks the string instead of running regexes
+check('quotes protect their contents',
+  minifyCSS('a{content:"x  /* not a comment */  y";color:red}') ===
+  'a{content:"x  /* not a comment */  y";color:red}',
+  minifyCSS('a{content:"x  /* not a comment */  y";color:red}'));
+check('media queries survive', minifyCSS('@media (max-width: 480px) {\n  .a {\n  color: red;\n  }\n}')
+  === '@media (max-width:480px){.a{color:red}}',
+  minifyCSS('@media (max-width: 480px) {\n  .a {\n  color: red;\n  }\n}'));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) {

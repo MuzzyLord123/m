@@ -31,6 +31,10 @@ const PAGES = [{
         { id: 'i1', type: 'input', props: { label: 'Full name', inputType: 'text', required: true } },
         { id: 'i2', type: 'input', props: { label: 'Email', inputType: 'email', required: true } },
         { id: 't1', type: 'textarea', props: { label: 'Your order' } },
+        { id: 's1', type: 'select', props: { label: 'Collection day', options: ['Friday', 'Saturday'] } },
+        { id: 'c1', type: 'checkbox', props: { label: 'Extras', options: ['Bara brith', 'Welsh cakes'] } },
+        { id: 'r1', type: 'radio', props: { label: 'Loaf size', options: ['Small', 'Large'] } },
+        { id: 'c2', type: 'checkbox', props: { text: 'Text me when ready' } },
         { id: 'b1', type: 'button', props: { text: 'Send order' } },
       ]},
     ]},
@@ -73,6 +77,12 @@ const check = (n, c, d) => { if (c) { pass++; console.log('PASS  ' + n); } else 
   await page.fill('input[name="full_name"]', 'Sioned Price');
   await page.fill('input[name="email"]', 'sioned@bakery.wales');
   await page.fill('textarea[name="your_order"]', 'Six bara brith, Friday.');
+  await page.selectOption('select[name="collection_day"]', 'Saturday');
+  // tick both extras, to prove a multi-answer group survives the trip
+  await page.check('input[name="extras"][value="Bara brith"]');
+  await page.check('input[name="extras"][value="Welsh cakes"]');
+  await page.check('input[name="loaf_size"][value="Large"]');
+  await page.check('input[name="text_me_when_ready"]');
   await page.click('button');
   await page.waitForTimeout(700);
 
@@ -86,6 +96,18 @@ const check = (n, c, d) => { if (c) { pass++; console.log('PASS  ' + n); } else 
   check('textarea captured', captured?.fields?.['Your order'] === 'Six bara brith, Friday.');
   check('honeypot sent empty', captured?.company_website === '');
   check('honeypot NOT in the field payload', !('company_website' in (captured?.fields || {})));
+  check('dropdown answer captured', captured?.fields?.['Collection day'] === 'Saturday',
+    JSON.stringify(captured?.fields?.['Collection day']));
+  check('multi-tick group arrives as one labelled answer',
+    captured?.fields?.['Extras'] === 'Bara brith, Welsh cakes',
+    JSON.stringify(captured?.fields?.['Extras']));
+  check('radio answer captured', captured?.fields?.['Loaf size'] === 'Large');
+  check('lone tick box captured under its own wording',
+    captured?.fields?.['Text me when ready'] === 'Text me when ready',
+    JSON.stringify(captured?.fields));
+  check('no raw field slugs leaked as labels',
+    !Object.keys(captured?.fields || {}).some(k => k.includes('_')),
+    Object.keys(captured?.fields || {}).join(' | '));
 
   const status = await page.textContent('.quooro-form-status');
   check('success message shown to the visitor', /Order received/.test(status || ''), `got: ${status}`);

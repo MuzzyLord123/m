@@ -47,6 +47,7 @@ export function PublishDashboard({ siteId, siteName, onPublish, isOpen, onClose 
   const {
     deployments, domains, currentDeployment, publishing,
     publishProgress, publishStage, rollback, addCustomDomain, removeDomain,
+    rollingBack, verifyingDomain, verifyDomain,
   } = useSitePublish(siteId);
 
   const [tab, setTab] = useState<'overview' | 'history' | 'domains'>('overview');
@@ -158,6 +159,7 @@ export function PublishDashboard({ siteId, siteName, onPublish, isOpen, onClose 
                   expandedLog={expandedLog}
                   setExpandedLog={setExpandedLog}
                   onRollback={rollback}
+                  rollingBack={rollingBack}
                 />
               )}
               {tab === 'domains' && (
@@ -167,6 +169,8 @@ export function PublishDashboard({ siteId, siteName, onPublish, isOpen, onClose 
                   setNewDomain={setNewDomain}
                   onAddDomain={addCustomDomain}
                   onRemoveDomain={removeDomain}
+                  onVerifyDomain={verifyDomain}
+                  verifyingDomain={verifyingDomain}
                 />
               )}
             </div>
@@ -301,7 +305,8 @@ function InfoCard({ icon, title, desc }: { icon: React.ReactNode; title: string;
 
 // ─── History ──────────────────
 
-function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback }: {
+function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback, rollingBack }: {
+  rollingBack?: string | null;
   deployments: Deployment[];
   expandedLog: string | null;
   setExpandedLog: (id: string | null) => void;
@@ -346,11 +351,12 @@ function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback }: {
                 {dep.status === 'archived' && (
                   <button
                     onClick={() => onRollback(dep.id)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium hover:bg-[#333] transition-colors"
+                    disabled={!!rollingBack}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors hover:bg-[#333] disabled:opacity-50"
                     style={{ border: '1px solid #333', color: '#888' }}
                   >
-                    <RotateCcw className="w-3 h-3" />
-                    Rollback
+                    <RotateCcw className={`w-3 h-3 ${rollingBack === dep.id ? 'animate-spin' : ''}`} />
+                    {rollingBack === dep.id ? 'Restoring…' : 'Rollback'}
                   </button>
                 )}
                 <button
@@ -393,7 +399,9 @@ function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback }: {
 
 // ─── Domains ──────────────────
 
-function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDomain }: {
+function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDomain, onVerifyDomain, verifyingDomain }: {
+  onVerifyDomain?: (id: string) => void;
+  verifyingDomain?: string | null;
   domains: SiteDomain[];
   newDomain: string;
   setNewDomain: (v: string) => void;
@@ -502,6 +510,17 @@ function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDom
                       </button>
                     </div>
                   ))}
+                  {/* Adding a domain used to leave it pending for ever with
+                      nothing ever checking. This asks the resolver. */}
+                  <button
+                    onClick={() => onVerifyDomain?.(domain.id)}
+                    disabled={!!verifyingDomain}
+                    className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors hover:bg-[#2a2a2a] disabled:opacity-50"
+                    style={{ border: '1px solid #333', color: '#ccc' }}
+                  >
+                    <RotateCcw className={`w-3 h-3 ${verifyingDomain === domain.id ? 'animate-spin' : ''}`} />
+                    {verifyingDomain === domain.id ? 'Checking DNS…' : "I've added these — check now"}
+                  </button>
                 </div>
               )}
             </div>

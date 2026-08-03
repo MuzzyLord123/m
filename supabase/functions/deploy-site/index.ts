@@ -67,7 +67,12 @@ serve(async (req) => {
 
     const versionNumber = (lastDeploy?.version_number || 0) + 1;
     const subdomain = generateSubdomain(siteName || "site", siteId);
+    // Two destinations. The versioned path is the archive a rollback reads
+    // from; the live path is the one the address actually serves. Publishing
+    // to a versioned URL meant a rollback could only change what the
+    // dashboard *said* was live, never what a visitor was served.
     const storagePath = `sites/${siteId}/v${versionNumber}`;
+    const livePath = `sites/${siteId}/live`;
 
     // Step 2: Create deployment record
     const { data: deployment, error: insertError } = await supabase
@@ -117,9 +122,9 @@ serve(async (req) => {
     } else if (useCloudflare && cfCustomDomain) {
       siteOrigin = `https://${subdomain}.${cfCustomDomain}`;
     } else if (useCloudflare) {
-      siteOrigin = `https://pub-${cfR2Bucket}.r2.dev/${storagePath}`;
+      siteOrigin = `https://pub-${cfR2Bucket}.r2.dev/${livePath}`;
     } else {
-      siteOrigin = `${supabaseUrl}/storage/v1/object/public/site-files/${storagePath}`;
+      siteOrigin = `${supabaseUrl}/storage/v1/object/public/site-files/${livePath}`;
     }
 
     log("Compiling", "running", `Building ${pages.length} page(s)...`);
@@ -135,16 +140,20 @@ serve(async (req) => {
     let totalSize = 0;
     let fileCount = 0;
 
+    // Written twice: once to the version's own archive, once to the live
+    // path the address serves.
     if (useCloudflare) {
       log("Uploading", "running", "Deploying to Cloudflare R2...");
       const uploadResult = await uploadToCloudflareR2(
         cfAccountId!, cfApiToken!, cfR2Bucket!, storagePath, compiledPages
       );
+      await uploadToCloudflareR2(cfAccountId!, cfApiToken!, cfR2Bucket!, livePath, compiledPages);
       totalSize = uploadResult.totalSize;
       fileCount = uploadResult.fileCount;
     } else {
       log("Uploading", "running", "Deploying to storage...");
       const uploadResult = await uploadToSupabaseStorage(supabase, storagePath, compiledPages);
+      await uploadToSupabaseStorage(supabase, livePath, compiledPages);
       totalSize = uploadResult.totalSize;
       fileCount = uploadResult.fileCount;
     }
@@ -472,6 +481,15 @@ function safeURL(value: unknown, allowData = false): string {
   return "";
 }
 
+/** A plain pixel dimension, if the element states one. Percentages, autos
+ *  and anything else return null rather than a misleading attribute. */
+function intrinsicPx(el: any, axis: "width" | "height"): number | null {
+  const raw = el.props?.[axis] ?? el.styles?.desktop?.[axis];
+  if (typeof raw === "number" && raw > 0) return Math.round(raw);
+  const m = String(raw ?? "").trim().match(/^(\d+(?:\.\d+)?)px$/);
+  return m ? Math.round(parseFloat(m[1])) : null;
+}
+
 /** A stable form field name derived from its label. */
 function fieldName(label: string, index: number): string {
   const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 40);
@@ -506,8 +524,8 @@ function compilePages(
   supabaseUrl: string,
 ): CompiledOutput {
   const allElements = pages.flatMap(p => p.elements);
-  const sharedCSS = buildCSSFromElements(allElements);
-  const sharedJS = generateBasicJS(siteId, supabaseUrl);
+  const sharedCSS = minifyCSS(buildCSSFromElements(allElements));
+  const sharedJS = minifyJS(generateBasicJS(siteId, supabaseUrl));
 
   const fileNameFor = (page: PageInput) => {
     const cleanSlug = (page.slug || "").replace(/^\/+/, "");
@@ -657,6 +675,12 @@ a { text-decoration: none; color: inherit; }
 .quooro-form-status[data-state="error"] { color: #b91c1c; }
 form[data-quooro-form] button[disabled] { opacity: .65; cursor: progress; }
 
+/* Choices. Enough shape to be usable; the author's own styles win. */
+.quooro-choice { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+.quooro-choice input { width: auto; margin: 0; }
+.quooro-choice-group { border: 0; padding: 0; margin: 0; display: grid; gap: .4rem; }
+.quooro-choice-group legend { padding: 0; margin-bottom: .35rem; font-weight: 600; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -698,6 +722,83 @@ function camelToKebab(str: string): string {
   return str.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
 }
 
+/**
+ * Minify the generated stylesheet.
+ *
+ * Walks the string rather than running regexes over it, because a CSS value
+ * can legitimately contain quotes, braces and even the characters that start
+ * a comment - content: "a/*b" would be mangled by the naive version. Inside
+ * a quoted string nothing is touched.
+ */
+function minifyCSS(css: string): string {
+  let out = "";
+  let quote: string | null = null;
+  // Whether we are inside a declaration block. It matters: ".a :hover" is a
+  // descendant selector and its space is load-bearing, while "color: red"
+  // inside a block can lose the space safely.
+  let inBlock = false;
+  // Parenthesis depth, so the colon in "@media (max-width: 480px)" is
+  // recognised as a feature separator even though no block is open yet.
+  let parens = 0;
+
+  for (let i = 0; i < css.length; i++) {
+    const c = css[i];
+
+    if (quote) {
+      out += c;
+      if (c === "\\") { out += css[++i] ?? ""; continue; }
+      if (c === quote) quote = null;
+      continue;
+    }
+
+    if (c === '"' || c === "'") { quote = c; out += c; continue; }
+
+    // Comment - drop it entirely.
+    if (c === "/" && css[i + 1] === "*") {
+      const end = css.indexOf("*/", i + 2);
+      i = end === -1 ? css.length : end + 1;
+      continue;
+    }
+
+    // Collapse any run of whitespace to a single space.
+    if (/\s/.test(c)) {
+      if (!/\s/.test(out[out.length - 1] ?? " ")) out += " ";
+      continue;
+    }
+
+    // Punctuation that never needs a space before it. A colon only qualifies
+    // inside a block, and inside parentheses like @media (max-width: 480px).
+    const colonIsSeparator = c === ":" && (inBlock || parens > 0);
+    const tightBefore = "{};,>)".includes(c) || colonIsSeparator;
+    if (tightBefore && out.endsWith(" ")) out = out.slice(0, -1);
+
+    out += c;
+    if (c === "{") inBlock = true;
+    if (c === "}") inBlock = false;
+    if (c === "(") parens++;
+    if (c === ")") parens = Math.max(0, parens - 1);
+
+    // ...and no space after it either.
+    if (c === ";" || c === "{" || c === "}" || c === "," || c === ">" || c === "(" || colonIsSeparator) {
+      while (i + 1 < css.length && /\s/.test(css[i + 1])) i++;
+    }
+  }
+  return out.replace(/;\}/g, "}").trim();
+}
+
+/**
+ * Minify the generated script. Conservative on purpose: this only removes
+ * whole-line comments and leading indentation, which is safe because the
+ * script is generated here and contains no multi-line string literals.
+ */
+function minifyJS(js: string): string {
+  return js
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line.length > 0 && !line.startsWith("//"))
+    .join("\n");
+}
+
 function getTag(el: any): string {
   const map: Record<string, string> = {
     section: "section", container: "div", columns: "div", grid: "div",
@@ -706,6 +807,7 @@ function getTag(el: any): string {
     input: "input", textarea: "textarea", card: "article",
     spacer: "div", divider: "hr", quote: "blockquote",
     list: "ul", code: "pre", table: "table",
+    select: "select", separator: "hr", badge: "span", audio: "audio",
   };
   if (el.type === "heading") {
     const level = el.props?.level || "h2";
@@ -714,16 +816,77 @@ function getTag(el: any): string {
   return map[el.type] || "div";
 }
 
+/**
+ * Choices - dropdowns, tick boxes, radio groups. These need markup a plain
+ * tag map cannot express (options inside a select, an input wrapped in its
+ * own label), so they are rendered before the generic path. Without this
+ * they came out as empty <div>s and the answers were simply lost.
+ */
+function renderChoice(el: any, pad: string, className: string): string | null {
+  // A lone tick box carries its wording in `text` rather than `label`, and
+  // that wording is what should name the field in the inbox.
+  const label = String(el.props?.label || el.props?.placeholder || el.props?.text || "Choice");
+  const name = escapeAttr(el.props?.name || fieldName(label, 0));
+  const required = el.props?.required ? " required" : "";
+
+  if (el.type === "select") {
+    const options: string[] = Array.isArray(el.props?.options) && el.props.options.length
+      ? el.props.options.map((o: unknown) => (typeof o === "string" ? o : String((o as any)?.label ?? (o as any)?.value ?? "")))
+      : [];
+    const placeholder = el.props?.placeholder ? String(el.props.placeholder) : "Choose…";
+    const opts = [
+      `${pad}  <option value="">${escapeHTML(placeholder)}</option>`,
+      ...options.filter(Boolean).map(o => `${pad}  <option value="${escapeAttr(o)}">${escapeHTML(o)}</option>`),
+    ].join("\n");
+    return `${pad}<select class="${className}" name="${name}" aria-label="${escapeAttr(label)}"${required}>\n${opts}\n${pad}</select>`;
+  }
+
+  if (el.type === "checkbox" || el.type === "radio") {
+    const type = el.type === "radio" ? "radio" : "checkbox";
+    // A group renders one control per option; a lone tick box renders itself.
+    const options: string[] = Array.isArray(el.props?.options) && el.props.options.length
+      ? el.props.options.map((o: unknown) => (typeof o === "string" ? o : String((o as any)?.label ?? (o as any)?.value ?? "")))
+      : [];
+    // data-field-label keeps the group's own wording on every control, so
+    // the inbox says "Which days suit you" rather than "which_days_suit_you".
+    if (options.length === 0) {
+      const text = String(el.props?.text || label);
+      return `${pad}<label class="${className} quooro-choice">` +
+        `<input type="${type}" name="${name}" value="${escapeAttr(text)}"` +
+        ` data-field-label="${escapeAttr(text)}"${required}> ` +
+        `<span>${escapeHTML(text)}</span></label>`;
+    }
+    const items = options.filter(Boolean).map(o =>
+      `${pad}  <label class="quooro-choice">` +
+      `<input type="${type}" name="${name}" value="${escapeAttr(o)}"` +
+      ` data-field-label="${escapeAttr(label)}"> ` +
+      `<span>${escapeHTML(o)}</span></label>`).join("\n");
+    return `${pad}<fieldset class="${className} quooro-choice-group">\n` +
+      `${pad}  <legend>${escapeHTML(label)}</legend>\n${items}\n${pad}</fieldset>`;
+  }
+
+  return null;
+}
+
 function elementToHTML(el: any, indent: number, pageSlugs: Set<string>): string {
   const pad = "  ".repeat(indent);
-  const tag = getTag(el);
   const className = `el-${el.id?.replace(/[^a-zA-Z0-9-_]/g, "") || "unknown"}`;
+  const choice = renderChoice(el, pad, className);
+  if (choice) return choice;
+
+  const tag = getTag(el);
   const selfClosing = ["img", "input", "hr"].includes(tag);
 
   let attrs = ` class="${className}"`;
   if (el.type === "image") {
     attrs += ` src="${escapeAttr(safeURL(el.props?.src, true))}"` +
              ` alt="${escapeAttr(el.props?.alt || "")}" loading="lazy" decoding="async"`;
+    // Intrinsic size reserves the space before the image arrives, so the
+    // page does not jump as it loads.
+    const w = intrinsicPx(el, "width");
+    const h = intrinsicPx(el, "height");
+    if (w) attrs += ` width="${w}"`;
+    if (h) attrs += ` height="${h}"`;
   }
   if (el.type === "video") attrs += ` src="${escapeAttr(safeURL(el.props?.src))}" controls playsinline`;
   if ((el.type === "button" || el.type === "link") && el.props?.href) {
@@ -855,7 +1018,8 @@ function generateBasicJS(siteId: string, supabaseUrl: string): string {
         data.forEach(function (value, key) {
           if (key === 'company_website') { honeypot = String(value); return; }
           var el = form.querySelector('[name="' + CSS.escape(key) + '"]');
-          var label = (el && (el.getAttribute('aria-label') || el.getAttribute('placeholder'))) || key;
+          var label = (el && (el.getAttribute('data-field-label')
+            || el.getAttribute('aria-label') || el.getAttribute('placeholder'))) || key;
           // Checkbox groups arrive as repeats; keep them together.
           fields[label] = fields[label] ? fields[label] + ', ' + value : String(value);
         });

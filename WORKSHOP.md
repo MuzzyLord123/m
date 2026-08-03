@@ -12,12 +12,16 @@ version with its own storage path, so nothing overwrites the last one.
 
 ```
 pages (JSON)  ->  deploy-site  ->  index.html, <slug>.html, 404.html
-                                   styles.css, script.js
+                                   styles.css, script.js   (both minified)
                                    sitemap.xml, robots.txt
-                                   -> R2 or Supabase Storage
+                                   -> sites/<id>/v<N>/    the archive
+                                   -> sites/<id>/live/    what the address serves
                                    -> site_deployments row (status: live)
                                    -> designer_sites.published_at / published_url
 ```
+
+Every publish writes twice: once to the version's own archive, once to the
+live path. That is what makes rollback real — see below.
 
 The address a page is compiled against, in priority order:
 
@@ -39,9 +43,21 @@ visitor fills a form on the published site
   -> script.js POSTs to /functions/v1/site-form-submit
   -> the function checks: site exists, site is published, not flooded
   -> row in site_form_submissions
+  -> emailed to the owner (or settings.form_notify_email)
   -> (optional) relayed to settings.form_webhook_url
   -> read in the Workshop under "Form submissions"
 ```
+
+Text, email, textarea, dropdowns, tick-box groups and radio groups all work.
+Multi-answer groups arrive as one labelled answer ("Extras: Bara brith,
+Welsh cakes"). Both relays are best effort on purpose: the row is stored
+first, so a broken webhook or a Resend outage cannot cost an enquiry or
+show the visitor an error.
+
+Email needs `RESEND_API_KEY` set on the project. Without it the relay is
+skipped with a log line — submissions are still stored and readable.
+Set `settings.form_notify_email` to an address to override the recipient,
+or to `false` to turn the emails off.
 
 Notes that matter:
 
@@ -73,35 +89,62 @@ Notes that matter:
 | Google | No sitemap, no robots.txt, no canonical | All three, with `noindex` pages excluded |
 | A bad URL | Whatever the host served | A designed 404 page |
 | `designer_sites.published_at` | Never set by a publish | Stamped on every publish |
+| Dropdowns, tick boxes, radios | Rendered as empty `div`; answers lost | Real controls, answers captured under their labels |
+| Rollback | Flipped a database row; could still serve the broken site | Re-uploads that version's files to the live path |
+| Custom domains | Left `pending_dns` for ever; nothing ever checked | Resolved over DNS-over-HTTPS on demand |
+| Submission emails | Not wired | Sent, with reply-to set to the enquirer |
+| CSS / JS | Shipped unminified | Minified (quote- and selector-aware) |
+| Images | No dimensions; the page jumped as they loaded | `width`/`height` emitted when known |
+
+## Rollback
+
+`rollback-site` copies the chosen version's files from `sites/<id>/v<N>/`
+back over `sites/<id>/live/`, and only updates the database once the files
+are actually in place. If a version predates versioned archives, it refuses
+and says so rather than reporting a success that did not happen.
+
+## Custom domains
+
+`verify-site-domain` resolves the domain over DNS-over-HTTPS and marks it
+verified only when a record genuinely matches. The TXT token is the gate,
+because it proves control; the CNAME is reported but not required, since it
+may legitimately be proxied or flattened to an A record. A failure names the
+record that is wrong and what was found instead.
+
+Verification is on demand — the customer presses "I've added these — check
+now". Nothing polls in the background.
 
 ## What is still not done
 
 Stated plainly so nobody assumes otherwise:
 
-- **Rollback is a database flip, not a re-upload.** `useSitePublish.rollback`
-  changes which `site_deployments` row is marked live. On a bare storage URL
-  that changes the address the dashboard shows. On a custom domain pointed
-  at a fixed path, it will not change what is actually served until the
-  deployment is re-uploaded to that path.
-- **Custom domain verification is manual.** `addCustomDomain` writes the DNS
-  instructions and leaves the row `pending_dns`. Nothing polls DNS or flips
-  it to verified — that is still a person's job.
 - **No image optimisation.** Images are referenced at whatever URL they were
-  given; nothing is resized, re-encoded or served responsively.
-- **No CSS or JS minification** in the compiled output.
-- **`select` and checkbox groups** have no tag mapping in the compiler, so
-  they render as `div`. Text, email, textarea and the standard inputs work.
-- **The email delivery method** in the forms builder is not wired. Submissions
-  are stored and can be relayed to a webhook; they are not emailed.
+  given. Dimensions are emitted to stop the page jumping, but nothing is
+  resized, re-encoded, or served responsively via `srcset`.
+- **No background DNS polling.** A domain is checked when asked, not on a
+  timer, so a customer who fixes their DNS overnight must press the button.
+- **HTML is not minified.** Only CSS and JS are. Whitespace between inline
+  elements is significant, and gzip on the wire recovers most of it anyway.
+- **Rich element types** beyond the core set (carousels, accordions, charts,
+  product grids) still fall back to a plain `div` in the compiled output.
+  They render in the editor but do not carry their behaviour to the
+  published site.
 
 ## Verifying changes to the compiler
 
 The compiler is pure and can be exercised without Deno. Two suites exist:
 
 - **`test-compiler.mjs`** — strips the Deno bits, transpiles, and asserts on
-  the generated HTML, sitemap, robots and 404 (40 assertions).
+  the generated HTML, sitemap, robots, 404, choice controls and the
+  minifiers (60 assertions).
 - **`test-published-site.mjs`** — compiles a site, serves it, and drives it
-  in Chromium: submits a form, checks the honeypot, forces a rate-limit
-  error, and confirms in-page anchors scroll (16 assertions).
+  in Chromium: submits a form with every field type, checks the honeypot,
+  forces a rate-limit error, and confirms in-page anchors scroll
+  (21 assertions).
+
+```
+node supabase/functions/deploy-site/test-compiler.mjs
+node supabase/functions/deploy-site/test-published-site.mjs
+```
 
 Run both after any change to `deploy-site/index.ts`.

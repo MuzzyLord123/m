@@ -39,6 +39,8 @@ export function useSitePublish(siteId?: string) {
   const [publishProgress, setPublishProgress] = useState(0);
   const [publishStage, setPublishStage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [rollingBack, setRollingBack] = useState<string | null>(null);
+  const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
 
   const loadDeployments = useCallback(async () => {
     if (!siteId) { setLoading(false); return; }
@@ -126,23 +128,58 @@ export function useSitePublish(siteId?: string) {
     }
   }, [siteId, publishing, loadDeployments]);
 
+  /**
+   * Put an earlier version back on the live address.
+   *
+   * This used to flip the database rows and report success, without moving a
+   * single file - so a rollback away from a broken site left the broken site
+   * being served. The work now happens in the rollback-site function, which
+   * copies the chosen version's files back over the live path and only then
+   * updates the records.
+   */
   const rollback = useCallback(async (deploymentId: string) => {
-    if (!siteId) return;
-    // Activate the chosen deployment, archive others
-    await supabase
-      .from('site_deployments')
-      .update({ status: 'archived' })
-      .eq('site_id', siteId)
-      .eq('status', 'live');
+    if (!siteId || rollingBack) return;
+    setRollingBack(deploymentId);
+    try {
+      const { data, error } = await supabase.functions.invoke('rollback-site', {
+        body: { deploymentId },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
 
-    await supabase
-      .from('site_deployments')
-      .update({ status: 'live', deployed_at: new Date().toISOString() })
-      .eq('id', deploymentId);
+      toast.success(`Rolled back to version ${data.versionNumber}`, {
+        description: `${data.filesRestored} files restored to the live address.`,
+      });
+      await loadDeployments();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Rollback failed');
+    } finally {
+      setRollingBack(null);
+    }
+  }, [siteId, rollingBack, loadDeployments]);
 
-    toast.success('Rolled back successfully');
-    await loadDeployments();
-  }, [siteId, loadDeployments]);
+  /** Ask the resolver whether the customer's DNS is actually in place. */
+  const verifyDomain = useCallback(async (domainId: string) => {
+    if (verifyingDomain) return;
+    setVerifyingDomain(domainId);
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-site-domain', {
+        body: { domainId },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.verified) toast.success(data.message || 'DNS verified.');
+      else toast.warning(data?.message || 'DNS is not verified yet.', { duration: 8000 });
+      await loadDeployments();
+      return data;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not check DNS');
+      return null;
+    } finally {
+      setVerifyingDomain(null);
+    }
+  }, [verifyingDomain, loadDeployments]);
 
   const addCustomDomain = useCallback(async (domainName: string) => {
     if (!siteId) return;
@@ -195,8 +232,11 @@ export function useSitePublish(siteId?: string) {
     publishProgress,
     publishStage,
     loading,
+    rollingBack,
+    verifyingDomain,
     publish,
     rollback,
+    verifyDomain,
     addCustomDomain,
     removeDomain,
     reload: loadDeployments,

@@ -122,9 +122,12 @@ serve(async (req) => {
       return json({ error: "Could not record your message. Please try again." }, 500);
     }
 
-    // Optional relay to the customer's own endpoint. A failure here must not
-    // lose the submission - it is already safely stored above.
-    const webhook = (site.settings as Record<string, unknown> | null)?.form_webhook_url;
+    // Relays. Both are best effort by design: the submission is already
+    // stored, and a customer's broken webhook must never cost them an
+    // enquiry or show the visitor an error.
+    const settings = (site.settings as Record<string, unknown> | null) || {};
+
+    const webhook = settings.form_webhook_url;
     if (typeof webhook === "string" && /^https:\/\//i.test(webhook)) {
       try {
         await fetch(webhook, {
@@ -138,12 +141,89 @@ serve(async (req) => {
       }
     }
 
+    // Where to email it. The site's own setting wins; otherwise the account
+    // the site belongs to, so "email me submissions" works without setup.
+    let recipient = typeof settings.form_notify_email === "string" ? settings.form_notify_email : "";
+    if (!recipient) {
+      const { data: owner } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("user_id", site.user_id)
+        .maybeSingle();
+      recipient = owner?.email || "";
+    }
+    if (recipient && settings.form_notify_email !== false) {
+      await emailSubmission(recipient, site.site_name, formName, pageSlug, payload, {
+        name: guess(payload, ["name", "full name", "your name", "first name"]),
+        email: guess(payload, ["email", "email address", "your email", "e-mail"]),
+      });
+    }
+
     return json({ ok: true, message: "Thank you." });
   } catch (e) {
     console.error("site-form-submit error:", e);
     return json({ error: "Could not record your message. Please try again." }, 500);
   }
 });
+
+/**
+ * Email the submission on. Never throws: the row is already stored, so a
+ * missing API key or a Resend outage must not turn into a visitor-facing
+ * error or a lost enquiry.
+ */
+async function emailSubmission(
+  to: string,
+  siteName: string,
+  formName: string,
+  pageSlug: string,
+  payload: Record<string, string>,
+  contact: { name: string | null; email: string | null },
+) {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  if (!apiKey) {
+    console.warn("site-form-submit: RESEND_API_KEY not configured, skipping email relay");
+    return;
+  }
+
+  const esc = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  const rows = Object.entries(payload).map(([field, value]) => `
+    <tr>
+      <td style="padding:8px 14px;border-bottom:1px solid #ececec;color:#666;font-size:13px;white-space:nowrap;vertical-align:top">${esc(field)}</td>
+      <td style="padding:8px 14px;border-bottom:1px solid #ececec;font-size:14px;white-space:pre-wrap">${esc(value)}</td>
+    </tr>`).join("");
+
+  const who = contact.name || contact.email || "someone";
+  const html = `<!DOCTYPE html><html><body style="margin:0;background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+  <div style="max-width:600px;margin:0 auto;padding:28px 20px">
+    <p style="margin:0 0 4px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#888">${esc(siteName)}</p>
+    <h1 style="margin:0 0 4px;font-size:19px;color:#111">New ${esc(formName.toLowerCase())} submission</h1>
+    <p style="margin:0 0 18px;font-size:13px;color:#666">From ${esc(who)}${pageSlug ? ` &middot; ${esc(pageSlug)}` : ""}</p>
+    <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #ececec;border-radius:8px;overflow:hidden">${rows}</table>
+    ${contact.email ? `<p style="margin:18px 0 0;font-size:13px"><a href="mailto:${esc(contact.email)}" style="color:#c2410c">Reply to ${esc(contact.email)}</a></p>` : ""}
+    <p style="margin:22px 0 0;font-size:11px;color:#999">Sent by Quooro because a form on your published site was submitted.</p>
+  </div></body></html>`;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Quooro <support@quooro.com>",
+        to: [to],
+        subject: `${siteName}: new ${formName.toLowerCase()} submission`,
+        html,
+        // So a reply from the inbox goes straight back to the enquirer.
+        ...(contact.email ? { reply_to: contact.email } : {}),
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) console.error("site-form-submit email relay failed:", await res.text());
+  } catch (e) {
+    console.error("site-form-submit email relay threw:", e instanceof Error ? e.message : e);
+  }
+}
 
 /** Per-site salted digest. Enough to spot a flood from one source, and
  *  useless for following somebody between two different sites. */
