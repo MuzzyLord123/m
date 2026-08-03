@@ -30,27 +30,54 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
   const [spacingValue, setSpacingValue] = useState('');
   const spacingInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * Keep the toolbar over its element.
+   *
+   * This used to be a setInterval firing every 200ms for as long as anything
+   * was selected: a querySelector plus a getBoundingClientRect, five times a
+   * second, forever. Reading layout on a timer forces the browser to flush
+   * style and layout synchronously and defeats its own batching, and it was
+   * the single largest cost in the editor - getBoundingClientRect was the
+   * hottest identifiable function in a CPU profile of ordinary clicking.
+   *
+   * Now it measures when something has actually moved: the element resizes,
+   * the canvas scrolls, or the window changes. Each measurement is deferred
+   * to an animation frame so a burst of scroll events costs one read.
+   */
   useEffect(() => {
     if (!selectedElement) return;
+    const target = document.querySelector(`[data-element-id="${selectedElement.id}"]`);
+    if (!target) return;
 
-    const updatePosition = () => {
-      const el = document.querySelector(`[data-element-id="${selectedElement.id}"]`);
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const rect = target.getBoundingClientRect();
       const toolbarWidth = 520;
       let left = rect.left + rect.width / 2 - toolbarWidth / 2;
       left = Math.max(8, Math.min(left, window.innerWidth - toolbarWidth - 8));
       let top = rect.top - 56;
       if (top < 56) top = rect.bottom + 8;
-      setPosition(prev => {
-        if (Math.abs(prev.top - top) < 1 && Math.abs(prev.left - left) < 1) return prev;
-        return { top, left };
-      });
+      setPosition(prev =>
+        Math.abs(prev.top - top) < 1 && Math.abs(prev.left - left) < 1 ? prev : { top, left });
     };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(measure); };
 
-    updatePosition();
-    const interval = setInterval(updatePosition, 200);
-    return () => clearInterval(interval);
+    measure();
+
+    const ro = new ResizeObserver(schedule);
+    ro.observe(target);
+
+    const scroller = target.closest('[data-canvas="true"]') || window;
+    scroller.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      ro.disconnect();
+      scroller.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
   }, [selectedElement, state.elements]);
 
   const updateStyle = useCallback((prop: string, value: string) => {

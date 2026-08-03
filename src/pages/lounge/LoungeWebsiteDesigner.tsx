@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { DesignerSplash } from '@/components/splash/DesignerSplash';
+import { WorkshopSplash } from '@/components/splash/WorkshopSplash';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, Paintbrush, Globe, Loader2, ExternalLink, Trash2, Download,
@@ -418,10 +418,13 @@ export default function LoungeWebsiteDesigner() {
   return (
     <>
     {pendingEditorUrl && (
-      <DesignerSplash onComplete={() => {
-        navigate(pendingEditorUrl);
-        setPendingEditorUrl(null);
-      }} />
+      <WorkshopSplash
+        siteName={sites.find(s => pendingEditorUrl.endsWith(s.id))?.site_name}
+        onComplete={() => {
+          navigate(pendingEditorUrl);
+          setPendingEditorUrl(null);
+        }}
+      />
     )}
     <div className="min-h-[80vh] space-y-6 p-4 md:p-6 lg:p-8">
       <PageHeader

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef, useMemo, useSyncExternalStore } from 'react';
 import { EditorState, EditorAction, EditorElement, Breakpoint, ResponsiveStyles } from './types';
 import { removeElement, updateElement, insertElement, moveElement, cloneElement, findElement, findParent } from './utils/treeUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -162,9 +162,47 @@ interface EditorContextValue {
   moveSelectedDown: () => void;
   copyStyles: () => void;
   pasteStyles: () => void;
+  /** The live selection, readable inside callbacks without subscribing to
+   *  it - so a drag handler can check it without re-rendering on it. */
+  selectionRef: React.MutableRefObject<string[]>;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
+
+/**
+ * Per-element selection, as an external store.
+ *
+ * Context is all-or-nothing: when selectedIds changes every consumer
+ * re-renders, so clicking one element re-rendered all 128 on the artboard,
+ * costing ~84ms a click. useSyncExternalStore lets each element subscribe to
+ * its own boolean, and React re-renders only the ones whose answer actually
+ * changed - the element gaining selection and the one losing it.
+ */
+const selectionListeners = new Set<() => void>();
+const selectionState = { ids: [] as string[], hovered: null as string | null };
+
+function notifySelection() { selectionListeners.forEach(l => l()); }
+
+function subscribeSelection(cb: () => void) {
+  selectionListeners.add(cb);
+  return () => { selectionListeners.delete(cb); };
+}
+
+export function useIsSelected(id: string): boolean {
+  return useSyncExternalStore(
+    subscribeSelection,
+    () => selectionState.ids.includes(id),
+    () => false,
+  );
+}
+
+export function useIsHovered(id: string): boolean {
+  return useSyncExternalStore(
+    subscribeSelection,
+    () => selectionState.hovered === id,
+    () => false,
+  );
+}
 
 export function EditorProvider({ children, pageId }: { children: React.ReactNode; pageId: string | null }) {
   const [state, dispatch] = useReducer(editorReducer, initialState);
@@ -375,11 +413,63 @@ export function EditorProvider({ children, pageId }: { children: React.ReactNode
     return () => window.removeEventListener('keydown', handler);
   }, [state.selectedIds, saveToDatabase, copyStyles, pasteStyles, moveSelectedUp, moveSelectedDown, wrapInContainer, selectedElement]);
 
+  /**
+   * The provider value was a fresh object literal on every render, so every
+   * consumer re-rendered on every state change - and the canvas has one
+   * consumer per element. Clicking a single element re-rendered all of them,
+   * which is why selection took ~143ms on a page of 128 elements and the
+   * whole editor sat at 43fps.
+   */
+  const selectionRef = useRef<string[]>(state.selectedIds);
+  selectionRef.current = state.selectedIds;
+
+  const value = useMemo(
+    () => ({ state, dispatch, saveToDatabase, selectedElement, wrapInContainer,
+             moveSelectedUp, moveSelectedDown, copyStyles, pasteStyles,
+             selectionRef }),
+    [state, saveToDatabase, selectedElement, wrapInContainer,
+     moveSelectedUp, moveSelectedDown, copyStyles, pasteStyles],
+  );
+
+  /**
+   * The canvas reads exactly three things - which breakpoint, what is
+   * selected, what is hovered - and nothing else. Giving it its own context
+   * means editing a style or typing in a panel no longer re-renders every
+   * element on the artboard.
+   */
+  // The store mirrors the reducer; this is the only place it is written.
+  if (selectionState.ids !== state.selectedIds || selectionState.hovered !== state.hoveredId) {
+    selectionState.ids = state.selectedIds;
+    selectionState.hovered = state.hoveredId;
+    queueMicrotask(notifySelection);
+  }
+
+  const canvasValue = useMemo(
+    () => ({ breakpoint: state.breakpoint, selectedIds: state.selectedIds, hoveredId: state.hoveredId }),
+    [state.breakpoint, state.selectedIds, state.hoveredId],
+  );
+
   return (
-    <EditorContext.Provider value={{ state, dispatch, saveToDatabase, selectedElement, wrapInContainer, moveSelectedUp, moveSelectedDown, copyStyles, pasteStyles }}>
-      {children}
+    <EditorContext.Provider value={value}>
+      <CanvasStateContext.Provider value={canvasValue}>
+        {children}
+      </CanvasStateContext.Provider>
     </EditorContext.Provider>
   );
+}
+
+/** Just the three values the artboard cares about. */
+interface CanvasState {
+  breakpoint: Breakpoint;
+  selectedIds: string[];
+  hoveredId: string | null;
+}
+const CanvasStateContext = createContext<CanvasState | null>(null);
+
+export function useCanvasState(): CanvasState {
+  const ctx = useContext(CanvasStateContext);
+  if (!ctx) throw new Error('useCanvasState must be used within EditorProvider');
+  return ctx;
 }
 
 export function useEditor() {

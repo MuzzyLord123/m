@@ -148,6 +148,21 @@ Stated plainly so nobody assumes otherwise:
   is re-checked every two minutes while you are looking at it, and stops
   when the tab is hidden. There is no server-side cron, so a domain that
   propagates overnight verifies the next time you open the panel.
+- **Selecting an element costs about 85ms.** Measured in-page, not through
+  a test driver. The important finding is that the cost is *fixed*: 16
+  elements on the artboard costs 81ms, 128 elements costs 89ms. It does not
+  scale with the canvas, so it is not the artboard — it is the right-hand
+  panels re-rendering their whole tree for the newly selected element.
+  StyleEditor alone is 61KB of controls. Fixing it means memoising those
+  panels' sections, which has not been done.
+
+  Three things were fixed while finding this, and they are real but they are
+  not that: the floating toolbar no longer polls `getBoundingClientRect` five
+  times a second, the canvas no longer reads layout and sets React state on
+  every mouse move, and each element now subscribes to its own selection
+  rather than all of them re-rendering together. Those help hovering,
+  scrolling and dragging. They did not move the 85ms.
+
 - **The deep panels** — Animation, Interactions, CMS — use the studio
   palette and have had their decorative tints removed, but their layout has
   not been re-composed the way the style panel was. They work; they are

@@ -21,7 +21,13 @@ export function EditorCanvas() {
   const { state, dispatch } = useEditor();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [cursorCoords, setCursorCoords] = useState<{ x: number; y: number } | null>(null);
+  // Written to directly on pointer move. React never re-renders for this.
+  const cursorXRef = useRef<HTMLSpanElement>(null);
+  const cursorYRef = useRef<HTMLSpanElement>(null);
+  const [cursorInside, setCursorInside] = useState(false);
+  // The wrapper's rect only changes when the pane resizes, not when the
+  // pointer moves, so it is measured once and re-measured on resize.
+  const wrapperRect = useRef<DOMRect | null>(null);
   // Pan state
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -174,6 +180,25 @@ export function EditorCanvas() {
     dispatch({ type: 'SET_ZOOM', payload: 1 });
   }, [dispatch]);
 
+  // Measure the canvas pane once, and again only when it actually changes
+  // size. Reading it inside the pointer handler forced a synchronous layout
+  // on every single mouse move.
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const measure = () => { wrapperRect.current = wrapper.getBoundingClientRect(); };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(wrapper);
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('scroll', measure, { passive: true, capture: true });
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, { capture: true } as EventListenerOptions);
+    };
+  }, []);
+
   // Element count for canvas info
   const elementCount = useMemo(() => {
     let count = 0;
@@ -203,21 +228,22 @@ export function EditorCanvas() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onMouseMove={e => {
-        const wrapper = wrapperRef.current;
-        if (!wrapper) return;
-        const rect = wrapper.getBoundingClientRect();
+        const rect = wrapperRect.current;
+        if (!rect) return;
         const rawX = (e.clientX - rect.left - panOffset.x) / zoom;
         const rawY = (e.clientY - rect.top - panOffset.y) / zoom;
         const artboardLeft = CANVAS_SIZE / 2 - breakpointWidth / 2;
         const x = Math.round(rawX - artboardLeft);
         const y = Math.round(rawY - 60);
-        if (x >= 0 && x <= breakpointWidth && y >= 0) {
-          setCursorCoords({ x, y });
-        } else {
-          setCursorCoords(null);
+        const inside = x >= 0 && x <= breakpointWidth && y >= 0;
+        if (inside) {
+          if (cursorXRef.current) cursorXRef.current.textContent = `X:${x}`;
+          if (cursorYRef.current) cursorYRef.current.textContent = `Y:${y}`;
         }
+        // State changes only when crossing the artboard edge, not per pixel.
+        if (inside !== cursorInside) setCursorInside(inside);
       }}
-      onMouseLeave={() => setCursorCoords(null)}
+      onMouseLeave={() => setCursorInside(false)}
       data-canvas="true"
     >
       {/* A floating readout used to sit here repeating the viewport, the
@@ -488,7 +514,7 @@ export function EditorCanvas() {
 
       {/* Cursor coordinate readout + mode indicator */}
       <AnimatePresence>
-        {(cursorCoords || spaceHeld) && !isPanning && (
+        {(cursorInside || spaceHeld) && !isPanning && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -520,14 +546,10 @@ export function EditorCanvas() {
             }}>
               {spaceHeld ? 'PAN' : 'SELECT'}
             </span>
-            {cursorCoords && (
+            {cursorInside && (
               <>
-                <span style={{ fontSize: '9px', fontFamily: 'ui-monospace, SFMono-Regular, monospace', color: 'hsl(var(--studio-risk))', fontWeight: 600 }}>
-                  X:{cursorCoords.x}
-                </span>
-                <span style={{ fontSize: '9px', fontFamily: 'ui-monospace, SFMono-Regular, monospace', color: 'hsl(var(--studio-ok))', fontWeight: 600 }}>
-                  Y:{cursorCoords.y}
-                </span>
+                <span ref={cursorXRef} style={{ fontSize: '10px', fontFamily: 'ui-monospace, SFMono-Regular, monospace', color: 'hsl(var(--studio-ink-2))' }} />
+                <span ref={cursorYRef} style={{ fontSize: '10px', fontFamily: 'ui-monospace, SFMono-Regular, monospace', color: 'hsl(var(--studio-ink-2))' }} />
               </>
             )}
             {showGrid && (
