@@ -77,25 +77,25 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] h-[92vh] p-0 gap-0 border-0 rounded-lg overflow-hidden flex flex-col" style={{ backgroundColor: '#1a1a1a' }}>
+      <DialogContent className="max-w-[95vw] h-[92vh] p-0 gap-0 border-0 rounded-lg overflow-hidden flex flex-col" style={{ backgroundColor: 'hsl(var(--studio-panel))' }}>
         <DialogTitle className="sr-only">Template Preview — {template.name}</DialogTitle>
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 h-12 shrink-0" style={{ borderBottom: '1px solid #2a2a2a' }}>
-          <span className="text-[11px] font-medium truncate max-w-[200px]" style={{ color: '#ccc' }}>
+        <div className="flex items-center justify-between px-4 h-12 shrink-0" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
+          <span className="text-[11px] font-medium truncate max-w-[200px]" style={{ color: 'hsl(var(--studio-ink-2))' }}>
             Preview — {template.name}
           </span>
 
           {/* Page tabs */}
           {pages.length > 1 && (
-            <div className="flex items-center gap-0 rounded-lg p-0.5 mx-2" style={{ backgroundColor: '#252525', border: '1px solid #2a2a2a' }}>
+            <div className="flex items-center gap-0 rounded-lg p-0.5 mx-2" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
               {pages.map((page, i) => (
                 <button
                   key={page.slug}
                   onClick={() => setActivePageIndex(i)}
                   className="h-7 px-3 flex items-center gap-1.5 rounded-md text-[10px] font-medium transition-all"
                   style={{
-                    backgroundColor: activePageIndex === i ? '#0073E6' : 'transparent',
-                    color: activePageIndex === i ? '#fff' : '#888',
+                    backgroundColor: activePageIndex === i ? 'hsl(var(--studio-accent))' : 'transparent',
+                    color: activePageIndex === i ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-ink-2))',
                   }}
                 >
                   {page.name}
@@ -105,7 +105,7 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
           )}
 
           {/* Device switcher */}
-          <div className="flex items-center gap-0 rounded-lg p-0.5" style={{ backgroundColor: '#252525', border: '1px solid #2a2a2a' }}>
+          <div className="flex items-center gap-0 rounded-lg p-0.5" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
             {DEVICES.map(d => {
               const Icon = d.icon;
               const active = device === d.key;
@@ -115,8 +115,8 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
                   onClick={() => setDevice(d.key)}
                   className="h-7 px-2.5 flex items-center gap-1 rounded-md text-[10px] font-medium transition-all"
                   style={{
-                    backgroundColor: active ? '#0073E6' : 'transparent',
-                    color: active ? '#fff' : '#888',
+                    backgroundColor: active ? 'hsl(var(--studio-accent))' : 'transparent',
+                    color: active ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-ink-2))',
                   }}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -128,15 +128,15 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
 
           <button
             onClick={() => onOpenChange(false)}
-            className="h-7 w-7 flex items-center justify-center rounded hover:bg-[#333] transition-colors"
+            className="h-7 w-7 flex items-center justify-center rounded hover:bg-[hsl(var(--studio-hover))] transition-colors"
           >
-            <X className="h-3.5 w-3.5" style={{ color: '#888' }} />
+            <X className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-ink-2))' }} />
           </button>
         </div>
 
         {/* Preview area */}
         <div className="flex-1 flex justify-center overflow-hidden" style={{
-          backgroundColor: '#111',
+          backgroundColor: 'hsl(var(--studio-sunken))',
           padding: device === 'browser' ? '0' : '24px',
           alignItems: device === 'browser' ? 'stretch' : 'flex-start',
         }}>
@@ -157,8 +157,8 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
             {device === 'browser' && (
               <div style={{
                 height: '36px', display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '0 12px', backgroundColor: '#2a2a2a',
-                borderBottom: '1px solid #333',
+                padding: '0 12px', backgroundColor: 'hsl(var(--studio-raised))',
+                borderBottom: '1px solid hsl(var(--studio-line))',
               }}>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#ff5f57' }} />
@@ -172,7 +172,7 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
                     className="h-5 w-5 flex items-center justify-center rounded transition-colors"
                     style={{ opacity: activePageIndex === 0 ? 0.3 : 0.6 }}
                   >
-                    <ChevronLeft className="h-3 w-3" style={{ color: '#999' }} />
+                    <ChevronLeft className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-2))' }} />
                   </button>
                   <button
                     onClick={() => setActivePageIndex(Math.min(pages.length - 1, activePageIndex + 1))}
@@ -180,12 +180,12 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
                     className="h-5 w-5 flex items-center justify-center rounded transition-colors"
                     style={{ opacity: activePageIndex >= pages.length - 1 ? 0.3 : 0.6 }}
                   >
-                    <ChevronRight className="h-3 w-3" style={{ color: '#999' }} />
+                    <ChevronRight className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-2))' }} />
                   </button>
                   <div style={{
-                    flex: 1, height: '22px', borderRadius: '4px', backgroundColor: '#1a1a1a',
-                    border: '1px solid #333', display: 'flex', alignItems: 'center',
-                    padding: '0 10px', fontSize: '10px', color: '#666',
+                    flex: 1, height: '22px', borderRadius: '4px', backgroundColor: 'hsl(var(--studio-panel))',
+                    border: '1px solid hsl(var(--studio-line))', display: 'flex', alignItems: 'center',
+                    padding: '0 10px', fontSize: '10px', color: 'hsl(var(--studio-ink-3))',
                   }}>
                     {template.name.toLowerCase().replace(/\s+/g, '-')}.com{pages[activePageIndex]?.slug !== '/' ? pages[activePageIndex]?.slug : ''}
                   </div>
@@ -200,7 +200,7 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
                   position: 'absolute',
                   inset: device === 'mobile' ? '-16px -8px' : device === 'tablet' ? '-12px -8px' : '-8px -4px',
                   borderRadius: activeDevice.frame.radius,
-                  border: `${device === 'mobile' ? '3px' : '2px'} solid #333`,
+                  border: `${device === 'mobile' ? '3px' : '2px'} solid hsl(var(--studio-line))`,
                   pointerEvents: 'none',
                   zIndex: 10,
                 }}
@@ -209,9 +209,9 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
             {device === 'mobile' && (
               <div style={{
                 position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)',
-                width: '120px', height: '24px', backgroundColor: '#1a1a1a',
+                width: '120px', height: '24px', backgroundColor: 'hsl(var(--studio-panel))',
                 borderRadius: '0 0 16px 16px', zIndex: 20,
-                border: '2px solid #333', borderTop: 'none',
+                border: '2px solid hsl(var(--studio-line))', borderTop: 'none',
               }} />
             )}
 
@@ -225,7 +225,7 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
                 width: '100%',
                 flex: device === 'browser' ? '1' : undefined,
                 height: device === 'browser' ? undefined : device === 'mobile' ? '812px' : device === 'tablet' ? '1024px' : '800px',
-                backgroundColor: '#fff',
+                backgroundColor: 'hsl(var(--studio-ink))',
                 borderRadius: device === 'browser' ? '0' : (activeDevice.frame?.radius || '8px'),
                 overflow: 'hidden',
               }}
@@ -234,7 +234,7 @@ export function TemplatePreviewModal({ open, onOpenChange, template }: TemplateP
             {activeDevice.frame && device !== 'browser' && (
               <div style={{
                 textAlign: 'center', marginTop: '16px',
-                fontSize: '10px', fontWeight: 600, color: '#555',
+                fontSize: '10px', fontWeight: 600, color: 'hsl(var(--studio-ink-3))',
                 letterSpacing: '0.06em', textTransform: 'uppercase',
               }}>
                 {activeDevice.label} — {activeDevice.frame.w}×{activeDevice.frame.h}

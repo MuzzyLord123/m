@@ -30,11 +30,11 @@ export function DropIndicator({ position, rect, canvasRect }: DropIndicatorProps
           top: rect.top - canvasRect.top - 2,
           width: width + 4,
           height: rect.height + 4,
-          border: '2px dashed #0073E6',
+          border: '2px dashed hsl(var(--studio-accent))',
           borderRadius: '8px',
           pointerEvents: 'none',
           zIndex: 100,
-          backgroundColor: 'rgba(0, 115, 230, 0.04)',
+          backgroundColor: 'hsl(var(--studio-accent) / 0.04)',
         }}
       >
         {/* Pulsing corner rings */}
@@ -52,7 +52,7 @@ export function DropIndicator({ position, rect, canvasRect }: DropIndicatorProps
                 [isLeft ? 'left' : 'right']: -4,
                 width: 8, height: 8,
                 borderRadius: '50%',
-                backgroundColor: 'rgba(0, 115, 230, 0.4)',
+                backgroundColor: 'hsl(var(--studio-accent) / 0.4)',
               }}
             />
           );
@@ -68,13 +68,13 @@ export function DropIndicator({ position, rect, canvasRect }: DropIndicatorProps
             transform: 'translate(-50%, -50%)',
             padding: '3px 10px',
             borderRadius: '6px',
-            backgroundColor: 'rgba(0, 115, 230, 0.9)',
-            color: '#fff',
+            backgroundColor: 'hsl(var(--studio-accent) / 0.9)',
+            color: 'hsl(var(--studio-ink))',
             fontSize: '9px',
             fontWeight: 700,
             letterSpacing: '0.05em',
             whiteSpace: 'nowrap',
-            boxShadow: '0 2px 12px rgba(0, 115, 230, 0.4)',
+            boxShadow: '0 2px 12px hsl(var(--studio-accent) / 0.4)',
           }}
         >
           {POSITION_LABELS[position]}
@@ -98,11 +98,11 @@ export function DropIndicator({ position, rect, canvasRect }: DropIndicatorProps
         top,
         width,
         height: '3px',
-        background: 'linear-gradient(90deg, transparent, #0073E6, #0073E6, transparent)',
+        background: 'linear-gradient(90deg, transparent, hsl(var(--studio-accent)), hsl(var(--studio-accent)), transparent)',
         borderRadius: '2px',
         pointerEvents: 'none',
         zIndex: 100,
-        boxShadow: '0 0 8px rgba(0, 115, 230, 0.5)',
+        boxShadow: '0 0 8px hsl(var(--studio-accent) / 0.5)',
       }}
     >
       {/* End dots */}
@@ -111,8 +111,8 @@ export function DropIndicator({ position, rect, canvasRect }: DropIndicatorProps
         transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
         style={{
           position: 'absolute', left: -3, top: -3, width: 9, height: 9,
-          borderRadius: '50%', backgroundColor: '#0073E6',
-          boxShadow: '0 0 6px rgba(0, 115, 230, 0.6)',
+          borderRadius: '50%', backgroundColor: 'hsl(var(--studio-accent))',
+          boxShadow: '0 0 6px hsl(var(--studio-accent) / 0.6)',
         }}
       />
       <motion.div
@@ -120,8 +120,8 @@ export function DropIndicator({ position, rect, canvasRect }: DropIndicatorProps
         transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
         style={{
           position: 'absolute', right: -3, top: -3, width: 9, height: 9,
-          borderRadius: '50%', backgroundColor: '#0073E6',
-          boxShadow: '0 0 6px rgba(0, 115, 230, 0.6)',
+          borderRadius: '50%', backgroundColor: 'hsl(var(--studio-accent))',
+          boxShadow: '0 0 6px hsl(var(--studio-accent) / 0.6)',
         }}
       />
       {/* Position label */}
@@ -135,8 +135,8 @@ export function DropIndicator({ position, rect, canvasRect }: DropIndicatorProps
           top: position === 'before' ? -20 : 8,
           padding: '2px 8px',
           borderRadius: '4px',
-          backgroundColor: 'rgba(0, 115, 230, 0.9)',
-          color: '#fff',
+          backgroundColor: 'hsl(var(--studio-accent) / 0.9)',
+          color: 'hsl(var(--studio-ink))',
           fontSize: '8px',
           fontWeight: 700,
           letterSpacing: '0.04em',

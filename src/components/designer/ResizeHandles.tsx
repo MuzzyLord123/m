@@ -144,11 +144,11 @@ export const ResizeHandles = memo(function ResizeHandles({ elementId }: ResizeHa
           onMouseDown={e => handleMouseDown(e, h.dx, h.dy, h.pos)}
           style={{
             ...getHandleStyle(h.pos, h.type),
-            backgroundColor: activeHandle === h.pos ? '#0073E6' : '#fff',
-            border: `1.5px solid ${activeHandle === h.pos ? '#004d99' : '#0073E6'}`,
+            backgroundColor: activeHandle === h.pos ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink))',
+            border: `1.5px solid ${activeHandle === h.pos ? '#004d99' : 'hsl(var(--studio-accent))'}`,
             cursor: h.cursor,
             boxShadow: activeHandle === h.pos
-              ? '0 0 8px rgba(0,115,230,0.5)'
+              ? '0 0 8px hsl(var(--studio-accent) / 0.5)'
               : '0 1px 4px rgba(0,0,0,0.25)',
             transition: 'background-color 0.1s, box-shadow 0.15s, transform 0.1s',
             opacity: h.type === 'edge' ? 0.7 : 1,
@@ -177,8 +177,8 @@ export const ResizeHandles = memo(function ResizeHandles({ elementId }: ResizeHa
             gap: '6px',
             padding: '3px 10px',
             borderRadius: '6px',
-            backgroundColor: 'rgba(0,115,230,0.95)',
-            color: '#fff',
+            backgroundColor: 'hsl(var(--studio-accent) / 0.95)',
+            color: 'hsl(var(--studio-ink))',
             fontSize: '10px',
             fontWeight: 600,
             fontFamily: 'monospace',

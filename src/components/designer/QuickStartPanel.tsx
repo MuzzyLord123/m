@@ -20,7 +20,7 @@ const PAGE_STARTERS: PageStarter[] = [
     name: 'Landing Page',
     description: 'Hero, features, testimonials, CTA & footer',
     icon: Layout,
-    color: '#0073E6',
+    color: 'hsl(var(--studio-accent))',
     sectionIds: ['nav-logo-left', 'hero-bold-centered', 'feat-3col-icons', 'testimonial-cards', 'cta-centered-gradient', 'footer-4col-links'],
   },
   {
@@ -28,7 +28,7 @@ const PAGE_STARTERS: PageStarter[] = [
     name: 'About Page',
     description: 'Story, team, stats & values',
     icon: FileText,
-    color: '#8b5cf6',
+    color: 'hsl(var(--studio-ink-3))',
     sectionIds: ['nav-logo-left', 'hero-split', 'stats-4col-simple', 'team-grid-4', 'cta-split-image', 'footer-4col-links'],
   },
   {
@@ -36,7 +36,7 @@ const PAGE_STARTERS: PageStarter[] = [
     name: 'Contact Page',
     description: 'Contact form, map & info',
     icon: Phone,
-    color: '#10b981',
+    color: 'hsl(var(--studio-ok))',
     sectionIds: ['nav-logo-left', 'contact-split-form', 'faq-accordion-minimal', 'footer-4col-links'],
   },
   {
@@ -44,7 +44,7 @@ const PAGE_STARTERS: PageStarter[] = [
     name: 'Services Page',
     description: 'Service list, pricing & CTA',
     icon: Briefcase,
-    color: '#f59e0b',
+    color: 'hsl(var(--studio-warn))',
     sectionIds: ['nav-logo-left', 'hero-bold-centered', 'feat-3col-icons', 'pricing-3-tier', 'cta-centered-gradient', 'footer-4col-links'],
   },
   {
@@ -52,7 +52,7 @@ const PAGE_STARTERS: PageStarter[] = [
     name: 'Portfolio',
     description: 'Gallery showcase with projects',
     icon: ShoppingBag,
-    color: '#ec4899',
+    color: 'hsl(var(--studio-ink-3))',
     sectionIds: ['nav-logo-left', 'hero-split', 'gallery-masonry-3col', 'testimonial-cards', 'cta-split-image', 'footer-4col-links'],
   },
   {
@@ -60,7 +60,7 @@ const PAGE_STARTERS: PageStarter[] = [
     name: 'Restaurant',
     description: 'Menu, reservation & gallery',
     icon: Utensils,
-    color: '#ef4444',
+    color: 'hsl(var(--studio-risk))',
     sectionIds: ['nav-logo-left', 'hero-bold-centered', 'feat-3col-icons', 'gallery-masonry-3col', 'testimonial-cards', 'cta-centered-gradient', 'footer-4col-links'],
   },
   {
@@ -68,7 +68,7 @@ const PAGE_STARTERS: PageStarter[] = [
     name: 'Education',
     description: 'Courses, instructors & enrollment',
     icon: GraduationCap,
-    color: '#06b6d4',
+    color: 'hsl(var(--studio-ink-3))',
     sectionIds: ['nav-logo-left', 'hero-split', 'feat-3col-icons', 'stats-4col-simple', 'pricing-3-tier', 'cta-split-image', 'footer-4col-links'],
   },
   {
@@ -76,7 +76,7 @@ const PAGE_STARTERS: PageStarter[] = [
     name: 'Non-Profit',
     description: 'Mission, impact & donations',
     icon: Heart,
-    color: '#f97316',
+    color: 'hsl(var(--studio-warn))',
     sectionIds: ['nav-logo-left', 'hero-bold-centered', 'stats-4col-simple', 'testimonial-cards', 'cta-centered-gradient', 'footer-4col-links'],
   },
   {
@@ -84,7 +84,7 @@ const PAGE_STARTERS: PageStarter[] = [
     name: 'Event Page',
     description: 'Schedule, speakers & registration',
     icon: Calendar,
-    color: '#a855f7',
+    color: 'hsl(var(--studio-ink-3))',
     sectionIds: ['nav-logo-left', 'hero-bold-centered', 'feat-3col-icons', 'team-grid-4', 'cta-split-image', 'footer-4col-links'],
   },
 ];
@@ -137,11 +137,11 @@ export function QuickStartPanel() {
         className="text-center mb-6"
       >
         <div className="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #0073E6, #005bb5)', boxShadow: '0 8px 32px rgba(0,115,230,0.3)' }}>
+          style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent)), hsl(var(--studio-accent)))', boxShadow: '0 8px 32px hsl(var(--studio-accent) / 0.3)' }}>
           <Zap className="h-7 w-7 text-white" />
         </div>
-        <h2 className="text-xl font-bold text-[#e0e0e0] mb-2">What are you building?</h2>
-        <p className="text-[13px] text-[#777] max-w-md">
+        <h2 className="text-xl font-bold text-[hsl(var(--studio-ink))] mb-2">What are you building?</h2>
+        <p className="text-[13px] text-[hsl(var(--studio-ink-3))] max-w-md">
           Describe your site or pick a template below to get started instantly.
         </p>
       </motion.div>
@@ -157,30 +157,30 @@ export function QuickStartPanel() {
           className="flex items-center gap-2 rounded-xl px-4 py-3 transition-all"
           style={{
             backgroundColor: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(0,115,230,0.2)',
+            border: '1px solid hsl(var(--studio-accent) / 0.2)',
             boxShadow: '0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03)',
           }}
         >
-          <Wand2 className="h-4 w-4 shrink-0" style={{ color: '#0073E6' }} />
+          <Wand2 className="h-4 w-4 shrink-0" style={{ color: 'hsl(var(--studio-accent))' }} />
           <input
             value={aiPrompt}
             onChange={e => setAiPrompt(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleAiGenerate(); }}
             placeholder="Describe your website… e.g. 'A modern SaaS landing page for a project management tool'"
-            className="flex-1 bg-transparent text-[13px] text-[#ccc] placeholder:text-[#555] outline-none"
+            className="flex-1 bg-transparent text-[13px] text-[hsl(var(--studio-ink-2))] placeholder:text-[hsl(var(--studio-ink-3))] outline-none"
           />
           <button
             onClick={handleAiGenerate}
             disabled={!aiPrompt.trim()}
             className="h-7 px-3 flex items-center gap-1.5 rounded-lg text-[11px] font-semibold text-white transition-all disabled:opacity-30"
-            style={{ background: 'linear-gradient(135deg, #0073E6, #005bb5)' }}
+            style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent)), hsl(var(--studio-accent)))' }}
           >
             Generate <ArrowRight className="h-3 w-3" />
           </button>
         </div>
         <div className="flex items-center justify-center gap-1.5 mt-2">
-          <Sparkles className="h-2.5 w-2.5" style={{ color: '#555' }} />
-          <span className="text-[9px]" style={{ color: '#555' }}>Powered by AI • or press ⌘J anytime</span>
+          <Sparkles className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
+          <span className="text-[9px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Powered by AI • or press ⌘J anytime</span>
         </div>
       </motion.div>
 
@@ -213,8 +213,8 @@ export function QuickStartPanel() {
                 <div style={{ color: starter.color }}><Icon className="h-5 w-5" /></div>
               </div>
               <div className="text-center">
-                <div className="text-[12px] font-semibold text-[#ccc] mb-1">{starter.name}</div>
-                <div className="text-[10px] text-[#666] leading-snug">{starter.description}</div>
+                <div className="text-[12px] font-semibold text-[hsl(var(--studio-ink-2))] mb-1">{starter.name}</div>
+                <div className="text-[10px] text-[hsl(var(--studio-ink-3))] leading-snug">{starter.description}</div>
               </div>
             </motion.button>
           );
@@ -223,9 +223,9 @@ export function QuickStartPanel() {
 
       {/* Divider */}
       <div className="flex items-center gap-3 w-full max-w-md mb-6">
-        <div className="flex-1 h-px bg-[#333]" />
-        <span className="text-[10px] text-[#555] uppercase tracking-widest font-semibold">or start from scratch</span>
-        <div className="flex-1 h-px bg-[#333]" />
+        <div className="flex-1 h-px bg-[hsl(var(--studio-hover))]" />
+        <span className="text-[10px] text-[hsl(var(--studio-ink-3))] uppercase tracking-widest font-semibold">or start from scratch</span>
+        <div className="flex-1 h-px bg-[hsl(var(--studio-hover))]" />
       </div>
 
       {/* Bottom hints */}
@@ -234,32 +234,32 @@ export function QuickStartPanel() {
           whileHover={{ scale: 1.03, y: -1 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => dispatch({ type: 'SET_LEFT_TAB', payload: 'sections' })}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-medium text-[#999] transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-medium text-[hsl(var(--studio-ink-2))] transition-all"
           style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <Sparkles className="h-3.5 w-3.5" style={{ color: '#666' }} />
+          <Sparkles className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           Browse sections
         </motion.button>
         <motion.button
           whileHover={{ scale: 1.03, y: -1 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => dispatch({ type: 'SET_LEFT_TAB', payload: 'templates' })}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-medium text-[#999] transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-medium text-[hsl(var(--studio-ink-2))] transition-all"
           style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <Layout className="h-3.5 w-3.5" style={{ color: '#666' }} />
+          <Layout className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           Browse templates
         </motion.button>
         <motion.button
           whileHover={{ scale: 1.03, y: -1 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => { const e = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }); window.dispatchEvent(e); }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-medium text-[#999] transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[11px] font-medium text-[hsl(var(--studio-ink-2))] transition-all"
           style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <Command className="h-3.5 w-3.5" style={{ color: '#666' }} />
+          <Command className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           Command palette
-          <kbd className="text-[8px] px-1 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: '#666' }}>⌘K</kbd>
+          <kbd className="text-[8px] px-1 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: 'hsl(var(--studio-ink-3))' }}>⌘K</kbd>
         </motion.button>
       </div>
     </motion.div>

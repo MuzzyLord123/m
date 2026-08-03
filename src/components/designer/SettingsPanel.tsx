@@ -10,13 +10,13 @@ function SectionHeader({ label, open, onClick, icon: Icon }: { label: string; op
     <button
       onClick={onClick}
       className="w-full flex items-center justify-between h-8 px-0 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors"
-      style={{ color: '#888' }}
+      style={{ color: 'hsl(var(--studio-ink-2))' }}
     >
       <span className="flex items-center gap-2">
-        {Icon && <Icon className="h-3 w-3" style={{ color: '#666' }} />}
+        {Icon && <Icon className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />}
         {label}
       </span>
-      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? '' : '-rotate-90'}`} style={{ color: '#555' }} />
+      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? '' : '-rotate-90'}`} style={{ color: 'hsl(var(--studio-ink-3))' }} />
     </button>
   );
 }
@@ -27,22 +27,22 @@ function FieldRow({ label, value, onChange, placeholder, multiline }: {
   const InputEl = multiline ? 'textarea' : 'input';
   return (
     <div className="flex items-start gap-2">
-      <span className="text-[10px] w-16 shrink-0 text-right pt-1.5" style={{ color: '#777' }}>{label}</span>
+      <span className="text-[10px] w-16 shrink-0 text-right pt-1.5" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <InputEl
         value={value}
         onChange={(e: any) => onChange(e.target.value)}
         placeholder={placeholder}
         className="flex-1 px-2 rounded text-[11px] outline-none transition-all resize-none"
         style={{
-          backgroundColor: '#2d2d2d',
-          border: '1px solid #333',
-          color: '#ddd',
+          backgroundColor: 'hsl(var(--studio-raised))',
+          border: '1px solid hsl(var(--studio-line))',
+          color: 'hsl(var(--studio-ink-2))',
           height: multiline ? '60px' : '24px',
           paddingTop: multiline ? '6px' : '0',
           lineHeight: multiline ? '1.4' : '24px',
         }}
-        onFocus={(e: any) => { e.currentTarget.style.borderColor = '#0073E6'; }}
-        onBlur={(e: any) => { e.currentTarget.style.borderColor = '#333'; }}
+        onFocus={(e: any) => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+        onBlur={(e: any) => { e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; }}
       />
     </div>
   );
@@ -51,11 +51,11 @@ function FieldRow({ label, value, onChange, placeholder, multiline }: {
 function ToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center gap-2 h-7">
-      <span className="text-[10px] flex-1 text-right" style={{ color: '#777' }}>{label}</span>
+      <span className="text-[10px] flex-1 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <button
         onClick={() => onChange(!value)}
         className="w-8 h-4 rounded-full relative transition-colors"
-        style={{ backgroundColor: value ? '#0073E6' : '#333' }}
+        style={{ backgroundColor: value ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line))' }}
       >
         <div className="absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all" style={{ left: value ? '16px' : '2px' }} />
       </button>
@@ -70,15 +70,15 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
   };
   return (
     <div className="flex items-center gap-2 h-7">
-      <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: '#777' }}>{label}</span>
+      <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <div className="flex-1 flex items-center gap-1.5">
         <div className="relative">
           <input type="color" value={value || '#000000'} onChange={e => onChange(e.target.value)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-          <div className="w-6 h-6 rounded-md border cursor-pointer" style={{ backgroundColor: value || 'transparent', borderColor: '#444', backgroundImage: !value ? 'linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%), linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%)' : undefined, backgroundSize: !value ? '8px 8px' : undefined, backgroundPosition: !value ? '0 0, 4px 4px' : undefined }} />
+          <div className="w-6 h-6 rounded-md border cursor-pointer" style={{ backgroundColor: value || 'transparent', borderColor: 'hsl(var(--studio-line-strong))', backgroundImage: !value ? 'linear-gradient(45deg, hsl(var(--studio-line)) 25%, transparent 25%, transparent 75%, hsl(var(--studio-line)) 75%), linear-gradient(45deg, hsl(var(--studio-line)) 25%, transparent 25%, transparent 75%, hsl(var(--studio-line)) 75%)' : undefined, backgroundSize: !value ? '8px 8px' : undefined, backgroundPosition: !value ? '0 0, 4px 4px' : undefined }} />
         </div>
-        <input value={value} onChange={e => onChange(e.target.value)} placeholder="#000000" className="flex-1 h-6 px-2 rounded text-[11px] outline-none transition-all font-mono" style={{ backgroundColor: '#2d2d2d', border: '1px solid #333', color: '#ddd' }} onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }} onBlur={e => { e.currentTarget.style.borderColor = '#333'; }} />
-        <button onClick={handleCopy} className="h-6 w-6 flex items-center justify-center rounded hover:bg-[#333] transition-colors">
-          {copied ? <Check className="h-3 w-3" style={{ color: '#4ade80' }} /> : <Copy className="h-3 w-3" style={{ color: '#555' }} />}
+        <input value={value} onChange={e => onChange(e.target.value)} placeholder="#000000" className="flex-1 h-6 px-2 rounded text-[11px] outline-none transition-all font-mono" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }} onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; }} />
+        <button onClick={handleCopy} className="h-6 w-6 flex items-center justify-center rounded hover:bg-[hsl(var(--studio-hover))] transition-colors">
+          {copied ? <Check className="h-3 w-3" style={{ color: 'hsl(var(--studio-ok))' }} /> : <Copy className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />}
         </button>
       </div>
     </div>
@@ -99,14 +99,14 @@ function PageLinkSelector({ value, onChange, siteId }: { value: string; onChange
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2 h-7">
-        <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: '#0073E6' }}>📄 Page</span>
+        <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: 'hsl(var(--studio-accent))' }}>📄 Page</span>
         <select
           value={value}
           onChange={e => onChange(e.target.value)}
           className="flex-1 h-6 px-1.5 rounded text-[11px] outline-none appearance-none cursor-pointer transition-all"
-          style={{ backgroundColor: '#2d2d2d', border: `1px solid ${linkedPage ? '#0073E6' : '#333'}`, color: '#ddd' }}
-          onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-          onBlur={e => { e.currentTarget.style.borderColor = linkedPage ? '#0073E6' : '#333'; }}
+          style={{ backgroundColor: 'hsl(var(--studio-raised))', border: `1px solid ${linkedPage ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line))'}`, color: 'hsl(var(--studio-ink-2))' }}
+          onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+          onBlur={e => { e.currentTarget.style.borderColor = linkedPage ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line))'; }}
         >
           <option value="">— No page link —</option>
           {pages.map(p => (
@@ -115,9 +115,9 @@ function PageLinkSelector({ value, onChange, siteId }: { value: string; onChange
         </select>
       </div>
       {linkedPage && (
-        <div className="flex items-center gap-1.5 ml-[72px] px-2 py-1 rounded" style={{ backgroundColor: 'rgba(0,115,230,0.08)', border: '1px solid rgba(0,115,230,0.15)' }}>
-          <span className="text-[9px] font-semibold" style={{ color: '#0073E6' }}>✓ Linked to "{linkedPage.page_name}"</span>
-          <button onClick={() => onChange('')} className="text-[9px] ml-auto hover:text-red-400 transition-colors" style={{ color: '#666' }}>✕</button>
+        <div className="flex items-center gap-1.5 ml-[72px] px-2 py-1 rounded" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.08)', border: '1px solid hsl(var(--studio-accent) / 0.15)' }}>
+          <span className="text-[9px] font-semibold" style={{ color: 'hsl(var(--studio-accent))' }}>✓ Linked to "{linkedPage.page_name}"</span>
+          <button onClick={() => onChange('')} className="text-[9px] ml-auto hover:text-red-400 transition-colors" style={{ color: 'hsl(var(--studio-ink-3))' }}>✕</button>
         </div>
       )}
     </div>
@@ -132,9 +132,9 @@ function CodeEditor({ value, onChange, placeholder, rows = 6 }: { value: string;
       placeholder={placeholder}
       rows={rows}
       className="w-full px-3 py-2 rounded-lg text-[11px] font-mono outline-none resize-none"
-      style={{ backgroundColor: '#141414', border: '1px solid #333', color: '#93c5fd', lineHeight: '1.5' }}
-      onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-      onBlur={e => { e.currentTarget.style.borderColor = '#333'; }}
+      style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-3))', lineHeight: '1.5' }}
+      onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+      onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; }}
     />
   );
 }
@@ -218,16 +218,16 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
           <div className="flex items-center justify-between py-3">
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-semibold text-white">Page Settings</span>
-              <span className="text-[9px] text-[#444]">SEO, meta tags, favicon & code injection</span>
+              <span className="text-[9px] text-[hsl(var(--studio-hover))]">SEO, meta tags, favicon & code injection</span>
             </div>
             {seoSaving && (
-              <span className="text-[9px] px-2 py-0.5 rounded animate-pulse" style={{ backgroundColor: 'rgba(0,115,230,0.1)', color: '#0073E6' }}>
+              <span className="text-[9px] px-2 py-0.5 rounded animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.1)', color: 'hsl(var(--studio-accent))' }}>
                 Saving…
               </span>
             )}
           </div>
 
-          <div className="h-[1px] my-2" style={{ backgroundColor: '#2a2a2a' }} />
+          <div className="h-[1px] my-2" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
 
           {/* Favicon */}
           <SectionHeader label="Favicon" open={openSections.favicon} onClick={() => toggle('favicon')} icon={Globe} />
@@ -237,16 +237,16 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
               {pageSeo.favicon_url && (
                 <div className="flex items-center gap-2 ml-[72px]">
                   <img src={pageSeo.favicon_url} alt="Favicon" className="w-5 h-5 rounded" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                  <span className="text-[9px]" style={{ color: '#4ade80' }}>✓ Favicon set</span>
+                  <span className="text-[9px]" style={{ color: 'hsl(var(--studio-ok))' }}>✓ Favicon set</span>
                 </div>
               )}
-              <div className="text-[9px] px-1 py-1 rounded" style={{ color: '#666', backgroundColor: '#1a1a1a' }}>
+              <div className="text-[9px] px-1 py-1 rounded" style={{ color: 'hsl(var(--studio-ink-3))', backgroundColor: 'hsl(var(--studio-panel))' }}>
                 🌐 The favicon appears in the browser tab. Use a .ico, .png, or .svg file.
               </div>
             </div>
           )}
 
-          <div className="h-[1px] my-1" style={{ backgroundColor: '#2a2a2a' }} />
+          <div className="h-[1px] my-1" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
 
           {/* Page SEO */}
           <SectionHeader label="SEO Meta Tags" open={openSections.pageSeo} onClick={() => toggle('pageSeo')} icon={Search} />
@@ -258,16 +258,16 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
               <ToggleRow label="No Index" value={pageSeo.no_index} onChange={(v) => updateSeo('no_index', v)} />
               <ToggleRow label="No Follow" value={pageSeo.no_follow} onChange={(v) => updateSeo('no_follow', v)} />
               {pageSeo.seo_title && (
-                <div className="ml-[72px] p-2 rounded space-y-1" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+                <div className="ml-[72px] p-2 rounded space-y-1" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
                   <div className="text-[10px] font-medium" style={{ color: '#8ab4f8' }}>{pageSeo.seo_title}</div>
-                  <div className="text-[9px]" style={{ color: '#4ade80' }}>example.com › page</div>
+                  <div className="text-[9px]" style={{ color: 'hsl(var(--studio-ok))' }}>example.com › page</div>
                   <div className="text-[9px] line-clamp-2" style={{ color: '#bdc1c6' }}>{pageSeo.seo_description || 'No description set'}</div>
                 </div>
               )}
             </div>
           )}
 
-          <div className="h-[1px] my-1" style={{ backgroundColor: '#2a2a2a' }} />
+          <div className="h-[1px] my-1" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
 
           {/* Open Graph */}
           <SectionHeader label="Open Graph / Social" open={openSections.openGraph} onClick={() => toggle('openGraph')} icon={Globe} />
@@ -277,27 +277,27 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
               <FieldRow label="OG Desc" value={pageSeo.og_description} onChange={(v) => updateSeo('og_description', v)} placeholder="OG description" multiline />
               <FieldRow label="OG Image" value={pageSeo.og_image} onChange={(v) => updateSeo('og_image', v)} placeholder="https://image-url.jpg" />
               <FieldRow label="Twitter" value={pageSeo.twitter_handle} onChange={(v) => updateSeo('twitter_handle', v)} placeholder="@handle" />
-              <div className="text-[9px] px-1 py-1 rounded" style={{ color: '#666', backgroundColor: '#1a1a1a' }}>
+              <div className="text-[9px] px-1 py-1 rounded" style={{ color: 'hsl(var(--studio-ink-3))', backgroundColor: 'hsl(var(--studio-panel))' }}>
                 💡 These tags control how your page looks when shared on social media
               </div>
             </div>
           )}
 
-          <div className="h-[1px] my-1" style={{ backgroundColor: '#2a2a2a' }} />
+          <div className="h-[1px] my-1" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
 
           {/* Code Injection */}
           <SectionHeader label="Custom Code" open={openSections.codeInjection} onClick={() => toggle('codeInjection')} icon={FileCode} />
           {openSections.codeInjection && (
             <div className="space-y-3 pb-3">
               <div className="space-y-1.5">
-                <span className="text-[9px] text-[#555] font-semibold uppercase tracking-wider">Head Code</span>
+                <span className="text-[9px] text-[hsl(var(--studio-ink-3))] font-semibold uppercase tracking-wider">Head Code</span>
                 <CodeEditor value={pageSeo.head_code} onChange={(v) => updateSeo('head_code', v)} placeholder="<!-- Add scripts, meta tags, fonts... -->" rows={4} />
               </div>
               <div className="space-y-1.5">
-                <span className="text-[9px] text-[#555] font-semibold uppercase tracking-wider">Body End Code</span>
+                <span className="text-[9px] text-[hsl(var(--studio-ink-3))] font-semibold uppercase tracking-wider">Body End Code</span>
                 <CodeEditor value={pageSeo.body_code} onChange={(v) => updateSeo('body_code', v)} placeholder="<!-- Analytics, chat widgets... -->" rows={4} />
               </div>
-              <div className="text-[9px] px-1 py-1 rounded" style={{ color: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.06)' }}>
+              <div className="text-[9px] px-1 py-1 rounded" style={{ color: 'hsl(var(--studio-warn))', backgroundColor: 'rgba(245,158,11,0.06)' }}>
                 ⚠️ Custom code is included in the exported site
               </div>
             </div>
@@ -311,7 +311,7 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
     dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, updates: { props: { ...selectedElement.props, [key]: value } } } });
   };
 
-  const sectionDivider = <div className="h-[1px] my-1" style={{ backgroundColor: '#2a2a2a' }} />;
+  const sectionDivider = <div className="h-[1px] my-1" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />;
 
   return (
     <ScrollArea className="h-full">
@@ -322,12 +322,12 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
           <div className="space-y-1.5 pb-2">
             <FieldRow label="Name" value={selectedElement.name || ''} onChange={(v) => dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, updates: { name: v } } })} placeholder="My Element" />
             <div className="flex items-center gap-2 h-7">
-              <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: '#777' }}>ID</span>
-              <span className="text-[10px] font-mono" style={{ color: '#555' }}>{selectedElement.id.slice(0, 12)}…</span>
+              <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>ID</span>
+              <span className="text-[10px] font-mono" style={{ color: 'hsl(var(--studio-ink-3))' }}>{selectedElement.id.slice(0, 12)}…</span>
             </div>
             <div className="flex items-center gap-2 h-7">
-              <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: '#777' }}>Type</span>
-              <span className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ backgroundColor: '#333', color: '#0073E6' }}>{selectedElement.type}</span>
+              <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Type</span>
+              <span className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ backgroundColor: 'hsl(var(--studio-hover))', color: 'hsl(var(--studio-accent))' }}>{selectedElement.type}</span>
             </div>
           </div>
         )}
@@ -348,7 +348,7 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
             {(selectedElement.type === 'button' || selectedElement.type === 'link') && (
               <div className="space-y-1.5">
                 <div className="flex items-start gap-2">
-                  <span className="text-[10px] w-16 shrink-0 text-right pt-1.5" style={{ color: '#777' }}>
+                  <span className="text-[10px] w-16 shrink-0 text-right pt-1.5" style={{ color: 'hsl(var(--studio-ink-3))' }}>
                     <span className="flex items-center gap-1 justify-end"><Phone className="h-3 w-3" /> Phone</span>
                   </span>
                   <div className="flex-1 space-y-1">
@@ -364,19 +364,19 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
                       placeholder="+44 7700 900000"
                       className="w-full px-2 rounded text-[11px] outline-none transition-all"
                       style={{
-                        backgroundColor: '#2d2d2d',
-                        border: `1px solid ${(selectedElement.props.phoneNumber as string) ? '#22c55e' : '#333'}`,
-                        color: '#ddd',
+                        backgroundColor: 'hsl(var(--studio-raised))',
+                        border: `1px solid ${(selectedElement.props.phoneNumber as string) ? 'hsl(var(--studio-ok))' : 'hsl(var(--studio-line))'}`,
+                        color: 'hsl(var(--studio-ink-2))',
                         height: '24px',
                         lineHeight: '24px',
                       }}
-                      onFocus={(e) => { e.currentTarget.style.borderColor = '#22c55e'; }}
-                      onBlur={(e) => { e.currentTarget.style.borderColor = (selectedElement.props.phoneNumber as string) ? '#22c55e' : '#333'; }}
+                      onFocus={(e) => { e.currentTarget.style.borderColor = 'hsl(var(--studio-ok))'; }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = (selectedElement.props.phoneNumber as string) ? 'hsl(var(--studio-ok))' : 'hsl(var(--studio-line))'; }}
                     />
                     {(selectedElement.props.phoneNumber as string) && (
                       <div className="flex items-center gap-1.5 px-2 py-1 rounded" style={{ backgroundColor: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.15)' }}>
-                        <Phone className="h-2.5 w-2.5" style={{ color: '#22c55e' }} />
-                        <span className="text-[9px] font-semibold" style={{ color: '#22c55e' }}>
+                        <Phone className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ok))' }} />
+                        <span className="text-[9px] font-semibold" style={{ color: 'hsl(var(--studio-ok))' }}>
                           Calls {(selectedElement.props.phoneNumber as string)} on click
                         </span>
                         <button
@@ -387,7 +387,7 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
                             }
                           }}
                           className="text-[9px] ml-auto hover:text-red-400 transition-colors"
-                          style={{ color: '#666' }}
+                          style={{ color: 'hsl(var(--studio-ink-3))' }}
                         >
                           ✕
                         </button>
@@ -396,7 +396,7 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
                   </div>
                 </div>
                 {!(selectedElement.props.phoneNumber as string) && (
-                  <div className="text-[9px] px-2 py-1 rounded ml-[72px]" style={{ color: '#555', backgroundColor: '#1a1a1a' }}>
+                  <div className="text-[9px] px-2 py-1 rounded ml-[72px]" style={{ color: 'hsl(var(--studio-ink-3))', backgroundColor: 'hsl(var(--studio-panel))' }}>
                     📞 Enter a phone number to make this button dial on the user's device
                   </div>
                 )}
@@ -423,7 +423,7 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
               </>
             )}
             {!(selectedElement.props.href) && !(selectedElement.props.phoneNumber) && (
-              <div className="text-[9px] px-2 py-1.5 rounded" style={{ color: '#666', backgroundColor: '#1a1a1a' }}>
+              <div className="text-[9px] px-2 py-1.5 rounded" style={{ color: 'hsl(var(--studio-ink-3))', backgroundColor: 'hsl(var(--studio-panel))' }}>
                 🔗 Link this element to any page, URL, or phone number.
               </div>
             )}
@@ -451,11 +451,11 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
           <div className="space-y-1.5 pb-2">
             <FieldRow label="Classes" value={(selectedElement.props.className as string) || ''} onChange={(v) => updateProp('className', v)} placeholder="my-class another-class" />
             <FieldRow label="Element ID" value={(selectedElement.props.elementId as string) || ''} onChange={(v) => updateProp('elementId', v)} placeholder="hero-section" />
-            <div className="text-[9px] px-2 py-1 rounded" style={{ color: '#555', backgroundColor: '#1a1a1a' }}>
+            <div className="text-[9px] px-2 py-1 rounded" style={{ color: 'hsl(var(--studio-ink-3))', backgroundColor: 'hsl(var(--studio-panel))' }}>
               🔗 Use Element ID for anchor links: #hero-section
             </div>
             <div className="h-1" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#666' }}>Custom Data Attributes</span>
+            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Custom Data Attributes</span>
             <FieldRow label="data-*" value={(selectedElement.props.dataAttr as string) || ''} onChange={(v) => updateProp('dataAttr', v)} placeholder="data-section=hero" />
             <FieldRow label="data-2" value={(selectedElement.props.dataAttr2 as string) || ''} onChange={(v) => updateProp('dataAttr2', v)} placeholder="data-analytics=cta" />
             <FieldRow label="data-3" value={(selectedElement.props.dataAttr3 as string) || ''} onChange={(v) => updateProp('dataAttr3', v)} placeholder="data-testid=button" />
@@ -467,29 +467,29 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
         <SectionHeader label="Visibility & Settings" open={openSections.advanced} onClick={() => toggle('advanced')} icon={Shield} />
         {openSections.advanced && (
           <div className="space-y-1.5 pb-2">
-            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#666' }}>Responsive Visibility</span>
+            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Responsive Visibility</span>
             <ToggleRow label="Hide on Mobile" value={(selectedElement.props.hideOnMobile as boolean) || false} onChange={(v) => updateProp('hideOnMobile', v)} />
             <ToggleRow label="Hide on Tablet" value={(selectedElement.props.hideOnTablet as boolean) || false} onChange={(v) => updateProp('hideOnTablet', v)} />
             <ToggleRow label="Hide on Desktop" value={(selectedElement.props.hideOnDesktop as boolean) || false} onChange={(v) => updateProp('hideOnDesktop', v)} />
             <ToggleRow label="Require Auth" value={(selectedElement.props.requireAuth as boolean) || false} onChange={(v) => updateProp('requireAuth', v)} />
 
-            <div className="h-[1px] my-1" style={{ backgroundColor: '#2a2a2a' }} />
-            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#666' }}>Background Video</span>
+            <div className="h-[1px] my-1" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
+            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Background Video</span>
             <FieldRow label="Video URL" value={(selectedElement.props.bgVideoUrl as string) || ''} onChange={(v) => updateProp('bgVideoUrl', v)} placeholder="https://…mp4" />
             <FieldRow label="Poster" value={(selectedElement.props.bgVideoPoster as string) || ''} onChange={(v) => updateProp('bgVideoPoster', v)} placeholder="https://…jpg" />
             <ToggleRow label="Autoplay" value={(selectedElement.props.bgVideoAutoplay as boolean) ?? true} onChange={(v) => updateProp('bgVideoAutoplay', v)} />
             <ToggleRow label="Loop" value={(selectedElement.props.bgVideoLoop as boolean) ?? true} onChange={(v) => updateProp('bgVideoLoop', v)} />
             <ToggleRow label="Muted" value={(selectedElement.props.bgVideoMuted as boolean) ?? true} onChange={(v) => updateProp('bgVideoMuted', v)} />
 
-            <div className="h-[1px] my-1" style={{ backgroundColor: '#2a2a2a' }} />
-            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#666' }}>Link Settings</span>
+            <div className="h-[1px] my-1" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
+            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Link Settings</span>
             <FieldRow label="Rel" value={(selectedElement.props.rel as string) || ''} onChange={(v) => updateProp('rel', v)} placeholder="nofollow noopener" />
             <ToggleRow label="Download" value={(selectedElement.props.download as boolean) || false} onChange={(v) => updateProp('download', v)} />
 
             {/* Component-specific props */}
             {selectedElement.type === 'input' && (
               <>
-                <div className="h-[1px] my-1" style={{ backgroundColor: '#2a2a2a' }} />
+                <div className="h-[1px] my-1" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
                 <FieldRow label="Label" value={(selectedElement.props.label as string) || ''} onChange={(v) => updateProp('label', v)} />
                 <FieldRow label="Placeholder" value={(selectedElement.props.placeholder as string) || ''} onChange={(v) => updateProp('placeholder', v)} />
                 <FieldRow label="Type" value={(selectedElement.props.inputType as string) || ''} onChange={(v) => updateProp('inputType', v)} placeholder="text, email, number…" />
@@ -518,7 +518,7 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
                 <FieldRow label="Label" value={(selectedElement.props.label as string) || ''} onChange={(v) => updateProp('label', v)} />
                 <FieldRow label="Value" value={String((selectedElement.props.value as number) || 0)} onChange={(v) => updateProp('value', Number(v))} placeholder="0-100" />
                 <ToggleRow label="Show Value" value={(selectedElement.props.showValue as boolean) || false} onChange={(v) => updateProp('showValue', v)} />
-                <FieldRow label="Color" value={(selectedElement.props.barColor as string) || ''} onChange={(v) => updateProp('barColor', v)} placeholder="#3b82f6" />
+                <FieldRow label="Color" value={(selectedElement.props.barColor as string) || ''} onChange={(v) => updateProp('barColor', v)} placeholder="hsl(var(--studio-accent))" />
               </>
             )}
             {selectedElement.type === 'countdown' && (
@@ -552,7 +552,7 @@ export function SettingsPanel({ siteId }: { siteId?: string }) {
             {selectedElement.type === 'tag-pill' && (
               <>
                 <FieldRow label="Text" value={(selectedElement.props.text as string) || ''} onChange={(v) => updateProp('text', v)} />
-                <FieldRow label="Color" value={(selectedElement.props.color as string) || ''} onChange={(v) => updateProp('color', v)} placeholder="#3b82f6" />
+                <FieldRow label="Color" value={(selectedElement.props.color as string) || ''} onChange={(v) => updateProp('color', v)} placeholder="hsl(var(--studio-accent))" />
                 <ToggleRow label="Removable" value={(selectedElement.props.removable as boolean) || false} onChange={(v) => updateProp('removable', v)} />
               </>
             )}

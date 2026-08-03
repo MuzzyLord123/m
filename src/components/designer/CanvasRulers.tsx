@@ -110,10 +110,10 @@ export const CanvasRulers = memo(function CanvasRulers() {
               position: 'absolute', right: '4px', top: '2px', zIndex: 2,
               display: 'flex', alignItems: 'center', gap: '2px',
               padding: '0 4px', height: '12px', borderRadius: '6px',
-              backgroundColor: 'rgba(0,115,230,0.12)',
-              border: '1px solid rgba(0,115,230,0.2)',
+              backgroundColor: 'hsl(var(--studio-accent) / 0.12)',
+              border: '1px solid hsl(var(--studio-accent) / 0.2)',
             }}>
-              <span style={{ fontSize: '7px', fontWeight: 800, color: '#0073E6', fontFamily: 'ui-monospace, monospace' }}>
+              <span style={{ fontSize: '7px', fontWeight: 800, color: 'hsl(var(--studio-accent))', fontFamily: 'ui-monospace, monospace' }}>
                 {guidelines.length} {guidelines.length === 1 ? 'guide' : 'guides'}
               </span>
             </div>
@@ -153,7 +153,7 @@ export const CanvasRulers = memo(function CanvasRulers() {
             bottom: 0,
             width: '1px',
             height: '18px',
-            backgroundColor: 'rgba(0,115,230,0.5)',
+            backgroundColor: 'hsl(var(--studio-accent) / 0.5)',
           }} />
 
           {/* Half marks */}
@@ -163,7 +163,7 @@ export const CanvasRulers = memo(function CanvasRulers() {
             bottom: 0,
             width: '1px',
             height: '12px',
-            backgroundColor: 'rgba(0,115,230,0.15)',
+            backgroundColor: 'hsl(var(--studio-accent) / 0.15)',
           }} />
           <div style={{
             position: 'absolute',
@@ -171,7 +171,7 @@ export const CanvasRulers = memo(function CanvasRulers() {
             bottom: 0,
             width: '1px',
             height: '12px',
-            backgroundColor: 'rgba(0,115,230,0.15)',
+            backgroundColor: 'hsl(var(--studio-accent) / 0.15)',
           }} />
 
           {/* Hover cursor position indicator */}
@@ -183,7 +183,7 @@ export const CanvasRulers = memo(function CanvasRulers() {
                 bottom: 0,
                 width: '1px',
                 height: '22px',
-                backgroundColor: 'rgba(0,115,230,0.8)',
+                backgroundColor: 'hsl(var(--studio-accent) / 0.8)',
                 pointerEvents: 'none',
                 transition: 'left 0.02s linear',
               }} />
@@ -196,23 +196,23 @@ export const CanvasRulers = memo(function CanvasRulers() {
                 gap: '4px',
                 fontSize: '8px',
                 fontFamily: 'ui-monospace, SFMono-Regular, monospace',
-                color: '#0073E6',
+                color: 'hsl(var(--studio-accent))',
                 fontWeight: 700,
                 backgroundColor: 'rgba(0,10,20,0.95)',
                 padding: '2px 6px',
                 borderRadius: '4px',
-                border: '1px solid rgba(0,115,230,0.2)',
+                border: '1px solid hsl(var(--studio-accent) / 0.2)',
                 pointerEvents: 'none',
                 whiteSpace: 'nowrap',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
               }}>
                 <span>{hoverPos}px</span>
-                <span style={{ color: '#444' }}>·</span>
-                <span style={{ color: '#8b5cf6', fontWeight: 600 }}>
+                <span style={{ color: 'hsl(var(--studio-hover))' }}>·</span>
+                <span style={{ color: 'hsl(var(--studio-ink-3))', fontWeight: 600 }}>
                   {Math.round((hoverPos / bpWidth) * 100)}%
                 </span>
                 {Math.abs(hoverPos - bpWidth / 2) < 3 && (
-                  <span style={{ color: '#22c55e', fontSize: '7px', fontWeight: 700 }}>CENTER</span>
+                  <span style={{ color: 'hsl(var(--studio-ok))', fontSize: '7px', fontWeight: 700 }}>CENTER</span>
                 )}
               </div>
             </>
@@ -245,7 +245,7 @@ export const CanvasRulers = memo(function CanvasRulers() {
             left: '4px',
             fontSize: '8px',
             fontFamily: 'ui-monospace, SFMono-Regular, monospace',
-            color: '#ec4899',
+            color: 'hsl(var(--studio-ink-3))',
             fontWeight: 600,
             backgroundColor: 'rgba(236,72,153,0.12)',
             padding: '1px 4px',
@@ -261,7 +261,7 @@ export const CanvasRulers = memo(function CanvasRulers() {
             left: '-3px',
             width: '7px',
             height: '7px',
-            backgroundColor: '#ec4899',
+            backgroundColor: 'hsl(var(--studio-ink-3))',
             transform: 'rotate(45deg)',
             borderRadius: '1px',
           }} />
@@ -306,7 +306,7 @@ export const CanvasRulers = memo(function CanvasRulers() {
             transform: `translateX(${-pixelWidth / 2 + hoverPos * zoom}px)`,
             width: '1px',
             height: 'calc(100% - 50px)',
-            background: 'linear-gradient(180deg, rgba(0,115,230,0.15) 0%, rgba(0,115,230,0.03) 50%, transparent 100%)',
+            background: 'linear-gradient(180deg, hsl(var(--studio-accent) / 0.15) 0%, hsl(var(--studio-accent) / 0.03) 50%, transparent 100%)',
             zIndex: 13,
             pointerEvents: 'none',
           }}

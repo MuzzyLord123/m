@@ -41,7 +41,7 @@ export function ResponsivePreview({ siteName, onClose }: { siteName: string; onC
       {/* Toolbar */}
       <div
         className="flex items-center justify-between px-6 shrink-0"
-        style={{ height: '56px', borderBottom: '1px solid rgba(255,255,255,0.06)', backgroundColor: '#1a1a1a' }}
+        style={{ height: '56px', borderBottom: '1px solid rgba(255,255,255,0.06)', backgroundColor: 'hsl(var(--studio-panel))' }}
       >
         <div className="flex items-center gap-1">
           {DEVICES.map((d, i) => {
@@ -52,9 +52,9 @@ export function ResponsivePreview({ siteName, onClose }: { siteName: string; onC
                 onClick={() => setActiveDevice(i)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-[11px] font-medium"
                 style={{
-                  backgroundColor: activeDevice === i ? 'rgba(0,115,230,0.15)' : 'transparent',
-                  color: activeDevice === i ? '#0073E6' : '#666',
-                  border: activeDevice === i ? '1px solid rgba(0,115,230,0.3)' : '1px solid transparent',
+                  backgroundColor: activeDevice === i ? 'hsl(var(--studio-accent) / 0.15)' : 'transparent',
+                  color: activeDevice === i ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-3))',
+                  border: activeDevice === i ? '1px solid hsl(var(--studio-accent) / 0.3)' : '1px solid transparent',
                 }}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -68,14 +68,14 @@ export function ResponsivePreview({ siteName, onClose }: { siteName: string; onC
           <button
             onClick={() => setIsLandscape(!isLandscape)}
             className="p-2 rounded-lg hover:bg-white/5 transition-colors"
-            style={{ color: '#888' }}
+            style={{ color: 'hsl(var(--studio-ink-2))' }}
           >
             <RotateCw className="h-4 w-4" />
           </button>
-          <span className="text-[11px] font-mono" style={{ color: '#555' }}>
+          <span className="text-[11px] font-mono" style={{ color: 'hsl(var(--studio-ink-3))' }}>
             {w} × {h}
           </span>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/5 transition-colors" style={{ color: '#888' }}>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/5 transition-colors" style={{ color: 'hsl(var(--studio-ink-2))' }}>
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -108,7 +108,7 @@ export function ResponsivePreview({ siteName, onClose }: { siteName: string; onC
                 transform: `scale(${scale})`,
                 transformOrigin: 'top left',
                 border: 'none',
-                backgroundColor: '#fff',
+                backgroundColor: 'hsl(var(--studio-ink))',
               }}
               title="Responsive Preview"
             />

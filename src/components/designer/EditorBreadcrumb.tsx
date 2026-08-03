@@ -14,8 +14,8 @@ const TYPE_ICONS: Record<string, typeof Box> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  section: '#8b5cf6', text: '#3b82f6', heading: '#6366f1', image: '#f59e0b',
-  button: '#22c55e', container: '#0073E6', navbar: '#06b6d4', footer: '#06b6d4',
+  section: 'hsl(var(--studio-ink-3))', text: 'hsl(var(--studio-accent))', heading: 'hsl(var(--studio-ink-3))', image: 'hsl(var(--studio-warn))',
+  button: 'hsl(var(--studio-ok))', container: 'hsl(var(--studio-accent))', navbar: 'hsl(var(--studio-ink-3))', footer: 'hsl(var(--studio-ink-3))',
 };
 
 function getAncestors(elements: EditorElement[], targetId: string): EditorElement[] {
@@ -51,7 +51,7 @@ export function EditorBreadcrumb() {
   return (
     <div
       className="flex items-center gap-0.5 px-2 h-7 shrink-0 overflow-x-auto"
-      style={{ backgroundColor: '#161616', borderTop: '1px solid rgba(255,255,255,0.04)' }}
+      style={{ backgroundColor: 'hsl(var(--studio-panel))', borderTop: '1px solid rgba(255,255,255,0.04)' }}
     >
       {/* Depth badge */}
       <div
@@ -64,7 +64,7 @@ export function EditorBreadcrumb() {
       >
         <span
           className="text-[7px] font-bold uppercase tracking-wider font-mono"
-          style={{ color: depth > 4 ? '#ef4444' : depth > 2 ? '#f59e0b' : '#22c55e' }}
+          style={{ color: depth > 4 ? 'hsl(var(--studio-risk))' : depth > 2 ? 'hsl(var(--studio-warn))' : 'hsl(var(--studio-ok))' }}
         >
           D{depth}
         </span>
@@ -82,21 +82,21 @@ export function EditorBreadcrumb() {
           backgroundColor: hoveredId === 'body' ? 'rgba(255,255,255,0.05)' : 'transparent',
         }}
       >
-        <Home className="h-2.5 w-2.5" style={{ color: '#555' }} />
-        <span className="text-[9px] font-medium" style={{ color: '#555' }}>Body</span>
+        <Home className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
+        <span className="text-[9px] font-medium" style={{ color: 'hsl(var(--studio-ink-3))' }}>Body</span>
       </motion.button>
 
       {/* Ancestors */}
       {ancestors.map((el, i) => {
         const isLast = i === ancestors.length - 1;
         const Icon = TYPE_ICONS[el.type] || Box;
-        const color = isLast ? (TYPE_COLORS[el.type] || '#0073E6') : '#666';
+        const color = isLast ? (TYPE_COLORS[el.type] || 'hsl(var(--studio-accent))') : 'hsl(var(--studio-ink-3))';
         const isHovered = hoveredId === el.id;
         const childCount = el.children?.length || 0;
 
         return (
           <span key={el.id} className="flex items-center gap-0.5 shrink-0">
-            <ChevronRight className="h-2.5 w-2.5" style={{ color: '#333' }} />
+            <ChevronRight className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-hover))' }} />
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
@@ -126,7 +126,7 @@ export function EditorBreadcrumb() {
               )}
               <span
                 className="text-[9px] font-medium"
-                style={{ color: isLast ? color : isHovered ? '#aaa' : '#666' }}
+                style={{ color: isLast ? color : isHovered ? 'hsl(var(--studio-ink-2))' : 'hsl(var(--studio-ink-3))' }}
               >
                 {el.name || el.type}
               </span>
@@ -141,7 +141,7 @@ export function EditorBreadcrumb() {
               {childCount > 0 && (
                 <span
                   className="text-[7px] font-mono tabular-nums ml-0.5 px-1 py-px rounded"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: '#444' }}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.03)', color: 'hsl(var(--studio-hover))' }}
                 >
                   {childCount}
                 </span>
@@ -153,7 +153,7 @@ export function EditorBreadcrumb() {
 
       {/* Esc hint */}
       {depth > 1 && (
-        <span className="ml-1 shrink-0 text-[7px] font-mono px-1.5 py-0.5 rounded" style={{ color: '#333', backgroundColor: '#141414', border: '1px solid #1a1a1a' }}>
+        <span className="ml-1 shrink-0 text-[7px] font-mono px-1.5 py-0.5 rounded" style={{ color: 'hsl(var(--studio-hover))', backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
           Esc ↑
         </span>
       )}
@@ -167,7 +167,7 @@ export function EditorBreadcrumb() {
           className="h-4 w-4 flex items-center justify-center rounded hover:bg-white/5 transition-colors"
           title="Copy path"
         >
-          <Copy className="h-2.5 w-2.5" style={{ color: '#444' }} />
+          <Copy className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-hover))' }} />
         </motion.button>
       </div>
     </div>

@@ -14,17 +14,17 @@ function SectionHeader({ label, open, onClick, badge }: { label: string; open: b
     <button
       onClick={onClick}
       className="w-full flex items-center justify-between h-8 px-0 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors group"
-      style={{ color: '#888' }}
+      style={{ color: 'hsl(var(--studio-ink-2))' }}
     >
       <span className="flex items-center gap-2">
         {label}
         {badge && (
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full font-semibold" style={{ backgroundColor: 'rgba(0,115,230,0.15)', color: '#0073E6' }}>
+          <span className="text-[8px] px-1.5 py-0.5 rounded-full font-semibold" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.15)', color: 'hsl(var(--studio-accent))' }}>
             {badge}
           </span>
         )}
       </span>
-      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? '' : '-rotate-90'}`} style={{ color: '#555' }} />
+      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? '' : '-rotate-90'}`} style={{ color: 'hsl(var(--studio-ink-3))' }} />
     </button>
   );
 }
@@ -34,7 +34,7 @@ function FieldRow({ label, value, onChange, placeholder, type = 'text', suffix }
 }) {
   return (
     <div className="flex items-center gap-2 h-7">
-      <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: '#777' }}>{label}</span>
+      <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <div className="flex-1 relative">
         <input
           value={value}
@@ -43,15 +43,15 @@ function FieldRow({ label, value, onChange, placeholder, type = 'text', suffix }
           type={type}
           className="w-full h-6 px-2 rounded text-[11px] outline-none transition-all"
           style={{
-            backgroundColor: '#2d2d2d',
-            border: '1px solid #333',
-            color: '#ddd',
+            backgroundColor: 'hsl(var(--studio-raised))',
+            border: '1px solid hsl(var(--studio-line))',
+            color: 'hsl(var(--studio-ink-2))',
             paddingRight: suffix ? '28px' : '8px',
           }}
-          onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(0,115,230,0.1)'; }}
-          onBlur={e => { e.currentTarget.style.borderColor = '#333'; e.currentTarget.style.boxShadow = 'none'; }}
+          onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; e.currentTarget.style.boxShadow = '0 0 0 2px hsl(var(--studio-accent) / 0.1)'; }}
+          onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; e.currentTarget.style.boxShadow = 'none'; }}
         />
-        {suffix && <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px]" style={{ color: '#555' }}>{suffix}</span>}
+        {suffix && <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>{suffix}</span>}
       </div>
     </div>
   );
@@ -62,18 +62,18 @@ function SelectRow({ label, value, onChange, options }: {
 }) {
   return (
     <div className="flex items-center gap-2 h-7">
-      <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: '#777' }}>{label}</span>
+      <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="flex-1 h-6 px-1.5 rounded text-[11px] outline-none appearance-none cursor-pointer transition-all"
         style={{
-          backgroundColor: '#2d2d2d',
-          border: '1px solid #333',
-          color: '#ddd',
+          backgroundColor: 'hsl(var(--studio-raised))',
+          border: '1px solid hsl(var(--studio-line))',
+          color: 'hsl(var(--studio-ink-2))',
         }}
-        onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(0,115,230,0.1)'; }}
-        onBlur={e => { e.currentTarget.style.borderColor = '#333'; e.currentTarget.style.boxShadow = 'none'; }}
+        onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; e.currentTarget.style.boxShadow = '0 0 0 2px hsl(var(--studio-accent) / 0.1)'; }}
+        onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; e.currentTarget.style.boxShadow = 'none'; }}
       >
         <option value="">—</option>
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -113,7 +113,7 @@ function ColorPickerRow({ label, value, onChange }: { label: string; value: stri
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2 h-7">
-        <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: '#777' }}>{label}</span>
+        <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
         <div className="flex-1 flex items-center gap-1.5">
           <div className="relative">
             <input
@@ -126,8 +126,8 @@ function ColorPickerRow({ label, value, onChange }: { label: string; value: stri
               className="w-6 h-6 rounded-md border cursor-pointer"
               style={{
                 backgroundColor: value || 'transparent',
-                borderColor: '#444',
-                backgroundImage: !value ? 'linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%), linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%)' : undefined,
+                borderColor: 'hsl(var(--studio-line-strong))',
+                backgroundImage: !value ? 'linear-gradient(45deg, hsl(var(--studio-line)) 25%, transparent 25%, transparent 75%, hsl(var(--studio-line)) 75%), linear-gradient(45deg, hsl(var(--studio-line)) 25%, transparent 25%, transparent 75%, hsl(var(--studio-line)) 75%)' : undefined,
                 backgroundSize: !value ? '8px 8px' : undefined,
                 backgroundPosition: !value ? '0 0, 4px 4px' : undefined,
               }}
@@ -138,19 +138,19 @@ function ColorPickerRow({ label, value, onChange }: { label: string; value: stri
             onChange={(e) => { onChange(e.target.value); if (e.target.value.match(/^#[0-9a-fA-F]{6}$/)) addRecentColor(e.target.value); }}
             placeholder="#000000"
             className="flex-1 h-6 px-2 rounded text-[11px] outline-none transition-all font-mono"
-            style={{ backgroundColor: '#2d2d2d', border: '1px solid #333', color: '#ddd' }}
-            onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-            onBlur={e => { e.currentTarget.style.borderColor = '#333'; }}
+            style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+            onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; }}
           />
-          <button onClick={handleCopy} className="h-6 w-6 flex items-center justify-center rounded hover:bg-[#333] transition-colors">
-            {copied ? <Check className="h-3 w-3" style={{ color: '#4ade80' }} /> : <Copy className="h-3 w-3" style={{ color: '#555' }} />}
+          <button onClick={handleCopy} className="h-6 w-6 flex items-center justify-center rounded hover:bg-[hsl(var(--studio-hover))] transition-colors">
+            {copied ? <Check className="h-3 w-3" style={{ color: 'hsl(var(--studio-ok))' }} /> : <Copy className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />}
           </button>
         </div>
       </div>
       {/* Recent colors row */}
       {recentColors.length > 0 && (
         <div className="flex items-center gap-1 pl-[72px]">
-          <Pipette className="h-2 w-2 shrink-0" style={{ color: '#333' }} />
+          <Pipette className="h-2 w-2 shrink-0" style={{ color: 'hsl(var(--studio-hover))' }} />
           {recentColors.slice(0, 8).map((c, i) => (
             <button
               key={`${c}-${i}`}
@@ -158,7 +158,7 @@ function ColorPickerRow({ label, value, onChange }: { label: string; value: stri
               className="w-3.5 h-3.5 rounded-sm border transition-transform hover:scale-125"
               style={{
                 backgroundColor: c,
-                borderColor: c === value ? '#fff' : '#333',
+                borderColor: c === value ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-line))',
                 boxShadow: c === value ? `0 0 0 1px ${c}` : 'none',
               }}
               title={c}
@@ -175,7 +175,7 @@ function ColorPickerRow({ label, value, onChange }: { label: string; value: stri
 function PresetRow({ label, presets, onSelect, currentValue }: { label: string; presets: { label: string; value: string }[]; onSelect: (v: string) => void; currentValue?: string }) {
   return (
     <div className="space-y-1.5">
-      <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#666' }}>{label}</span>
+      <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <div className="flex flex-wrap gap-1">
         {presets.map(p => (
           <button
@@ -183,9 +183,9 @@ function PresetRow({ label, presets, onSelect, currentValue }: { label: string; 
             onClick={() => onSelect(p.value)}
             className="h-6 px-2 rounded text-[10px] font-medium transition-all"
             style={{
-              backgroundColor: currentValue === p.value ? 'rgba(0,115,230,0.2)' : '#2d2d2d',
-              border: `1px solid ${currentValue === p.value ? '#0073E6' : '#333'}`,
-              color: currentValue === p.value ? '#0073E6' : '#999',
+              backgroundColor: currentValue === p.value ? 'hsl(var(--studio-accent) / 0.2)' : 'hsl(var(--studio-raised))',
+              border: `1px solid ${currentValue === p.value ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line))'}`,
+              color: currentValue === p.value ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
             }}
           >
             {p.label}
@@ -208,25 +208,25 @@ const GRADIENT_PRESETS = [
   { label: 'Rose', value: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' },
   { label: 'Arctic', value: 'linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%)' },
   { label: 'Aurora', value: 'linear-gradient(135deg, #0a0015 0%, #1a0030 25%, #0d1b2a 50%, #0a192f 100%)' },
-  { label: 'Neon', value: 'linear-gradient(135deg, #6366f1 0%, #ec4899 50%, #8b5cf6 100%)' },
+  { label: 'Neon', value: 'linear-gradient(135deg, hsl(var(--studio-ink-3)) 0%, hsl(var(--studio-ink-3)) 50%, hsl(var(--studio-ink-3)) 100%)' },
   { label: 'Cosmic', value: 'linear-gradient(135deg, #312e81 0%, #1e1b4b 50%, #0f172a 100%)' },
-  { label: 'Mint', value: 'linear-gradient(135deg, #0ea5e9 0%, #10b981 100%)' },
-  { label: 'Berry', value: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)' },
+  { label: 'Mint', value: 'linear-gradient(135deg, hsl(var(--studio-accent)) 0%, hsl(var(--studio-ok)) 100%)' },
+  { label: 'Berry', value: 'linear-gradient(135deg, hsl(var(--studio-ink-3)) 0%, #db2777 100%)' },
   { label: 'Slate', value: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' },
-  { label: 'Peach', value: 'linear-gradient(135deg, #fb923c 0%, #f472b6 100%)' },
+  { label: 'Peach', value: 'linear-gradient(135deg, #fb923c 0%, hsl(var(--studio-ink-3)) 100%)' },
   { label: 'Ice', value: 'linear-gradient(135deg, #e0f2fe 0%, #c7d2fe 100%)' },
   // V3 Gradients
-  { label: 'Indigo', value: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%)' },
-  { label: 'Tropical', value: 'linear-gradient(135deg, #f97316 0%, #ec4899 50%, #8b5cf6 100%)' },
+  { label: 'Indigo', value: 'linear-gradient(135deg, #4f46e5 0%, hsl(var(--studio-ink-3)) 50%, hsl(var(--studio-ink-3)) 100%)' },
+  { label: 'Tropical', value: 'linear-gradient(135deg, hsl(var(--studio-warn)) 0%, hsl(var(--studio-ink-3)) 50%, hsl(var(--studio-ink-3)) 100%)' },
   { label: 'Northern', value: 'linear-gradient(165deg, #020617 0%, #0f172a 40%, #1e1b4b 100%)' },
-  { label: 'Lava', value: 'linear-gradient(135deg, #dc2626 0%, #f97316 50%, #fbbf24 100%)' },
-  { label: 'Sapphire', value: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' },
-  { label: 'Forest', value: 'linear-gradient(135deg, #064e3b 0%, #059669 50%, #34d399 100%)' },
-  { label: 'Candy', value: 'linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #60a5fa 100%)' },
+  { label: 'Lava', value: 'linear-gradient(135deg, hsl(var(--studio-risk)) 0%, hsl(var(--studio-warn)) 50%, hsl(var(--studio-warn)) 100%)' },
+  { label: 'Sapphire', value: 'linear-gradient(135deg, #1e3a8a 0%, hsl(var(--studio-accent)) 100%)' },
+  { label: 'Forest', value: 'linear-gradient(135deg, #064e3b 0%, #059669 50%, hsl(var(--studio-ok)) 100%)' },
+  { label: 'Candy', value: 'linear-gradient(135deg, hsl(var(--studio-ink-3)) 0%, hsl(var(--studio-ink-3)) 50%, hsl(var(--studio-accent)) 100%)' },
   { label: 'Carbon', value: 'linear-gradient(135deg, #18181b 0%, #27272a 50%, #3f3f46 100%)' },
-  { label: 'Hologram', value: 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 33%, #ec4899 66%, #f59e0b 100%)' },
+  { label: 'Hologram', value: 'linear-gradient(135deg, hsl(var(--studio-ink-3)) 0%, hsl(var(--studio-ink-3)) 33%, hsl(var(--studio-ink-3)) 66%, hsl(var(--studio-warn)) 100%)' },
   { label: 'Midnight', value: 'linear-gradient(135deg, #020617 0%, #1e1b4b 100%)' },
-  { label: 'Warm', value: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fbbf24 100%)' },
+  { label: 'Warm', value: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, hsl(var(--studio-warn)) 100%)' },
   { label: 'Cool', value: 'linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 50%, #6ee7b7 100%)' },
 ];
 
@@ -260,7 +260,7 @@ const SHADOW_PRESETS = [
   { label: 'Large', value: '0 8px 32px rgba(0,0,0,0.15)' },
   { label: 'XL', value: '0 16px 48px rgba(0,0,0,0.2)' },
   { label: 'XXL', value: '0 24px 64px rgba(0,0,0,0.25)' },
-  { label: 'Glow', value: '0 0 24px rgba(0,115,230,0.3)' },
+  { label: 'Glow', value: '0 0 24px hsl(var(--studio-accent) / 0.3)' },
   { label: 'Indigo', value: '0 0 32px rgba(99,102,241,0.3)' },
   { label: 'Pink', value: '0 0 32px rgba(236,72,153,0.3)' },
   { label: 'Green', value: '0 0 32px rgba(16,185,129,0.3)' },
@@ -325,8 +325,8 @@ function ImageSection({ src, alt, onSrcChange, onAltChange }: {
         disabled={uploading}
         className="w-full h-8 flex items-center justify-center gap-2 rounded-lg text-[11px] font-medium transition-all"
         style={{
-          backgroundColor: uploading ? '#1e1e1e' : '#0073E6',
-          color: '#fff',
+          backgroundColor: uploading ? 'hsl(var(--studio-panel))' : 'hsl(var(--studio-accent))',
+          color: 'hsl(var(--studio-ink))',
           border: 'none',
           cursor: uploading ? 'wait' : 'pointer',
           opacity: uploading ? 0.7 : 1,
@@ -336,7 +336,7 @@ function ImageSection({ src, alt, onSrcChange, onAltChange }: {
         {uploading ? 'Uploading…' : 'Upload from PC'}
       </button>
       {src && (
-        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid #333' }}>
+        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid hsl(var(--studio-line))' }}>
           <img src={src} alt={alt} style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '120px', objectFit: 'cover' }} />
         </div>
       )}
@@ -353,7 +353,7 @@ function SliderRow({ label, value, onChange, min = 0, max = 100, unit = '' }: {
 }) {
   return (
     <div className="flex items-center gap-2 h-7">
-      <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: '#777' }}>{label}</span>
+      <span className="text-[10px] w-16 shrink-0 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <input
         type="range"
         min={min}
@@ -362,10 +362,10 @@ function SliderRow({ label, value, onChange, min = 0, max = 100, unit = '' }: {
         onChange={e => onChange(Number(e.target.value))}
         className="flex-1 h-1 rounded-full appearance-none cursor-pointer"
         style={{
-          background: `linear-gradient(to right, #0073E6 0%, #0073E6 ${((value - min) / (max - min)) * 100}%, #333 ${((value - min) / (max - min)) * 100}%, #333 100%)`,
+          background: `linear-gradient(to right, hsl(var(--studio-accent)) 0%, hsl(var(--studio-accent)) ${((value - min) / (max - min)) * 100}%, hsl(var(--studio-line)) ${((value - min) / (max - min)) * 100}%, hsl(var(--studio-line)) 100%)`,
         }}
       />
-      <span className="text-[10px] w-10 text-right tabular-nums" style={{ color: '#888' }}>{value}{unit}</span>
+      <span className="text-[10px] w-10 text-right tabular-nums" style={{ color: 'hsl(var(--studio-ink-2))' }}>{value}{unit}</span>
     </div>
   );
 }
@@ -388,7 +388,7 @@ function PageLinkDropdown({ value, onChange, siteId }: { value: string; onChange
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2 h-7">
-        <span className="text-[10px] w-16 shrink-0 text-right flex items-center justify-end gap-1" style={{ color: '#0073E6' }}>
+        <span className="text-[10px] w-16 shrink-0 text-right flex items-center justify-end gap-1" style={{ color: 'hsl(var(--studio-accent))' }}>
           <Link className="h-3 w-3" />
           Page
         </span>
@@ -396,9 +396,9 @@ function PageLinkDropdown({ value, onChange, siteId }: { value: string; onChange
           value={value}
           onChange={e => onChange(e.target.value)}
           className="flex-1 h-6 px-1.5 rounded text-[11px] outline-none appearance-none cursor-pointer transition-all"
-          style={{ backgroundColor: '#2d2d2d', border: `1px solid ${linkedPage ? '#0073E6' : '#333'}`, color: '#ddd' }}
-          onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-          onBlur={e => { e.currentTarget.style.borderColor = linkedPage ? '#0073E6' : '#333'; }}
+          style={{ backgroundColor: 'hsl(var(--studio-raised))', border: `1px solid ${linkedPage ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line))'}`, color: 'hsl(var(--studio-ink-2))' }}
+          onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+          onBlur={e => { e.currentTarget.style.borderColor = linkedPage ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line))'; }}
         >
           <option value="">— No page link —</option>
           {pages.map(p => (
@@ -407,9 +407,9 @@ function PageLinkDropdown({ value, onChange, siteId }: { value: string; onChange
         </select>
       </div>
       {linkedPage && (
-        <div className="flex items-center gap-1.5 ml-[72px] px-2 py-1 rounded" style={{ backgroundColor: 'rgba(0,115,230,0.08)', border: '1px solid rgba(0,115,230,0.15)' }}>
-          <span className="text-[9px] font-semibold" style={{ color: '#0073E6' }}>✓ Linked to "{linkedPage.page_name}"</span>
-          <button onClick={() => onChange('')} className="text-[9px] ml-auto hover:text-red-400 transition-colors" style={{ color: '#666' }}>✕</button>
+        <div className="flex items-center gap-1.5 ml-[72px] px-2 py-1 rounded" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.08)', border: '1px solid hsl(var(--studio-accent) / 0.15)' }}>
+          <span className="text-[9px] font-semibold" style={{ color: 'hsl(var(--studio-accent))' }}>✓ Linked to "{linkedPage.page_name}"</span>
+          <button onClick={() => onChange('')} className="text-[9px] ml-auto hover:text-red-400 transition-colors" style={{ color: 'hsl(var(--studio-ink-3))' }}>✕</button>
         </div>
       )}
     </div>
@@ -426,22 +426,11 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
 
   const toggle = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
 
-  if (!selectedElement) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-3" style={{ color: '#555' }}>
-        <motion.div
-          animate={{ scale: [1, 1.08, 1] }}
-          transition={{ duration: 3, repeat: Infinity }}
-          className="w-14 h-14 rounded-xl flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, rgba(0,115,230,0.08), rgba(0,115,230,0.02))', border: '1px solid rgba(0,115,230,0.08)' }}
-        >
-          <Palette className="h-6 w-6" style={{ color: 'rgba(0,115,230,0.3)' }} />
-        </motion.div>
-        <span className="text-[11px] font-medium">Select an element to style</span>
-        <span className="text-[9px]" style={{ color: '#444' }}>Click any element on the canvas</span>
-      </div>
-    );
-  }
+  // The panel above already says nothing is selected, and says it better -
+  // with the shortcut to do something about it. A second empty state under
+  // the first, complete with a pulsing icon, was the panel explaining the
+  // same nothing twice.
+  if (!selectedElement) return null;
 
   const bp = state.breakpoint;
   const currentStyles = { ...(selectedElement.styles.desktop ?? {}), ...(bp !== 'desktop' ? selectedElement.styles[bp] ?? {} : {}) };
@@ -462,14 +451,14 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
 
   const s = (key: StyleKey) => (currentStyles[key] as string) ?? '';
 
-  const sectionDivider = <div className="h-[1px] my-1" style={{ backgroundColor: '#2a2a2a' }} />;
+  const sectionDivider = <div className="h-[1px] my-1" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />;
 
   return (
     <ScrollArea className="h-full">
       <div className="p-3 space-y-0.5">
         {/* Element selector badge */}
-        <div className="flex items-center gap-2 mb-3 p-2 rounded-lg" style={{ backgroundColor: '#2d2d2d', border: '1px solid #333' }}>
-          <div className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold" style={{ background: 'linear-gradient(135deg, #0073E6, #005bb5)', color: '#fff' }}>
+        <div className="flex items-center gap-2 mb-3 p-2 rounded-lg" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
+          <div className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent)), hsl(var(--studio-accent)))', color: 'hsl(var(--studio-ink))' }}>
             {selectedElement.type.charAt(0).toUpperCase()}
           </div>
           <input
@@ -477,9 +466,9 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
             onChange={(e) => dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, updates: { name: e.target.value } } })}
             placeholder={selectedElement.type}
             className="flex-1 bg-transparent text-[11px] font-medium outline-none"
-            style={{ color: '#ddd' }}
+            style={{ color: 'hsl(var(--studio-ink-2))' }}
           />
-          <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ backgroundColor: '#333', color: '#888' }}>
+          <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'hsl(var(--studio-hover))', color: 'hsl(var(--studio-ink-2))' }}>
             {bp === 'desktop' ? '🖥' : bp === 'tablet' ? '📱' : '📲'} {bp}
           </span>
         </div>
@@ -672,7 +661,7 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
           <div className="space-y-2 pb-2">
             <ColorPickerRow label="Color" value={s('backgroundColor')} onChange={(v) => updateStyle('backgroundColor', v)} />
             <div className="space-y-1.5">
-              <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#666' }}>Gradient Presets</span>
+              <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Gradient Presets</span>
               <GradientPresets onSelect={(v) => updateStyle('background', v)} />
             </div>
             <FieldRow label="Gradient" value={s('background')} onChange={(v) => updateStyle('background', v)} placeholder="linear-gradient(…)" />
@@ -772,7 +761,7 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
               { label: 'Arrow', value: 'polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%)' },
               { label: 'Notch', value: 'polygon(0 0, 100% 0, 100% calc(100% - 24px), 50% 100%, 0 calc(100% - 24px))' },
             ]} onSelect={(v) => updateStyle('clipPath', v)} currentValue={s('clipPath')} />
-            <FieldRow label="Outline" value={s('outline')} onChange={(v) => updateStyle('outline', v)} placeholder="2px solid #3b82f6" />
+            <FieldRow label="Outline" value={s('outline')} onChange={(v) => updateStyle('outline', v)} placeholder="2px solid hsl(var(--studio-accent))" />
             <FieldRow label="Outline Off" value={s('outlineOffset')} onChange={(v) => updateStyle('outlineOffset', v)} placeholder="2px" />
           </div>
         )}
@@ -782,7 +771,7 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
         <SectionHeader label="Filters & Glass" open={openSections.filters} onClick={() => toggle('filters')} badge="PRO" />
         {openSections.filters && (
           <div className="space-y-1.5 pb-2">
-            <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#666' }}>Individual Filters</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Individual Filters</span>
             <SliderRow label="Blur" value={parseFloat(s('filter')?.match(/blur\((\d+)/)?.[1] || '0')} onChange={(v) => {
               const current = s('filter') || '';
               const cleaned = current.replace(/blur\([^)]*\)\s*/g, '').trim();
@@ -822,7 +811,7 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
               { label: 'Hue Rotate', value: 'hue-rotate(90deg)' }, { label: 'Drop Shadow', value: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' },
             ]} onSelect={(v) => updateStyle('filter', v)} currentValue={s('filter')} />
             <div className="h-2" />
-            <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#666' }}>Backdrop Filter</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Backdrop Filter</span>
             <SliderRow label="BG Blur" value={parseFloat(s('backdropFilter')?.match(/blur\((\d+)/)?.[1] || '0')} onChange={(v) => {
               const current = s('backdropFilter') || '';
               const cleaned = current.replace(/blur\([^)]*\)\s*/g, '').trim();
@@ -834,7 +823,7 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
               updateStyle('backdropFilter', v !== 100 ? `brightness(${v / 100}) ${cleaned}`.trim() : cleaned || '');
             }} min={0} max={200} unit="%" />
             <FieldRow label="Backdrop" value={s('backdropFilter')} onChange={(v) => updateStyle('backdropFilter', v)} placeholder="blur(12px)" />
-            <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#666' }}>Glassmorphism Presets</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Glassmorphism Presets</span>
             <PresetRow label="" presets={[
               { label: 'Light Glass', value: 'blur(12px) saturate(180%)' },
               { label: 'Heavy Glass', value: 'blur(24px) saturate(200%) brightness(1.1)' },
@@ -854,7 +843,7 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
         <SectionHeader label="Transform & 3D" open={openSections.transform} onClick={() => toggle('transform')} badge="PRO" />
         {openSections.transform && (
           <div className="space-y-1.5 pb-2">
-            <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#666' }}>Individual Controls</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Individual Controls</span>
             <FieldRow label="Move X" value={s('transform')?.match(/translateX\(([^)]+)\)/)?.[1] || ''} onChange={(v) => {
               const current = s('transform') || '';
               const cleaned = current.replace(/translateX\([^)]*\)\s*/g, '').trim();

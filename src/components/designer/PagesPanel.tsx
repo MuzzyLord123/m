@@ -174,25 +174,25 @@ export function PagesPanel({ siteId }: { siteId: string }) {
           <span className="text-[11px] font-semibold text-white">Pages</span>
           <button
             onClick={addPage}
-            className="h-6 w-6 flex items-center justify-center rounded hover:bg-[#333] transition-colors"
+            className="h-6 w-6 flex items-center justify-center rounded hover:bg-[hsl(var(--studio-hover))] transition-colors"
             title="Add page"
           >
-            <Plus className="h-3.5 w-3.5 text-[#888]" />
+            <Plus className="h-3.5 w-3.5 text-[hsl(var(--studio-ink-2))]" />
           </button>
         </div>
 
         {/* Search */}
         <div className="px-3 pb-2">
           <div className="relative">
-            <Search className="h-3 w-3 absolute left-2 top-1/2 -translate-y-1/2 text-[#555]" />
+            <Search className="h-3 w-3 absolute left-2 top-1/2 -translate-y-1/2 text-[hsl(var(--studio-ink-3))]" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search pages…"
               className="w-full h-7 pl-7 pr-2 rounded text-[11px] outline-none"
-              style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}
-              onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-              onBlur={e => { e.currentTarget.style.borderColor = '#333'; }}
+              style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; }}
             />
           </div>
         </div>
@@ -200,16 +200,16 @@ export function PagesPanel({ siteId }: { siteId: string }) {
         {/* Pages section */}
         <div className="px-2">
           <div className="flex items-center gap-1 px-1 py-1">
-            <ChevronDown className="h-3 w-3 text-[#555]" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#666]">Pages</span>
+            <ChevronDown className="h-3 w-3 text-[hsl(var(--studio-ink-3))]" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--studio-ink-3))]">Pages</span>
           </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-[#333] border-t-[#0073E6] rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-[hsl(var(--studio-line))] border-t-[hsl(var(--studio-accent))] rounded-full animate-spin" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-[11px] text-center py-6 text-[#555]">
+            <div className="text-[11px] text-center py-6 text-[hsl(var(--studio-ink-3))]">
               {search ? 'No matching pages' : 'No pages yet'}
             </div>
           ) : (
@@ -223,16 +223,16 @@ export function PagesPanel({ siteId }: { siteId: string }) {
                       key={page.id}
                       className="group relative flex items-center gap-1 h-9 px-2 rounded cursor-pointer transition-all"
                       style={{
-                        backgroundColor: state.activePage === page.id ? 'rgba(0,115,230,0.12)' : 'transparent',
-                        borderLeft: state.activePage === page.id ? '2px solid #0073E6' : '2px solid transparent',
+                        backgroundColor: state.activePage === page.id ? 'hsl(var(--studio-accent) / 0.12)' : 'transparent',
+                        borderLeft: state.activePage === page.id ? '2px solid hsl(var(--studio-accent))' : '2px solid transparent',
                       }}
                       onClick={() => switchPage(page.id)}
                     >
-                      <GripVertical className="h-3 w-3 shrink-0 opacity-0 group-hover:opacity-30 cursor-grab text-[#666]" />
+                      <GripVertical className="h-3 w-3 shrink-0 opacity-0 group-hover:opacity-30 cursor-grab text-[hsl(var(--studio-ink-3))]" />
                       {page.is_homepage ? (
-                        <Home className="h-3 w-3 shrink-0 text-[#0073E6]" />
+                        <Home className="h-3 w-3 shrink-0 text-[hsl(var(--studio-accent))]" />
                       ) : (
-                        <File className="h-3 w-3 shrink-0 text-[#666]" />
+                        <File className="h-3 w-3 shrink-0 text-[hsl(var(--studio-ink-3))]" />
                       )}
 
                       {editingId === page.id ? (
@@ -249,7 +249,7 @@ export function PagesPanel({ siteId }: { siteId: string }) {
                         <div className="flex-1 min-w-0">
                           <span
                             className="block text-[11px] font-medium truncate"
-                            style={{ color: state.activePage === page.id ? '#fff' : '#bbb' }}
+                            style={{ color: state.activePage === page.id ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-ink-2))' }}
                             onDoubleClick={(e) => {
                               e.stopPropagation();
                               setEditingId(page.id);
@@ -265,11 +265,11 @@ export function PagesPanel({ siteId }: { siteId: string }) {
                                 className="h-full rounded-full transition-all duration-300"
                                 style={{
                                   width: `${density * 100}%`,
-                                  backgroundColor: density > 0.8 ? '#f59e0b' : density > 0.5 ? '#0073E6' : '#22c55e',
+                                  backgroundColor: density > 0.8 ? 'hsl(var(--studio-warn))' : density > 0.5 ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ok))',
                                 }}
                               />
                             </div>
-                            <span className="text-[7px] tabular-nums font-mono shrink-0" style={{ color: '#555' }}>
+                            <span className="text-[7px] tabular-nums font-mono shrink-0" style={{ color: 'hsl(var(--studio-ink-3))' }}>
                               {page.element_count || 0}
                             </span>
                           </div>
@@ -277,7 +277,7 @@ export function PagesPanel({ siteId }: { siteId: string }) {
                       )}
 
                       {page.is_homepage && (
-                        <span className="text-[8px] px-1 py-0.5 rounded font-bold" style={{ backgroundColor: 'rgba(0,115,230,0.2)', color: '#0073E6' }}>
+                        <span className="text-[8px] px-1 py-0.5 rounded font-bold" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.2)', color: 'hsl(var(--studio-accent))' }}>
                           HOME
                         </span>
                       )}
@@ -285,9 +285,9 @@ export function PagesPanel({ siteId }: { siteId: string }) {
                   <div className="relative">
                     <button
                       onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === page.id ? null : page.id); }}
-                      className="h-5 w-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 hover:bg-[#333] transition-all"
+                      className="h-5 w-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 hover:bg-[hsl(var(--studio-hover))] transition-all"
                     >
-                      <MoreHorizontal className="h-3 w-3 text-[#888]" />
+                      <MoreHorizontal className="h-3 w-3 text-[hsl(var(--studio-ink-2))]" />
                     </button>
 
                     <AnimatePresence>
@@ -297,32 +297,32 @@ export function PagesPanel({ siteId }: { siteId: string }) {
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           className="absolute right-0 top-full mt-1 z-[200] rounded-lg py-1 min-w-[150px]"
-                          style={{ backgroundColor: '#2d2d2d', border: '1px solid #3a3a3a', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}
+                          style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}
                           onClick={e => e.stopPropagation()}
                         >
                           <button
                             onClick={() => { setEditingId(page.id); setEditName(page.page_name); setMenuOpen(null); }}
-                            className="w-full flex items-center gap-2 h-7 px-3 text-[11px] text-[#ccc] hover:bg-[#3a3a3a]"
+                            className="w-full flex items-center gap-2 h-7 px-3 text-[11px] text-[hsl(var(--studio-ink-2))] hover:bg-[hsl(var(--studio-hover))]"
                           >
-                            <Settings className="h-3 w-3 text-[#888]" /> Rename
+                            <Settings className="h-3 w-3 text-[hsl(var(--studio-ink-2))]" /> Rename
                           </button>
                           <button
                             onClick={() => duplicatePage(page)}
-                            className="w-full flex items-center gap-2 h-7 px-3 text-[11px] text-[#ccc] hover:bg-[#3a3a3a]"
+                            className="w-full flex items-center gap-2 h-7 px-3 text-[11px] text-[hsl(var(--studio-ink-2))] hover:bg-[hsl(var(--studio-hover))]"
                           >
-                            <Copy className="h-3 w-3 text-[#888]" /> Duplicate
+                            <Copy className="h-3 w-3 text-[hsl(var(--studio-ink-2))]" /> Duplicate
                           </button>
                           {!page.is_homepage && (
                             <button
                               onClick={() => setHomepage(page.id)}
-                              className="w-full flex items-center gap-2 h-7 px-3 text-[11px] text-[#ccc] hover:bg-[#3a3a3a]"
+                              className="w-full flex items-center gap-2 h-7 px-3 text-[11px] text-[hsl(var(--studio-ink-2))] hover:bg-[hsl(var(--studio-hover))]"
                             >
-                              <Home className="h-3 w-3 text-[#888]" /> Set as homepage
+                              <Home className="h-3 w-3 text-[hsl(var(--studio-ink-2))]" /> Set as homepage
                             </button>
                           )}
                           {pages.length > 1 && (
                             <>
-                              <div className="h-[1px] my-1 mx-2" style={{ backgroundColor: '#3a3a3a' }} />
+                              <div className="h-[1px] my-1 mx-2" style={{ backgroundColor: 'hsl(var(--studio-hover))' }} />
                               <button
                                 onClick={() => deletePage(page.id)}
                                 className="w-full flex items-center gap-2 h-7 px-3 text-[11px] text-red-400 hover:bg-red-500/10"

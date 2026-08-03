@@ -109,56 +109,56 @@ export function AIEditDialog({ open, onClose, elementId }: AIEditDialogProps) {
           style={{
             width: '440px',
             maxWidth: '90vw',
-            backgroundColor: '#1a1a1a',
-            border: '1px solid #2a2a2a',
+            backgroundColor: 'hsl(var(--studio-panel))',
+            border: '1px solid hsl(var(--studio-line))',
             boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
           }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid #2a2a2a' }}>
+          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #a78bfa, #7c3aed)' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))' }}>
                 <Wand2 className="w-4 h-4 text-white" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-white">AI Edit</h3>
-                <p className="text-[10px] text-[#666]">
-                  Editing: <span className="text-[#a78bfa]">{element?.name || element?.type || 'element'}</span>
+                <p className="text-[10px] text-[hsl(var(--studio-ink-3))]">
+                  Editing: <span className="text-[hsl(var(--studio-ink-3))]">{element?.name || element?.type || 'element'}</span>
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#333] transition-colors">
-              <X className="w-4 h-4 text-[#666]" />
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[hsl(var(--studio-hover))] transition-colors">
+              <X className="w-4 h-4 text-[hsl(var(--studio-ink-3))]" />
             </button>
           </div>
 
           {/* Body */}
           <div className="p-5 space-y-4">
             {/* Input */}
-            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #333' }}>
+            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid hsl(var(--studio-line))' }}>
               <textarea
                 value={prompt}
                 onChange={e => setPrompt(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
                 placeholder="Describe the changes you want..."
                 rows={3}
-                className="w-full bg-transparent text-[13px] text-white placeholder:text-[#444] p-4 resize-none outline-none"
-                style={{ backgroundColor: '#141414' }}
+                className="w-full bg-transparent text-[13px] text-white placeholder:text-[hsl(var(--studio-hover))] p-4 resize-none outline-none"
+                style={{ backgroundColor: 'hsl(var(--studio-panel))' }}
                 autoFocus
               />
             </div>
 
             {/* Quick edits */}
             <div className="space-y-2">
-              <span className="text-[9px] text-[#555] font-semibold uppercase tracking-wider">Quick Edits</span>
+              <span className="text-[9px] text-[hsl(var(--studio-ink-3))] font-semibold uppercase tracking-wider">Quick Edits</span>
               <div className="flex flex-wrap gap-1.5">
                 {quickEdits.map((qe, i) => (
                   <button
                     key={i}
                     onClick={() => setPrompt(qe)}
-                    className="px-3 py-1.5 rounded-lg text-[11px] text-[#777] hover:text-[#bbb] hover:bg-[#2a2a2a] transition-all"
-                    style={{ border: '1px solid #2a2a2a' }}
+                    className="px-3 py-1.5 rounded-lg text-[11px] text-[hsl(var(--studio-ink-3))] hover:text-[hsl(var(--studio-ink-2))] hover:bg-[hsl(var(--studio-raised))] transition-all"
+                    style={{ border: '1px solid hsl(var(--studio-line))' }}
                   >
                     {qe}
                   </button>
@@ -171,7 +171,7 @@ export function AIEditDialog({ open, onClose, elementId }: AIEditDialogProps) {
               onClick={handleSubmit}
               disabled={!prompt.trim() || loading}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-semibold transition-all disabled:opacity-30"
-              style={{ background: 'linear-gradient(135deg, #a78bfa, #7c3aed)', color: '#fff' }}
+              style={{ background: 'linear-gradient(135deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))', color: 'hsl(var(--studio-ink))' }}
             >
               {loading ? (
                 <>

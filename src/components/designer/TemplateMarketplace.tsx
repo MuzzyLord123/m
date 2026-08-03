@@ -12,9 +12,9 @@ import { toast } from 'sonner';
 import { useSavedTemplates } from '@/hooks/useSavedTemplates';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  All: '#8b5cf6', Portfolio: '#ec4899', Agency: '#3b82f6', SaaS: '#10b981',
-  Business: '#f59e0b', Startup: '#6366f1', Creator: '#f43f5e', Restaurant: '#f97316',
-  Blog: '#0ea5e9', 'E-commerce': '#14b8a6', Landing: '#a855f7', Saved: '#a78bfa',
+  All: 'hsl(var(--studio-ink-3))', Portfolio: 'hsl(var(--studio-ink-3))', Agency: 'hsl(var(--studio-accent))', SaaS: 'hsl(var(--studio-ok))',
+  Business: 'hsl(var(--studio-warn))', Startup: 'hsl(var(--studio-ink-3))', Creator: 'hsl(var(--studio-ink-3))', Restaurant: 'hsl(var(--studio-warn))',
+  Blog: 'hsl(var(--studio-accent))', 'E-commerce': 'hsl(var(--studio-ink-3))', Landing: 'hsl(var(--studio-ink-3))', Saved: 'hsl(var(--studio-ink-3))',
 };
 
 function countElements(els: EditorElement[]): number {
@@ -88,7 +88,7 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
     return counts;
   }, []);
 
-  const activeColor = CATEGORY_COLORS[activeCategory] || '#8b5cf6';
+  const activeColor = CATEGORY_COLORS[activeCategory] || 'hsl(var(--studio-ink-3))';
 
   return (
     <>
@@ -98,9 +98,9 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(236,72,153,0.08))', border: '1px solid rgba(139,92,246,0.15)' }}>
-                <Sparkles className="h-3 w-3" style={{ color: '#8b5cf6' }} />
+                <Sparkles className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
               </div>
-              <span className="text-[11px] font-semibold" style={{ color: '#ccc' }}>Templates</span>
+              <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>Templates</span>
             </div>
             <span className="text-[9px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${activeColor}10`, color: activeColor, border: `1px solid ${activeColor}15` }}>
               {TEMPLATES.length}
@@ -109,22 +109,22 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3" style={{ color: '#555' }} />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
             <input
               value={search} onChange={e => setSearch(e.target.value)}
               placeholder={`Search templates…`}
               className="w-full h-7 pl-7 pr-3 rounded-lg text-[10px] outline-none transition-colors"
-              style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', color: '#ddd' }}
-              onFocus={e => { e.currentTarget.style.borderColor = '#8b5cf6'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.08)'; }}
-              onBlur={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.boxShadow = 'none'; }}
+              style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-ink-3))'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.08)'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-raised))'; e.currentTarget.style.boxShadow = 'none'; }}
             />
-            {search && <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 flex items-center justify-center rounded-full hover:bg-white/10" style={{ color: '#555', fontSize: '9px' }}>✕</button>}
+            {search && <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 flex items-center justify-center rounded-full hover:bg-white/10" style={{ color: 'hsl(var(--studio-ink-3))', fontSize: '9px' }}>✕</button>}
           </div>
 
           {/* Category pills with counts */}
           <div className="flex flex-wrap gap-0.5">
             {TEMPLATE_CATEGORIES.map(cat => {
-              const catColor = CATEGORY_COLORS[cat] || '#555';
+              const catColor = CATEGORY_COLORS[cat] || 'hsl(var(--studio-ink-3))';
               const count = categoryCounts[cat] || 0;
               return (
                 <button
@@ -132,7 +132,7 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
                   className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[8px] font-semibold uppercase tracking-wider transition-all"
                   style={{
                     backgroundColor: activeCategory === cat ? `${catColor}15` : 'transparent',
-                    color: activeCategory === cat ? catColor : '#666',
+                    color: activeCategory === cat ? catColor: 'hsl(var(--studio-ink-3))',
                     border: `1px solid ${activeCategory === cat ? `${catColor}30` : 'transparent'}`,
                   }}
                 >
@@ -146,14 +146,14 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
           {/* Sort & results */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <LayoutGrid className="h-2.5 w-2.5" style={{ color: '#444' }} />
-              <span className="text-[9px] tabular-nums" style={{ color: '#555' }}>{filtered.length} template{filtered.length !== 1 ? 's' : ''}</span>
+              <LayoutGrid className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-hover))' }} />
+              <span className="text-[9px] tabular-nums" style={{ color: 'hsl(var(--studio-ink-3))' }}>{filtered.length} template{filtered.length !== 1 ? 's' : ''}</span>
             </div>
             <div className="flex items-center gap-0.5">
-              <Filter className="h-2.5 w-2.5" style={{ color: '#444' }} />
+              <Filter className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-hover))' }} />
               {(['name', 'pages', 'elements'] as const).map(s => (
                 <button key={s} onClick={() => setSortBy(s)} className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded transition-all"
-                  style={{ backgroundColor: sortBy === s ? 'rgba(139,92,246,0.1)' : 'transparent', color: sortBy === s ? '#8b5cf6' : '#444' }}
+                  style={{ backgroundColor: sortBy === s ? 'rgba(139,92,246,0.1)' : 'transparent', color: sortBy === s ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-line-strong))' }}
                 >{s}</button>
               ))}
             </div>
@@ -164,26 +164,26 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
             <div>
               <div className="flex items-center gap-1.5 mb-2">
                 <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-                <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#555' }}>Saved</span>
-                <span className="text-[7px] tabular-nums px-1 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>{savedTemplates.length}</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Saved</span>
+                <span className="text-[7px] tabular-nums px-1 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: 'hsl(var(--studio-warn))' }}>{savedTemplates.length}</span>
               </div>
               <div className="grid grid-cols-1 gap-1.5">
                 {savedTemplates.filter(t => !search || t.name.toLowerCase().includes(search.toLowerCase())).map(st => (
-                  <div key={st.id} className="group rounded-lg p-2.5 cursor-pointer transition-all" style={{ backgroundColor: '#1e1e1e', border: '1px solid rgba(167,139,250,0.12)' }}>
+                  <div key={st.id} className="group rounded-lg p-2.5 cursor-pointer transition-all" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid rgba(167,139,250,0.12)' }}>
                     <div className="flex items-center justify-between mb-0.5">
                       <div className="flex items-center gap-1.5">
                         <BookmarkPlus className="h-3 w-3 text-amber-500" />
-                        <span className="text-[10px] font-semibold" style={{ color: '#ddd' }}>{st.name}</span>
+                        <span className="text-[10px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>{st.name}</span>
                       </div>
                       <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => { const t: DesignerTemplate = { id: st.id, name: st.name, description: st.description, category: st.category, elements: st.elements, pages: st.pages || undefined }; applyTemplate(t); }}
-                          className="px-2 py-0.5 rounded text-[8px] font-semibold" style={{ backgroundColor: 'rgba(139,92,246,0.12)', color: '#8b5cf6', border: '1px solid rgba(139,92,246,0.2)' }}>Use</button>
+                          className="px-2 py-0.5 rounded text-[8px] font-semibold" style={{ backgroundColor: 'rgba(139,92,246,0.12)', color: 'hsl(var(--studio-ink-3))', border: '1px solid rgba(139,92,246,0.2)' }}>Use</button>
                         <button onClick={() => deleteTemplate(st.id)} className="p-1 rounded hover:bg-red-500/20 transition-colors"><Trash2 className="w-2.5 h-2.5 text-red-400" /></button>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {st.description && <p className="text-[8px] flex-1 truncate" style={{ color: '#555' }}>{st.description}</p>}
-                      <span className="text-[7px] tabular-nums shrink-0" style={{ color: '#444' }}>{st.elements.length} els</span>
+                      {st.description && <p className="text-[8px] flex-1 truncate" style={{ color: 'hsl(var(--studio-ink-3))' }}>{st.description}</p>}
+                      <span className="text-[7px] tabular-nums shrink-0" style={{ color: 'hsl(var(--studio-hover))' }}>{st.elements.length} els</span>
                     </div>
                   </div>
                 ))}
@@ -195,7 +195,7 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
           <div className="grid grid-cols-1 gap-2">
             <AnimatePresence mode="popLayout">
               {filtered.map(template => {
-                const catColor = CATEGORY_COLORS[template.category] || '#555';
+                const catColor = CATEGORY_COLORS[template.category] || 'hsl(var(--studio-ink-3))';
                 const elCount = countElements(template.pages?.[0]?.elements || template.elements || []);
                 const pageCount = template.pages?.length || 1;
                 return (
@@ -204,7 +204,7 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
                     initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                     className="group rounded-lg overflow-hidden cursor-pointer"
-                    style={{ backgroundColor: '#1e1e1e', border: `1px solid ${hoveredId === template.id ? `${catColor}40` : '#252525'}`, transition: 'border-color 0.2s ease' }}
+                    style={{ backgroundColor: 'hsl(var(--studio-panel))', border: `1px solid ${hoveredId === template.id ? `${catColor}40` : 'hsl(var(--studio-raised))'}`, transition: 'border-color 0.2s ease' }}
                     onMouseEnter={() => setHoveredId(template.id)} onMouseLeave={() => setHoveredId(null)}
                   >
                     <div className="relative overflow-hidden" style={{ height: '110px' }}>
@@ -224,7 +224,7 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
                       <div className="absolute top-2 right-2 flex items-center gap-1">
                         {pageCount > 1 && (
                           <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[7px] font-bold"
-                            style={{ backgroundColor: 'rgba(0,115,230,0.8)', backdropFilter: 'blur(8px)', color: '#fff' }}>
+                            style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.8)', backdropFilter: 'blur(8px)', color: 'hsl(var(--studio-ink))' }}>
                             <FileText className="h-2 w-2" /> {pageCount}
                           </div>
                         )}
@@ -259,16 +259,16 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
                     {/* Info */}
                     <div className="p-2">
                       <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-[10px] font-semibold truncate" style={{ color: '#ddd' }}>{template.name}</span>
+                        <span className="text-[10px] font-semibold truncate" style={{ color: 'hsl(var(--studio-ink-2))' }}>{template.name}</span>
                       </div>
-                      <p className="text-[8px] leading-snug truncate" style={{ color: '#555' }}>{template.description}</p>
+                      <p className="text-[8px] leading-snug truncate" style={{ color: 'hsl(var(--studio-ink-3))' }}>{template.description}</p>
                     </div>
                   </motion.div>
                 );
               })}
             </AnimatePresence>
             {filtered.length === 0 && (
-              <div className="text-center py-8" style={{ color: '#555', fontSize: '11px' }}>No templates found</div>
+              <div className="text-center py-8" style={{ color: 'hsl(var(--studio-ink-3))', fontSize: '11px' }}>No templates found</div>
             )}
           </div>
         </div>

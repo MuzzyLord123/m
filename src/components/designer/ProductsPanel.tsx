@@ -198,14 +198,14 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!siteId) return <div className="flex items-center justify-center h-full text-[11px] text-[#555]">No site loaded</div>;
+  if (!siteId) return <div className="flex items-center justify-center h-full text-[11px] text-[hsl(var(--studio-ink-3))]">No site loaded</div>;
 
   return (
-    <div className="h-full flex flex-col" style={{ color: '#ccc' }}>
-      <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: '1px solid #2a2a2a' }}>
+    <div className="h-full flex flex-col" style={{ color: 'hsl(var(--studio-ink-2))' }}>
+      <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
         <div className="flex items-center gap-1.5">
           <ShoppingBag className="h-3.5 w-3.5 text-emerald-400" />
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#888]">Products</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--studio-ink-2))]">Products</span>
         </div>
         <div className="flex gap-1">
           <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => setShowPageTemplates(true)}>
@@ -222,14 +222,14 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
 
       {/* Search & filter */}
       {products.length > 0 && (
-        <div className="flex gap-1.5 px-2 py-1.5" style={{ borderBottom: '1px solid #2a2a2a' }}>
+        <div className="flex gap-1.5 px-2 py-1.5" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
           <div className="relative flex-1">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-[#555]" />
-            <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search..." className="h-7 text-[11px] pl-7" style={{ backgroundColor: '#2a2a2a', border: '1px solid #333', color: '#ccc' }} />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-[hsl(var(--studio-ink-3))]" />
+            <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search..." className="h-7 text-[11px] pl-7" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
           </div>
           {categories.length > 0 && (
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="h-7 w-24 text-[10px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #333', color: '#ccc' }}><Tag className="h-3 w-3 mr-1" /><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-7 w-24 text-[10px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}><Tag className="h-3 w-3 mr-1" /><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
                 {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -241,12 +241,12 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
 
       <ScrollArea className="flex-1">
         {loading ? (
-          <div className="p-3 text-[11px] text-[#555]">Loading</div>
+          <div className="p-3 text-[11px] text-[hsl(var(--studio-ink-3))]">Loading</div>
         ) : products.length === 0 ? (
           <div className="p-4 text-center">
-            <ShoppingBag className="h-8 w-8 mx-auto text-[#444] mb-2" />
-            <p className="text-[11px] text-[#666] mb-2">No products on this site</p>
-            <p className="text-[10px] text-[#555] mb-3">Sync from inventory or add product page templates</p>
+            <ShoppingBag className="h-8 w-8 mx-auto text-[hsl(var(--studio-hover))] mb-2" />
+            <p className="text-[11px] text-[hsl(var(--studio-ink-3))] mb-2">No products on this site</p>
+            <p className="text-[10px] text-[hsl(var(--studio-ink-3))] mb-3">Sync from inventory or add product page templates</p>
             <div className="flex gap-2 justify-center">
               <Button size="sm" className="h-7 text-[11px]" onClick={() => { loadInventory(); setShowSync(true); }}>
                 <Link2 className="h-3 w-3 mr-1" /> Sync Inventory
@@ -260,11 +260,11 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
           <div className="p-2 space-y-1">
             {filteredProducts.map(product => (
               <div key={product.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 group">
-                <div className="w-8 h-8 rounded bg-[#2a2a2a] overflow-hidden shrink-0">
+                <div className="w-8 h-8 rounded bg-[hsl(var(--studio-raised))] overflow-hidden shrink-0">
                   {product.images?.[0]?.url ? (
                     <img src={product.images[0].url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#444] text-[10px] font-bold">{product.name[0]}</div>
+                    <div className="w-full h-full flex items-center justify-center text-[hsl(var(--studio-hover))] text-[10px] font-bold">{product.name[0]}</div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setShowEdit(product)}>
@@ -272,16 +272,16 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
                   <p className="text-[10px] text-emerald-400">{formatPrice(product.price, product.currency)}</p>
                 </div>
                 {product.inv_product_id && (
-                  <Badge variant="outline" className="text-[8px] h-3.5 shrink-0" style={{ borderColor: '#0073E6', color: '#0073E6' }}>synced</Badge>
+                  <Badge variant="outline" className="text-[8px] h-3.5 shrink-0" style={{ borderColor: 'hsl(var(--studio-accent))', color: 'hsl(var(--studio-accent))' }}>synced</Badge>
                 )}
                 <Badge variant="outline" className="text-[9px] h-4 shrink-0" style={{
-                  borderColor: product.status === 'active' ? '#22c55e' : '#666',
-                  color: product.status === 'active' ? '#22c55e' : '#888',
+                  borderColor: product.status === 'active' ? 'hsl(var(--studio-ok))' : 'hsl(var(--studio-ink-3))',
+                  color: product.status === 'active' ? 'hsl(var(--studio-ok))' : 'hsl(var(--studio-ink-2))',
                 }}>{product.status}</Badge>
-                <button onClick={() => insertProductPage('product-hero-1', product)} className="opacity-0 group-hover:opacity-100 text-[#666] hover:text-emerald-400 p-0.5" title="Add product page">
+                <button onClick={() => insertProductPage('product-hero-1', product)} className="opacity-0 group-hover:opacity-100 text-[hsl(var(--studio-ink-3))] hover:text-emerald-400 p-0.5" title="Add product page">
                   <FileText className="h-3 w-3" />
                 </button>
-                <button onClick={() => deleteProduct(product.id)} className="opacity-0 group-hover:opacity-100 text-[#666] hover:text-red-400 p-0.5">
+                <button onClick={() => deleteProduct(product.id)} className="opacity-0 group-hover:opacity-100 text-[hsl(var(--studio-ink-3))] hover:text-red-400 p-0.5">
                   <Trash2 className="h-3 w-3" />
                 </button>
               </div>
@@ -292,19 +292,19 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
 
       {/* Product Page Templates Dialog */}
       <Dialog open={showPageTemplates} onOpenChange={setShowPageTemplates}>
-        <DialogContent className="max-w-[90vw] sm:max-w-md" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc', maxHeight: '85vh' }}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))', maxHeight: '85vh' }}>
           <DialogHeader><DialogTitle className="text-sm">Product Page Templates</DialogTitle></DialogHeader>
-          <p className="text-[10px] text-[#888] -mt-1">Click to add to canvas. Auto-fills with product data.</p>
+          <p className="text-[10px] text-[hsl(var(--studio-ink-2))] -mt-1">Click to add to canvas. Auto-fills with product data.</p>
           <ScrollArea className="max-h-[60vh]">
             <div className="grid grid-cols-2 gap-2 p-1">
               {PRODUCT_PAGE_TEMPLATES.map(template => (
                 <button key={template.id} onClick={() => insertProductPage(template.id, products[0])}
-                  className="flex flex-col gap-1.5 p-2.5 rounded-lg hover:bg-white/5 text-left transition-colors" style={{ border: '1px solid #333' }}>
-                  <div className="w-full h-14 rounded flex items-center justify-center text-2xl" style={{ backgroundColor: '#252525' }}>
+                  className="flex flex-col gap-1.5 p-2.5 rounded-lg hover:bg-white/5 text-left transition-colors" style={{ border: '1px solid hsl(var(--studio-line))' }}>
+                  <div className="w-full h-14 rounded flex items-center justify-center text-2xl" style={{ backgroundColor: 'hsl(var(--studio-raised))' }}>
                     {template.icon}
                   </div>
                   <span className="text-[10px] font-medium leading-tight">{template.name}</span>
-                  <span className="text-[9px] text-[#666] leading-tight">{template.description}</span>
+                  <span className="text-[9px] text-[hsl(var(--studio-ink-3))] leading-tight">{template.description}</span>
                 </button>
               ))}
             </div>
@@ -314,11 +314,11 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
 
       {/* Sync from Inventory Dialog */}
       <Dialog open={showSync} onOpenChange={setShowSync}>
-        <DialogContent className="sm:max-w-md" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}>
+        <DialogContent className="sm:max-w-md" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
           <DialogHeader><DialogTitle className="text-sm">Sync from Inventory</DialogTitle></DialogHeader>
           <ScrollArea className="max-h-[300px]">
             {invProducts.length === 0 ? (
-              <p className="text-[11px] text-[#666] text-center py-4">No inventory products found</p>
+              <p className="text-[11px] text-[hsl(var(--studio-ink-3))] text-center py-4">No inventory products found</p>
             ) : (
               <div className="space-y-1 p-1">
                 {invProducts.map(ip => {
@@ -329,7 +329,7 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
                         onChange={e => { const s = new Set(selectedInv); e.target.checked ? s.add(ip.id) : s.delete(ip.id); setSelectedInv(s); }} />
                       <div className="flex-1 min-w-0">
                         <p className="text-[11px] font-medium truncate">{ip.name}</p>
-                        <p className="text-[10px] text-[#666]">SKU: {ip.sku} • {formatPrice(ip.selling_price)}</p>
+                        <p className="text-[10px] text-[hsl(var(--studio-ink-3))]">SKU: {ip.sku} • {formatPrice(ip.selling_price)}</p>
                       </div>
                       {alreadySynced && <Badge variant="outline" className="text-[8px] h-3.5">synced</Badge>}
                     </label>
@@ -350,32 +350,32 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
       {/* Edit Product Dialog */}
       <Dialog open={!!showEdit} onOpenChange={() => setShowEdit(null)}>
         {showEdit && (
-          <DialogContent className="sm:max-w-md" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}>
+          <DialogContent className="sm:max-w-md" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
             <DialogHeader><DialogTitle className="text-sm">Edit Product</DialogTitle></DialogHeader>
             <ScrollArea className="max-h-[400px]">
               <div className="space-y-3 pr-2">
                 <div>
-                  <label className="text-[11px] text-[#888] mb-1 block">Name</label>
-                  <Input defaultValue={showEdit.name} onBlur={e => updateProduct(showEdit, { name: e.target.value })} className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                  <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Name</label>
+                  <Input defaultValue={showEdit.name} onBlur={e => updateProduct(showEdit, { name: e.target.value })} className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                 </div>
                 <div>
-                  <label className="text-[11px] text-[#888] mb-1 block">Description</label>
-                  <Textarea defaultValue={showEdit.description || ''} onBlur={e => updateProduct(showEdit, { description: e.target.value })} rows={3} className="text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                  <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Description</label>
+                  <Textarea defaultValue={showEdit.description || ''} onBlur={e => updateProduct(showEdit, { description: e.target.value })} rows={3} className="text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[11px] text-[#888] mb-1 block">Price</label>
-                    <Input type="number" defaultValue={showEdit.price} onBlur={e => updateProduct(showEdit, { price: Number(e.target.value) })} className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                    <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Price</label>
+                    <Input type="number" defaultValue={showEdit.price} onBlur={e => updateProduct(showEdit, { price: Number(e.target.value) })} className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                   </div>
                   <div>
-                    <label className="text-[11px] text-[#888] mb-1 block">Compare Price</label>
-                    <Input type="number" defaultValue={showEdit.compare_at_price || ''} onBlur={e => updateProduct(showEdit, { compare_at_price: Number(e.target.value) || null })} className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                    <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Compare Price</label>
+                    <Input type="number" defaultValue={showEdit.compare_at_price || ''} onBlur={e => updateProduct(showEdit, { compare_at_price: Number(e.target.value) || null })} className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                   </div>
                 </div>
                 <div>
-                  <label className="text-[11px] text-[#888] mb-1 block">Status</label>
+                  <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Status</label>
                   <Select value={showEdit.status} onValueChange={v => updateProduct(showEdit, { status: v })}>
-                    <SelectTrigger className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }}><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="draft">Draft</SelectItem>
@@ -384,15 +384,15 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
                   </Select>
                 </div>
                 <div>
-                  <label className="text-[11px] text-[#888] mb-1 block">Image URL</label>
-                  <Input defaultValue={showEdit.images?.[0]?.url || ''} onBlur={e => updateProduct(showEdit, { images: e.target.value ? [{ url: e.target.value }] : [] } as any)} className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                  <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Image URL</label>
+                  <Input defaultValue={showEdit.images?.[0]?.url || ''} onBlur={e => updateProduct(showEdit, { images: e.target.value ? [{ url: e.target.value }] : [] } as any)} className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                 </div>
                 <div>
-                  <label className="text-[11px] text-[#888] mb-1 block">Category</label>
-                  <Input defaultValue={showEdit.category || ''} onBlur={e => updateProduct(showEdit, { category: e.target.value || null })} className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                  <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Category</label>
+                  <Input defaultValue={showEdit.category || ''} onBlur={e => updateProduct(showEdit, { category: e.target.value || null })} className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                 </div>
                 {showEdit.inv_product_id && (
-                  <div className="p-2 rounded text-[10px] text-[#888]" style={{ backgroundColor: '#252525', border: '1px solid #333' }}>
+                  <div className="p-2 rounded text-[10px] text-[hsl(var(--studio-ink-2))]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
                     <span className="text-emerald-400">●</span> Linked to inventory product
                   </div>
                 )}
@@ -412,23 +412,23 @@ document.querySelectorAll('.quooro-buy-now').forEach(function(btn){
 
       {/* Embed Snippet Dialog */}
       <Dialog open={showSnippet} onOpenChange={setShowSnippet}>
-        <DialogContent className="sm:max-w-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}>
+        <DialogContent className="sm:max-w-lg" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
           <DialogHeader><DialogTitle className="text-sm">Embed Store on External Site</DialogTitle></DialogHeader>
-          <p className="text-[11px] text-[#888] mb-2">Copy this code into your exported site's HTML. Orders will appear in your dashboard.</p>
+          <p className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-2">Copy this code into your exported site's HTML. Orders will appear in your dashboard.</p>
           <div className="relative">
-            <pre className="text-[10px] p-3 rounded overflow-auto max-h-[250px]" style={{ backgroundColor: '#111', color: '#aaa', border: '1px solid #333' }}>{generateSnippet()}</pre>
+            <pre className="text-[10px] p-3 rounded overflow-auto max-h-[250px]" style={{ backgroundColor: 'hsl(var(--studio-sunken))', color: 'hsl(var(--studio-ink-2))', border: '1px solid hsl(var(--studio-line))' }}>{generateSnippet()}</pre>
             <Button size="sm" variant="ghost" className="absolute top-2 right-2 h-6 text-[10px]" onClick={copySnippet}>
               {copied ? <Check className="h-3 w-3 mr-1 text-green-400" /> : <Copy className="h-3 w-3 mr-1" />}
               {copied ? 'Copied' : 'Copy'}
             </Button>
           </div>
           <div className="space-y-2 mt-2">
-            <div className="text-[10px] text-[#666]">
-              <strong className="text-[#888]">Product IDs:</strong>
+            <div className="text-[10px] text-[hsl(var(--studio-ink-3))]">
+              <strong className="text-[hsl(var(--studio-ink-2))]">Product IDs:</strong>
               {products.map(p => (
                 <div key={p.id} className="flex items-center gap-1 mt-1">
-                  <code className="px-1 py-0.5 rounded text-[9px]" style={{ backgroundColor: '#2a2a2a' }}>{p.id}</code>
-                  <span className="text-[#888]">— {p.name}</span>
+                  <code className="px-1 py-0.5 rounded text-[9px]" style={{ backgroundColor: 'hsl(var(--studio-raised))' }}>{p.id}</code>
+                  <span className="text-[hsl(var(--studio-ink-2))]">— {p.name}</span>
                 </div>
               ))}
             </div>

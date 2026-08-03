@@ -121,11 +121,11 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
   ];
 
   const tones: { key: Tone; label: string; color: string }[] = [
-    { key: 'professional', label: 'Professional', color: '#3b82f6' },
-    { key: 'casual', label: 'Casual', color: '#f59e0b' },
-    { key: 'luxury', label: 'Luxury', color: '#a78bfa' },
-    { key: 'playful', label: 'Playful', color: '#ec4899' },
-    { key: 'minimal', label: 'Minimal', color: '#6b7280' },
+    { key: 'professional', label: 'Professional', color: 'hsl(var(--studio-accent))' },
+    { key: 'casual', label: 'Casual', color: 'hsl(var(--studio-warn))' },
+    { key: 'luxury', label: 'Luxury', color: 'hsl(var(--studio-ink-3))' },
+    { key: 'playful', label: 'Playful', color: 'hsl(var(--studio-ink-3))' },
+    { key: 'minimal', label: 'Minimal', color: 'hsl(var(--studio-ink-3))' },
   ];
 
   const quickPrompts: Record<Mode, string[]> = {
@@ -168,19 +168,19 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
   const progress = loading ? Math.min(((stageIndex + 1) / stages.length) * 100, 95) : 0;
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: '#1e1e1e' }}>
+    <div className="h-full flex flex-col" style={{ backgroundColor: 'hsl(var(--studio-panel))' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-3 h-10 shrink-0" style={{ borderBottom: '1px solid #2a2a2a', background: 'linear-gradient(180deg, #252525, #1e1e1e)' }}>
+      <div className="flex items-center justify-between px-3 h-10 shrink-0" style={{ borderBottom: '1px solid hsl(var(--studio-line))', background: 'linear-gradient(180deg, hsl(var(--studio-raised)), hsl(var(--studio-panel)))' }}>
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #a78bfa, #7c3aed)' }}>
+          <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))' }}>
             <Sparkles className="w-3 h-3 text-white" />
           </div>
           <span className="text-[11px] font-semibold text-white">AI Assistant</span>
         </div>
         <div className="flex items-center gap-1.5">
           <AIModelSelect />
-          <button onClick={onClose} className="p-1 rounded hover:bg-[#333] transition-colors">
-            <X className="w-3.5 h-3.5 text-[#666]" />
+          <button onClick={onClose} className="p-1 rounded hover:bg-[hsl(var(--studio-hover))] transition-colors">
+            <X className="w-3.5 h-3.5 text-[hsl(var(--studio-ink-3))]" />
           </button>
         </div>
       </div>
@@ -198,8 +198,8 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
                 className="flex items-center gap-1.5 py-2 px-2.5 rounded-lg text-[10px] font-medium transition-all"
                 style={{
                   backgroundColor: active ? 'rgba(167,139,250,0.1)' : 'transparent',
-                  color: active ? '#a78bfa' : '#666',
-                  border: `1px solid ${active ? 'rgba(167,139,250,0.2)' : '#2a2a2a'}`,
+                  color: active ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-3))',
+                  border: `1px solid ${active ? 'rgba(167,139,250,0.2)' : 'hsl(var(--studio-raised))'}`,
                 }}
               >
                 <Icon className="w-3 h-3" />
@@ -211,7 +211,7 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
 
         {/* Tone Selector */}
         <div className="space-y-1">
-          <span className="text-[9px] text-[#555] font-semibold uppercase tracking-wider flex items-center gap-1">
+          <span className="text-[9px] text-[hsl(var(--studio-ink-3))] font-semibold uppercase tracking-wider flex items-center gap-1">
             <Palette className="w-3 h-3" /> Tone
           </span>
           <div className="flex flex-wrap gap-1">
@@ -222,8 +222,8 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
                 className="px-2 py-1 rounded text-[9px] font-semibold transition-all"
                 style={{
                   backgroundColor: tone === t.key ? t.color + '20' : 'transparent',
-                  color: tone === t.key ? t.color : '#666',
-                  border: `1px solid ${tone === t.key ? t.color + '40' : '#2a2a2a'}`,
+                  color: tone === t.key ? t.color: 'hsl(var(--studio-ink-3))',
+                  border: `1px solid ${tone === t.key ? t.color + '40' : 'hsl(var(--studio-raised))'}`,
                 }}
               >
                 {t.label}
@@ -235,27 +235,27 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
         {/* Business type (for content mode) */}
         {mode === 'content' && (
           <div className="space-y-1">
-            <span className="text-[9px] text-[#555] font-semibold uppercase tracking-wider">Business Type</span>
+            <span className="text-[9px] text-[hsl(var(--studio-ink-3))] font-semibold uppercase tracking-wider">Business Type</span>
             <input
               value={businessType}
               onChange={e => setBusinessType(e.target.value)}
               placeholder="e.g. SaaS, Restaurant, Agency…"
               className="w-full h-7 px-3 rounded-lg text-[11px] outline-none"
-              style={{ backgroundColor: '#141414', border: '1px solid #333', color: '#ccc' }}
+              style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
             />
           </div>
         )}
 
         {/* Input */}
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #333' }}>
+        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid hsl(var(--studio-line))' }}>
           <textarea
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={mode === 'content' ? 'Describe the content you need...' : 'Describe what you want to generate...'}
             rows={3}
-            className="w-full bg-transparent text-[12px] text-white placeholder:text-[#444] p-3 resize-none outline-none"
-            style={{ backgroundColor: '#141414' }}
+            className="w-full bg-transparent text-[12px] text-white placeholder:text-[hsl(var(--studio-hover))] p-3 resize-none outline-none"
+            style={{ backgroundColor: 'hsl(var(--studio-panel))' }}
           />
         </div>
 
@@ -267,19 +267,19 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="rounded-xl p-3 space-y-2"
-              style={{ backgroundColor: '#141414', border: '1px solid rgba(167,139,250,0.15)' }}
+              style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid rgba(167,139,250,0.15)' }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Zap className="w-3 h-3 text-[#a78bfa] animate-pulse" />
-                  <span className="text-[10px] text-[#a78bfa] font-medium">{stages[stageIndex]}</span>
+                  <Zap className="w-3 h-3 text-[hsl(var(--studio-ink-3))] animate-pulse" />
+                  <span className="text-[10px] text-[hsl(var(--studio-ink-3))] font-medium">{stages[stageIndex]}</span>
                 </div>
-                <span className="text-[9px] text-[#555] tabular-nums">{elapsed}s / ~{EST_TIMES[mode]}s</span>
+                <span className="text-[9px] text-[hsl(var(--studio-ink-3))] tabular-nums">{elapsed}s / ~{EST_TIMES[mode]}s</span>
               </div>
-              <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: '#2a2a2a' }}>
+              <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'hsl(var(--studio-raised))' }}>
                 <motion.div
                   className="h-full rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #a78bfa, #7c3aed)' }}
+                  style={{ background: 'linear-gradient(90deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))' }}
                   initial={{ width: '0%' }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -295,7 +295,7 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
             onClick={() => generate()}
             disabled={!prompt.trim() || loading}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[11px] font-semibold transition-all disabled:opacity-30"
-            style={{ background: 'linear-gradient(135deg, #a78bfa, #7c3aed)', color: '#fff' }}
+            style={{ background: 'linear-gradient(135deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))', color: 'hsl(var(--studio-ink))' }}
           >
             {loading ? (
               <>
@@ -312,11 +312,11 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
           {lastPrompt && !loading && (
             <button
               onClick={() => generate(lastPrompt)}
-              className="h-[38px] w-[38px] flex items-center justify-center rounded-xl transition-all hover:bg-[#333]"
-              style={{ border: '1px solid #333' }}
+              className="h-[38px] w-[38px] flex items-center justify-center rounded-xl transition-all hover:bg-[hsl(var(--studio-hover))]"
+              style={{ border: '1px solid hsl(var(--studio-line))' }}
               title="Regenerate"
             >
-              <RefreshCw className="w-3.5 h-3.5 text-[#888]" />
+              <RefreshCw className="w-3.5 h-3.5 text-[hsl(var(--studio-ink-2))]" />
             </button>
           )}
         </div>
@@ -327,8 +327,8 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
             {!showSave ? (
               <button
                 onClick={() => setShowSave(true)}
-                className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[11px] font-medium transition-all hover:bg-[#2a2a2a]"
-                style={{ border: '1px solid #333', color: '#888' }}
+                className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[11px] font-medium transition-all hover:bg-[hsl(var(--studio-raised))]"
+                style={{ border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
               >
                 <Save className="w-3.5 h-3.5" />
                 Save as Template
@@ -340,7 +340,7 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
                   onChange={e => setSaveName(e.target.value)}
                   placeholder="Template name…"
                   className="flex-1 h-8 px-2.5 rounded-lg text-[11px] outline-none"
-                  style={{ backgroundColor: '#141414', border: '1px solid #333', color: '#ccc' }}
+                  style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
                   autoFocus
                   onKeyDown={e => {
                     if (e.key === 'Enter' && saveName.trim()) {
@@ -360,7 +360,7 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
                   }}
                   disabled={!saveName.trim()}
                   className="h-8 px-3 rounded-lg text-[10px] font-semibold disabled:opacity-30"
-                  style={{ backgroundColor: '#0073E6', color: '#fff' }}
+                  style={{ backgroundColor: 'hsl(var(--studio-accent))', color: 'hsl(var(--studio-ink))' }}
                 >
                   Save
                 </button>
@@ -372,13 +372,13 @@ export function AIGeneratePanel({ siteId, siteName, onClose }: AIGeneratePanelPr
 
         {!loading && (
           <div className="space-y-2">
-            <span className="text-[9px] text-[#555] font-semibold uppercase tracking-wider">Suggestions</span>
+            <span className="text-[9px] text-[hsl(var(--studio-ink-3))] font-semibold uppercase tracking-wider">Suggestions</span>
             <div className="space-y-1">
               {quickPrompts[mode].map((qp, i) => (
                 <button
                   key={i}
                   onClick={() => setPrompt(qp)}
-                  className="w-full text-left px-3 py-2 rounded-lg text-[11px] text-[#666] hover:text-[#aaa] hover:bg-[#252525] transition-colors"
+                  className="w-full text-left px-3 py-2 rounded-lg text-[11px] text-[hsl(var(--studio-ink-3))] hover:text-[hsl(var(--studio-ink-2))] hover:bg-[hsl(var(--studio-raised))] transition-colors"
                   style={{ border: '1px solid transparent' }}
                 >
                   <Wand2 className="w-3 h-3 inline mr-2 opacity-40" />

@@ -30,11 +30,11 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  section: '#8b5cf6', container: '#6366f1', columns: '#3b82f6', grid: '#0ea5e9',
-  heading: '#f59e0b', text: '#a3a3a3', button: '#22c55e', image: '#ec4899',
-  video: '#f43f5e', card: '#a855f7', form: '#14b8a6', navbar: '#06b6d4',
-  footer: '#64748b', input: '#f59e0b', divider: '#555', spacer: '#555',
-  icon: '#a855f7', link: '#0073E6', badge: '#f59e0b', quote: '#e879f9',
+  section: 'hsl(var(--studio-ink-3))', container: 'hsl(var(--studio-ink-3))', columns: 'hsl(var(--studio-accent))', grid: 'hsl(var(--studio-accent))',
+  heading: 'hsl(var(--studio-warn))', text: 'hsl(var(--studio-ink-2))', button: 'hsl(var(--studio-ok))', image: 'hsl(var(--studio-ink-3))',
+  video: 'hsl(var(--studio-ink-3))', card: 'hsl(var(--studio-ink-3))', form: 'hsl(var(--studio-ink-3))', navbar: 'hsl(var(--studio-ink-3))',
+  footer: 'hsl(var(--studio-ink-3))', input: 'hsl(var(--studio-warn))', divider: 'hsl(var(--studio-ink-3))', spacer: 'hsl(var(--studio-ink-3))',
+  icon: 'hsl(var(--studio-ink-3))', link: 'hsl(var(--studio-accent))', badge: 'hsl(var(--studio-warn))', quote: 'hsl(var(--studio-ink-3))',
 };
 
 const TYPE_GROUPS: Record<string, string> = {
@@ -65,7 +65,7 @@ const LayerItem = memo(function LayerItem({ element, depth = 0 }: { element: Edi
   const rowRef = useRef<HTMLDivElement>(null);
 
   const descendantCount = useMemo(() => countDescendants(element), [element]);
-  const dotColor = TYPE_COLORS[element.type] || '#555';
+  const dotColor = TYPE_COLORS[element.type] || 'hsl(var(--studio-ink-3))';
   const typeIcon = TYPE_ICONS[element.type] || '○';
 
   const handleDragStart = (e: React.DragEvent) => {
@@ -157,8 +157,8 @@ const LayerItem = memo(function LayerItem({ element, depth = 0 }: { element: Edi
     <div className="relative">
       {/* Drop indicator: before */}
       {dropPos === 'before' && (
-        <div className="absolute left-2 right-2 top-0 h-[2px] rounded-full z-10" style={{ backgroundColor: '#0073E6', boxShadow: '0 0 8px rgba(0,115,230,0.5)' }}>
-          <div className="absolute -left-[3px] -top-[3px] w-2 h-2 rounded-full" style={{ backgroundColor: '#0073E6' }} />
+        <div className="absolute left-2 right-2 top-0 h-[2px] rounded-full z-10" style={{ backgroundColor: 'hsl(var(--studio-accent))', boxShadow: '0 0 8px hsl(var(--studio-accent) / 0.5)' }}>
+          <div className="absolute -left-[3px] -top-[3px] w-2 h-2 rounded-full" style={{ backgroundColor: 'hsl(var(--studio-accent))' }} />
         </div>
       )}
 
@@ -176,12 +176,12 @@ const LayerItem = memo(function LayerItem({ element, depth = 0 }: { element: Edi
           paddingRight: '4px',
           opacity: isDragging ? 0.3 : 1,
           backgroundColor: dropPos === 'inside'
-            ? 'rgba(0, 115, 230, 0.1)'
-            : isSelected ? 'rgba(0, 115, 230, 0.12)' : isHovered ? 'rgba(255,255,255,0.03)' : 'transparent',
+            ? 'hsl(var(--studio-accent) / 0.1)'
+            : isSelected ? 'hsl(var(--studio-accent) / 0.12)' : isHovered ? 'rgba(255,255,255,0.03)' : 'transparent',
           borderLeft: dropPos === 'inside'
-            ? '2px dashed #0073E6'
+            ? '2px dashed hsl(var(--studio-accent))'
             : isSelected ? `2px solid ${dotColor}` : '2px solid transparent',
-          outline: dropPos === 'inside' ? '1px dashed rgba(0,115,230,0.3)' : 'none',
+          outline: dropPos === 'inside' ? '1px dashed hsl(var(--studio-accent) / 0.3)' : 'none',
           borderRadius: dropPos === 'inside' ? '4px' : '0',
         }}
         onMouseEnter={() => dispatch({ type: 'HOVER', payload: element.id })}
@@ -199,11 +199,11 @@ const LayerItem = memo(function LayerItem({ element, depth = 0 }: { element: Edi
           if (hasChildren) setCollapsed(c => !c);
         }}
       >
-        <GripVertical className="h-2.5 w-2.5 shrink-0 opacity-0 group-hover:opacity-50 cursor-grab active:cursor-grabbing transition-opacity" style={{ color: '#666' }} />
+        <GripVertical className="h-2.5 w-2.5 shrink-0 opacity-0 group-hover:opacity-50 cursor-grab active:cursor-grabbing transition-opacity" style={{ color: 'hsl(var(--studio-ink-3))' }} />
 
         {hasChildren ? (
           <button onClick={(e) => { e.stopPropagation(); setCollapsed(c => !c); }} className="shrink-0 h-4 w-4 flex items-center justify-center rounded hover:bg-white/5">
-            <ChevronRight className={`h-2.5 w-2.5 transition-transform duration-150 ${collapsed ? '' : 'rotate-90'}`} style={{ color: '#555' }} />
+            <ChevronRight className={`h-2.5 w-2.5 transition-transform duration-150 ${collapsed ? '' : 'rotate-90'}`} style={{ color: 'hsl(var(--studio-ink-3))' }} />
           </button>
         ) : (
           <div className="w-4 shrink-0" />
@@ -224,7 +224,7 @@ const LayerItem = memo(function LayerItem({ element, depth = 0 }: { element: Edi
         <span
           className="truncate flex-1 text-[10.5px] font-medium ml-1"
           style={{
-            color: isSelected ? '#fff' : element.hidden ? '#444' : '#aaa',
+            color: isSelected ? 'hsl(var(--studio-ink))' : element.hidden ? 'hsl(var(--studio-line-strong))' : 'hsl(var(--studio-ink-2))',
             textDecoration: element.hidden ? 'line-through' : undefined,
             opacity: element.hidden ? 0.5 : 1,
           }}
@@ -241,17 +241,17 @@ const LayerItem = memo(function LayerItem({ element, depth = 0 }: { element: Edi
 
         {/* Descendant count for containers */}
         {hasChildren && !collapsed && descendantCount > 0 && (
-          <span className="text-[8px] tabular-nums shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#444' }}>
+          <span className="text-[8px] tabular-nums shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: 'hsl(var(--studio-hover))' }}>
             {descendantCount}
           </span>
         )}
 
         {/* Locked badge always visible */}
         {element.locked && (
-          <Lock className="h-2.5 w-2.5 shrink-0" style={{ color: '#f59e0b' }} />
+          <Lock className="h-2.5 w-2.5 shrink-0" style={{ color: 'hsl(var(--studio-warn))' }} />
         )}
         {element.hidden && (
-          <EyeOff className="h-2.5 w-2.5 shrink-0" style={{ color: '#555' }} />
+          <EyeOff className="h-2.5 w-2.5 shrink-0" style={{ color: 'hsl(var(--studio-ink-3))' }} />
         )}
 
         <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -260,33 +260,33 @@ const LayerItem = memo(function LayerItem({ element, depth = 0 }: { element: Edi
             onClick={(e) => { e.stopPropagation(); dispatch({ type: 'DUPLICATE_ELEMENT', payload: element.id }); }}
             title="Duplicate"
           >
-            <Copy className="h-2.5 w-2.5" style={{ color: '#555' }} />
+            <Copy className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           </button>
           <button
             className="h-[18px] w-[18px] flex items-center justify-center rounded hover:bg-white/5"
             onClick={(e) => { e.stopPropagation(); dispatch({ type: 'UPDATE_ELEMENT', payload: { id: element.id, updates: { hidden: !element.hidden } } }); }}
           >
-            {element.hidden ? <EyeOff className="h-2.5 w-2.5" style={{ color: '#555' }} /> : <Eye className="h-2.5 w-2.5" style={{ color: '#555' }} />}
+            {element.hidden ? <EyeOff className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} /> : <Eye className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />}
           </button>
           <button
             className="h-[18px] w-[18px] flex items-center justify-center rounded hover:bg-white/5"
             onClick={(e) => { e.stopPropagation(); dispatch({ type: 'UPDATE_ELEMENT', payload: { id: element.id, updates: { locked: !element.locked } } }); }}
           >
-            {element.locked ? <Lock className="h-2.5 w-2.5" style={{ color: '#f59e0b' }} /> : <Unlock className="h-2.5 w-2.5" style={{ color: '#555' }} />}
+            {element.locked ? <Lock className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-warn))' }} /> : <Unlock className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />}
           </button>
           <button
             className="h-[18px] w-[18px] flex items-center justify-center rounded hover:bg-red-500/10"
             onClick={(e) => { e.stopPropagation(); dispatch({ type: 'DELETE_ELEMENT', payload: element.id }); }}
           >
-            <Trash2 className="h-2.5 w-2.5" style={{ color: '#555' }} />
+            <Trash2 className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           </button>
         </div>
       </div>
 
       {/* Drop indicator: after */}
       {dropPos === 'after' && (
-        <div className="absolute left-2 right-2 bottom-0 h-[2px] rounded-full z-10" style={{ backgroundColor: '#0073E6', boxShadow: '0 0 8px rgba(0,115,230,0.5)' }}>
-          <div className="absolute -left-[3px] -top-[3px] w-2 h-2 rounded-full" style={{ backgroundColor: '#0073E6' }} />
+        <div className="absolute left-2 right-2 bottom-0 h-[2px] rounded-full z-10" style={{ backgroundColor: 'hsl(var(--studio-accent))', boxShadow: '0 0 8px hsl(var(--studio-accent) / 0.5)' }}>
+          <div className="absolute -left-[3px] -top-[3px] w-2 h-2 rounded-full" style={{ backgroundColor: 'hsl(var(--studio-accent))' }} />
         </div>
       )}
 
@@ -399,21 +399,21 @@ export function LayersPanel() {
           <div className="px-2 py-1.5">
             <div className="relative flex gap-1">
               <div className="relative flex-1">
-                <Search className="h-3 w-3 absolute left-2 top-1/2 -translate-y-1/2" style={{ color: '#444' }} />
+                <Search className="h-3 w-3 absolute left-2 top-1/2 -translate-y-1/2" style={{ color: 'hsl(var(--studio-hover))' }} />
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Filter layers…"
                   className="w-full h-6 pl-7 pr-2 rounded text-[10px] outline-none transition-all"
-                  style={{ backgroundColor: '#181818', border: '1px solid #252525', color: '#ccc' }}
-                  onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(0,115,230,0.08)'; }}
-                  onBlur={e => { e.currentTarget.style.borderColor = '#252525'; e.currentTarget.style.boxShadow = 'none'; }}
+                  style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; e.currentTarget.style.boxShadow = '0 0 0 2px hsl(var(--studio-accent) / 0.08)'; }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-raised))'; e.currentTarget.style.boxShadow = 'none'; }}
                 />
               </div>
               <button onClick={() => setShowFilters(!showFilters)}
                 className="h-6 w-6 flex items-center justify-center rounded transition-colors"
-                style={{ backgroundColor: showFilters || filterType ? 'rgba(0,115,230,0.08)' : '#181818', border: `1px solid ${showFilters || filterType ? 'rgba(0,115,230,0.2)' : '#252525'}` }}>
-                <Filter className="h-3 w-3" style={{ color: filterType ? '#0073E6' : '#444' }} />
+                style={{ backgroundColor: showFilters || filterType ? 'hsl(var(--studio-accent) / 0.08)' : 'hsl(var(--studio-panel))', border: `1px solid ${showFilters || filterType ? 'hsl(var(--studio-accent) / 0.2)' : 'hsl(var(--studio-raised))'}` }}>
+                <Filter className="h-3 w-3" style={{ color: filterType ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line-strong))' }} />
               </button>
             </div>
           </div>
@@ -425,18 +425,18 @@ export function LayersPanel() {
                 <div className="px-2 pb-1.5 flex flex-wrap gap-0.5">
                   <button onClick={() => setFilterType(null)}
                     className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md transition-colors"
-                    style={{ backgroundColor: !filterType ? 'rgba(0,115,230,0.1)' : 'transparent', color: !filterType ? '#0073E6' : '#555', border: `1px solid ${!filterType ? 'rgba(0,115,230,0.2)' : 'transparent'}` }}>
+                    style={{ backgroundColor: !filterType ? 'hsl(var(--studio-accent) / 0.1)' : 'transparent', color: !filterType ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-3))', border: `1px solid ${!filterType ? 'hsl(var(--studio-accent) / 0.2)' : 'transparent'}` }}>
                     All
                   </button>
                   {Object.keys(typeCounts).sort().map(type => (
                     <button key={type} onClick={() => setFilterType(filterType === type ? null : type)}
                       className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md transition-colors flex items-center gap-0.5"
                       style={{
-                        backgroundColor: filterType === type ? `${TYPE_COLORS[type] || '#555'}12` : 'transparent',
-                        color: filterType === type ? (TYPE_COLORS[type] || '#555') : '#444',
-                        border: `1px solid ${filterType === type ? `${TYPE_COLORS[type] || '#555'}25` : 'transparent'}`,
+                        backgroundColor: filterType === type ? `${TYPE_COLORS[type] || 'hsl(var(--studio-ink-3))'}12` : 'transparent',
+                        color: filterType === type ? (TYPE_COLORS[type] || 'hsl(var(--studio-ink-3))') : 'hsl(var(--studio-line-strong))',
+                        border: `1px solid ${filterType === type ? `${TYPE_COLORS[type] || 'hsl(var(--studio-ink-3))'}25` : 'transparent'}`,
                       }}>
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TYPE_COLORS[type] || '#555' }} />
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TYPE_COLORS[type] || 'hsl(var(--studio-ink-3))' }} />
                       {type}
                       <span className="tabular-nums opacity-70">{typeCounts[type]}</span>
                     </button>
@@ -449,8 +449,8 @@ export function LayersPanel() {
           {/* Header with stats + collapse/expand all */}
           <div className="flex items-center justify-between px-3 py-1">
             <div className="flex items-center gap-1.5">
-              <Layers className="h-3 w-3" style={{ color: '#444' }} />
-              <span className="text-[9px] font-bold uppercase tracking-[0.1em]" style={{ color: '#555' }}>
+              <Layers className="h-3 w-3" style={{ color: 'hsl(var(--studio-hover))' }} />
+              <span className="text-[9px] font-bold uppercase tracking-[0.1em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>
                 Layers
               </span>
             </div>
@@ -459,29 +459,29 @@ export function LayersPanel() {
               <button
                 onClick={() => document.querySelectorAll<HTMLElement>('[data-layer-collapse]').forEach(b => b.click())}
                 className="h-4 px-1.5 rounded flex items-center gap-0.5 transition-colors"
-                style={{ backgroundColor: '#181818', border: '1px solid #222' }}
+                style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}
                 title="Collapse all"
               >
-                <FolderClosed className="h-2 w-2" style={{ color: '#555' }} />
-                <span className="text-[7px] font-mono" style={{ color: '#444' }}>−</span>
+                <FolderClosed className="h-2 w-2" style={{ color: 'hsl(var(--studio-ink-3))' }} />
+                <span className="text-[7px] font-mono" style={{ color: 'hsl(var(--studio-hover))' }}>−</span>
               </button>
               <button
                 onClick={() => document.querySelectorAll<HTMLElement>('[data-layer-expand]').forEach(b => b.click())}
                 className="h-4 px-1.5 rounded flex items-center gap-0.5 transition-colors"
-                style={{ backgroundColor: '#181818', border: '1px solid #222' }}
+                style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}
                 title="Expand all"
               >
-                <FolderOpen className="h-2 w-2" style={{ color: '#555' }} />
-                <span className="text-[7px] font-mono" style={{ color: '#444' }}>+</span>
+                <FolderOpen className="h-2 w-2" style={{ color: 'hsl(var(--studio-ink-3))' }} />
+                <span className="text-[7px] font-mono" style={{ color: 'hsl(var(--studio-hover))' }}>+</span>
               </button>
-              <div className="w-px h-3" style={{ backgroundColor: '#222' }} />
+              <div className="w-px h-3" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
               {topTypes.map(([type, count]) => (
                 <span key={type} className="flex items-center gap-0.5" title={`${count} ${type}(s)`}>
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TYPE_COLORS[type] || '#555' }} />
-                  <span className="text-[8px] tabular-nums" style={{ color: '#444' }}>{count}</span>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TYPE_COLORS[type] || 'hsl(var(--studio-ink-3))' }} />
+                  <span className="text-[8px] tabular-nums" style={{ color: 'hsl(var(--studio-hover))' }}>{count}</span>
                 </span>
               ))}
-              <span className="text-[9px] tabular-nums font-mono" style={{ color: '#444' }}>{totalCount}</span>
+              <span className="text-[9px] tabular-nums font-mono" style={{ color: 'hsl(var(--studio-hover))' }}>{totalCount}</span>
             </div>
           </div>
 
@@ -489,7 +489,7 @@ export function LayersPanel() {
           {totalCount > 0 && (
             <div className="px-3 pb-1.5 space-y-1">
               {/* Visual distribution bar */}
-              <div className="h-1.5 rounded-full overflow-hidden flex" style={{ backgroundColor: '#181818' }}>
+              <div className="h-1.5 rounded-full overflow-hidden flex" style={{ backgroundColor: 'hsl(var(--studio-panel))' }}>
                 {Object.entries(typeCounts)
                   .sort((a, b) => b[1] - a[1])
                   .map(([type, count]) => (
@@ -497,7 +497,7 @@ export function LayersPanel() {
                       key={type}
                       style={{
                         width: `${(count / totalCount) * 100}%`,
-                        backgroundColor: TYPE_COLORS[type] || '#555',
+                        backgroundColor: TYPE_COLORS[type] || 'hsl(var(--studio-ink-3))',
                         opacity: 0.7,
                         minWidth: '2px',
                       }}
@@ -508,17 +508,17 @@ export function LayersPanel() {
               {/* Group badges + status counts */}
               <div className="flex items-center gap-2 flex-wrap">
                 {Object.entries(groupCounts).slice(0, 4).map(([group, count]) => (
-                  <span key={group} className="text-[7px] font-semibold px-1.5 py-0.5 rounded" style={{ backgroundColor: '#181818', color: '#555', border: '1px solid #222' }}>
-                    {group} <span className="tabular-nums" style={{ color: '#888' }}>{count}</span>
+                  <span key={group} className="text-[7px] font-semibold px-1.5 py-0.5 rounded" style={{ backgroundColor: 'hsl(var(--studio-panel))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>
+                    {group} <span className="tabular-nums" style={{ color: 'hsl(var(--studio-ink-2))' }}>{count}</span>
                   </span>
                 ))}
                 {hiddenCount > 0 && (
-                  <span className="text-[7px] font-semibold flex items-center gap-0.5 px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(107,114,128,0.08)', color: '#6b7280' }}>
+                  <span className="text-[7px] font-semibold flex items-center gap-0.5 px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(107,114,128,0.08)', color: 'hsl(var(--studio-ink-3))' }}>
                     <EyeOff className="h-2 w-2" />{hiddenCount}
                   </span>
                 )}
                 {lockedCount > 0 && (
-                  <span className="text-[7px] font-semibold flex items-center gap-0.5 px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.08)', color: '#f59e0b' }}>
+                  <span className="text-[7px] font-semibold flex items-center gap-0.5 px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.08)', color: 'hsl(var(--studio-warn))' }}>
                     <Lock className="h-2 w-2" />{lockedCount}
                   </span>
                 )}
@@ -528,14 +528,14 @@ export function LayersPanel() {
 
           {filtered.length === 0 ? (
             <div className="text-center py-8 px-3">
-              <div className="w-12 h-12 rounded-2xl mx-auto mb-2 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(0,115,230,0.06), rgba(0,115,230,0.02))', border: '1px solid rgba(0,115,230,0.08)' }}>
-                <Layers className="w-5 h-5" style={{ color: 'rgba(0,115,230,0.25)' }} />
+              <div className="w-12 h-12 rounded-2xl mx-auto mb-2 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.06), hsl(var(--studio-accent) / 0.02))', border: '1px solid hsl(var(--studio-accent) / 0.08)' }}>
+                <Layers className="w-5 h-5" style={{ color: 'hsl(var(--studio-accent) / 0.25)' }} />
               </div>
-              <p className="text-[10px] font-medium" style={{ color: '#555' }}>
+              <p className="text-[10px] font-medium" style={{ color: 'hsl(var(--studio-ink-3))' }}>
                 {search || filterType ? 'No matching layers' : 'No elements on canvas'}
               </p>
               {(search || filterType) && (
-                <button onClick={() => { setSearch(''); setFilterType(null); }} className="text-[9px] mt-1" style={{ color: '#0073E6' }}>Clear filters</button>
+                <button onClick={() => { setSearch(''); setFilterType(null); }} className="text-[9px] mt-1" style={{ color: 'hsl(var(--studio-accent))' }}>Clear filters</button>
               )}
             </div>
           ) : (

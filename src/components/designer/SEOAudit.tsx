@@ -19,15 +19,15 @@ interface AuditItem {
 }
 
 const CATEGORY_CONFIG: Record<string, { icon: typeof Globe; color: string }> = {
-  'Content': { icon: Type, color: '#f59e0b' },
-  'Structure': { icon: FileText, color: '#3b82f6' },
-  'Media': { icon: Image, color: '#ec4899' },
-  'Performance': { icon: Zap, color: '#22c55e' },
-  'Accessibility': { icon: Accessibility, color: '#8b5cf6' },
-  'Technical': { icon: Shield, color: '#0ea5e9' },
+  'Content': { icon: Type, color: 'hsl(var(--studio-warn))' },
+  'Structure': { icon: FileText, color: 'hsl(var(--studio-accent))' },
+  'Media': { icon: Image, color: 'hsl(var(--studio-ink-3))' },
+  'Performance': { icon: Zap, color: 'hsl(var(--studio-ok))' },
+  'Accessibility': { icon: Accessibility, color: 'hsl(var(--studio-ink-3))' },
+  'Technical': { icon: Shield, color: 'hsl(var(--studio-accent))' },
 };
 
-const IMPACT_COLORS: Record<string, string> = { high: '#ef4444', medium: '#f59e0b', low: '#6b7280' };
+const IMPACT_COLORS: Record<string, string> = { high: 'hsl(var(--studio-risk))', medium: 'hsl(var(--studio-warn))', low: 'hsl(var(--studio-ink-3))' };
 
 function flattenElements(els: EditorElement[]): EditorElement[] {
   const flat: EditorElement[] = [];
@@ -140,7 +140,7 @@ export function SEOAudit() {
   const warnCount = audits.filter(a => a.status === 'warning').length;
   const failCount = audits.filter(a => a.status === 'fail').length;
   const score = Math.round((passCount / audits.length) * 100);
-  const scoreColor = score >= 80 ? '#22c55e' : score >= 50 ? '#f59e0b' : '#ef4444';
+  const scoreColor = score >= 80 ? 'hsl(var(--studio-ok))' : score >= 50 ? 'hsl(var(--studio-warn))' : 'hsl(var(--studio-risk))';
   const scoreLabel = score >= 90 ? 'Excellent' : score >= 70 ? 'Good' : score >= 50 ? 'Needs Work' : 'Poor';
 
   const filtered = filterStatus ? audits.filter(a => a.status === filterStatus) : audits;
@@ -157,42 +157,42 @@ export function SEOAudit() {
         {/* Header */}
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(236,72,153,0.08))', border: '1px solid rgba(139,92,246,0.15)' }}>
-            <Search className="h-3 w-3" style={{ color: '#8b5cf6' }} />
+            <Search className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           </div>
-          <span className="text-[11px] font-semibold" style={{ color: '#ccc' }}>SEO Audit</span>
+          <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>SEO Audit</span>
         </div>
 
         {/* Score */}
-        <div className="rounded-xl p-4" style={{ background: 'linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1))', border: '1px solid #222' }}>
+        <div className="rounded-xl p-4" style={{ background: 'linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1))', border: '1px solid hsl(var(--studio-line))' }}>
           <div className="flex items-center gap-4">
             <div className="relative flex items-center justify-center rounded-full shrink-0"
               style={{ width: '72px', height: '72px', background: `conic-gradient(${scoreColor} ${score * 3.6}deg, rgba(255,255,255,0.04) ${score * 3.6}deg)` }}>
-              <div className="flex flex-col items-center justify-center rounded-full" style={{ width: '58px', height: '58px', backgroundColor: '#1a1a1a' }}>
+              <div className="flex flex-col items-center justify-center rounded-full" style={{ width: '58px', height: '58px', backgroundColor: 'hsl(var(--studio-panel))' }}>
                 <span className="text-[20px] font-bold tabular-nums" style={{ color: scoreColor }}>{score}</span>
-                <span className="text-[7px] font-bold uppercase" style={{ color: '#555' }}>Score</span>
+                <span className="text-[7px] font-bold uppercase" style={{ color: 'hsl(var(--studio-ink-3))' }}>Score</span>
               </div>
             </div>
             <div className="flex-1">
               <div className="text-[12px] font-bold mb-1" style={{ color: scoreColor }}>{scoreLabel}</div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3" style={{ color: '#22c55e' }} />
-                  <span className="text-[9px] font-semibold tabular-nums" style={{ color: '#22c55e' }}>{passCount}</span>
+                  <CheckCircle className="h-3 w-3" style={{ color: 'hsl(var(--studio-ok))' }} />
+                  <span className="text-[9px] font-semibold tabular-nums" style={{ color: 'hsl(var(--studio-ok))' }}>{passCount}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" style={{ color: '#f59e0b' }} />
-                  <span className="text-[9px] font-semibold tabular-nums" style={{ color: '#f59e0b' }}>{warnCount}</span>
+                  <AlertCircle className="h-3 w-3" style={{ color: 'hsl(var(--studio-warn))' }} />
+                  <span className="text-[9px] font-semibold tabular-nums" style={{ color: 'hsl(var(--studio-warn))' }}>{warnCount}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <XCircle className="h-3 w-3" style={{ color: '#ef4444' }} />
-                  <span className="text-[9px] font-semibold tabular-nums" style={{ color: '#ef4444' }}>{failCount}</span>
+                  <XCircle className="h-3 w-3" style={{ color: 'hsl(var(--studio-risk))' }} />
+                  <span className="text-[9px] font-semibold tabular-nums" style={{ color: 'hsl(var(--studio-risk))' }}>{failCount}</span>
                 </div>
               </div>
-              <div className="w-full h-1.5 rounded-full mt-2 overflow-hidden" style={{ backgroundColor: '#222' }}>
+              <div className="w-full h-1.5 rounded-full mt-2 overflow-hidden" style={{ backgroundColor: 'hsl(var(--studio-raised))' }}>
                 <div className="h-full rounded-full flex">
-                  <div style={{ width: `${(passCount / audits.length) * 100}%`, backgroundColor: '#22c55e' }} />
-                  <div style={{ width: `${(warnCount / audits.length) * 100}%`, backgroundColor: '#f59e0b' }} />
-                  <div style={{ width: `${(failCount / audits.length) * 100}%`, backgroundColor: '#ef4444' }} />
+                  <div style={{ width: `${(passCount / audits.length) * 100}%`, backgroundColor: 'hsl(var(--studio-ok))' }} />
+                  <div style={{ width: `${(warnCount / audits.length) * 100}%`, backgroundColor: 'hsl(var(--studio-warn))' }} />
+                  <div style={{ width: `${(failCount / audits.length) * 100}%`, backgroundColor: 'hsl(var(--studio-risk))' }} />
                 </div>
               </div>
             </div>
@@ -203,16 +203,16 @@ export function SEOAudit() {
         <div className="flex items-center gap-1">
           {[
             { key: null, label: 'All', count: audits.length },
-            { key: 'fail', label: 'Errors', count: failCount, color: '#ef4444' },
-            { key: 'warning', label: 'Warnings', count: warnCount, color: '#f59e0b' },
-            { key: 'pass', label: 'Passed', count: passCount, color: '#22c55e' },
+            { key: 'fail', label: 'Errors', count: failCount, color: 'hsl(var(--studio-risk))' },
+            { key: 'warning', label: 'Warnings', count: warnCount, color: 'hsl(var(--studio-warn))' },
+            { key: 'pass', label: 'Passed', count: passCount, color: 'hsl(var(--studio-ok))' },
           ].map(f => (
             <button key={f.key || 'all'} onClick={() => setFilterStatus(f.key)}
               className="flex items-center gap-1 px-2 py-1 rounded-md text-[8px] font-semibold transition-all"
               style={{
-                backgroundColor: filterStatus === f.key ? `${f.color || '#0073E6'}12` : 'transparent',
-                color: filterStatus === f.key ? (f.color || '#0073E6') : '#555',
-                border: `1px solid ${filterStatus === f.key ? `${f.color || '#0073E6'}30` : 'transparent'}`,
+                backgroundColor: filterStatus === f.key ? `${f.color || 'hsl(var(--studio-accent))'}12` : 'transparent',
+                color: filterStatus === f.key ? (f.color || 'hsl(var(--studio-accent))') : 'hsl(var(--studio-ink-3))',
+                border: `1px solid ${filterStatus === f.key ? `${f.color || 'hsl(var(--studio-accent))'}30` : 'transparent'}`,
               }}>
               {f.label}
               <span className="text-[7px] tabular-nums opacity-70">{f.count}</span>
@@ -225,7 +225,7 @@ export function SEOAudit() {
           {grouped.map(({ category, items }) => {
             const config = CATEGORY_CONFIG[category];
             const Icon = config?.icon || Globe;
-            const color = config?.color || '#555';
+            const color = config?.color || 'hsl(var(--studio-ink-3))';
             const isOpen = expandedCategories[category] !== false;
             const catFails = items.filter(i => i.status === 'fail').length;
             const catWarns = items.filter(i => i.status === 'warning').length;
@@ -235,16 +235,16 @@ export function SEOAudit() {
                 <button onClick={() => toggleCategory(category)}
                   className="w-full flex items-center justify-between py-1.5 px-1 transition-colors">
                   <div className="flex items-center gap-2">
-                    <ChevronRight className={`h-2.5 w-2.5 transition-transform ${isOpen ? 'rotate-90' : ''}`} style={{ color: '#444' }} />
+                    <ChevronRight className={`h-2.5 w-2.5 transition-transform ${isOpen ? 'rotate-90' : ''}`} style={{ color: 'hsl(var(--studio-hover))' }} />
                     <div className="w-4 h-4 rounded flex items-center justify-center" style={{ backgroundColor: `${color}12`, border: `1px solid ${color}20` }}>
                       <Icon className="h-2.5 w-2.5" style={{ color }} />
                     </div>
-                    <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#888' }}>{category}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-2))' }}>{category}</span>
                     <span className="text-[8px] tabular-nums px-1 rounded" style={{ backgroundColor: `${color}10`, color }}>{items.length}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {catFails > 0 && <span className="text-[7px] font-bold px-1 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>{catFails}</span>}
-                    {catWarns > 0 && <span className="text-[7px] font-bold px-1 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>{catWarns}</span>}
+                    {catFails > 0 && <span className="text-[7px] font-bold px-1 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: 'hsl(var(--studio-risk))' }}>{catFails}</span>}
+                    {catWarns > 0 && <span className="text-[7px] font-bold px-1 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: 'hsl(var(--studio-warn))' }}>{catWarns}</span>}
                   </div>
                 </button>
 
@@ -254,23 +254,23 @@ export function SEOAudit() {
                       <div className="space-y-1 mb-2">
                         {items.map((item, i) => {
                           const StatusIcon = item.status === 'pass' ? CheckCircle : item.status === 'warning' ? AlertCircle : XCircle;
-                          const statusColor = item.status === 'pass' ? '#22c55e' : item.status === 'warning' ? '#f59e0b' : '#ef4444';
+                          const statusColor = item.status === 'pass' ? 'hsl(var(--studio-ok))' : item.status === 'warning' ? 'hsl(var(--studio-warn))' : 'hsl(var(--studio-risk))';
                           return (
-                            <div key={i} className="rounded-lg p-2.5 group" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
+                            <div key={i} className="rounded-lg p-2.5 group" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
                               <div className="flex items-start gap-2">
                                 <StatusIcon className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color: statusColor }} />
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-semibold" style={{ color: '#ddd' }}>{item.label}</span>
+                                    <span className="text-[10px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>{item.label}</span>
                                     <span className="text-[7px] font-bold uppercase px-1 py-0.5 rounded" style={{ backgroundColor: `${IMPACT_COLORS[item.impact]}10`, color: IMPACT_COLORS[item.impact] }}>
                                       {item.impact}
                                     </span>
                                   </div>
-                                  <p className="text-[9px] mt-0.5" style={{ color: '#666' }}>{item.detail}</p>
+                                  <p className="text-[9px] mt-0.5" style={{ color: 'hsl(var(--studio-ink-3))' }}>{item.detail}</p>
                                   {item.fix && (
-                                    <div className="flex items-center gap-1 mt-1 px-1.5 py-1 rounded" style={{ backgroundColor: 'rgba(0,115,230,0.04)', border: '1px solid rgba(0,115,230,0.08)' }}>
-                                      <Zap className="h-2 w-2 shrink-0" style={{ color: '#0073E6' }} />
-                                      <span className="text-[8px]" style={{ color: '#0073E6' }}>{item.fix}</span>
+                                    <div className="flex items-center gap-1 mt-1 px-1.5 py-1 rounded" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.04)', border: '1px solid hsl(var(--studio-accent) / 0.08)' }}>
+                                      <Zap className="h-2 w-2 shrink-0" style={{ color: 'hsl(var(--studio-accent))' }} />
+                                      <span className="text-[8px]" style={{ color: 'hsl(var(--studio-accent))' }}>{item.fix}</span>
                                     </div>
                                   )}
                                 </div>
@@ -287,7 +287,7 @@ export function SEOAudit() {
           })}
         </div>
 
-        <div className="text-[9px] text-center pt-1" style={{ color: '#444' }}>
+        <div className="text-[9px] text-center pt-1" style={{ color: 'hsl(var(--studio-hover))' }}>
           {passCount}/{audits.length} checks passed • {Object.keys(CATEGORY_CONFIG).length} categories audited
         </div>
       </div>

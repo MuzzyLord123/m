@@ -6,11 +6,11 @@ import { ChevronDown, Columns, Rows, Grid3X3, AlignLeft, AlignCenter, AlignRight
 /* ── Shared UI ── */
 function Section({ label, open, onClick, badge }: { label: string; open: boolean; onClick: () => void; badge?: string }) {
   return (
-    <button onClick={onClick} className="w-full flex items-center justify-between h-8 px-0 text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#888' }}>
+    <button onClick={onClick} className="w-full flex items-center justify-between h-8 px-0 text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'hsl(var(--studio-ink-2))' }}>
       <span className="flex items-center gap-2">{label}
-        {badge && <span className="text-[8px] px-1.5 py-0.5 rounded-full font-semibold" style={{ backgroundColor: 'rgba(0,115,230,0.15)', color: '#0073E6' }}>{badge}</span>}
+        {badge && <span className="text-[8px] px-1.5 py-0.5 rounded-full font-semibold" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.15)', color: 'hsl(var(--studio-accent))' }}>{badge}</span>}
       </span>
-      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? '' : '-rotate-90'}`} style={{ color: '#555' }} />
+      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? '' : '-rotate-90'}`} style={{ color: 'hsl(var(--studio-ink-3))' }} />
     </button>
   );
 }
@@ -20,11 +20,11 @@ function MiniInput({ value, onChange, suffix, placeholder }: { value: string; on
     <div className="relative flex-1">
       <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
         className="w-full h-6 px-2 rounded text-[11px] outline-none"
-        style={{ backgroundColor: '#2d2d2d', border: '1px solid #333', color: '#ddd', paddingRight: suffix ? '22px' : '8px' }}
-        onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-        onBlur={e => { e.currentTarget.style.borderColor = '#333'; }}
+        style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))', paddingRight: suffix ? '22px' : '8px' }}
+        onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+        onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; }}
       />
-      {suffix && <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px]" style={{ color: '#555' }}>{suffix}</span>}
+      {suffix && <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>{suffix}</span>}
     </div>
   );
 }
@@ -34,12 +34,12 @@ function IconBtn({ active, onClick, children, title }: { active?: boolean; onCli
     <button title={title} onClick={onClick}
       className="h-7 w-7 flex items-center justify-center rounded-md transition-all"
       style={{
-        backgroundColor: active ? '#0073E620' : '#2d2d2d',
-        border: `1px solid ${active ? '#0073E640' : '#333'}`,
-        color: active ? '#0073E6' : '#888',
+        backgroundColor: active ? '#0073E620' : 'hsl(var(--studio-raised))',
+        border: `1px solid ${active ? '#0073E640' : 'hsl(var(--studio-line))'}`,
+        color: active ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
       }}
-      onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = '#333'; }}
-      onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = '#2d2d2d'; }}
+      onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = 'hsl(var(--studio-line))'; }}
+      onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = 'hsl(var(--studio-raised))'; }}
     >{children}</button>
   );
 }
@@ -47,12 +47,12 @@ function IconBtn({ active, onClick, children, title }: { active?: boolean; onCli
 function SliderRow({ label, value, onChange, min = 0, max = 100, suffix = '' }: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; suffix?: string }) {
   return (
     <div className="flex items-center gap-2 h-7">
-      <span className="text-[10px] w-14 shrink-0 text-right" style={{ color: '#777' }}>{label}</span>
+      <span className="text-[10px] w-14 shrink-0 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <input type="range" min={min} max={max} value={value} onChange={e => onChange(Number(e.target.value))}
         className="flex-1 h-1 rounded-full appearance-none cursor-pointer"
-        style={{ background: `linear-gradient(to right, #0073E6 0%, #0073E6 ${((value - min) / (max - min)) * 100}%, #333 ${((value - min) / (max - min)) * 100}%, #333 100%)` }}
+        style={{ background: `linear-gradient(to right, hsl(var(--studio-accent)) 0%, hsl(var(--studio-accent)) ${((value - min) / (max - min)) * 100}%, hsl(var(--studio-line)) ${((value - min) / (max - min)) * 100}%, hsl(var(--studio-line)) 100%)` }}
       />
-      <span className="text-[10px] w-10 text-right tabular-nums" style={{ color: '#aaa' }}>{value}{suffix}</span>
+      <span className="text-[10px] w-10 text-right tabular-nums" style={{ color: 'hsl(var(--studio-ink-2))' }}>{value}{suffix}</span>
     </div>
   );
 }
@@ -66,8 +66,8 @@ function SpacingVisualizer({ margin, padding, onChange }: {
   const SpaceInput = ({ type, side, value }: { type: 'margin' | 'padding'; side: string; value: string }) => (
     <input value={value} onChange={e => onChange(type, side, e.target.value)} placeholder="–"
       className="w-7 h-5 text-center text-[9px] rounded outline-none"
-      style={{ backgroundColor: 'transparent', border: 'none', color: type === 'margin' ? '#f59e0b' : '#10b981' }}
-      onFocus={e => e.currentTarget.style.backgroundColor = '#2d2d2d'}
+      style={{ backgroundColor: 'transparent', border: 'none', color: type === 'margin' ? 'hsl(var(--studio-warn))' : 'hsl(var(--studio-ok))' }}
+      onFocus={e => e.currentTarget.style.backgroundColor = 'hsl(var(--studio-raised))'}
       onBlur={e => e.currentTarget.style.backgroundColor = 'transparent'}
     />
   );
@@ -176,43 +176,43 @@ export function AdvancedStylePanel() {
   return (
     <ScrollArea className="h-full">
       <div className="p-3 space-y-1">
-        <h3 className="text-[11px] font-semibold mb-2" style={{ color: '#e0e0e0' }}>Advanced Styles</h3>
+        <h3 className="text-[11px] font-semibold mb-2" style={{ color: 'hsl(var(--studio-ink))' }}>Advanced Styles</h3>
 
         {/* Layout / Display */}
         <Section label="Layout" open={layoutOpen} onClick={() => setLayoutOpen(!layoutOpen)} badge={displayMode} />
         {layoutOpen && (
           <div className="space-y-2 mb-2">
-            <div className="text-[9px] mb-1" style={{ color: '#666' }}>Display</div>
+            <div className="text-[9px] mb-1" style={{ color: 'hsl(var(--studio-ink-3))' }}>Display</div>
             <div className="flex gap-1">
               {(['block', 'flex', 'grid', 'inline-block', 'none'] as const).map(d => (
                 <button key={d} onClick={() => setDisplayMode(d)}
                   className="flex-1 text-[9px] py-1.5 rounded-md transition-all capitalize"
                   style={{
-                    backgroundColor: displayMode === d ? '#0073E620' : '#2d2d2d',
-                    border: `1px solid ${displayMode === d ? '#0073E640' : '#333'}`,
-                    color: displayMode === d ? '#0073E6' : '#888',
+                    backgroundColor: displayMode === d ? '#0073E620' : 'hsl(var(--studio-raised))',
+                    border: `1px solid ${displayMode === d ? '#0073E640' : 'hsl(var(--studio-line))'}`,
+                    color: displayMode === d ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
                   }}>{d === 'inline-block' ? 'Inline' : d}</button>
               ))}
             </div>
 
             {displayMode === 'flex' && (
-              <div className="space-y-2 rounded-md p-2" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
-                <div className="text-[9px]" style={{ color: '#666' }}>Direction</div>
+              <div className="space-y-2 rounded-md p-2" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
+                <div className="text-[9px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Direction</div>
                 <div className="flex gap-1">
                   <IconBtn active={flexDirection === 'row'} onClick={() => setFlexDirection('row')} title="Row"><Columns className="h-3.5 w-3.5" /></IconBtn>
                   <IconBtn active={flexDirection === 'column'} onClick={() => setFlexDirection('column')} title="Column"><Rows className="h-3.5 w-3.5" /></IconBtn>
-                  <div className="w-px" style={{ backgroundColor: '#333' }} />
+                  <div className="w-px" style={{ backgroundColor: 'hsl(var(--studio-hover))' }} />
                   <IconBtn active={flexWrap} onClick={() => setFlexWrap(!flexWrap)} title="Wrap"><StretchHorizontal className="h-3.5 w-3.5" /></IconBtn>
                 </div>
 
-                <div className="text-[9px] mt-1" style={{ color: '#666' }}>Justify</div>
+                <div className="text-[9px] mt-1" style={{ color: 'hsl(var(--studio-ink-3))' }}>Justify</div>
                 <div className="flex gap-1">
                   {[{ v: 'flex-start', i: AlignLeft }, { v: 'center', i: AlignCenter }, { v: 'flex-end', i: AlignRight }, { v: 'space-between', i: AlignHorizontalJustifyCenter }].map(j => (
                     <IconBtn key={j.v} active={justifyContent === j.v} onClick={() => setJustifyContent(j.v)} title={j.v}><j.i className="h-3.5 w-3.5" /></IconBtn>
                   ))}
                 </div>
 
-                <div className="text-[9px] mt-1" style={{ color: '#666' }}>Align</div>
+                <div className="text-[9px] mt-1" style={{ color: 'hsl(var(--studio-ink-3))' }}>Align</div>
                 <div className="flex gap-1">
                   {[{ v: 'flex-start', i: ArrowUp }, { v: 'center', i: Minus }, { v: 'flex-end', i: ArrowDown }, { v: 'stretch', i: StretchVertical }].map(a => (
                     <IconBtn key={a.v} active={alignItems === a.v} onClick={() => setAlignItems(a.v)} title={a.v}><a.i className="h-3.5 w-3.5" /></IconBtn>
@@ -220,28 +220,28 @@ export function AdvancedStylePanel() {
                 </div>
 
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[9px]" style={{ color: '#666' }}>Gap</span>
+                  <span className="text-[9px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Gap</span>
                   <MiniInput value={gap} onChange={setGap} suffix="px" />
                 </div>
               </div>
             )}
 
             {displayMode === 'grid' && (
-              <div className="space-y-2 rounded-md p-2" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
+              <div className="space-y-2 rounded-md p-2" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
                 <div className="flex items-center gap-2">
-                  <Grid3X3 className="h-3.5 w-3.5" style={{ color: '#0073E6' }} />
-                  <span className="text-[9px]" style={{ color: '#666' }}>CSS Grid</span>
+                  <Grid3X3 className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-accent))' }} />
+                  <span className="text-[9px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>CSS Grid</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] w-10" style={{ color: '#666' }}>Cols</span>
+                  <span className="text-[9px] w-10" style={{ color: 'hsl(var(--studio-ink-3))' }}>Cols</span>
                   <MiniInput value={gridCols} onChange={setGridCols} />
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] w-10" style={{ color: '#666' }}>Rows</span>
+                  <span className="text-[9px] w-10" style={{ color: 'hsl(var(--studio-ink-3))' }}>Rows</span>
                   <MiniInput value={gridRows} onChange={setGridRows} />
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] w-10" style={{ color: '#666' }}>Gap</span>
+                  <span className="text-[9px] w-10" style={{ color: 'hsl(var(--studio-ink-3))' }}>Gap</span>
                   <MiniInput value={gap} onChange={setGap} suffix="px" />
                 </div>
               </div>
@@ -287,23 +287,23 @@ export function AdvancedStylePanel() {
         {typographyOpen && (
           <div className="space-y-1.5 mb-2">
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Size</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Size</span>
               <MiniInput value={fontSize} onChange={setFontSize} suffix="px" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Weight</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Weight</span>
               <select value={fontWeight} onChange={e => setFontWeight(e.target.value)}
                 className="flex-1 h-6 px-1.5 rounded text-[10px] outline-none cursor-pointer"
-                style={{ backgroundColor: '#2d2d2d', border: '1px solid #333', color: '#ddd' }}>
+                style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
                 {['100','200','300','400','500','600','700','800','900'].map(w => <option key={w} value={w}>{w}</option>)}
               </select>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Line H</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Line H</span>
               <MiniInput value={lineHeight} onChange={setLineHeight} />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Spacing</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Spacing</span>
               <MiniInput value={letterSpacing} onChange={setLetterSpacing} suffix="px" />
             </div>
             <div className="flex gap-1">
@@ -311,9 +311,9 @@ export function AdvancedStylePanel() {
                 <button key={t} onClick={() => setTextTransform(t)}
                   className="flex-1 text-[8px] py-1 rounded-md capitalize"
                   style={{
-                    backgroundColor: textTransform === t ? '#0073E620' : '#2d2d2d',
-                    border: `1px solid ${textTransform === t ? '#0073E640' : '#333'}`,
-                    color: textTransform === t ? '#0073E6' : '#888',
+                    backgroundColor: textTransform === t ? '#0073E620' : 'hsl(var(--studio-raised))',
+                    border: `1px solid ${textTransform === t ? '#0073E640' : 'hsl(var(--studio-line))'}`,
+                    color: textTransform === t ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
                   }}>{t === 'none' ? 'Aa' : t.slice(0, 3)}</button>
               ))}
             </div>
@@ -322,9 +322,9 @@ export function AdvancedStylePanel() {
                 <button key={d} onClick={() => setTextDecoration(d)}
                   className="flex-1 text-[8px] py-1 rounded-md capitalize"
                   style={{
-                    backgroundColor: textDecoration === d ? '#0073E620' : '#2d2d2d',
-                    border: `1px solid ${textDecoration === d ? '#0073E640' : '#333'}`,
-                    color: textDecoration === d ? '#0073E6' : '#888',
+                    backgroundColor: textDecoration === d ? '#0073E620' : 'hsl(var(--studio-raised))',
+                    border: `1px solid ${textDecoration === d ? '#0073E640' : 'hsl(var(--studio-line))'}`,
+                    color: textDecoration === d ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
                   }}>{d === 'none' ? '—' : d === 'line-through' ? 'S' : d.slice(0, 3)}</button>
               ))}
             </div>
@@ -336,26 +336,26 @@ export function AdvancedStylePanel() {
         {borderOpen && (
           <div className="space-y-1.5 mb-2">
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Width</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Width</span>
               <MiniInput value={borderWidth} onChange={setBorderWidth} suffix="px" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Style</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Style</span>
               <select value={borderStyle} onChange={e => setBorderStyle(e.target.value)}
                 className="flex-1 h-6 px-1.5 rounded text-[10px] outline-none cursor-pointer"
-                style={{ backgroundColor: '#2d2d2d', border: '1px solid #333', color: '#ddd' }}>
+                style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
                 {['solid','dashed','dotted','double','groove','ridge','inset','outset','none'].map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Color</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Color</span>
               <div className="flex items-center gap-1 flex-1">
                 <input type="color" value={borderColor} onChange={e => setBorderColor(e.target.value)} className="w-6 h-6 rounded cursor-pointer border-0 p-0" />
                 <MiniInput value={borderColor} onChange={setBorderColor} />
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Radius</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Radius</span>
               <MiniInput value={borderRadius} onChange={setBorderRadius} suffix="px" />
             </div>
           </div>
@@ -368,31 +368,31 @@ export function AdvancedStylePanel() {
             <SliderRow label="Opacity" value={opacity} onChange={setOpacity} min={0} max={100} suffix="%" />
             <SliderRow label="Bg Blur" value={backdropBlur} onChange={setBackdropBlur} min={0} max={50} suffix="px" />
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Blend</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Blend</span>
               <select value={mixBlendMode} onChange={e => setMixBlendMode(e.target.value)}
                 className="flex-1 h-6 px-1.5 rounded text-[10px] outline-none cursor-pointer"
-                style={{ backgroundColor: '#2d2d2d', border: '1px solid #333', color: '#ddd' }}>
+                style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
                 {['normal','multiply','screen','overlay','darken','lighten','color-dodge','color-burn','hard-light','soft-light','difference','exclusion','hue','saturation','color','luminosity'].map(m => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Cursor</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Cursor</span>
               <select value={cursor} onChange={e => setCursor(e.target.value)}
                 className="flex-1 h-6 px-1.5 rounded text-[10px] outline-none cursor-pointer"
-                style={{ backgroundColor: '#2d2d2d', border: '1px solid #333', color: '#ddd' }}>
+                style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
                 {['auto','pointer','crosshair','move','grab','grabbing','text','not-allowed','wait','zoom-in','zoom-out','none'].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] w-14 text-right" style={{ color: '#777' }}>Overflow</span>
+              <span className="text-[9px] w-14 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>Overflow</span>
               <div className="flex gap-1 flex-1">
                 {['visible','hidden','scroll','auto'].map(o => (
                   <button key={o} onClick={() => setOverflow(o)}
                     className="flex-1 text-[8px] py-1 rounded-md capitalize"
                     style={{
-                      backgroundColor: overflow === o ? '#0073E620' : '#2d2d2d',
-                      border: `1px solid ${overflow === o ? '#0073E640' : '#333'}`,
-                      color: overflow === o ? '#0073E6' : '#888',
+                      backgroundColor: overflow === o ? '#0073E620' : 'hsl(var(--studio-raised))',
+                      border: `1px solid ${overflow === o ? '#0073E640' : 'hsl(var(--studio-line))'}`,
+                      color: overflow === o ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
                     }}>{o.slice(0, 4)}</button>
                 ))}
               </div>

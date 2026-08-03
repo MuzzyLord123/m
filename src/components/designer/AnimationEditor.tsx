@@ -6,9 +6,9 @@ import { ChevronDown, ChevronRight, Play, RotateCcw, Zap, MousePointer2, Eye, Sc
 import { motion, AnimatePresence } from 'framer-motion';
 
 const GROUP_COLORS: Record<string, string> = {
-  Basic: '#64748b', Fade: '#3b82f6', Slide: '#0ea5e9', Scale: '#8b5cf6',
-  Rotate: '#f59e0b', Bounce: '#22c55e', '3D': '#ec4899', Blur: '#06b6d4',
-  Cinematic: '#f43f5e', Scroll: '#a855f7', Loop: '#14b8a6', Text: '#f97316',
+  Basic: 'hsl(var(--studio-ink-3))', Fade: 'hsl(var(--studio-accent))', Slide: 'hsl(var(--studio-accent))', Scale: 'hsl(var(--studio-ink-3))',
+  Rotate: 'hsl(var(--studio-warn))', Bounce: 'hsl(var(--studio-ok))', '3D': 'hsl(var(--studio-ink-3))', Blur: 'hsl(var(--studio-ink-3))',
+  Cinematic: 'hsl(var(--studio-ink-3))', Scroll: 'hsl(var(--studio-ink-3))', Loop: 'hsl(var(--studio-ink-3))', Text: 'hsl(var(--studio-warn))',
 };
 
 const ANIMATION_PRESETS: { label: string; group: string; value: AnimationType; preview: string }[] = [
@@ -93,16 +93,16 @@ const HOVER_PRESETS = [
   { label: 'Darken', filter: 'brightness(0.9)', transition: '0.3s ease' },
   { label: 'Saturate', filter: 'saturate(1.3)', transition: '0.3s ease' },
   { label: 'Blur Background', backdropFilter: 'blur(4px)', transition: '0.3s ease' },
-  { label: 'Border Glow', boxShadow: '0 0 0 2px rgba(59,130,246,0.5)', transition: '0.3s ease' },
+  { label: 'Border Glow', boxShadow: '0 0 0 2px hsl(var(--studio-accent) / 0.5)', transition: '0.3s ease' },
 ];
 
 const TRIGGER_ITEMS = [
-  { value: 'onLoad', label: 'Load', icon: Zap, color: '#f59e0b' },
-  { value: 'onScroll', label: 'Scroll', icon: Scroll, color: '#a855f7' },
-  { value: 'onHover', label: 'Hover', icon: MousePointer2, color: '#3b82f6' },
-  { value: 'onClick', label: 'Click', icon: MousePointer2, color: '#22c55e' },
-  { value: 'onView', label: 'In View', icon: Eye, color: '#0ea5e9' },
-  { value: 'timed', label: 'Timed', icon: Timer, color: '#f43f5e' },
+  { value: 'onLoad', label: 'Load', icon: Zap, color: 'hsl(var(--studio-warn))' },
+  { value: 'onScroll', label: 'Scroll', icon: Scroll, color: 'hsl(var(--studio-ink-3))' },
+  { value: 'onHover', label: 'Hover', icon: MousePointer2, color: 'hsl(var(--studio-accent))' },
+  { value: 'onClick', label: 'Click', icon: MousePointer2, color: 'hsl(var(--studio-ok))' },
+  { value: 'onView', label: 'In View', icon: Eye, color: 'hsl(var(--studio-accent))' },
+  { value: 'timed', label: 'Timed', icon: Timer, color: 'hsl(var(--studio-ink-3))' },
 ];
 
 function SectionHeader({ label, icon, open, onClick, color, count }: { label: string; icon?: React.ReactNode; open: boolean; onClick: () => void; color?: string; count?: number }) {
@@ -110,19 +110,19 @@ function SectionHeader({ label, icon, open, onClick, color, count }: { label: st
     <button
       onClick={onClick}
       className="w-full flex items-center justify-between h-9 px-0 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors group"
-      style={{ color: '#888' }}
+      style={{ color: 'hsl(var(--studio-ink-2))' }}
     >
       <div className="flex items-center gap-2">
         <ChevronRight
           className={`h-2.5 w-2.5 transition-transform duration-200 ${open ? 'rotate-90' : ''}`}
-          style={{ color: '#444' }}
+          style={{ color: 'hsl(var(--studio-hover))' }}
         />
-        <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ backgroundColor: `${color || '#555'}10`, border: `1px solid ${color || '#555'}15` }}>
+        <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ backgroundColor: `${color || 'hsl(var(--studio-ink-3))'}10`, border: `1px solid ${color || 'hsl(var(--studio-ink-3))'}15` }}>
           {icon}
         </div>
         {label}
         {count !== undefined && (
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full tabular-nums" style={{ backgroundColor: `${color || '#555'}12`, color: color || '#555' }}>
+          <span className="text-[8px] px-1.5 py-0.5 rounded-full tabular-nums" style={{ backgroundColor: `${color || 'hsl(var(--studio-ink-3))'}12`, color: color || 'hsl(var(--studio-ink-3))' }}>
             {count}
           </span>
         )}
@@ -143,15 +143,15 @@ export function AnimationEditor() {
 
   if (!selectedElement) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3" style={{ color: '#555' }}>
+      <div className="flex flex-col items-center justify-center h-full gap-3" style={{ color: 'hsl(var(--studio-ink-3))' }}>
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.08), rgba(168,85,247,0.02))', border: '1px solid rgba(168,85,247,0.1)' }}>
           <Zap className="h-6 w-6" style={{ color: 'rgba(168,85,247,0.4)' }} />
         </div>
-        <span className="text-[12px] font-medium" style={{ color: '#888' }}>No element selected</span>
-        <span className="text-[10px]" style={{ color: '#444' }}>Click an element to animate it</span>
+        <span className="text-[12px] font-medium" style={{ color: 'hsl(var(--studio-ink-2))' }}>No element selected</span>
+        <span className="text-[10px]" style={{ color: 'hsl(var(--studio-hover))' }}>Click an element to animate it</span>
         <div className="flex items-center gap-2 mt-2">
-          <kbd className="text-[8px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: '#1e1e1e', color: '#555', border: '1px solid #252525' }}>A</kbd>
-          <span className="text-[9px]" style={{ color: '#444' }}>to open animation panel</span>
+          <kbd className="text-[8px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'hsl(var(--studio-panel))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>A</kbd>
+          <span className="text-[9px]" style={{ color: 'hsl(var(--studio-hover))' }}>to open animation panel</span>
         </div>
       </div>
     );
@@ -181,7 +181,7 @@ export function AnimationEditor() {
 
   // Current animation info
   const currentPreset = ANIMATION_PRESETS.find(p => p.value === anim.type);
-  const currentGroupColor = currentPreset ? (GROUP_COLORS[currentPreset.group] || '#555') : '#555';
+  const currentGroupColor = currentPreset ? (GROUP_COLORS[currentPreset.group] || 'hsl(var(--studio-ink-3))') : 'hsl(var(--studio-ink-3))';
 
   return (
     <ScrollArea className="h-full">
@@ -195,31 +195,31 @@ export function AnimationEditor() {
             </div>
             <div className="flex-1 min-w-0">
               <span className="text-[10px] font-semibold block" style={{ color: currentGroupColor }}>{currentPreset?.label}</span>
-              <span className="text-[8px] block" style={{ color: '#555' }}>{currentPreset?.preview}</span>
+              <span className="text-[8px] block" style={{ color: 'hsl(var(--studio-ink-3))' }}>{currentPreset?.preview}</span>
             </div>
             <button onClick={() => update({ type: 'none' as AnimationType })} className="h-5 w-5 rounded flex items-center justify-center hover:bg-white/[0.06]" title="Clear animation">
-              <Trash2 className="h-2.5 w-2.5" style={{ color: '#555' }} />
+              <Trash2 className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
             </button>
           </div>
         )}
 
         {/* ── Entrance Animation ── */}
-        <SectionHeader label="Entrance" icon={<Play className="h-3 w-3" style={{ color: '#3b82f6' }} />} color="#3b82f6" open={openSections.entrance} onClick={() => toggle('entrance')} count={Object.keys(groups).length} />
+        <SectionHeader label="Entrance" icon={<Play className="h-3 w-3" style={{ color: 'hsl(var(--studio-accent))' }} />} color="hsl(var(--studio-accent))" open={openSections.entrance} onClick={() => toggle('entrance')} count={Object.keys(groups).length} />
         <AnimatePresence>
           {openSections.entrance && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
               <div className="space-y-3 pb-3">
                 {Object.entries(groups).map(([group, presets]) => {
-                  const groupColor = GROUP_COLORS[group] || '#555';
+                  const groupColor = GROUP_COLORS[group] || 'hsl(var(--studio-ink-3))';
                   const isCollapsed = collapsedGroups.includes(group);
                   const hasActive = presets.some(p => p.value === anim.type);
                   return (
                     <div key={group}>
                       <button onClick={() => toggleGroup(group)} className="flex items-center gap-1.5 mb-1 w-full group/g">
-                        <ChevronRight className={`h-2 w-2 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} style={{ color: '#444' }} />
+                        <ChevronRight className={`h-2 w-2 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} style={{ color: 'hsl(var(--studio-hover))' }} />
                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: groupColor }} />
-                        <span className="text-[8px] font-bold uppercase tracking-[0.12em] flex-1 text-left" style={{ color: hasActive ? groupColor : '#555' }}>{group}</span>
-                        <span className="text-[7px] tabular-nums opacity-0 group-hover/g:opacity-100 transition-opacity" style={{ color: '#444' }}>{presets.length}</span>
+                        <span className="text-[8px] font-bold uppercase tracking-[0.12em] flex-1 text-left" style={{ color: hasActive ? groupColor: 'hsl(var(--studio-ink-3))' }}>{group}</span>
+                        <span className="text-[7px] tabular-nums opacity-0 group-hover/g:opacity-100 transition-opacity" style={{ color: 'hsl(var(--studio-hover))' }}>{presets.length}</span>
                       </button>
                       {!isCollapsed && (
                         <div className="grid grid-cols-2 gap-0.5 ml-3">
@@ -231,10 +231,10 @@ export function AnimationEditor() {
                               style={{
                                 backgroundColor: anim.type === p.value ? `${groupColor}15` : 'transparent',
                                 border: `1px solid ${anim.type === p.value ? `${groupColor}30` : 'transparent'}`,
-                                color: anim.type === p.value ? groupColor : '#888',
+                                color: anim.type === p.value ? groupColor: 'hsl(var(--studio-ink-2))',
                                 fontWeight: anim.type === p.value ? 600 : 400,
                               }}
-                              onMouseEnter={e => { if (anim.type !== p.value) { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor = '#333'; } }}
+                              onMouseEnter={e => { if (anim.type !== p.value) { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; } }}
                               onMouseLeave={e => { if (anim.type !== p.value) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
                             >
                               {p.label}
@@ -248,7 +248,7 @@ export function AnimationEditor() {
 
                 {/* Trigger */}
                 <div className="space-y-1.5">
-                  <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#666' }}>Trigger</div>
+                  <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Trigger</div>
                   <div className="grid grid-cols-3 gap-1">
                     {TRIGGER_ITEMS.map(t => {
                       const Icon = t.icon;
@@ -259,9 +259,9 @@ export function AnimationEditor() {
                           onClick={() => update({ trigger: t.value as AnimationTrigger })}
                           className="flex flex-col items-center gap-0.5 py-1.5 rounded-lg transition-all text-[8px] font-medium"
                           style={{
-                            backgroundColor: active ? `${t.color}12` : '#2a2a2a',
-                            border: `1px solid ${active ? `${t.color}30` : '#333'}`,
-                            color: active ? t.color : '#888',
+                            backgroundColor: active ? `${t.color}12` : 'hsl(var(--studio-raised))',
+                            border: `1px solid ${active ? `${t.color}30` : 'hsl(var(--studio-line))'}`,
+                            color: active ? t.color: 'hsl(var(--studio-ink-2))',
                           }}
                         >
                           <Icon className="h-3 w-3" />
@@ -274,16 +274,16 @@ export function AnimationEditor() {
 
                 {/* Timing controls */}
                 <div className="space-y-1.5">
-                  <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#666' }}>Timing</div>
-                  <ControlRow label="Duration" value={anim.duration || 0.6} onChange={v => update({ duration: v })} suffix="s" min={0} max={5} step={0.1} color="#3b82f6" />
-                  <ControlRow label="Delay" value={anim.delay || 0} onChange={v => update({ delay: v })} suffix="s" min={0} max={5} step={0.1} color="#8b5cf6" />
-                  <ControlRow label="Stagger" value={(anim as any).stagger || 0} onChange={v => update({ stagger: v } as any)} suffix="s" min={0} max={2} step={0.05} color="#0ea5e9" />
-                  <ControlRow label="Intensity" value={(anim as any).intensity || 1} onChange={v => update({ intensity: v } as any)} suffix="x" min={0.1} max={3} step={0.1} color="#f59e0b" />
+                  <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Timing</div>
+                  <ControlRow label="Duration" value={anim.duration || 0.6} onChange={v => update({ duration: v })} suffix="s" min={0} max={5} step={0.1} color="hsl(var(--studio-accent))" />
+                  <ControlRow label="Delay" value={anim.delay || 0} onChange={v => update({ delay: v })} suffix="s" min={0} max={5} step={0.1} color="hsl(var(--studio-ink-3))" />
+                  <ControlRow label="Stagger" value={(anim as any).stagger || 0} onChange={v => update({ stagger: v } as any)} suffix="s" min={0} max={2} step={0.05} color="hsl(var(--studio-accent))" />
+                  <ControlRow label="Intensity" value={(anim as any).intensity || 1} onChange={v => update({ intensity: v } as any)} suffix="x" min={0.1} max={3} step={0.1} color="hsl(var(--studio-warn))" />
                 </div>
 
                 {/* Easing */}
                 <div className="space-y-1">
-                  <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#666' }}>Easing</div>
+                  <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Easing</div>
                   <div className="grid grid-cols-2 gap-0.5">
                     {EASING_OPTIONS.map(e => (
                       <button
@@ -291,9 +291,9 @@ export function AnimationEditor() {
                         onClick={() => update({ easing: e.value } as any)}
                         className="px-2 py-1 rounded text-[9px] transition-all"
                         style={{
-                          backgroundColor: (anim as any).easing === e.value ? 'rgba(0,115,230,0.12)' : 'transparent',
-                          border: `1px solid ${(anim as any).easing === e.value ? '#0073E6' : 'transparent'}`,
-                          color: (anim as any).easing === e.value ? '#4da3ff' : '#888',
+                          backgroundColor: (anim as any).easing === e.value ? 'hsl(var(--studio-accent) / 0.12)' : 'transparent',
+                          border: `1px solid ${(anim as any).easing === e.value ? 'hsl(var(--studio-accent))' : 'transparent'}`,
+                          color: (anim as any).easing === e.value ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
                         }}
                       >
                         {e.label}
@@ -308,9 +308,9 @@ export function AnimationEditor() {
                     onClick={() => update({ loop: !(anim as any).loop } as any)}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-medium transition-all"
                     style={{
-                      backgroundColor: (anim as any).loop ? 'rgba(20,184,166,0.12)' : '#2a2a2a',
-                      border: `1px solid ${(anim as any).loop ? 'rgba(20,184,166,0.3)' : '#333'}`,
-                      color: (anim as any).loop ? '#14b8a6' : '#888',
+                      backgroundColor: (anim as any).loop ? 'rgba(20,184,166,0.12)' : 'hsl(var(--studio-raised))',
+                      border: `1px solid ${(anim as any).loop ? 'rgba(20,184,166,0.3)' : 'hsl(var(--studio-line))'}`,
+                      color: (anim as any).loop ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-2))',
                     }}
                   >
                     <RotateCcw className="h-3 w-3" />
@@ -318,14 +318,14 @@ export function AnimationEditor() {
                   </button>
                   {(anim as any).loop && (
                     <div className="flex items-center gap-1 flex-1">
-                      <span className="text-[9px]" style={{ color: '#666' }}>Delay:</span>
+                      <span className="text-[9px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Delay:</span>
                       <input
                         type="number" step="0.1" min="0" value={(anim as any).loopDelay || 0}
                         onChange={e => update({ loopDelay: parseFloat(e.target.value) || 0 } as any)}
                         className="w-14 h-5 px-1 rounded text-[10px] outline-none"
-                        style={{ backgroundColor: '#2a2a2a', border: '1px solid #333', color: '#ddd' }}
+                        style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
                       />
-                      <span className="text-[9px]" style={{ color: '#555' }}>s</span>
+                      <span className="text-[9px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>s</span>
                     </div>
                   )}
                 </div>
@@ -333,15 +333,15 @@ export function AnimationEditor() {
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="h-[1px]" style={{ backgroundColor: '#222' }} />
+        <div className="h-[1px]" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
 
         {/* ── Hover Effects ── */}
-        <SectionHeader label="Hover Effects" icon={<MousePointer2 className="h-3 w-3" style={{ color: '#ec4899' }} />} color="#ec4899" open={openSections.hover} onClick={() => toggle('hover')} count={HOVER_PRESETS.length} />
+        <SectionHeader label="Hover Effects" icon={<MousePointer2 className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />} color="hsl(var(--studio-ink-3))" open={openSections.hover} onClick={() => toggle('hover')} count={HOVER_PRESETS.length} />
         <AnimatePresence>
           {openSections.hover && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
               <div className="space-y-2 pb-3">
-                <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#666' }}>Quick Presets</div>
+                <div className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Quick Presets</div>
                 <div className="grid grid-cols-2 gap-0.5">
                   {HOVER_PRESETS.map(preset => (
                     <button
@@ -356,21 +356,21 @@ export function AnimationEditor() {
                         updateHover(styles);
                       }}
                       className="px-2 py-1.5 rounded-lg text-[9px] text-left transition-all"
-                      style={{ backgroundColor: 'transparent', border: '1px solid transparent', color: '#888' }}
-                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(236,72,153,0.06)'; e.currentTarget.style.borderColor = 'rgba(236,72,153,0.15)'; e.currentTarget.style.color = '#ec4899'; }}
-                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = '#888'; }}
+                      style={{ backgroundColor: 'transparent', border: '1px solid transparent', color: 'hsl(var(--studio-ink-2))' }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(236,72,153,0.06)'; e.currentTarget.style.borderColor = 'rgba(236,72,153,0.15)'; e.currentTarget.style.color = 'hsl(var(--studio-ink-3))'; }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'hsl(var(--studio-ink-2))'; }}
                     >
                       {preset.label}
                     </button>
                   ))}
                 </div>
 
-                <div className="text-[9px] font-semibold uppercase tracking-wider mt-2" style={{ color: '#666' }}>Custom</div>
-                <HoverField label="BG Color" value={(selectedElement.hoverStyles?.backgroundColor as string) || ''} onChange={v => updateHover({ backgroundColor: v })} placeholder="#3b82f6" />
-                <HoverField label="Color" value={(selectedElement.hoverStyles?.color as string) || ''} onChange={v => updateHover({ color: v })} placeholder="#fff" />
+                <div className="text-[9px] font-semibold uppercase tracking-wider mt-2" style={{ color: 'hsl(var(--studio-ink-3))' }}>Custom</div>
+                <HoverField label="BG Color" value={(selectedElement.hoverStyles?.backgroundColor as string) || ''} onChange={v => updateHover({ backgroundColor: v })} placeholder="hsl(var(--studio-accent))" />
+                <HoverField label="Color" value={(selectedElement.hoverStyles?.color as string) || ''} onChange={v => updateHover({ color: v })} placeholder="hsl(var(--studio-ink))" />
                 <HoverField label="Transform" value={(selectedElement.hoverStyles?.transform as string) || ''} onChange={v => updateHover({ transform: v })} placeholder="scale(1.05)" />
                 <HoverField label="Shadow" value={(selectedElement.hoverStyles?.boxShadow as string) || ''} onChange={v => updateHover({ boxShadow: v })} placeholder="0 4px 20px rgba(…)" />
-                <HoverField label="Border" value={(selectedElement.hoverStyles?.border as string) || ''} onChange={v => updateHover({ border: v })} placeholder="1px solid #0073E6" />
+                <HoverField label="Border" value={(selectedElement.hoverStyles?.border as string) || ''} onChange={v => updateHover({ border: v })} placeholder="1px solid hsl(var(--studio-accent))" />
                 <HoverField label="Opacity" value={(selectedElement.hoverStyles?.opacity as string) || ''} onChange={v => updateHover({ opacity: v })} placeholder="0.8" />
                 <HoverField label="Filter" value={(selectedElement.hoverStyles?.filter as string) || ''} onChange={v => updateHover({ filter: v })} placeholder="brightness(1.1)" />
                 <HoverField label="Transition" value={(selectedElement.hoverStyles?.transition as string) || ''} onChange={v => updateHover({ transition: v })} placeholder="all 0.3s ease" />
@@ -378,15 +378,15 @@ export function AnimationEditor() {
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="h-[1px]" style={{ backgroundColor: '#222' }} />
+        <div className="h-[1px]" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
 
         {/* ── Scroll Effects ── */}
-        <SectionHeader label="Scroll Effects" icon={<Scroll className="h-3 w-3" style={{ color: '#a855f7' }} />} color="#a855f7" open={openSections.scroll} onClick={() => toggle('scroll')} />
+        <SectionHeader label="Scroll Effects" icon={<Scroll className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />} color="hsl(var(--studio-ink-3))" open={openSections.scroll} onClick={() => toggle('scroll')} />
         <AnimatePresence>
           {openSections.scroll && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
               <div className="space-y-2 pb-3">
-                <div className="text-[8px] px-2 py-1.5 rounded-lg" style={{ backgroundColor: 'rgba(168,85,247,0.06)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.1)' }}>
+                <div className="text-[8px] px-2 py-1.5 rounded-lg" style={{ backgroundColor: 'rgba(168,85,247,0.06)', color: 'hsl(var(--studio-ink-3))', border: '1px solid rgba(168,85,247,0.1)' }}>
                   Scroll-linked animations activate as the user scrolls the page.
                 </div>
                 {[
@@ -399,17 +399,17 @@ export function AnimationEditor() {
                 ].map(field => (
                   <div key={field.prop}>
                     <HoverField label={field.label} value={(anim as any)[field.prop] || ''} onChange={v => update({ [field.prop]: v } as any)} placeholder={field.placeholder} />
-                    <div className="text-[7px] pl-[72px] mt-0.5" style={{ color: '#444' }}>{field.desc}</div>
+                    <div className="text-[7px] pl-[72px] mt-0.5" style={{ color: 'hsl(var(--studio-hover))' }}>{field.desc}</div>
                   </div>
                 ))}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="h-[1px]" style={{ backgroundColor: '#222' }} />
+        <div className="h-[1px]" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
 
         {/* ── 3D Transform ── */}
-        <SectionHeader label="3D Transform" icon={<Eye className="h-3 w-3" style={{ color: '#0ea5e9' }} />} color="#0ea5e9" open={openSections.transform} onClick={() => toggle('transform')} />
+        <SectionHeader label="3D Transform" icon={<Eye className="h-3 w-3" style={{ color: 'hsl(var(--studio-accent))' }} />} color="hsl(var(--studio-accent))" open={openSections.transform} onClick={() => toggle('transform')} />
         <AnimatePresence>
           {openSections.transform && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
@@ -425,10 +425,10 @@ export function AnimationEditor() {
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="h-[1px]" style={{ backgroundColor: '#222' }} />
+        <div className="h-[1px]" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
 
         {/* ── Transitions ── */}
-        <SectionHeader label="Transitions" icon={<Timer className="h-3 w-3" style={{ color: '#f59e0b' }} />} color="#f59e0b" open={openSections.transition} onClick={() => toggle('transition')} />
+        <SectionHeader label="Transitions" icon={<Timer className="h-3 w-3" style={{ color: 'hsl(var(--studio-warn))' }} />} color="hsl(var(--studio-warn))" open={openSections.transition} onClick={() => toggle('transition')} />
         <AnimatePresence>
           {openSections.transition && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
@@ -453,24 +453,24 @@ export function AnimationEditor() {
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="h-[1px]" style={{ backgroundColor: '#222' }} />
+        <div className="h-[1px]" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
 
         {/* ── Interaction Timeline ── */}
-        <SectionHeader label="Interaction Timeline" icon={<Zap className="h-3 w-3" style={{ color: '#22c55e' }} />} color="#22c55e" open={openSections.interactions} onClick={() => toggle('interactions')} count={((selectedElement.props.interactionSteps as any[]) || []).length} />
+        <SectionHeader label="Interaction Timeline" icon={<Zap className="h-3 w-3" style={{ color: 'hsl(var(--studio-ok))' }} />} color="hsl(var(--studio-ok))" open={openSections.interactions} onClick={() => toggle('interactions')} count={((selectedElement.props.interactionSteps as any[]) || []).length} />
         <AnimatePresence>
           {openSections.interactions && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
               <div className="space-y-2 pb-3">
-                <div className="text-[8px] px-2 py-1.5 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.06)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.1)' }}>
+                <div className="text-[8px] px-2 py-1.5 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.06)', color: 'hsl(var(--studio-ok))', border: '1px solid rgba(34,197,94,0.1)' }}>
                   Build multi-step animations — like Webflow interactions.
                 </div>
 
                 {((selectedElement.props.interactionSteps as any[]) || []).map((step: any, i: number) => (
-                  <div key={i} className="p-2 rounded-lg space-y-1" style={{ backgroundColor: '#1a1a1a', border: '1px solid #252525' }}>
+                  <div key={i} className="p-2 rounded-lg space-y-1" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 rounded flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#22c55e' }}>{i + 1}</div>
-                        <span className="text-[9px] font-semibold" style={{ color: '#22c55e' }}>Step {i + 1}</span>
+                        <div className="w-4 h-4 rounded flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: 'hsl(var(--studio-ok))' }}>{i + 1}</div>
+                        <span className="text-[9px] font-semibold" style={{ color: 'hsl(var(--studio-ok))' }}>Step {i + 1}</span>
                       </div>
                       <button
                         onClick={() => {
@@ -517,26 +517,26 @@ export function AnimationEditor() {
                     dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, updates: { props: { ...selectedElement.props, interactionSteps: steps } } } });
                   }}
                   className="w-full h-7 rounded-lg text-[9px] font-medium transition-all flex items-center justify-center gap-1.5"
-                  style={{ backgroundColor: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.15)', color: '#22c55e' }}
+                  style={{ backgroundColor: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.15)', color: 'hsl(var(--studio-ok))' }}
                 >
                   <Plus className="h-3 w-3" /> Add Step
                 </button>
 
-                <div className="text-[9px] font-semibold uppercase tracking-wider mt-2" style={{ color: '#666' }}>Quick Sequences</div>
+                <div className="text-[9px] font-semibold uppercase tracking-wider mt-2" style={{ color: 'hsl(var(--studio-ink-3))' }}>Quick Sequences</div>
                 <div className="grid grid-cols-2 gap-0.5">
                   {[
                     { label: 'Scale Bounce', steps: [{ property: 'transform', from: 'scale(1)', to: 'scale(1.1)', duration: '0.2s', delay: '0s' }, { property: 'transform', from: 'scale(1.1)', to: 'scale(1)', duration: '0.2s', delay: '0.2s' }] },
                     { label: 'Fade & Slide', steps: [{ property: 'opacity', from: '0', to: '1', duration: '0.4s', delay: '0s' }, { property: 'transform', from: 'translateY(20px)', to: 'translateY(0)', duration: '0.4s', delay: '0s' }] },
-                    { label: 'Color Flash', steps: [{ property: 'background-color', from: '#3b82f6', to: '#ef4444', duration: '0.3s', delay: '0s' }, { property: 'background-color', from: '#ef4444', to: '#3b82f6', duration: '0.3s', delay: '0.3s' }] },
+                    { label: 'Color Flash', steps: [{ property: 'background-color', from: 'hsl(var(--studio-accent))', to: 'hsl(var(--studio-risk))', duration: '0.3s', delay: '0s' }, { property: 'background-color', from: 'hsl(var(--studio-risk))', to: 'hsl(var(--studio-accent))', duration: '0.3s', delay: '0.3s' }] },
                     { label: 'Shake', steps: [{ property: 'transform', from: 'translateX(0)', to: 'translateX(-5px)', duration: '0.1s', delay: '0s' }, { property: 'transform', from: 'translateX(-5px)', to: 'translateX(5px)', duration: '0.1s', delay: '0.1s' }, { property: 'transform', from: 'translateX(5px)', to: 'translateX(0)', duration: '0.1s', delay: '0.2s' }] },
                   ].map(preset => (
                     <button
                       key={preset.label}
                       onClick={() => dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, updates: { props: { ...selectedElement.props, interactionSteps: preset.steps } } } })}
                       className="px-2 py-1.5 rounded-lg text-[9px] text-left transition-all"
-                      style={{ backgroundColor: 'transparent', color: '#888' }}
-                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(34,197,94,0.06)'; e.currentTarget.style.color = '#22c55e'; }}
-                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#888'; }}
+                      style={{ backgroundColor: 'transparent', color: 'hsl(var(--studio-ink-2))' }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(34,197,94,0.06)'; e.currentTarget.style.color = 'hsl(var(--studio-ok))'; }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'hsl(var(--studio-ink-2))'; }}
                     >
                       {preset.label}
                     </button>
@@ -556,20 +556,20 @@ function ControlRow({ label, value, onChange, suffix, min, max, step, color }: {
 }) {
   return (
     <div className="flex items-center gap-2 h-7">
-      <span className="text-[9px] w-16 shrink-0 text-right font-medium" style={{ color: '#666' }}>{label}</span>
+      <span className="text-[9px] w-16 shrink-0 text-right font-medium" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <input
         type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(parseFloat(e.target.value))}
         className="flex-1 h-1"
-        style={{ accentColor: color || '#0073E6' }}
+        style={{ accentColor: color || 'hsl(var(--studio-accent))' }}
       />
       <input
         type="number" step={step} min={min} max={max} value={value}
         onChange={e => onChange(parseFloat(e.target.value) || 0)}
         className="w-11 h-5 px-1 rounded text-[9px] outline-none text-center tabular-nums"
-        style={{ backgroundColor: '#2a2a2a', border: '1px solid #333', color: '#ddd' }}
+        style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
       />
-      {suffix && <span className="text-[8px] w-2" style={{ color: '#555' }}>{suffix}</span>}
+      {suffix && <span className="text-[8px] w-2" style={{ color: 'hsl(var(--studio-ink-3))' }}>{suffix}</span>}
     </div>
   );
 }
@@ -579,15 +579,15 @@ function HoverField({ label, value, onChange, placeholder }: {
 }) {
   return (
     <div className="flex items-center gap-2 h-6">
-      <span className="text-[9px] w-16 shrink-0 text-right font-medium" style={{ color: '#666' }}>{label}</span>
+      <span className="text-[9px] w-16 shrink-0 text-right font-medium" style={{ color: 'hsl(var(--studio-ink-3))' }}>{label}</span>
       <input
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         className="flex-1 h-5 px-2 rounded text-[10px] outline-none"
-        style={{ backgroundColor: '#2a2a2a', border: '1px solid #333', color: '#ddd' }}
-        onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-        onBlur={e => { e.currentTarget.style.borderColor = '#333'; }}
+        style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
+        onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+        onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-line))'; }}
       />
     </div>
   );
@@ -602,9 +602,9 @@ function PresetRow({ presets, onSelect, currentValue }: { presets: { label: stri
           onClick={() => onSelect(p.value)}
           className="h-5 px-1.5 rounded text-[8px] font-medium transition-all"
           style={{
-            backgroundColor: currentValue === p.value ? 'rgba(0,115,230,0.15)' : 'transparent',
-            border: `1px solid ${currentValue === p.value ? 'rgba(0,115,230,0.3)' : 'transparent'}`,
-            color: currentValue === p.value ? '#0073E6' : '#888',
+            backgroundColor: currentValue === p.value ? 'hsl(var(--studio-accent) / 0.15)' : 'transparent',
+            border: `1px solid ${currentValue === p.value ? 'hsl(var(--studio-accent) / 0.3)' : 'transparent'}`,
+            color: currentValue === p.value ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
           }}
         >
           {p.label}

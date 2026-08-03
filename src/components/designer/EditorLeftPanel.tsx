@@ -33,36 +33,36 @@ const TAB_GROUPS = [
   {
     label: 'Build',
     tabs: [
-      { key: 'components', label: 'Add', icon: LayoutGrid, color: '#0073E6', desc: 'Drag elements onto canvas' },
-      { key: 'sections', label: 'Sections', icon: Blocks, color: '#8b5cf6', desc: 'Pre-built page sections' },
-      { key: 'pages', label: 'Pages', icon: FileText, color: '#22c55e', desc: 'Manage site pages' },
-      { key: 'layers', label: 'Layers', icon: Layers, color: '#f59e0b', desc: 'Element tree & hierarchy' },
+      { key: 'components', label: 'Add', icon: LayoutGrid, color: 'hsl(var(--studio-accent))', desc: 'Drag elements onto canvas' },
+      { key: 'sections', label: 'Sections', icon: Blocks, color: 'hsl(var(--studio-ink-3))', desc: 'Pre-built page sections' },
+      { key: 'pages', label: 'Pages', icon: FileText, color: 'hsl(var(--studio-ok))', desc: 'Manage site pages' },
+      { key: 'layers', label: 'Layers', icon: Layers, color: 'hsl(var(--studio-warn))', desc: 'Element tree & hierarchy' },
     ],
   },
   {
     label: 'Design',
     tabs: [
-      { key: 'interactions', label: 'Interactions', icon: Zap, color: '#ec4899', desc: 'Animations & triggers' },
-      { key: 'styles', label: 'Styles', icon: PaintBucket, color: '#06b6d4', desc: 'Advanced CSS properties' },
-      { key: 'forms', label: 'Forms', icon: FormInput, color: '#14b8a6', desc: 'Form builder & logic' },
-      { key: 'design', label: 'Design', icon: Palette, color: '#a855f7', desc: 'Design tokens & theme' },
-      { key: 'gradient', label: 'Gradient', icon: Sparkles, color: '#f43f5e', desc: 'Visual gradient editor' },
+      { key: 'interactions', label: 'Interactions', icon: Zap, color: 'hsl(var(--studio-ink-3))', desc: 'Animations & triggers' },
+      { key: 'styles', label: 'Styles', icon: PaintBucket, color: 'hsl(var(--studio-ink-3))', desc: 'Advanced CSS properties' },
+      { key: 'forms', label: 'Forms', icon: FormInput, color: 'hsl(var(--studio-ink-3))', desc: 'Form builder & logic' },
+      { key: 'design', label: 'Design', icon: Palette, color: 'hsl(var(--studio-ink-3))', desc: 'Design tokens & theme' },
+      { key: 'gradient', label: 'Gradient', icon: Sparkles, color: 'hsl(var(--studio-ink-3))', desc: 'Visual gradient editor' },
     ],
   },
   {
     label: 'Content',
     tabs: [
-      { key: 'cms', label: 'CMS', icon: Database, color: '#3b82f6', desc: 'Collections & entries' },
-      { key: 'products', label: 'Products', icon: ShoppingBag, color: '#22c55e', desc: 'E-commerce catalogue' },
-      { key: 'templates', label: 'Sites', icon: Store, color: '#f59e0b', desc: 'Templates & marketplace' },
+      { key: 'cms', label: 'CMS', icon: Database, color: 'hsl(var(--studio-accent))', desc: 'Collections & entries' },
+      { key: 'products', label: 'Products', icon: ShoppingBag, color: 'hsl(var(--studio-ok))', desc: 'E-commerce catalogue' },
+      { key: 'templates', label: 'Sites', icon: Store, color: 'hsl(var(--studio-warn))', desc: 'Templates & marketplace' },
     ],
   },
   {
     label: 'Tools',
     tabs: [
-      { key: 'seo', label: 'SEO', icon: Search, color: '#0ea5e9', desc: 'SEO audit & metadata' },
-      { key: 'history', label: 'History', icon: History, color: '#64748b', desc: 'Version history' },
-      { key: 'embed', label: 'Embed', icon: Code2, color: '#a3a3a3', desc: 'Custom code & embeds' },
+      { key: 'seo', label: 'SEO', icon: Search, color: 'hsl(var(--studio-accent))', desc: 'SEO audit & metadata' },
+      { key: 'history', label: 'History', icon: History, color: 'hsl(var(--studio-ink-3))', desc: 'Version history' },
+      { key: 'embed', label: 'Embed', icon: Code2, color: 'hsl(var(--studio-ink-2))', desc: 'Custom code & embeds' },
     ],
   },
 ];
@@ -83,15 +83,15 @@ export function EditorLeftPanel({ siteId }: EditorLeftPanelProps) {
   };
 
   return (
-    <div className="h-full flex flex-row" style={{ backgroundColor: '#1a1a1a' }}>
+    <div className="h-full flex flex-row" style={{ backgroundColor: 'hsl(var(--studio-panel))' }}>
       {/* Vertical icon rail with grouped sections */}
-      <div className="flex flex-col shrink-0 py-1 overflow-y-auto scrollbar-none justify-between" style={{ borderRight: '1px solid #222', backgroundColor: '#161616', width: '44px' }}>
+      <div className="flex flex-col shrink-0 py-1 overflow-y-auto scrollbar-none justify-between" style={{ borderRight: '1px solid hsl(var(--studio-line))', backgroundColor: 'hsl(var(--studio-panel))', width: '44px' }}>
         <div>
           {/* Recently used tabs */}
           {recentTabs.length > 0 && (
             <div>
               <div className="px-1 py-1">
-                <span className="block text-center" style={{ fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#2a2a2a' }}>
+                <span className="block text-center" style={{ fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'hsl(var(--studio-raised))' }}>
                   Recent
                 </span>
               </div>
@@ -106,31 +106,31 @@ export function EditorLeftPanel({ siteId }: EditorLeftPanelProps) {
                       <button
                         onClick={() => handleTabChange(tab.key)}
                         className="relative flex items-center justify-center w-full h-8 transition-all duration-200"
-                        style={{ color: '#444', opacity: 0.7 }}
+                        style={{ color: 'hsl(var(--studio-hover))', opacity: 0.7 }}
                         onMouseEnter={e => { e.currentTarget.style.color = tab.color; e.currentTarget.style.opacity = '1'; }}
-                        onMouseLeave={e => { e.currentTarget.style.color = '#444'; e.currentTarget.style.opacity = '0.7'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = 'hsl(var(--studio-line-strong))'; e.currentTarget.style.opacity = '0.7'; }}
                       >
                         <Icon className="h-[13px] w-[13px] shrink-0" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent side="right" sideOffset={8} className="text-[10px] font-medium" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#ccc', padding: '6px 10px' }}>
+                    <TooltipContent side="right" sideOffset={8} className="text-[10px] font-medium" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))', padding: '6px 10px' }}>
                       {tab.label}
                     </TooltipContent>
                   </Tooltip>
                 );
               })}
-              <div className="mx-2 my-1 h-px" style={{ backgroundColor: '#222' }} />
+              <div className="mx-2 my-1 h-px" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
             </div>
           )}
 
           {TAB_GROUPS.map((group, gi) => (
             <div key={group.label}>
               {gi > 0 && (
-                <div className="mx-2 my-1 h-px" style={{ backgroundColor: '#222' }} />
+                <div className="mx-2 my-1 h-px" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
               )}
               {/* Group label */}
               <div className="px-1 py-1">
-                <span className="block text-center" style={{ fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#333' }}>
+                <span className="block text-center" style={{ fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'hsl(var(--studio-hover))' }}>
                   {group.label}
                 </span>
               </div>
@@ -145,11 +145,11 @@ export function EditorLeftPanel({ siteId }: EditorLeftPanelProps) {
                         onClick={() => handleTabChange(tab.key)}
                         className="relative flex items-center justify-center w-full h-9 transition-all duration-200"
                         style={{
-                          color: active ? tab.color : isRecent ? '#666' : '#555',
+                          color: active ? tab.color : isRecent ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-3))',
                           backgroundColor: active ? `${tab.color}0a` : 'transparent',
                         }}
                         onMouseEnter={e => { if (!active) { e.currentTarget.style.color = tab.color; e.currentTarget.style.backgroundColor = `${tab.color}08`; } }}
-                        onMouseLeave={e => { if (!active) { e.currentTarget.style.color = isRecent ? '#666' : '#555'; e.currentTarget.style.backgroundColor = 'transparent'; } }}
+                        onMouseLeave={e => { if (!active) { e.currentTarget.style.color = isRecent ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-3))'; e.currentTarget.style.backgroundColor = 'transparent'; } }}
                       >
                         {/* Active indicator bar */}
                         {active && (
@@ -167,13 +167,13 @@ export function EditorLeftPanel({ siteId }: EditorLeftPanelProps) {
                         <Icon className="h-[15px] w-[15px] shrink-0" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent side="right" sideOffset={8} className="text-[10px] font-medium" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#ccc', padding: '6px 10px' }}>
+                    <TooltipContent side="right" sideOffset={8} className="text-[10px] font-medium" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))', padding: '6px 10px' }}>
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-2">
                           <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tab.color }} />
                           <span className="font-semibold">{tab.label}</span>
                         </div>
-                        <span style={{ fontSize: '9px', color: '#666' }}>{tab.desc}</span>
+                        <span style={{ fontSize: '9px', color: 'hsl(var(--studio-ink-3))' }}>{tab.desc}</span>
                       </div>
                     </TooltipContent>
                   </Tooltip>
@@ -185,20 +185,20 @@ export function EditorLeftPanel({ siteId }: EditorLeftPanelProps) {
         
         {/* Collapse toggle at bottom */}
         <div className="mt-auto pt-1">
-          <div className="mx-2 mb-1 h-px" style={{ backgroundColor: '#222' }} />
+          <div className="mx-2 mb-1 h-px" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={() => setPanelCollapsed(c => !c)}
                 className="flex items-center justify-center w-full h-8 transition-all duration-200"
-                style={{ color: '#444' }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#888'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = '#444'; }}
+                style={{ color: 'hsl(var(--studio-hover))' }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'hsl(var(--studio-ink-2))'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'hsl(var(--studio-line-strong))'; }}
               >
                 {panelCollapsed ? <ChevronsRight className="h-3.5 w-3.5" /> : <ChevronsLeft className="h-3.5 w-3.5" />}
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={8} className="text-[10px]" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#888' }}>
+            <TooltipContent side="right" sideOffset={8} className="text-[10px]" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
               {panelCollapsed ? 'Expand panel' : 'Collapse panel'}
             </TooltipContent>
           </Tooltip>
@@ -220,7 +220,7 @@ export function EditorLeftPanel({ siteId }: EditorLeftPanelProps) {
               {activeTab === 'sections' && <SectionsLibrary />}
               {activeTab === 'pages' && siteId && <PagesPanel siteId={siteId} />}
               {activeTab === 'pages' && !siteId && (
-                <div className="flex items-center justify-center h-full text-[11px] text-[#555]">No site loaded</div>
+                <div className="flex items-center justify-center h-full text-[11px] text-[hsl(var(--studio-ink-3))]">No site loaded</div>
               )}
               {activeTab === 'layers' && <LayersPanel />}
               {activeTab === 'interactions' && <InteractionsPanel />}

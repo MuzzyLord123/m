@@ -68,38 +68,38 @@ export function KeyboardShortcutsModal({ open, onClose }: KeyboardShortcutsModal
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             className="relative z-10 w-full max-w-lg rounded-2xl p-6"
             style={{
-              backgroundColor: '#1a1a1a',
-              border: '1px solid #2a2a2a',
+              backgroundColor: 'hsl(var(--studio-panel))',
+              border: '1px solid hsl(var(--studio-line))',
               boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
             }}
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0073E6, #005bb5)' }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent)), hsl(var(--studio-accent)))' }}>
                   <Command className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold text-[#e0e0e0]">Keyboard Shortcuts</h2>
-                  <p className="text-[10px] text-[#666]">Speed up your workflow</p>
+                  <h2 className="text-sm font-semibold text-[hsl(var(--studio-ink))]">Keyboard Shortcuts</h2>
+                  <p className="text-[10px] text-[hsl(var(--studio-ink-3))]">Speed up your workflow</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
                 className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-white/[0.06] transition-colors"
               >
-                <X className="h-4 w-4 text-[#666]" />
+                <X className="h-4 w-4 text-[hsl(var(--studio-ink-3))]" />
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-6">
               {SHORTCUT_GROUPS.map(group => (
                 <div key={group.label}>
-                  <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#555] mb-2.5">{group.label}</div>
+                  <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-[hsl(var(--studio-ink-3))] mb-2.5">{group.label}</div>
                   <div className="space-y-1">
                     {group.shortcuts.map(([key, label]) => (
                       <div key={key} className="flex items-center justify-between py-1">
-                        <span className="text-[11px] text-[#999]">{label}</span>
-                        <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-[#2a2a2a] text-[#777] border border-[#333] min-w-[28px] text-center">
+                        <span className="text-[11px] text-[hsl(var(--studio-ink-2))]">{label}</span>
+                        <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-[hsl(var(--studio-raised))] text-[hsl(var(--studio-ink-3))] border border-[hsl(var(--studio-line))] min-w-[28px] text-center">
                           {key}
                         </kbd>
                       </div>
@@ -109,8 +109,8 @@ export function KeyboardShortcutsModal({ open, onClose }: KeyboardShortcutsModal
               ))}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-[#2a2a2a] flex items-center justify-center">
-              <span className="text-[10px] text-[#555]">Press <kbd className="text-[10px] font-mono px-1 py-0.5 rounded bg-[#2a2a2a] text-[#777] border border-[#333]">⌘ /</kbd> to toggle this panel</span>
+            <div className="mt-6 pt-4 border-t border-[hsl(var(--studio-line))] flex items-center justify-center">
+              <span className="text-[10px] text-[hsl(var(--studio-ink-3))]">Press <kbd className="text-[10px] font-mono px-1 py-0.5 rounded bg-[hsl(var(--studio-raised))] text-[hsl(var(--studio-ink-3))] border border-[hsl(var(--studio-line))]">⌘ /</kbd> to toggle this panel</span>
             </div>
           </motion.div>
         </motion.div>

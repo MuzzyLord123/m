@@ -15,7 +15,7 @@ export function SectionPreview({ elements }: { elements: EditorElement[] }) {
         height: '120px',
         overflow: 'hidden',
         borderRadius: '4px',
-        backgroundColor: '#1a1a1a',
+        backgroundColor: 'hsl(var(--studio-panel))',
         position: 'relative',
       }}
     >

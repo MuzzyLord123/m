@@ -298,7 +298,7 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
   };
 
   const renderFieldInput = (field: CMSField, value: any, onChange: (val: any) => void, isEdit = false) => {
-    const inputStyle = { backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' };
+    const inputStyle = { backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' };
     switch (field.type) {
       case 'richtext': case 'markdown':
         return <Textarea value={value || ''} onChange={e => onChange(e.target.value)} rows={4} className="text-[12px]" style={inputStyle} placeholder={field.helpText} />;
@@ -328,16 +328,16 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
     }
   };
 
-  if (!siteId) return <div className="flex items-center justify-center h-full text-[11px] text-[#555]">No site loaded</div>;
+  if (!siteId) return <div className="flex items-center justify-center h-full text-[11px] text-[hsl(var(--studio-ink-3))]">No site loaded</div>;
 
   // Collection list view
   if (!activeCollection) {
     return (
-      <div className="h-full flex flex-col" style={{ color: '#ccc' }}>
-        <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: '1px solid #2a2a2a' }}>
+      <div className="h-full flex flex-col" style={{ color: 'hsl(var(--studio-ink-2))' }}>
+        <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
           <div className="flex items-center gap-1.5">
             <Database className="h-3.5 w-3.5 text-purple-400" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#888]">CMS</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--studio-ink-2))]">CMS</span>
           </div>
           <div className="flex gap-1">
             <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => setShowPresets(true)}>
@@ -350,12 +350,12 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
         </div>
         <ScrollArea className="flex-1">
           {loading ? (
-            <div className="p-3 text-[11px] text-[#555]">Loading</div>
+            <div className="p-3 text-[11px] text-[hsl(var(--studio-ink-3))]">Loading</div>
           ) : collections.length === 0 ? (
             <div className="p-4 text-center">
-              <Database className="h-8 w-8 mx-auto text-[#444] mb-2" />
-              <p className="text-[11px] text-[#666] mb-2">No CMS collections yet</p>
-              <p className="text-[10px] text-[#555] mb-3">Start with a template or create a custom collection</p>
+              <Database className="h-8 w-8 mx-auto text-[hsl(var(--studio-hover))] mb-2" />
+              <p className="text-[11px] text-[hsl(var(--studio-ink-3))] mb-2">No CMS collections yet</p>
+              <p className="text-[10px] text-[hsl(var(--studio-ink-3))] mb-3">Start with a template or create a custom collection</p>
               <div className="flex gap-2 justify-center">
                 <Button size="sm" className="h-7 text-[11px]" onClick={() => setShowPresets(true)}>
                   <LayoutTemplate className="h-3 w-3 mr-1" /> Templates
@@ -372,9 +372,9 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
                   <span className="text-sm shrink-0">{coll.icon || '📄'}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-medium truncate">{coll.name}</p>
-                    <p className="text-[10px] text-[#555]">{coll.fields.length} fields</p>
+                    <p className="text-[10px] text-[hsl(var(--studio-ink-3))]">{coll.fields.length} fields</p>
                   </div>
-                  <ChevronRight className="h-3 w-3 text-[#555]" />
+                  <ChevronRight className="h-3 w-3 text-[hsl(var(--studio-ink-3))]" />
                   <button className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-red-400" onClick={e => { e.stopPropagation(); deleteCollection(coll.id); }}>
                     <Trash2 className="h-3 w-3" />
                   </button>
@@ -386,16 +386,16 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
 
         {/* Preset Templates Dialog */}
         <Dialog open={showPresets} onOpenChange={setShowPresets}>
-          <DialogContent className="sm:max-w-md" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}>
+          <DialogContent className="sm:max-w-md" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
             <DialogHeader><DialogTitle className="text-sm">Collection Templates</DialogTitle></DialogHeader>
             <ScrollArea className="max-h-[400px]">
               <div className="grid grid-cols-2 gap-2 p-1">
                 {COLLECTION_PRESETS.map(preset => (
                   <button key={preset.slug} onClick={() => createFromPreset(preset)}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-lg hover:bg-white/5 text-center transition-colors" style={{ border: '1px solid #333' }}>
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-lg hover:bg-white/5 text-center transition-colors" style={{ border: '1px solid hsl(var(--studio-line))' }}>
                     <span className="text-2xl">{preset.icon}</span>
                     <span className="text-[11px] font-medium">{preset.name}</span>
-                    <span className="text-[9px] text-[#666]">{preset.fields.length} fields</span>
+                    <span className="text-[9px] text-[hsl(var(--studio-ink-3))]">{preset.fields.length} fields</span>
                   </button>
                 ))}
               </div>
@@ -405,43 +405,43 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
 
         {/* New Collection Dialog */}
         <Dialog open={showNewCollection} onOpenChange={setShowNewCollection}>
-          <DialogContent className="sm:max-w-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}>
+          <DialogContent className="sm:max-w-lg" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
             <DialogHeader><DialogTitle className="text-sm">Create Custom Collection</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div>
-                <label className="text-[11px] text-[#888] mb-1 block">Collection Name</label>
-                <Input value={newCollName} onChange={e => setNewCollName(e.target.value)} placeholder="e.g. Blog Posts" className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Collection Name</label>
+                <Input value={newCollName} onChange={e => setNewCollName(e.target.value)} placeholder="e.g. Blog Posts" className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
               </div>
               <div>
-                <label className="text-[11px] text-[#888] mb-1 block">Description</label>
-                <Input value={newCollDesc} onChange={e => setNewCollDesc(e.target.value)} placeholder="Optional" className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Description</label>
+                <Input value={newCollDesc} onChange={e => setNewCollDesc(e.target.value)} placeholder="Optional" className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-[11px] text-[#888]">Fields</label>
+                  <label className="text-[11px] text-[hsl(var(--studio-ink-2))]">Fields</label>
                   <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={addField}><Plus className="h-3 w-3 mr-1" /> Add Field</Button>
                 </div>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {newFields.map((field, idx) => (
-                    <div key={idx} className="flex gap-2 items-start p-2 rounded" style={{ backgroundColor: '#2a2a2a' }}>
+                    <div key={idx} className="flex gap-2 items-start p-2 rounded" style={{ backgroundColor: 'hsl(var(--studio-raised))' }}>
                       <div className="flex-1 space-y-1.5">
-                        <Input value={field.name} onChange={e => updateField(idx, { name: e.target.value })} placeholder="Field name" className="h-7 text-[11px]" style={{ backgroundColor: '#222', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                        <Input value={field.name} onChange={e => updateField(idx, { name: e.target.value })} placeholder="Field name" className="h-7 text-[11px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                         <div className="flex gap-2">
                           <Select value={field.type} onValueChange={v => updateField(idx, { type: v as CMSField['type'] })}>
-                            <SelectTrigger className="h-7 text-[11px] flex-1" style={{ backgroundColor: '#222', border: '1px solid #3a3a3a', color: '#ccc' }}><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-7 text-[11px] flex-1" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}><SelectValue /></SelectTrigger>
                             <SelectContent>{FIELD_TYPES.map(ft => <SelectItem key={ft.value} value={ft.value}>{ft.icon} {ft.label}</SelectItem>)}</SelectContent>
                           </Select>
-                          <label className="flex items-center gap-1 text-[10px] text-[#888]">
+                          <label className="flex items-center gap-1 text-[10px] text-[hsl(var(--studio-ink-2))]">
                             <input type="checkbox" checked={field.required || false} onChange={e => updateField(idx, { required: e.target.checked })} />Req
                           </label>
                         </div>
                         {field.type === 'select' && (
                           <Input value={(field.options || []).join(', ')} onChange={e => updateField(idx, { options: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
-                            placeholder="option1, option2, option3" className="h-7 text-[10px]" style={{ backgroundColor: '#222', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                            placeholder="option1, option2, option3" className="h-7 text-[10px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                         )}
-                        <Input value={field.helpText || ''} onChange={e => updateField(idx, { helpText: e.target.value })} placeholder="Help text (optional)" className="h-6 text-[10px]" style={{ backgroundColor: '#222', border: '1px solid #3a3a3a', color: '#888' }} />
+                        <Input value={field.helpText || ''} onChange={e => updateField(idx, { helpText: e.target.value })} placeholder="Help text (optional)" className="h-6 text-[10px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                       </div>
-                      <button onClick={() => setNewFields(prev => prev.filter((_, i) => i !== idx))} className="text-[#666] hover:text-red-400 mt-1">
+                      <button onClick={() => setNewFields(prev => prev.filter((_, i) => i !== idx))} className="text-[hsl(var(--studio-ink-3))] hover:text-red-400 mt-1">
                         <Trash2 className="h-3 w-3" />
                       </button>
                     </div>
@@ -458,9 +458,9 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
 
   // Entry list view
   return (
-    <div className="h-full flex flex-col" style={{ color: '#ccc' }}>
-      <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid #2a2a2a' }}>
-        <button onClick={() => { setActiveCollection(null); setEntries([]); setSearchQuery(''); setStatusFilter('all'); setSelectedEntries(new Set()); }} className="text-[#888] hover:text-white">
+    <div className="h-full flex flex-col" style={{ color: 'hsl(var(--studio-ink-2))' }}>
+      <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
+        <button onClick={() => { setActiveCollection(null); setEntries([]); setSearchQuery(''); setStatusFilter('all'); setSelectedEntries(new Set()); }} className="text-[hsl(var(--studio-ink-2))] hover:text-white">
           <ChevronLeft className="h-3.5 w-3.5" />
         </button>
         <span className="text-sm shrink-0">{activeCollection.icon || '📄'}</span>
@@ -474,13 +474,13 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
       </div>
 
       {/* Search & filter bar */}
-      <div className="flex gap-1.5 px-2 py-1.5" style={{ borderBottom: '1px solid #2a2a2a' }}>
+      <div className="flex gap-1.5 px-2 py-1.5" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
         <div className="relative flex-1">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-[#555]" />
-          <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search..." className="h-7 text-[11px] pl-7" style={{ backgroundColor: '#2a2a2a', border: '1px solid #333', color: '#ccc' }} />
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-[hsl(var(--studio-ink-3))]" />
+          <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search..." className="h-7 text-[11px] pl-7" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-7 w-24 text-[10px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #333', color: '#ccc' }}><Filter className="h-3 w-3 mr-1" /><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-7 w-24 text-[10px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}><Filter className="h-3 w-3 mr-1" /><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
@@ -492,8 +492,8 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
 
       {/* Bulk actions */}
       {selectedEntries.size > 0 && (
-        <div className="flex items-center gap-2 px-3 py-1.5" style={{ backgroundColor: '#252525', borderBottom: '1px solid #2a2a2a' }}>
-          <span className="text-[10px] text-[#888]">{selectedEntries.size} selected</span>
+        <div className="flex items-center gap-2 px-3 py-1.5" style={{ backgroundColor: 'hsl(var(--studio-raised))', borderBottom: '1px solid hsl(var(--studio-line))' }}>
+          <span className="text-[10px] text-[hsl(var(--studio-ink-2))]">{selectedEntries.size} selected</span>
           <Button size="sm" variant="ghost" className="h-5 text-[10px]" onClick={bulkPublish}>Publish</Button>
           <Button size="sm" variant="ghost" className="h-5 text-[10px] text-red-400" onClick={bulkDelete}>Delete</Button>
           <Button size="sm" variant="ghost" className="h-5 text-[10px]" onClick={() => setSelectedEntries(new Set())}>Clear</Button>
@@ -503,7 +503,7 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
       <ScrollArea className="flex-1">
         {filteredEntries.length === 0 ? (
           <div className="p-4 text-center">
-            <p className="text-[11px] text-[#666] mb-2">{searchQuery ? 'No matching entries' : 'No entries in this collection'}</p>
+            <p className="text-[11px] text-[hsl(var(--studio-ink-3))] mb-2">{searchQuery ? 'No matching entries' : 'No entries in this collection'}</p>
             {!searchQuery && (
               <Button size="sm" className="h-7 text-[11px]" onClick={() => { setNewEntryData({}); setNewEntryTitle(''); setShowNewEntry(true); }}>
                 <Plus className="h-3 w-3 mr-1" /> Add Entry
@@ -515,26 +515,26 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
             {filteredEntries.map(entry => (
               <div key={entry.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 group">
                 <button onClick={() => setSelectedEntries(prev => { const s = new Set(prev); s.has(entry.id) ? s.delete(entry.id) : s.add(entry.id); return s; })} className="shrink-0">
-                  {selectedEntries.has(entry.id) ? <CheckSquare className="h-3.5 w-3.5 text-purple-400" /> : <Square className="h-3.5 w-3.5 text-[#444]" />}
+                  {selectedEntries.has(entry.id) ? <CheckSquare className="h-3.5 w-3.5 text-purple-400" /> : <Square className="h-3.5 w-3.5 text-[hsl(var(--studio-hover))]" />}
                 </button>
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setShowEditEntry(entry)}>
                   <p className="text-[11px] font-medium truncate">{entry.title}</p>
-                  <p className="text-[10px] text-[#555]">{new Date(entry.created_at).toLocaleDateString()}</p>
+                  <p className="text-[10px] text-[hsl(var(--studio-ink-3))]">{new Date(entry.created_at).toLocaleDateString()}</p>
                 </div>
                 <Badge variant="outline" className="text-[9px] h-4 shrink-0" style={{
-                  borderColor: entry.status === 'published' ? '#22c55e' : entry.status === 'scheduled' ? '#f59e0b' : '#666',
-                  color: entry.status === 'published' ? '#22c55e' : entry.status === 'scheduled' ? '#f59e0b' : '#888',
+                  borderColor: entry.status === 'published' ? 'hsl(var(--studio-ok))' : entry.status === 'scheduled' ? 'hsl(var(--studio-warn))' : 'hsl(var(--studio-ink-3))',
+                  color: entry.status === 'published' ? 'hsl(var(--studio-ok))' : entry.status === 'scheduled' ? 'hsl(var(--studio-warn))' : 'hsl(var(--studio-ink-2))',
                 }}>{entry.status}</Badge>
-                <button onClick={() => togglePublish(entry)} className="text-[#666] hover:text-white p-0.5" title={entry.status === 'published' ? 'Unpublish' : 'Publish'}>
+                <button onClick={() => togglePublish(entry)} className="text-[hsl(var(--studio-ink-3))] hover:text-white p-0.5" title={entry.status === 'published' ? 'Unpublish' : 'Publish'}>
                   {entry.status === 'published' ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                 </button>
-                <button onClick={() => { setShowSchedule(entry); setScheduleDate(''); }} className="text-[#666] hover:text-white p-0.5 opacity-0 group-hover:opacity-100" title="Schedule">
+                <button onClick={() => { setShowSchedule(entry); setScheduleDate(''); }} className="text-[hsl(var(--studio-ink-3))] hover:text-white p-0.5 opacity-0 group-hover:opacity-100" title="Schedule">
                   <Calendar className="h-3 w-3" />
                 </button>
-                <button onClick={() => duplicateEntry(entry)} className="text-[#666] hover:text-white p-0.5 opacity-0 group-hover:opacity-100" title="Duplicate">
+                <button onClick={() => duplicateEntry(entry)} className="text-[hsl(var(--studio-ink-3))] hover:text-white p-0.5 opacity-0 group-hover:opacity-100" title="Duplicate">
                   <Copy className="h-3 w-3" />
                 </button>
-                <button onClick={() => deleteEntry(entry.id)} className="opacity-0 group-hover:opacity-100 text-[#666] hover:text-red-400 p-0.5">
+                <button onClick={() => deleteEntry(entry.id)} className="opacity-0 group-hover:opacity-100 text-[hsl(var(--studio-ink-3))] hover:text-red-400 p-0.5">
                   <Trash2 className="h-3 w-3" />
                 </button>
               </div>
@@ -545,11 +545,11 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
 
       {/* Schedule Dialog */}
       <Dialog open={!!showSchedule} onOpenChange={() => setShowSchedule(null)}>
-        <DialogContent className="sm:max-w-sm" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}>
+        <DialogContent className="sm:max-w-sm" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
           <DialogHeader><DialogTitle className="text-sm">Schedule Publication</DialogTitle></DialogHeader>
           <div>
-            <label className="text-[11px] text-[#888] mb-1 block">Publish Date & Time</label>
-            <Input type="datetime-local" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+            <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Publish Date & Time</label>
+            <Input type="datetime-local" value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
           </div>
           <DialogFooter><Button size="sm" onClick={schedulePublish} disabled={!scheduleDate}>Schedule</Button></DialogFooter>
         </DialogContent>
@@ -557,20 +557,20 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
 
       {/* New Entry Dialog */}
       <Dialog open={showNewEntry} onOpenChange={setShowNewEntry}>
-        <DialogContent className="sm:max-w-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}>
+        <DialogContent className="sm:max-w-lg" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
           <DialogHeader><DialogTitle className="text-sm">New {activeCollection.name} Entry</DialogTitle></DialogHeader>
           <ScrollArea className="max-h-[450px]">
             <div className="space-y-3 pr-2">
               <div>
-                <label className="text-[11px] text-[#888] mb-1 block">Title *</label>
-                <Input value={newEntryTitle} onChange={e => setNewEntryTitle(e.target.value)} className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Title *</label>
+                <Input value={newEntryTitle} onChange={e => setNewEntryTitle(e.target.value)} className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
               </div>
               {activeCollection.fields.map(field => (
                 <div key={field.slug}>
-                  <label className="text-[11px] text-[#888] mb-1 flex items-center gap-1">
+                  <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 flex items-center gap-1">
                     {field.name} {field.required && <span className="text-red-400">*</span>}
                   </label>
-                  {field.helpText && <p className="text-[9px] text-[#555] mb-1">{field.helpText}</p>}
+                  {field.helpText && <p className="text-[9px] text-[hsl(var(--studio-ink-3))] mb-1">{field.helpText}</p>}
                   {renderFieldInput(field, newEntryData[field.slug], val => setNewEntryData(prev => ({ ...prev, [field.slug]: val })))}
                 </div>
               ))}
@@ -583,21 +583,21 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
       {/* Edit Entry Dialog */}
       <Dialog open={!!showEditEntry} onOpenChange={() => setShowEditEntry(null)}>
         {showEditEntry && (
-          <DialogContent className="sm:max-w-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}>
+          <DialogContent className="sm:max-w-lg" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
             <DialogHeader><DialogTitle className="text-sm">Edit Entry</DialogTitle></DialogHeader>
             <ScrollArea className="max-h-[450px]">
               <div className="space-y-3 pr-2">
                 <div>
-                  <label className="text-[11px] text-[#888] mb-1 block">Title</label>
-                  <Input defaultValue={showEditEntry.title} onBlur={e => updateEntry(showEditEntry, { title: e.target.value } as any)} className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                  <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Title</label>
+                  <Input defaultValue={showEditEntry.title} onBlur={e => updateEntry(showEditEntry, { title: e.target.value } as any)} className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                 </div>
                 <div>
-                  <label className="text-[11px] text-[#888] mb-1 block">Slug</label>
-                  <Input defaultValue={showEditEntry.slug} onBlur={e => updateEntry(showEditEntry, { slug: e.target.value } as any)} className="h-8 text-[12px]" style={{ backgroundColor: '#2a2a2a', border: '1px solid #3a3a3a', color: '#ccc' }} />
+                  <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 block">Slug</label>
+                  <Input defaultValue={showEditEntry.slug} onBlur={e => updateEntry(showEditEntry, { slug: e.target.value } as any)} className="h-8 text-[12px]" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }} />
                 </div>
                 {activeCollection.fields.map(field => (
                   <div key={field.slug}>
-                    <label className="text-[11px] text-[#888] mb-1 flex items-center gap-1">
+                    <label className="text-[11px] text-[hsl(var(--studio-ink-2))] mb-1 flex items-center gap-1">
                       {field.name} {field.required && <span className="text-red-400">*</span>}
                     </label>
                     {renderFieldInput(field, (showEditEntry.data as any)?.[field.slug], val => updateEntry(showEditEntry, { data: { ...(showEditEntry.data as any), [field.slug]: val } } as any), true)}
@@ -608,8 +608,8 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
             <DialogFooter>
               <div className="flex gap-2">
                 <Badge variant="outline" className="text-[9px]" style={{
-                  borderColor: showEditEntry.status === 'published' ? '#22c55e' : '#666',
-                  color: showEditEntry.status === 'published' ? '#22c55e' : '#888',
+                  borderColor: showEditEntry.status === 'published' ? 'hsl(var(--studio-ok))' : 'hsl(var(--studio-ink-3))',
+                  color: showEditEntry.status === 'published' ? 'hsl(var(--studio-ok))' : 'hsl(var(--studio-ink-2))',
                 }}>{showEditEntry.status}</Badge>
                 <Button size="sm" variant="outline" onClick={() => setShowEditEntry(null)}>Done</Button>
               </div>
@@ -620,22 +620,22 @@ export function CMSPanel({ siteId }: { siteId?: string }) {
 
       {/* Field Editor Dialog */}
       <Dialog open={showFieldEditor} onOpenChange={setShowFieldEditor}>
-        <DialogContent className="sm:max-w-lg" style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', color: '#ccc' }}>
+        <DialogContent className="sm:max-w-lg" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}>
           <DialogHeader><DialogTitle className="text-sm">Edit Fields — {activeCollection.name}</DialogTitle></DialogHeader>
           <div className="space-y-2 max-h-[350px] overflow-y-auto">
             {activeCollection.fields.map((field, idx) => (
-              <div key={idx} className="flex gap-2 items-center p-2 rounded" style={{ backgroundColor: '#2a2a2a' }}>
-                <GripVertical className="h-3 w-3 text-[#444] shrink-0" />
+              <div key={idx} className="flex gap-2 items-center p-2 rounded" style={{ backgroundColor: 'hsl(var(--studio-raised))' }}>
+                <GripVertical className="h-3 w-3 text-[hsl(var(--studio-hover))] shrink-0" />
                 <span className="text-[11px] flex-1">{field.name}</span>
                 <Badge variant="outline" className="text-[9px] h-4">{field.type}</Badge>
                 {field.required && <Badge variant="outline" className="text-[9px] h-4 text-red-400 border-red-400/30">req</Badge>}
                 <button onClick={() => {
                   const updated = activeCollection.fields.filter((_, i) => i !== idx);
                   updateCollectionFields(updated);
-                }} className="text-[#666] hover:text-red-400"><Trash2 className="h-3 w-3" /></button>
+                }} className="text-[hsl(var(--studio-ink-3))] hover:text-red-400"><Trash2 className="h-3 w-3" /></button>
               </div>
             ))}
-            {activeCollection.fields.length === 0 && <p className="text-[11px] text-[#555] text-center py-2">No fields defined</p>}
+            {activeCollection.fields.length === 0 && <p className="text-[11px] text-[hsl(var(--studio-ink-3))] text-center py-2">No fields defined</p>}
           </div>
           <div className="flex gap-2 mt-2">
             <Button size="sm" variant="outline" className="text-[10px]" onClick={() => {

@@ -54,9 +54,9 @@ export function AddSectionButton() {
         onClick={() => setOpen(true)}
         className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[80] flex items-center gap-2 px-4 py-2 rounded-lg text-[11px] font-semibold transition-all hover:scale-105"
         style={{
-          backgroundColor: 'rgba(0, 115, 230, 0.9)',
-          color: '#fff',
-          boxShadow: '0 4px 20px rgba(0,115,230,0.4)',
+          backgroundColor: 'hsl(var(--studio-accent) / 0.9)',
+          color: 'hsl(var(--studio-ink))',
+          boxShadow: '0 4px 20px hsl(var(--studio-accent) / 0.4)',
           backdropFilter: 'blur(8px)',
         }}
         whileHover={{ y: -2 }}
@@ -83,27 +83,27 @@ export function AddSectionButton() {
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               className="relative z-10 w-full max-w-3xl max-h-[80vh] rounded-2xl overflow-hidden flex"
               style={{
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #2a2a2a',
+                backgroundColor: 'hsl(var(--studio-panel))',
+                border: '1px solid hsl(var(--studio-line))',
                 boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
               }}
             >
               {/* Categories sidebar */}
-              <div className="w-48 shrink-0 border-r border-[#2a2a2a] p-3 space-y-1 overflow-y-auto" style={{ backgroundColor: '#161616' }}>
-                <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#555] mb-3 px-2">Categories</div>
+              <div className="w-48 shrink-0 border-r border-[hsl(var(--studio-line))] p-3 space-y-1 overflow-y-auto" style={{ backgroundColor: 'hsl(var(--studio-panel))' }}>
+                <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-[hsl(var(--studio-ink-3))] mb-3 px-2">Categories</div>
                 {QUICK_CATEGORIES.map(cat => (
                   <button
                     key={cat}
                     onClick={() => { setActiveCategory(cat); setSearch(''); }}
                     className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-medium flex items-center justify-between transition-all ${
-                      activeCategory === cat ? 'bg-[#0073E6]/15 text-[#4da6ff]' : 'text-[#888] hover:text-[#ccc] hover:bg-white/[0.04]'
+                      activeCategory === cat ? 'bg-[hsl(var(--studio-accent))]/15 text-[#4da6ff]' : 'text-[hsl(var(--studio-ink-2))] hover:text-[hsl(var(--studio-ink-2))] hover:bg-white/[0.04]'
                     }`}
                   >
                     <span>{cat}</span>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[8px] tabular-nums px-1 py-0.5 rounded" style={{
-                        backgroundColor: activeCategory === cat ? 'rgba(0,115,230,0.15)' : 'rgba(255,255,255,0.04)',
-                        color: activeCategory === cat ? '#4da6ff' : '#555',
+                        backgroundColor: activeCategory === cat ? 'hsl(var(--studio-accent) / 0.15)' : 'rgba(255,255,255,0.04)',
+                        color: activeCategory === cat ? '#4da6ff' : 'hsl(var(--studio-ink-3))',
                       }}>
                         {allCategoryCounts[cat] || 0}
                       </span>
@@ -117,24 +117,24 @@ export function AddSectionButton() {
               <div className="flex-1 overflow-y-auto p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h3 className="text-sm font-semibold text-[#e0e0e0]">{activeCategory}</h3>
-                    <p className="text-[10px] text-[#666]">{sections.length} sections available</p>
+                    <h3 className="text-sm font-semibold text-[hsl(var(--studio-ink))]">{activeCategory}</h3>
+                    <p className="text-[10px] text-[hsl(var(--studio-ink-3))]">{sections.length} sections available</p>
                   </div>
                   <button onClick={() => setOpen(false)} className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-white/[0.06] transition-colors">
-                    <X className="h-4 w-4 text-[#666]" />
+                    <X className="h-4 w-4 text-[hsl(var(--studio-ink-3))]" />
                   </button>
                 </div>
                 {/* Search */}
                 <div className="relative mb-4">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3" style={{ color: '#555' }} />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
                   <input
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder={`Search ${activeCategory.toLowerCase()}…`}
                     className="w-full h-8 pl-8 pr-3 rounded-lg text-[11px] outline-none"
-                    style={{ backgroundColor: '#222', border: '1px solid #2a2a2a', color: '#ddd' }}
-                    onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-                    onBlur={e => { e.currentTarget.style.borderColor = '#2a2a2a'; }}
+                    style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
+                    onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-raised))'; }}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -145,15 +145,15 @@ export function AddSectionButton() {
                       whileTap={{ scale: 0.98 }}
                       onClick={() => insertSection(block.elements)}
                       className="rounded-lg overflow-hidden text-left transition-all group"
-                      style={{ backgroundColor: '#222', border: '1px solid #2a2a2a' }}
+                      style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}
                     >
                       <SectionPreview elements={block.elements} />
                       <div className="p-2.5">
-                        <div className="text-[11px] font-semibold text-[#ddd] mb-0.5">{block.name}</div>
-                        <div className="text-[9px] text-[#666] leading-snug">{block.description}</div>
+                        <div className="text-[11px] font-semibold text-[hsl(var(--studio-ink-2))] mb-0.5">{block.name}</div>
+                        <div className="text-[9px] text-[hsl(var(--studio-ink-3))] leading-snug">{block.description}</div>
                       </div>
                       <div className="px-2.5 pb-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="flex items-center gap-1 text-[9px] font-semibold text-[#0073E6]">
+                        <div className="flex items-center gap-1 text-[9px] font-semibold text-[hsl(var(--studio-accent))]">
                           <Plus className="h-2.5 w-2.5" /> Click to add
                         </div>
                       </div>

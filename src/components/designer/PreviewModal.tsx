@@ -189,13 +189,13 @@ export function PreviewModal({ open, onOpenChange, siteName, siteId }: PreviewMo
   html { scroll-behavior: smooth; }
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
   input, textarea, select { outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-  input:focus, textarea:focus, select:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  input:focus, textarea:focus, select:focus { border-color: hsl(var(--studio-accent)) !important; box-shadow: 0 0 0 3px hsl(var(--studio-accent) / 0.15); }
   a, button { cursor: pointer; }
   button:active, a:active { transform: scale(0.97); }
   [data-animate] { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
   [data-animate].is-visible { opacity: 1; transform: translateY(0); }
   @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-  ::selection { background: rgba(59,130,246,0.3); }
+  ::selection { background: hsl(var(--studio-accent) / 0.3); }
   details summary { cursor: pointer; }
   details[open] summary ~ * { animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
@@ -265,10 +265,10 @@ ${routerScript}
   const activeDevice = DEVICES.find(d => d.key === device)!;
 
   const consoleLogColors: Record<string, string> = {
-    log: '#e0e0e0',
-    info: '#60a5fa',
-    warn: '#fbbf24',
-    error: '#f87171',
+    log: 'hsl(var(--studio-ink))',
+    info: 'hsl(var(--studio-accent))',
+    warn: 'hsl(var(--studio-warn))',
+    error: 'hsl(var(--studio-risk))',
   };
   const consoleLogIcons: Record<string, typeof Info> = {
     log: Info,
@@ -279,19 +279,19 @@ ${routerScript}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] h-[92vh] p-0 gap-0 border-0 rounded-lg overflow-hidden flex flex-col" style={{ backgroundColor: '#1a1a1a' }}>
+      <DialogContent className="max-w-[95vw] h-[92vh] p-0 gap-0 border-0 rounded-lg overflow-hidden flex flex-col" style={{ backgroundColor: 'hsl(var(--studio-panel))' }}>
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 h-12 shrink-0" style={{ borderBottom: '1px solid #2a2a2a' }}>
+        <div className="flex items-center justify-between px-4 h-12 shrink-0" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
           <div className="flex items-center gap-3">
-            <span className="text-[11px] font-medium" style={{ color: '#ccc' }}>Preview — {siteName}</span>
+            <span className="text-[11px] font-medium" style={{ color: 'hsl(var(--studio-ink-2))' }}>Preview — {siteName}</span>
             {/* Test mode badge */}
-            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(251,191,36,0.15)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.3)' }}>
+            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(251,191,36,0.15)', color: 'hsl(var(--studio-warn))', border: '1px solid rgba(251,191,36,0.3)' }}>
               Live Preview
             </span>
           </div>
 
           {/* Device switcher */}
-          <div className="flex items-center gap-0 rounded-lg p-0.5" style={{ backgroundColor: '#252525', border: '1px solid #2a2a2a' }}>
+          <div className="flex items-center gap-0 rounded-lg p-0.5" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
             {DEVICES.map(d => {
               const Icon = d.icon;
               const active = device === d.key;
@@ -301,8 +301,8 @@ ${routerScript}
                   onClick={() => setDevice(d.key)}
                   className="h-7 px-3 flex items-center gap-1.5 rounded-md text-[10px] font-medium transition-all"
                   style={{
-                    backgroundColor: active ? '#0073E6' : 'transparent',
-                    color: active ? '#fff' : '#888',
+                    backgroundColor: active ? 'hsl(var(--studio-accent))' : 'transparent',
+                    color: active ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-ink-2))',
                   }}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -319,39 +319,39 @@ ${routerScript}
               className="h-7 px-2.5 flex items-center gap-1.5 rounded text-[10px] font-medium transition-colors"
               style={{
                 backgroundColor: consoleOpen ? '#1e3a5f' : 'transparent',
-                color: consoleOpen ? '#60a5fa' : '#888',
+                color: consoleOpen ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
               }}
               title="Toggle Console"
             >
               <TerminalSquare className="h-3.5 w-3.5" />
               Console
               {consoleLogs.filter(l => l.level === 'error').length > 0 && (
-                <span className="ml-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: '#dc2626', color: '#fff' }}>
+                <span className="ml-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ backgroundColor: 'hsl(var(--studio-risk))', color: 'hsl(var(--studio-ink))' }}>
                   {consoleLogs.filter(l => l.level === 'error').length}
                 </span>
               )}
             </button>
             <button
               onClick={copyShareLink}
-              className="h-7 px-2.5 flex items-center gap-1.5 rounded text-[10px] font-medium transition-colors hover:bg-[#333]"
-              style={{ color: '#888' }}
+              className="h-7 px-2.5 flex items-center gap-1.5 rounded text-[10px] font-medium transition-colors hover:bg-[hsl(var(--studio-hover))]"
+              style={{ color: 'hsl(var(--studio-ink-2))' }}
               title="Share Preview"
             >
-              {linkCopied ? <Check className="h-3.5 w-3.5" style={{ color: '#22c55e' }} /> : <Share2 className="h-3.5 w-3.5" />}
+              {linkCopied ? <Check className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-ok))' }} /> : <Share2 className="h-3.5 w-3.5" />}
             </button>
             <button
               onClick={openInNewTab}
-              className="h-7 px-2.5 flex items-center gap-1.5 rounded text-[10px] font-medium transition-colors hover:bg-[#333]"
-              style={{ color: '#888' }}
+              className="h-7 px-2.5 flex items-center gap-1.5 rounded text-[10px] font-medium transition-colors hover:bg-[hsl(var(--studio-hover))]"
+              style={{ color: 'hsl(var(--studio-ink-2))' }}
               title="Open in New Tab"
             >
               <ExternalLink className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => onOpenChange(false)}
-              className="h-7 w-7 flex items-center justify-center rounded hover:bg-[#333] transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded hover:bg-[hsl(var(--studio-hover))] transition-colors"
             >
-              <X className="h-3.5 w-3.5" style={{ color: '#888' }} />
+              <X className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-ink-2))' }} />
             </button>
           </div>
         </div>
@@ -359,7 +359,7 @@ ${routerScript}
         {/* Preview area */}
         <div className="flex-1 flex flex-col overflow-hidden" style={{ minHeight: 0 }}>
           <div className="flex-1 flex justify-center overflow-hidden" style={{
-            backgroundColor: '#111',
+            backgroundColor: 'hsl(var(--studio-sunken))',
             padding: device === 'browser' || device === 'responsive' ? '0' : '24px',
             alignItems: device === 'browser' || device === 'responsive' ? 'stretch' : 'flex-start',
           }}>
@@ -380,8 +380,8 @@ ${routerScript}
               {device === 'browser' && (
                 <div style={{
                   height: '36px', display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '0 12px', backgroundColor: '#2a2a2a',
-                  borderBottom: '1px solid #333',
+                  padding: '0 12px', backgroundColor: 'hsl(var(--studio-raised))',
+                  borderBottom: '1px solid hsl(var(--studio-line))',
                 }}>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#ff5f57' }} />
@@ -389,9 +389,9 @@ ${routerScript}
                     <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#28c840' }} />
                   </div>
                   <div style={{
-                    flex: 1, height: '22px', borderRadius: '4px', backgroundColor: '#1a1a1a',
-                    border: '1px solid #333', display: 'flex', alignItems: 'center',
-                    padding: '0 10px', fontSize: '10px', color: '#666',
+                    flex: 1, height: '22px', borderRadius: '4px', backgroundColor: 'hsl(var(--studio-panel))',
+                    border: '1px solid hsl(var(--studio-line))', display: 'flex', alignItems: 'center',
+                    padding: '0 10px', fontSize: '10px', color: 'hsl(var(--studio-ink-3))',
                   }}>
                     🔒 https://{siteName.toLowerCase().replace(/\s+/g, '-')}.quooro-sites.com
                   </div>
@@ -405,7 +405,7 @@ ${routerScript}
                     position: 'absolute',
                     inset: device === 'mobile' ? '-16px -8px' : device === 'tablet' ? '-12px -8px' : '-8px -4px',
                     borderRadius: activeDevice.frame.radius,
-                    border: `${device === 'mobile' ? '3px' : '2px'} solid #333`,
+                    border: `${device === 'mobile' ? '3px' : '2px'} solid hsl(var(--studio-line))`,
                     pointerEvents: 'none',
                     zIndex: 10,
                   }}
@@ -415,9 +415,9 @@ ${routerScript}
               {device === 'mobile' && (
                 <div style={{
                   position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)',
-                  width: '120px', height: '24px', backgroundColor: '#1a1a1a',
+                  width: '120px', height: '24px', backgroundColor: 'hsl(var(--studio-panel))',
                   borderRadius: '0 0 16px 16px', zIndex: 20,
-                  border: '2px solid #333', borderTop: 'none',
+                  border: '2px solid hsl(var(--studio-line))', borderTop: 'none',
                 }} />
               )}
 
@@ -432,7 +432,7 @@ ${routerScript}
                   width: '100%',
                   flex: device === 'browser' || device === 'responsive' ? '1' : undefined,
                   height: device === 'browser' || device === 'responsive' ? undefined : device === 'mobile' ? '812px' : device === 'tablet' ? '1024px' : '800px',
-                  backgroundColor: '#fff',
+                  backgroundColor: 'hsl(var(--studio-ink))',
                   borderRadius: device === 'browser' || device === 'responsive' ? '0' : (activeDevice.frame?.radius || '8px'),
                   overflow: 'hidden',
                 }}
@@ -442,7 +442,7 @@ ${routerScript}
               {device !== 'responsive' && device !== 'browser' && (
                 <div style={{
                   textAlign: 'center', marginTop: '16px',
-                  fontSize: '10px', fontWeight: 600, color: '#555',
+                  fontSize: '10px', fontWeight: 600, color: 'hsl(var(--studio-ink-3))',
                   letterSpacing: '0.06em', textTransform: 'uppercase',
                 }}>
                   {activeDevice.label} — {activeDevice.frame?.w}×{activeDevice.frame?.h}
@@ -460,18 +460,18 @@ ${routerScript}
                 exit={{ height: 0 }}
                 transition={{ duration: 0.2 }}
                 style={{
-                  borderTop: '1px solid #2a2a2a',
-                  backgroundColor: '#111',
+                  borderTop: '1px solid hsl(var(--studio-line))',
+                  backgroundColor: 'hsl(var(--studio-sunken))',
                   overflow: 'hidden',
                 }}
               >
-                <div className="flex items-center justify-between px-3 h-7 shrink-0" style={{ borderBottom: '1px solid #222', backgroundColor: '#1a1a1a' }}>
-                  <span className="text-[10px] font-medium" style={{ color: '#888' }}>Console</span>
+                <div className="flex items-center justify-between px-3 h-7 shrink-0" style={{ borderBottom: '1px solid hsl(var(--studio-line))', backgroundColor: 'hsl(var(--studio-panel))' }}>
+                  <span className="text-[10px] font-medium" style={{ color: 'hsl(var(--studio-ink-2))' }}>Console</span>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setConsoleLogs([])}
-                      className="text-[9px] px-1.5 rounded hover:bg-[#333] transition-colors"
-                      style={{ color: '#666' }}
+                      className="text-[9px] px-1.5 rounded hover:bg-[hsl(var(--studio-hover))] transition-colors"
+                      style={{ color: 'hsl(var(--studio-ink-3))' }}
                     >
                       Clear
                     </button>
@@ -479,7 +479,7 @@ ${routerScript}
                 </div>
                 <div className="overflow-y-auto" style={{ height: 'calc(100% - 28px)', fontFamily: "'SF Mono', 'Fira Code', monospace", fontSize: '11px' }}>
                   {consoleLogs.length === 0 && (
-                    <div className="flex items-center justify-center h-full" style={{ color: '#444' }}>
+                    <div className="flex items-center justify-center h-full" style={{ color: 'hsl(var(--studio-hover))' }}>
                       <span className="text-[10px]">No console output yet — interact with the preview</span>
                     </div>
                   )}
@@ -490,14 +490,14 @@ ${routerScript}
                         key={i}
                         className="flex items-start gap-2 px-3 py-1 border-b"
                         style={{
-                          borderColor: '#1a1a1a',
+                          borderColor: 'hsl(var(--studio-line))',
                           backgroundColor: entry.level === 'error' ? 'rgba(220,38,38,0.05)' : entry.level === 'warn' ? 'rgba(251,191,36,0.03)' : 'transparent',
                           color: consoleLogColors[entry.level],
                         }}
                       >
                         <Icon className="h-3 w-3 mt-0.5 shrink-0" style={{ opacity: 0.6 }} />
                         <span className="whitespace-pre-wrap break-all">{entry.message}</span>
-                        <span className="ml-auto text-[9px] shrink-0" style={{ color: '#444' }}>
+                        <span className="ml-auto text-[9px] shrink-0" style={{ color: 'hsl(var(--studio-hover))' }}>
                           {new Date(entry.timestamp).toLocaleTimeString('en-GB', { hour12: false })}
                         </span>
                       </div>

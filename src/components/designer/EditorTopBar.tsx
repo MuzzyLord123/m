@@ -24,9 +24,9 @@ interface EditorTopBarProps {
 }
 
 const BREAKPOINT_COLORS: Record<Breakpoint, string> = {
-  desktop: '#0073E6',
-  tablet: '#8b5cf6',
-  mobile: '#22c55e',
+  desktop: 'hsl(var(--studio-accent))',
+  tablet: 'hsl(var(--studio-ink-3))',
+  mobile: 'hsl(var(--studio-ok))',
 };
 
 export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCode, onCSSPreview, onShortcuts, onExit, onSaveToFiles, onSaveToDevice, onPublish, plannerMode = 'editor', onPlannerModeChange }: EditorTopBarProps) {
@@ -77,46 +77,46 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
     <>
       <div
         className="h-12 flex items-center justify-between px-3 shrink-0 select-none gap-3"
-        style={{ backgroundColor: '#141414', borderBottom: '1px solid #252525', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}
+        style={{ backgroundColor: 'hsl(var(--studio-panel))', borderBottom: '1px solid hsl(var(--studio-line))', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}
       >
         {/* Left */}
         <div className="flex items-center gap-1.5 shrink-0">
           <SettingsMenu onExportCode={onExportCode} onCSSPreview={onCSSPreview} onExit={onExit} onSaveToFiles={onSaveToFiles} onSaveToDevice={onSaveToDevice} siteId={siteId} />
-          <div className="w-[1px] h-4 bg-[#333]" />
+          <div className="w-[1px] h-4 bg-[hsl(var(--studio-hover))]" />
           <div className="flex items-center gap-1.5">
             <motion.div
               className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: state.isDirty ? '#f59e0b' : '#4ade80' }}
+              style={{ backgroundColor: state.isDirty ? 'hsl(var(--studio-warn))' : 'hsl(var(--studio-ok))' }}
               animate={state.isDirty ? { scale: [1, 1.3, 1] } : {}}
               transition={{ duration: 1.5, repeat: state.isDirty ? Infinity : 0 }}
             />
-            <span className="text-[11px] font-medium text-[#ccc] truncate max-w-[120px]">{siteName}</span>
+            <span className="text-[11px] font-medium text-[hsl(var(--studio-ink-2))] truncate max-w-[120px]">{siteName}</span>
           </div>
-          <div className="w-[1px] h-4 bg-[#333]" />
+          <div className="w-[1px] h-4 bg-[hsl(var(--studio-hover))]" />
           {/* Undo/Redo with count */}
           <div className="flex items-center gap-0.5">
             <button
               onClick={() => dispatch({ type: 'UNDO' })}
               disabled={state.historyIndex <= 0}
-              className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors disabled:opacity-20"
+              className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[hsl(var(--studio-hover))] transition-colors disabled:opacity-20"
               title="Undo (⌘Z)"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--studio-ink-2))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 7v6h6" /><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
               </svg>
             </button>
             <button
               onClick={() => dispatch({ type: 'REDO' })}
               disabled={state.historyIndex >= state.history.length - 1}
-              className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors disabled:opacity-20"
+              className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[hsl(var(--studio-hover))] transition-colors disabled:opacity-20"
               title="Redo (⌘⇧Z)"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--studio-ink-2))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 7v6h-6" /><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
               </svg>
             </button>
             {state.history.length > 1 && (
-              <span className="text-[8px] font-mono tabular-nums px-1 rounded" style={{ color: '#444', backgroundColor: '#1a1a1a' }}>
+              <span className="text-[8px] font-mono tabular-nums px-1 rounded" style={{ color: 'hsl(var(--studio-hover))', backgroundColor: 'hsl(var(--studio-panel))' }}>
                 {state.historyIndex}/{state.history.length - 1}
               </span>
             )}
@@ -132,23 +132,23 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
               transition={{ duration: 0.15 }}
               className="flex items-center gap-1 h-6 px-2 rounded-md"
               style={{
-                backgroundColor: state.saveStatus === 'saving' ? 'rgba(59, 130, 246, 0.08)' : state.saveStatus === 'saved' ? 'rgba(74, 222, 128, 0.08)' : state.saveStatus === 'error' ? 'rgba(239, 68, 68, 0.08)' : 'transparent',
+                backgroundColor: state.saveStatus === 'saving' ? 'hsl(var(--studio-accent) / 0.08)' : state.saveStatus === 'saved' ? 'rgba(74, 222, 128, 0.08)' : state.saveStatus === 'error' ? 'rgba(239, 68, 68, 0.08)' : 'transparent',
               }}
             >
               {state.saveStatus === 'saving' ? (
-                <Loader2 className="h-3 w-3 animate-spin" style={{ color: '#3b82f6' }} />
+                <Loader2 className="h-3 w-3 animate-spin" style={{ color: 'hsl(var(--studio-accent))' }} />
               ) : state.saveStatus === 'saved' ? (
-                <Check className="h-3 w-3" style={{ color: '#4ade80' }} />
+                <Check className="h-3 w-3" style={{ color: 'hsl(var(--studio-ok))' }} />
               ) : state.saveStatus === 'error' ? (
-                <AlertCircle className="h-3 w-3" style={{ color: '#ef4444' }} />
+                <AlertCircle className="h-3 w-3" style={{ color: 'hsl(var(--studio-risk))' }} />
               ) : (
-                <Save className="h-3 w-3" style={{ color: '#555' }} />
+                <Save className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
               )}
-              <span className={`text-[9px] font-medium ${state.saveStatus === 'error' ? 'text-red-400' : state.saveStatus === 'saved' ? 'text-green-400' : state.saveStatus === 'saving' ? 'text-blue-400' : 'text-[#666]'}`}>
+              <span className={`text-[9px] font-medium ${state.saveStatus === 'error' ? 'text-red-400' : state.saveStatus === 'saved' ? 'text-green-400' : state.saveStatus === 'saving' ? 'text-blue-400' : 'text-[hsl(var(--studio-ink-3))]'}`}>
                 {state.saveStatus === 'saving' ? 'Saving…' : state.saveStatus === 'saved' ? 'Saved' : state.saveStatus === 'error' ? 'Error' : ''}
               </span>
               {lastSavedTime && state.saveStatus !== 'saving' && (
-                <span className="text-[7px] font-mono ml-0.5" style={{ color: '#444' }}>
+                <span className="text-[7px] font-mono ml-0.5" style={{ color: 'hsl(var(--studio-hover))' }}>
                   {lastSavedTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                 </span>
               )}
@@ -156,9 +156,9 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
           </AnimatePresence>
 
           {/* Element count badge */}
-          <div className="h-5 px-1.5 rounded flex items-center gap-1" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
+          <div className="h-5 px-1.5 rounded flex items-center gap-1" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
             <div className="w-1 h-1 rounded-full" style={{ backgroundColor: activeColor, opacity: 0.6 }} />
-            <span className="text-[8px] font-mono tabular-nums" style={{ color: '#555' }}>{elementCount} el</span>
+            <span className="text-[8px] font-mono tabular-nums" style={{ color: 'hsl(var(--studio-ink-3))' }}>{elementCount} el</span>
           </div>
         </div>
 
@@ -167,10 +167,10 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
           {onPlannerModeChange && (
             <PlannerModeSwitcher mode={plannerMode} onModeChange={onPlannerModeChange} />
           )}
-          <div className="w-px h-4 bg-[#333]" />
+          <div className="w-px h-4 bg-[hsl(var(--studio-hover))]" />
 
           {/* Breakpoints with colored active indicator */}
-          <div className="flex items-center gap-0 rounded-lg p-0.5 relative" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
+          <div className="flex items-center gap-0 rounded-lg p-0.5 relative" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
             {breakpoints.map(bp => {
               const isActive = state.breakpoint === bp.key;
               const color = BREAKPOINT_COLORS[bp.key];
@@ -180,7 +180,7 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
                   onClick={() => dispatch({ type: 'SET_BREAKPOINT', payload: bp.key })}
                   className="relative h-7 px-3 flex items-center gap-1.5 rounded-md text-[10px] font-medium transition-all"
                   style={{
-                    color: isActive ? '#fff' : '#666',
+                    color: isActive ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-ink-3))',
                     backgroundColor: isActive ? color : 'transparent',
                     boxShadow: isActive ? `0 2px 12px ${color}40, 0 0 0 1px ${color}30` : 'none',
                   }}
@@ -197,18 +197,18 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
           </div>
 
           {/* Zoom with presets */}
-          <div className="flex items-center gap-0 rounded-lg p-0.5" style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}>
+          <div className="flex items-center gap-0 rounded-lg p-0.5" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
             <button
               onClick={() => dispatch({ type: 'SET_ZOOM', payload: Math.max(0.25, state.zoom - 0.1) })}
-              className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors"
+              className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-[hsl(var(--studio-hover))] transition-colors"
             >
-              <Minus className="h-3 w-3 text-[#888]" />
+              <Minus className="h-3 w-3 text-[hsl(var(--studio-ink-2))]" />
             </button>
             <div className="relative">
               <button
                 onClick={() => setShowZoomPresets(v => !v)}
                 className="text-[10px] hover:text-white w-12 text-center tabular-nums transition-colors font-mono"
-                style={{ color: Math.round(state.zoom * 100) !== 100 ? '#0073E6' : '#888' }}
+                style={{ color: Math.round(state.zoom * 100) !== 100 ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))' }}
                 title="Zoom presets"
               >
                 {Math.round(state.zoom * 100)}%
@@ -221,10 +221,10 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
                     exit={{ opacity: 0, y: -4, scale: 0.95 }}
                     transition={{ duration: 0.12 }}
                     className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-[400] rounded-xl overflow-hidden"
-                    style={{ backgroundColor: 'rgba(18,18,18,0.98)', border: '1px solid #333', boxShadow: '0 12px 40px rgba(0,0,0,0.5)', backdropFilter: 'blur(20px)', minWidth: '90px' }}
+                    style={{ backgroundColor: 'rgba(18,18,18,0.98)', border: '1px solid hsl(var(--studio-line))', boxShadow: '0 12px 40px rgba(0,0,0,0.5)', backdropFilter: 'blur(20px)', minWidth: '90px' }}
                   >
-                    <div className="px-3 py-1.5" style={{ borderBottom: '1px solid #222' }}>
-                      <span className="text-[7px] font-bold uppercase tracking-[0.1em]" style={{ color: '#444' }}>Zoom</span>
+                    <div className="px-3 py-1.5" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
+                      <span className="text-[7px] font-bold uppercase tracking-[0.1em]" style={{ color: 'hsl(var(--studio-hover))' }}>Zoom</span>
                     </div>
                     {[25, 50, 75, 100, 125, 150, 200, 300].map(z => (
                       <button
@@ -232,21 +232,21 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
                         onClick={() => { dispatch({ type: 'SET_ZOOM', payload: z / 100 }); setShowZoomPresets(false); }}
                         className="w-full flex items-center justify-between h-7 px-3 text-[11px] font-mono transition-colors"
                         style={{
-                          color: Math.round(state.zoom * 100) === z ? '#0073E6' : '#888',
-                          backgroundColor: Math.round(state.zoom * 100) === z ? 'rgba(0,115,230,0.08)' : 'transparent',
+                          color: Math.round(state.zoom * 100) === z ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
+                          backgroundColor: Math.round(state.zoom * 100) === z ? 'hsl(var(--studio-accent) / 0.08)' : 'transparent',
                         }}
                         onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = Math.round(state.zoom * 100) === z ? 'rgba(0,115,230,0.08)' : 'transparent'; }}
+                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = Math.round(state.zoom * 100) === z ? 'hsl(var(--studio-accent) / 0.08)' : 'transparent'; }}
                       >
                         <span>{z}%</span>
-                        {Math.round(state.zoom * 100) === z && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#0073E6' }} />}
+                        {Math.round(state.zoom * 100) === z && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'hsl(var(--studio-accent))' }} />}
                       </button>
                     ))}
-                    <div className="px-3 py-1.5" style={{ borderTop: '1px solid #222' }}>
+                    <div className="px-3 py-1.5" style={{ borderTop: '1px solid hsl(var(--studio-line))' }}>
                       <button
                         onClick={() => { dispatch({ type: 'SET_ZOOM', payload: 1 }); setShowZoomPresets(false); }}
                         className="text-[9px] font-medium w-full text-left"
-                        style={{ color: '#555' }}
+                        style={{ color: 'hsl(var(--studio-ink-3))' }}
                       >
                         Reset to 100%
                       </button>
@@ -257,9 +257,9 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
             </div>
             <button
               onClick={() => dispatch({ type: 'SET_ZOOM', payload: Math.min(3, state.zoom + 0.1) })}
-              className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors"
+              className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-[hsl(var(--studio-hover))] transition-colors"
             >
-              <Plus className="h-3 w-3 text-[#888]" />
+              <Plus className="h-3 w-3 text-[hsl(var(--studio-ink-2))]" />
             </button>
           </div>
         </div>
@@ -268,28 +268,28 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
         <div className="flex items-center gap-1">
           <button
             onClick={() => { const e = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }); window.dispatchEvent(e); }}
-            className="h-7 px-2.5 flex items-center gap-1.5 rounded-md hover:bg-[#333] transition-colors"
+            className="h-7 px-2.5 flex items-center gap-1.5 rounded-md hover:bg-[hsl(var(--studio-hover))] transition-colors"
             title="Command palette (⌘K)"
           >
-            <Search className="h-3 w-3 text-[#666]" />
-            <span className="text-[9px] text-[#555] font-mono">⌘K</span>
+            <Search className="h-3 w-3 text-[hsl(var(--studio-ink-3))]" />
+            <span className="text-[9px] text-[hsl(var(--studio-ink-3))] font-mono">⌘K</span>
           </button>
           <button
             onClick={() => { onShortcuts?.(); setShowShortcuts(false); }}
-            className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors"
+            className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[hsl(var(--studio-hover))] transition-colors"
             title="Keyboard shortcuts (⌘/)"
           >
-            <Command className="h-3.5 w-3.5 text-[#666]" />
+            <Command className="h-3.5 w-3.5 text-[hsl(var(--studio-ink-3))]" />
           </button>
           <button
             onClick={onPreview}
-            className="h-7 px-3.5 flex items-center gap-1.5 rounded-lg text-[11px] font-medium text-[#bbb] hover:bg-[#2a2a2a] hover:text-white transition-all duration-200 group"
+            className="h-7 px-3.5 flex items-center gap-1.5 rounded-lg text-[11px] font-medium text-[hsl(var(--studio-ink-2))] hover:bg-[hsl(var(--studio-raised))] hover:text-white transition-all duration-200 group"
           >
             <Eye className="h-3.5 w-3.5 transition-transform group-hover:scale-110" /> Preview
           </button>
           <button
             onClick={onExportCode}
-            className="h-7 px-3.5 flex items-center gap-1.5 rounded-lg text-[11px] font-medium text-[#bbb] hover:bg-[#2a2a2a] hover:text-white transition-all duration-200 group"
+            className="h-7 px-3.5 flex items-center gap-1.5 rounded-lg text-[11px] font-medium text-[hsl(var(--studio-ink-2))] hover:bg-[hsl(var(--studio-raised))] hover:text-white transition-all duration-200 group"
           >
             <Download className="h-3.5 w-3.5 transition-transform group-hover:scale-110" /> Export
           </button>
@@ -299,11 +299,11 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
             onClick={() => onPublish?.()}
             className="h-8 px-5 flex items-center gap-2 rounded-lg text-[11px] font-semibold text-white transition-all duration-200 hover:brightness-110 relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, #0073E6 0%, #005bb5 50%, #0073E6 100%)',
+              background: 'linear-gradient(135deg, hsl(var(--studio-accent)) 0%, hsl(var(--studio-accent)) 50%, hsl(var(--studio-accent)) 100%)',
               backgroundSize: '200% 200%',
               boxShadow: publishPulse
-                ? '0 2px 20px rgba(0,115,230,0.5), 0 0 40px rgba(0,115,230,0.15)'
-                : '0 2px 12px rgba(0,115,230,0.35)',
+                ? '0 2px 20px hsl(var(--studio-accent) / 0.5), 0 0 40px hsl(var(--studio-accent) / 0.15)'
+                : '0 2px 12px hsl(var(--studio-accent) / 0.35)',
             }}
             animate={publishPulse ? { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] } : {}}
             transition={{ duration: 2, ease: 'easeInOut' }}
@@ -324,15 +324,15 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
             className="absolute top-12 right-4 z-[300] rounded-xl overflow-hidden"
             style={{
               backgroundColor: 'rgba(22,22,22,0.98)',
-              border: '1px solid #333',
+              border: '1px solid hsl(var(--studio-line))',
               boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
               backdropFilter: 'blur(20px)',
               minWidth: '260px',
             }}
           >
             <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              <span className="text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: '#888' }}>Keyboard Shortcuts</span>
-              <kbd className="text-[8px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: '#252525', color: '#555', border: '1px solid #333' }}>⌘/</kbd>
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: 'hsl(var(--studio-ink-2))' }}>Keyboard Shortcuts</span>
+              <kbd className="text-[8px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'hsl(var(--studio-raised))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>⌘/</kbd>
             </div>
             <div className="p-3 space-y-0.5">
               {[
@@ -344,11 +344,11 @@ export function EditorTopBar({ siteName, siteId, onExport, onPreview, onExportCo
                 { section: 'View', items: [['1/2/3', 'Breakpoints'], ['⌘ +/-', 'Zoom'], ['⌘ 0', 'Reset Zoom'], ['⌘ A', 'Select All'], ['Space+Drag', 'Pan Canvas']] },
               ].map(group => (
                 <div key={group.section}>
-                  <div className="text-[8px] font-bold uppercase tracking-widest py-1 mt-1" style={{ color: '#444' }}>{group.section}</div>
+                  <div className="text-[8px] font-bold uppercase tracking-widest py-1 mt-1" style={{ color: 'hsl(var(--studio-hover))' }}>{group.section}</div>
                   {group.items.map(([key, label]) => (
                     <div key={key} className="flex items-center justify-between py-[3px]">
-                      <span className="text-[11px]" style={{ color: '#999' }}>{label}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: '#222', color: '#666', border: '1px solid #2a2a2a' }}>{key}</span>
+                      <span className="text-[11px]" style={{ color: 'hsl(var(--studio-ink-2))' }}>{label}</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'hsl(var(--studio-raised))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>{key}</span>
                     </div>
                   ))}
                 </div>

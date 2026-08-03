@@ -59,28 +59,28 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
   const getSuggestions = (): Suggestion[] => {
     if (selectedElement) {
       return [
-        { label: 'Modernize design', description: 'Apply contemporary styling & spacing', icon: Wand2, prompt: `Modernize this ${selectedElement.type} element with contemporary styling`, color: '#a78bfa' },
-        { label: 'Fix spacing', description: 'Improve padding, margins & alignment', icon: Layout, prompt: `Fix spacing and alignment for this ${selectedElement.type}`, color: '#3b82f6' },
-        { label: 'Better typography', description: 'Refine font sizes, weights & hierarchy', icon: Type, prompt: `Improve typography for this ${selectedElement.type} with better font sizing and weights`, color: '#f59e0b' },
-        { label: 'Add animations', description: 'Subtle motion effects & transitions', icon: Palette, prompt: `Add subtle animations and visual effects to this ${selectedElement.type}`, color: '#ec4899' },
-        { label: 'Responsive fix', description: 'Ensure it looks good on all devices', icon: Repeat, prompt: `Make this ${selectedElement.type} fully responsive across all breakpoints`, color: '#22c55e' },
+        { label: 'Modernize design', description: 'Apply contemporary styling & spacing', icon: Wand2, prompt: `Modernize this ${selectedElement.type} element with contemporary styling`, color: 'hsl(var(--studio-ink-3))' },
+        { label: 'Fix spacing', description: 'Improve padding, margins & alignment', icon: Layout, prompt: `Fix spacing and alignment for this ${selectedElement.type}`, color: 'hsl(var(--studio-accent))' },
+        { label: 'Better typography', description: 'Refine font sizes, weights & hierarchy', icon: Type, prompt: `Improve typography for this ${selectedElement.type} with better font sizing and weights`, color: 'hsl(var(--studio-warn))' },
+        { label: 'Add animations', description: 'Subtle motion effects & transitions', icon: Palette, prompt: `Add subtle animations and visual effects to this ${selectedElement.type}`, color: 'hsl(var(--studio-ink-3))' },
+        { label: 'Responsive fix', description: 'Ensure it looks good on all devices', icon: Repeat, prompt: `Make this ${selectedElement.type} fully responsive across all breakpoints`, color: 'hsl(var(--studio-ok))' },
       ];
     }
     if (state.elements.length === 0) {
       return [
-        { label: 'SaaS landing page', description: 'Hero, features, pricing & footer', icon: Layout, prompt: 'Create a modern SaaS landing page with hero, features, pricing, and footer', color: '#3b82f6' },
-        { label: 'Portfolio site', description: 'Gallery, about & contact sections', icon: Image, prompt: 'Create a creative portfolio site with gallery, about section, and contact form', color: '#a78bfa' },
-        { label: 'Restaurant page', description: 'Menu, reservations & location', icon: Zap, prompt: 'Create a restaurant website with menu, reservations, and location section', color: '#f59e0b' },
-        { label: 'Agency site', description: 'Services, case studies & team', icon: Globe, prompt: 'Create a digital agency landing page with services, case studies, and team section', color: '#ec4899' },
-        { label: 'E-commerce store', description: 'Products, cart & checkout flow', icon: Layers, prompt: 'Create an e-commerce landing page with featured products, categories, and hero banner', color: '#22c55e' },
+        { label: 'SaaS landing page', description: 'Hero, features, pricing & footer', icon: Layout, prompt: 'Create a modern SaaS landing page with hero, features, pricing, and footer', color: 'hsl(var(--studio-accent))' },
+        { label: 'Portfolio site', description: 'Gallery, about & contact sections', icon: Image, prompt: 'Create a creative portfolio site with gallery, about section, and contact form', color: 'hsl(var(--studio-ink-3))' },
+        { label: 'Restaurant page', description: 'Menu, reservations & location', icon: Zap, prompt: 'Create a restaurant website with menu, reservations, and location section', color: 'hsl(var(--studio-warn))' },
+        { label: 'Agency site', description: 'Services, case studies & team', icon: Globe, prompt: 'Create a digital agency landing page with services, case studies, and team section', color: 'hsl(var(--studio-ink-3))' },
+        { label: 'E-commerce store', description: 'Products, cart & checkout flow', icon: Layers, prompt: 'Create an e-commerce landing page with featured products, categories, and hero banner', color: 'hsl(var(--studio-ok))' },
       ];
     }
     return [
-      { label: 'Add hero section', description: 'Bold heading, subtext & CTA', icon: Layout, prompt: 'Generate a hero section with bold heading, subtext, and CTA button', color: '#3b82f6' },
-      { label: 'Add testimonials', description: '3 customer quotes with avatars', icon: MessageSquare, prompt: 'Generate a testimonials section with 3 customer quotes', color: '#a78bfa' },
-      { label: 'Add pricing table', description: '3 tiers with features comparison', icon: Zap, prompt: 'Generate a pricing section with 3 tiers', color: '#f59e0b' },
-      { label: 'Add CTA section', description: 'Gradient background with action button', icon: Sparkles, prompt: 'Generate a call-to-action section with gradient background', color: '#ec4899' },
-      { label: 'Add FAQ section', description: 'Accordion-style questions & answers', icon: Lightbulb, prompt: 'Generate an FAQ section with 5 common questions', color: '#22c55e' },
+      { label: 'Add hero section', description: 'Bold heading, subtext & CTA', icon: Layout, prompt: 'Generate a hero section with bold heading, subtext, and CTA button', color: 'hsl(var(--studio-accent))' },
+      { label: 'Add testimonials', description: '3 customer quotes with avatars', icon: MessageSquare, prompt: 'Generate a testimonials section with 3 customer quotes', color: 'hsl(var(--studio-ink-3))' },
+      { label: 'Add pricing table', description: '3 tiers with features comparison', icon: Zap, prompt: 'Generate a pricing section with 3 tiers', color: 'hsl(var(--studio-warn))' },
+      { label: 'Add CTA section', description: 'Gradient background with action button', icon: Sparkles, prompt: 'Generate a call-to-action section with gradient background', color: 'hsl(var(--studio-ink-3))' },
+      { label: 'Add FAQ section', description: 'Accordion-style questions & answers', icon: Lightbulb, prompt: 'Generate an FAQ section with 5 common questions', color: 'hsl(var(--studio-ok))' },
     ];
   };
 
@@ -163,7 +163,7 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
               className="flex items-center gap-2 rounded-l-xl overflow-hidden"
               style={{
                 padding: peeking ? '10px 14px 10px 12px' : '10px 6px 10px 10px',
-                background: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
+                background: 'linear-gradient(135deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))',
                 boxShadow: '0 8px 32px rgba(124,58,237,0.4), -4px 0 20px rgba(124,58,237,0.15)',
                 transition: 'padding 0.2s ease',
               }}
@@ -231,7 +231,7 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
             >
               {/* Input */}
               <div className="flex items-center gap-3 px-5 h-14" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #7c3aed, #a78bfa)', boxShadow: '0 2px 8px rgba(124,58,237,0.3)' }}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))', boxShadow: '0 2px 8px rgba(124,58,237,0.3)' }}>
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
                 <input
@@ -241,25 +241,25 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
                   onFocus={() => { if (!prompt.trim() && history.length > 0) setShowHistory(true); }}
                   onKeyDown={e => { if (e.key === 'Enter') generate(); if (e.key === 'Escape') setOpen(false); }}
                   placeholder={selectedElement ? `Edit ${selectedElement.type}…` : 'Describe what you want to build…'}
-                  className="flex-1 bg-transparent text-[14px] text-white placeholder:text-[#444] outline-none"
+                  className="flex-1 bg-transparent text-[14px] text-white placeholder:text-[hsl(var(--studio-hover))] outline-none"
                   disabled={loading}
                 />
                 {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#a78bfa' }} />
+                  <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'hsl(var(--studio-ink-3))' }} />
                 ) : prompt.trim() ? (
-                  <button onClick={() => generate()} className="h-7 w-7 rounded-lg flex items-center justify-center text-white" style={{ background: 'linear-gradient(135deg, #7c3aed, #a78bfa)' }}>
+                  <button onClick={() => generate()} className="h-7 w-7 rounded-lg flex items-center justify-center text-white" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))' }}>
                     <Send className="w-3 h-3" />
                   </button>
                 ) : (
-                  <kbd className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: '#222', color: '#555', border: '1px solid #2a2a2a' }}>ESC</kbd>
+                  <kbd className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'hsl(var(--studio-raised))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>ESC</kbd>
                 )}
               </div>
 
               {/* Context badge */}
               {selectedElement && (
                 <div className="px-5 py-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium" style={{ backgroundColor: 'rgba(0,115,230,0.08)', color: '#0073E6', border: '1px solid rgba(0,115,230,0.1)' }}>
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#0073E6' }} />
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.08)', color: 'hsl(var(--studio-accent))', border: '1px solid hsl(var(--studio-accent) / 0.1)' }}>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'hsl(var(--studio-accent))' }} />
                     Editing: {selectedElement.name || selectedElement.type}
                   </div>
                 </div>
@@ -268,15 +268,15 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
               {/* History dropdown */}
               {showHistory && !loading && history.length > 0 && !prompt.trim() && (
                 <div className="px-3 py-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                  <div className="px-2 py-1 text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#444' }}>Recent</div>
+                  <div className="px-2 py-1 text-[9px] font-semibold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-hover))' }}>Recent</div>
                   {history.slice(0, 5).map((h, i) => (
                     <button
                       key={i}
                       onClick={() => { setPrompt(h); setShowHistory(false); }}
                       className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-[11px] hover:bg-white/[0.03] transition-colors"
-                      style={{ color: '#888' }}
+                      style={{ color: 'hsl(var(--studio-ink-2))' }}
                     >
-                      <Repeat className="h-2.5 w-2.5 shrink-0" style={{ color: '#444' }} />
+                      <Repeat className="h-2.5 w-2.5 shrink-0" style={{ color: 'hsl(var(--studio-hover))' }} />
                       <span className="truncate">{h}</span>
                     </button>
                   ))}
@@ -287,7 +287,7 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
               {!loading && (
                 <div className="p-2 max-h-[340px] overflow-auto">
                   <div className="px-3 py-1.5">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.1em]" style={{ color: '#444' }}>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.1em]" style={{ color: 'hsl(var(--studio-hover))' }}>
                       {selectedElement ? 'Edit Suggestions' : state.elements.length === 0 ? 'Quick Start' : 'Add to Page'}
                     </span>
                   </div>
@@ -312,8 +312,8 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
                           <Icon className="w-4 h-4" style={{ color: s.color }} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <span className="text-[12px] font-medium block" style={{ color: '#ddd' }}>{s.label}</span>
-                          <span className="text-[10px] block mt-0.5" style={{ color: '#555' }}>{s.description}</span>
+                          <span className="text-[12px] font-medium block" style={{ color: 'hsl(var(--studio-ink-2))' }}>{s.label}</span>
+                          <span className="text-[10px] block mt-0.5" style={{ color: 'hsl(var(--studio-ink-3))' }}>{s.description}</span>
                         </div>
                         <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: s.color }} />
                       </button>
@@ -332,7 +332,7 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
                       animate={{ rotate: [0, 5, -5, 0] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      <Sparkles className="w-6 h-6" style={{ color: '#a78bfa' }} />
+                      <Sparkles className="w-6 h-6" style={{ color: 'hsl(var(--studio-ink-3))' }} />
                     </motion.div>
                     <motion.div
                       className="absolute -inset-2 rounded-3xl"
@@ -341,11 +341,11 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
                       transition={{ duration: 2, repeat: Infinity }}
                     />
                   </div>
-                  <span className="text-[12px] font-medium" style={{ color: '#888' }}>Generating your design…</span>
-                  <div className="w-48 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#1e1e1e' }}>
+                  <span className="text-[12px] font-medium" style={{ color: 'hsl(var(--studio-ink-2))' }}>Generating your design…</span>
+                  <div className="w-48 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'hsl(var(--studio-panel))' }}>
                     <motion.div
                       className="h-full rounded-full"
-                      style={{ background: 'linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed)', backgroundSize: '200% 100%' }}
+                      style={{ background: 'linear-gradient(90deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))', backgroundSize: '200% 100%' }}
                       initial={{ width: '0%' }}
                       animate={{ width: '85%', backgroundPosition: ['0% 0%', '100% 0%'] }}
                       transition={{ width: { duration: 10, ease: 'easeOut' }, backgroundPosition: { duration: 1.5, repeat: Infinity } }}
@@ -356,13 +356,13 @@ export function AICopilot({ siteId, siteName }: { siteId?: string; siteName?: st
 
               {/* Footer */}
               <div className="px-5 py-2.5 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                <span className="text-[9px]" style={{ color: '#333' }}>Powered by Quooro AI</span>
+                <span className="text-[9px]" style={{ color: 'hsl(var(--studio-hover))' }}>Powered by Quooro AI</span>
                 <div className="flex items-center gap-4">
-                  <span className="text-[9px] flex items-center gap-1" style={{ color: '#444' }}>
-                    <kbd className="px-1 py-0.5 rounded text-[8px] font-mono" style={{ backgroundColor: '#1e1e1e', color: '#555', border: '1px solid #252525' }}>↵</kbd> Generate
+                  <span className="text-[9px] flex items-center gap-1" style={{ color: 'hsl(var(--studio-hover))' }}>
+                    <kbd className="px-1 py-0.5 rounded text-[8px] font-mono" style={{ backgroundColor: 'hsl(var(--studio-panel))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>↵</kbd> Generate
                   </span>
-                  <span className="text-[9px] flex items-center gap-1" style={{ color: '#444' }}>
-                    <kbd className="px-1 py-0.5 rounded text-[8px] font-mono" style={{ backgroundColor: '#1e1e1e', color: '#555', border: '1px solid #252525' }}>ESC</kbd> Close
+                  <span className="text-[9px] flex items-center gap-1" style={{ color: 'hsl(var(--studio-hover))' }}>
+                    <kbd className="px-1 py-0.5 rounded text-[8px] font-mono" style={{ backgroundColor: 'hsl(var(--studio-panel))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>ESC</kbd> Close
                   </span>
                 </div>
               </div>

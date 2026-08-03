@@ -19,11 +19,11 @@ interface PublishDashboardProps {
 }
 
 const STATUS_CONFIG: Record<string, { color: string; icon: typeof CheckCircle2; label: string }> = {
-  live: { color: '#22c55e', icon: CheckCircle2, label: 'Live' },
-  building: { color: '#f59e0b', icon: Loader2, label: 'Building' },
-  pending: { color: '#6b7280', icon: Clock, label: 'Pending' },
-  archived: { color: '#6b7280', icon: Archive, label: 'Archived' },
-  failed: { color: '#ef4444', icon: AlertCircle, label: 'Failed' },
+  live: { color: 'hsl(var(--studio-ok))', icon: CheckCircle2, label: 'Live' },
+  building: { color: 'hsl(var(--studio-warn))', icon: Loader2, label: 'Building' },
+  pending: { color: 'hsl(var(--studio-ink-3))', icon: Clock, label: 'Pending' },
+  archived: { color: 'hsl(var(--studio-ink-3))', icon: Archive, label: 'Archived' },
+  failed: { color: 'hsl(var(--studio-risk))', icon: AlertCircle, label: 'Failed' },
 };
 
 function formatBytes(bytes: number): string {
@@ -72,22 +72,22 @@ export function PublishDashboard({ siteId, siteName, onPublish, isOpen, onClose 
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="rounded-2xl overflow-hidden w-[640px] max-h-[85vh] flex flex-col"
-          style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: '0 25px 80px rgba(0,0,0,0.6)' }}
+          style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', boxShadow: '0 25px 80px rgba(0,0,0,0.6)' }}
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="px-5 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid #2a2a2a' }}>
+          <div className="px-5 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0073E6, #005bb5)' }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent)), hsl(var(--studio-accent)))' }}>
                 <Rocket className="w-4.5 h-4.5 text-white" />
               </div>
               <div>
                 <h2 className="text-[14px] font-bold text-white">Publish & Deploy</h2>
-                <p className="text-[11px] text-[#666]">{siteName}</p>
+                <p className="text-[11px] text-[hsl(var(--studio-ink-3))]">{siteName}</p>
               </div>
             </div>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#333] transition-colors">
-              <X className="w-4 h-4 text-[#666]" />
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[hsl(var(--studio-hover))] transition-colors">
+              <X className="w-4 h-4 text-[hsl(var(--studio-ink-3))]" />
             </button>
           </div>
 
@@ -99,19 +99,19 @@ export function PublishDashboard({ siteId, siteName, onPublish, isOpen, onClose 
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 className="px-5 py-3 shrink-0"
-                style={{ borderBottom: '1px solid #2a2a2a', background: 'linear-gradient(180deg, rgba(0,115,230,0.05), transparent)' }}
+                style={{ borderBottom: '1px solid hsl(var(--studio-line))', background: 'linear-gradient(180deg, hsl(var(--studio-accent) / 0.05), transparent)' }}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="w-3.5 h-3.5 text-[#0073E6] animate-spin" />
-                    <span className="text-[11px] font-medium text-[#0073E6]">{publishStage}</span>
+                    <Loader2 className="w-3.5 h-3.5 text-[hsl(var(--studio-accent))] animate-spin" />
+                    <span className="text-[11px] font-medium text-[hsl(var(--studio-accent))]">{publishStage}</span>
                   </div>
-                  <span className="text-[10px] text-[#555] tabular-nums">{publishProgress}%</span>
+                  <span className="text-[10px] text-[hsl(var(--studio-ink-3))] tabular-nums">{publishProgress}%</span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#2a2a2a' }}>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'hsl(var(--studio-raised))' }}>
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #0073E6, #4da3ff)' }}
+                    style={{ background: 'linear-gradient(90deg, hsl(var(--studio-accent)), hsl(var(--studio-accent)))' }}
                     initial={{ width: '0%' }}
                     animate={{ width: `${publishProgress}%` }}
                     transition={{ duration: 0.5 }}
@@ -129,9 +129,9 @@ export function PublishDashboard({ siteId, siteName, onPublish, isOpen, onClose 
                 onClick={() => setTab(t)}
                 className="px-3 py-1.5 rounded-lg text-[11px] font-medium capitalize transition-all"
                 style={{
-                  backgroundColor: tab === t ? 'rgba(0,115,230,0.1)' : 'transparent',
-                  color: tab === t ? '#4da3ff' : '#888',
-                  border: `1px solid ${tab === t ? 'rgba(0,115,230,0.2)' : 'transparent'}`,
+                  backgroundColor: tab === t ? 'hsl(var(--studio-accent) / 0.1)' : 'transparent',
+                  color: tab === t ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))',
+                  border: `1px solid ${tab === t ? 'hsl(var(--studio-accent) / 0.2)' : 'transparent'}`,
                 }}
               >
                 {t === 'overview' && <Globe className="w-3 h-3 inline mr-1.5" />}
@@ -195,13 +195,13 @@ function OverviewTab({ currentDeployment, domains, publishing, onPublish }: {
     <div className="space-y-4">
       {/* Current status */}
       {currentDeployment ? (
-        <div className="rounded-xl p-4 space-y-3" style={{ backgroundColor: '#222', border: '1px solid #2a2a2a' }}>
+        <div className="rounded-xl p-4 space-y-3" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#22c55e' }} />
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-ok))' }} />
               <span className="text-[12px] font-semibold text-white">Your site is live</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#22c55e' }}>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: 'hsl(var(--studio-ok))' }}>
               v{currentDeployment.version_number}
             </span>
           </div>
@@ -209,7 +209,7 @@ function OverviewTab({ currentDeployment, domains, publishing, onPublish }: {
           {/* Live URL */}
           {currentDeployment.live_url && (
             <div className="flex items-center gap-2">
-              <div className="flex-1 px-3 py-2 rounded-lg text-[11px] font-mono truncate" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#4da3ff' }}>
+              <div className="flex-1 px-3 py-2 rounded-lg text-[11px] font-mono truncate" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-accent))' }}>
                 {currentDeployment.live_url}
               </div>
               <button
@@ -217,19 +217,19 @@ function OverviewTab({ currentDeployment, domains, publishing, onPublish }: {
                   navigator.clipboard.writeText(currentDeployment.live_url!);
                   toast.success('URL copied!');
                 }}
-                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[#333] transition-colors"
-                style={{ border: '1px solid #333' }}
+                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[hsl(var(--studio-hover))] transition-colors"
+                style={{ border: '1px solid hsl(var(--studio-line))' }}
               >
-                <Copy className="w-3.5 h-3.5 text-[#888]" />
+                <Copy className="w-3.5 h-3.5 text-[hsl(var(--studio-ink-2))]" />
               </button>
               <a
                 href={currentDeployment.live_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[#333] transition-colors"
-                style={{ border: '1px solid #333' }}
+                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[hsl(var(--studio-hover))] transition-colors"
+                style={{ border: '1px solid hsl(var(--studio-line))' }}
               >
-                <ExternalLink className="w-3.5 h-3.5 text-[#888]" />
+                <ExternalLink className="w-3.5 h-3.5 text-[hsl(var(--studio-ink-2))]" />
               </a>
             </div>
           )}
@@ -242,13 +242,13 @@ function OverviewTab({ currentDeployment, domains, publishing, onPublish }: {
           </div>
         </div>
       ) : (
-        <div className="rounded-xl p-6 text-center space-y-3" style={{ backgroundColor: '#222', border: '1px solid #2a2a2a' }}>
-          <div className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(0,115,230,0.1), transparent)', border: '1px solid rgba(0,115,230,0.15)' }}>
-            <Globe className="w-6 h-6" style={{ color: 'rgba(0,115,230,0.4)' }} />
+        <div className="rounded-xl p-6 text-center space-y-3" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
+          <div className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.1), transparent)', border: '1px solid hsl(var(--studio-accent) / 0.15)' }}>
+            <Globe className="w-6 h-6" style={{ color: 'hsl(var(--studio-accent) / 0.4)' }} />
           </div>
           <div>
             <p className="text-[13px] font-semibold text-white">Not published yet</p>
-            <p className="text-[11px] text-[#666] mt-0.5">Click Publish to make your site live</p>
+            <p className="text-[11px] text-[hsl(var(--studio-ink-3))] mt-0.5">Click Publish to make your site live</p>
           </div>
         </div>
       )}
@@ -258,7 +258,7 @@ function OverviewTab({ currentDeployment, domains, publishing, onPublish }: {
         onClick={onPublish}
         disabled={publishing}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-bold text-white transition-all disabled:opacity-50"
-        style={{ background: 'linear-gradient(135deg, #0073E6, #005bb5)', boxShadow: '0 4px 20px rgba(0,115,230,0.3)' }}
+        style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent)), hsl(var(--studio-accent)))', boxShadow: '0 4px 20px hsl(var(--studio-accent) / 0.3)' }}
       >
         {publishing ? (
           <>
@@ -285,20 +285,20 @@ function OverviewTab({ currentDeployment, domains, publishing, onPublish }: {
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg p-2.5 text-center" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-      <div className="flex items-center justify-center gap-1 mb-1" style={{ color: '#666' }}>{icon}</div>
+    <div className="rounded-lg p-2.5 text-center" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
+      <div className="flex items-center justify-center gap-1 mb-1" style={{ color: 'hsl(var(--studio-ink-3))' }}>{icon}</div>
       <div className="text-[12px] font-bold text-white">{value}</div>
-      <div className="text-[9px] text-[#555] uppercase tracking-wider">{label}</div>
+      <div className="text-[9px] text-[hsl(var(--studio-ink-3))] uppercase tracking-wider">{label}</div>
     </div>
   );
 }
 
 function InfoCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="rounded-lg p-3 flex flex-col items-center gap-1.5" style={{ backgroundColor: '#222', border: '1px solid #2a2a2a' }}>
-      <div style={{ color: '#0073E6' }}>{icon}</div>
-      <span className="text-[10px] font-semibold text-[#ccc]">{title}</span>
-      <span className="text-[9px] text-[#555]">{desc}</span>
+    <div className="rounded-lg p-3 flex flex-col items-center gap-1.5" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
+      <div style={{ color: 'hsl(var(--studio-accent))' }}>{icon}</div>
+      <span className="text-[10px] font-semibold text-[hsl(var(--studio-ink-2))]">{title}</span>
+      <span className="text-[9px] text-[hsl(var(--studio-ink-3))]">{desc}</span>
     </div>
   );
 }
@@ -315,8 +315,8 @@ function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback, roll
   if (deployments.length === 0) {
     return (
       <div className="text-center py-8">
-        <Clock className="w-8 h-8 mx-auto mb-2" style={{ color: '#333' }} />
-        <p className="text-[12px] text-[#666]">No deployments yet</p>
+        <Clock className="w-8 h-8 mx-auto mb-2" style={{ color: 'hsl(var(--studio-hover))' }} />
+        <p className="text-[12px] text-[hsl(var(--studio-ink-3))]">No deployments yet</p>
       </div>
     );
   }
@@ -329,7 +329,7 @@ function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback, roll
         const isExpanded = expandedLog === dep.id;
 
         return (
-          <div key={dep.id} className="rounded-xl overflow-hidden" style={{ backgroundColor: '#222', border: `1px solid ${dep.status === 'live' ? 'rgba(34,197,94,0.2)' : '#2a2a2a'}` }}>
+          <div key={dep.id} className="rounded-xl overflow-hidden" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: `1px solid ${dep.status === 'live' ? 'rgba(34,197,94,0.2)' : 'hsl(var(--studio-raised))'}` }}>
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-3">
                 <StatusIcon className={`w-4 h-4 ${dep.status === 'building' ? 'animate-spin' : ''}`} style={{ color: config.color }} />
@@ -341,9 +341,9 @@ function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback, roll
                     </span>
                   </div>
                   <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-[10px] text-[#666]">{dep.page_count} pages</span>
-                    <span className="text-[10px] text-[#666]">{formatBytes(dep.total_size_bytes)}</span>
-                    <span className="text-[10px] text-[#555]">{dep.deployed_at ? timeAgo(dep.deployed_at) : dep.created_at ? timeAgo(dep.created_at) : ''}</span>
+                    <span className="text-[10px] text-[hsl(var(--studio-ink-3))]">{dep.page_count} pages</span>
+                    <span className="text-[10px] text-[hsl(var(--studio-ink-3))]">{formatBytes(dep.total_size_bytes)}</span>
+                    <span className="text-[10px] text-[hsl(var(--studio-ink-3))]">{dep.deployed_at ? timeAgo(dep.deployed_at) : dep.created_at ? timeAgo(dep.created_at) : ''}</span>
                   </div>
                 </div>
               </div>
@@ -352,8 +352,8 @@ function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback, roll
                   <button
                     onClick={() => onRollback(dep.id)}
                     disabled={!!rollingBack}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors hover:bg-[#333] disabled:opacity-50"
-                    style={{ border: '1px solid #333', color: '#888' }}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors hover:bg-[hsl(var(--studio-hover))] disabled:opacity-50"
+                    style={{ border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
                   >
                     <RotateCcw className={`w-3 h-3 ${rollingBack === dep.id ? 'animate-spin' : ''}`} />
                     {rollingBack === dep.id ? 'Restoring…' : 'Rollback'}
@@ -361,9 +361,9 @@ function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback, roll
                 )}
                 <button
                   onClick={() => setExpandedLog(isExpanded ? null : dep.id)}
-                  className="p-1.5 rounded-lg hover:bg-[#333] transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-[hsl(var(--studio-hover))] transition-colors"
                 >
-                  {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-[#888]" /> : <ChevronRight className="w-3.5 h-3.5 text-[#888]" />}
+                  {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-[hsl(var(--studio-ink-2))]" /> : <ChevronRight className="w-3.5 h-3.5 text-[hsl(var(--studio-ink-2))]" />}
                 </button>
               </div>
             </div>
@@ -377,13 +377,13 @@ function HistoryTab({ deployments, expandedLog, setExpandedLog, onRollback, roll
                   exit={{ height: 0, opacity: 0 }}
                   className="px-4 pb-3"
                 >
-                  <div className="rounded-lg p-3 space-y-1.5" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-                    <div className="text-[9px] font-bold uppercase tracking-wider mb-2" style={{ color: '#555' }}>Build Log</div>
+                  <div className="rounded-lg p-3 space-y-1.5" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
+                    <div className="text-[9px] font-bold uppercase tracking-wider mb-2" style={{ color: 'hsl(var(--studio-ink-3))' }}>Build Log</div>
                     {(dep.build_log as any[]).map((entry: any, i: number) => (
                       <div key={i} className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: entry.status === 'complete' ? '#22c55e' : entry.status === 'running' ? '#f59e0b' : '#ef4444' }} />
-                        <span className="text-[10px] font-medium" style={{ color: '#999' }}>{entry.step}</span>
-                        {entry.details && <span className="text-[10px] text-[#555] ml-auto">{entry.details}</span>}
+                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: entry.status === 'complete' ? 'hsl(var(--studio-ok))' : entry.status === 'running' ? 'hsl(var(--studio-warn))' : 'hsl(var(--studio-risk))' }} />
+                        <span className="text-[10px] font-medium" style={{ color: 'hsl(var(--studio-ink-2))' }}>{entry.step}</span>
+                        {entry.details && <span className="text-[10px] text-[hsl(var(--studio-ink-3))] ml-auto">{entry.details}</span>}
                       </div>
                     ))}
                   </div>
@@ -411,7 +411,7 @@ function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDom
   return (
     <div className="space-y-4">
       {/* Add domain */}
-      <div className="rounded-xl p-4 space-y-3" style={{ backgroundColor: '#222', border: '1px solid #2a2a2a' }}>
+      <div className="rounded-xl p-4 space-y-3" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
         <div className="text-[11px] font-semibold text-white">Connect Custom Domain</div>
         <div className="flex gap-2">
           <input
@@ -419,7 +419,7 @@ function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDom
             onChange={e => setNewDomain(e.target.value)}
             placeholder="yourdomain.com"
             className="flex-1 h-9 px-3 rounded-lg text-[12px] outline-none"
-            style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#ccc' }}
+            style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
             onKeyDown={e => {
               if (e.key === 'Enter' && newDomain.trim()) {
                 onAddDomain(newDomain.trim());
@@ -431,7 +431,7 @@ function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDom
             onClick={() => { if (newDomain.trim()) { onAddDomain(newDomain.trim()); setNewDomain(''); } }}
             disabled={!newDomain.trim()}
             className="h-9 px-4 rounded-lg text-[11px] font-semibold text-white disabled:opacity-30"
-            style={{ backgroundColor: '#0073E6' }}
+            style={{ backgroundColor: 'hsl(var(--studio-accent))' }}
           >
             <Plus className="w-3.5 h-3.5 inline mr-1" />
             Add
@@ -442,14 +442,14 @@ function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDom
       {/* Domain list */}
       {domains.length === 0 ? (
         <div className="text-center py-6">
-          <Link2 className="w-8 h-8 mx-auto mb-2" style={{ color: '#333' }} />
-          <p className="text-[12px] text-[#666]">No domains connected</p>
-          <p className="text-[10px] text-[#444] mt-1">Publish your site to get a free Quooro subdomain</p>
+          <Link2 className="w-8 h-8 mx-auto mb-2" style={{ color: 'hsl(var(--studio-hover))' }} />
+          <p className="text-[12px] text-[hsl(var(--studio-ink-3))]">No domains connected</p>
+          <p className="text-[10px] text-[hsl(var(--studio-hover))] mt-1">Publish your site to get a free Quooro subdomain</p>
         </div>
       ) : (
         <div className="space-y-2">
           {domains.map(domain => (
-            <div key={domain.id} className="rounded-xl p-4" style={{ backgroundColor: '#222', border: '1px solid #2a2a2a' }}>
+            <div key={domain.id} className="rounded-xl p-4" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   {domain.status === 'active' ? (
@@ -459,8 +459,8 @@ function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDom
                   )}
                   <span className="text-[12px] font-semibold text-white">{domain.domain_name}</span>
                   <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold uppercase" style={{
-                    backgroundColor: domain.domain_type === 'subdomain' ? 'rgba(0,115,230,0.1)' : 'rgba(167,139,250,0.1)',
-                    color: domain.domain_type === 'subdomain' ? '#4da3ff' : '#a78bfa',
+                    backgroundColor: domain.domain_type === 'subdomain' ? 'hsl(var(--studio-accent) / 0.1)' : 'rgba(167,139,250,0.1)',
+                    color: domain.domain_type === 'subdomain' ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-3))',
                   }}>
                     {domain.domain_type}
                   </span>
@@ -475,7 +475,7 @@ function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDom
                 )}
               </div>
 
-              <div className="flex items-center gap-3 text-[10px] text-[#666]">
+              <div className="flex items-center gap-3 text-[10px] text-[hsl(var(--studio-ink-3))]">
                 {domain.ssl_active && (
                   <span className="flex items-center gap-1">
                     <Shield className="w-3 h-3 text-green-500" /> SSL Active
@@ -493,20 +493,20 @@ function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDom
 
               {/* DNS Instructions for pending custom domains */}
               {domain.domain_type === 'custom' && domain.status === 'pending_dns' && domain.dns_instructions && (
-                <div className="mt-3 rounded-lg p-3 space-y-2" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}>
-                  <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#f59e0b' }}>DNS Setup Required</div>
-                  <p className="text-[10px] text-[#888]">Add these records at your domain provider:</p>
+                <div className="mt-3 rounded-lg p-3 space-y-2" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
+                  <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-warn))' }}>DNS Setup Required</div>
+                  <p className="text-[10px] text-[hsl(var(--studio-ink-2))]">Add these records at your domain provider:</p>
                   {(domain.dns_instructions as any)?.records?.map((rec: any, i: number) => (
-                    <div key={i} className="flex items-center gap-3 px-2 py-1.5 rounded" style={{ backgroundColor: '#222' }}>
-                      <span className="text-[10px] font-mono font-bold" style={{ color: '#4da3ff', minWidth: '40px' }}>{rec.type}</span>
-                      <span className="text-[10px] font-mono text-[#999]">{rec.name}</span>
-                      <span className="text-[10px] text-[#555]">→</span>
-                      <span className="text-[10px] font-mono text-[#ccc] truncate">{rec.value}</span>
+                    <div key={i} className="flex items-center gap-3 px-2 py-1.5 rounded" style={{ backgroundColor: 'hsl(var(--studio-raised))' }}>
+                      <span className="text-[10px] font-mono font-bold" style={{ color: 'hsl(var(--studio-accent))', minWidth: '40px' }}>{rec.type}</span>
+                      <span className="text-[10px] font-mono text-[hsl(var(--studio-ink-2))]">{rec.name}</span>
+                      <span className="text-[10px] text-[hsl(var(--studio-ink-3))]">→</span>
+                      <span className="text-[10px] font-mono text-[hsl(var(--studio-ink-2))] truncate">{rec.value}</span>
                       <button
                         onClick={() => { navigator.clipboard.writeText(rec.value); toast.success('Copied!'); }}
                         className="ml-auto shrink-0"
                       >
-                        <Copy className="w-3 h-3 text-[#555] hover:text-white" />
+                        <Copy className="w-3 h-3 text-[hsl(var(--studio-ink-3))] hover:text-white" />
                       </button>
                     </div>
                   ))}
@@ -515,8 +515,8 @@ function DomainsTab({ domains, newDomain, setNewDomain, onAddDomain, onRemoveDom
                   <button
                     onClick={() => onVerifyDomain?.(domain.id)}
                     disabled={!!verifyingDomain}
-                    className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors hover:bg-[#2a2a2a] disabled:opacity-50"
-                    style={{ border: '1px solid #333', color: '#ccc' }}
+                    className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-[10px] font-medium transition-colors hover:bg-[hsl(var(--studio-raised))] disabled:opacity-50"
+                    style={{ border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
                   >
                     <RotateCcw className={`w-3 h-3 ${verifyingDomain === domain.id ? 'animate-spin' : ''}`} />
                     {verifyingDomain === domain.id ? 'Checking DNS…' : "I've added these — check now"}

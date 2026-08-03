@@ -1958,3 +1958,104 @@ body.perf-no-bg .lounge-bg-grid {
   outline-offset: 1px;
   border-radius: 7px;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   THE WORKSHOP STUDIO
+   ─────────────────────────────────────────────────────────────
+   The site builder is a tool surface, not a page: always dark,
+   always dense, and it should feel like an instrument rather than
+   a website. It gets its own token layer for that reason - but a
+   layer derived from Quooro's palette, not invented alongside it.
+
+   Before this existed the designer carried 2,689 hardcoded hex
+   colours across 54 components, and painted 125 distinct colours
+   on a single screen. Every panel had improvised its own greys
+   and its own blue, which is precisely why it read as generated
+   rather than designed. One ramp, one accent, one selection hue.
+
+   Two accents, and the split is deliberate:
+     --studio-accent     Quooro rust. Actions the person takes.
+     --studio-select     A cool hue. Only ever the canvas telling
+                         you what is selected or measured.
+   Keeping "what I am doing" and "what the machine has selected"
+   in different hues is what stops a builder feeling noisy - it is
+   the one place a second colour earns its keep.
+   ──────────────────────────────────────────────────────────── */
+.studio {
+  --studio-bg: 240 6% 4%;
+  --studio-panel: 240 5% 7%;
+  --studio-raised: 240 5% 10%;
+  --studio-hover: 240 5% 14%;
+  --studio-sunken: 240 7% 3%;
+
+  --studio-line: 240 4% 15%;
+  --studio-line-strong: 240 4% 24%;
+
+  --studio-ink: 60 8% 93%;
+  --studio-ink-2: 60 4% 64%;
+  --studio-ink-3: 60 4% 42%;
+
+  --studio-accent: 13 79% 57%;
+  --studio-accent-ink: 240 6% 5%;
+  --studio-select: 205 90% 56%;
+
+  --studio-ok: 142 40% 52%;
+  --studio-warn: 38 60% 56%;
+  --studio-risk: 0 62% 62%;
+
+  color: hsl(var(--studio-ink));
+  background: hsl(var(--studio-bg));
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'tnum';
+}
+
+/* Hairlines carry the whole structure in a dark tool, so they are
+   defined once and never guessed at per component. */
+.studio-hair-r { border-right: 1px solid hsl(var(--studio-line)); }
+.studio-hair-l { border-left: 1px solid hsl(var(--studio-line)); }
+.studio-hair-b { border-bottom: 1px solid hsl(var(--studio-line)); }
+.studio-hair-t { border-top: 1px solid hsl(var(--studio-line)); }
+
+/* The one label style. Small caps, wide tracking, never shouted. */
+.studio-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: hsl(var(--studio-ink-3));
+}
+
+/* Panels scroll constantly; a visible chrome scrollbar breaks the
+   illusion of an instrument. */
+.studio-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--studio-line-strong)) transparent; }
+.studio-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+.studio-scroll::-webkit-scrollbar-track { background: transparent; }
+.studio-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--studio-line-strong));
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.studio-scroll::-webkit-scrollbar-thumb:hover { background-clip: content-box; background-color: hsl(var(--studio-ink-3)); }
+
+/* Every focusable thing in the studio, one ring. */
+.studio :focus-visible {
+  outline: 2px solid hsl(var(--studio-accent) / 0.8);
+  outline-offset: 1px;
+  border-radius: 6px;
+}
+
+/* The canvas plane: a quiet grid so the page being built reads as
+   an object sitting on a surface, rather than a div on a colour. */
+.studio-canvas-plane {
+  background-color: hsl(var(--studio-sunken));
+  background-image:
+    linear-gradient(hsl(var(--studio-line) / 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--studio-line) / 0.5) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio *, .studio *::before, .studio *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

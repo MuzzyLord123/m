@@ -4,10 +4,10 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SPEED_COLORS: Record<string, string> = {
-  Fastest: '#22c55e',
-  Fast: '#3b82f6',
-  Medium: '#f59e0b',
-  Slow: '#ef4444',
+  Fastest: 'hsl(var(--studio-ok))',
+  Fast: 'hsl(var(--studio-accent))',
+  Medium: 'hsl(var(--studio-warn))',
+  Slow: 'hsl(var(--studio-risk))',
 };
 
 const QUALITY_ICONS: Record<string, typeof Zap> = {
@@ -38,8 +38,8 @@ export function AIModelSelect() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-medium transition-all hover:bg-[#333]"
-        style={{ border: '1px solid #333', color: '#999' }}
+        className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-medium transition-all hover:bg-[hsl(var(--studio-hover))]"
+        style={{ border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
       >
         <Cpu className="w-3 h-3" style={{ color: SPEED_COLORS[current?.speed || 'Fast'] }} />
         <span className="max-w-[80px] truncate">{current?.label || 'Select Model'}</span>
@@ -54,17 +54,17 @@ export function AIModelSelect() {
             exit={{ opacity: 0, y: -4, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className="absolute top-full left-0 mt-1 rounded-xl overflow-hidden z-50 w-[260px]"
-            style={{ backgroundColor: '#1e1e1e', border: '1px solid #333', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}
+            style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}
           >
             <div className="p-2 space-y-0.5">
-              <div className="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider" style={{ color: '#555' }}>
+              <div className="px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>
                 AI Engine
               </div>
 
               {/* Group by provider */}
               {['Google', 'OpenAI'].map(provider => (
                 <div key={provider}>
-                  <div className="px-2 py-1 text-[8px] font-bold uppercase tracking-widest" style={{ color: '#444' }}>
+                  <div className="px-2 py-1 text-[8px] font-bold uppercase tracking-widest" style={{ color: 'hsl(var(--studio-hover))' }}>
                     {provider}
                   </div>
                   {AI_MODELS.filter(m => m.provider === provider).map(model => {
@@ -76,31 +76,31 @@ export function AIModelSelect() {
                         onClick={() => { updateModel(model.id as AIModelId); setOpen(false); }}
                         className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all"
                         style={{
-                          backgroundColor: isActive ? 'rgba(0,115,230,0.1)' : 'transparent',
-                          border: `1px solid ${isActive ? 'rgba(0,115,230,0.2)' : 'transparent'}`,
+                          backgroundColor: isActive ? 'hsl(var(--studio-accent) / 0.1)' : 'transparent',
+                          border: `1px solid ${isActive ? 'hsl(var(--studio-accent) / 0.2)' : 'transparent'}`,
                         }}
                       >
                         <div
                           className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                          style={{ backgroundColor: isActive ? 'rgba(0,115,230,0.15)' : '#2a2a2a' }}
+                          style={{ backgroundColor: isActive ? 'hsl(var(--studio-accent) / 0.15)' : 'hsl(var(--studio-raised))' }}
                         >
-                          <QualityIcon className="w-3 h-3" style={{ color: isActive ? '#4da3ff' : '#888' }} />
+                          <QualityIcon className="w-3 h-3" style={{ color: isActive ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))' }} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-[11px] font-medium" style={{ color: isActive ? '#4da3ff' : '#ccc' }}>
+                          <div className="text-[11px] font-medium" style={{ color: isActive ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-2))' }}>
                             {model.label}
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
                             <span className="text-[9px] flex items-center gap-0.5" style={{ color: SPEED_COLORS[model.speed] }}>
                               ● {model.speed}
                             </span>
-                            <span className="text-[9px]" style={{ color: '#555' }}>
+                            <span className="text-[9px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>
                               {model.quality} quality
                             </span>
                           </div>
                         </div>
                         {isActive && (
-                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#0073E6' }} />
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'hsl(var(--studio-accent))' }} />
                         )}
                       </button>
                     );

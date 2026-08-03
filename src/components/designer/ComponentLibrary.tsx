@@ -5,6 +5,8 @@ import { COMPONENT_REGISTRY } from './constants/componentRegistry';
 import { ComponentCategory, ElementType } from './types';
 import { createElement } from './utils/elementFactory';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { ROW, GLYPH } from './studio';
 import {
   LayoutTemplate, Square, Columns3, Grid3x3, MoveVertical, Minus,
   Type, AlignLeft, MousePointerClick, Tag, CreditCard,
@@ -31,11 +33,16 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 const CATEGORIES: ComponentCategory[] = ['Layout', 'Content', 'Media', 'Marketing', 'Interactive', 'Data', 'Forms', 'Navigation', 'Social', 'Charts', 'Advanced'];
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Layout: '#6366f1', Content: '#f59e0b', Media: '#ec4899', Marketing: '#22c55e',
-  Interactive: '#0073E6', Data: '#8b5cf6', Forms: '#14b8a6', Navigation: '#06b6d4',
-  Social: '#f43f5e', Charts: '#a855f7', Advanced: '#64748b',
-};
+/**
+ * The library used to give every category its own hue - eleven of them, each
+ * with a coloured dot on its chip and a coloured tile on every row. Eleven
+ * colours are not a hierarchy; they are noise, and they were the single
+ * loudest reason the builder read as generated rather than designed.
+ *
+ * The category is now carried by position (rows sit under their own heading)
+ * and by the glyph. Colour is reserved for state.
+ */
+const CATEGORY_COLORS: Record<string, string> = {};
 
 const CATEGORY_ICONS: Record<string, typeof Layers> = {
   Layout: LayoutTemplate, Content: Type, Media: ImageIcon, Marketing: Sparkles,
@@ -146,36 +153,36 @@ export function ComponentLibrary() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(0,115,230,0.1), rgba(99,102,241,0.08))', border: '1px solid rgba(0,115,230,0.15)' }}>
-              <Package className="h-3 w-3" style={{ color: '#0073E6' }} />
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.1), rgba(99,102,241,0.08))', border: '1px solid hsl(var(--studio-accent) / 0.15)' }}>
+              <Package className="h-3 w-3" style={{ color: 'hsl(var(--studio-accent))' }} />
             </div>
-            <span className="text-[11px] font-semibold" style={{ color: '#ccc' }}>Components</span>
+            <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>Components</span>
           </div>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setShowSearch(s => !s)}
               className="h-6 w-6 flex items-center justify-center rounded-md transition-colors"
-              style={{ backgroundColor: showSearch ? 'rgba(0,115,230,0.1)' : 'transparent', color: showSearch ? '#0073E6' : '#555' }}
+              style={{ backgroundColor: showSearch ? 'hsl(var(--studio-accent) / 0.1)' : 'transparent', color: showSearch ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-3))' }}
             >
               <Search className="h-3 w-3" />
             </button>
-            <div className="flex rounded overflow-hidden" style={{ border: '1px solid #2a2a2a' }}>
+            <div className="flex rounded overflow-hidden" style={{ border: '1px solid hsl(var(--studio-line))' }}>
               <button
                 onClick={() => setViewMode('grid')}
                 className="h-6 w-6 flex items-center justify-center transition-colors"
-                style={{ backgroundColor: viewMode === 'grid' ? '#333' : '#181818', color: viewMode === 'grid' ? '#fff' : '#555' }}
+                style={{ backgroundColor: viewMode === 'grid' ? 'hsl(var(--studio-line))' : 'hsl(var(--studio-panel))', color: viewMode === 'grid' ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-ink-3))' }}
               >
                 <Grid2x2 className="h-2.5 w-2.5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
                 className="h-6 w-6 flex items-center justify-center transition-colors"
-                style={{ backgroundColor: viewMode === 'list' ? '#333' : '#181818', color: viewMode === 'list' ? '#fff' : '#555' }}
+                style={{ backgroundColor: viewMode === 'list' ? 'hsl(var(--studio-line))' : 'hsl(var(--studio-panel))', color: viewMode === 'list' ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-ink-3))' }}
               >
                 <LayoutList className="h-2.5 w-2.5" />
               </button>
             </div>
-            <span className="text-[9px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(0,115,230,0.08)', color: '#0073E6', border: '1px solid rgba(0,115,230,0.12)' }}>
+            <span className="text-[9px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.08)', color: 'hsl(var(--studio-accent))', border: '1px solid hsl(var(--studio-accent) / 0.12)' }}>
               {COMPONENT_REGISTRY.length}
             </span>
           </div>
@@ -184,7 +191,7 @@ export function ComponentLibrary() {
         {/* Collapsible search */}
         {showSearch && (
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Search className="h-3.5 w-3.5" style={{ position: 'absolute', left: '10px', color: '#555', pointerEvents: 'none' }} />
+            <Search className="h-3.5 w-3.5" style={{ position: 'absolute', left: '10px', color: 'hsl(var(--studio-ink-3))', pointerEvents: 'none' }} />
             <input
               type="text"
               autoFocus
@@ -195,20 +202,20 @@ export function ComponentLibrary() {
                 width: '100%', height: '30px',
                 padding: '0 28px 0 32px',
                 fontSize: '11px', fontWeight: 500,
-                backgroundColor: '#181818',
-                border: '1px solid #2a2a2a',
+                backgroundColor: 'hsl(var(--studio-panel))',
+                border: '1px solid hsl(var(--studio-line))',
                 borderRadius: '8px',
-                color: '#ccc',
+                color: 'hsl(var(--studio-ink-2))',
                 outline: 'none',
               }}
-              onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-              onBlur={e => { e.currentTarget.style.borderColor = '#2a2a2a'; }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-raised))'; }}
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 flex items-center justify-center rounded-full hover:bg-white/10"
-                style={{ color: '#666', fontSize: '10px' }}
+                style={{ color: 'hsl(var(--studio-ink-3))', fontSize: '10px' }}
               >✕</button>
             )}
           </div>
@@ -221,26 +228,27 @@ export function ComponentLibrary() {
               onClick={() => setActiveCategory(null)}
               className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-1 rounded-md transition-all"
               style={{
-                backgroundColor: !activeCategory ? 'rgba(0,115,230,0.1)' : 'transparent',
-                color: !activeCategory ? '#0073E6' : '#444',
-                border: `1px solid ${!activeCategory ? 'rgba(0,115,230,0.2)' : 'transparent'}`,
+                backgroundColor: !activeCategory ? 'hsl(var(--studio-accent) / 0.1)' : 'transparent',
+                color: !activeCategory ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line-strong))',
+                border: `1px solid ${!activeCategory ? 'hsl(var(--studio-accent) / 0.2)' : 'transparent'}`,
               }}
             >All</button>
             {CATEGORIES.map(cat => {
-              const color = CATEGORY_COLORS[cat] || '#555';
+              const color = CATEGORY_COLORS[cat] || 'hsl(var(--studio-ink-3))';
               const isActive = activeCategory === cat;
               const count = categoryCounts[cat] || 0;
               if (count === 0) return null;
               return (
                 <button key={cat} onClick={() => setActiveCategory(isActive ? null : cat)}
-                  className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-1 rounded-md transition-all flex items-center gap-0.5"
-                  style={{
-                    backgroundColor: isActive ? `${color}12` : 'transparent',
-                    color: isActive ? color : '#444',
-                    border: `1px solid ${isActive ? `${color}25` : 'transparent'}`,
-                  }}>
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
+                  aria-pressed={isActive}
+                  className={cn(
+                    'flex items-center gap-1 rounded-[5px] px-2 py-1 text-[10.5px] font-medium leading-none transition-colors duration-100',
+                    isActive
+                      ? 'bg-[hsl(var(--studio-hover))] text-[hsl(var(--studio-ink))]'
+                      : 'text-[hsl(var(--studio-ink-3))] hover:bg-[hsl(var(--studio-hover))] hover:text-[hsl(var(--studio-ink-2))]',
+                  )}>
                   {cat}
+                  <span className="text-[9.5px] tabular-nums opacity-60">{count}</span>
                 </button>
               );
             })}
@@ -251,7 +259,7 @@ export function ComponentLibrary() {
         {!filtered && !activeCategory && (
           <div className="flex flex-wrap gap-1">
             {['section', 'container', 'heading', 'text', 'button', 'image'].map(type => {
-              const color = CATEGORY_COLORS[COMPONENT_REGISTRY.find(c => c.type === type)?.category || 'Layout'] || '#0073E6';
+              const color = CATEGORY_COLORS[COMPONENT_REGISTRY.find(c => c.type === type)?.category || 'Layout'] || 'hsl(var(--studio-accent))';
               return (
                 <button
                   key={type}
@@ -276,8 +284,8 @@ export function ComponentLibrary() {
           <div>
             <div className="flex items-center gap-1.5 mb-2 px-0.5">
               <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#555]">Favorites</span>
-              <span className="text-[8px] tabular-nums px-1 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--studio-ink-3))]">Favorites</span>
+              <span className="text-[8px] tabular-nums px-1 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: 'hsl(var(--studio-warn))' }}>
                 {favoriteComponents.length}
               </span>
             </div>
@@ -293,16 +301,16 @@ export function ComponentLibrary() {
         {!filtered && !activeCategory && recentComponents.length > 0 && (
           <div>
             <div className="flex items-center gap-1.5 mb-2 px-0.5">
-              <Zap className="h-3 w-3" style={{ color: '#0073E6' }} />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#555]">Recent</span>
-              <span className="text-[8px] tabular-nums px-1 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(0,115,230,0.1)', color: '#0073E6' }}>
+              <Zap className="h-3 w-3" style={{ color: 'hsl(var(--studio-accent))' }} />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[hsl(var(--studio-ink-3))]">Recent</span>
+              <span className="text-[8px] tabular-nums px-1 py-0.5 rounded-full" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.1)', color: 'hsl(var(--studio-accent))' }}>
                 {recentComponents.length}
               </span>
             </div>
             <div className="flex gap-1 flex-wrap">
               {recentComponents.map((comp) => {
                 const Icon = ICON_MAP[comp.icon] || Square;
-                const catColor = CATEGORY_COLORS[comp.category] || '#555';
+                const catColor = CATEGORY_COLORS[comp.category] || 'hsl(var(--studio-ink-3))';
                 return (
                   <motion.button
                     key={comp.type}
@@ -311,14 +319,14 @@ export function ComponentLibrary() {
                     onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, comp.type)}
                     className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-grab active:cursor-grabbing select-none"
                     style={{
-                      backgroundColor: '#1a1a1a',
-                      border: '1px solid #222',
+                      backgroundColor: 'hsl(var(--studio-panel))',
+                      border: '1px solid hsl(var(--studio-line))',
                     }}
                     whileHover={{ borderColor: `${catColor}30`, backgroundColor: `${catColor}06` }}
                     whileTap={{ scale: 0.96 }}
                   >
                     <Icon className="h-3 w-3" style={{ color: catColor }} />
-                    <span className="text-[9px] font-medium" style={{ color: '#888' }}>{comp.label}</span>
+                    <span className="text-[9px] font-medium" style={{ color: 'hsl(var(--studio-ink-2))' }}>{comp.label}</span>
                   </motion.button>
                 );
               })}
@@ -329,9 +337,9 @@ export function ComponentLibrary() {
         {/* Filtered or categorized */}
         {filtered ? (
           <div>
-            <div className="text-[9px] font-medium mb-2 px-0.5 flex items-center gap-1.5" style={{ color: '#555' }}>
-              <Search className="h-3 w-3" style={{ color: '#444' }} />
-              {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "<span style={{ color: '#0073E6' }}>{search}</span>"
+            <div className="text-[9px] font-medium mb-2 px-0.5 flex items-center gap-1.5" style={{ color: 'hsl(var(--studio-ink-3))' }}>
+              <Search className="h-3 w-3" style={{ color: 'hsl(var(--studio-hover))' }} />
+              {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "<span style={{ color: 'hsl(var(--studio-accent))' }}>{search}</span>"
             </div>
             <div className={viewMode === 'grid' ? 'grid grid-cols-3 gap-1' : 'space-y-1'}>
               {filtered.map((comp, i) => (
@@ -339,11 +347,11 @@ export function ComponentLibrary() {
               ))}
               {filtered.length === 0 && (
                 <div className="col-span-3 text-center py-8">
-                  <div className="w-12 h-12 rounded-2xl mx-auto mb-2 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(0,115,230,0.06), rgba(0,115,230,0.02))', border: '1px solid rgba(0,115,230,0.08)' }}>
-                    <Search className="w-5 h-5" style={{ color: 'rgba(0,115,230,0.25)' }} />
+                  <div className="w-12 h-12 rounded-2xl mx-auto mb-2 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.06), hsl(var(--studio-accent) / 0.02))', border: '1px solid hsl(var(--studio-accent) / 0.08)' }}>
+                    <Search className="w-5 h-5" style={{ color: 'hsl(var(--studio-accent) / 0.25)' }} />
                   </div>
-                  <p className="text-[10px] font-medium" style={{ color: '#555' }}>No components found</p>
-                  <button onClick={() => setSearch('')} className="text-[9px] mt-1" style={{ color: '#0073E6' }}>Clear search</button>
+                  <p className="text-[10px] font-medium" style={{ color: 'hsl(var(--studio-ink-3))' }}>No components found</p>
+                  <button onClick={() => setSearch('')} className="text-[9px] mt-1" style={{ color: 'hsl(var(--studio-accent))' }}>Clear search</button>
                 </div>
               )}
             </div>
@@ -353,7 +361,7 @@ export function ComponentLibrary() {
             const components = COMPONENT_REGISTRY.filter(c => c.category === cat);
             if (components.length === 0) return null;
             const isCollapsed = collapsed.includes(cat);
-            const catColor = CATEGORY_COLORS[cat] || '#555';
+            const catColor = CATEGORY_COLORS[cat] || 'hsl(var(--studio-ink-3))';
             const CatIcon = CATEGORY_ICONS[cat] || Square;
             return (
               <div key={cat}>
@@ -363,12 +371,12 @@ export function ComponentLibrary() {
                 >
                   <ChevronRight
                     className={`h-2.5 w-2.5 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
-                    style={{ color: '#444' }}
+                    style={{ color: 'hsl(var(--studio-hover))' }}
                   />
                   <div className="w-4 h-4 rounded flex items-center justify-center" style={{ backgroundColor: `${catColor}12`, border: `1px solid ${catColor}18` }}>
                     <CatIcon className="h-2.5 w-2.5" style={{ color: catColor }} />
                   </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.1em] flex-1 text-left" style={{ color: '#666' }}>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.1em] flex-1 text-left" style={{ color: 'hsl(var(--studio-ink-3))' }}>
                     {cat}
                   </span>
                   <span className="text-[8px] tabular-nums font-mono px-1 py-0.5 rounded" style={{ backgroundColor: `${catColor}08`, color: catColor }}>
@@ -399,7 +407,7 @@ export function ComponentLibrary() {
 
         {/* Component count */}
         <div className="text-center pt-2 pb-4">
-          <span className="text-[10px]" style={{ color: '#444' }}>{COMPONENT_REGISTRY.length} components • {CATEGORIES.length} categories</span>
+          <span className="text-[10px]" style={{ color: 'hsl(var(--studio-hover))' }}>{COMPONENT_REGISTRY.length} components • {CATEGORIES.length} categories</span>
         </div>
       </div>
     </ScrollArea>
@@ -416,7 +424,7 @@ const ComponentCard = memo(function ComponentCard({ comp, index, onDragStart, on
   onToggleFavorite: (type: string) => void;
 }) {
   const Icon = ICON_MAP[comp.icon] || Square;
-  const catColor = CATEGORY_COLORS[comp.category] || '#555';
+  const catColor = CATEGORY_COLORS[comp.category] || 'hsl(var(--studio-ink-3))';
 
   if (viewMode === 'list') {
     return (
@@ -427,31 +435,25 @@ const ComponentCard = memo(function ComponentCard({ comp, index, onDragStart, on
         draggable
         onDragStart={(e) => onDragStart(e as unknown as React.DragEvent, comp.type)}
         onClick={() => onClick(comp.type)}
-        className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-grab active:cursor-grabbing select-none group"
-        style={{
-          backgroundColor: '#1a1a1a',
-          border: '1px solid #222',
-          transition: 'all 0.2s ease',
-        }}
-        whileHover={{ borderColor: `${catColor}30`, backgroundColor: `${catColor}04` }}
-        whileTap={{ scale: 0.98 }}
+        /* One row object, the same height and hover as the layers tree and
+           the pages list. No card chrome, no repeated category caption -
+           the rows already sit under their category's own heading. */
+        className={cn(ROW, 'cursor-grab active:cursor-grabbing')}
       >
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `linear-gradient(135deg, ${catColor}10, transparent)`, border: `1px solid ${catColor}15` }}>
-          <Icon className="h-3.5 w-3.5" style={{ color: catColor }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <span className="text-[11px] font-medium block truncate" style={{ color: '#999' }}>{comp.label}</span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full" style={{ backgroundColor: catColor }} />
-            <span className="text-[8px] capitalize font-semibold" style={{ color: catColor }}>{comp.category}</span>
-          </div>
-        </div>
+        <Icon className={GLYPH} />
+        <span className="min-w-0 flex-1 truncate">{comp.label}</span>
         <button
           onClick={(e) => { e.stopPropagation(); onToggleFavorite(comp.type); }}
-          className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 flex items-center justify-center rounded-md hover:bg-white/[0.06]"
-          style={{ opacity: isFavorite ? 1 : undefined }}
+          aria-label={isFavorite ? `Unpin ${comp.label}` : `Pin ${comp.label}`}
+          className={cn(
+            'grid h-5 w-5 shrink-0 place-items-center rounded-[4px] transition-opacity',
+            'hover:bg-[hsl(var(--studio-raised))]',
+            isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+          )}
         >
-          <Star className={`h-3 w-3 ${isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[#555]'}`} />
+          <Star className={cn('h-3 w-3', isFavorite
+            ? 'fill-[hsl(var(--studio-accent))] text-[hsl(var(--studio-accent))]'
+            : 'text-[hsl(var(--studio-ink-3))]')} />
         </button>
       </motion.div>
     );
@@ -467,8 +469,8 @@ const ComponentCard = memo(function ComponentCard({ comp, index, onDragStart, on
       onClick={() => onClick(comp.type)}
       className="flex flex-col items-center gap-1 p-1.5 rounded-lg cursor-grab active:cursor-grabbing select-none group relative"
       style={{
-        backgroundColor: '#1a1a1a',
-        border: '1px solid #222',
+        backgroundColor: 'hsl(var(--studio-panel))',
+        border: '1px solid hsl(var(--studio-line))',
         transition: 'all 0.2s ease',
       }}
       whileHover={{
@@ -483,7 +485,7 @@ const ComponentCard = memo(function ComponentCard({ comp, index, onDragStart, on
         className="absolute top-0.5 right-0.5 opacity-0 group-hover:opacity-100 transition-opacity h-4 w-4 flex items-center justify-center rounded hover:bg-white/[0.08]"
         style={{ opacity: isFavorite ? 1 : undefined }}
       >
-        <Star className={`h-2 w-2 ${isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[#555]'}`} />
+        <Star className={`h-2 w-2 ${isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[hsl(var(--studio-ink-3))]'}`} />
       </button>
       {/* Category dot */}
       <div className="absolute top-1 left-1 w-1 h-1 rounded-full" style={{ backgroundColor: catColor }} />
@@ -495,7 +497,7 @@ const ComponentCard = memo(function ComponentCard({ comp, index, onDragStart, on
       }}>
         <Icon className="h-3 w-3" style={{ color: catColor }} />
       </div>
-      <span className="text-[8px] leading-tight font-medium truncate w-full text-center" style={{ color: '#999' }}>{comp.label}</span>
+      <span className="text-[8px] leading-tight font-medium truncate w-full text-center" style={{ color: 'hsl(var(--studio-ink-2))' }}>{comp.label}</span>
     </motion.div>
   );
 });

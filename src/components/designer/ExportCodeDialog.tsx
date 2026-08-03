@@ -243,21 +243,21 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="w-[800px] max-h-[85vh] rounded-xl flex flex-col overflow-hidden"
-            style={{ backgroundColor: '#0d1117', border: '1px solid #30363d', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}
+            style={{ backgroundColor: 'hsl(var(--studio-sunken))', border: '1px solid hsl(var(--studio-line))', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 h-12 shrink-0" style={{ borderBottom: '1px solid #21262d' }}>
+            <div className="flex items-center justify-between px-5 h-12 shrink-0" style={{ borderBottom: '1px solid hsl(var(--studio-line))' }}>
               <div className="flex items-center gap-3">
                 <span className="text-[13px] font-bold text-white">Export Code</span>
                 {pages.length > 1 && (
-                  <div className="flex items-center h-6 rounded-md overflow-hidden" style={{ border: '1px solid #30363d' }}>
+                  <div className="flex items-center h-6 rounded-md overflow-hidden" style={{ border: '1px solid hsl(var(--studio-line))' }}>
                     <button
                       onClick={() => setExportMode('multi')}
                       className="h-full px-2.5 text-[10px] font-semibold transition-colors"
                       style={{
                         backgroundColor: exportMode === 'multi' ? '#238636' : 'transparent',
-                        color: exportMode === 'multi' ? '#fff' : '#8b949e',
+                        color: exportMode === 'multi' ? 'hsl(var(--studio-ink))' : '#8b949e',
                       }}
                     >
                       All Pages
@@ -267,7 +267,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
                       className="h-full px-2.5 text-[10px] font-semibold transition-colors"
                       style={{
                         backgroundColor: exportMode === 'single' ? '#1f6feb' : 'transparent',
-                        color: exportMode === 'single' ? '#fff' : '#8b949e',
+                        color: exportMode === 'single' ? 'hsl(var(--studio-ink))' : '#8b949e',
                       }}
                     >
                       Single Page
@@ -279,7 +279,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
                 <button
                   onClick={handleCopy}
                   className="h-7 px-3 flex items-center gap-1.5 rounded-md text-[11px] font-medium transition-colors"
-                  style={{ backgroundColor: '#21262d', color: '#c9d1d9', border: '1px solid #30363d' }}
+                  style={{ backgroundColor: 'hsl(var(--studio-line))', color: '#c9d1d9', border: '1px solid hsl(var(--studio-line))' }}
                 >
                   {copied ? <Check className="h-3 w-3" style={{ color: '#3fb950' }} /> : <Copy className="h-3 w-3" />}
                   {copied ? 'Copied!' : 'Copy'}
@@ -291,7 +291,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
                 >
                   <Download className="h-3 w-3" /> Download ZIP
                 </button>
-                <button onClick={onClose} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#21262d] transition-colors">
+                <button onClick={onClose} className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[hsl(var(--studio-line))] transition-colors">
                   <X className="h-4 w-4" style={{ color: '#8b949e' }} />
                 </button>
               </div>
@@ -299,7 +299,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
 
             {/* Page selector for single-page mode */}
             {exportMode === 'single' && pages.length > 1 && (
-              <div className="flex items-center gap-2 px-5 h-9 shrink-0" style={{ borderBottom: '1px solid #21262d', backgroundColor: '#161b22' }}>
+              <div className="flex items-center gap-2 px-5 h-9 shrink-0" style={{ borderBottom: '1px solid hsl(var(--studio-line))', backgroundColor: 'hsl(var(--studio-panel))' }}>
                 <span className="text-[10px] font-medium" style={{ color: '#8b949e' }}>Page:</span>
                 <div className="flex gap-1">
                   {pages.map((p, i) => (
@@ -308,8 +308,8 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
                       onClick={() => setSelectedPageIdx(i)}
                       className="h-6 px-2.5 rounded text-[10px] font-medium transition-colors"
                       style={{
-                        backgroundColor: selectedPageIdx === i ? '#1f6feb' : '#21262d',
-                        color: selectedPageIdx === i ? '#fff' : '#8b949e',
+                        backgroundColor: selectedPageIdx === i ? '#1f6feb' : 'hsl(var(--studio-line))',
+                        color: selectedPageIdx === i ? 'hsl(var(--studio-ink))' : '#8b949e',
                       }}
                     >
                       {p.page_name}
@@ -321,7 +321,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
             )}
 
             {/* Tabs */}
-            <div className="flex px-5 gap-0 shrink-0" style={{ borderBottom: '1px solid #21262d', backgroundColor: '#161b22' }}>
+            <div className="flex px-5 gap-0 shrink-0" style={{ borderBottom: '1px solid hsl(var(--studio-line))', backgroundColor: 'hsl(var(--studio-panel))' }}>
               {tabConfig.map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
@@ -347,7 +347,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
               <div className="flex-1" />
               <div className="flex items-center gap-3 self-center">
                 {currentTabSize > 0 && (
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: '#21262d', color: '#7ee787' }}>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'hsl(var(--studio-line))', color: '#7ee787' }}>
                     {formatSize(currentTabSize)}
                   </span>
                 )}
@@ -358,7 +358,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
             </div>
 
             {/* Code with line numbers */}
-            <div className="flex-1 overflow-auto" style={{ backgroundColor: '#0d1117' }}>
+            <div className="flex-1 overflow-auto" style={{ backgroundColor: 'hsl(var(--studio-sunken))' }}>
               <style dangerouslySetInnerHTML={{ __html: `
                 .hl-tag { color: #7ee787; }
                 .hl-attr { color: #79c0ff; }
@@ -374,7 +374,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
               `}} />
               <div className="flex">
                 {/* Line numbers */}
-                <div className="shrink-0 py-4 pr-3 text-right select-none" style={{ minWidth: '52px', color: '#484f58', borderRight: '1px solid #21262d' }}>
+                <div className="shrink-0 py-4 pr-3 text-right select-none" style={{ minWidth: '52px', color: '#484f58', borderRight: '1px solid hsl(var(--studio-line))' }}>
                   {getContent().split('\n').map((_, i) => (
                     <div key={i} className="text-[11px] font-mono leading-5 px-2">{i + 1}</div>
                   ))}
@@ -387,7 +387,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-5 py-2.5 shrink-0" style={{ borderTop: '1px solid #21262d', backgroundColor: '#161b22' }}>
+            <div className="flex items-center justify-between px-5 py-2.5 shrink-0" style={{ borderTop: '1px solid hsl(var(--studio-line))', backgroundColor: 'hsl(var(--studio-panel))' }}>
               <div className="flex items-center gap-1.5">
                 <Info className="h-3 w-3" style={{ color: '#484f58' }} />
                 <span className="text-[10px]" style={{ color: '#484f58' }}>
@@ -395,7 +395,7 @@ export function ExportCodeDialog({ open, onClose, siteName, siteId }: ExportCode
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: '#21262d', color: '#79c0ff' }}>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'hsl(var(--studio-line))', color: '#79c0ff' }}>
                   Total: {formatSize(sizeEstimate.total)}
                 </span>
                 {exportMode === 'multi' && pages.length > 1 && (

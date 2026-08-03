@@ -16,10 +16,10 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  section: '#8b5cf6', container: '#6366f1', columns: '#3b82f6', grid: '#0ea5e9',
-  heading: '#f59e0b', text: '#a3a3a3', button: '#22c55e', image: '#ec4899',
-  video: '#f43f5e', card: '#a855f7', form: '#14b8a6', navbar: '#06b6d4',
-  footer: '#64748b', input: '#f59e0b', badge: '#f97316', quote: '#8b5cf6',
+  section: 'hsl(var(--studio-ink-3))', container: 'hsl(var(--studio-ink-3))', columns: 'hsl(var(--studio-accent))', grid: 'hsl(var(--studio-accent))',
+  heading: 'hsl(var(--studio-warn))', text: 'hsl(var(--studio-ink-2))', button: 'hsl(var(--studio-ok))', image: 'hsl(var(--studio-ink-3))',
+  video: 'hsl(var(--studio-ink-3))', card: 'hsl(var(--studio-ink-3))', form: 'hsl(var(--studio-ink-3))', navbar: 'hsl(var(--studio-ink-3))',
+  footer: 'hsl(var(--studio-ink-3))', input: 'hsl(var(--studio-warn))', badge: 'hsl(var(--studio-warn))', quote: 'hsl(var(--studio-ink-3))',
 };
 
 export const FloatingToolbar = memo(function FloatingToolbar() {
@@ -79,7 +79,7 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
 
   const isContainer = ['section', 'container', 'columns', 'grid', 'navbar', 'footer', 'card'].includes(selectedElement.type);
   const isText = ['heading', 'text', 'button', 'badge', 'link', 'quote'].includes(selectedElement.type);
-  const typeColor = TYPE_COLORS[selectedElement.type] || '#0073E6';
+  const typeColor = TYPE_COLORS[selectedElement.type] || 'hsl(var(--studio-accent))';
 
   type ActionItem = { icon: typeof Copy; label: string; onClick: () => void; danger?: boolean; active?: boolean; color?: string } | 'sep';
 
@@ -100,20 +100,20 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
       { icon: Minus, label: 'Decrease font size', onClick: () => {
         const size = parseInt(currentStyles?.fontSize as string) || 16;
         updateStyle('fontSize', `${Math.max(8, size - 2)}px`);
-      }, color: '#f59e0b' },
-      { icon: Type, label: `Font: ${(currentStyles?.fontSize as string) || '16px'}`, onClick: () => {}, color: '#f59e0b' },
+      }, color: 'hsl(var(--studio-warn))' },
+      { icon: Type, label: `Font: ${(currentStyles?.fontSize as string) || '16px'}`, onClick: () => {}, color: 'hsl(var(--studio-warn))' },
       { icon: Plus, label: 'Increase font size', onClick: () => {
         const size = parseInt(currentStyles?.fontSize as string) || 16;
         updateStyle('fontSize', `${Math.min(200, size + 2)}px`);
-      }, color: '#f59e0b' },
+      }, color: 'hsl(var(--studio-warn))' },
       'sep',
     );
   }
 
   if (isContainer) {
     actions.push(
-      { icon: Rows3, label: 'Stack vertical', onClick: () => updateStyle('flexDirection', 'column'), active: currentStyles?.flexDirection === 'column' || !currentStyles?.flexDirection, color: '#8b5cf6' },
-      { icon: Columns3, label: 'Stack horizontal', onClick: () => updateStyle('flexDirection', 'row'), active: currentStyles?.flexDirection === 'row', color: '#3b82f6' },
+      { icon: Rows3, label: 'Stack vertical', onClick: () => updateStyle('flexDirection', 'column'), active: currentStyles?.flexDirection === 'column' || !currentStyles?.flexDirection, color: 'hsl(var(--studio-ink-3))' },
+      { icon: Columns3, label: 'Stack horizontal', onClick: () => updateStyle('flexDirection', 'row'), active: currentStyles?.flexDirection === 'row', color: 'hsl(var(--studio-accent))' },
       'sep',
       { icon: AlignStartVertical, label: 'Align start', onClick: () => updateStyle('alignItems', 'flex-start'), active: currentStyles?.alignItems === 'flex-start' },
       { icon: AlignCenterVertical, label: 'Align center', onClick: () => updateStyle('alignItems', 'center'), active: currentStyles?.alignItems === 'center' },
@@ -126,8 +126,8 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
   }
 
   actions.push(
-    { icon: Minus, label: 'Reduce padding', onClick: () => adjustSpacing('padding', -4), color: '#06b6d4' },
-    { icon: Plus, label: 'Increase padding', onClick: () => adjustSpacing('padding', 4), color: '#06b6d4' },
+    { icon: Minus, label: 'Reduce padding', onClick: () => adjustSpacing('padding', -4), color: 'hsl(var(--studio-ink-3))' },
+    { icon: Plus, label: 'Increase padding', onClick: () => adjustSpacing('padding', 4), color: 'hsl(var(--studio-ink-3))' },
     'sep',
     { icon: Copy, label: 'Duplicate (⌘D)', onClick: () => dispatch({ type: 'DUPLICATE_ELEMENT', payload: selectedElement.id }) },
     { icon: Box, label: 'Wrap (⌘G)', onClick: () => wrapInContainer() },
@@ -143,7 +143,7 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
       icon: selectedElement.locked ? Unlock : Lock,
       label: selectedElement.locked ? 'Unlock' : 'Lock',
       onClick: () => dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, updates: { locked: !selectedElement.locked } } }),
-      color: selectedElement.locked ? '#f59e0b' : undefined,
+      color: selectedElement.locked ? 'hsl(var(--studio-warn))' : undefined,
     },
     'sep',
     { icon: Palette, label: 'Style panel', onClick: () => dispatch({ type: 'SET_RIGHT_TAB', payload: 'style' }) },
@@ -219,8 +219,8 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
               }}
               title="Click to edit padding"
             >
-              <Move className="h-2.5 w-2.5" style={{ color: '#06b6d4' }} />
-              <span style={{ fontSize: '9px', fontFamily: 'monospace', color: '#06b6d4', fontWeight: 600 }}>
+              <Move className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
+              <span style={{ fontSize: '9px', fontFamily: 'monospace', color: 'hsl(var(--studio-ink-3))', fontWeight: 600 }}>
                 {typeof currentPadding === 'string' ? currentPadding.replace(/px/g, '') : currentPadding}
               </span>
             </div>
@@ -235,11 +235,11 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
                 }}
                 onClick={e => e.stopPropagation()}
               >
-                <div style={{ fontSize: '8px', fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Padding (px)</div>
+                <div style={{ fontSize: '8px', fontWeight: 700, color: 'hsl(var(--studio-ink-3))', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Padding (px)</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <button
                     onClick={() => adjustSpacing('padding', -4)}
-                    style={{ width: '22px', height: '22px', borderRadius: '5px', border: '1px solid #333', backgroundColor: '#1a1a1a', color: '#888', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ width: '22px', height: '22px', borderRadius: '5px', border: '1px solid hsl(var(--studio-line))', backgroundColor: 'hsl(var(--studio-panel))', color: 'hsl(var(--studio-ink-2))', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >−</button>
                   <input
                     ref={spacingInputRef}
@@ -259,14 +259,14 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
                       setShowSpacingInput(false);
                     }}
                     style={{
-                      width: '48px', height: '22px', borderRadius: '5px', border: '1px solid #06b6d4',
-                      backgroundColor: '#111', color: '#06b6d4', fontSize: '11px', fontFamily: 'monospace',
+                      width: '48px', height: '22px', borderRadius: '5px', border: '1px solid hsl(var(--studio-ink-3))',
+                      backgroundColor: 'hsl(var(--studio-sunken))', color: 'hsl(var(--studio-ink-3))', fontSize: '11px', fontFamily: 'monospace',
                       textAlign: 'center', outline: 'none',
                     }}
                   />
                   <button
                     onClick={() => adjustSpacing('padding', 4)}
-                    style={{ width: '22px', height: '22px', borderRadius: '5px', border: '1px solid #333', backgroundColor: '#1a1a1a', color: '#888', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ width: '22px', height: '22px', borderRadius: '5px', border: '1px solid hsl(var(--studio-line))', backgroundColor: 'hsl(var(--studio-panel))', color: 'hsl(var(--studio-ink-2))', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >+</button>
                 </div>
                 {/* Quick presets */}
@@ -277,8 +277,8 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
                       onClick={() => { updateStyle('padding', `${v}px`); setShowSpacingInput(false); }}
                       style={{
                         flex: 1, height: '20px', borderRadius: '4px', border: '1px solid #282828',
-                        backgroundColor: currentPadding === `${v}px` ? 'rgba(6,182,212,0.12)' : '#1a1a1a',
-                        color: currentPadding === `${v}px` ? '#06b6d4' : '#555',
+                        backgroundColor: currentPadding === `${v}px` ? 'rgba(6,182,212,0.12)' : 'hsl(var(--studio-panel))',
+                        color: currentPadding === `${v}px` ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-3))',
                         fontSize: '8px', fontFamily: 'monospace', cursor: 'pointer',
                       }}
                     >{v}</button>
@@ -297,7 +297,7 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
             }}
             title={`Opacity: ${Math.round(currentOpacity * 100)}%`}
           >
-            <Eye className="h-2.5 w-2.5" style={{ color: currentOpacity < 1 ? '#8b5cf6' : '#333', cursor: 'pointer' }}
+            <Eye className="h-2.5 w-2.5" style={{ color: currentOpacity < 1 ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-line))', cursor: 'pointer' }}
               onClick={() => {
                 const next = currentOpacity >= 1 ? 0.5 : currentOpacity <= 0.3 ? 1 : currentOpacity - 0.25;
                 updateStyle('opacity', String(Math.max(0.05, next)));
@@ -309,11 +309,11 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
               value={Math.round(currentOpacity * 100)}
               onChange={e => updateStyle('opacity', String(parseInt(e.target.value) / 100))}
               style={{
-                width: '40px', height: '3px', accentColor: '#8b5cf6',
+                width: '40px', height: '3px', accentColor: 'hsl(var(--studio-ink-3))',
                 cursor: 'pointer', opacity: 0.8,
               }}
             />
-            <span style={{ fontSize: '8px', fontFamily: 'monospace', color: currentOpacity < 1 ? '#8b5cf6' : '#555', fontWeight: 600, minWidth: '24px', textAlign: 'right' }}>
+            <span style={{ fontSize: '8px', fontFamily: 'monospace', color: currentOpacity < 1 ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-3))', fontWeight: 600, minWidth: '24px', textAlign: 'right' }}>
               {Math.round(currentOpacity * 100)}%
             </span>
           </div>
@@ -326,7 +326,7 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
                 return <div key={`sep-${i}`} style={{ width: '1px', height: '18px', backgroundColor: '#282828', margin: '0 1px' }} />;
               }
               const Icon = action.icon;
-              const activeColor = action.color || '#0073E6';
+              const activeColor = action.color || 'hsl(var(--studio-accent))';
               return (
                 <Tooltip key={i}>
                   <TooltipTrigger asChild>
@@ -338,16 +338,16 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
                         border: 'none', cursor: 'pointer',
                         transition: 'all 0.12s ease',
                         backgroundColor: action.active ? `${activeColor}12` : 'transparent',
-                        color: action.active ? activeColor : action.danger ? '#ef4444' : '#777',
+                        color: action.active ? activeColor : action.danger ? 'hsl(var(--studio-risk))' : 'hsl(var(--studio-ink-3))',
                       }}
                       onMouseEnter={e => {
                         e.currentTarget.style.backgroundColor = action.danger ? 'rgba(239,68,68,0.1)' : `${activeColor}12`;
-                        e.currentTarget.style.color = action.danger ? '#ef4444' : activeColor;
+                        e.currentTarget.style.color = action.danger ? 'hsl(var(--studio-risk))' : activeColor;
                         e.currentTarget.style.transform = 'scale(1.1)';
                       }}
                       onMouseLeave={e => {
                         e.currentTarget.style.backgroundColor = action.active ? `${activeColor}12` : 'transparent';
-                        e.currentTarget.style.color = action.active ? activeColor : action.danger ? '#ef4444' : '#777';
+                        e.currentTarget.style.color = action.active ? activeColor : action.danger ? 'hsl(var(--studio-risk))' : 'hsl(var(--studio-ink-3))';
                         e.currentTarget.style.transform = 'scale(1)';
                       }}
                     >
@@ -357,7 +357,7 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
                   <TooltipContent
                     side="top"
                     className="text-[10px] px-2.5 py-1 rounded-lg"
-                    style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#ccc', boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}
+                    style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))', boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}
                   >
                     {action.label}
                   </TooltipContent>

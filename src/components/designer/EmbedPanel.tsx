@@ -56,7 +56,7 @@ export function EmbedPanel({ siteId }: { siteId?: string }) {
 
   // Booking customization
   const [bookingCustom, setBookingCustom] = useState({
-    color: '#3b82f6',
+    color: 'hsl(var(--studio-accent))',
     height: 700,
     rounded: 12,
     shadow: true,
@@ -68,7 +68,7 @@ export function EmbedPanel({ siteId }: { siteId?: string }) {
     fields: ['name', 'email', 'message'],
     submitLabel: 'Send Message',
     successMessage: "Thank you! We'll be in touch soon.",
-    brandColor: '#3b82f6',
+    brandColor: 'hsl(var(--studio-accent))',
     rounded: 8,
     fontSize: 14,
   });
@@ -111,7 +111,7 @@ export function EmbedPanel({ siteId }: { siteId?: string }) {
       return `    <div style="margin-bottom:16px"><label style="display:block;font-size:${formConfig.fontSize}px;font-weight:500;margin-bottom:4px;color:#374151">${label}</label><input type="${type}" name="${f}" required style="width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:${formConfig.rounded}px;font-size:${formConfig.fontSize}px" /></div>`;
     }).join('\n');
 
-    return `<!-- Quooro Contact Form -->\n<form id="quooro-contact-form" style="max-width:480px;margin:0 auto;padding:32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">\n${fieldsHtml}\n    <button type="submit" style="width:100%;padding:12px;background:${formConfig.brandColor};color:#fff;border:none;border-radius:${formConfig.rounded}px;font-size:${formConfig.fontSize + 1}px;font-weight:600;cursor:pointer">${formConfig.submitLabel}</button>\n    <p id="quooro-form-success" style="display:none;text-align:center;padding:16px;color:#059669;font-weight:500">${formConfig.successMessage}</p>\n</form>`;
+    return `<!-- Quooro Contact Form -->\n<form id="quooro-contact-form" style="max-width:480px;margin:0 auto;padding:32px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">\n${fieldsHtml}\n    <button type="submit" style="width:100%;padding:12px;background:${formConfig.brandColor};color:hsl(var(--studio-ink));border:none;border-radius:${formConfig.rounded}px;font-size:${formConfig.fontSize + 1}px;font-weight:600;cursor:pointer">${formConfig.submitLabel}</button>\n    <p id="quooro-form-success" style="display:none;text-align:center;padding:16px;color:#059669;font-weight:500">${formConfig.successMessage}</p>\n</form>`;
   };
 
   const getActiveSnippet = () => {
@@ -217,12 +217,12 @@ export function EmbedPanel({ siteId }: { siteId?: string }) {
   const formPreviewHtml = `
     <!DOCTYPE html>
     <html><head><meta charset="utf-8"><style>
-      body { margin: 0; padding: 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; }
+      body { margin: 0; padding: 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: hsl(var(--studio-ink)); }
       label { display: block; font-size: ${formConfig.fontSize}px; font-weight: 500; margin-bottom: 4px; color: #374151; }
       input, textarea { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: ${formConfig.rounded}px; font-size: ${formConfig.fontSize}px; box-sizing: border-box; }
       textarea { resize: vertical; }
       .field { margin-bottom: 16px; }
-      button { width: 100%; padding: 12px; background: ${formConfig.brandColor}; color: #fff; border: none; border-radius: ${formConfig.rounded}px; font-size: ${formConfig.fontSize + 1}px; font-weight: 600; cursor: pointer; }
+      button { width: 100%; padding: 12px; background: ${formConfig.brandColor}; color: hsl(var(--studio-ink)); border: none; border-radius: ${formConfig.rounded}px; font-size: ${formConfig.fontSize + 1}px; font-weight: 600; cursor: pointer; }
       button:hover { opacity: 0.9; }
     </style></head><body>
       <form>

@@ -21,13 +21,13 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?:
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Layout: '#8b5cf6',
-  Basic: '#3b82f6',
-  Typography: '#06b6d4',
-  Media: '#f59e0b',
-  Forms: '#22c55e',
-  Interactive: '#ec4899',
-  Navigation: '#6366f1',
+  Layout: 'hsl(var(--studio-ink-3))',
+  Basic: 'hsl(var(--studio-accent))',
+  Typography: 'hsl(var(--studio-ink-3))',
+  Media: 'hsl(var(--studio-warn))',
+  Forms: 'hsl(var(--studio-ok))',
+  Interactive: 'hsl(var(--studio-ink-3))',
+  Navigation: 'hsl(var(--studio-ink-3))',
 };
 
 export const DragGhost = memo(function DragGhost() {
@@ -55,7 +55,7 @@ export const DragGhost = memo(function DragGhost() {
   const comp = dragType ? COMPONENT_REGISTRY.find(c => c.type === dragType) : null;
   const Icon = comp ? ICON_MAP[comp.icon] || Square : Square;
   const category = comp?.category || 'Basic';
-  const catColor = CATEGORY_COLORS[category] || '#0073E6';
+  const catColor = CATEGORY_COLORS[category] || 'hsl(var(--studio-accent))';
 
   return (
     <AnimatePresence>
@@ -98,7 +98,7 @@ export const DragGhost = memo(function DragGhost() {
               >
                 <Icon className="h-3 w-3" style={{ color: catColor }} />
               </div>
-              <span style={{ fontSize: '11px', fontWeight: 600, color: '#eee', letterSpacing: '0.01em' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: 'hsl(var(--studio-ink))', letterSpacing: '0.01em' }}>
                 {comp.label}
               </span>
               {/* Container badge */}
@@ -106,7 +106,7 @@ export const DragGhost = memo(function DragGhost() {
                 <span style={{
                   fontSize: '6px', fontWeight: 800, textTransform: 'uppercase',
                   letterSpacing: '0.1em', padding: '1px 4px', borderRadius: '3px',
-                  backgroundColor: 'rgba(34,197,94,0.1)', color: '#22c55e',
+                  backgroundColor: 'rgba(34,197,94,0.1)', color: 'hsl(var(--studio-ok))',
                   border: '1px solid rgba(34,197,94,0.15)',
                 }}>
                   Container
@@ -127,15 +127,15 @@ export const DragGhost = memo(function DragGhost() {
                 {category}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '8px', color: '#444' }}>
-                  <ArrowDown className="h-2 w-2" style={{ color: '#444' }} />
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '8px', color: 'hsl(var(--studio-hover))' }}>
+                  <ArrowDown className="h-2 w-2" style={{ color: 'hsl(var(--studio-hover))' }} />
                   Drop to place
                 </span>
                 {/* Snap indicator */}
                 <span style={{
                   fontSize: '6px', fontWeight: 700, textTransform: 'uppercase',
                   letterSpacing: '0.08em', padding: '1px 4px', borderRadius: '3px',
-                  backgroundColor: 'rgba(139,92,246,0.08)', color: '#8b5cf6',
+                  backgroundColor: 'rgba(139,92,246,0.08)', color: 'hsl(var(--studio-ink-3))',
                   border: '1px solid rgba(139,92,246,0.12)',
                 }}>
                   Snap

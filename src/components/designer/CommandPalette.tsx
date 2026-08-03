@@ -26,13 +26,13 @@ interface CommandItem {
 }
 
 const CATEGORY_ICONS: Record<string, { icon: typeof Search; color: string }> = {
-  Recent: { icon: Clock, color: '#f59e0b' },
-  Navigate: { icon: LayoutGrid, color: '#3b82f6' },
-  Edit: { icon: Undo2, color: '#22c55e' },
-  View: { icon: Eye, color: '#8b5cf6' },
-  Breakpoint: { icon: Monitor, color: '#0ea5e9' },
-  Element: { icon: Layers, color: '#ec4899' },
-  'Add Component': { icon: Sparkles, color: '#a855f7' },
+  Recent: { icon: Clock, color: 'hsl(var(--studio-warn))' },
+  Navigate: { icon: LayoutGrid, color: 'hsl(var(--studio-accent))' },
+  Edit: { icon: Undo2, color: 'hsl(var(--studio-ok))' },
+  View: { icon: Eye, color: 'hsl(var(--studio-ink-3))' },
+  Breakpoint: { icon: Monitor, color: 'hsl(var(--studio-accent))' },
+  Element: { icon: Layers, color: 'hsl(var(--studio-ink-3))' },
+  'Add Component': { icon: Sparkles, color: 'hsl(var(--studio-ink-3))' },
 };
 
 let recentCommandIds: string[] = [];
@@ -43,7 +43,7 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   if (!query) return text;
   const idx = text.toLowerCase().indexOf(query.toLowerCase());
   if (idx === -1) return text;
-  return <>{text.slice(0, idx)}<span style={{ color: '#0073E6', fontWeight: 700 }}>{text.slice(idx, idx + query.length)}</span>{text.slice(idx + query.length)}</>;
+  return <>{text.slice(0, idx)}<span style={{ color: 'hsl(var(--studio-accent))', fontWeight: 700 }}>{text.slice(idx, idx + query.length)}</span>{text.slice(idx + query.length)}</>;
 }
 
 export function CommandPalette() {
@@ -194,33 +194,33 @@ export function CommandPalette() {
           initial={{ opacity: 0, scale: 0.96, y: -8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: -8 }}
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           className="relative w-[560px] max-h-[460px] flex flex-col rounded-2xl overflow-hidden"
-          style={{ backgroundColor: '#151515', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 32px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03) inset, 0 0 80px rgba(0,115,230,0.05)' }}
+          style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 32px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03) inset, 0 0 80px hsl(var(--studio-accent) / 0.05)' }}
           onClick={e => e.stopPropagation()}>
 
           {/* Search with gradient border */}
           <div className="relative" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <div className="flex items-center gap-3 px-5 py-3.5">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, rgba(0,115,230,0.1), rgba(139,92,246,0.1))', border: '1px solid rgba(0,115,230,0.12)' }}>
-                <Search className="h-3.5 w-3.5" style={{ color: '#0073E6' }} />
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.1), rgba(139,92,246,0.1))', border: '1px solid hsl(var(--studio-accent) / 0.12)' }}>
+                <Search className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-accent))' }} />
               </div>
               <input
                 ref={inputRef} value={search} onChange={e => setSearch(e.target.value)} onKeyDown={handleKeyDown}
                 placeholder="Search commands, components, actions…"
-                className="flex-1 bg-transparent text-[13px] text-[#e0e0e0] placeholder:text-[#444] outline-none"
+                className="flex-1 bg-transparent text-[13px] text-[hsl(var(--studio-ink))] placeholder:text-[hsl(var(--studio-hover))] outline-none"
               />
               <div className="flex items-center gap-1">
                 {search && (
-                  <span className="text-[8px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(0,115,230,0.08)', color: '#0073E6' }}>
+                  <span className="text-[8px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.08)', color: 'hsl(var(--studio-accent))' }}>
                     {flatItems.length}
                   </span>
                 )}
-                <kbd className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: '#222', color: '#555', border: '1px solid #2a2a2a' }}>ESC</kbd>
+                <kbd className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'hsl(var(--studio-raised))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>ESC</kbd>
               </div>
             </div>
             {/* Active search indicator */}
             {search && (
               <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} className="absolute bottom-0 left-0 right-0 h-[1px]"
-                style={{ background: 'linear-gradient(90deg, transparent, #0073E6, transparent)', transformOrigin: 'center' }} />
+                style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--studio-accent)), transparent)', transformOrigin: 'center' }} />
             )}
           </div>
 
@@ -233,9 +233,9 @@ export function CommandPalette() {
                 return (
                   <button key={category} onClick={() => setSearch(category)}
                     className="flex items-center gap-1 px-2 py-1 rounded-md text-[8px] font-semibold uppercase tracking-wider transition-all"
-                    style={{ backgroundColor: 'transparent', color: '#444' }}
+                    style={{ backgroundColor: 'transparent', color: 'hsl(var(--studio-hover))' }}
                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${color}10`; e.currentTarget.style.color = color; }}
-                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#444'; }}>
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'hsl(var(--studio-line-strong))'; }}>
                     <Icon className="h-2.5 w-2.5" /> {category}
                   </button>
                 );
@@ -247,29 +247,29 @@ export function CommandPalette() {
           <div ref={listRef} className="flex-1 overflow-y-auto py-1.5" style={{ maxHeight: '370px' }}>
             {flatItems.length === 0 ? (
               <div className="py-12 text-center">
-                <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(0,115,230,0.06), rgba(139,92,246,0.04))', border: '1px solid rgba(0,115,230,0.08)' }}>
-                  <Search className="h-5 w-5" style={{ color: 'rgba(0,115,230,0.3)' }} />
+                <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.06), rgba(139,92,246,0.04))', border: '1px solid hsl(var(--studio-accent) / 0.08)' }}>
+                  <Search className="h-5 w-5" style={{ color: 'hsl(var(--studio-accent) / 0.3)' }} />
                 </div>
-                <div className="text-[12px] font-medium" style={{ color: '#555' }}>No results for "{search}"</div>
-                <div className="text-[10px] mt-1" style={{ color: '#333' }}>Try a different search term</div>
+                <div className="text-[12px] font-medium" style={{ color: 'hsl(var(--studio-ink-3))' }}>No results for "{search}"</div>
+                <div className="text-[10px] mt-1" style={{ color: 'hsl(var(--studio-hover))' }}>Try a different search term</div>
               </div>
             ) : (
               Array.from(grouped.entries()).map(([category, items]) => {
-                const catConfig = CATEGORY_ICONS[category] || { icon: Hash, color: '#555' };
+                const catConfig = CATEGORY_ICONS[category] || { icon: Hash, color: 'hsl(var(--studio-ink-3))' };
                 const CatIcon = catConfig.icon;
                 return (
                   <div key={category}>
                     <div className="flex items-center gap-2 px-5 py-1.5">
                       <CatIcon className="h-2.5 w-2.5" style={{ color: catConfig.color }} />
                       <span className="text-[9px] font-bold uppercase tracking-[0.1em]" style={{ color: catConfig.color }}>{category}</span>
-                      <span className="text-[7px] tabular-nums" style={{ color: '#333' }}>{items.length}</span>
+                      <span className="text-[7px] tabular-nums" style={{ color: 'hsl(var(--studio-hover))' }}>{items.length}</span>
                       <div className="flex-1 h-px" style={{ backgroundColor: `${catConfig.color}08` }} />
                     </div>
                     {items.map(item => {
                       const idx = globalIdx++;
                       const Icon = item.icon;
                       const isSel = idx === selectedIndex;
-                      const itemColor = CATEGORY_ICONS[item.category]?.color || '#0073E6';
+                      const itemColor = CATEGORY_ICONS[item.category]?.color || 'hsl(var(--studio-accent))';
                       return (
                         <button key={item.id} data-index={idx}
                           onClick={() => { addToRecent(item.id); item.action(); setOpen(false); }}
@@ -281,14 +281,14 @@ export function CommandPalette() {
                           }}>
                           <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                             style={{ backgroundColor: isSel ? `${itemColor}12` : 'rgba(255,255,255,0.03)', border: `1px solid ${isSel ? `${itemColor}20` : 'rgba(255,255,255,0.04)'}` }}>
-                            <Icon className="h-3 w-3" style={{ color: isSel ? itemColor : '#666' }} />
+                            <Icon className="h-3 w-3" style={{ color: isSel ? itemColor: 'hsl(var(--studio-ink-3))' }} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-[12px] font-medium truncate" style={{ color: isSel ? '#fff' : '#bbb' }}>{highlightMatch(item.label, search)}</div>
-                            {item.description && <div className="text-[9px] truncate mt-0.5" style={{ color: '#444' }}>{item.description}</div>}
+                            <div className="text-[12px] font-medium truncate" style={{ color: isSel ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-ink-2))' }}>{highlightMatch(item.label, search)}</div>
+                            {item.description && <div className="text-[9px] truncate mt-0.5" style={{ color: 'hsl(var(--studio-hover))' }}>{item.description}</div>}
                           </div>
                           {item.shortcut && (
-                            <kbd className="text-[9px] px-1.5 py-0.5 rounded font-mono shrink-0" style={{ backgroundColor: '#1e1e1e', color: isSel ? itemColor : '#555', border: `1px solid ${isSel ? `${itemColor}20` : '#252525'}` }}>
+                            <kbd className="text-[9px] px-1.5 py-0.5 rounded font-mono shrink-0" style={{ backgroundColor: 'hsl(var(--studio-panel))', color: isSel ? itemColor: 'hsl(var(--studio-ink-3))', border: `1px solid ${isSel ? `${itemColor}20` : 'hsl(var(--studio-raised))'}` }}>
                               {item.shortcut}
                             </kbd>
                           )}
@@ -305,20 +305,20 @@ export function CommandPalette() {
           <div className="flex items-center justify-between px-5 py-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', backgroundColor: '#121212' }}>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
-                <Command className="h-2.5 w-2.5" style={{ color: '#333' }} />
-                <span className="text-[9px] tabular-nums" style={{ color: '#444' }}>{flatItems.length} command{flatItems.length !== 1 ? 's' : ''}</span>
+                <Command className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-hover))' }} />
+                <span className="text-[9px] tabular-nums" style={{ color: 'hsl(var(--studio-hover))' }}>{flatItems.length} command{flatItems.length !== 1 ? 's' : ''}</span>
               </div>
               {search && flatItems.length > 0 && (
                 <div className="flex items-center gap-1">
-                  <Zap className="h-2 w-2" style={{ color: '#22c55e' }} />
-                  <span className="text-[8px] font-mono" style={{ color: '#22c55e' }}>Best: {flatItems[0]?.label}</span>
+                  <Zap className="h-2 w-2" style={{ color: 'hsl(var(--studio-ok))' }} />
+                  <span className="text-[8px] font-mono" style={{ color: 'hsl(var(--studio-ok))' }}>Best: {flatItems[0]?.label}</span>
                 </div>
               )}
               {/* Category breakdown */}
               {search && flatItems.length > 0 && (
                 <div className="flex items-center gap-1">
                   {Array.from(grouped.entries()).filter(([k]) => k !== 'Recent').slice(0, 4).map(([cat, items]) => {
-                    const c = CATEGORY_ICONS[cat]?.color || '#555';
+                    const c = CATEGORY_ICONS[cat]?.color || 'hsl(var(--studio-ink-3))';
                     return (
                       <span key={cat} className="text-[7px] tabular-nums px-1 py-0.5 rounded" style={{ backgroundColor: `${c}08`, color: c }}>
                         {cat.slice(0, 3)} {items.length}
@@ -330,8 +330,8 @@ export function CommandPalette() {
             </div>
             <div className="flex items-center gap-4">
               {[['↑↓', 'navigate'], ['↵', 'run'], ['esc', 'close']].map(([key, label]) => (
-                <span key={label} className="text-[9px] flex items-center gap-1" style={{ color: '#444' }}>
-                  <kbd className="px-1 py-0.5 rounded text-[8px] font-mono" style={{ backgroundColor: '#1e1e1e', color: '#555', border: '1px solid #252525' }}>{key}</kbd> {label}
+                <span key={label} className="text-[9px] flex items-center gap-1" style={{ color: 'hsl(var(--studio-hover))' }}>
+                  <kbd className="px-1 py-0.5 rounded text-[8px] font-mono" style={{ backgroundColor: 'hsl(var(--studio-panel))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>{key}</kbd> {label}
                 </span>
               ))}
             </div>

@@ -18,13 +18,13 @@ interface FlatItem {
 const CONTAINER_TYPES = new Set(['section', 'navbar', 'footer', 'container', 'columns', 'grid', 'card']);
 
 const TYPE_COLORS: Record<string, string> = {
-  section: 'rgba(0,115,230,0.5)',
+  section: 'hsl(var(--studio-accent) / 0.5)',
   navbar: 'rgba(139,92,246,0.5)',
   footer: 'rgba(139,92,246,0.4)',
-  container: 'rgba(0,115,230,0.3)',
-  columns: 'rgba(0,115,230,0.25)',
-  grid: 'rgba(0,115,230,0.25)',
-  card: 'rgba(59,130,246,0.3)',
+  container: 'hsl(var(--studio-accent) / 0.3)',
+  columns: 'hsl(var(--studio-accent) / 0.25)',
+  grid: 'hsl(var(--studio-accent) / 0.25)',
+  card: 'hsl(var(--studio-accent) / 0.3)',
   heading: 'rgba(255,255,255,0.25)',
   text: 'rgba(255,255,255,0.15)',
   image: 'rgba(236,72,153,0.35)',
@@ -102,7 +102,7 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
 
   // Health score based on structure quality
   const healthScore = useMemo(() => {
-    if (flat.length === 0) return { score: 0, label: '—', color: '#444' };
+    if (flat.length === 0) return { score: 0, label: '—', color: 'hsl(var(--studio-hover))' };
     let score = 100;
     // Penalize deep nesting (>4 levels)
     if (maxDepth > 5) score -= (maxDepth - 5) * 8;
@@ -116,10 +116,10 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
     // Bonus for good section usage
     if (sectionCount >= 2 && sectionCount <= 12) score += 5;
     score = Math.max(0, Math.min(100, score));
-    if (score >= 85) return { score, label: 'Excellent', color: '#22c55e' };
-    if (score >= 65) return { score, label: 'Good', color: '#0073E6' };
-    if (score >= 40) return { score, label: 'Fair', color: '#f59e0b' };
-    return { score, label: 'Needs work', color: '#ef4444' };
+    if (score >= 85) return { score, label: 'Excellent', color: 'hsl(var(--studio-ok))' };
+    if (score >= 65) return { score, label: 'Good', color: 'hsl(var(--studio-accent))' };
+    if (score >= 40) return { score, label: 'Fair', color: 'hsl(var(--studio-warn))' };
+    return { score, label: 'Needs work', color: 'hsl(var(--studio-risk))' };
   }, [flat.length, maxDepth, sectionCount, containerCount]);
 
   if (flat.length === 0) return null;
@@ -145,8 +145,8 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
           onClick={() => setCollapsed(c => !c)}
           className="flex items-center gap-1.5 transition-colors hover:opacity-80"
         >
-          <Map className="h-3 w-3" style={{ color: '#555' }} />
-          <span style={{ fontSize: '9px', color: '#666', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <Map className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
+          <span style={{ fontSize: '9px', color: 'hsl(var(--studio-ink-3))', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Structure
           </span>
         </button>
@@ -179,8 +179,8 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
             onClick={() => setViewMode(v => v === 'tree' ? 'density' : 'tree')}
             className="w-5 h-5 rounded flex items-center justify-center transition-all"
             style={{
-              color: viewMode === 'density' ? '#0073E6' : '#444',
-              backgroundColor: viewMode === 'density' ? 'rgba(0,115,230,0.08)' : 'transparent',
+              color: viewMode === 'density' ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line-strong))',
+              backgroundColor: viewMode === 'density' ? 'hsl(var(--studio-accent) / 0.08)' : 'transparent',
             }}
             title={viewMode === 'tree' ? 'Show density view' : 'Show tree view'}
           >
@@ -191,14 +191,14 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
             <button
               onClick={scrollToSelected}
               className="w-5 h-5 rounded flex items-center justify-center transition-all"
-              style={{ color: '#0073E6' }}
+              style={{ color: 'hsl(var(--studio-accent))' }}
               title="Focus selected element"
             >
               <Focus className="h-2.5 w-2.5" />
             </button>
           )}
-          <span style={{ fontSize: '9px', color: '#444' }}>{flat.length}</span>
-          <button onClick={() => setCollapsed(c => !c)} className="text-[#444] hover:text-[#888] transition-colors">
+          <span style={{ fontSize: '9px', color: 'hsl(var(--studio-hover))' }}>{flat.length}</span>
+          <button onClick={() => setCollapsed(c => !c)} className="text-[hsl(var(--studio-hover))] hover:text-[hsl(var(--studio-ink-2))] transition-colors">
             {collapsed ? <ChevronUp className="h-2.5 w-2.5" /> : <ChevronDown className="h-2.5 w-2.5" />}
           </button>
         </div>
@@ -232,8 +232,8 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
                         height: item.isContainer ? '14px' : '10px',
                         paddingLeft: `${item.depth * 8 + 4}px`,
                         paddingRight: '4px',
-                        backgroundColor: isSel ? 'rgba(0,115,230,0.12)' : isHov ? 'rgba(255,255,255,0.04)' : 'transparent',
-                        borderLeft: isSel ? '2px solid #0073E6' : '2px solid transparent',
+                        backgroundColor: isSel ? 'hsl(var(--studio-accent) / 0.12)' : isHov ? 'rgba(255,255,255,0.04)' : 'transparent',
+                        borderLeft: isSel ? '2px solid hsl(var(--studio-accent))' : '2px solid transparent',
                       }}
                     >
                       {/* Depth connector lines */}
@@ -249,7 +249,7 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
                       
                       {/* Type icon */}
                       {(isHov || isSel) && (
-                        <span style={{ fontSize: '7px', color: isSel ? '#0073E6' : '#444', width: '8px', textAlign: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: '7px', color: isSel ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line-strong))', width: '8px', textAlign: 'center', flexShrink: 0 }}>
                           {TYPE_LABELS[item.type] || '·'}
                         </span>
                       )}
@@ -259,14 +259,14 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
                           flex: 1,
                           height: item.isContainer ? '4px' : '2px',
                           borderRadius: '1px',
-                          backgroundColor: isSel ? '#0073E6' : isHov ? 'rgba(255,255,255,0.2)' : color,
+                          backgroundColor: isSel ? 'hsl(var(--studio-accent))' : isHov ? 'rgba(255,255,255,0.2)' : color,
                           transition: 'background-color 0.1s',
                         }}
                       />
                       {(isHov || isSel) && (
                         <span style={{
                           fontSize: '7px',
-                          color: isSel ? '#0073E6' : '#666',
+                          color: isSel ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-ink-3))',
                           fontWeight: 600,
                           whiteSpace: 'nowrap',
                           textTransform: 'uppercase',
@@ -276,7 +276,7 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
                         </span>
                       )}
                       {item.childCount > 0 && (isHov || isSel) && (
-                        <span style={{ fontSize: '6px', color: '#333', fontFamily: 'monospace' }}>
+                        <span style={{ fontSize: '6px', color: 'hsl(var(--studio-hover))', fontFamily: 'monospace' }}>
                           ({item.childCount})
                         </span>
                       )}
@@ -304,7 +304,7 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
                           style={{ backgroundColor: color }}
                         />
                       </div>
-                      <span style={{ fontSize: '8px', color: '#444', fontFamily: 'monospace', fontWeight: 600, width: '16px', textAlign: 'right' }}>
+                      <span style={{ fontSize: '8px', color: 'hsl(var(--studio-hover))', fontFamily: 'monospace', fontWeight: 600, width: '16px', textAlign: 'right' }}>
                         {count}
                       </span>
                     </div>
@@ -313,7 +313,7 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
                 
                 {/* Depth indicator */}
                 <div className="flex items-center gap-1.5 pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.03)' }}>
-                  <span style={{ fontSize: '7px', color: '#333', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <span style={{ fontSize: '7px', color: 'hsl(var(--studio-hover))', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Max depth
                   </span>
                   <div className="flex gap-px flex-1">
@@ -325,7 +325,7 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
                       />
                     ))}
                   </div>
-                  <span style={{ fontSize: '8px', color: '#555', fontFamily: 'monospace', fontWeight: 600 }}>{maxDepth}</span>
+                  <span style={{ fontSize: '8px', color: 'hsl(var(--studio-ink-3))', fontFamily: 'monospace', fontWeight: 600 }}>{maxDepth}</span>
                 </div>
               </div>
             )}
@@ -337,17 +337,17 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
             >
               <div className="flex items-center gap-2">
                 {sectionCount > 0 && (
-                  <span style={{ fontSize: '8px', color: '#555' }}>
-                    <span style={{ color: 'rgba(0,115,230,0.7)' }}>●</span> {sectionCount}s
+                  <span style={{ fontSize: '8px', color: 'hsl(var(--studio-ink-3))' }}>
+                    <span style={{ color: 'hsl(var(--studio-accent) / 0.7)' }}>●</span> {sectionCount}s
                   </span>
                 )}
                 {containerCount > 0 && (
-                  <span style={{ fontSize: '8px', color: '#555' }}>
-                    <span style={{ color: 'rgba(59,130,246,0.7)' }}>●</span> {containerCount}c
+                  <span style={{ fontSize: '8px', color: 'hsl(var(--studio-ink-3))' }}>
+                    <span style={{ color: 'hsl(var(--studio-accent) / 0.7)' }}>●</span> {containerCount}c
                   </span>
                 )}
                 {leafCount > 0 && (
-                  <span style={{ fontSize: '8px', color: '#555' }}>
+                  <span style={{ fontSize: '8px', color: 'hsl(var(--studio-ink-3))' }}>
                     <span style={{ color: 'rgba(255,255,255,0.3)' }}>●</span> {leafCount}l
                   </span>
                 )}
@@ -360,7 +360,7 @@ export const CanvasMinimap = memo(function CanvasMinimap() {
                     {healthScore.score}
                   </span>
                 </div>
-                <span style={{ fontSize: '8px', color: '#444', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '8px', color: 'hsl(var(--studio-hover))', fontFamily: 'monospace' }}>
                   {Math.round(state.zoom * 100)}%
                 </span>
               </div>

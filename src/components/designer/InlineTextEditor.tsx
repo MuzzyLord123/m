@@ -66,9 +66,9 @@ export function InlineTextEditor({ elementId, initialText, onFinish, style }: In
         onMouseDown={e => e.stopPropagation()}
         style={{
           ...style,
-          outline: '2px solid #0073E6',
+          outline: '2px solid hsl(var(--studio-accent))',
           outlineOffset: '2px',
-          boxShadow: '0 0 0 5px rgba(0, 115, 230, 0.12), 0 4px 16px rgba(0,0,0,0.2)',
+          boxShadow: '0 0 0 5px hsl(var(--studio-accent) / 0.12), 0 4px 16px rgba(0,0,0,0.2)',
           cursor: 'text',
           minWidth: '20px',
           whiteSpace: 'pre-wrap',
@@ -98,19 +98,19 @@ export function InlineTextEditor({ elementId, initialText, onFinish, style }: In
             whiteSpace: 'nowrap',
           }}
         >
-          <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: '#0073E6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: 'hsl(var(--studio-accent))' }}>
             <Hash style={{ width: 8, height: 8 }} />
             <span className="tabular-nums font-mono">{charCount}</span>
-            <span style={{ color: '#444' }}>chars</span>
+            <span style={{ color: 'hsl(var(--studio-hover))' }}>chars</span>
           </span>
           <span style={{ width: 1, height: 10, backgroundColor: 'rgba(255,255,255,0.06)' }} />
-          <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: '#8b5cf6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: 'hsl(var(--studio-ink-3))' }}>
             <AlignLeft style={{ width: 8, height: 8 }} />
             <span className="tabular-nums font-mono">{wordCount}</span>
-            <span style={{ color: '#444' }}>words</span>
+            <span style={{ color: 'hsl(var(--studio-hover))' }}>words</span>
           </span>
           <span style={{ width: 1, height: 10, backgroundColor: 'rgba(255,255,255,0.06)' }} />
-          <span style={{ fontSize: '8px', color: '#333' }}>
+          <span style={{ fontSize: '8px', color: 'hsl(var(--studio-hover))' }}>
             Enter ↵ save · Esc cancel
           </span>
         </motion.div>

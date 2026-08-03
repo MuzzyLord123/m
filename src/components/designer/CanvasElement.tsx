@@ -209,20 +209,20 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
   }
 
   const dropStyles: CSSProperties = dropPosition === 'inside'
-    ? { boxShadow: 'inset 0 0 0 2px rgba(0, 115, 230, 0.5)', borderRadius: '4px' }
+    ? { boxShadow: 'inset 0 0 0 2px hsl(var(--studio-accent) / 0.5)', borderRadius: '4px' }
     : {};
 
   const outlineStyle: CSSProperties = isSelected
     ? {
-        outline: '2px solid #0073E6',
+        outline: '2px solid hsl(var(--studio-accent))',
         outlineOffset: '0px',
-        boxShadow: `0 0 0 4px rgba(0, 115, 230, 0.12)${isDraggingElement ? ', 0 12px 40px rgba(0,0,0,0.35)' : ''}`,
+        boxShadow: `0 0 0 4px hsl(var(--studio-accent) / 0.12)${isDraggingElement ? ', 0 12px 40px rgba(0,0,0,0.35)' : ''}`,
       }
     : isHovered
     ? {
-        outline: '1.5px solid rgba(0, 115, 230, 0.35)',
+        outline: '1.5px solid hsl(var(--studio-accent) / 0.35)',
         outlineOffset: '0px',
-        boxShadow: '0 0 0 3px rgba(0, 115, 230, 0.06)',
+        boxShadow: '0 0 0 3px hsl(var(--studio-accent) / 0.06)',
       }
     : {};
 
@@ -286,7 +286,7 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
       case 'html':
         return <div dangerouslySetInnerHTML={{ __html: (element.props.htmlContent as string) || '' }} />;
       case 'embed':
-        return element.props.embedUrl ? <iframe src={element.props.embedUrl as string} style={{ width: '100%', height: '100%', border: 'none' }} /> : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8' }}>Embed URL</div>;
+        return element.props.embedUrl ? <iframe src={element.props.embedUrl as string} style={{ width: '100%', height: '100%', border: 'none' }} /> : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'hsl(var(--studio-ink-2))' }}>Embed URL</div>;
       case 'spacer':
       case 'divider':
       case 'separator':
@@ -308,7 +308,7 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
       case 'countdown':
         return <div style={{ textAlign: 'center' }}><div style={{ fontSize: '12px', opacity: 0.5, marginBottom: '8px' }}>{(element.props.label as string) || 'Countdown'}</div><div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>{['Days', 'Hours', 'Min', 'Sec'].map(u => <div key={u}><div style={{ fontSize: '32px', fontWeight: 700 }}>00</div><div style={{ fontSize: '10px', opacity: 0.5 }}>{u}</div></div>)}</div></div>;
       case 'progress':
-        return <div style={{ width: '100%' }}><div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '13px' }}><span>{(element.props.label as string) || 'Progress'}</span>{element.props.showValue && <span>{element.props.value as number || 0}%</span>}</div><div style={{ width: '100%', height: '8px', backgroundColor: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}><div style={{ width: `${element.props.value || 0}%`, height: '100%', backgroundColor: '#3b82f6', borderRadius: '4px' }} /></div></div>;
+        return <div style={{ width: '100%' }}><div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '13px' }}><span>{(element.props.label as string) || 'Progress'}</span>{element.props.showValue && <span>{element.props.value as number || 0}%</span>}</div><div style={{ width: '100%', height: '8px', backgroundColor: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}><div style={{ width: `${element.props.value || 0}%`, height: '100%', backgroundColor: 'hsl(var(--studio-accent))', borderRadius: '4px' }} /></div></div>;
       case 'table': {
         const headers = (element.props.headers as string[]) || ['Col 1', 'Col 2'];
         const rows = (element.props.rows as string[][]) || [['Data', 'Data']];
@@ -317,20 +317,20 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
       case 'accordion':
         return <div style={{ padding: '12px 16px', fontWeight: 600, fontSize: '15px' }}>{(element.props.title as string) || 'Accordion'} ▾</div>;
       case 'tabs':
-        return <div style={{ display: 'flex', gap: '0', borderBottom: '2px solid #e2e8f0' }}>{((element.props.tabs as string[]) || ['Tab 1', 'Tab 2']).map((t, i) => <div key={i} style={{ padding: '8px 16px', fontSize: '13px', fontWeight: 500, borderBottom: i === 0 ? '2px solid #3b82f6' : 'none', color: i === 0 ? '#3b82f6' : '#94a3b8' }}>{t}</div>)}</div>;
+        return <div style={{ display: 'flex', gap: '0', borderBottom: '2px solid #e2e8f0' }}>{((element.props.tabs as string[]) || ['Tab 1', 'Tab 2']).map((t, i) => <div key={i} style={{ padding: '8px 16px', fontSize: '13px', fontWeight: 500, borderBottom: i === 0 ? '2px solid hsl(var(--studio-accent))' : 'none', color: i === 0 ? 'hsl(var(--studio-accent))' : '#94a3b8' }}>{t}</div>)}</div>;
       case 'map':
-        return element.props.embedUrl ? <iframe src={element.props.embedUrl as string} style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }} /> : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8' }}>Map Embed</div>;
+        return element.props.embedUrl ? <iframe src={element.props.embedUrl as string} style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }} /> : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'hsl(var(--studio-ink-2))' }}>Map Embed</div>;
       case 'marquee':
-        return <div style={{ padding: '12px', fontSize: '13px', color: '#94a3b8', textAlign: 'center' }}>↔ Marquee</div>;
+        return <div style={{ padding: '12px', fontSize: '13px', color: 'hsl(var(--studio-ink-2))', textAlign: 'center' }}>↔ Marquee</div>;
       case 'select':
         return <div style={{ width: '100%' }}>{element.props.label && <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>{element.props.label as string}</label>}<select style={{ ...styles, pointerEvents: 'none' as any }} disabled><option>{element.props.placeholder as string || 'Choose…'}</option></select></div>;
       case 'checkbox':
         return <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}><input type="checkbox" disabled />{element.props.label as string || 'Checkbox'}</label>;
       case 'audio':
-        return <div style={{ padding: '12px', fontSize: '13px', color: '#94a3b8', textAlign: 'center' }}>♪ Audio Player</div>;
+        return <div style={{ padding: '12px', fontSize: '13px', color: 'hsl(var(--studio-ink-2))', textAlign: 'center' }}>♪ Audio Player</div>;
       case 'product-grid':
         return (
-          <div style={{ padding: '24px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '2px dashed #3b82f6', textAlign: 'center' }}>
+          <div style={{ padding: '24px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '2px dashed hsl(var(--studio-accent))', textAlign: 'center' }}>
             <div style={{ fontSize: '28px', marginBottom: '8px' }}>🛍️</div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>Live Product Grid</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '16px' }}>
@@ -340,25 +340,25 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
         );
       case 'booking-widget':
         return (
-          <div style={{ padding: '24px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '2px dashed #22c55e', textAlign: 'center' }}>
+          <div style={{ padding: '24px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '2px dashed hsl(var(--studio-ok))', textAlign: 'center' }}>
             <div style={{ fontSize: '28px', marginBottom: '8px' }}>📅</div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>Booking Widget</div>
           </div>
         );
       case 'booking-calendar':
         return (
-          <div style={{ padding: '24px', backgroundColor: '#f0f9ff', borderRadius: '8px', border: '2px dashed #0ea5e9', textAlign: 'center' }}>
+          <div style={{ padding: '24px', backgroundColor: '#f0f9ff', borderRadius: '8px', border: '2px dashed hsl(var(--studio-accent))', textAlign: 'center' }}>
             <div style={{ fontSize: '28px', marginBottom: '8px' }}>🗓️</div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>Appointment Calendar</div>
-            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Interactive calendar with available slots</div>
+            <div style={{ fontSize: '12px', color: 'hsl(var(--studio-ink-3))', marginTop: '4px' }}>Interactive calendar with available slots</div>
           </div>
         );
       case 'service-list':
         return (
-          <div style={{ padding: '24px', backgroundColor: '#fefce8', borderRadius: '8px', border: '2px dashed #eab308', textAlign: 'center' }}>
+          <div style={{ padding: '24px', backgroundColor: '#fefce8', borderRadius: '8px', border: '2px dashed hsl(var(--studio-warn))', textAlign: 'center' }}>
             <div style={{ fontSize: '28px', marginBottom: '8px' }}>📋</div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>Service List</div>
-            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Displays available services with pricing</div>
+            <div style={{ fontSize: '12px', color: 'hsl(var(--studio-ink-3))', marginTop: '4px' }}>Displays available services with pricing</div>
           </div>
         );
       case 'booking-button':
@@ -369,7 +369,7 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
         );
       case 'visitor-auth':
         return (
-          <div style={{ padding: '24px', backgroundColor: '#eff6ff', borderRadius: '8px', border: '2px dashed #3b82f6', textAlign: 'center' }}>
+          <div style={{ padding: '24px', backgroundColor: '#eff6ff', borderRadius: '8px', border: '2px dashed hsl(var(--studio-accent))', textAlign: 'center' }}>
             <div style={{ fontSize: '28px', marginBottom: '8px' }}>🔐</div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>Login / Signup</div>
           </div>
@@ -379,12 +379,12 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <span>🛒</span>
             <span>{(element.props.text as string) || 'Cart'}</span>
-            <span style={{ backgroundColor: '#ef4444', color: '#fff', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700 }}>0</span>
+            <span style={{ backgroundColor: 'hsl(var(--studio-risk))', color: 'hsl(var(--studio-ink))', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700 }}>0</span>
           </div>
         );
       case 'visitor-dashboard':
         return (
-          <div style={{ padding: '24px', backgroundColor: '#faf5ff', borderRadius: '8px', border: '2px dashed #a855f7', textAlign: 'center' }}>
+          <div style={{ padding: '24px', backgroundColor: '#faf5ff', borderRadius: '8px', border: '2px dashed hsl(var(--studio-ink-3))', textAlign: 'center' }}>
             <div style={{ fontSize: '28px', marginBottom: '8px' }}>📊</div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>Customer Dashboard</div>
           </div>
@@ -397,12 +397,12 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
               "{(element.props.quote as string) || 'This product completely transformed how we work.'}"
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700, color: '#64748b' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700, color: 'hsl(var(--studio-ink-3))' }}>
                 {((element.props.author as string) || 'J')[0]}
               </div>
               <div>
                 <div style={{ fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>{(element.props.author as string) || 'Jane Doe'}</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8' }}>{(element.props.role as string) || 'CEO, Acme Inc'}</div>
+                <div style={{ fontSize: '12px', color: 'hsl(var(--studio-ink-2))' }}>{(element.props.role as string) || 'CEO, Acme Inc'}</div>
               </div>
             </div>
           </div>
@@ -416,9 +416,9 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
         );
       case 'pricing-card':
         return (
-          <div style={{ padding: '32px', backgroundColor: '#ffffff', borderRadius: '16px', border: '2px solid #e2e8f0', textAlign: 'center' }}>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{(element.props.planName as string) || 'Pro'}</div>
-            <div style={{ fontSize: '48px', fontWeight: 800, color: '#0f172a', marginTop: '8px' }}>{(element.props.price as string) || '$29'}<span style={{ fontSize: '16px', fontWeight: 400, color: '#94a3b8' }}>/mo</span></div>
+          <div style={{ padding: '32px', backgroundColor: 'hsl(var(--studio-ink))', borderRadius: '16px', border: '2px solid #e2e8f0', textAlign: 'center' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: 'hsl(var(--studio-ink-3))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{(element.props.planName as string) || 'Pro'}</div>
+            <div style={{ fontSize: '48px', fontWeight: 800, color: '#0f172a', marginTop: '8px' }}>{(element.props.price as string) || '$29'}<span style={{ fontSize: '16px', fontWeight: 400, color: 'hsl(var(--studio-ink-2))' }}>/mo</span></div>
             <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {((element.props.features as string[]) || ['Feature 1', 'Feature 2', 'Feature 3']).map((f, i) => (
                 <div key={i} style={{ fontSize: '14px', color: '#475569' }}>✓ {f}</div>
@@ -428,8 +428,8 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
         );
       case 'cta-banner':
         return (
-          <div style={{ padding: '48px 32px', background: 'linear-gradient(135deg, #0073E6, #005bb5)', borderRadius: '16px', textAlign: 'center' }}>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: '#ffffff', marginBottom: '12px' }}>{(element.props.text as string) || 'Ready to get started?'}</div>
+          <div style={{ padding: '48px 32px', background: 'linear-gradient(135deg, hsl(var(--studio-accent)), hsl(var(--studio-accent)))', borderRadius: '16px', textAlign: 'center' }}>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: 'hsl(var(--studio-ink))', marginBottom: '12px' }}>{(element.props.text as string) || 'Ready to get started?'}</div>
             <div style={{ fontSize: '16px', color: 'rgba(255,255,255,0.8)' }}>{(element.props.subtitle as string) || 'Join thousands of happy customers.'}</div>
           </div>
         );
@@ -438,14 +438,14 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
           <div style={{ padding: '24px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
             <div style={{ fontSize: '28px', marginBottom: '12px' }}>{(element.props.icon as string) || '⚡'}</div>
             <div style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>{(element.props.title as string) || 'Feature'}</div>
-            <div style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6 }}>{(element.props.description as string) || 'Description of this feature.'}</div>
+            <div style={{ fontSize: '14px', color: 'hsl(var(--studio-ink-3))', lineHeight: 1.6 }}>{(element.props.description as string) || 'Description of this feature.'}</div>
           </div>
         );
       case 'stat-card':
         return (
           <div style={{ padding: '24px', textAlign: 'center' }}>
-            <div style={{ fontSize: '40px', fontWeight: 800, color: '#0073E6' }}>{(element.props.value as string) || '99%'}</div>
-            <div style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>{(element.props.label as string) || 'Success Rate'}</div>
+            <div style={{ fontSize: '40px', fontWeight: 800, color: 'hsl(var(--studio-accent))' }}>{(element.props.value as string) || '99%'}</div>
+            <div style={{ fontSize: '14px', color: 'hsl(var(--studio-ink-3))', marginTop: '4px' }}>{(element.props.label as string) || 'Success Rate'}</div>
           </div>
         );
       case 'social-share':
@@ -463,28 +463,28 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
         return (
           <div style={{ display: 'flex', gap: '8px' }}>
             <input placeholder="Enter your email" style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', pointerEvents: 'none' }} readOnly />
-            <button style={{ padding: '10px 20px', borderRadius: '8px', backgroundColor: '#0073E6', color: '#fff', border: 'none', fontSize: '14px', fontWeight: 600 }}>Subscribe</button>
+            <button style={{ padding: '10px 20px', borderRadius: '8px', backgroundColor: 'hsl(var(--studio-accent))', color: 'hsl(var(--studio-ink))', border: 'none', fontSize: '14px', fontWeight: 600 }}>Subscribe</button>
           </div>
         );
       case 'bar-chart':
         return (
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '120px', padding: '8px' }}>
             {[60, 85, 45, 95, 70].map((h, i) => (
-              <div key={i} style={{ flex: 1, height: `${h}%`, backgroundColor: '#0073E6', borderRadius: '4px 4px 0 0', opacity: 0.7 + i * 0.06 }} />
+              <div key={i} style={{ flex: 1, height: `${h}%`, backgroundColor: 'hsl(var(--studio-accent))', borderRadius: '4px 4px 0 0', opacity: 0.7 + i * 0.06 }} />
             ))}
           </div>
         );
       case 'line-chart':
-        return <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '13px' }}>📈 Line Chart</div>;
+        return <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--studio-ink-2))', fontSize: '13px' }}>📈 Line Chart</div>;
       case 'pie-chart':
-        return <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '13px' }}>🥧 Pie Chart</div>;
+        return <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--studio-ink-2))', fontSize: '13px' }}>🥧 Pie Chart</div>;
       case 'review-widget':
-        return <div style={{ padding: '16px', fontSize: '13px', color: '#64748b' }}>⭐ Review Widget</div>;
+        return <div style={{ padding: '16px', fontSize: '13px', color: 'hsl(var(--studio-ink-3))' }}>⭐ Review Widget</div>;
       case 'avatar-group':
         return (
           <div style={{ display: 'flex' }}>
             {[1,2,3,4].map(i => (
-              <div key={i} style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: `hsl(${i*60},60%,70%)`, border: '2px solid #fff', marginLeft: i > 1 ? '-8px' : 0 }} />
+              <div key={i} style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: `hsl(${i*60},60%,70%)`, border: '2px solid hsl(var(--studio-ink))', marginLeft: i > 1 ? '-8px' : 0 }} />
             ))}
           </div>
         );
@@ -492,10 +492,10 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
       case 'animated-counter':
         return (
           <div style={{ textAlign: 'center', padding: '16px' }}>
-            <div style={{ fontSize: '56px', fontWeight: 800, background: 'linear-gradient(135deg, #0073E6, #00b4d8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <div style={{ fontSize: '56px', fontWeight: 800, background: 'linear-gradient(135deg, hsl(var(--studio-accent)), #00b4d8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               {(element.props.prefix as string) || ''}{(element.props.endValue as number) || 2500}{(element.props.suffix as string) || '+'}
             </div>
-            <div style={{ fontSize: '14px', color: '#64748b', marginTop: '4px', fontWeight: 500 }}>{(element.props.label as string) || 'Counter'}</div>
+            <div style={{ fontSize: '14px', color: 'hsl(var(--studio-ink-3))', marginTop: '4px', fontWeight: 500 }}>{(element.props.label as string) || 'Counter'}</div>
           </div>
         );
       case 'gradient-text': {
@@ -516,28 +516,28 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
       case 'before-after':
         return (
           <div style={{ width: '100%', height: '100%', position: 'relative', display: 'flex' }}>
-            <div style={{ width: '50%', height: '100%', backgroundColor: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '14px', fontWeight: 600 }}>BEFORE</div>
-            <div style={{ width: '2px', backgroundColor: '#fff', position: 'relative', cursor: 'col-resize', zIndex: 2 }}>
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>⇔</div>
+            <div style={{ width: '50%', height: '100%', backgroundColor: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--studio-ink-2))', fontSize: '14px', fontWeight: 600 }}>BEFORE</div>
+            <div style={{ width: '2px', backgroundColor: 'hsl(var(--studio-ink))', position: 'relative', cursor: 'col-resize', zIndex: 2 }}>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'hsl(var(--studio-ink))', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>⇔</div>
             </div>
-            <div style={{ width: '50%', height: '100%', backgroundColor: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', fontWeight: 600 }}>AFTER</div>
+            <div style={{ width: '50%', height: '100%', backgroundColor: 'hsl(var(--studio-accent))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--studio-ink))', fontSize: '14px', fontWeight: 600 }}>AFTER</div>
           </div>
         );
       case 'scroll-progress':
         return (
           <div style={{ width: '100%', height: `${(element.props.height as number) || 3}px`, backgroundColor: '#e2e8f0', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{ width: '60%', height: '100%', backgroundColor: (element.props.color as string) || '#3b82f6', borderRadius: '2px', transition: 'width 0.3s' }} />
+            <div style={{ width: '60%', height: '100%', backgroundColor: (element.props.color as string) || 'hsl(var(--studio-accent))', borderRadius: '2px', transition: 'width 0.3s' }} />
           </div>
         );
       case 'video-background':
         return (
           <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '300px' }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundColor: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'hsl(var(--studio-sunken))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontSize: '40px' }}>🎬</span>
             </div>
             <div style={{ position: 'absolute', inset: 0, backgroundColor: (element.props.overlay as string) || 'rgba(0,0,0,0.5)' }} />
             {element.children.length === 0 && (
-              <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', color: '#fff', padding: '40px' }}>
+              <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', color: 'hsl(var(--studio-ink))', padding: '40px' }}>
                 <div style={{ fontSize: '14px', fontWeight: 600 }}>Video Background Section</div>
                 <div style={{ fontSize: '12px', opacity: 0.6, marginTop: '4px' }}>Drop content elements here</div>
               </div>
@@ -549,7 +549,7 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
           <div style={{ position: 'relative', width: '100%', minHeight: '300px', backgroundImage: `url(${(element.props.bgImage as string) || ''})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
             <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)' }} />
             {element.children.length === 0 && (
-              <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', color: '#fff', padding: '60px 40px' }}>
+              <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', color: 'hsl(var(--studio-ink))', padding: '60px 40px' }}>
                 <div style={{ fontSize: '14px', fontWeight: 600 }}>Parallax Section</div>
                 <div style={{ fontSize: '12px', opacity: 0.6, marginTop: '4px' }}>Fixed background with parallax effect</div>
               </div>
@@ -561,14 +561,14 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
           <div style={{ textAlign: 'center', padding: '24px' }}>
             <div style={{ fontSize: '36px', marginBottom: '16px' }}>{(element.props.icon as string) || '🚀'}</div>
             <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>{(element.props.title as string) || 'Feature'}</div>
-            <div style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6 }}>{(element.props.description as string) || 'Description here.'}</div>
+            <div style={{ fontSize: '14px', color: 'hsl(var(--studio-ink-3))', lineHeight: 1.6 }}>{(element.props.description as string) || 'Description here.'}</div>
           </div>
         );
       case 'logo-cloud':
         return (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '24px', alignItems: 'center', padding: '20px' }}>
             {((element.props.logos as string[]) || ['Google', 'Microsoft', 'Apple', 'Amazon', 'Meta', 'Netflix']).map((name, i) => (
-              <div key={i} style={{ fontSize: '14px', fontWeight: 700, color: '#94a3b8', textAlign: 'center', letterSpacing: '0.04em' }}>{name}</div>
+              <div key={i} style={{ fontSize: '14px', fontWeight: 700, color: 'hsl(var(--studio-ink-2))', textAlign: 'center', letterSpacing: '0.04em' }}>{name}</div>
             ))}
           </div>
         );
@@ -582,7 +582,7 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
             </thead>
             <tbody>
               {rows.map((row, ri) => (
-                <tr key={ri}>{row.map((cell, ci) => <td key={ci} style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', textAlign: ci === 0 ? 'left' : 'center', fontSize: '14px', color: ci === 0 ? '#334155' : '#64748b' }}>{cell === 'true' ? '✓' : cell === 'false' ? '—' : cell}</td>)}</tr>
+                <tr key={ri}>{row.map((cell, ci) => <td key={ci} style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', textAlign: ci === 0 ? 'left' : 'center', fontSize: '14px', color: ci === 0 ? '#334155' : 'hsl(var(--studio-ink-3))' }}>{cell === 'true' ? '✓' : cell === 'false' ? '—' : cell}</td>)}</tr>
               ))}
             </tbody>
           </table>
@@ -594,10 +594,10 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
             <div style={{ position: 'absolute', left: '6px', top: 0, bottom: 0, width: '2px', backgroundColor: '#e2e8f0' }} />
             {((element.props.items as any[]) || [{ year: '2024', title: 'Event', desc: 'Description' }]).map((item: any, i: number) => (
               <div key={i} style={{ position: 'relative', paddingBottom: '24px' }}>
-                <div style={{ position: 'absolute', left: '-20px', top: '4px', width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#3b82f6', border: '2px solid #fff', boxShadow: '0 0 0 2px #3b82f6' }} />
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#3b82f6', marginBottom: '4px' }}>{item.year}</div>
+                <div style={{ position: 'absolute', left: '-20px', top: '4px', width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'hsl(var(--studio-accent))', border: '2px solid hsl(var(--studio-ink))', boxShadow: '0 0 0 2px hsl(var(--studio-accent))' }} />
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'hsl(var(--studio-accent))', marginBottom: '4px' }}>{item.year}</div>
                 <div style={{ fontSize: '16px', fontWeight: 600, color: '#0f172a', marginBottom: '4px' }}>{item.title}</div>
-                <div style={{ fontSize: '13px', color: '#64748b' }}>{item.desc}</div>
+                <div style={{ fontSize: '13px', color: 'hsl(var(--studio-ink-3))' }}>{item.desc}</div>
               </div>
             ))}
           </div>
@@ -615,7 +615,7 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
       case 'floating-card':
       case 'glassmorphism-card':
         return element.children.length === 0 ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '80px', color: '#94a3b8', fontSize: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '80px', color: 'hsl(var(--studio-ink-2))', fontSize: '12px' }}>
             {element.type === 'glassmorphism-card' ? '🪟 Glass Card — Drop content' : '✨ Floating Card — Drop content'}
           </div>
         ) : null;
@@ -634,20 +634,20 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
         );
       case 'particle-field':
         return (
-          <div style={{ width: '100%', height: '100%', minHeight: '200px', backgroundColor: '#0a0a0a', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ width: '100%', height: '100%', minHeight: '200px', backgroundColor: 'hsl(var(--studio-sunken))', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
             {Array.from({ length: 20 }).map((_, i) => (
               <div key={i} style={{
                 position: 'absolute',
                 width: `${2 + Math.random() * 4}px`,
                 height: `${2 + Math.random() * 4}px`,
-                backgroundColor: (element.props.color as string) || '#3b82f6',
+                backgroundColor: (element.props.color as string) || 'hsl(var(--studio-accent))',
                 borderRadius: '50%',
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
                 opacity: 0.3 + Math.random() * 0.5,
               }} />
             ))}
-            <span style={{ position: 'relative', zIndex: 1, color: '#555', fontSize: '12px' }}>✦ Particle Field</span>
+            <span style={{ position: 'relative', zIndex: 1, color: 'hsl(var(--studio-ink-3))', fontSize: '12px' }}>✦ Particle Field</span>
           </div>
         );
       case 'text-reveal':
@@ -660,12 +660,12 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
       default:
         if (canHaveChildren) {
           return element.children.length === 0 ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '60px', color: '#94a3b8', fontSize: '12px', border: '1px dashed #e2e8f0', borderRadius: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '60px', color: 'hsl(var(--studio-ink-2))', fontSize: '12px', border: '1px dashed #e2e8f0', borderRadius: '6px' }}>
               Drop elements here
             </div>
           ) : null;
         }
-        return <div style={{ padding: '8px', color: '#94a3b8', fontSize: '12px' }}>{element.type}</div>;
+        return <div style={{ padding: '8px', color: 'hsl(var(--studio-ink-2))', fontSize: '12px' }}>{element.type}</div>;
     }
   };
 
@@ -730,17 +730,17 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
               gap: '4px',
               padding: '1px 6px',
               borderRadius: '4px 4px 0 0',
-              backgroundColor: isSelected ? '#0073E6' : 'rgba(0, 115, 230, 0.75)',
+              backgroundColor: isSelected ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-accent) / 0.75)',
               zIndex: 60,
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
-              boxShadow: '0 -2px 6px rgba(0,115,230,0.15)',
+              boxShadow: '0 -2px 6px hsl(var(--studio-accent) / 0.15)',
             }}
           >
             <span style={{
               fontSize: '9px',
               fontWeight: 700,
-              color: '#fff',
+              color: 'hsl(var(--studio-ink))',
               letterSpacing: '0.03em',
               textTransform: 'uppercase',
             }}>
@@ -773,7 +773,7 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
             <span style={{
               fontSize: '8px',
               fontWeight: 600,
-              color: '#0073E6',
+              color: 'hsl(var(--studio-accent))',
               fontFamily: 'ui-monospace, SFMono-Regular, monospace',
               letterSpacing: '0.02em',
             }}>
@@ -854,7 +854,7 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
               padding: '2px 10px',
               borderRadius: '6px',
               backgroundColor: 'rgba(0,0,0,0.9)',
-              color: '#fff',
+              color: 'hsl(var(--studio-ink))',
               fontSize: '9px',
               fontWeight: 600,
               fontFamily: 'ui-monospace, SFMono-Regular, monospace',
@@ -865,13 +865,13 @@ export const CanvasElement = memo(function CanvasElement({ element, depth = 0, c
               border: '1px solid rgba(255,255,255,0.06)',
             }}
           >
-            <span style={{ color: '#888' }}>X</span>
-            <span style={{ color: '#0073E6' }}>{parseInt(styles.left as string) || 0}</span>
-            <span style={{ color: '#333' }}>·</span>
-            <span style={{ color: '#888' }}>Y</span>
-            <span style={{ color: '#0073E6' }}>{parseInt(styles.top as string) || 0}</span>
-            <span style={{ color: '#333' }}>·</span>
-            <span style={{ color: '#555' }}>{ref.current ? `${ref.current.offsetWidth}×${ref.current.offsetHeight}` : ''}</span>
+            <span style={{ color: 'hsl(var(--studio-ink-2))' }}>X</span>
+            <span style={{ color: 'hsl(var(--studio-accent))' }}>{parseInt(styles.left as string) || 0}</span>
+            <span style={{ color: 'hsl(var(--studio-hover))' }}>·</span>
+            <span style={{ color: 'hsl(var(--studio-ink-2))' }}>Y</span>
+            <span style={{ color: 'hsl(var(--studio-accent))' }}>{parseInt(styles.top as string) || 0}</span>
+            <span style={{ color: 'hsl(var(--studio-hover))' }}>·</span>
+            <span style={{ color: 'hsl(var(--studio-ink-3))' }}>{ref.current ? `${ref.current.offsetWidth}×${ref.current.offsetHeight}` : ''}</span>
           </div>
         )}
 

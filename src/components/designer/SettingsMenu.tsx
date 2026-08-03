@@ -53,13 +53,13 @@ export function SettingsMenu({ onExportCode, onCSSPreview, onExit, onSaveToFiles
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[#333] transition-colors"
+        className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-[hsl(var(--studio-hover))] transition-colors"
         title="Settings"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <rect y="1" width="14" height="1.5" rx="0.75" fill="#999" />
-          <rect y="6" width="14" height="1.5" rx="0.75" fill="#999" />
-          <rect y="11" width="14" height="1.5" rx="0.75" fill="#999" />
+          <rect y="1" width="14" height="1.5" rx="0.75" fill="hsl(var(--studio-ink-2))" />
+          <rect y="6" width="14" height="1.5" rx="0.75" fill="hsl(var(--studio-ink-2))" />
+          <rect y="11" width="14" height="1.5" rx="0.75" fill="hsl(var(--studio-ink-2))" />
         </svg>
       </button>
 
@@ -72,19 +72,19 @@ export function SettingsMenu({ onExportCode, onCSSPreview, onExit, onSaveToFiles
             transition={{ duration: 0.12 }}
             className="absolute top-full left-0 mt-1 z-[500] rounded-lg py-1 min-w-[220px]"
             style={{
-              backgroundColor: '#2d2d2d',
-              border: '1px solid #3a3a3a',
+              backgroundColor: 'hsl(var(--studio-raised))',
+              border: '1px solid hsl(var(--studio-line))',
               boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
             }}
           >
             {items.map((item, i) => {
               if ('divider' in item && item.divider) {
-                return <div key={i} className="h-[1px] my-1 mx-2" style={{ backgroundColor: '#3a3a3a' }} />;
+                return <div key={i} className="h-[1px] my-1 mx-2" style={{ backgroundColor: 'hsl(var(--studio-hover))' }} />;
               }
               if ('section' in item && item.section) {
                 return (
                   <div key={i} className="px-3 pt-2 pb-1">
-                    <span className="text-[8px] font-bold uppercase tracking-[0.1em]" style={{ color: '#555' }}>{item.section}</span>
+                    <span className="text-[8px] font-bold uppercase tracking-[0.1em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>{item.section}</span>
                   </div>
                 );
               }
@@ -94,19 +94,19 @@ export function SettingsMenu({ onExportCode, onCSSPreview, onExit, onSaveToFiles
                   key={i}
                   onClick={(item as any).action}
                   disabled={(item as any).disabled}
-                  className="w-full flex items-center gap-2.5 h-8 px-3 text-[12px] text-[#ccc] hover:bg-[#3a3a3a] transition-colors disabled:opacity-30 group"
+                  className="w-full flex items-center gap-2.5 h-8 px-3 text-[12px] text-[hsl(var(--studio-ink-2))] hover:bg-[hsl(var(--studio-hover))] transition-colors disabled:opacity-30 group"
                 >
-                  <Icon className="h-3.5 w-3.5 text-[#888] group-hover:text-[#bbb] transition-colors" />
+                  <Icon className="h-3.5 w-3.5 text-[hsl(var(--studio-ink-2))] group-hover:text-[hsl(var(--studio-ink-2))] transition-colors" />
                   <span className="flex-1 text-left">{(item as any).label}</span>
                   {(item as any).shortcut && (
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: '#252525', color: '#666', border: '1px solid #333' }}>{(item as any).shortcut}</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'hsl(var(--studio-raised))', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-line))' }}>{(item as any).shortcut}</span>
                   )}
                 </button>
               );
             })}
             {/* Version footer */}
-            <div className="mt-1 px-3 py-2" style={{ borderTop: '1px solid #3a3a3a' }}>
-              <span className="text-[8px] font-mono" style={{ color: '#444' }}>Workshop v3.2 • Quooro</span>
+            <div className="mt-1 px-3 py-2" style={{ borderTop: '1px solid hsl(var(--studio-line))' }}>
+              <span className="text-[8px] font-mono" style={{ color: 'hsl(var(--studio-hover))' }}>Workshop v3.2 • Quooro</span>
             </div>
           </motion.div>
         )}

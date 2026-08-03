@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEditor } from './EditorContext';
 import { CanvasElement } from './CanvasElement';
-import { CanvasMinimap } from './CanvasMinimap';
 import { DragGhost } from './DragGhost';
 import { FloatingToolbar } from './FloatingToolbar';
 import { QuickStartPanel } from './QuickStartPanel';
@@ -13,9 +12,9 @@ import { CanvasRulers } from './CanvasRulers';
 import { Monitor, Tablet, Smartphone, Move, ZoomIn, RotateCcw, Hand, MousePointer2 } from 'lucide-react';
 
 const BREAKPOINT_CONFIGS = {
-  desktop: { width: 1280, color: '#0073E6', icon: Monitor, label: 'Desktop' },
-  tablet: { width: 768, color: '#8b5cf6', icon: Tablet, label: 'Tablet' },
-  mobile: { width: 375, color: '#22c55e', icon: Smartphone, label: 'Mobile' },
+  desktop: { width: 1280, color: 'hsl(var(--studio-accent))', icon: Monitor, label: 'Desktop' },
+  tablet: { width: 768, color: 'hsl(var(--studio-ink-3))', icon: Tablet, label: 'Tablet' },
+  mobile: { width: 375, color: 'hsl(var(--studio-ok))', icon: Smartphone, label: 'Mobile' },
 } as const;
 
 export function EditorCanvas() {
@@ -186,12 +185,14 @@ export function EditorCanvas() {
   return (
     <div
       ref={wrapperRef}
-      className="flex-1"
+      /* A quiet 32px grid, so the page being built reads as an object
+         sitting on a surface rather than a div on a flat colour. It is the
+         cheapest thing that makes a canvas feel like a canvas. */
+      className="studio-canvas-plane flex-1"
       style={{
         overflow: 'hidden',
         position: 'relative',
         minHeight: 0,
-        backgroundColor: '#080808',
         cursor: spaceHeld ? (isPanning ? 'grabbing' : 'grab') : 'default',
         userSelect: isPanning ? 'none' : undefined,
       }}
@@ -219,47 +220,21 @@ export function EditorCanvas() {
       onMouseLeave={() => setCursorCoords(null)}
       data-canvas="true"
     >
-      {/* Canvas info overlay — top center */}
-      <div style={{
-        position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',
-        display: 'flex', alignItems: 'center', gap: '6px',
-        padding: '4px 14px', borderRadius: '10px',
-        backgroundColor: 'rgba(14,14,14,0.92)',
-        border: '1px solid rgba(255,255,255,0.05)',
-        backdropFilter: 'blur(12px)',
-        zIndex: 10,
-        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-      }}>
-        <BreakpointIcon className="h-3 w-3" style={{ color: bpColor }} />
-        <span style={{ fontSize: '10px', fontWeight: 700, color: bpColor, letterSpacing: '0.02em' }}>
-          {bp.label}
-        </span>
-        <div style={{ width: '1px', height: '12px', backgroundColor: '#1e1e1e' }} />
-        <span style={{ fontSize: '10px', fontWeight: 500, color: '#555', fontFamily: 'monospace' }}>
-          {breakpointWidth}px
-        </span>
-        <div style={{ width: '1px', height: '12px', backgroundColor: '#1e1e1e' }} />
-        <span style={{ fontSize: '10px', fontWeight: 600, color: Math.round(zoom * 100) !== 100 ? bpColor : '#444', fontFamily: 'monospace' }}>
-          {Math.round(zoom * 100)}%
-        </span>
-        {elementCount > 0 && (
-          <>
-            <div style={{ width: '1px', height: '12px', backgroundColor: '#1e1e1e' }} />
-            <span style={{ fontSize: '9px', fontWeight: 500, color: '#333', fontFamily: 'monospace' }}>
-              {elementCount} el{elementCount !== 1 ? 's' : ''}
-            </span>
-          </>
-        )}
-        {spaceHeld && (
-          <>
-            <div style={{ width: '1px', height: '12px', backgroundColor: '#1e1e1e' }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Hand className="h-2.5 w-2.5" style={{ color: '#0073E6' }} />
-              <span style={{ fontSize: '9px', color: '#0073E6', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Pan</span>
-            </div>
-          </>
-        )}
-      </div>
+      {/* A floating readout used to sit here repeating the viewport, the
+          width, the zoom and the element count - all four of which are
+          already on the top bar, the zoom control and the status bar. Four
+          duplicated facts covering the artboard is exactly what made the
+          canvas feel cluttered rather than considered. Only the transient
+          pan hint survives, because nothing else reports that. */}
+      {spaceHeld && (
+        <div
+          className="pointer-events-none absolute left-1/2 top-2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-[7px] border border-[hsl(var(--studio-line))] bg-[hsl(var(--studio-panel))]/95 px-2.5 py-1 backdrop-blur"
+          role="status"
+        >
+          <Hand className="h-3 w-3 text-[hsl(var(--studio-ink-2))]" />
+          <span className="text-[10.5px] font-medium text-[hsl(var(--studio-ink-2))]">Panning</span>
+        </div>
+      )}
 
       {/* Canvas controls — bottom right — premium glass panel */}
       <div style={{
@@ -275,9 +250,9 @@ export function EditorCanvas() {
         <button
           onClick={() => dispatch({ type: 'SET_ZOOM', payload: Math.min(3, state.zoom + 0.15) })}
           className="h-8 w-8 flex items-center justify-center transition-all duration-150"
-          style={{ color: '#555' }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = '#555'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+          style={{ color: 'hsl(var(--studio-ink-3))' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'hsl(var(--studio-ink))'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'hsl(var(--studio-ink-3))'; e.currentTarget.style.backgroundColor = 'transparent'; }}
           title="Zoom in (⌘+)"
         >
           <ZoomIn className="h-3.5 w-3.5" />
@@ -292,9 +267,9 @@ export function EditorCanvas() {
             dispatch({ type: 'SET_ZOOM', payload: next });
           }}
           className="h-6 flex items-center justify-center transition-all duration-150"
-          style={{ color: Math.round(zoom * 100) !== 100 ? bpColor : '#444', fontSize: '9px', fontWeight: 700, fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = Math.round(zoom * 100) !== 100 ? bpColor : '#444'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+          style={{ color: Math.round(zoom * 100) !== 100 ? bpColor: 'hsl(var(--studio-hover))', fontSize: '9px', fontWeight: 700, fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'hsl(var(--studio-ink))'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = Math.round(zoom * 100) !== 100 ? bpColor: 'hsl(var(--studio-hover))'; e.currentTarget.style.backgroundColor = 'transparent'; }}
           title="Click to cycle zoom presets"
         >
           {Math.round(zoom * 100)}%
@@ -306,9 +281,9 @@ export function EditorCanvas() {
         <button
           onClick={() => setShowGrid(g => !g)}
           className="h-8 w-8 flex items-center justify-center transition-all duration-150"
-          style={{ color: showGrid ? '#0073E6' : '#444', backgroundColor: showGrid ? 'rgba(0,115,230,0.08)' : 'transparent' }}
-          onMouseEnter={e => { e.currentTarget.style.color = showGrid ? '#3B9AFF' : '#fff'; e.currentTarget.style.backgroundColor = showGrid ? 'rgba(0,115,230,0.12)' : 'rgba(255,255,255,0.06)'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = showGrid ? '#0073E6' : '#444'; e.currentTarget.style.backgroundColor = showGrid ? 'rgba(0,115,230,0.08)' : 'transparent'; }}
+          style={{ color: showGrid ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line-strong))', backgroundColor: showGrid ? 'hsl(var(--studio-accent) / 0.08)' : 'transparent' }}
+          onMouseEnter={e => { e.currentTarget.style.color = showGrid ? '#3B9AFF' : 'hsl(var(--studio-ink))'; e.currentTarget.style.backgroundColor = showGrid ? 'hsl(var(--studio-accent) / 0.12)' : 'rgba(255,255,255,0.06)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = showGrid ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line-strong))'; e.currentTarget.style.backgroundColor = showGrid ? 'hsl(var(--studio-accent) / 0.08)' : 'transparent'; }}
           title={showGrid ? 'Hide grid (G)' : 'Show grid (G)'}
         >
           <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.2">
@@ -323,9 +298,9 @@ export function EditorCanvas() {
         <button
           onClick={resetView}
           className="h-8 w-8 flex items-center justify-center transition-all duration-150"
-          style={{ color: Math.round(zoom * 100) !== 100 || panOffset.x !== 0 || panOffset.y !== 0 ? '#0073E6' : '#333' }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = Math.round(zoom * 100) !== 100 || panOffset.x !== 0 || panOffset.y !== 0 ? '#0073E6' : '#333'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+          style={{ color: Math.round(zoom * 100) !== 100 || panOffset.x !== 0 || panOffset.y !== 0 ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line))' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'hsl(var(--studio-ink))'; e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = Math.round(zoom * 100) !== 100 || panOffset.x !== 0 || panOffset.y !== 0 ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line))'; e.currentTarget.style.backgroundColor = 'transparent'; }}
           title="Reset view"
         >
           <RotateCcw className="h-3.5 w-3.5" />
@@ -383,7 +358,7 @@ export function EditorCanvas() {
             marginLeft: -(breakpointWidth * zoom) / 2,
             width: breakpointWidth * zoom,
             minHeight: 800 * zoom,
-            backgroundColor: '#ffffff',
+            backgroundColor: 'hsl(var(--studio-ink))',
             borderRadius: `${8 * zoom}px`,
             boxShadow: isDragOver
               ? `0 0 0 2px ${bpColor}, 0 0 60px ${bpColor}22, 0 24px 80px rgba(0,0,0,0.5)`
@@ -417,7 +392,7 @@ export function EditorCanvas() {
                     bottom: 0,
                     width: 1,
                     height: `${(i % 5 === 0 ? 6 : 3) * zoom}px`,
-                    backgroundColor: i % 5 === 0 ? '#333' : '#222',
+                    backgroundColor: i % 5 === 0 ? 'hsl(var(--studio-line))' : 'hsl(var(--studio-raised))',
                   }}
                 />
               ))}
@@ -453,7 +428,7 @@ export function EditorCanvas() {
                   </span>
                   <span style={{
                     fontSize: `${10 * zoom}px`,
-                    color: '#555',
+                    color: 'hsl(var(--studio-ink-3))',
                     fontWeight: 500,
                     fontFamily: 'ui-monospace, SFMono-Regular, monospace',
                   }}>
@@ -467,10 +442,10 @@ export function EditorCanvas() {
                   borderRadius: `${6 * zoom}px`,
                   backgroundColor: 'rgba(14,14,14,0.8)',
                   fontSize: `${9 * zoom}px`,
-                  color: '#444',
+                  color: 'hsl(var(--studio-hover))',
                   fontWeight: 600,
                   fontFamily: 'ui-monospace, SFMono-Regular, monospace',
-                  border: '1px solid #1a1a1a',
+                  border: '1px solid hsl(var(--studio-line))',
                 }}>
                   {elementCount} element{elementCount !== 1 ? 's' : ''}
                 </div>
@@ -529,7 +504,7 @@ export function EditorCanvas() {
               padding: '3px 8px',
               borderRadius: '6px',
               backgroundColor: 'rgba(0,0,0,0.7)',
-              border: '1px solid #222',
+              border: '1px solid hsl(var(--studio-line))',
               backdropFilter: 'blur(8px)',
               zIndex: 10,
               pointerEvents: 'none',
@@ -539,24 +514,24 @@ export function EditorCanvas() {
             <span style={{
               fontSize: '7px', fontWeight: 800, textTransform: 'uppercase',
               letterSpacing: '0.08em', padding: '1px 4px', borderRadius: '3px',
-              backgroundColor: spaceHeld ? 'rgba(139,92,246,0.15)' : 'rgba(0,115,230,0.1)',
-              color: spaceHeld ? '#8b5cf6' : '#0073E6',
-              border: `1px solid ${spaceHeld ? 'rgba(139,92,246,0.25)' : 'rgba(0,115,230,0.15)'}`,
+              backgroundColor: spaceHeld ? 'rgba(139,92,246,0.15)' : 'hsl(var(--studio-accent) / 0.1)',
+              color: spaceHeld ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-accent))',
+              border: `1px solid ${spaceHeld ? 'rgba(139,92,246,0.25)' : 'hsl(var(--studio-accent) / 0.15)'}`,
             }}>
               {spaceHeld ? 'PAN' : 'SELECT'}
             </span>
             {cursorCoords && (
               <>
-                <span style={{ fontSize: '9px', fontFamily: 'ui-monospace, SFMono-Regular, monospace', color: '#ef4444', fontWeight: 600 }}>
+                <span style={{ fontSize: '9px', fontFamily: 'ui-monospace, SFMono-Regular, monospace', color: 'hsl(var(--studio-risk))', fontWeight: 600 }}>
                   X:{cursorCoords.x}
                 </span>
-                <span style={{ fontSize: '9px', fontFamily: 'ui-monospace, SFMono-Regular, monospace', color: '#22c55e', fontWeight: 600 }}>
+                <span style={{ fontSize: '9px', fontFamily: 'ui-monospace, SFMono-Regular, monospace', color: 'hsl(var(--studio-ok))', fontWeight: 600 }}>
                   Y:{cursorCoords.y}
                 </span>
               </>
             )}
             {showGrid && (
-              <span style={{ fontSize: '7px', fontWeight: 700, color: '#f59e0b', padding: '1px 3px', borderRadius: '2px', backgroundColor: 'rgba(245,158,11,0.1)' }}>
+              <span style={{ fontSize: '7px', fontWeight: 700, color: 'hsl(var(--studio-warn))', padding: '1px 3px', borderRadius: '2px', backgroundColor: 'rgba(245,158,11,0.1)' }}>
                 GRID
               </span>
             )}
@@ -565,7 +540,11 @@ export function EditorCanvas() {
       </AnimatePresence>
 
       {/* Structure minimap */}
-      <CanvasMinimap />
+      {/* The structure minimap used to float here permanently, drawing the
+          page as stacked coloured bars over the bottom-right of the
+          artboard - decoration that obscured the work it described. The
+          layers panel already shows structure, properly, and can be
+          scrolled and clicked. */}
 
       {/* Drag over indicator */}
       <AnimatePresence>

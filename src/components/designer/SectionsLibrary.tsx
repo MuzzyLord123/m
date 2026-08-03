@@ -8,10 +8,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, LayoutGrid, Plus, ChevronRight, Star, Layers, Sparkles } from 'lucide-react';
 
 const CATEGORY_COLORS: Partial<Record<SectionCategory, string>> = {
-  Navbars: '#6366f1', Heroes: '#ec4899', Features: '#10b981', Content: '#f59e0b',
-  CTA: '#ef4444', Testimonials: '#8b5cf6', Pricing: '#06b6d4', FAQ: '#84cc16',
-  Team: '#f97316', Stats: '#14b8a6', Gallery: '#a855f7', Logos: '#64748b',
-  Contact: '#3b82f6', Footers: '#78716c', Banners: '#e11d48',
+  Navbars: 'hsl(var(--studio-ink-3))', Heroes: 'hsl(var(--studio-ink-3))', Features: 'hsl(var(--studio-ok))', Content: 'hsl(var(--studio-warn))',
+  CTA: 'hsl(var(--studio-risk))', Testimonials: 'hsl(var(--studio-ink-3))', Pricing: 'hsl(var(--studio-ink-3))', FAQ: 'hsl(var(--studio-ink-3))',
+  Team: 'hsl(var(--studio-warn))', Stats: 'hsl(var(--studio-ink-3))', Gallery: 'hsl(var(--studio-ink-3))', Logos: 'hsl(var(--studio-ink-3))',
+  Contact: 'hsl(var(--studio-accent))', Footers: '#78716c', Banners: 'hsl(var(--studio-risk))',
 };
 
 const FAVORITES_KEY = 'workshop-section-favorites';
@@ -76,29 +76,29 @@ export function SectionsLibrary() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(236,72,153,0.1))', border: '1px solid rgba(139,92,246,0.15)' }}>
-              <Layers className="h-3 w-3" style={{ color: '#8b5cf6' }} />
+              <Layers className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
             </div>
-            <span className="text-[11px] font-semibold" style={{ color: '#ccc' }}>Sections</span>
+            <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>Sections</span>
           </div>
-          <span className="text-[9px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(139,92,246,0.08)', color: '#8b5cf6', border: '1px solid rgba(139,92,246,0.1)' }}>
+          <span className="text-[9px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(139,92,246,0.08)', color: 'hsl(var(--studio-ink-3))', border: '1px solid rgba(139,92,246,0.1)' }}>
             {ALL_SECTION_BLOCKS.length}
           </span>
         </div>
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3" style={{ color: '#555' }} />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={`Search sections…`}
             className="w-full h-7 pl-7 pr-3 rounded-lg text-[10px] outline-none transition-colors"
-            style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', color: '#ddd' }}
-            onFocus={e => { e.currentTarget.style.borderColor = '#8b5cf6'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.08)'; }}
-            onBlur={e => { e.currentTarget.style.borderColor = '#2a2a2a'; e.currentTarget.style.boxShadow = 'none'; }}
+            style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-ink-3))'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.08)'; }}
+            onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-raised))'; e.currentTarget.style.boxShadow = 'none'; }}
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 flex items-center justify-center rounded-full hover:bg-white/10" style={{ color: '#555', fontSize: '9px' }}>✕</button>
+            <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 flex items-center justify-center rounded-full hover:bg-white/10" style={{ color: 'hsl(var(--studio-ink-3))', fontSize: '9px' }}>✕</button>
           )}
         </div>
 
@@ -109,14 +109,14 @@ export function SectionsLibrary() {
             className="px-2 py-0.5 rounded-md text-[8px] font-semibold uppercase tracking-wider transition-all"
             style={{
               backgroundColor: activeCategory === 'All' ? 'rgba(139,92,246,0.15)' : 'transparent',
-              color: activeCategory === 'All' ? '#8b5cf6' : '#666',
+              color: activeCategory === 'All' ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-3))',
               border: `1px solid ${activeCategory === 'All' ? 'rgba(139,92,246,0.25)' : 'transparent'}`,
             }}
           >
             All
           </button>
           {activeCategories.map(cat => {
-            const catColor = CATEGORY_COLORS[cat] || '#555';
+            const catColor = CATEGORY_COLORS[cat] || 'hsl(var(--studio-ink-3))';
             return (
               <button
                 key={cat}
@@ -124,7 +124,7 @@ export function SectionsLibrary() {
                 className="px-2 py-0.5 rounded-md text-[8px] font-semibold uppercase tracking-wider transition-all"
                 style={{
                   backgroundColor: activeCategory === cat ? `${catColor}15` : 'transparent',
-                  color: activeCategory === cat ? catColor : '#666',
+                  color: activeCategory === cat ? catColor: 'hsl(var(--studio-ink-3))',
                   border: `1px solid ${activeCategory === cat ? `${catColor}30` : 'transparent'}`,
                 }}
               >
@@ -139,8 +139,8 @@ export function SectionsLibrary() {
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
-              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#555' }}>Favorites</span>
-              <span className="text-[7px] tabular-nums px-1 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>{favoriteBlocks.length}</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Favorites</span>
+              <span className="text-[7px] tabular-nums px-1 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: 'hsl(var(--studio-warn))' }}>{favoriteBlocks.length}</span>
             </div>
             <div className="grid grid-cols-1 gap-1.5">
               {favoriteBlocks.map(block => (
@@ -152,8 +152,8 @@ export function SectionsLibrary() {
 
         {/* Count bar */}
         <div className="flex items-center gap-2">
-          <LayoutGrid className="h-2.5 w-2.5" style={{ color: '#444' }} />
-          <span className="text-[9px] tabular-nums" style={{ color: '#555' }}>
+          <LayoutGrid className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-hover))' }} />
+          <span className="text-[9px] tabular-nums" style={{ color: 'hsl(var(--studio-ink-3))' }}>
             {filtered.length} section{filtered.length !== 1 ? 's' : ''}
             {search && ` for "${search}"`}
           </span>
@@ -162,15 +162,15 @@ export function SectionsLibrary() {
         {/* Grouped or flat list */}
         {groupedByCategory ? (
           Object.entries(groupedByCategory).map(([category, blocks]) => {
-            const catColor = CATEGORY_COLORS[category as SectionCategory] || '#555';
+            const catColor = CATEGORY_COLORS[category as SectionCategory] || 'hsl(var(--studio-ink-3))';
             const isCollapsed = collapsed.includes(category);
             return (
               <div key={category}>
                 <button onClick={() => toggleCollapse(category)} className="flex items-center gap-1.5 mb-1.5 mt-2 w-full group">
-                  <ChevronRight className={`h-2.5 w-2.5 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} style={{ color: '#444' }} />
+                  <ChevronRight className={`h-2.5 w-2.5 transition-transform ${isCollapsed ? '' : 'rotate-90'}`} style={{ color: 'hsl(var(--studio-hover))' }} />
                   <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: catColor }} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider flex-1 text-left" style={{ color: '#888' }}>{category}</span>
-                  <span className="text-[8px] tabular-nums opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#444' }}>{blocks.length}</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider flex-1 text-left" style={{ color: 'hsl(var(--studio-ink-2))' }}>{category}</span>
+                  <span className="text-[8px] tabular-nums opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: 'hsl(var(--studio-hover))' }}>{blocks.length}</span>
                 </button>
                 <AnimatePresence>
                   {!isCollapsed && (
@@ -194,7 +194,7 @@ export function SectionsLibrary() {
               ))}
             </AnimatePresence>
             {filtered.length === 0 && (
-              <div className="text-center py-8" style={{ color: '#555', fontSize: '11px' }}>No sections found</div>
+              <div className="text-center py-8" style={{ color: 'hsl(var(--studio-ink-3))', fontSize: '11px' }}>No sections found</div>
             )}
           </div>
         )}
@@ -206,7 +206,7 @@ export function SectionsLibrary() {
 function SectionCard({ block, hovered, onHover, onInsert, isFavorite, onToggleFavorite }: {
   block: SectionBlock; hovered: boolean; onHover: (id: string | null) => void; onInsert: (block: SectionBlock) => void; isFavorite: boolean; onToggleFavorite: (id: string) => void;
 }) {
-  const accentColor = CATEGORY_COLORS[block.category] || '#555';
+  const accentColor = CATEGORY_COLORS[block.category] || 'hsl(var(--studio-ink-3))';
   const elementCount = countElements(block.elements);
 
   return (
@@ -218,8 +218,8 @@ function SectionCard({ block, hovered, onHover, onInsert, isFavorite, onToggleFa
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
       className="group rounded-lg overflow-hidden cursor-pointer"
       style={{
-        backgroundColor: '#1e1e1e',
-        border: `1px solid ${hovered ? `${accentColor}40` : '#252525'}`,
+        backgroundColor: 'hsl(var(--studio-panel))',
+        border: `1px solid ${hovered ? `${accentColor}40` : 'hsl(var(--studio-raised))'}`,
         transition: 'border-color 0.2s ease',
       }}
       onMouseEnter={() => onHover(block.id)}
@@ -231,7 +231,7 @@ function SectionCard({ block, hovered, onHover, onInsert, isFavorite, onToggleFa
         <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <div className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: accentColor }} />
-            <span className="text-[10px] font-semibold truncate" style={{ color: '#ddd' }}>{block.name}</span>
+            <span className="text-[10px] font-semibold truncate" style={{ color: 'hsl(var(--studio-ink-2))' }}>{block.name}</span>
           </div>
           <div className="flex items-center gap-0.5">
             <button
@@ -239,7 +239,7 @@ function SectionCard({ block, hovered, onHover, onInsert, isFavorite, onToggleFa
               className="opacity-0 group-hover:opacity-100 h-5 w-5 flex items-center justify-center rounded hover:bg-white/[0.06] transition-all"
               style={{ opacity: isFavorite ? 1 : undefined }}
             >
-              <Star className={`h-2.5 w-2.5 ${isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[#555]'}`} />
+              <Star className={`h-2.5 w-2.5 ${isFavorite ? 'text-amber-500 fill-amber-500' : 'text-[hsl(var(--studio-ink-3))]'}`} />
             </button>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -254,8 +254,8 @@ function SectionCard({ block, hovered, onHover, onInsert, isFavorite, onToggleFa
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <p className="text-[8px] leading-snug flex-1 truncate" style={{ color: '#555' }}>{block.description}</p>
-          <span className="text-[7px] tabular-nums shrink-0" style={{ color: '#444' }}>{elementCount} els</span>
+          <p className="text-[8px] leading-snug flex-1 truncate" style={{ color: 'hsl(var(--studio-ink-3))' }}>{block.description}</p>
+          <span className="text-[7px] tabular-nums shrink-0" style={{ color: 'hsl(var(--studio-hover))' }}>{elementCount} els</span>
         </div>
       </div>
     </motion.div>

@@ -12,8 +12,8 @@ export function GradientEditor() {
   const [gradientType, setGradientType] = useState<'linear' | 'radial'>('linear');
   const [angle, setAngle] = useState(135);
   const [stops, setStops] = useState<GradientStop[]>([
-    { color: '#8b5cf6', position: 0 },
-    { color: '#3b82f6', position: 100 },
+    { color: 'hsl(var(--studio-ink-3))', position: 0 },
+    { color: 'hsl(var(--studio-accent))', position: 100 },
   ]);
 
   const gradientCSS = useMemo(() => {
@@ -47,7 +47,7 @@ export function GradientEditor() {
 
   const addStop = () => {
     const mid = stops.length > 0 ? Math.round((stops[stops.length - 1].position + stops[0].position) / 2) : 50;
-    setStops([...stops, { color: '#ffffff', position: mid }]);
+    setStops([...stops, { color: 'hsl(var(--studio-ink))', position: mid }]);
   };
 
   const removeStop = (i: number) => {
@@ -60,10 +60,10 @@ export function GradientEditor() {
   };
 
   return (
-    <div className="p-3 space-y-3" style={{ backgroundColor: '#1e1e1e' }}>
+    <div className="p-3 space-y-3" style={{ backgroundColor: 'hsl(var(--studio-panel))' }}>
       <div className="flex items-center gap-2 mb-2">
-        <Palette className="h-3.5 w-3.5" style={{ color: '#8b5cf6' }} />
-        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#999' }}>Gradient Editor</span>
+        <Palette className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
+        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-2))' }}>Gradient Editor</span>
       </div>
 
       {/* Preview */}
@@ -80,9 +80,9 @@ export function GradientEditor() {
             onClick={() => setGradientType(t)}
             className="flex-1 py-1.5 rounded text-[10px] font-semibold uppercase tracking-wider"
             style={{
-              backgroundColor: gradientType === t ? '#0073E6' : '#2d2d2d',
-              color: gradientType === t ? '#fff' : '#666',
-              border: `1px solid ${gradientType === t ? '#0073E6' : '#333'}`,
+              backgroundColor: gradientType === t ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-raised))',
+              color: gradientType === t ? 'hsl(var(--studio-ink))' : 'hsl(var(--studio-ink-3))',
+              border: `1px solid ${gradientType === t ? 'hsl(var(--studio-accent))' : 'hsl(var(--studio-line))'}`,
             }}
           >
             {t}
@@ -93,7 +93,7 @@ export function GradientEditor() {
       {/* Angle (linear only) */}
       {gradientType === 'linear' && (
         <div className="flex items-center gap-2">
-          <RotateCw className="h-3 w-3" style={{ color: '#666' }} />
+          <RotateCw className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           <input
             type="range"
             min="0"
@@ -101,9 +101,9 @@ export function GradientEditor() {
             value={angle}
             onChange={e => setAngle(Number(e.target.value))}
             className="flex-1"
-            style={{ accentColor: '#0073E6' }}
+            style={{ accentColor: 'hsl(var(--studio-accent))' }}
           />
-          <span className="text-[10px] font-mono" style={{ color: '#888', minWidth: '36px' }}>{angle}°</span>
+          <span className="text-[10px] font-mono" style={{ color: 'hsl(var(--studio-ink-2))', minWidth: '36px' }}>{angle}°</span>
         </div>
       )}
 
@@ -127,7 +127,7 @@ export function GradientEditor() {
               className="flex-1"
               style={{ accentColor: stop.color }}
             />
-            <span className="text-[10px] font-mono" style={{ color: '#888', minWidth: '28px' }}>{stop.position}%</span>
+            <span className="text-[10px] font-mono" style={{ color: 'hsl(var(--studio-ink-2))', minWidth: '28px' }}>{stop.position}%</span>
             {stops.length > 2 && (
               <button onClick={() => removeStop(i)} className="p-0.5 rounded hover:bg-red-500/20">
                 <Trash2 className="h-3 w-3 text-red-400" />
@@ -140,7 +140,7 @@ export function GradientEditor() {
       <button
         onClick={addStop}
         className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded text-[10px] font-semibold"
-        style={{ backgroundColor: '#2d2d2d', color: '#888', border: '1px solid #333' }}
+        style={{ backgroundColor: 'hsl(var(--studio-raised))', color: 'hsl(var(--studio-ink-2))', border: '1px solid hsl(var(--studio-line))' }}
       >
         <Plus className="h-3 w-3" /> Add Stop
       </button>
@@ -150,7 +150,7 @@ export function GradientEditor() {
         <button
           onClick={() => applyGradient('background')}
           className="flex-1 py-2 rounded text-[10px] font-semibold"
-          style={{ backgroundColor: '#0073E6', color: '#fff' }}
+          style={{ backgroundColor: 'hsl(var(--studio-accent))', color: 'hsl(var(--studio-ink))' }}
           disabled={!selectedElement}
         >
           Apply as BG
@@ -158,7 +158,7 @@ export function GradientEditor() {
         <button
           onClick={() => applyGradient('color')}
           className="flex-1 py-2 rounded text-[10px] font-semibold"
-          style={{ backgroundColor: '#2d2d2d', color: '#ddd', border: '1px solid #333' }}
+          style={{ backgroundColor: 'hsl(var(--studio-raised))', color: 'hsl(var(--studio-ink-2))', border: '1px solid hsl(var(--studio-line))' }}
           disabled={!selectedElement}
         >
           Apply as Text
@@ -168,7 +168,7 @@ export function GradientEditor() {
       {/* CSS output */}
       <div
         className="p-2 rounded text-[10px] font-mono break-all cursor-pointer"
-        style={{ backgroundColor: '#252525', color: '#888', border: '1px solid #333' }}
+        style={{ backgroundColor: 'hsl(var(--studio-raised))', color: 'hsl(var(--studio-ink-2))', border: '1px solid hsl(var(--studio-line))' }}
         onClick={() => navigator.clipboard.writeText(gradientCSS)}
         title="Click to copy"
       >

@@ -24,22 +24,22 @@ interface Interaction {
 
 /* ── Constants ── */
 const TRIGGER_CONFIG: Record<string, { icon: typeof Zap; color: string; label: string; desc: string }> = {
-  'scroll-into-view': { icon: Eye, color: '#3b82f6', label: 'Scroll Into View', desc: 'When element enters viewport' },
-  'hover': { icon: MousePointer2, color: '#8b5cf6', label: 'Mouse Hover', desc: 'On mouse enter/leave' },
-  'click': { icon: Zap, color: '#f59e0b', label: 'Click / Tap', desc: 'On click or tap' },
-  'page-load': { icon: Timer, color: '#22c55e', label: 'Page Load', desc: 'When page finishes loading' },
-  'scroll-progress': { icon: Scroll, color: '#0ea5e9', label: 'While Scrolling', desc: 'Tied to scroll position' },
-  'mouse-move': { icon: Move, color: '#ec4899', label: 'Mouse Move', desc: 'Parallax on cursor position' },
+  'scroll-into-view': { icon: Eye, color: 'hsl(var(--studio-accent))', label: 'Scroll Into View', desc: 'When element enters viewport' },
+  'hover': { icon: MousePointer2, color: 'hsl(var(--studio-ink-3))', label: 'Mouse Hover', desc: 'On mouse enter/leave' },
+  'click': { icon: Zap, color: 'hsl(var(--studio-warn))', label: 'Click / Tap', desc: 'On click or tap' },
+  'page-load': { icon: Timer, color: 'hsl(var(--studio-ok))', label: 'Page Load', desc: 'When page finishes loading' },
+  'scroll-progress': { icon: Scroll, color: 'hsl(var(--studio-accent))', label: 'While Scrolling', desc: 'Tied to scroll position' },
+  'mouse-move': { icon: Move, color: 'hsl(var(--studio-ink-3))', label: 'Mouse Move', desc: 'Parallax on cursor position' },
 };
 
 const PROPERTY_GROUPS = [
-  { group: 'Transform', color: '#3b82f6', items: ['translateX', 'translateY', 'translateZ', 'scale', 'scaleX', 'scaleY', 'rotate', 'rotateX', 'rotateY', 'rotateZ', 'skewX', 'skewY'] },
-  { group: 'Appearance', color: '#8b5cf6', items: ['opacity', 'blur', 'brightness', 'contrast', 'saturate', 'hue-rotate'] },
-  { group: 'Size', color: '#22c55e', items: ['width', 'height', 'max-width', 'max-height'] },
-  { group: 'Spacing', color: '#f59e0b', items: ['margin-top', 'margin-bottom', 'padding-top', 'padding-bottom'] },
-  { group: 'Color', color: '#ec4899', items: ['background-color', 'color', 'border-color', 'box-shadow'] },
-  { group: 'Border', color: '#0ea5e9', items: ['border-width', 'border-radius'] },
-  { group: 'Typography', color: '#f97316', items: ['font-size', 'letter-spacing', 'line-height'] },
+  { group: 'Transform', color: 'hsl(var(--studio-accent))', items: ['translateX', 'translateY', 'translateZ', 'scale', 'scaleX', 'scaleY', 'rotate', 'rotateX', 'rotateY', 'rotateZ', 'skewX', 'skewY'] },
+  { group: 'Appearance', color: 'hsl(var(--studio-ink-3))', items: ['opacity', 'blur', 'brightness', 'contrast', 'saturate', 'hue-rotate'] },
+  { group: 'Size', color: 'hsl(var(--studio-ok))', items: ['width', 'height', 'max-width', 'max-height'] },
+  { group: 'Spacing', color: 'hsl(var(--studio-warn))', items: ['margin-top', 'margin-bottom', 'padding-top', 'padding-bottom'] },
+  { group: 'Color', color: 'hsl(var(--studio-ink-3))', items: ['background-color', 'color', 'border-color', 'box-shadow'] },
+  { group: 'Border', color: 'hsl(var(--studio-accent))', items: ['border-width', 'border-radius'] },
+  { group: 'Typography', color: 'hsl(var(--studio-warn))', items: ['font-size', 'letter-spacing', 'line-height'] },
 ];
 
 const EASINGS = [
@@ -61,19 +61,19 @@ function getPropertyColor(property: string): string {
   for (const g of PROPERTY_GROUPS) {
     if (g.items.includes(property)) return g.color;
   }
-  return '#555';
+  return 'hsl(var(--studio-ink-3))';
 }
 
 /* ── Section Header ── */
 function Section({ label, open, onClick, count, color, icon }: { label: string; open: boolean; onClick: () => void; count?: number; color?: string; icon?: React.ReactNode }) {
   return (
-    <button onClick={onClick} className="w-full flex items-center justify-between h-8 px-0 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors" style={{ color: '#888' }}>
+    <button onClick={onClick} className="w-full flex items-center justify-between h-8 px-0 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors" style={{ color: 'hsl(var(--studio-ink-2))' }}>
       <div className="flex items-center gap-2">
-        <ChevronRight className={`h-2.5 w-2.5 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} style={{ color: '#444' }} />
+        <ChevronRight className={`h-2.5 w-2.5 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} style={{ color: 'hsl(var(--studio-hover))' }} />
         {icon}
         {label}
         {count !== undefined && (
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full font-bold tabular-nums" style={{ backgroundColor: `${color || '#0073E6'}12`, color: color || '#0073E6' }}>{count}</span>
+          <span className="text-[8px] px-1.5 py-0.5 rounded-full font-bold tabular-nums" style={{ backgroundColor: `${color || 'hsl(var(--studio-accent))'}12`, color: color || 'hsl(var(--studio-accent))' }}>{count}</span>
         )}
       </div>
     </button>
@@ -86,11 +86,11 @@ function MiniInput({ value, onChange, suffix, width = '100%' }: { value: string 
     <div className="relative" style={{ width }}>
       <input value={value} onChange={e => onChange(e.target.value)}
         className="w-full h-6 px-2 rounded text-[10px] outline-none"
-        style={{ backgroundColor: '#222', border: '1px solid #2a2a2a', color: '#ddd', paddingRight: suffix ? '22px' : '8px' }}
-        onFocus={e => { e.currentTarget.style.borderColor = '#0073E6'; }}
-        onBlur={e => { e.currentTarget.style.borderColor = '#2a2a2a'; }}
+        style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))', paddingRight: suffix ? '22px' : '8px' }}
+        onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-accent))'; }}
+        onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-raised))'; }}
       />
-      {suffix && <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px]" style={{ color: '#555' }}>{suffix}</span>}
+      {suffix && <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px]" style={{ color: 'hsl(var(--studio-ink-3))' }}>{suffix}</span>}
     </div>
   );
 }
@@ -99,7 +99,7 @@ function MiniSelect({ value, onChange, options }: { value: string; onChange: (v:
   return (
     <select value={value} onChange={e => onChange(e.target.value)}
       className="h-6 px-1.5 rounded text-[10px] outline-none cursor-pointer"
-      style={{ backgroundColor: '#222', border: '1px solid #2a2a2a', color: '#ddd', minWidth: 0 }}>
+      style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))', minWidth: 0 }}>
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   );
@@ -117,8 +117,8 @@ function EasingCurve({ easing }: { easing: string }) {
   };
   return (
     <svg width="28" height="28" viewBox="0 0 32 32" fill="none" className="shrink-0">
-      <rect x="2" y="2" width="28" height="28" rx="4" stroke="#2a2a2a" strokeWidth="0.5" />
-      <path d={getPath(easing)} stroke="#0073E6" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <rect x="2" y="2" width="28" height="28" rx="4" stroke="hsl(var(--studio-raised))" strokeWidth="0.5" />
+      <path d={getPath(easing)} stroke="hsl(var(--studio-accent))" strokeWidth="2" fill="none" strokeLinecap="round" />
     </svg>
   );
 }
@@ -129,8 +129,8 @@ function TimelineBar({ steps, totalDuration }: { steps: InteractionStep[]; total
   return (
     <div className="mt-2 mb-1 px-1">
       <div className="flex items-center gap-1 mb-1">
-        <span className="text-[7px] tabular-nums" style={{ color: '#444' }}>0s</span>
-        <div className="flex-1 h-7 rounded-md overflow-hidden relative" style={{ backgroundColor: '#161616', border: '1px solid #1e1e1e' }}>
+        <span className="text-[7px] tabular-nums" style={{ color: 'hsl(var(--studio-hover))' }}>0s</span>
+        <div className="flex-1 h-7 rounded-md overflow-hidden relative" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
           {steps.map((s, i) => {
             const left = (s.delay / totalDuration) * 100;
             const width = (s.duration / totalDuration) * 100;
@@ -144,7 +144,7 @@ function TimelineBar({ steps, totalDuration }: { steps: InteractionStep[]; total
             );
           })}
         </div>
-        <span className="text-[7px] tabular-nums" style={{ color: '#444' }}>{(totalDuration / 1000).toFixed(1)}s</span>
+        <span className="text-[7px] tabular-nums" style={{ color: 'hsl(var(--studio-hover))' }}>{(totalDuration / 1000).toFixed(1)}s</span>
       </div>
     </div>
   );
@@ -156,22 +156,22 @@ function StepEditor({ step, onUpdate, onDelete }: { step: InteractionStep; onUpd
   const propColor = getPropertyColor(step.property);
 
   return (
-    <motion.div layout className="rounded-lg p-2 mb-1" style={{ backgroundColor: '#1a1a1a', border: `1px solid ${propOpen ? `${propColor}25` : '#222'}`, transition: 'border-color 0.2s' }}>
+    <motion.div layout className="rounded-lg p-2 mb-1" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: `1px solid ${propOpen ? `${propColor}25` : 'hsl(var(--studio-raised))'}`, transition: 'border-color 0.2s' }}>
       <div className="flex items-center justify-between mb-2">
         <button onClick={() => setPropOpen(!propOpen)} className="flex items-center gap-1.5">
           <div className="w-4 h-4 rounded flex items-center justify-center" style={{ backgroundColor: `${propColor}15`, border: `1px solid ${propColor}25` }}>
             <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: propColor }} />
           </div>
           <span className="text-[9px] font-semibold" style={{ color: propColor }}>{step.property || 'Select'}</span>
-          <ChevronDown className={`h-2 w-2 transition-transform ${propOpen ? '' : '-rotate-90'}`} style={{ color: '#444' }} />
+          <ChevronDown className={`h-2 w-2 transition-transform ${propOpen ? '' : '-rotate-90'}`} style={{ color: 'hsl(var(--studio-hover))' }} />
         </button>
-        <button onClick={onDelete} className="p-0.5 rounded hover:bg-red-500/10 transition-colors"><Trash2 className="h-2.5 w-2.5" style={{ color: '#555' }} /></button>
+        <button onClick={onDelete} className="p-0.5 rounded hover:bg-red-500/10 transition-colors"><Trash2 className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} /></button>
       </div>
 
       <AnimatePresence>
         {propOpen && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
-            <div className="mb-2 rounded-md p-1.5 space-y-1" style={{ backgroundColor: '#161616', border: '1px solid #1e1e1e', maxHeight: 160, overflowY: 'auto' }}>
+            <div className="mb-2 rounded-md p-1.5 space-y-1" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', maxHeight: 160, overflowY: 'auto' }}>
               {PROPERTY_GROUPS.map(g => (
                 <div key={g.group}>
                   <div className="text-[7px] uppercase tracking-wider px-1 py-0.5 font-bold flex items-center gap-1" style={{ color: g.color }}>
@@ -182,7 +182,7 @@ function StepEditor({ step, onUpdate, onDelete }: { step: InteractionStep; onUpd
                     {g.items.map(p => (
                       <button key={p} onClick={() => { onUpdate({ ...step, property: p }); setPropOpen(false); }}
                         className="text-[8px] px-1.5 py-0.5 rounded transition-colors"
-                        style={{ backgroundColor: step.property === p ? `${g.color}15` : '#222', color: step.property === p ? g.color : '#888', border: `1px solid ${step.property === p ? `${g.color}30` : '#2a2a2a'}` }}>
+                        style={{ backgroundColor: step.property === p ? `${g.color}15` : 'hsl(var(--studio-raised))', color: step.property === p ? g.color: 'hsl(var(--studio-ink-2))', border: `1px solid ${step.property === p ? `${g.color}30` : 'hsl(var(--studio-raised))'}` }}>
                         {p}
                       </button>
                     ))}
@@ -195,13 +195,13 @@ function StepEditor({ step, onUpdate, onDelete }: { step: InteractionStep; onUpd
       </AnimatePresence>
 
       <div className="grid grid-cols-2 gap-1.5">
-        <div><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: '#555' }}>From</div><MiniInput value={step.from} onChange={v => onUpdate({ ...step, from: v })} /></div>
-        <div><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: '#555' }}>To</div><MiniInput value={step.to} onChange={v => onUpdate({ ...step, to: v })} /></div>
-        <div><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: '#555' }}>Duration</div><MiniInput value={step.duration} onChange={v => onUpdate({ ...step, duration: parseInt(v) || 0 })} suffix="ms" /></div>
-        <div><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: '#555' }}>Delay</div><MiniInput value={step.delay} onChange={v => onUpdate({ ...step, delay: parseInt(v) || 0 })} suffix="ms" /></div>
+        <div><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>From</div><MiniInput value={step.from} onChange={v => onUpdate({ ...step, from: v })} /></div>
+        <div><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>To</div><MiniInput value={step.to} onChange={v => onUpdate({ ...step, to: v })} /></div>
+        <div><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Duration</div><MiniInput value={step.duration} onChange={v => onUpdate({ ...step, duration: parseInt(v) || 0 })} suffix="ms" /></div>
+        <div><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Delay</div><MiniInput value={step.delay} onChange={v => onUpdate({ ...step, delay: parseInt(v) || 0 })} suffix="ms" /></div>
       </div>
       <div className="mt-1.5 flex items-center gap-2">
-        <div className="flex-1"><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: '#555' }}>Easing</div>
+        <div className="flex-1"><div className="text-[7px] mb-0.5 font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Easing</div>
           <MiniSelect value={step.easing} onChange={v => onUpdate({ ...step, easing: v })} options={EASINGS} />
         </div>
         <EasingCurve easing={step.easing} />
@@ -315,27 +315,27 @@ export function InteractionsPanel() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(236,72,153,0.08))', border: '1px solid rgba(245,158,11,0.15)' }}>
-              <Zap className="h-3 w-3" style={{ color: '#f59e0b' }} />
+              <Zap className="h-3 w-3" style={{ color: 'hsl(var(--studio-warn))' }} />
             </div>
-            <span className="text-[11px] font-semibold" style={{ color: '#ccc' }}>Interactions</span>
+            <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>Interactions</span>
           </div>
           <button onClick={() => addInteraction()} className="flex items-center gap-1 text-[8px] font-semibold px-2 py-1 rounded-lg transition-all"
-            style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', color: '#fff' }}>
+            style={{ background: 'linear-gradient(135deg, hsl(var(--studio-warn)), hsl(var(--studio-warn)))', color: 'hsl(var(--studio-ink))' }}>
             <Plus className="h-3 w-3" /> New
           </button>
         </div>
 
         {/* Selected element */}
         {selectedEl && (
-          <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
-            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#22c55e' }} />
-            <span className="text-[9px]" style={{ color: '#888' }}>Target: <span style={{ color: '#ddd' }}>{selectedEl.type}</span></span>
+          <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
+            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'hsl(var(--studio-ok))' }} />
+            <span className="text-[9px]" style={{ color: 'hsl(var(--studio-ink-2))' }}>Target: <span style={{ color: 'hsl(var(--studio-ink-2))' }}>{selectedEl.type}</span></span>
           </div>
         )}
 
         {/* Quick Presets */}
-        <Section label="Presets" open={presetsOpen} onClick={() => setPresetsOpen(!presetsOpen)} count={QUICK_PRESETS.length} color="#f59e0b"
-          icon={<Sparkles className="h-3 w-3" style={{ color: '#f59e0b' }} />} />
+        <Section label="Presets" open={presetsOpen} onClick={() => setPresetsOpen(!presetsOpen)} count={QUICK_PRESETS.length} color="hsl(var(--studio-warn))"
+          icon={<Sparkles className="h-3 w-3" style={{ color: 'hsl(var(--studio-warn))' }} />} />
         <AnimatePresence>
           {presetsOpen && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
@@ -343,21 +343,21 @@ export function InteractionsPanel() {
                 {QUICK_PRESETS.map(p => {
                   const tc = TRIGGER_CONFIG[p.trigger];
                   const TriggerIcon = tc?.icon || Zap;
-                  const triggerColor = tc?.color || '#555';
+                  const triggerColor = tc?.color || 'hsl(var(--studio-ink-3))';
                   return (
                     <button key={p.name} onClick={() => addInteraction(p)}
                       className="text-left p-2 rounded-lg transition-all group"
-                      style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}
+                      style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}
                       onMouseEnter={e => { e.currentTarget.style.borderColor = `${triggerColor}40`; e.currentTarget.style.backgroundColor = `${triggerColor}05`; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = '#222'; e.currentTarget.style.backgroundColor = '#1a1a1a'; }}>
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-raised))'; e.currentTarget.style.backgroundColor = 'hsl(var(--studio-panel))'; }}>
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <div className="w-4 h-4 rounded flex items-center justify-center" style={{ backgroundColor: `${triggerColor}12`, border: `1px solid ${triggerColor}20` }}>
                           <TriggerIcon className="h-2.5 w-2.5" style={{ color: triggerColor }} />
                         </div>
-                        <span className="text-[9px] font-medium truncate" style={{ color: '#ddd' }}>{p.name}</span>
+                        <span className="text-[9px] font-medium truncate" style={{ color: 'hsl(var(--studio-ink-2))' }}>{p.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[7px] tabular-nums" style={{ color: '#555' }}>{p.steps.length} steps</span>
+                        <span className="text-[7px] tabular-nums" style={{ color: 'hsl(var(--studio-ink-3))' }}>{p.steps.length} steps</span>
                         <span className="text-[7px]" style={{ color: triggerColor }}>{p.trigger}</span>
                       </div>
                     </button>
@@ -372,35 +372,35 @@ export function InteractionsPanel() {
         {interactions.length > 0 && (
           <div>
             <div className="flex items-center gap-1.5 mb-1.5">
-              <Layers className="h-3 w-3" style={{ color: '#444' }} />
-              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#555' }}>Active</span>
-              <span className="text-[8px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(245,158,11,0.08)', color: '#f59e0b' }}>{interactions.length}</span>
+              <Layers className="h-3 w-3" style={{ color: 'hsl(var(--studio-hover))' }} />
+              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Active</span>
+              <span className="text-[8px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(245,158,11,0.08)', color: 'hsl(var(--studio-warn))' }}>{interactions.length}</span>
             </div>
             <div className="space-y-1">
               {interactions.map(i => {
                 const tc = TRIGGER_CONFIG[i.trigger];
-                const triggerColor = tc?.color || '#555';
+                const triggerColor = tc?.color || 'hsl(var(--studio-ink-3))';
                 const TriggerIcon = tc?.icon || Zap;
                 const isSelected = selectedId === i.id;
                 return (
                   <div key={i.id}
                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-all group"
-                    style={{ backgroundColor: isSelected ? `${triggerColor}06` : '#1a1a1a', border: `1px solid ${isSelected ? `${triggerColor}25` : '#222'}` }}
+                    style={{ backgroundColor: isSelected ? `${triggerColor}06` : 'hsl(var(--studio-panel))', border: `1px solid ${isSelected ? `${triggerColor}25` : 'hsl(var(--studio-raised))'}` }}
                     onClick={() => setSelectedId(i.id)}>
                     <button onClick={e => { e.stopPropagation(); updateInteraction(i.id, { enabled: !i.enabled }); }} className="p-0.5">
-                      {i.enabled ? <Eye className="h-3 w-3" style={{ color: '#22c55e' }} /> : <EyeOff className="h-3 w-3" style={{ color: '#555' }} />}
+                      {i.enabled ? <Eye className="h-3 w-3" style={{ color: 'hsl(var(--studio-ok))' }} /> : <EyeOff className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />}
                     </button>
                     <div className="w-4 h-4 rounded flex items-center justify-center shrink-0" style={{ backgroundColor: `${triggerColor}12`, border: `1px solid ${triggerColor}20` }}>
                       <TriggerIcon className="h-2.5 w-2.5" style={{ color: triggerColor }} />
                     </div>
-                    <span className="text-[10px] flex-1 truncate font-medium" style={{ color: isSelected ? '#ddd' : '#999' }}>{i.name}</span>
-                    <span className="text-[7px] tabular-nums" style={{ color: '#444' }}>{i.steps.length}s</span>
+                    <span className="text-[10px] flex-1 truncate font-medium" style={{ color: isSelected ? 'hsl(var(--studio-ink-2))' : 'hsl(var(--studio-ink-2))' }}>{i.name}</span>
+                    <span className="text-[7px] tabular-nums" style={{ color: 'hsl(var(--studio-hover))' }}>{i.steps.length}s</span>
                     <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={e => { e.stopPropagation(); duplicateInteraction(i); }} className="p-0.5 rounded hover:bg-white/5">
-                        <Copy className="h-2.5 w-2.5" style={{ color: '#555' }} />
+                        <Copy className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
                       </button>
                       <button onClick={e => { e.stopPropagation(); deleteInteraction(i.id); }} className="p-0.5 rounded hover:bg-red-500/10">
-                        <Trash2 className="h-2.5 w-2.5" style={{ color: '#555' }} />
+                        <Trash2 className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
                       </button>
                     </div>
                   </div>
@@ -413,33 +413,33 @@ export function InteractionsPanel() {
         {/* Editor */}
         {selected && (
           <div className="space-y-2">
-            <div className="rounded-lg p-2.5" style={{ backgroundColor: '#161616', border: '1px solid #1e1e1e' }}>
+            <div className="rounded-lg p-2.5" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
               <div className="mb-2">
-                <div className="text-[7px] uppercase tracking-wider mb-0.5 font-bold" style={{ color: '#555' }}>Name</div>
+                <div className="text-[7px] uppercase tracking-wider mb-0.5 font-bold" style={{ color: 'hsl(var(--studio-ink-3))' }}>Name</div>
                 <MiniInput value={selected.name} onChange={v => updateInteraction(selected.id, { name: v })} />
               </div>
 
               {/* Trigger selector */}
               <div className="mb-2">
-                <div className="text-[7px] uppercase tracking-wider mb-0.5 font-bold" style={{ color: '#555' }}>Trigger</div>
+                <div className="text-[7px] uppercase tracking-wider mb-0.5 font-bold" style={{ color: 'hsl(var(--studio-ink-3))' }}>Trigger</div>
                 <button onClick={() => setTriggerOpen(!triggerOpen)} className="w-full flex items-center justify-between p-1.5 rounded-md"
-                  style={{ backgroundColor: '#222', border: '1px solid #2a2a2a' }}>
+                  style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
                   <div className="flex items-center gap-1.5">
                     {(() => { const tc = TRIGGER_CONFIG[selected.trigger]; const Icon = tc?.icon || Zap; return (
                       <>
-                        <div className="w-4 h-4 rounded flex items-center justify-center" style={{ backgroundColor: `${tc?.color || '#555'}12` }}>
-                          <Icon className="h-2.5 w-2.5" style={{ color: tc?.color || '#555' }} />
+                        <div className="w-4 h-4 rounded flex items-center justify-center" style={{ backgroundColor: `${tc?.color || 'hsl(var(--studio-ink-3))'}12` }}>
+                          <Icon className="h-2.5 w-2.5" style={{ color: tc?.color || 'hsl(var(--studio-ink-3))' }} />
                         </div>
-                        <span className="text-[10px] font-medium" style={{ color: tc?.color || '#ddd' }}>{tc?.label || selected.trigger}</span>
+                        <span className="text-[10px] font-medium" style={{ color: tc?.color || 'hsl(var(--studio-ink-2))' }}>{tc?.label || selected.trigger}</span>
                       </>
                     ); })()}
                   </div>
-                  <ChevronDown className={`h-2.5 w-2.5 transition-transform ${triggerOpen ? '' : '-rotate-90'}`} style={{ color: '#444' }} />
+                  <ChevronDown className={`h-2.5 w-2.5 transition-transform ${triggerOpen ? '' : '-rotate-90'}`} style={{ color: 'hsl(var(--studio-hover))' }} />
                 </button>
                 <AnimatePresence>
                   {triggerOpen && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
-                      <div className="mt-1 rounded-lg p-1 space-y-0.5" style={{ backgroundColor: '#1a1a1a', border: '1px solid #222' }}>
+                      <div className="mt-1 rounded-lg p-1 space-y-0.5" style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))' }}>
                         {Object.entries(TRIGGER_CONFIG).map(([value, config]) => {
                           const Icon = config.icon;
                           const isActive = selected.trigger === value;
@@ -447,14 +447,14 @@ export function InteractionsPanel() {
                             <button key={value} onClick={() => { updateInteraction(selected.id, { trigger: value as Interaction['trigger'] }); setTriggerOpen(false); }}
                               className="w-full flex items-center gap-2 p-1.5 rounded-md transition-colors text-left"
                               style={{ backgroundColor: isActive ? `${config.color}08` : 'transparent' }}
-                              onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = '#222'; }}
+                              onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'hsl(var(--studio-raised))'; }}
                               onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'transparent'; }}>
                               <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ backgroundColor: `${config.color}12`, border: `1px solid ${config.color}20` }}>
-                                <Icon className="h-3 w-3" style={{ color: isActive ? config.color : '#666' }} />
+                                <Icon className="h-3 w-3" style={{ color: isActive ? config.color: 'hsl(var(--studio-ink-3))' }} />
                               </div>
                               <div>
-                                <div className="text-[10px] font-medium" style={{ color: isActive ? config.color : '#999' }}>{config.label}</div>
-                                <div className="text-[8px]" style={{ color: '#444' }}>{config.desc}</div>
+                                <div className="text-[10px] font-medium" style={{ color: isActive ? config.color: 'hsl(var(--studio-ink-2))' }}>{config.label}</div>
+                                <div className="text-[8px]" style={{ color: 'hsl(var(--studio-hover))' }}>{config.desc}</div>
                               </div>
                             </button>
                           );
@@ -468,12 +468,12 @@ export function InteractionsPanel() {
               {/* Loop toggle */}
               <div className="flex items-center justify-between py-1">
                 <div className="flex items-center gap-1.5">
-                  <RefreshCw className="h-3 w-3" style={{ color: selected.loop ? '#22c55e' : '#555' }} />
-                  <span className="text-[9px]" style={{ color: '#888' }}>Loop animation</span>
+                  <RefreshCw className="h-3 w-3" style={{ color: selected.loop ? 'hsl(var(--studio-ok))' : 'hsl(var(--studio-ink-3))' }} />
+                  <span className="text-[9px]" style={{ color: 'hsl(var(--studio-ink-2))' }}>Loop animation</span>
                 </div>
                 <button onClick={() => updateInteraction(selected.id, { loop: !selected.loop })}
                   className="w-7 h-4 rounded-full transition-colors flex items-center"
-                  style={{ backgroundColor: selected.loop ? '#22c55e' : '#333', padding: '2px' }}>
+                  style={{ backgroundColor: selected.loop ? 'hsl(var(--studio-ok))' : 'hsl(var(--studio-line))', padding: '2px' }}>
                   <div className="w-3 h-3 rounded-full bg-white transition-transform" style={{ transform: selected.loop ? 'translateX(12px)' : 'translateX(0)' }} />
                 </button>
               </div>
@@ -485,11 +485,11 @@ export function InteractionsPanel() {
             {/* Steps */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <Settings className="h-3 w-3" style={{ color: '#444' }} />
-                <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#555' }}>Steps</span>
+                <Settings className="h-3 w-3" style={{ color: 'hsl(var(--studio-hover))' }} />
+                <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'hsl(var(--studio-ink-3))' }}>Steps</span>
               </div>
               <button onClick={addStep} className="flex items-center gap-1 text-[8px] px-2 py-1 rounded-md font-semibold"
-                style={{ backgroundColor: 'rgba(0,115,230,0.08)', color: '#0073E6', border: '1px solid rgba(0,115,230,0.15)' }}>
+                style={{ backgroundColor: 'hsl(var(--studio-accent) / 0.08)', color: 'hsl(var(--studio-accent))', border: '1px solid hsl(var(--studio-accent) / 0.15)' }}>
                 <Plus className="h-2.5 w-2.5" /> Add
               </button>
             </div>
@@ -508,8 +508,8 @@ export function InteractionsPanel() {
             <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.06), rgba(245,158,11,0.02))', border: '1px solid rgba(245,158,11,0.08)' }}>
               <Zap className="w-6 h-6" style={{ color: 'rgba(245,158,11,0.3)' }} />
             </div>
-            <p className="text-[11px] font-medium" style={{ color: '#555' }}>No interactions yet</p>
-            <p className="text-[9px] mt-1" style={{ color: '#444' }}>Select an element & add an interaction</p>
+            <p className="text-[11px] font-medium" style={{ color: 'hsl(var(--studio-ink-3))' }}>No interactions yet</p>
+            <p className="text-[9px] mt-1" style={{ color: 'hsl(var(--studio-hover))' }}>Select an element & add an interaction</p>
           </div>
         )}
       </div>

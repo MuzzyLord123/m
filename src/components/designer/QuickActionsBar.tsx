@@ -14,10 +14,10 @@ import { getStyleClipboard } from './EditorContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const TYPE_COLORS: Record<string, string> = {
-  section: '#8b5cf6', container: '#6366f1', columns: '#3b82f6', grid: '#0ea5e9',
-  heading: '#f59e0b', text: '#a3a3a3', button: '#22c55e', image: '#ec4899',
-  video: '#f43f5e', card: '#a855f7', form: '#14b8a6', navbar: '#06b6d4',
-  footer: '#64748b', input: '#f59e0b', badge: '#f97316', quote: '#8b5cf6', link: '#3b82f6',
+  section: 'hsl(var(--studio-ink-3))', container: 'hsl(var(--studio-ink-3))', columns: 'hsl(var(--studio-accent))', grid: 'hsl(var(--studio-accent))',
+  heading: 'hsl(var(--studio-warn))', text: 'hsl(var(--studio-ink-2))', button: 'hsl(var(--studio-ok))', image: 'hsl(var(--studio-ink-3))',
+  video: 'hsl(var(--studio-ink-3))', card: 'hsl(var(--studio-ink-3))', form: 'hsl(var(--studio-ink-3))', navbar: 'hsl(var(--studio-ink-3))',
+  footer: 'hsl(var(--studio-ink-3))', input: 'hsl(var(--studio-warn))', badge: 'hsl(var(--studio-warn))', quote: 'hsl(var(--studio-ink-3))', link: 'hsl(var(--studio-accent))',
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -57,7 +57,7 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
 
   const isContainer = ['section', 'container', 'columns', 'grid', 'navbar', 'footer', 'card'].includes(selectedElement.type);
   const isText = ['heading', 'text', 'button', 'badge', 'link', 'quote'].includes(selectedElement.type);
-  const typeColor = TYPE_COLORS[selectedElement.type] || '#555';
+  const typeColor = TYPE_COLORS[selectedElement.type] || 'hsl(var(--studio-ink-3))';
 
   type ActionItem = { icon: any; label: string; onClick: () => void; active?: boolean; danger?: boolean; disabled?: boolean; color?: string } | 'sep';
 
@@ -72,8 +72,8 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
 
   if (isContainer) {
     actions.push(
-      { icon: Rows3, label: 'Vertical', onClick: () => updateStyle('flexDirection', 'column'), active: currentStyles?.flexDirection === 'column' || !currentStyles?.flexDirection, color: '#8b5cf6' },
-      { icon: Columns3, label: 'Horizontal', onClick: () => updateStyle('flexDirection', 'row'), active: currentStyles?.flexDirection === 'row', color: '#3b82f6' },
+      { icon: Rows3, label: 'Vertical', onClick: () => updateStyle('flexDirection', 'column'), active: currentStyles?.flexDirection === 'column' || !currentStyles?.flexDirection, color: 'hsl(var(--studio-ink-3))' },
+      { icon: Columns3, label: 'Horizontal', onClick: () => updateStyle('flexDirection', 'row'), active: currentStyles?.flexDirection === 'row', color: 'hsl(var(--studio-accent))' },
       'sep',
       { icon: AlignStartVertical, label: 'Start', onClick: () => updateStyle('alignItems', 'flex-start'), active: currentStyles?.alignItems === 'flex-start' },
       { icon: AlignCenterVertical, label: 'Center', onClick: () => updateStyle('alignItems', 'center'), active: currentStyles?.alignItems === 'center' },
@@ -96,9 +96,9 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
       { icon: AlignRight, label: 'Right', onClick: () => updateStyle('textAlign', 'right'), active: currentStyles?.textAlign === 'right' },
       'sep',
       // Font size adjust
-      { icon: Minus, label: '−2px font', onClick: () => { const cur = parseInt(currentStyles?.fontSize as string) || 16; updateStyle('fontSize', `${Math.max(8, cur - 2)}px`); }, color: '#f59e0b' },
-      { icon: Type, label: `Font: ${currentStyles?.fontSize || '16px'}`, onClick: () => dispatch({ type: 'SET_RIGHT_TAB', payload: 'style' }), color: '#f59e0b' },
-      { icon: Plus, label: '+2px font', onClick: () => { const cur = parseInt(currentStyles?.fontSize as string) || 16; updateStyle('fontSize', `${cur + 2}px`); }, color: '#f59e0b' },
+      { icon: Minus, label: '−2px font', onClick: () => { const cur = parseInt(currentStyles?.fontSize as string) || 16; updateStyle('fontSize', `${Math.max(8, cur - 2)}px`); }, color: 'hsl(var(--studio-warn))' },
+      { icon: Type, label: `Font: ${currentStyles?.fontSize || '16px'}`, onClick: () => dispatch({ type: 'SET_RIGHT_TAB', payload: 'style' }), color: 'hsl(var(--studio-warn))' },
+      { icon: Plus, label: '+2px font', onClick: () => { const cur = parseInt(currentStyles?.fontSize as string) || 16; updateStyle('fontSize', `${cur + 2}px`); }, color: 'hsl(var(--studio-warn))' },
       'sep',
     );
   }
@@ -106,23 +106,23 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
   // Border radius presets
   const currentRadius = currentStyles?.borderRadius as string || '0';
   actions.push(
-    { icon: Square, label: 'Sharp (0)', onClick: () => updateStyle('borderRadius', '0px'), active: currentRadius === '0px' || currentRadius === '0', color: '#64748b' },
-    { icon: RectangleHorizontal, label: 'Rounded (8px)', onClick: () => updateStyle('borderRadius', '8px'), active: currentRadius === '8px', color: '#64748b' },
-    { icon: Circle, label: 'Pill (999px)', onClick: () => updateStyle('borderRadius', '999px'), active: currentRadius === '999px', color: '#64748b' },
+    { icon: Square, label: 'Sharp (0)', onClick: () => updateStyle('borderRadius', '0px'), active: currentRadius === '0px' || currentRadius === '0', color: 'hsl(var(--studio-ink-3))' },
+    { icon: RectangleHorizontal, label: 'Rounded (8px)', onClick: () => updateStyle('borderRadius', '8px'), active: currentRadius === '8px', color: 'hsl(var(--studio-ink-3))' },
+    { icon: Circle, label: 'Pill (999px)', onClick: () => updateStyle('borderRadius', '999px'), active: currentRadius === '999px', color: 'hsl(var(--studio-ink-3))' },
     'sep',
   );
 
   // Spacing quick-adjust
   actions.push(
-    { icon: Minus, label: '−4px padding', onClick: () => adjustSpacing('padding', -4), color: '#06b6d4' },
-    { icon: Plus, label: '+4px padding', onClick: () => adjustSpacing('padding', 4), color: '#06b6d4' },
+    { icon: Minus, label: '−4px padding', onClick: () => adjustSpacing('padding', -4), color: 'hsl(var(--studio-ink-3))' },
+    { icon: Plus, label: '+4px padding', onClick: () => adjustSpacing('padding', 4), color: 'hsl(var(--studio-ink-3))' },
     'sep',
   );
 
   // Opacity quick-adjust
   const currentOpacity = parseFloat(currentStyles?.opacity as string) ?? 1;
   actions.push(
-    { icon: Eye, label: `Opacity: ${Math.round(currentOpacity * 100)}%`, onClick: () => updateStyle('opacity', currentOpacity >= 0.9 ? '0.5' : currentOpacity <= 0.3 ? '1' : '0.25'), color: '#06b6d4',
+    { icon: Eye, label: `Opacity: ${Math.round(currentOpacity * 100)}%`, onClick: () => updateStyle('opacity', currentOpacity >= 0.9 ? '0.5' : currentOpacity <= 0.3 ? '1' : '0.25'), color: 'hsl(var(--studio-ink-3))',
       active: currentOpacity < 1 },
     'sep',
   );
@@ -132,7 +132,7 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
     { icon: ClipboardPaste, label: 'Paste styles (⌘⌥V)', onClick: pasteStyles, disabled: !getStyleClipboard() },
     'sep',
     { icon: selectedElement.hidden ? EyeOff : Eye, label: selectedElement.hidden ? 'Show' : 'Hide', onClick: () => dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, updates: { hidden: !selectedElement.hidden } } }), active: selectedElement.hidden },
-    { icon: selectedElement.locked ? Unlock : Lock, label: selectedElement.locked ? 'Unlock' : 'Lock', onClick: () => dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, updates: { locked: !selectedElement.locked } } }), active: selectedElement.locked, color: '#f59e0b' },
+    { icon: selectedElement.locked ? Unlock : Lock, label: selectedElement.locked ? 'Unlock' : 'Lock', onClick: () => dispatch({ type: 'UPDATE_ELEMENT', payload: { id: selectedElement.id, updates: { locked: !selectedElement.locked } } }), active: selectedElement.locked, color: 'hsl(var(--studio-warn))' },
     'sep',
     { icon: Palette, label: 'Style panel', onClick: () => dispatch({ type: 'SET_RIGHT_TAB', payload: 'style' }) },
     { icon: Sparkles, label: 'Animate', onClick: () => dispatch({ type: 'SET_RIGHT_TAB', payload: 'animation' }) },
@@ -180,11 +180,11 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
               style={{ backgroundColor: 'rgba(6,182,212,0.05)' }}
               title={`Padding: ${currentPadding} | Gap: ${currentGap}`}
             >
-              <Move className="h-2.5 w-2.5" style={{ color: '#06b6d4' }} />
-              <span className="text-[8px] font-mono font-semibold" style={{ color: '#06b6d4' }}>
+              <Move className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />
+              <span className="text-[8px] font-mono font-semibold" style={{ color: 'hsl(var(--studio-ink-3))' }}>
                 P:{typeof currentPadding === 'string' ? currentPadding.replace(/px/g, '') : currentPadding}
               </span>
-              <span className="text-[8px] font-mono" style={{ color: '#0ea5e9' }}>
+              <span className="text-[8px] font-mono" style={{ color: 'hsl(var(--studio-accent))' }}>
                 G:{typeof currentGap === 'string' ? currentGap.replace(/px/g, '') : currentGap}
               </span>
             </div>
@@ -198,7 +198,7 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
               return <div key={`sep-${i}`} className="w-px h-5 mx-0.5 shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }} />;
             }
             const Icon = action.icon;
-            const activeColor = action.color || '#0073E6';
+            const activeColor = action.color || 'hsl(var(--studio-accent))';
             return (
               <Tooltip key={i}>
                 <TooltipTrigger asChild>
@@ -207,19 +207,19 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
                     disabled={action.disabled}
                     className="h-7 w-7 flex items-center justify-center rounded-lg transition-all duration-100 shrink-0 disabled:opacity-20"
                     style={{
-                      color: action.danger ? '#ef4444' : action.active ? activeColor : '#666',
+                      color: action.danger ? 'hsl(var(--studio-risk))' : action.active ? activeColor: 'hsl(var(--studio-ink-3))',
                       backgroundColor: action.active ? `${activeColor}0d` : 'transparent',
                     }}
                     onMouseEnter={e => {
                       if (!action.active) {
                         e.currentTarget.style.backgroundColor = action.danger ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.06)';
-                        e.currentTarget.style.color = action.danger ? '#ef4444' : '#fff';
+                        e.currentTarget.style.color = action.danger ? 'hsl(var(--studio-risk))' : 'hsl(var(--studio-ink))';
                         e.currentTarget.style.transform = 'scale(1.1)';
                       }
                     }}
                     onMouseLeave={e => {
                       e.currentTarget.style.backgroundColor = action.active ? `${activeColor}0d` : 'transparent';
-                      e.currentTarget.style.color = action.danger ? '#ef4444' : action.active ? activeColor : '#666';
+                      e.currentTarget.style.color = action.danger ? 'hsl(var(--studio-risk))' : action.active ? activeColor: 'hsl(var(--studio-ink-3))';
                       e.currentTarget.style.transform = 'scale(1)';
                     }}
                   >
@@ -229,7 +229,7 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
                 <TooltipContent
                   side="top"
                   className="text-[10px] px-2.5 py-1 rounded-lg"
-                  style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#ccc', boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}
+                  style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))', boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}
                 >
                   {action.label}
                 </TooltipContent>

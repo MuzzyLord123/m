@@ -82,16 +82,16 @@ export default function WebsiteEditor() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#1e1e1e' }}>
+      <div className="studio h-screen w-screen flex flex-col overflow-hidden">
         {/* Skeleton top bar */}
-        <div className="h-12 flex items-center px-3 gap-3 shrink-0" style={{ backgroundColor: '#141414', borderBottom: '1px solid #252525' }}>
-          <div className="w-6 h-6 rounded-md animate-pulse" style={{ backgroundColor: '#252525' }} />
-          <div className="w-px h-4" style={{ backgroundColor: '#252525' }} />
-          <div className="w-24 h-4 rounded animate-pulse" style={{ backgroundColor: '#252525' }} />
+        <div className="h-12 flex items-center px-3 gap-3 shrink-0" style={{ backgroundColor: 'hsl(var(--studio-panel))', borderBottom: '1px solid hsl(var(--studio-line))' }}>
+          <div className="w-6 h-6 rounded-md animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
+          <div className="w-px h-4" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
+          <div className="w-24 h-4 rounded animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
           <div className="flex-1" />
           <div className="flex gap-1.5">
             {[56, 56, 56].map((w, i) => (
-              <div key={i} className="h-7 rounded-md animate-pulse" style={{ width: w, backgroundColor: '#252525', animationDelay: `${i * 100}ms` }} />
+              <div key={i} className="h-7 rounded-md animate-pulse" style={{ width: w, backgroundColor: 'hsl(var(--studio-raised))', animationDelay: `${i * 100}ms` }} />
             ))}
           </div>
           <div className="flex-1" />
@@ -100,45 +100,45 @@ export default function WebsiteEditor() {
         {/* Skeleton body */}
         <div className="flex flex-1">
           {/* Left panel skeleton */}
-          <div className="w-[220px] shrink-0 p-3 space-y-3" style={{ backgroundColor: '#161616', borderRight: '1px solid #252525' }}>
+          <div className="w-[220px] shrink-0 p-3 space-y-3" style={{ backgroundColor: '#161616', borderRight: '1px solid hsl(var(--studio-line))' }}>
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-8 rounded-lg animate-pulse" style={{ backgroundColor: '#1e1e1e', animationDelay: `${i * 80}ms` }} />
+              <div key={i} className="h-8 rounded-lg animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-panel))', animationDelay: `${i * 80}ms` }} />
             ))}
           </div>
           {/* Canvas skeleton */}
-          <div className="flex-1 flex items-start justify-center pt-16" style={{ backgroundColor: '#1e1e1e' }}>
+          <div className="flex-1 flex items-start justify-center pt-16" style={{ backgroundColor: 'hsl(var(--studio-panel))' }}>
             <div className="flex flex-col items-center gap-4">
-              <div className="w-[600px] rounded-xl overflow-hidden" style={{ backgroundColor: '#222', border: '1px solid #2a2a2a' }}>
+              <div className="w-[600px] rounded-xl overflow-hidden" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
                 <div className="h-10 animate-pulse" style={{ backgroundColor: '#282828' }} />
                 <div className="p-6 space-y-4">
-                  <div className="h-6 w-3/4 rounded animate-pulse" style={{ backgroundColor: '#2a2a2a' }} />
-                  <div className="h-4 w-1/2 rounded animate-pulse" style={{ backgroundColor: '#252525', animationDelay: '100ms' }} />
-                  <div className="h-32 rounded-lg animate-pulse" style={{ backgroundColor: '#252525', animationDelay: '200ms' }} />
+                  <div className="h-6 w-3/4 rounded animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
+                  <div className="h-4 w-1/2 rounded animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-raised))', animationDelay: '100ms' }} />
+                  <div className="h-32 rounded-lg animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-raised))', animationDelay: '200ms' }} />
                   <div className="flex gap-3">
                     <div className="h-8 w-24 rounded-lg animate-pulse" style={{ backgroundColor: '#1a3a5c', animationDelay: '300ms' }} />
-                    <div className="h-8 w-20 rounded-lg animate-pulse" style={{ backgroundColor: '#252525', animationDelay: '350ms' }} />
+                    <div className="h-8 w-20 rounded-lg animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-raised))', animationDelay: '350ms' }} />
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-2">
-                <div className="w-5 h-5 border-2 border-[#333] border-t-[#0073E6] rounded-full animate-spin" />
-                <span className="text-[#666] text-[11px] font-medium tracking-wide">Preparing canvas…</span>
+                <div className="w-5 h-5 border-2 border-[hsl(var(--studio-line))] border-t-[hsl(var(--studio-accent))] rounded-full animate-spin" />
+                <span className="text-[hsl(var(--studio-ink-3))] text-[11px] font-medium tracking-wide">Preparing canvas…</span>
               </div>
             </div>
           </div>
           {/* Right panel skeleton */}
-          <div className="w-[280px] shrink-0 p-3 space-y-3" style={{ backgroundColor: '#161616', borderLeft: '1px solid #252525' }}>
-            <div className="h-5 w-16 rounded animate-pulse" style={{ backgroundColor: '#252525' }} />
+          <div className="w-[280px] shrink-0 p-3 space-y-3" style={{ backgroundColor: '#161616', borderLeft: '1px solid hsl(var(--studio-line))' }}>
+            <div className="h-5 w-16 rounded animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-raised))' }} />
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-7 rounded-lg animate-pulse" style={{ backgroundColor: '#1e1e1e', animationDelay: `${i * 60}ms` }} />
+              <div key={i} className="h-7 rounded-lg animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-panel))', animationDelay: `${i * 60}ms` }} />
             ))}
           </div>
         </div>
         {/* Skeleton status bar */}
-        <div className="h-7 flex items-center px-3 gap-2" style={{ backgroundColor: '#0c0c0c', borderTop: '1px solid #1a1a1a' }}>
-          <div className="w-32 h-3 rounded animate-pulse" style={{ backgroundColor: '#1a1a1a' }} />
+        <div className="h-7 flex items-center px-3 gap-2" style={{ backgroundColor: '#0c0c0c', borderTop: '1px solid hsl(var(--studio-line))' }}>
+          <div className="w-32 h-3 rounded animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-panel))' }} />
           <div className="flex-1" />
-          <div className="w-16 h-3 rounded animate-pulse" style={{ backgroundColor: '#1a1a1a' }} />
+          <div className="w-16 h-3 rounded animate-pulse" style={{ backgroundColor: 'hsl(var(--studio-panel))' }} />
         </div>
       </div>
     );
@@ -171,10 +171,10 @@ export default function WebsiteEditor() {
         initial={{ opacity: 0, scale: 1.02 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="h-screen w-screen flex flex-col overflow-hidden"
+        className="studio h-screen w-screen flex flex-col overflow-hidden"
         style={{
-          backgroundColor: '#1e1e1e',
-          color: '#e0e0e0',
+          backgroundColor: 'hsl(var(--studio-panel))',
+          color: 'hsl(var(--studio-ink))',
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
           fontSize: '12px',
         }}
@@ -205,7 +205,7 @@ export default function WebsiteEditor() {
           <ResizablePanel defaultSize={28} minSize={24} maxSize={34}>
             <EditorLeftPanel siteId={siteId} />
           </ResizablePanel>
-          <ResizableHandle className="w-[1px] bg-[#2a2a2a] hover:bg-[#0073E6] transition-colors" />
+          <ResizableHandle className="w-[1px] bg-[hsl(var(--studio-raised))] hover:bg-[hsl(var(--studio-accent))] transition-colors" />
           <ResizablePanel defaultSize={58}>
             <div className="flex flex-col h-full relative">
               <EditorCanvas />
@@ -214,7 +214,7 @@ export default function WebsiteEditor() {
               <EditorStatusBar />
             </div>
           </ResizablePanel>
-          <ResizableHandle className="w-[1px] bg-[#2a2a2a] hover:bg-[#0073E6] transition-colors" />
+          <ResizableHandle className="w-[1px] bg-[hsl(var(--studio-raised))] hover:bg-[hsl(var(--studio-accent))] transition-colors" />
           <ResizablePanel defaultSize={26} minSize={18} maxSize={35}>
             <EditorRightPanel siteId={siteId} />
           </ResizablePanel>
