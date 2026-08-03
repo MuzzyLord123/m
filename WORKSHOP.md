@@ -147,7 +147,7 @@ The compiler is pure and can be exercised without Deno. Two suites exist:
 
 - **`test-compiler.mjs`** — strips the Deno bits, transpiles, and asserts on
   the generated HTML, sitemap, robots, 404, choice controls and the
-  minifiers (60 assertions).
+  minifiers, and that rich elements reach the published page (67 assertions).
 - **`test-published-site.mjs`** — compiles a site, serves it, and drives it
   in Chromium: submits a form with every field type, checks the honeypot,
   forces a rate-limit error, and confirms in-page anchors scroll
