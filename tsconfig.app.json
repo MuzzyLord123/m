@@ -19,7 +19,8 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ]
+      ],
+      "@site/*": ["./supabase/functions/_shared/site/*"]
     },
     "skipLibCheck": true,
     "strict": false,

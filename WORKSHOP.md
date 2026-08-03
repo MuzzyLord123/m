@@ -3,6 +3,18 @@
 The Workshop (`/lounge/website-designer`) is the part of Quooro where a
 customer builds and publishes a website. This is the honest state of it.
 
+## One compiler
+
+The editor and the publish path run the **same** code, in
+`supabase/functions/_shared/site/`. They used to run two different
+compilers, and the weaker one ran on publish: 75 of the 102 element types -
+accordions, tabs, carousels, pricing cards, timelines, social icons -
+rendered correctly in your exported code and came out as empty `<div>`s on
+the site that actually went live.
+
+The editor reaches it through the `@site` alias; `deploy-site` imports it
+relatively. There is no second implementation to drift.
+
 ## The publish path
 
 A published site is a set of static files compiled by the `deploy-site`
@@ -125,10 +137,9 @@ Stated plainly so nobody assumes otherwise:
   timer, so a customer who fixes their DNS overnight must press the button.
 - **HTML is not minified.** Only CSS and JS are. Whitespace between inline
   elements is significant, and gzip on the wire recovers most of it anyway.
-- **Rich element types** beyond the core set (carousels, accordions, charts,
-  product grids) still fall back to a plain `div` in the compiled output.
-  They render in the editor but do not carry their behaviour to the
-  published site.
+- **Charts** (bar, line, pie) still render as a styled container rather than
+  a drawn chart on the published page. Everything else in the library now
+  carries its real markup and behaviour.
 
 ## Verifying changes to the compiler
 

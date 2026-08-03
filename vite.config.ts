@@ -15,6 +15,8 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // One site compiler, shared by the editor and the publish function.
+      "@site": path.resolve(__dirname, "./supabase/functions/_shared/site"),
     },
   },
   build: {

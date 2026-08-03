@@ -1,20 +1,37 @@
 /**
- * Compiles a site with the real deploy-site compiler, serves the output as
- * a static site, and drives it in a browser: does the form actually submit,
- * does the honeypot work, do errors surface, do anchors scroll?
+ * Compiles a site with the real publish pipeline, serves the output, and
+ * drives it in a browser: does the form actually submit, does the honeypot
+ * work, do errors surface, do anchors scroll?
+ *
+ * The element rendering now comes from the shared compiler in
+ * supabase/functions/_shared/site, so this exercises exactly the code the
+ * editor's own export runs.
  */
 import { readFileSync } from 'node:fs';
 import http from 'node:http';
 import { transformSync } from '/home/user/m/node_modules/esbuild/lib/main.js';
 import { chromium } from '/home/user/m/node_modules/playwright-core/index.mjs';
 
-const SRC = '/home/user/m/supabase/functions/deploy-site/index.ts';
-let src = readFileSync(SRC, 'utf8').replace(/^import .*$/gm, '');
-const a = src.indexOf('serve(async (req)'), b = src.indexOf('// ─── Types ─');
-src = src.slice(0, a) + src.slice(b);
-const js = transformSync(src, { loader: 'ts', format: 'cjs', target: 'es2022' }).code;
+const SHARED = '/home/user/m/supabase/functions/_shared/site';
+const strip = f => readFileSync(`${SHARED}/${f}`, 'utf8')
+  .replace(/^import .*$/gm, '').replace(/^export /gm, '');
+const exporterJs = transformSync(
+  strip('cssCompiler.ts') + '\n' + strip('jsGenerator.ts') + '\n' + strip('htmlExporter.ts') +
+  '\nmodule.exports = { generateBodyHTML, buildCSS, generateJS };',
+  { loader: 'ts', format: 'cjs', target: 'es2022' }).code;
+const em = { exports: {} };
+new Function('module', 'exports', 'require', exporterJs)(em, em.exports, () => ({}));
+const { generateBodyHTML, buildCSS, generateJS } = em.exports;
+
+let deploySrc = readFileSync('/home/user/m/supabase/functions/deploy-site/index.ts', 'utf8')
+  .replace(/^import .*$/gm, '');
+const a = deploySrc.indexOf('serve(async (req)'), b = deploySrc.indexOf('// ─── Types ─');
+deploySrc = deploySrc.slice(0, a) + deploySrc.slice(b);
+const deployJs = transformSync(deploySrc, { loader: 'ts', format: 'cjs', target: 'es2022' }).code;
 const m = { exports: {} };
-new Function('module', 'exports', 'require', js + '\nmodule.exports={compilePages};')(m, m.exports, () => ({}));
+new Function('module', 'exports', 'require', 'crypto', 'generateBodyHTML', 'buildCSS', 'generateJS',
+  deployJs + '\nmodule.exports={compilePages};')
+  (m, m.exports, () => ({}), globalThis.crypto, generateBodyHTML, buildCSS, generateJS);
 
 const SITE_ID = '11111111-2222-3333-4444-555555555555';
 const SUPA = 'https://ref.supabase.co';

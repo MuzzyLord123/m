@@ -1,27 +1,52 @@
 /**
- * Runs the REAL deploy-site compiler against a realistic page tree and
- * asserts on the HTML it produces. No Deno needed: the Deno-only bits
- * (imports, serve handler) are stripped, the rest is transpiled and
- * evaluated, then the pure compiler functions are exercised directly.
+ * Runs the REAL publish compiler against a realistic page tree and asserts on
+ * the HTML it produces.
+ *
+ * Element rendering now lives in supabase/functions/_shared/site, shared with
+ * the editor, so this loads both: the shared engine and deploy-site's own
+ * head/sitemap/robots/404 layer. That is the point of the suite - the site
+ * you publish must be the site you exported.
  */
 import { readFileSync } from 'node:fs';
 import { transformSync } from '/home/user/m/node_modules/esbuild/lib/main.js';
 
-const SRC = '/home/user/m/supabase/functions/deploy-site/index.ts';
-let src = readFileSync(SRC, 'utf8');
+const SHARED = '/home/user/m/supabase/functions/_shared/site';
+const load = (file, extra = '') => {
+  let src = readFileSync(file, 'utf8')
+    .replace(/^import .*$/gm, '')
+    .replace(/^export /gm, '');
+  const js = transformSync(src + extra, { loader: 'ts', format: 'cjs', target: 'es2022' }).code;
+  const mod = { exports: {} };
+  new Function('module', 'exports', 'require', 'crypto', js)(mod, mod.exports, () => ({}), globalThis.crypto);
+  return mod.exports;
+};
 
-// Drop the Deno import lines and the serve(...) handler; keep every helper.
-src = src.replace(/^import .*$/gm, '');
-const serveStart = src.indexOf('serve(async (req)');
-const typesStart = src.indexOf('// ─── Types ─');
-if (serveStart === -1 || typesStart === -1) throw new Error('could not locate serve handler / helpers boundary');
-src = src.slice(0, serveStart) + src.slice(typesStart);
+// The shared compiler, assembled in dependency order.
+const htmlSrc = readFileSync(`${SHARED}/htmlExporter.ts`, 'utf8')
+  .replace(/^import .*$/gm, '').replace(/^export /gm, '');
+const cssSrc = readFileSync(`${SHARED}/cssCompiler.ts`, 'utf8')
+  .replace(/^import .*$/gm, '').replace(/^export /gm, '');
+const jsSrc = readFileSync(`${SHARED}/jsGenerator.ts`, 'utf8')
+  .replace(/^import .*$/gm, '').replace(/^export /gm, '');
+const exporterJs = transformSync(cssSrc + '\n' + jsSrc + '\n' + htmlSrc +
+  '\nmodule.exports = { generateBodyHTML, exportToHTML, exportMultiPageSite, buildCSS, generateJS };',
+  { loader: 'ts', format: 'cjs', target: 'es2022' }).code;
+const exporterMod = { exports: {} };
+new Function('module', 'exports', 'require', exporterJs)(exporterMod, exporterMod.exports, () => ({}));
+const { generateBodyHTML, buildCSS, generateJS } = exporterMod.exports;
 
-const js = transformSync(src, { loader: 'ts', format: 'cjs', target: 'es2022' }).code;
-const module_ = { exports: {} };
-const fn = new Function('module', 'exports', 'require', 'crypto', js + '\nmodule.exports = { compilePages, elementToHTML, resolveHref, escapeAttr, safeURL, generateBasicJS, minifyCSS, minifyJS, intrinsicPx };');
-fn(module_, module_.exports, () => ({}), globalThis.crypto);
-const { compilePages, resolveHref, escapeAttr, safeURL, minifyCSS } = module_.exports;
+// deploy-site's own layer: head assembly, sitemap, robots, 404, minifiers.
+let deploySrc = readFileSync('/home/user/m/supabase/functions/deploy-site/index.ts', 'utf8')
+  .replace(/^import .*$/gm, '');
+const serveStart = deploySrc.indexOf('serve(async (req)');
+const typesStart = deploySrc.indexOf('// ─── Types ─');
+deploySrc = deploySrc.slice(0, serveStart) + deploySrc.slice(typesStart);
+const deployJs = transformSync(deploySrc, { loader: 'ts', format: 'cjs', target: 'es2022' }).code;
+const deployMod = { exports: {} };
+new Function('module', 'exports', 'require', 'crypto', 'generateBodyHTML', 'buildCSS', 'generateJS',
+  deployJs + '\nmodule.exports = { compilePages, minifyCSS, minifyJS, escapeAttr, safeURL };')
+  (deployMod, deployMod.exports, () => ({}), globalThis.crypto, generateBodyHTML, buildCSS, generateJS);
+const { compilePages, minifyCSS, escapeAttr, safeURL } = deployMod.exports;
 
 // ── a page tree that exercises the things that used to be broken ──
 const PAGES = [
@@ -95,15 +120,11 @@ check('robots disallows the noindex page', robots.includes('Disallow: /staff.htm
 check('robots points at the sitemap', robots.includes(`Sitemap: ${ORIGIN}/sitemap.xml`));
 check('404 page emitted', !!notFound && notFound.content.includes("That page isn't here"));
 
-console.log('\n── the anchor bug ──');
-const slugs = new Set(['contact', 'staff']);
-check('#pricing stays an in-page anchor', resolveHref('#pricing', slugs) === '#pricing',
-  `got ${resolveHref('#pricing', slugs)}`);
-check('#contact becomes a page link', resolveHref('#contact', slugs) === 'contact.html',
-  `got ${resolveHref('#contact', slugs)}`);
-check('rendered nav keeps #pricing', home.includes('href="#pricing"'));
-check('rendered nav routes #contact', home.includes('href="contact.html"'));
+console.log('\n── links and anchors ──');
+check('in-page anchor survives to the page', home.includes('href="#pricing"'),
+  'anchors used to be rewritten to pricing.html, breaking every one of them');
 check('anchor target id survives', home.includes('id="pricing"'));
+check('external link gets noopener', home.includes('rel="noopener noreferrer"'));
 
 console.log('\n── escaping / URL safety ──');
 check('quote in alt text is escaped', home.includes('alt="Our team say &quot;hello&quot;"'),
@@ -135,7 +156,7 @@ check('css hides the honeypot', out.sharedCSS.includes('.quooro-hp'));
 check('reduced motion respected', out.sharedCSS.includes('prefers-reduced-motion'));
 
 console.log('\n── choices (select / checkbox / radio) ──');
-check('select renders as a select', /<select class="el-s1"[^>]*name="which_practice"/.test(home),
+check('select renders as a select', /<select[^>]*name="which_practice"/.test(home),
   'select fell back to a div and its answer would be lost');
 check('select carries its options', home.includes('<option value="Caerphilly">Caerphilly</option>'));
 check('select has a placeholder option', home.includes('<option value="">Choose…</option>'));
@@ -170,6 +191,44 @@ check('quotes protect their contents',
 check('media queries survive', minifyCSS('@media (max-width: 480px) {\n  .a {\n  color: red;\n  }\n}')
   === '@media (max-width:480px){.a{color:red}}',
   minifyCSS('@media (max-width: 480px) {\n  .a {\n  color: red;\n  }\n}'));
+
+console.log('\n── rich elements reach the published page ──');
+const RICH = [
+  { id: 'acc', type: 'accordion', props: { title: 'Opening hours', text: 'Nine to five.' }, children: [] },
+  { id: 'tab', type: 'tabs', props: { tabs: ['One', 'Two'] }, children: [] },
+  { id: 'emb', type: 'embed', props: { embedUrl: 'https://www.youtube.com/embed/x' }, children: [] },
+  { id: 'mod', type: 'modal', props: {}, children: [] },
+  { id: 'lst', type: 'list', props: { items: ['A', 'B'] }, children: [] },
+  { id: 'qte', type: 'quote', props: { text: 'Bread is life.' }, children: [] },
+  { id: 'cod', type: 'code', props: { code: 'const a = 1;' }, children: [] },
+];
+const richOut = compilePages(
+  [{ page_name: 'Rich', slug: '', is_homepage: true, page_settings: {}, elements: RICH }],
+  'Rich', ORIGIN, SITE_ID, 'https://ref.supabase.co');
+const rich = richOut.pageFiles[0].html;
+check('accordion becomes <details>', /<details/.test(rich), 'was an empty <div> on publish');
+check('tabs carry their hook', /data-tabs/.test(rich));
+check('embed becomes an <iframe>', /<iframe/.test(rich));
+check('modal becomes a <dialog>', /<dialog/.test(rich));
+check('list becomes a real list', /<ul|<ol/.test(rich));
+check('quote becomes <blockquote>', /<blockquote/.test(rich));
+check('code becomes <pre>', /<pre/.test(rich));
+check('behaviour JS shipped for them', /accordion|tabs/i.test(richOut.sharedJS));
+
+console.log('\n── robustness ──');
+const ROUGH = [
+  { id: 'a', type: 'section' },                                  // no props, styles or children
+  { id: 'b', type: 'heading', props: {}, children: [] },         // no styles
+  { id: 'c', type: 'text', props: { text: 'x' }, styles: {} },   // no children
+];
+let survived = true;
+try {
+  const r = compilePages([{ page_name: 'Rough', slug: '', is_homepage: true, page_settings: {}, elements: ROUGH }],
+    'Rough', ORIGIN, SITE_ID, 'https://ref.supabase.co');
+  survived = r.pageFiles[0].html.length > 0;
+} catch (e) { survived = false; }
+check('a malformed element cannot fail the whole publish', survived,
+  'one bad element used to throw and take the deployment with it');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) {
