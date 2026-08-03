@@ -200,7 +200,7 @@ export function CommandPalette() {
           {/* Search with gradient border */}
           <div className="relative" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <div className="flex items-center gap-3 px-5 py-3.5">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.1), rgba(139,92,246,0.1))', border: '1px solid hsl(var(--studio-accent) / 0.12)' }}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.1), hsl(var(--studio-ink-3) / 0.1))', border: '1px solid hsl(var(--studio-accent) / 0.12)' }}>
                 <Search className="h-3.5 w-3.5" style={{ color: 'hsl(var(--studio-accent))' }} />
               </div>
               <input
@@ -247,7 +247,7 @@ export function CommandPalette() {
           <div ref={listRef} className="flex-1 overflow-y-auto py-1.5" style={{ maxHeight: '370px' }}>
             {flatItems.length === 0 ? (
               <div className="py-12 text-center">
-                <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.06), rgba(139,92,246,0.04))', border: '1px solid hsl(var(--studio-accent) / 0.08)' }}>
+                <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.06), hsl(var(--studio-ink-3) / 0.04))', border: '1px solid hsl(var(--studio-accent) / 0.08)' }}>
                   <Search className="h-5 w-5" style={{ color: 'hsl(var(--studio-accent) / 0.3)' }} />
                 </div>
                 <div className="text-[12px] font-medium" style={{ color: 'hsl(var(--studio-ink-3))' }}>No results for "{search}"</div>

@@ -89,7 +89,11 @@ function resolveHref(href: string, keepHashLinks: boolean = false): string {
 }
 
 /** Generate body-only HTML for preview */
+/** Reset per page, so the first image of each page gets priority. */
+let _seenFirstImage = false;
+
 export function generateBodyHTML(elements: EditorElement[]): string {
+  _seenFirstImage = false;
   _keepHashLinks = true;
   const html = elements.map(el => elementToHTML(el, 2)).join('\n\n');
   _keepHashLinks = false;
@@ -140,7 +144,15 @@ function getAttrs(el: EditorElement, inForm = false): string {
     attrs.push(`src="${escapeAttr(safeURL((el.props || {}).src, true))}"`);
     attrs.push(`alt="${escapeAttr(((el.props || {}).alt as string) || el.name || 'Image')}"`);
     attrs.push('decoding="async"');
-    attrs.push('loading="lazy"');
+    // Lazy-loading the first image delays the very paint the visitor is
+    // waiting for. It gets fetched eagerly and at high priority; everything
+    // below it stays lazy.
+    if (_seenFirstImage) {
+      attrs.push('loading="lazy"');
+    } else {
+      attrs.push('fetchpriority="high"');
+      _seenFirstImage = true;
+    }
     if ((el.props || {}).width) attrs.push(`width="${(el.props || {}).width}"`);
     if ((el.props || {}).height) attrs.push(`height="${(el.props || {}).height}"`);
   }

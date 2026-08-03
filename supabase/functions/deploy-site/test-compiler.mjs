@@ -232,6 +232,33 @@ check('figures also given as text', /<table class="chart-data"/.test(ch) && /Sou
 check('chart labelled for assistive tech', /role="group" aria-label="Loaves sold"/.test(ch));
 check('a hostile colour cannot reach the svg', !/javascript:/.test(ch));
 
+console.log('\n── html minification ──');
+check('gaps between block tags closed up', !/<\/section>\s+<section/.test(home));
+check('a form still has its markup', /<form/.test(home) && /<input/.test(home));
+// Whitespace between inline elements is rendered; welding it is the one
+// thing an HTML minifier must never do.
+const inlineOut = compilePages([{ page_name: 'I', slug: '', is_homepage: true, page_settings: {}, elements: [
+  { id: 'p1', type: 'text', props: { text: 'one' }, children: [] },
+  { id: 'nv', type: 'navbar', props: {}, children: [
+    { id: 'la', type: 'link', props: { text: 'One', href: '/a' }, children: [] },
+    { id: 'lb', type: 'link', props: { text: 'Two', href: '/b' }, children: [] },
+  ]},
+]}], 'I', ORIGIN, SITE_ID, 'https://ref.supabase.co');
+const inl = inlineOut.pageFiles[0].html;
+check('space between adjacent links is kept', /<\/a>\s<a|<\/a>\s+<a/.test(inl),
+  'links would have been welded into "OneTwo"');
+check('script tag survives intact', /<script src="script.js" defer><\/script>/.test(home));
+
+console.log('\n── images ──');
+const imgOut = compilePages([{ page_name: 'M', slug: '', is_homepage: true, page_settings: {}, elements: [
+  { id: 'i1', type: 'image', props: { src: '/hero.jpg', alt: 'Hero' }, children: [] },
+  { id: 'i2', type: 'image', props: { src: '/below.jpg', alt: 'Below' }, children: [] },
+]}], 'M', ORIGIN, SITE_ID, 'https://ref.supabase.co');
+const im = imgOut.pageFiles[0].html;
+check('first image is not lazy', /hero\.jpg[^>]*fetchpriority="high"/.test(im),
+  'lazy-loading the hero delays the paint the visitor is waiting for');
+check('later images stay lazy', /below\.jpg[^>]*loading="lazy"/.test(im));
+
 console.log('\n── robustness ──');
 const ROUGH = [
   { id: 'a', type: 'section' },                                  // no props, styles or children

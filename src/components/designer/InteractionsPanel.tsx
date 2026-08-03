@@ -314,13 +314,13 @@ export function InteractionsPanel() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(236,72,153,0.08))', border: '1px solid rgba(245,158,11,0.15)' }}>
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
               <Zap className="h-3 w-3" style={{ color: 'hsl(var(--studio-warn))' }} />
             </div>
             <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>Interactions</span>
           </div>
           <button onClick={() => addInteraction()} className="flex items-center gap-1 text-[8px] font-semibold px-2 py-1 rounded-lg transition-all"
-            style={{ background: 'linear-gradient(135deg, hsl(var(--studio-warn)), hsl(var(--studio-warn)))', color: 'hsl(var(--studio-ink))' }}>
+            style={{ backgroundColor: 'hsl(var(--studio-accent))', color: 'hsl(var(--studio-accent-ink))' }}>
             <Plus className="h-3 w-3" /> New
           </button>
         </div>
@@ -505,7 +505,7 @@ export function InteractionsPanel() {
         {/* Empty state */}
         {interactions.length === 0 && !presetsOpen && (
           <div className="text-center py-8">
-            <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.06), rgba(245,158,11,0.02))', border: '1px solid rgba(245,158,11,0.08)' }}>
+            <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
               <Zap className="w-6 h-6" style={{ color: 'rgba(245,158,11,0.3)' }} />
             </div>
             <p className="text-[11px] font-medium" style={{ color: 'hsl(var(--studio-ink-3))' }}>No interactions yet</p>

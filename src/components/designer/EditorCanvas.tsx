@@ -514,9 +514,9 @@ export function EditorCanvas() {
             <span style={{
               fontSize: '7px', fontWeight: 800, textTransform: 'uppercase',
               letterSpacing: '0.08em', padding: '1px 4px', borderRadius: '3px',
-              backgroundColor: spaceHeld ? 'rgba(139,92,246,0.15)' : 'hsl(var(--studio-accent) / 0.1)',
+              backgroundColor: spaceHeld ? 'hsl(var(--studio-ink-3) / 0.15)' : 'hsl(var(--studio-accent) / 0.1)',
               color: spaceHeld ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-accent))',
-              border: `1px solid ${spaceHeld ? 'rgba(139,92,246,0.25)' : 'hsl(var(--studio-accent) / 0.15)'}`,
+              border: `1px solid ${spaceHeld ? 'hsl(var(--studio-ink-3) / 0.25)' : 'hsl(var(--studio-accent) / 0.15)'}`,
             }}>
               {spaceHeld ? 'PAN' : 'SELECT'}
             </span>

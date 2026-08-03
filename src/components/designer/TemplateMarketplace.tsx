@@ -97,7 +97,7 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(236,72,153,0.08))', border: '1px solid rgba(139,92,246,0.15)' }}>
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-ink-3) / 0.12), hsl(var(--studio-ink-3) / 0.08))', border: '1px solid hsl(var(--studio-ink-3) / 0.15)' }}>
                 <Sparkles className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
               </div>
               <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>Templates</span>
@@ -115,7 +115,7 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
               placeholder={`Search templates…`}
               className="w-full h-7 pl-7 pr-3 rounded-lg text-[10px] outline-none transition-colors"
               style={{ backgroundColor: 'hsl(var(--studio-panel))', border: '1px solid hsl(var(--studio-line))', color: 'hsl(var(--studio-ink-2))' }}
-              onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-ink-3))'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.08)'; }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-ink-3))'; e.currentTarget.style.boxShadow = '0 0 0 2px hsl(var(--studio-ink-3) / 0.08)'; }}
               onBlur={e => { e.currentTarget.style.borderColor = 'hsl(var(--studio-raised))'; e.currentTarget.style.boxShadow = 'none'; }}
             />
             {search && <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 flex items-center justify-center rounded-full hover:bg-white/10" style={{ color: 'hsl(var(--studio-ink-3))', fontSize: '9px' }}>✕</button>}
@@ -153,7 +153,7 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
               <Filter className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-hover))' }} />
               {(['name', 'pages', 'elements'] as const).map(s => (
                 <button key={s} onClick={() => setSortBy(s)} className="text-[7px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded transition-all"
-                  style={{ backgroundColor: sortBy === s ? 'rgba(139,92,246,0.1)' : 'transparent', color: sortBy === s ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-line-strong))' }}
+                  style={{ backgroundColor: sortBy === s ? 'hsl(var(--studio-ink-3) / 0.1)' : 'transparent', color: sortBy === s ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-line-strong))' }}
                 >{s}</button>
               ))}
             </div>
@@ -177,7 +177,7 @@ export function TemplateMarketplace({ siteId }: { siteId?: string }) {
                       </div>
                       <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => { const t: DesignerTemplate = { id: st.id, name: st.name, description: st.description, category: st.category, elements: st.elements, pages: st.pages || undefined }; applyTemplate(t); }}
-                          className="px-2 py-0.5 rounded text-[8px] font-semibold" style={{ backgroundColor: 'rgba(139,92,246,0.12)', color: 'hsl(var(--studio-ink-3))', border: '1px solid rgba(139,92,246,0.2)' }}>Use</button>
+                          className="px-2 py-0.5 rounded text-[8px] font-semibold" style={{ backgroundColor: 'hsl(var(--studio-ink-3) / 0.12)', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-ink-3) / 0.2)' }}>Use</button>
                         <button onClick={() => deleteTemplate(st.id)} className="p-1 rounded hover:bg-red-500/20 transition-colors"><Trash2 className="w-2.5 h-2.5 text-red-400" /></button>
                       </div>
                     </div>

@@ -156,7 +156,7 @@ export function SEOAudit() {
       <div className="p-3 space-y-3">
         {/* Header */}
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(236,72,153,0.08))', border: '1px solid rgba(139,92,246,0.15)' }}>
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-ink-3) / 0.1), hsl(var(--studio-ink-3) / 0.08))', border: '1px solid hsl(var(--studio-ink-3) / 0.15)' }}>
             <Search className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           </div>
           <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>SEO Audit</span>

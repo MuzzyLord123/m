@@ -98,7 +98,7 @@ export function DesignPanel() {
       <div className="p-3 space-y-3">
         {/* Header */}
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.1), hsl(var(--studio-accent) / 0.1))', border: '1px solid rgba(139,92,246,0.15)' }}>
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-ink-3) / 0.1), hsl(var(--studio-accent) / 0.1))', border: '1px solid hsl(var(--studio-ink-3) / 0.15)' }}>
             <Sparkles className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
           </div>
           <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>Design System</span>
@@ -136,7 +136,7 @@ export function DesignPanel() {
           style={{
             background: applied ? 'linear-gradient(135deg, hsl(var(--studio-ok)), #059669)' : 'linear-gradient(135deg, hsl(var(--studio-ink-3)), hsl(var(--studio-ink-3)))',
             color: 'hsl(var(--studio-ink))',
-            boxShadow: applied ? '0 2px 12px rgba(16,185,129,0.25)' : '0 2px 12px rgba(139,92,246,0.25)',
+            boxShadow: applied ? '0 2px 12px rgba(16,185,129,0.25)' : '0 2px 12px hsl(var(--studio-ink-3) / 0.25)',
           }}
         >
           {applied ? <Check className="h-3.5 w-3.5" /> : <Zap className="h-3.5 w-3.5" />}
@@ -151,7 +151,7 @@ export function DesignPanel() {
               <button
                 onClick={() => setPresetFilter('all')}
                 className="px-1.5 py-0.5 rounded text-[7px] font-bold uppercase tracking-wider transition-all"
-                style={{ backgroundColor: presetFilter === 'all' ? 'rgba(139,92,246,0.12)' : 'transparent', color: presetFilter === 'all' ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-3))' }}
+                style={{ backgroundColor: presetFilter === 'all' ? 'hsl(var(--studio-ink-3) / 0.12)' : 'transparent', color: presetFilter === 'all' ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-3))' }}
               >All</button>
               {uniqueTags.map(tag => (
                 <button

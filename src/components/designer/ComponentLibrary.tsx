@@ -153,7 +153,7 @@ export function ComponentLibrary() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.1), rgba(99,102,241,0.08))', border: '1px solid hsl(var(--studio-accent) / 0.15)' }}>
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.1), hsl(var(--studio-ink-3) / 0.08))', border: '1px solid hsl(var(--studio-accent) / 0.15)' }}>
               <Package className="h-3 w-3" style={{ color: 'hsl(var(--studio-accent))' }} />
             </div>
             <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>Components</span>

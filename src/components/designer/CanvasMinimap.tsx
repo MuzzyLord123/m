@@ -19,20 +19,20 @@ const CONTAINER_TYPES = new Set(['section', 'navbar', 'footer', 'container', 'co
 
 const TYPE_COLORS: Record<string, string> = {
   section: 'hsl(var(--studio-accent) / 0.5)',
-  navbar: 'rgba(139,92,246,0.5)',
-  footer: 'rgba(139,92,246,0.4)',
+  navbar: 'hsl(var(--studio-ink-3) / 0.5)',
+  footer: 'hsl(var(--studio-ink-3) / 0.4)',
   container: 'hsl(var(--studio-accent) / 0.3)',
   columns: 'hsl(var(--studio-accent) / 0.25)',
   grid: 'hsl(var(--studio-accent) / 0.25)',
   card: 'hsl(var(--studio-accent) / 0.3)',
   heading: 'rgba(255,255,255,0.25)',
   text: 'rgba(255,255,255,0.15)',
-  image: 'rgba(236,72,153,0.35)',
-  video: 'rgba(236,72,153,0.3)',
+  image: 'hsl(var(--studio-ink-3) / 0.35)',
+  video: 'hsl(var(--studio-ink-3) / 0.3)',
   button: 'rgba(34,197,94,0.4)',
   form: 'rgba(245,158,11,0.35)',
   input: 'rgba(245,158,11,0.25)',
-  icon: 'rgba(168,85,247,0.3)',
+  icon: 'hsl(var(--studio-ink-3) / 0.3)',
   divider: 'rgba(255,255,255,0.08)',
 };
 

@@ -212,9 +212,9 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
               style={{
                 display: 'flex', alignItems: 'center', gap: '3px',
                 padding: '2px 8px', borderRadius: '6px',
-                backgroundColor: showSpacingInput ? 'rgba(6,182,212,0.12)' : 'rgba(6,182,212,0.06)',
+                backgroundColor: showSpacingInput ? 'hsl(var(--studio-ink-3) / 0.12)' : 'hsl(var(--studio-ink-3) / 0.06)',
                 cursor: 'pointer',
-                border: showSpacingInput ? '1px solid rgba(6,182,212,0.25)' : '1px solid transparent',
+                border: showSpacingInput ? '1px solid hsl(var(--studio-ink-3) / 0.25)' : '1px solid transparent',
                 transition: 'all 0.15s ease',
               }}
               title="Click to edit padding"
@@ -277,7 +277,7 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
                       onClick={() => { updateStyle('padding', `${v}px`); setShowSpacingInput(false); }}
                       style={{
                         flex: 1, height: '20px', borderRadius: '4px', border: '1px solid #282828',
-                        backgroundColor: currentPadding === `${v}px` ? 'rgba(6,182,212,0.12)' : 'hsl(var(--studio-panel))',
+                        backgroundColor: currentPadding === `${v}px` ? 'hsl(var(--studio-ink-3) / 0.12)' : 'hsl(var(--studio-panel))',
                         color: currentPadding === `${v}px` ? 'hsl(var(--studio-ink-3))' : 'hsl(var(--studio-ink-3))',
                         fontSize: '8px', fontFamily: 'monospace', cursor: 'pointer',
                       }}
@@ -293,7 +293,7 @@ export const FloatingToolbar = memo(function FloatingToolbar() {
             style={{
               display: 'flex', alignItems: 'center', gap: '4px',
               padding: '2px 6px', borderRadius: '6px',
-              backgroundColor: currentOpacity < 1 ? 'rgba(139,92,246,0.06)' : 'transparent',
+              backgroundColor: currentOpacity < 1 ? 'hsl(var(--studio-ink-3) / 0.06)' : 'transparent',
             }}
             title={`Opacity: ${Math.round(currentOpacity * 100)}%`}
           >

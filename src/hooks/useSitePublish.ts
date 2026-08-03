@@ -64,6 +64,42 @@ export function useSitePublish(siteId?: string) {
 
   useEffect(() => { loadDeployments(); }, [loadDeployments]);
 
+  /**
+   * DNS propagates on its own schedule, so a domain added now may only go
+   * live in an hour. Verification used to be entirely manual, which meant a
+   * customer who set their records correctly had no way to find out except
+   * by pressing a button they had no reason to press again.
+   *
+   * While a domain is pending and this panel is open, it is re-checked
+   * quietly every couple of minutes. Nothing polls when there is nothing
+   * pending, and nothing polls when the tab is in the background.
+   */
+  const pendingDomainIds = domains
+    .filter(d => d.domain_type === 'custom' && !d.dns_verified)
+    .map(d => d.id)
+    .join(',');
+
+  useEffect(() => {
+    if (!pendingDomainIds) return;
+    let stopped = false;
+
+    const recheck = async () => {
+      if (stopped || document.hidden) return;
+      for (const id of pendingDomainIds.split(',')) {
+        const { data } = await supabase.functions.invoke('verify-site-domain', { body: { domainId: id } });
+        // Only interrupt with news worth having.
+        if (data?.verified) {
+          toast.success('Your domain is verified and live.');
+          await loadDeployments();
+          return;
+        }
+      }
+    };
+
+    const timer = window.setInterval(recheck, 120_000);
+    return () => { stopped = true; window.clearInterval(timer); };
+  }, [pendingDomainIds, loadDeployments]);
+
   const publish = useCallback(async (
     siteName: string,
     pages: { page_name: string; slug: string; is_homepage: boolean; elements: any[]; seo_title?: string; seo_description?: string; page_settings?: any }[]

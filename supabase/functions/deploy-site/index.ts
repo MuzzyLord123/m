@@ -579,7 +579,7 @@ ${bodyContent}
 </body>
 </html>`;
 
-    return { filename, html };
+    return { filename, html: minifyHTML(html) };
   });
 
   // Anything indexable goes in the sitemap; a page marked noindex does not.
@@ -745,6 +745,47 @@ function minifyCSS(css: string): string {
     }
   }
   return out.replace(/;\}/g, "}").trim();
+}
+
+/**
+ * Minify the generated HTML.
+ *
+ * The reason this was left undone for so long is that whitespace between
+ * inline elements is rendered - "<a>one</a> <a>two</a>" is not the same as
+ * "<a>one</a><a>two</a>" - so a blanket collapse silently welds words and
+ * links together. This only removes whitespace where BOTH sides are
+ * block-level tags, which is never rendered, and never touches the inside
+ * of pre, textarea, script or style.
+ */
+const BLOCK_TAGS = new Set([
+  'html', 'head', 'body', 'div', 'section', 'article', 'aside', 'header',
+  'footer', 'nav', 'main', 'form', 'fieldset', 'ul', 'ol', 'li', 'table',
+  'thead', 'tbody', 'tr', 'td', 'th', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'p', 'blockquote', 'pre', 'figure', 'figcaption', 'hr', 'details',
+  'summary', 'dialog', 'meta', 'link', 'title', 'script', 'style',
+]);
+
+function minifyHTML(html: string): string {
+  // Protect anything whose whitespace is load-bearing.
+  const guarded: string[] = [];
+  let src = html.replace(/<(pre|textarea|script|style)\b[\s\S]*?<\/\1>/gi, m => {
+    guarded.push(m);
+    return `\u0000${guarded.length - 1}\u0000`;
+  });
+
+  const tagName = (tag: string) => (tag.match(/^<\/?\s*([a-z0-9-]+)/i)?.[1] || '').toLowerCase();
+
+  src = src.replace(/(<[^>]+>)(\s+)(<[^>]+>)/g, (whole, a, _ws, b) =>
+    BLOCK_TAGS.has(tagName(a)) && BLOCK_TAGS.has(tagName(b)) ? `${a}${b}` : whole);
+  // Repeat: removing one gap creates new adjacencies.
+  for (let i = 0; i < 4; i++) {
+    src = src.replace(/(<[^>]+>)(\s+)(<[^>]+>)/g, (whole, a, _ws, b) =>
+      BLOCK_TAGS.has(tagName(a)) && BLOCK_TAGS.has(tagName(b)) ? `${a}${b}` : whole);
+  }
+  // Comments the author did not write.
+  src = src.replace(/<!--(?!\[if)[\s\S]*?-->/g, '');
+
+  return src.replace(/\u0000(\d+)\u0000/g, (_m, i) => guarded[Number(i)]);
 }
 
 /**

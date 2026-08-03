@@ -261,14 +261,14 @@ const SHADOW_PRESETS = [
   { label: 'XL', value: '0 16px 48px rgba(0,0,0,0.2)' },
   { label: 'XXL', value: '0 24px 64px rgba(0,0,0,0.25)' },
   { label: 'Glow', value: '0 0 24px hsl(var(--studio-accent) / 0.3)' },
-  { label: 'Indigo', value: '0 0 32px rgba(99,102,241,0.3)' },
-  { label: 'Pink', value: '0 0 32px rgba(236,72,153,0.3)' },
+  { label: 'Indigo', value: '0 0 32px hsl(var(--studio-ink-3) / 0.3)' },
+  { label: 'Pink', value: '0 0 32px hsl(var(--studio-ink-3) / 0.3)' },
   { label: 'Green', value: '0 0 32px rgba(16,185,129,0.3)' },
   { label: 'Sharp', value: '4px 4px 0 #000' },
   { label: 'Brutal', value: '8px 8px 0 #000' },
   { label: 'Inset', value: 'inset 0 2px 8px rgba(0,0,0,0.15)' },
   { label: 'Layered', value: '0 1px 2px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.1), 0 16px 48px rgba(0,0,0,0.12)' },
-  { label: 'Dreamy', value: '0 8px 40px rgba(99,102,241,0.15), 0 0 80px rgba(139,92,246,0.08)' },
+  { label: 'Dreamy', value: '0 8px 40px hsl(var(--studio-ink-3) / 0.15), 0 0 80px hsl(var(--studio-ink-3) / 0.08)' },
 ];
 
 /* ── Typography presets ─────────────────────────────── */

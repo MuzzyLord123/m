@@ -177,7 +177,7 @@ export const QuickActionsBar = memo(function QuickActionsBar() {
           <>
             <div
               className="flex items-center gap-1 px-2 py-0.5 rounded-lg shrink-0"
-              style={{ backgroundColor: 'rgba(6,182,212,0.05)' }}
+              style={{ backgroundColor: 'hsl(var(--studio-ink-3) / 0.05)' }}
               title={`Padding: ${currentPadding} | Gap: ${currentGap}`}
             >
               <Move className="h-2.5 w-2.5" style={{ color: 'hsl(var(--studio-ink-3))' }} />

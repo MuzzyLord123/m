@@ -145,7 +145,7 @@ export function VersionHistoryPanel() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.1), rgba(99,102,241,0.08))', border: '1px solid hsl(var(--studio-accent) / 0.15)' }}>
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--studio-accent) / 0.1), hsl(var(--studio-ink-3) / 0.08))', border: '1px solid hsl(var(--studio-accent) / 0.15)' }}>
               <History className="h-3 w-3" style={{ color: 'hsl(var(--studio-accent))' }} />
             </div>
             <span className="text-[11px] font-semibold" style={{ color: 'hsl(var(--studio-ink-2))' }}>Version History</span>
@@ -188,7 +188,7 @@ export function VersionHistoryPanel() {
               <span className="text-[10px] font-medium" style={{ color: 'hsl(var(--studio-ink-2))' }}>Current State</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[9px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'rgba(139,92,246,0.08)', color: 'hsl(var(--studio-ink-3))' }}>
+              <span className="text-[9px] tabular-nums px-1.5 py-0.5 rounded-md" style={{ backgroundColor: 'hsl(var(--studio-ink-3) / 0.08)', color: 'hsl(var(--studio-ink-3))' }}>
                 <Layers className="h-2 w-2 inline mr-0.5" />{currentCount} els
               </span>
             </div>
@@ -262,7 +262,7 @@ export function VersionHistoryPanel() {
 
         {/* Compare bar */}
         {compareSnap && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="rounded-lg p-2.5" style={{ backgroundColor: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.15)' }}>
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="rounded-lg p-2.5" style={{ backgroundColor: 'hsl(var(--studio-ink-3) / 0.05)', border: '1px solid hsl(var(--studio-ink-3) / 0.15)' }}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Diff className="h-3 w-3" style={{ color: 'hsl(var(--studio-ink-3))' }} />
@@ -287,7 +287,7 @@ export function VersionHistoryPanel() {
                 <span className="text-[8px] tabular-nums font-mono w-8 text-right" style={{ color: 'hsl(var(--studio-ink-3))' }}>{compareCount}</span>
               </div>
             </div>
-            <div className="flex items-center justify-between mt-2 pt-1.5" style={{ borderTop: '1px solid rgba(139,92,246,0.1)' }}>
+            <div className="flex items-center justify-between mt-2 pt-1.5" style={{ borderTop: '1px solid hsl(var(--studio-ink-3) / 0.1)' }}>
               <span className="text-[8px]" style={{ color: 'hsl(var(--studio-ink-2))' }}>Difference</span>
               <div className="flex items-center gap-2">
                 <span className="text-[9px] font-bold tabular-nums px-1.5 py-0.5 rounded" style={{
@@ -375,7 +375,7 @@ export function VersionHistoryPanel() {
                       <span className="text-[8px] flex items-center gap-0.5" style={{ color: 'hsl(var(--studio-ink-3))' }}>
                         <Clock className="h-2 w-2" /> {formatTime(snap.timestamp)}
                       </span>
-                      <span className="text-[8px] tabular-nums px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(139,92,246,0.06)', color: 'hsl(var(--studio-ink-3))' }}>
+                      <span className="text-[8px] tabular-nums px-1 py-0.5 rounded" style={{ backgroundColor: 'hsl(var(--studio-ink-3) / 0.06)', color: 'hsl(var(--studio-ink-3))' }}>
                         {snap.elementCount} els
                       </span>
                       {elDiff !== 0 && (

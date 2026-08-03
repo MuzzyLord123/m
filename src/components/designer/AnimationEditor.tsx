@@ -144,8 +144,8 @@ export function AnimationEditor() {
   if (!selectedElement) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3" style={{ color: 'hsl(var(--studio-ink-3))' }}>
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.08), rgba(168,85,247,0.02))', border: '1px solid rgba(168,85,247,0.1)' }}>
-          <Zap className="h-6 w-6" style={{ color: 'rgba(168,85,247,0.4)' }} />
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'hsl(var(--studio-raised))', border: '1px solid hsl(var(--studio-line))' }}>
+          <Zap className="h-6 w-6" style={{ color: 'hsl(var(--studio-ink-3) / 0.4)' }} />
         </div>
         <span className="text-[12px] font-medium" style={{ color: 'hsl(var(--studio-ink-2))' }}>No element selected</span>
         <span className="text-[10px]" style={{ color: 'hsl(var(--studio-hover))' }}>Click an element to animate it</span>
@@ -357,7 +357,7 @@ export function AnimationEditor() {
                       }}
                       className="px-2 py-1.5 rounded-lg text-[9px] text-left transition-all"
                       style={{ backgroundColor: 'transparent', border: '1px solid transparent', color: 'hsl(var(--studio-ink-2))' }}
-                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(236,72,153,0.06)'; e.currentTarget.style.borderColor = 'rgba(236,72,153,0.15)'; e.currentTarget.style.color = 'hsl(var(--studio-ink-3))'; }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'hsl(var(--studio-ink-3) / 0.06)'; e.currentTarget.style.borderColor = 'hsl(var(--studio-ink-3) / 0.15)'; e.currentTarget.style.color = 'hsl(var(--studio-ink-3))'; }}
                       onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'hsl(var(--studio-ink-2))'; }}
                     >
                       {preset.label}
@@ -386,7 +386,7 @@ export function AnimationEditor() {
           {openSections.scroll && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
               <div className="space-y-2 pb-3">
-                <div className="text-[8px] px-2 py-1.5 rounded-lg" style={{ backgroundColor: 'rgba(168,85,247,0.06)', color: 'hsl(var(--studio-ink-3))', border: '1px solid rgba(168,85,247,0.1)' }}>
+                <div className="text-[8px] px-2 py-1.5 rounded-lg" style={{ backgroundColor: 'hsl(var(--studio-ink-3) / 0.06)', color: 'hsl(var(--studio-ink-3))', border: '1px solid hsl(var(--studio-ink-3) / 0.1)' }}>
                   Scroll-linked animations activate as the user scrolls the page.
                 </div>
                 {[

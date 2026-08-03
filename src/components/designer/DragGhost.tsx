@@ -135,8 +135,8 @@ export const DragGhost = memo(function DragGhost() {
                 <span style={{
                   fontSize: '6px', fontWeight: 700, textTransform: 'uppercase',
                   letterSpacing: '0.08em', padding: '1px 4px', borderRadius: '3px',
-                  backgroundColor: 'rgba(139,92,246,0.08)', color: 'hsl(var(--studio-ink-3))',
-                  border: '1px solid rgba(139,92,246,0.12)',
+                  backgroundColor: 'hsl(var(--studio-ink-3) / 0.08)', color: 'hsl(var(--studio-ink-3))',
+                  border: '1px solid hsl(var(--studio-ink-3) / 0.12)',
                 }}>
                   Snap
                 </span>

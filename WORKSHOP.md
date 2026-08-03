@@ -112,6 +112,9 @@ Notes that matter:
 | Class names | `h1-h1`, `nav-nav1` — a machine stamp | The name you gave the element: `.site-header`, `.hero` |
 | Submit buttons | `type="button"` — every exported form was dead on click | `type="submit"` inside a form |
 | Product descriptions | Invented marketing copy published onto real shops | Blank until somebody writes one |
+| HTML | Shipped unminified | Minified between block tags only — inline spacing is never welded |
+| The hero image | Lazy-loaded, delaying the paint people wait for | First image eager and high priority; the rest lazy |
+| A pending domain | Checked only if you thought to press the button | Re-checked every two minutes while the panel is open |
 
 ## Rollback
 
@@ -135,35 +138,20 @@ now". Nothing polls in the background.
 
 Stated plainly so nobody assumes otherwise:
 
-- **No image optimisation.** Images are referenced at whatever URL they were
-  given. Dimensions are emitted to stop the page jumping, but nothing is
-  resized, re-encoded, or served responsively via `srcset`.
-- **No background DNS polling.** A domain is checked when asked, not on a
-  timer, so a customer who fixes their DNS overnight must press the button.
-- **HTML is not minified.** Only CSS and JS are. Whitespace between inline
-  elements is significant, and gzip on the wire recovers most of it anyway.
-- **The deep panels** — Animation, Interactions, CMS — use the studio palette
-  but have not been re-composed the way the style panel was. They work; they
-  are denser than they need to be.
-
-## Verifying changes to the compiler
-
-The compiler is pure and can be exercised without Deno. Two suites exist:
-
-- **`test-compiler.mjs`** — strips the Deno bits, transpiles, and asserts on
-  the generated HTML, sitemap, robots, 404, choice controls and the
-  minifiers, that rich elements and charts reach the published page, and that a malformed element cannot fail a publish (73 assertions).
-- **`test-published-site.mjs`** — compiles a site, serves it, and drives it
-  in Chromium: submits a form with every field type, checks the honeypot,
-  forces a rate-limit error, and confirms in-page anchors scroll
-  (21 assertions).
-
-```
-node supabase/functions/deploy-site/test-compiler.mjs
-node supabase/functions/deploy-site/test-published-site.mjs
-```
-
-Run both after any change to `deploy-site/index.ts`.
+- **No image derivatives.** Images are served at whatever URL they were
+  given. The first image on a page is fetched eagerly at high priority and
+  the rest are lazy, and dimensions are emitted so the page does not jump —
+  but nothing is resized or re-encoded, so there is no `srcset`. Doing that
+  properly needs an image pipeline (a transform service or a build step),
+  not a change to the compiler.
+- **DNS re-checks only while the publish panel is open.** A pending domain
+  is re-checked every two minutes while you are looking at it, and stops
+  when the tab is hidden. There is no server-side cron, so a domain that
+  propagates overnight verifies the next time you open the panel.
+- **The deep panels** — Animation, Interactions, CMS — use the studio
+  palette and have had their decorative tints removed, but their layout has
+  not been re-composed the way the style panel was. They work; they are
+  denser than they need to be.
 
 ## What exported code looks like
 
