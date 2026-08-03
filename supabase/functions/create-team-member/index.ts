@@ -74,16 +74,19 @@ serve(async (req) => {
 
     if (teamData.primary_account_id !== requestingUser.id) {
       // Check if user is an admin
-      const { data: roleData } = await supabaseClient
+      /* An owner of the platform is not "not an admin". The old check
+         demanded exactly one admin role row and threw on anything else. */
+      const { data: isOwner } = await supabase.rpc('am_i_platform_owner');
+      const { data: roles } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', requestingUser.id)
-        .eq('role', 'admin')
-        .single();
+        .eq('user_id', requestingUser.id);
+      const permitted = isOwner === true
+        || (roles || []).some((r: { role: string }) => r.role === 'admin');
 
-      if (!roleData) {
+      if (!permitted) {
         return new Response(
-          JSON.stringify({ error: 'Only team owners or admins can create team members' }),
+          JSON.stringify({ error: 'You need to be a team owner, an admin or a platform owner to add a team member.' }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }

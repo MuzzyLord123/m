@@ -45,16 +45,22 @@ serve(async (req) => {
     }
 
     // Check if user has admin role
-    const { data: roleData, error: roleError } = await supabaseClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', requestingUser.id)
-      .eq('role', 'admin')
-      .single();
-
-    if (roleError || !roleData) {
+    /* A platform owner sits above admin, so an owner qualifies by virtue of
+       being one. The admin check reads all of the caller's roles rather than
+       demanding exactly one row: .single() threw whenever somebody held more
+       than one role, locking them out of their own product. */
+    const { data: __isOwner } = await supabaseClient.rpc('am_i_platform_owner');
+    let permitted = __isOwner === true;
+    if (!permitted) {
+      const { data: __roles } = await supabaseClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', requestingUser.id);
+      permitted = (__roles || []).some((r: { role: string }) => r.role === 'admin');
+    }
+    if (!permitted) {
       return new Response(
-        JSON.stringify({ error: 'Only admins can reset client passwords' }),
+        JSON.stringify({ error: 'You need to be an admin or a platform owner to reset a client password.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

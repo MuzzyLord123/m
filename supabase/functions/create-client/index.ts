@@ -56,28 +56,36 @@ serve(async (req) => {
       );
     }
 
-    // Check if user has admin role
-    const { data: roleData, error: roleError } = await supabaseClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', requestingUser.id)
-      .eq('role', 'admin')
-      .single();
+    /**
+     * Who may create a client account.
+     *
+     * This used to demand a user_roles row with role='admin', read with
+     * .single(). That rejected the two people who own the platform: an
+     * owner sits above admin, and .single() also errors outright when a
+     * user holds more than one role rather than picking the useful one. So
+     * the owners of the business could not create a client account in
+     * their own product.
+     *
+     * A platform owner is allowed by virtue of being an owner; otherwise an
+     * admin role is required. maybeSingle is gone entirely - the query asks
+     * whether any qualifying row exists, which cannot throw on a count.
+     */
+    const { data: isOwner } = await supabaseClient.rpc('am_i_platform_owner');
 
-    if (roleError || !roleData) {
-      return new Response(
-        JSON.stringify({ error: 'Only admins can create client accounts' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    let permitted = isOwner === true;
+
+    if (!permitted) {
+      const { data: roles } = await supabaseClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', requestingUser.id);
+      permitted = (roles || []).some((r: { role: string }) => r.role === 'admin');
     }
 
-    // Parse request body
-    const { email, password, fullName, company, phone, plan, pageCount, notes, websiteStatus, previewUrl, enquiryId, enquiryData, accountType }: CreateClientRequest = await req.json();
-
-    if (!email || !password || !fullName) {
+    if (!permitted) {
       return new Response(
-        JSON.stringify({ error: 'Email, password, and full name are required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'You need to be an admin or a platform owner to create a client account.' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 

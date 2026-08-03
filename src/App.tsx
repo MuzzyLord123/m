@@ -312,6 +312,11 @@ function AnimatedRoutes() {
           <Route path="/lounge/office/powerpoint-home" element={<ProtectedRoute><CustomerGuard><SlidesHome /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/slides/edit" element={<ProtectedRoute><CustomerGuard><OfficePowerPointHome /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/onenote-home" element={<ProtectedRoute><CustomerGuard><OfficeOneNoteHome /></CustomerGuard></ProtectedRoute>} />
+          {/* Notes recorded "/lounge/office/notes" as their route for a long
+              time, and every one of those rows is still in the database. The
+              route now exists rather than 404ing somebody who clicks their
+              own recent note. */}
+          <Route path="/lounge/office/notes" element={<ProtectedRoute><CustomerGuard><OfficeOneNoteHome /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/onedrive" element={<ProtectedRoute><CustomerGuard><OfficeOneDrive /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/design-studio" element={<ProtectedRoute><CustomerGuard><DesignStudioHome /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/design-studio/editor" element={<ProtectedRoute><CustomerGuard><DesignStudioEditor /></CustomerGuard></ProtectedRoute>} />

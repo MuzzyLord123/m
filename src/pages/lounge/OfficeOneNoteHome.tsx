@@ -147,7 +147,7 @@ export default function OfficeOneNoteHome() {
           file_type: 'document',
           app_source: 'notes',
           source_id: 'notebook-root',
-          source_route: '/lounge/office/notes',
+          source_route: '/lounge/office/onenote-home',
           description: `${sections.reduce((s, sec) => s + sec.pages.length, 0)} pages across ${sections.length} sections`,
           metadata: JSON.parse(JSON.stringify({ sections })),
         };
@@ -366,7 +366,7 @@ export default function OfficeOneNoteHome() {
         file_type: 'document' as const,
         app_source: 'notes',
         source_id: 'notebook-root',
-        source_route: '/lounge/office/notes',
+        source_route: '/lounge/office/onenote-home',
         description: `${sections.reduce((s, sec) => s + sec.pages.length, 0)} pages across ${sections.length} sections`,
         metadata: JSON.parse(JSON.stringify({ sections })),
       };

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="108" fill="#E8613C"/>
+  <path fill="#0B0B0C" fill-rule="evenodd" d="
+    M256 96
+    a160 160 0 1 0 0 320
+    a160 160 0 1 0 0-320
+    Z
+    M256 176
+    a80 80 0 1 1 0 160
+    a80 80 0 1 1 0-160
+    Z
+  "/>
+  <!-- The tail: one solid stroke crossing the ring at the lower right and
+       breaking past it, so the mark reads as a Q and not an O. rotate(-45)
+       swings "down" round to "down-right"; a typeset flick would vanish at
+       16px, this does not. -->
+  <g transform="rotate(-45 256 256)">
+    <rect x="230" y="300" width="52" height="176" rx="26" fill="#0B0B0C"/>
+  </g>
+</svg>

@@ -35,7 +35,7 @@ import {
 const mobileNavItems = [
 { label: 'Command Center', icon: BarChart3, tab: 'command-center' },
 { label: 'Enquiries', icon: Mail, tab: 'enquiries' },
-{ label: 'Business Relationships', icon: Target, tab: 'leads' },
+{ label: 'Business Relationships', icon: Target, tab: 'leads', path: '/lounge/crm' },
 { label: 'Clients', icon: Users, tab: 'clients' },
 { label: 'Client Accounts', icon: Users, tab: 'client-accounts' },
 { label: 'Account Creation', icon: Shield, tab: 'account-creation' },

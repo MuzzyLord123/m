@@ -20,8 +20,12 @@ serve(async (req) => {
     if (!user) return json({ error: 'Unauthorized' }, 401, corsHeaders);
 
     // Caller must be an admin
-    const { data: role } = await admin.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle();
-    if (!role) return json({ error: 'Only admins can create admin accounts' }, 403, corsHeaders);
+    /* Owners appoint admins - refusing them here meant the only people who
+       should be able to add an admin were the only ones who could not. */
+    const { data: isOwner } = await admin.rpc('is_platform_owner', { _user_id: user.id });
+    const { data: roles } = await admin.from('user_roles').select('role').eq('user_id', user.id);
+    const permitted = isOwner === true || (roles || []).some((r: { role: string }) => r.role === 'admin');
+    if (!permitted) return json({ error: 'You need to be an admin or a platform owner to create an admin account.' }, 403, corsHeaders);
 
     const body = await req.json();
     const action = body.action || 'create';
