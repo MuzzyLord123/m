@@ -10,7 +10,6 @@ import { EditorRightPanel } from '@/components/designer/EditorRightPanel';
 import { EditorCanvas } from '@/components/designer/EditorCanvas';
 import { EditorStatusBar } from '@/components/designer/EditorStatusBar';
 import { KeyboardShortcutsModal } from '@/components/designer/KeyboardShortcutsModal';
-import { QuickActionsBar } from '@/components/designer/QuickActionsBar';
 import { PreviewModal } from '@/components/designer/PreviewModal';
 import { ContextMenu } from '@/components/designer/ContextMenu';
 import { ExportCodeDialog } from '@/components/designer/ExportCodeDialog';
@@ -209,7 +208,11 @@ export default function WebsiteEditor() {
           <ResizablePanel defaultSize={58}>
             <div className="flex flex-col h-full relative">
               <EditorCanvas />
-              <QuickActionsBar />
+              {/* A second floating toolbar used to sit at the bottom of the
+                  canvas duplicating the contextual one attached to the
+                  selection - two bars competing over the same work, each
+                  hiding part of it. The selection's own toolbar is the one
+                  that belongs, because it is anchored to what you clicked. */}
               <CommandPalette />
               <EditorStatusBar />
             </div>

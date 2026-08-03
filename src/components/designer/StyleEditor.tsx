@@ -421,7 +421,9 @@ function PageLinkDropdown({ value, onChange, siteId }: { value: string; onChange
 export function StyleEditor({ siteId }: { siteId?: string }) {
   const { state, dispatch, selectedElement } = useEditor();
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
-    content: true, position: true, layout: false, spacing: false, typography: false, background: false, border: false, effects: false, filters: false, transform: false, transition: false,
+    content: true, layout: true, spacing: true, typography: true,
+    background: false, border: false, position: false,
+    effects: false, filters: false, transform: false, transition: false,
   });
 
   const toggle = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -706,7 +708,7 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
         {sectionDivider}
 
         {/* Effects */}
-        <SectionHeader label="Effects" open={openSections.effects} onClick={() => toggle('effects')} badge="PRO" />
+        <SectionHeader label="Effects" open={openSections.effects} onClick={() => toggle('effects')} />
         {openSections.effects && (
           <div className="space-y-2 pb-2">
             <PresetRow label="Shadow Presets" presets={SHADOW_PRESETS} onSelect={(v) => updateStyle('boxShadow', v)} currentValue={s('boxShadow')} />
@@ -768,7 +770,7 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
         {sectionDivider}
 
         {/* Filters */}
-        <SectionHeader label="Filters & Glass" open={openSections.filters} onClick={() => toggle('filters')} badge="PRO" />
+        <SectionHeader label="Filters & Glass" open={openSections.filters} onClick={() => toggle('filters')} />
         {openSections.filters && (
           <div className="space-y-1.5 pb-2">
             <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Individual Filters</span>
@@ -840,7 +842,7 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
         {sectionDivider}
 
         {/* Transform */}
-        <SectionHeader label="Transform & 3D" open={openSections.transform} onClick={() => toggle('transform')} badge="PRO" />
+        <SectionHeader label="Transform & 3D" open={openSections.transform} onClick={() => toggle('transform')} />
         {openSections.transform && (
           <div className="space-y-1.5 pb-2">
             <span className="text-[9px] font-semibold uppercase tracking-[0.08em]" style={{ color: 'hsl(var(--studio-ink-3))' }}>Individual Controls</span>

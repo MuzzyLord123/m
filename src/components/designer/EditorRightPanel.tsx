@@ -199,9 +199,12 @@ export function EditorRightPanel({ siteId }: { siteId?: string }) {
                   </button>
                 )}
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[8px] uppercase tracking-wider font-semibold" style={{ color: typeColor }}>
-                    {selectedElement.type}
-                  </span>
+                  {/* Only worth saying when it differs from the name above. */}
+                  {selectedElement.name && selectedElement.name !== selectedElement.type && (
+                    <span className="text-[9px] uppercase tracking-[0.08em] text-[hsl(var(--studio-ink-3))]">
+                      {selectedElement.type}
+                    </span>
+                  )}
                   {selectedElement.children?.length > 0 && (
                     <span className="text-[8px] tabular-nums" style={{ color: 'hsl(var(--studio-hover))' }}>
                       • {selectedElement.children.length} children
@@ -225,13 +228,6 @@ export function EditorRightPanel({ siteId }: { siteId?: string }) {
                 {copied ? <Check className="h-2.5 w-2.5 text-green-400" /> : <Clipboard className="h-2.5 w-2.5 text-[hsl(var(--studio-ink-3))]" />}
               </button>
             </div>
-          </div>
-
-          {/* Breadcrumb path */}
-          <div className="flex items-center gap-0.5 text-[8px] overflow-x-auto scrollbar-none mb-2">
-            <span style={{ color: 'hsl(var(--studio-hover))' }}>body</span>
-            <ChevronRight className="h-2 w-2 shrink-0" style={{ color: 'hsl(var(--studio-hover))' }} />
-            <span style={{ color: typeColor }}>{selectedElement.type}</span>
           </div>
 
           {/* Mini Box Model Visualizer */}
@@ -278,16 +274,21 @@ export function EditorRightPanel({ siteId }: { siteId?: string }) {
                   key={i}
                   className="h-8 flex flex-col items-center justify-center gap-0.5 rounded-lg transition-all text-[9px] font-medium group"
                   style={{
-                    color: action.danger ? 'hsl(var(--studio-risk))' : action.active ? (action.color || 'hsl(var(--studio-accent))') : 'hsl(var(--studio-ink-3))',
+                    /* Delete sat here permanently red, at the same weight as
+                       Hide and Clone. A destructive action should be findable,
+                       not advertised - it earns its colour on approach. */
+                    color: action.active ? (action.color || 'hsl(var(--studio-accent))') : 'hsl(var(--studio-ink-3))',
                     backgroundColor: action.active ? `${action.color || 'hsl(var(--studio-accent))'}08` : 'transparent',
                     border: `1px solid ${action.active ? `${action.color || 'hsl(var(--studio-accent))'}15` : 'transparent'}`,
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = action.danger ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.04)';
+                    e.currentTarget.style.backgroundColor = action.danger ? 'hsl(var(--studio-risk) / 0.12)' : 'hsl(var(--studio-hover))';
+                    if (action.danger) e.currentTarget.style.color = 'hsl(var(--studio-risk))';
                     e.currentTarget.style.borderColor = action.danger ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.06)';
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.backgroundColor = action.active ? `${action.color || 'hsl(var(--studio-accent))'}08` : 'transparent';
+                    if (action.danger) e.currentTarget.style.color = 'hsl(var(--studio-ink-3))';
                     e.currentTarget.style.borderColor = action.active ? `${action.color || 'hsl(var(--studio-accent))'}15` : 'transparent';
                   }}
                   onClick={action.onClick}
