@@ -531,7 +531,7 @@ function compilePages(
 
   const pageFiles = pages.map(page => {
     const filename = fileNameFor(page);
-    const bodyContent = generateBodyHTML(page.elements as never);
+    const bodyContent = generateBodyHTML(page.elements as never, pageSlugs);
     const title = page.seo_title || page.page_name;
     const desc = page.seo_description || `${page.page_name} — ${siteName}`;
     const ps = page.page_settings || {};

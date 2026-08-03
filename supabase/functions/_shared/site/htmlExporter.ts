@@ -76,14 +76,25 @@ function getDataAttrs(el: EditorElement): string {
   return attrs.length ? ' ' + attrs.join(' ') : '';
 }
 
-/** Resolve page link slugs to proper filenames */
-function resolveHref(href: string, keepHashLinks: boolean = false): string {
+/**
+ * Turn an authored href into the one the built site should carry.
+ *
+ * The builder writes page links as `#contact` — the same shape as an in-page
+ * anchor. Only the page list can tell the two apart. Rewriting every hash
+ * broke every anchor on the site; keeping every hash broke every page link.
+ * So the page list decides: a hash that names a real page becomes
+ * `contact.html`, and anything else is left exactly as authored.
+ *
+ * With no page list (the editor's live preview, a single-page export) there
+ * is nothing to navigate to, so every hash stays an anchor.
+ */
+function resolveHref(href: string): string {
   if (!href) return '#';
   if (href.startsWith('#') && href.length > 1 && !href.includes(' ')) {
-    if (keepHashLinks) return href;
-    const slug = href.slice(1).replace(/^\/+/, '');
+    if (!_pageSlugs) return href;
+    const slug = href.slice(1).replace(/^\/+/, '').toLowerCase();
     if (!slug || slug === '/' || slug === 'index') return 'index.html';
-    return `${slug}.html`;
+    return _pageSlugs.has(slug) ? `${slug}.html` : href;
   }
   return href;
 }
@@ -92,15 +103,16 @@ function resolveHref(href: string, keepHashLinks: boolean = false): string {
 /** Reset per page, so the first image of each page gets priority. */
 let _seenFirstImage = false;
 
-export function generateBodyHTML(elements: EditorElement[]): string {
+export function generateBodyHTML(elements: EditorElement[], pageSlugs?: Set<string>): string {
   _seenFirstImage = false;
-  _keepHashLinks = true;
+  _pageSlugs = pageSlugs && pageSlugs.size ? pageSlugs : null;
   const html = elements.map(el => elementToHTML(el, 2)).join('\n\n');
-  _keepHashLinks = false;
+  _pageSlugs = null;
   return html;
 }
 
-let _keepHashLinks = false;
+/** The slugs of the pages being built, lower-cased. Null when there is no page list. */
+let _pageSlugs: Set<string> | null = null;
 
 function escapeHTML(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -165,7 +177,7 @@ function getAttrs(el: EditorElement, inForm = false): string {
     if ((el.props || {}).muted) attrs.push('muted');
   }
   if (el.type === 'button' || el.type === 'link') {
-    const href = resolveHref(((el.props || {}).href as string) || '#', _keepHashLinks);
+    const href = resolveHref(((el.props || {}).href as string) || '#');
     if (el.type === 'button' && !(el.props || {}).href) {
       attrs.push(`type="${inForm ? 'submit' : 'button'}"`);
     } else {
@@ -420,7 +432,7 @@ function elementToHTML(el: EditorElement, indent: number = 0, inForm = false): s
   // Non-link elements with href
   const isNativeLink = ['button', 'link'].includes(el.type) && (el.props || {}).href;
   const hasPageLink = !isNativeLink && (el.props || {}).href && typeof (el.props || {}).href === 'string' && (el.props || {}).href.length > 0;
-  const resolvedLink = hasPageLink ? resolveHref((el.props || {}).href as string, _keepHashLinks) : '';
+  const resolvedLink = hasPageLink ? resolveHref((el.props || {}).href as string) : '';
   const linkTarget = ((el.props || {}).openInNewTab || (el.props || {}).newTab) ? ' target="_blank" rel="noopener noreferrer"' : ((el.props || {}).target ? ` target="${(el.props || {}).target}"` : '');
 
   let elementHTML: string;
@@ -492,10 +504,16 @@ export function exportMultiPageSite(
   const sharedCSS = buildCSS(allElements);
   const sharedJS = generateJS(allElements);
 
+  // The exported zip navigates between pages exactly the way the live site
+  // does, so it needs the same page list to tell links from anchors.
+  const pageSlugs = new Set(
+    pages.map(p => (p.slug || '').replace(/^\/+/, '').toLowerCase()).filter(Boolean),
+  );
+
   const pageFiles = pages.map(page => {
     const cleanSlug = page.slug.replace(/^\/+/, '');
     const filename = page.is_homepage || cleanSlug === '' || cleanSlug === '/' ? 'index.html' : `${cleanSlug}.html`;
-    const bodyContent = page.elements.map(el => elementToHTML(el, 2)).join('\n\n');
+    const bodyContent = generateBodyHTML(page.elements, pageSlugs);
     const ps = page.page_settings || {};
     const title = page.seo_title || page.page_name;
     const desc = page.seo_description || `${page.page_name} — ${siteName}`;

@@ -28,7 +28,7 @@ import {
 import { cn } from '@/lib/utils';
 import { OfficeModuleBand } from '@/pages/lounge/office/ModuleShell';
 import { toast } from 'sonner';
-import ReactMarkdown from 'react-markdown';
+import { NoteMarkdown, NOTE_IMAGE_SCHEME } from '@/components/office/NoteMarkdown';
 
 interface Section {
   id: string;
@@ -78,6 +78,24 @@ const DEFAULT_SECTIONS: Section[] = [
   },
 ];
 
+/**
+ * The row a notebook lives in. Autosave and the Save button both write it, so
+ * they build it the same way — when they each had their own copy, the two
+ * drifted and only one of them was fixed.
+ */
+function notebookPayload(userId: string, sections: Section[]) {
+  return {
+    user_id: userId,
+    file_name: 'Notebook',
+    file_type: 'document' as const,
+    app_source: 'notes',
+    source_id: 'notebook-root',
+    source_route: '/lounge/office/onenote-home',
+    description: `${sections.reduce((s, sec) => s + sec.pages.length, 0)} pages across ${sections.length} sections`,
+    metadata: JSON.parse(JSON.stringify({ sections })),
+  };
+}
+
 export default function OfficeOneNoteHome() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -95,6 +113,7 @@ export default function OfficeOneNoteHome() {
   const [splitView, setSplitView] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [undoStack, setUndoStack] = useState<string[]>([]);
@@ -115,10 +134,15 @@ export default function OfficeOneNoteHome() {
           .eq('user_id', user.id)
           .eq('app_source', 'notes')
           .eq('source_id', 'notebook-root')
-          .maybeSingle();
-        
-        if (data?.metadata && (data.metadata as any).sections) {
-          const savedSections = (data.metadata as any).sections as Section[];
+          /* Newest first and take one. .maybeSingle() used to throw the
+             moment a duplicate existed, and the catch below turned that
+             into "your notebook is empty". */
+          .order('updated_at', { ascending: false })
+          .limit(1);
+
+        const row = (data || [])[0] as { metadata?: unknown } | undefined;
+        if (row?.metadata && (row.metadata as any).sections) {
+          const savedSections = (row.metadata as any).sections as Section[];
           // Restore Date objects
           const restored = savedSections.map(s => ({
             ...s,
@@ -141,30 +165,15 @@ export default function OfficeOneNoteHome() {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(async () => {
       try {
-        const payload = {
-          user_id: user.id,
-          file_name: 'Notebook',
-          file_type: 'document',
-          app_source: 'notes',
-          source_id: 'notebook-root',
-          source_route: '/lounge/office/onenote-home',
-          description: `${sections.reduce((s, sec) => s + sec.pages.length, 0)} pages across ${sections.length} sections`,
-          metadata: JSON.parse(JSON.stringify({ sections })),
-        };
-
-        const { data: existing } = await supabase
+        /* One upsert, not a select-then-insert. The old shape raced with
+           itself: two saves close together both looked, both found nothing,
+           and both inserted, leaving duplicate notebooks that surfaced as
+           phantom pages. The unique index on (user_id, app_source,
+           source_id) makes the second write a conflict this resolves. */
+        const { error } = await supabase
           .from('platform_files')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('app_source', 'notes')
-          .eq('source_id', 'notebook-root')
-          .maybeSingle();
-
-        if (existing) {
-          await supabase.from('platform_files').update(payload).eq('id', existing.id);
-        } else {
-          await supabase.from('platform_files').insert(payload);
-        }
+          .upsert(notebookPayload(user.id, sections), { onConflict: 'user_id,app_source,source_id' });
+        if (error) throw error;
       } catch (err) {
         console.error('Auto-save failed:', err);
       }
@@ -315,15 +324,35 @@ export default function OfficeOneNoteHome() {
     insertMarkdown(`${header}\n${separator}\n${body}`);
   }, [insertMarkdown]);
 
-  const handleImageFile = useCallback((file: File) => {
+  const handleImageFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      insertMarkdown(`![${file.name}](${result})`);
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error('That image is over 15MB. Please use a smaller one.');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not signed in');
+
+      const ext = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const path = `notes/${user.id}/${crypto.randomUUID()}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from('customer-uploads')
+        .upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+
+      // A short reference, not the picture itself. NoteMarkdown exchanges
+      // this for a signed URL when it draws the note.
+      insertMarkdown(`![${file.name.replace(/[[\]]/g, '')}](${NOTE_IMAGE_SCHEME}${path})`);
       setShowImageDialog(false);
-    };
-    reader.readAsDataURL(file);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Could not upload that image');
+    } finally {
+      setUploadingImage(false);
+    }
   }, [insertMarkdown]);
 
   const exportPage = useCallback((format: 'md' | 'txt' | 'html') => {
@@ -347,6 +376,16 @@ export default function OfficeOneNoteHome() {
   }, [page]);
 
   // Handle keyboard shortcuts
+  /* Pasting a screenshot straight into a note is how most images get there.
+     It went in as base64 before, same as the file picker. */
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const file = Array.from(e.clipboardData?.items || [])
+      .find(i => i.type.startsWith('image/'))?.getAsFile();
+    if (!file) return;
+    e.preventDefault();
+    void handleImageFile(file);
+  }, [handleImageFile]);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'b') { e.preventDefault(); insertAtCursor('**', '**'); }
     if ((e.ctrlKey || e.metaKey) && e.key === 'i') { e.preventDefault(); insertAtCursor('*', '*'); }
@@ -356,34 +395,17 @@ export default function OfficeOneNoteHome() {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
   }, [insertAtCursor, undo, redo]);
 
+  /* Pressing Save writes the same row the autosave does, so it goes through
+     the same upsert. It used to select-then-insert on its own, which raced
+     against the autosave as well as against itself. */
   const saveNote = useCallback(async () => {
     if (!user || !page) return;
     setSaving(true);
     try {
-      const payload = {
-        user_id: user.id,
-        file_name: 'Notebook',
-        file_type: 'document' as const,
-        app_source: 'notes',
-        source_id: 'notebook-root',
-        source_route: '/lounge/office/onenote-home',
-        description: `${sections.reduce((s, sec) => s + sec.pages.length, 0)} pages across ${sections.length} sections`,
-        metadata: JSON.parse(JSON.stringify({ sections })),
-      };
-
-      const { data: existing } = await supabase
+      const { error } = await supabase
         .from('platform_files')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('app_source', 'notes')
-        .eq('source_id', 'notebook-root')
-        .maybeSingle();
-
-      if (existing) {
-        await supabase.from('platform_files').update(payload).eq('id', existing.id);
-      } else {
-        await supabase.from('platform_files').insert(payload);
-      }
+        .upsert(notebookPayload(user.id, sections), { onConflict: 'user_id,app_source,source_id' });
+      if (error) throw error;
       toast.success('Note saved');
     } catch (err: any) {
       toast.error('Failed to save: ' + err.message);
@@ -461,7 +483,13 @@ export default function OfficeOneNoteHome() {
   );
 
   return (
-    <div className={cn('h-full flex flex-col overflow-hidden bg-background', fullscreen && 'fixed inset-0 z-50')}>
+    /* The notes app is a standalone route, so nothing above it sets a
+       height: h-full resolved against an auto-height parent, the content
+       grew the document, and adding a note pushed the whole page down
+       instead of scrolling inside the panes. Pinned to the viewport, so
+       every list and the editor scroll within their own column. dvh rather
+       than vh because mobile browser chrome moves. */
+    <div className={cn('flex h-[100dvh] flex-col overflow-hidden bg-background', fullscreen && 'fixed inset-0 z-50')}>
       {/* ─── MOBILE ─── */}
       {isMobile ? (
         <>
@@ -645,12 +673,12 @@ export default function OfficeOneNoteHome() {
 
                   {previewMode ? (
                     <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <ReactMarkdown>{page.content}</ReactMarkdown>
+                      <NoteMarkdown>{page.content}</NoteMarkdown>
                     </div>
                   ) : (
                     <Textarea ref={textareaRef} value={page.content}
                       onChange={e => { pushUndo(); updatePage({ content: e.target.value }); }}
-                      onKeyDown={handleKeyDown}
+                      onKeyDown={handleKeyDown} onPaste={handlePaste}
                       className="min-h-[60vh] resize-none border-none bg-transparent p-0 text-[16px] leading-[1.7] text-foreground/90 shadow-none focus-visible:ring-0"
                       placeholder="Start writing" disabled={page.locked} />
                   )}
@@ -846,7 +874,7 @@ export default function OfficeOneNoteHome() {
 
                       {previewMode ? (
                         <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <ReactMarkdown>{page.content}</ReactMarkdown>
+                          <NoteMarkdown>{page.content}</NoteMarkdown>
                         </div>
                       ) : splitView ? (
                         <>
@@ -856,20 +884,20 @@ export default function OfficeOneNoteHome() {
                               placeholder="Title" disabled={page.locked} />
                             <Textarea ref={textareaRef} value={page.content}
                               onChange={e => { pushUndo(); updatePage({ content: e.target.value }); }}
-                              onKeyDown={handleKeyDown}
+                              onKeyDown={handleKeyDown} onPaste={handlePaste}
                               className="min-h-[600px] resize-none rounded-[12px] border border-border/40 bg-background/40 p-4 font-mono text-[13px] leading-relaxed text-foreground/90 shadow-none focus-visible:ring-1 focus-visible:ring-primary/40"
                               placeholder="Write in markdown" disabled={page.locked} />
                           </div>
                           <div className="min-w-0 flex-1 overflow-auto rounded-[12px] border border-border/40 bg-card p-5">
                             <div className="prose prose-sm dark:prose-invert max-w-none">
-                              <ReactMarkdown>{page.content}</ReactMarkdown>
+                              <NoteMarkdown>{page.content}</NoteMarkdown>
                             </div>
                           </div>
                         </>
                       ) : (
                         <Textarea ref={textareaRef} value={page.content}
                           onChange={e => { pushUndo(); updatePage({ content: e.target.value }); }}
-                          onKeyDown={handleKeyDown}
+                          onKeyDown={handleKeyDown} onPaste={handlePaste}
                           className="min-h-[600px] resize-none border-none bg-transparent p-0 text-[15px] leading-[1.75] text-foreground/90 shadow-none focus-visible:ring-0"
                           placeholder="Start writing" disabled={page.locked} />
                       )}
@@ -928,7 +956,7 @@ export default function OfficeOneNoteHome() {
               <div onClick={() => fileInputRef.current?.click()}
                 className="cursor-pointer rounded-[12px] bg-foreground/[0.025] p-8 text-center transition-colors duration-150 hover:bg-foreground/[0.04]">
                 <FileUp className="mx-auto mb-2 h-7 w-7 text-muted-foreground" strokeWidth={1.6} />
-                <p className="text-xs font-medium">Choose an image</p>
+                <p className="text-xs font-medium">{uploadingImage ? 'Uploading…' : 'Choose an image'}</p>
                 <p className="mt-1 text-[10.5px] text-muted-foreground">PNG, JPG, GIF, WebP, SVG</p>
               </div>
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleImageFile(f); }} />
