@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { animate, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
+import { animate, m, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 import { useRef } from "react";
 import { Phone } from "@phosphor-icons/react/dist/ssr";
 import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
@@ -44,7 +44,7 @@ export function MobileActionBar() {
   });
 
   return (
-    <motion.div
+    <m.div
       style={{ y }}
       className="fixed inset-x-0 bottom-0 z-[80] lg:hidden"
       data-mobile-action-bar
@@ -66,6 +66,6 @@ export function MobileActionBar() {
           </Link>
         </div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }

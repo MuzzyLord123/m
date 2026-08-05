@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 
 /**
  * Signature interaction 1 — hero brush reveal.
@@ -53,7 +53,7 @@ export function HeroHeadline({
   return (
     <h1 className={className}>
       {lines.map((line, index) => (
-        <motion.span
+        <m.span
           key={index}
           className="block"
           style={{ ...maskStyle, ["--wipe" as string]: reduced ? "100%" : "0%" }}
@@ -66,7 +66,7 @@ export function HeroHeadline({
           }}
         >
           {line}
-        </motion.span>
+        </m.span>
       ))}
     </h1>
   );

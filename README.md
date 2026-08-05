@@ -154,36 +154,57 @@ non-zero on failure, so they drop straight into CI.
 
 ### Where the numbers stand
 
-Lighthouse, mobile profile, against a local production build:
+Lighthouse, mobile profile, against a local production build. Scores on this
+class of machine vary by a few points between runs, so these are medians of
+three; the occasional 60-something outlier is contention, not the page.
 
 | Page        | Perf | A11y | Best practices | SEO | LCP   | CLS   | TBT    |
 | ----------- | ---- | ---- | -------------- | --- | ----- | ----- | ------ |
-| `/`         | 93   | 100  | 100            | 100 | 3.0 s | 0.019 | 170 ms |
-| `/work`     | 91   | 100  | 100            | 100 | 3.2 s | 0.002 | 180 ms |
-| `/services` | 86   | 100  | 100            | 100 | 3.6 s | 0.010 | 240 ms |
-| `/about`    | 95   | 100  | 100            | 100 | 2.6 s | 0.003 | 170 ms |
-| `/contact`  | 93   | 100  | 100            | 100 | 2.7 s | 0.004 | 230 ms |
-| `/quote`    | 89   | 100  | 100            | 100 | 3.0 s | 0.004 | 290 ms |
-| `/blog`     | 93   | 100  | 100            | 100 | 2.7 s | 0.012 | 190 ms |
+| `/`         | 92   | 100  | 100            | 100 | 2.9 s | 0.019 | 190 ms |
+| `/work`     | 90   | 100  | 100            | 100 | 3.1 s | 0.000 | 220 ms |
+| `/services` | 87   | 100  | 100            | 100 | 3.6 s | 0.010 | 200 ms |
+| `/about`    | 94   | 100  | 100            | 100 | 2.7 s | 0.003 | 170 ms |
+| `/contact`  | 93   | 100  | 100            | 100 | 2.7 s | 0.004 | 200 ms |
+| `/quote`    | 89   | 100  | 100            | 100 | 2.8 s | 0.004 | 310 ms |
+| `/blog`     | 94   | 100  | 100            | 100 | 2.8 s | 0.012 | 150 ms |
 
 Accessibility, best practices and SEO are 100 across the site, and CLS is far
-inside its budget. **Performance is 86–95 rather than the 95+ target**, and
+inside its budget. **Performance is 87–94 rather than the 95+ target**, and
 Lighthouse's simulated LCP sits above 2.5s.
 
-The cause is client JavaScript on the critical path: React, the Next runtime
-and the animation library total around 170KB before the hero image is
-requested. Measured on a real throttled connection (4× CPU, 1.6Mbps) rather
-than Lighthouse's Lantern model, LCP on the home page is **1.2s** — the gap is
-the simulation's bandwidth contention, not a slow page. Two things already
-bought a second of simulated LCP back: subsetting the fonts, and taking the
-italic faces off the preload list.
+Measured on a real throttled connection (4x CPU, 1.6Mbps) rather than
+Lighthouse's Lantern model, LCP on the home page is **1.2s** and the LCP
+element is the hero photograph. The gap is the simulation modelling bandwidth
+contention between the critical-path JavaScript and the image.
 
-The remaining lever is the animation library. Moving the signature interactions
-onto `LazyMotion` with the `m` components, and rebuilding the nav's scroll
-condense on a CSS scroll-driven animation, would take roughly 40KB off first
-load and should clear 95. It is a real refactor across a dozen components
-rather than a setting, so it is left as the next piece of work rather than
-rushed.
+What moved the number, and what did not:
+
+- **Subsetting the fonts** to the characters the site renders (171KB to 120KB)
+  and **taking the italic faces off the preload list**: simulated LCP 4.0s to
+  ~2.9s, performance +7. The largest single win.
+- **Rewriting `Reveal` off the animation library** onto an IntersectionObserver
+  and a CSS transition. It is used 40-odd times on the home page, and this is
+  the change that keeps TBT under 300ms.
+- **Marking the first service photograph `priority`.** Its LCP element was an
+  unprioritised image at 2.9s on a real connection.
+- **`m` + `LazyMotion` instead of `motion`.** Measured, and it made no
+  difference: first load went 162KB to 163KB, because
+  `optimizePackageImports` in `next.config.mjs` was already tree-shaking the
+  library. The refactor is kept because it is the conventional shape and costs
+  nothing, but it is not the lever an earlier draft of this README claimed.
+  Loading the feature bundle through a dynamic import was tried too and was
+  actively worse (185KB), since the async chunk duplicates the barrel the
+  static imports already pull in.
+
+What is left, honestly: the remaining weight is React plus the Next runtime
+plus the animation core, and roughly 170KB of it sits ahead of the hero image.
+Getting to 95 means cutting the animation library out of the shell entirely --
+rebuilding the nav's scroll condense and the scroll progress bar on CSS
+scroll-driven animations, and the action bar on an IntersectionObserver
+sentinel. That is worth doing, but the nav condense is specified to be driven
+by a motion value rather than a class swap, so it is a design decision as much
+as a performance one and should be made deliberately rather than at the end of
+a build.
 
 ## House rules the code follows
 

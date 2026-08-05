@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, LazyMotion, domMax, m, useReducedMotion } from "motion/react";
 import { X } from "@phosphor-icons/react/dist/ssr";
 import { SwatchFilter, type Filter } from "./SwatchFilter";
 import { blurTone } from "@/lib/images";
@@ -26,6 +26,9 @@ export function GalleryMobile() {
   const shown = filter === "all" ? projects : projects.filter((p) => p.category === filter);
 
   return (
+    /* domMax: the bottom sheet is drag-to-dismiss, and drag is not in the
+       root's smaller feature bundle. */
+    <LazyMotion features={domMax}>
     <div className="lg:hidden">
       <div className="sticky top-[4.75rem] z-40 bg-paper/95 py-3 backdrop-blur-sm">
         <div className="shell">
@@ -78,6 +81,7 @@ export function GalleryMobile() {
 
       <ProjectSheet project={open} onClose={() => setOpen(null)} />
     </div>
+    </LazyMotion>
   );
 }
 
@@ -111,7 +115,7 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
     <AnimatePresence>
       {project && (
         <div className="fixed inset-0 z-[120]">
-          <motion.button
+          <m.button
             type="button"
             aria-label="Close project"
             onClick={onClose}
@@ -122,7 +126,7 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
             transition={{ duration: reduced ? 0 : 0.2 }}
           />
 
-          <motion.div
+          <m.div
             ref={sheetRef}
             role="dialog"
             aria-modal="true"
@@ -204,7 +208,7 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
                 {CTA_LABEL}
               </Link>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 
 /**
  * Hand-drawn brush-stroke underline. Two overlapping tapered strokes give it
@@ -31,7 +31,7 @@ export function BrushStroke({
       fill="none"
       aria-hidden="true"
     >
-      <motion.path
+      <m.path
         d="M1.5 6.2c14-2.3 30.4-3.4 47.8-3.3 19.4.1 38.6 1.4 69.2 3.6"
         stroke={colour}
         strokeWidth={3.2}
@@ -43,7 +43,7 @@ export function BrushStroke({
         }}
       />
       {/* Dry-brush trail — lighter, slightly offset, a beat behind. */}
-      <motion.path
+      <m.path
         d="M4 8.4c16-1.6 34-2.4 52-2.2 17 .2 34 1 62 2.4"
         stroke={colour}
         strokeWidth={1.1}

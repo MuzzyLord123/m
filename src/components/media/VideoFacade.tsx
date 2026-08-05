@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { blurTone } from "@/lib/images";
 
 /**
@@ -64,7 +64,7 @@ export function VideoFacade({
             <span className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/25 to-ink/10" />
 
             <span className="absolute inset-0 grid place-items-center">
-              <motion.svg
+              <m.svg
                 viewBox="0 0 96 96"
                 className="h-24 w-24 drop-shadow-[0_10px_28px_rgb(20_20_20/0.35)]"
                 aria-hidden="true"
@@ -79,7 +79,7 @@ export function VideoFacade({
                   fill="var(--color-accent)"
                 />
                 <path d="M40 33.5 65 48 40 62.5Z" fill="#fff" />
-              </motion.svg>
+              </m.svg>
             </span>
 
             <span className="absolute inset-x-0 bottom-0 p-6 text-left">

@@ -72,6 +72,9 @@ export default function ServicesPage() {
                       src={service.image}
                       alt=""
                       fill
+                      /* The first service photograph is this page's LCP
+                         element on mobile — it must not wait its turn. */
+                      priority={index === 0}
                       sizes="(min-width: 1024px) 45vw, 100vw"
                       placeholder="blur"
                       blurDataURL={blurTone(service.tone)}

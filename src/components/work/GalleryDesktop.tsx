@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, LazyMotion, domMax, m, useReducedMotion } from "motion/react";
 import { SwatchFilter, type Filter } from "./SwatchFilter";
 import { Lightbox } from "./Lightbox";
 import { blurTone } from "@/lib/images";
@@ -43,11 +43,14 @@ export function GalleryDesktop() {
   const shown = filter === "all" ? projects : projects.filter((p) => p.category === filter);
 
   return (
+    /* domMax rather than the root's domAnimation: the filter reflow uses
+       layout projection, which is not in the smaller bundle. */
+    <LazyMotion features={domMax}>
     <div className="hidden lg:block">
       <div className="shell">
         <SwatchFilter value={filter} onChange={setFilter} />
 
-        <motion.ul layout={!reduced} className="mt-12 grid grid-cols-12 gap-6">
+        <m.ul layout={!reduced} className="mt-12 grid grid-cols-12 gap-6">
           {/* Not mode="popLayout": it wraps exiting children in a div, which
               puts a non-list element between the ul and its li items. */}
           <AnimatePresence>
@@ -56,7 +59,7 @@ export function GalleryDesktop() {
               const image = project.images[0];
 
               return (
-                <motion.li
+                <m.li
                   key={project.slug}
                   id={project.slug}
                   layout={!reduced}
@@ -108,11 +111,11 @@ export function GalleryDesktop() {
                       </span>
                     </div>
                   </button>
-                </motion.li>
+                </m.li>
               );
             })}
           </AnimatePresence>
-        </motion.ul>
+        </m.ul>
 
         {shown.length === 0 && (
           <p className="mt-16 text-[1.0625rem] text-ink-soft">
@@ -124,5 +127,6 @@ export function GalleryDesktop() {
 
       <Lightbox project={open} onClose={() => setOpen(null)} />
     </div>
+    </LazyMotion>
   );
 }

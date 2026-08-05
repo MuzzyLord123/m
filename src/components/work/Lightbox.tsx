@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight, X } from "@phosphor-icons/react/dist/ssr";
 import { blurTone } from "@/lib/images";
 import { CTA_HREF, CTA_LABEL } from "@/config/site";
@@ -90,7 +90,7 @@ export function Lightbox({
   return (
     <AnimatePresence>
       {project && (
-        <motion.div
+        <m.div
           className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -104,7 +104,7 @@ export function Lightbox({
             className="absolute inset-0 cursor-zoom-out bg-ink/88 backdrop-blur-[3px]"
           />
 
-          <motion.div
+          <m.div
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
@@ -119,7 +119,7 @@ export function Lightbox({
             {/* Stage — all frames mounted, only the active one shown */}
             <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[4px] bg-plaster">
               {project.images.map((image, position) => (
-                <motion.div
+                <m.div
                   key={image.src}
                   className="absolute inset-0"
                   animate={{ opacity: position === index ? 1 : 0 }}
@@ -135,7 +135,7 @@ export function Lightbox({
                     blurDataURL={blurTone(image.tone)}
                     className="object-cover"
                   />
-                </motion.div>
+                </m.div>
               ))}
 
               {count > 1 && (
@@ -193,8 +193,8 @@ export function Lightbox({
                 {CTA_LABEL}
               </Link>
             </div>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

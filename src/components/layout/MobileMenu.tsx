@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { ArrowUpRight, Clock, EnvelopeSimple, Phone } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
@@ -98,7 +98,7 @@ export function MobileMenu() {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             ref={panelRef}
             id="mobile-menu"
             tabIndex={-1}
@@ -119,7 +119,7 @@ export function MobileMenu() {
             >
               <ul>
                 {menuLinks.map((link, index) => (
-                  <motion.li
+                  <m.li
                     key={link.href}
                     initial={{ y: reduced ? 0 : 26, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -139,13 +139,13 @@ export function MobileMenu() {
                         0{index + 1}
                       </span>
                     </Link>
-                  </motion.li>
+                  </m.li>
                 ))}
               </ul>
             </nav>
 
             {/* Everything below sits in thumb reach. */}
-            <motion.div
+            <m.div
               initial={{ y: reduced ? 0 : 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{
@@ -198,8 +198,8 @@ export function MobileMenu() {
                   Facebook <ArrowUpRight weight="light" className="size-3.5" />
                 </a>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -233,19 +233,19 @@ function BrushToggle({
       className="relative z-[96] -mr-2 grid size-11 place-items-center rounded-full transition-transform duration-200 active:scale-[0.94]"
     >
       <span className="relative block h-[18px] w-[26px]">
-        <motion.span
+        <m.span
           className={bar}
           style={{ top: 0 }}
           animate={open ? { width: 26, y: 8, rotate: 45 } : { width: 26, y: 0, rotate: 0 }}
           transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
         />
-        <motion.span
+        <m.span
           className={bar}
           style={{ top: 8 }}
           animate={open ? { width: 26, opacity: 0, scaleX: 0 } : { width: 17, opacity: 1, scaleX: 1 }}
           transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
         />
-        <motion.span
+        <m.span
           className={bar}
           style={{ top: 16 }}
           animate={open ? { width: 26, y: -8, rotate: -45 } : { width: 22, y: 0, rotate: 0 }}

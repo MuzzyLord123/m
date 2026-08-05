@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 
 /**
  * Live chat on Tawk.to's free plan, wearing our clothes.
@@ -100,7 +100,7 @@ export function ChatLauncher() {
   }
 
   return (
-    <motion.button
+    <m.button
       type="button"
       onClick={open}
       aria-label={status === "loading" ? "Opening live chat" : "Open live chat"}
@@ -139,6 +139,6 @@ export function ChatLauncher() {
           Connecting you to the chat
         </span>
       )}
-    </motion.button>
+    </m.button>
   );
 }

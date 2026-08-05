@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { m, useReducedMotion, useScroll, useTransform } from "motion/react";
 
 /**
  * Signature interaction 2 — roller-pass section transition.
@@ -38,7 +38,7 @@ export function RollerPass({
     <div ref={ref} className={`relative isolate ${className}`}>
       {children}
       {!reduced && (
-        <motion.div
+        <m.div
           aria-hidden="true"
           style={{ x, skewX: skew }}
           className={`pointer-events-none absolute inset-y-0 -left-[2%] z-20 w-[104%] ${

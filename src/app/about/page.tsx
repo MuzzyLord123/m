@@ -55,6 +55,7 @@ export default function AboutPage() {
                 src="/work/about-portrait.png"
                 alt="The Paint Man on site, cutting in a ceiling edge by hand"
                 fill
+                priority
                 sizes="(min-width: 1024px) 45vw, 100vw"
                 placeholder="blur"
                 blurDataURL={blurTone("#c3ccc9")}

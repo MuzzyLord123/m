@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from "react";
 import Image from "next/image";
-import { motion, useMotionTemplate, useMotionValue, useTransform } from "motion/react";
+import { m, useMotionTemplate, useMotionValue, useTransform } from "motion/react";
 import { blurTone } from "@/lib/images";
 import type { ProjectImage } from "@/data/projects";
 
@@ -90,7 +90,7 @@ export function BeforeAfter({
       />
 
       {/* Before — clipped back as the divider is dragged */}
-      <motion.div style={{ clipPath }} className="absolute inset-0">
+      <m.div style={{ clipPath }} className="absolute inset-0">
         <Image
           src={before.src}
           alt={before.alt}
@@ -101,13 +101,13 @@ export function BeforeAfter({
           blurDataURL={blurTone(before.tone)}
           className="h-full w-full object-cover"
         />
-      </motion.div>
+      </m.div>
 
       <Tag className="left-4" text="Before" />
       <Tag className="right-4" text="After" />
 
       {/* Divider — a masked tape edge with a roller grip */}
-      <motion.div
+      <m.div
         ref={handleRef}
         role="slider"
         tabIndex={0}
@@ -133,7 +133,7 @@ export function BeforeAfter({
             />
           </svg>
         </div>
-      </motion.div>
+      </m.div>
     </div>
   );
 }

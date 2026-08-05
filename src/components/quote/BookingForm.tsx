@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DayPicker } from "react-day-picker";
 import { addDays, format, startOfDay } from "date-fns";
 import { enGB } from "date-fns/locale";
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { PaintTick } from "./PaintTick";
 import { ChipGroup, Field, Honeypot, TextArea, TextInput } from "@/components/ui/Field";
@@ -267,7 +267,7 @@ export function BookingForm() {
               className="relative inline-flex h-13 items-center overflow-hidden rounded-full bg-accent px-7 py-4 text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98] disabled:cursor-wait disabled:opacity-90"
             >
               {status === "sending" && (
-                <motion.span
+                <m.span
                   aria-hidden="true"
                   className="absolute inset-y-0 left-0 bg-accent-deep"
                   initial={{ width: "0%" }}

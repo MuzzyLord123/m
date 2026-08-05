@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { PaintGauge } from "./PaintGauge";
 import { PaintTick } from "./PaintTick";
@@ -110,7 +110,7 @@ export function QuoteForm() {
       <div className="mt-5 min-h-[22rem]">
         <AnimatePresence mode="wait" initial={false}>
           {step === 1 && (
-            <motion.div key="step-1" {...slide}>
+            <m.div key="step-1" {...slide}>
               <h2 className="font-display text-[1.75rem] leading-tight font-semibold tracking-[-0.025em] text-ink">
                 What needs doing?
               </h2>
@@ -164,11 +164,11 @@ export function QuoteForm() {
                   )}
                 </div>
               </fieldset>
-            </motion.div>
+            </m.div>
           )}
 
           {step === 2 && (
-            <motion.div key="step-2" {...slide} className="grid gap-8">
+            <m.div key="step-2" {...slide} className="grid gap-8">
               <h2 className="font-display text-[1.75rem] leading-tight font-semibold tracking-[-0.025em] text-ink">
                 Tell us about the place.
               </h2>
@@ -190,11 +190,11 @@ export function QuoteForm() {
                 onChange={(value) => setValue("rooms", value as QuoteInput["rooms"], { shouldValidate: true })}
                 error={errors.rooms?.message}
               />
-            </motion.div>
+            </m.div>
           )}
 
           {step === 3 && (
-            <motion.div key="step-3" {...slide} className="grid gap-8">
+            <m.div key="step-3" {...slide} className="grid gap-8">
               <h2 className="font-display text-[1.75rem] leading-tight font-semibold tracking-[-0.025em] text-ink">
                 When would you like it done?
               </h2>
@@ -207,11 +207,11 @@ export function QuoteForm() {
                 onChange={(value) => setValue("timing", value as QuoteInput["timing"], { shouldValidate: true })}
                 error={errors.timing?.message}
               />
-            </motion.div>
+            </m.div>
           )}
 
           {step === 4 && (
-            <motion.div key="step-4" {...slide} className="grid gap-6">
+            <m.div key="step-4" {...slide} className="grid gap-6">
               <h2 className="font-display text-[1.75rem] leading-tight font-semibold tracking-[-0.025em] text-ink">
                 Where do we send the price?
               </h2>
@@ -303,7 +303,7 @@ export function QuoteForm() {
                   {serverError}
                 </p>
               )}
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>
@@ -336,7 +336,7 @@ export function QuoteForm() {
             className="relative inline-flex h-12 items-center overflow-hidden rounded-full bg-accent px-7 text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98] disabled:cursor-wait disabled:opacity-90"
           >
             {status === "sending" && (
-              <motion.span
+              <m.span
                 aria-hidden="true"
                 className="absolute inset-y-0 left-0 bg-accent-deep"
                 initial={{ width: "0%" }}

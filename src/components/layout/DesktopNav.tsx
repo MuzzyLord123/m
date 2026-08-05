@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, useScroll, useTransform } from "motion/react";
+import { m, useScroll, useTransform } from "motion/react";
 import { Phone } from "@phosphor-icons/react/dist/ssr";
 import { BrushStroke } from "@/components/brand/BrushStroke";
 import { Wordmark } from "@/components/brand/Wordmark";
@@ -33,12 +33,12 @@ export function DesktopNav() {
   const chromeOpacity = useTransform(scrollY, [40, 80], [0, 1]);
 
   return (
-    <motion.div
+    <m.div
       style={{ height, background, backdropFilter, WebkitBackdropFilter: backdropFilter }}
       className="relative hidden lg:block"
     >
       {/* Hairline + tinted shadow fade in together as the bar condenses. */}
-      <motion.div
+      <m.div
         aria-hidden="true"
         style={{ opacity: chromeOpacity }}
         className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-hairline shadow-[0_10px_30px_-16px_rgb(60_60_50/0.45)]"
@@ -53,7 +53,7 @@ export function DesktopNav() {
               const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
               return (
                 <li key={link.href}>
-                  <motion.span
+                  <m.span
                     initial="rest"
                     animate={active ? "drawn" : "rest"}
                     whileHover="drawn"
@@ -71,7 +71,7 @@ export function DesktopNav() {
                       colour="var(--color-accent)"
                       className="pointer-events-none absolute -bottom-0.5 left-0 h-[7px] w-full"
                     />
-                  </motion.span>
+                  </m.span>
                 </li>
               );
             })}
@@ -98,6 +98,6 @@ export function DesktopNav() {
           </div>
         </div>
       </nav>
-    </motion.div>
+    </m.div>
   );
 }

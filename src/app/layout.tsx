@@ -7,6 +7,7 @@ import { MobileActionBar } from "@/components/layout/MobileActionBar";
 import { ScrollPaintLevel } from "@/components/layout/ScrollPaintLevel";
 import { ChatLauncher } from "@/components/chat/ChatLauncher";
 import { StructuredData } from "@/components/seo/StructuredData";
+import { MotionProvider } from "@/components/motion/MotionProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -38,12 +39,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <ScrollPaintLevel />
-        <SiteHeader />
-        <main id="main">{children}</main>
-        <SiteFooter />
-        <MobileActionBar />
-        <ChatLauncher />
+        <MotionProvider>
+          <ScrollPaintLevel />
+          <SiteHeader />
+          <main id="main">{children}</main>
+          <SiteFooter />
+          <MobileActionBar />
+          <ChatLauncher />
+        </MotionProvider>
         <StructuredData />
         <div className="roller-grain" aria-hidden="true" />
       </body>
