@@ -97,15 +97,30 @@ nothing loads from YouTube until a visitor presses play.
 
 ## Fonts
 
-Self-hosted variable woff2 files in `src/fonts`, wired through `next/font/local`.
-There is no Google Fonts `<link>` and no runtime font CDN request.
+Self-hosted variable woff2 files served from our own origin through
+`next/font/local`. There is no Google Fonts `<link>` and no runtime font CDN
+request.
+
+The files are placed into `src/fonts` by `scripts/setup-fonts.mjs`, which runs
+ahead of `npm run dev` and `npm run build` and copies them out of two pinned
+`@fontsource-variable` devDependencies. Pinning them as packages rather than
+committing binaries means every environment — local, CI, the Docker image —
+builds from byte-identical files.
 
 The brand specifies **Clash Display** and **General Sans** from Fontshare, which
 was unreachable from the build environment. The closest free variable
 equivalents ship instead — Archivo (display) and Schibsted Grotesk (body). To
-swap in the real pair: download both from fontshare.com, drop the woff2 files
-into `src/fonts` using the existing four filenames, and adjust the weight ranges
-in `src/app/fonts.ts`. Nothing else references a font by name.
+swap in the real pair:
+
+1. Download both variable woff2 files from fontshare.com.
+2. Save them into `src/fonts` as `display-normal.woff2`, `display-italic.woff2`,
+   `body-normal.woff2` and `body-italic.woff2`. The setup script never
+   overwrites a file that already exists.
+3. Adjust the `weight` ranges in `src/app/fonts.ts` to match the axes those
+   files expose, and drop the `src/fonts/*.woff2` rule from `.gitignore` so the
+   real files are committed.
+
+Nothing else in the codebase references a font by name.
 
 ---
 

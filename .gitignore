@@ -10,3 +10,8 @@ npm-debug.log*
 .vercel
 next-env.d.ts
 tsconfig.tsbuildinfo
+
+# Font files are placed by scripts/setup-fonts.mjs from the pinned
+# @fontsource-variable packages. Drop real Fontshare woff2 files here under the
+# same four names and remove this rule to commit them instead.
+src/fonts/*.woff2
