@@ -32,16 +32,17 @@ export function SwatchFilter({
   const strip = layout === "strip";
 
   return (
-    <ul
-      className={
-        strip
-          ? "-mx-[var(--shell-pad)] flex snap-x gap-3 overflow-x-auto px-[var(--shell-pad)] pt-1 pb-3"
-          : "flex flex-wrap gap-3"
-      }
-      role="group"
-      aria-label="Filter projects by trade"
-    >
-      {OPTIONS.map((option) => {
+    /* The group role lives on a wrapper, not on the ul. Putting it on the list
+       itself overrides the list role and orphans every li inside it. */
+    <div role="group" aria-label="Filter projects by trade">
+      <ul
+        className={
+          strip
+            ? "-mx-[var(--shell-pad)] flex snap-x gap-3 overflow-x-auto px-[var(--shell-pad)] pt-1 pb-3"
+            : "flex flex-wrap gap-3"
+        }
+      >
+        {OPTIONS.map((option) => {
         const active = value === option.id;
         return (
           <li key={option.id} className={strip ? "shrink-0 snap-start" : undefined}>
@@ -76,7 +77,8 @@ export function SwatchFilter({
             </button>
           </li>
         );
-      })}
-    </ul>
+        })}
+      </ul>
+    </div>
   );
 }

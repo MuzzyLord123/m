@@ -26,7 +26,7 @@ export function SectionHeading({
       <div>
         <p
           className={`text-[0.75rem] font-semibold tracking-[0.16em] uppercase ${
-            onDark ? "text-white/70" : "text-ink-mute"
+            onDark ? "text-white/80" : "text-ink-mute"
           }`}
         >
           {eyebrow}

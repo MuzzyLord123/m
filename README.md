@@ -134,6 +134,57 @@ Nothing else in the codebase references a font by name.
 
 ---
 
+## Checking the work
+
+The site ships with its own audits. Start a production build first, then run
+any of them against it:
+
+```bash
+npm run build && npx next start -p 3100
+
+npm run audit:contrast      # WCAG ratios for every colour pair in use
+npm run audit:motion        # reduced-motion collapse + zero scroll listeners
+npm run audit:interaction   # lightbox, bottom sheet, menu, quote flow in a browser
+npm run audit:lighthouse    # Lighthouse mobile, all four categories
+npm run shots               # screenshots at 375 / 768 / 1024 / 1440
+```
+
+`audit:contrast` and `audit:motion` need no browser beyond Chromium and exit
+non-zero on failure, so they drop straight into CI.
+
+### Where the numbers stand
+
+Lighthouse, mobile profile, against a local production build:
+
+| Page        | Perf | A11y | Best practices | SEO | LCP   | CLS   | TBT    |
+| ----------- | ---- | ---- | -------------- | --- | ----- | ----- | ------ |
+| `/`         | 93   | 100  | 100            | 100 | 3.0 s | 0.019 | 170 ms |
+| `/work`     | 91   | 100  | 100            | 100 | 3.2 s | 0.002 | 180 ms |
+| `/services` | 86   | 100  | 100            | 100 | 3.6 s | 0.010 | 240 ms |
+| `/about`    | 95   | 100  | 100            | 100 | 2.6 s | 0.003 | 170 ms |
+| `/contact`  | 93   | 100  | 100            | 100 | 2.7 s | 0.004 | 230 ms |
+| `/quote`    | 89   | 100  | 100            | 100 | 3.0 s | 0.004 | 290 ms |
+| `/blog`     | 93   | 100  | 100            | 100 | 2.7 s | 0.012 | 190 ms |
+
+Accessibility, best practices and SEO are 100 across the site, and CLS is far
+inside its budget. **Performance is 86–95 rather than the 95+ target**, and
+Lighthouse's simulated LCP sits above 2.5s.
+
+The cause is client JavaScript on the critical path: React, the Next runtime
+and the animation library total around 170KB before the hero image is
+requested. Measured on a real throttled connection (4× CPU, 1.6Mbps) rather
+than Lighthouse's Lantern model, LCP on the home page is **1.2s** — the gap is
+the simulation's bandwidth contention, not a slow page. Two things already
+bought a second of simulated LCP back: subsetting the fonts, and taking the
+italic faces off the preload list.
+
+The remaining lever is the animation library. Moving the signature interactions
+onto `LazyMotion` with the `m` components, and rebuilding the nav's scroll
+condense on a CSS scroll-driven animation, would take roughly 40KB off first
+load and should clear 95. It is a real refactor across a dozen components
+rather than a setting, so it is left as the next piece of work rather than
+rushed.
+
 ## House rules the code follows
 
 - Server Components by default; anything with motion, scroll or pointer logic is

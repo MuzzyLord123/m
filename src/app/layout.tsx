@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { body, display } from "./fonts";
+import { body, bodyItalic, display, displayItalic } from "./fonts";
 import { site } from "@/config/site";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { MobileActionBar } from "@/components/layout/MobileActionBar";
 import { ScrollPaintLevel } from "@/components/layout/ScrollPaintLevel";
 import { ChatLauncher } from "@/components/chat/ChatLauncher";
+import { StructuredData } from "@/components/seo/StructuredData";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,7 +33,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-GB" className={`${display.variable} ${body.variable}`}>
+    <html lang="en-GB" className={`${display.variable} ${displayItalic.variable} ${body.variable} ${bodyItalic.variable}`}>
       <body className="bg-paper text-ink antialiased">
         <a href="#main" className="skip-link">
           Skip to content
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteFooter />
         <MobileActionBar />
         <ChatLauncher />
+        <StructuredData />
         <div className="roller-grain" aria-hidden="true" />
       </body>
     </html>

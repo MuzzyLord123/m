@@ -135,7 +135,7 @@ export function MobileMenu() {
                       className="flex items-baseline justify-between py-3.5 font-display text-[2.75rem] leading-[1.1] font-semibold tracking-[-0.035em] text-white"
                     >
                       {link.label}
-                      <span className="font-body text-sm font-normal text-white/45 tabular-nums">
+                      <span className="font-body text-sm font-normal text-white/80 tabular-nums">
                         0{index + 1}
                       </span>
                     </Link>
@@ -180,7 +180,7 @@ export function MobileMenu() {
                 </p>
               </div>
 
-              <div className="mt-6 flex gap-5 text-[0.8125rem] tracking-wide text-white/70 uppercase">
+              <div className="mt-6 flex gap-5 text-[0.8125rem] tracking-wide text-white/80 uppercase">
                 <a
                   href={site.social.instagram}
                   className="inline-flex items-center gap-1"

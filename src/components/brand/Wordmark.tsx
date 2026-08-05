@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { site } from "@/config/site";
 
 /**
  * Type-only lockup. "Paint" carries a painted underline in the accent — the
@@ -15,12 +14,13 @@ export function Wordmark({
   return (
     <Link
       href="/"
-      className={`group inline-flex items-baseline gap-[0.32em] font-display text-[1.0625rem] font-semibold tracking-[-0.03em] uppercase ${
+      /* No aria-label: the visible text is the accessible name, which is what
+         a screen reader should read and what axe expects to match. */
+      className={`group inline-flex items-baseline font-display text-[1.0625rem] font-semibold tracking-[-0.03em] uppercase ${
         onDark ? "text-white" : "text-ink"
       } ${className}`}
-      aria-label={`${site.name} — home`}
     >
-      <span className="opacity-55">The</span>
+      <span className={onDark ? "opacity-80" : "opacity-70"}>The&nbsp;</span>
       <span className="relative">
         Paint
         <span
@@ -30,7 +30,7 @@ export function Wordmark({
           }`}
         />
       </span>
-      <span>Man</span>
+      <span>&nbsp;Man</span>
     </Link>
   );
 }

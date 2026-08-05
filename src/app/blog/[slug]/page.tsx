@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { ArticleStructuredData } from "@/components/seo/StructuredData";
 import { formatPostDate, getNeighbours, getPost, posts } from "@/lib/blog";
 import { blurTone } from "@/lib/images";
 import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
@@ -42,6 +43,13 @@ export default async function BlogPost({ params }: Params) {
 
   return (
     <article className="pt-[7.5rem] pb-24 lg:pt-[10rem] lg:pb-32">
+      <ArticleStructuredData
+        title={post.title}
+        description={post.description}
+        slug={post.slug}
+        date={post.date}
+        image={post.image}
+      />
       <div className="shell">
         <Link
           href="/blog"

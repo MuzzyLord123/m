@@ -48,7 +48,9 @@ export function GalleryDesktop() {
         <SwatchFilter value={filter} onChange={setFilter} />
 
         <motion.ul layout={!reduced} className="mt-12 grid grid-cols-12 gap-6">
-          <AnimatePresence mode="popLayout">
+          {/* Not mode="popLayout": it wraps exiting children in a div, which
+              puts a non-list element between the ul and its li items. */}
+          <AnimatePresence>
             {shown.map((project, index) => {
               const cell = CELLS[index % CELLS.length];
               const image = project.images[0];

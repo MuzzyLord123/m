@@ -10,7 +10,7 @@ export function FinalCta() {
       <section className="bg-accent py-20 lg:py-28" aria-labelledby="final-cta-heading">
         <div className="shell grid items-end gap-10 lg:grid-cols-[1.2fr_0.8fr]">
           <div>
-            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-white/70 uppercase">
+            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-white/80 uppercase">
               Next step
             </p>
             <h2

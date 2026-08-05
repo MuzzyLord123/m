@@ -4,6 +4,9 @@
 FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+# Playwright is a devDependency used by the audit scripts. Its postinstall
+# would otherwise pull ~150MB of browsers into the image build for nothing.
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 COPY package.json package-lock.json* ./
 RUN npm ci
 

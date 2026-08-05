@@ -99,6 +99,20 @@
     padding-bottom: 0.06em;
   }
 
+  /* Italic faces live in their own families so they stay off the preload
+     critical path. Route emphasised text to the right one: display italic
+     inside headings, body italic everywhere else. */
+  :is(em, i, .italic) {
+    font-family: var(--ff-body-italic), var(--font-body);
+  }
+  :is(h1, h2, h3, .font-display) :is(em, i, .italic),
+  .font-display.italic,
+  h1.italic,
+  h2.italic,
+  h3.italic {
+    font-family: var(--ff-display-italic), var(--font-display);
+  }
+
   ::selection {
     background-color: var(--color-accent);
     color: #fff;
@@ -176,6 +190,23 @@
 }
 
 /* --------------------------------------------------------------------------
+   Reveal — the scroll-in used across every section. Transform and opacity
+   only. The reduced-motion block below collapses it to an instant appearance.
+   -------------------------------------------------------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 600ms var(--ease-coat),
+    transform 600ms var(--ease-coat);
+}
+.reveal[data-reveal="in"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
    Roller stipple — the single page texture.
    Applied once, fixed, above content, non-interactive, ~3% opacity.
    Never on a scrolling container.
@@ -206,5 +237,12 @@
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  /* Revealed content is simply present, whether or not the observer fires. */
+  .reveal {
+    opacity: 1;
+    transform: none;
   }
 }

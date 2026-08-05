@@ -6,7 +6,13 @@
     "dev": "node scripts/setup-fonts.mjs && next dev",
     "build": "node scripts/setup-fonts.mjs && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "placeholders": "node scripts/generate-placeholders.mjs",
+    "audit:contrast": "node scripts/contrast-audit.mjs",
+    "audit:motion": "node scripts/motion-audit.mjs",
+    "audit:interaction": "node scripts/interaction-check.mjs",
+    "audit:lighthouse": "node scripts/lighthouse.mjs",
+    "shots": "node scripts/shots.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",
@@ -32,7 +38,9 @@
     "@types/node": "^26.1.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
+    "lighthouse": "^13.4.1",
     "playwright": "^1.62.1",
+    "subset-font": "^2.5.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
   }
