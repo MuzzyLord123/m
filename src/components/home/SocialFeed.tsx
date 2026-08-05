@@ -50,7 +50,7 @@ export function SocialFeed() {
       </div>
 
       {/* Edge-to-edge scroll strip on mobile, uneven grid on desktop */}
-      <ul className="mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-[var(--shell-pad)] pb-2 lg:mx-auto lg:grid lg:max-w-[var(--spacing-shell)] lg:grid-cols-3 lg:gap-6 lg:overflow-visible">
+      <ul className="mt-12 flex snap-x snap-mandatory scroll-pl-[var(--shell-pad)] gap-4 overflow-x-auto px-[var(--shell-pad)] pb-2 lg:mx-auto lg:grid lg:max-w-[var(--spacing-shell)] lg:grid-cols-3 lg:gap-6 lg:overflow-visible">
         {socialPosts.slice(0, 6).map((post, index) => (
           <Reveal
             as="li"

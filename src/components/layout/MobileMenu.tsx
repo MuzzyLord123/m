@@ -149,7 +149,7 @@ export function MobileMenu() {
               <ul style={{ paddingInline: "1.25rem" }}
                 className="mt-3 flex snap-x gap-3 overflow-x-auto pb-1">
                 {featuredProjects.slice(0, 5).map((project) => (
-                  <li key={project.slug} className="w-[42vw] max-w-[11rem] shrink-0 snap-start">
+                  <li key={project.slug} className="w-[42vw] max-w-[11rem] shrink-0">
                     <Link href={`/work#${project.slug}`} className="block">
                       <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-white/15">
                         <Image
