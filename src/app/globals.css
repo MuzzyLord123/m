@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   THE PAINT MAN — DESIGN TOKENS
+   Art direction: "Fresh Coat". Clean plaster surfaces, crisp masked edges,
+   one confident accent applied with intent. Light mode only, deliberately.
+
+   RADIUS RULE — there are exactly three radii on this site and no others:
+     • buttons / chips / pills ......... rounded-full        (--radius-pill)
+     • cards / images / media .......... 4px                 (--radius-card)
+     • form inputs / textareas ......... 8px                 (--radius-input)
+   If a new element needs a radius, it is one of these three. No exceptions.
+
+   COLOUR RULE — one accent (Wet Paint Blue) carries 100% of UI chrome:
+   every CTA, hover, focus ring, active state and accent moment. The 5-colour
+   sample-card palette below exists ONLY inside swatch and gallery contexts
+   and never appears as UI chrome.
+   ========================================================================== */
+
+@theme {
+  /* Surfaces — cool-leaning neutrals, locked site-wide */
+  --color-paper: #fafaf8;
+  --color-plaster: #edede9;
+  --color-plaster-deep: #e2e2dd;
+  --color-hairline: #d8d8d2;
+
+  /* Ink */
+  --color-ink: #141414;
+  --color-ink-soft: #4b4b47; /* 8.1:1 on paper */
+  --color-ink-mute: #6a6a64; /* 5.2:1 on paper — AA for body and below */
+
+  /* Wet Paint Blue — the single accent */
+  --color-accent: #1d4fd8; /* 6.6:1 with white text */
+  --color-accent-deep: #1740b0;
+  --color-accent-ink: #12308a;
+  --color-accent-wash: #eaeffc;
+
+  /* Sample-card palette — swatch/gallery contexts only, never UI chrome */
+  --color-swatch-sage: #8a9a7b;
+  --color-swatch-terracotta: #b4613d;
+  --color-swatch-ochre: #c2932c;
+  --color-swatch-slate: #59656f;
+  --color-swatch-blush: #d3a7a0;
+
+  /* Type */
+  --font-display: var(--ff-display), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--ff-body), ui-sans-serif, system-ui, sans-serif;
+
+  /* Radius system — the only three radii that exist */
+  --radius-card: 4px;
+  --radius-input: 8px;
+  --radius-pill: 9999px;
+
+  /* Motion — one shared curve. Confident, physical, settles without bounce. */
+  --ease-coat: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Editorial rhythm */
+  --spacing-gutter: 1.25rem;
+  --spacing-shell: 88rem;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --shell-pad: clamp(1.25rem, 5vw, 4.5rem);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  /* Display face carries tight optical tracking at every size it is used. */
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  /* Descender reserve: italic display words with y/g/j/p/q must never clip. */
+  h1,
+  h2 {
+    padding-bottom: 0.06em;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+
+  /* One focus treatment site-wide, in the accent colour. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Skip link */
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 200;
+    transform: translateY(-200%);
+    background: var(--color-accent);
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    transition: transform 200ms var(--ease-coat);
+  }
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Utilities
+   -------------------------------------------------------------------------- */
+
+@utility shell {
+  width: 100%;
+  max-width: var(--spacing-shell);
+  margin-inline: auto;
+  padding-inline: var(--shell-pad);
+}
+
+/* Tape line — the only divider style on the site. A masked edge, not an <hr>.
+   Slight opacity fall-off at each end reads as a lifted strip of tape. */
+@utility tape-line {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-hairline) 8%,
+    var(--color-hairline) 92%,
+    transparent 100%
+  );
+}
+
+/* Prose measure for editorial copy */
+@utility measure {
+  max-width: 65ch;
+}
+
+/* Tinted shadows — never pure black. Tinted toward the background hue. */
+@utility shadow-lift {
+  box-shadow:
+    0 1px 2px rgb(60 60 50 / 0.05),
+    0 12px 32px -12px rgb(60 60 50 / 0.18);
+}
+@utility shadow-lift-deep {
+  box-shadow:
+    0 2px 4px rgb(60 60 50 / 0.06),
+    0 24px 56px -18px rgb(60 60 50 / 0.28);
+}
+@utility shadow-accent {
+  box-shadow: 0 14px 34px -14px rgb(29 79 216 / 0.55);
+}
+
+/* --------------------------------------------------------------------------
+   Roller stipple — the single page texture.
+   Applied once, fixed, above content, non-interactive, ~3% opacity.
+   Never on a scrolling container.
+   -------------------------------------------------------------------------- */
+
+.roller-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.032;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion — every signature animation collapses to its finished state.
+   Content is simply visible. Non-negotiable.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
