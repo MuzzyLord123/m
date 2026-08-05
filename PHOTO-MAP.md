@@ -1,5 +1,38 @@
 # Where your photographs go
 
+## The logo (read this first)
+
+Two files, both currently **stand-ins**:
+
+| File | Used on |
+| --- | --- |
+| `public/brand/logo.png` | Paper backgrounds — desktop bar, mobile bar |
+| `public/brand/logo-white.png` | The flooded accent menu and any dark ground |
+
+Export both with a **transparent background** and an aspect **no wider than
+about 4:1**. A wider lockup has to be set so small to fit the header that the
+words stop being readable — that is why the first pass at this had to be
+resized. SVG is better than PNG; change the extension in
+`src/components/brand/Wordmark.tsx` and it works as-is.
+
+The white version matters: the mobile menu floods orange, and the full-colour
+mark disappears into it.
+
+## Name and colour
+
+Your logo says **THEPAINTMEN.COM**, plural, in orange. The site had been built
+as "The Paint Man" in blue, per the original brief. The logo wins, so:
+
+- `site.name` is now **The Paint Men**. If the trading name is actually
+  singular, change it in `src/config/site.ts` and it propagates everywhere.
+- The accent is now your orange. It is set as **two weights on purpose**: the
+  bright logo orange only reaches ~3:1 against white, so white text on it fails
+  accessibility. `--color-accent` is a deeper working orange (5.4:1 with white)
+  that carries every button, link and focus ring; `--color-accent-bright` is the
+  logo orange, reserved for graphics nothing has to be read against — the brush
+  strokes, the drip, the scroll bar, the chat blob.
+
+
 The site is built around the 38 photographs you sent. Every one has a place
 reserved for it at a known filename, aspect ratio and blur tone.
 

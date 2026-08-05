@@ -8,5 +8,5 @@
  * globals.css. A server component — it ships zero bytes of JS.
  */
 export function ScrollPaintLevel() {
-  return <div aria-hidden="true" className="scroll-level fixed inset-x-0 top-0 z-[70] h-[3px] bg-accent" />;
+  return <div aria-hidden="true" className="scroll-level fixed inset-x-0 top-0 z-[70] h-[3px] bg-accent-bright" />;
 }

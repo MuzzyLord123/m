@@ -30,7 +30,7 @@ export function GalleryMobile() {
        root's smaller feature bundle. */
     <LazyMotion features={domMax}>
     <div className="lg:hidden">
-      <div className="sticky top-[4.75rem] z-40 bg-paper/95 py-3 backdrop-blur-sm">
+      <div className="sticky top-[5.25rem] z-40 bg-paper/95 py-3 backdrop-blur-sm">
         <div className="shell">
           <SwatchFilter value={filter} onChange={setFilter} layout="strip" />
         </div>

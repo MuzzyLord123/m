@@ -7,6 +7,9 @@ import { ArrowUpRight, Clock, EnvelopeSimple, Phone } from "@phosphor-icons/reac
 import { Wordmark } from "@/components/brand/Wordmark";
 import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
 import { primaryNav } from "@/lib/nav";
+import { featuredProjects } from "@/data/projects";
+import { blurTone } from "@/lib/images";
+import Image from "next/image";
 
 const FLOOD_ORIGIN = "calc(100% - 2.6rem) 2.55rem";
 const menuLinks = [...primaryNav, { href: "/contact", label: "Contact" }];
@@ -82,7 +85,7 @@ export function MobileMenu() {
       {/* One toggle, not two. The header row sits above the flood panel in the
           same stacking context, so it inverts to white rather than being
           duplicated underneath. */}
-      <div className="shell relative z-[96] flex h-[4.75rem] items-center justify-between">
+      <div className="shell relative z-[96] flex h-[5.25rem] items-center justify-between">
         <Wordmark onDark={open} />
         <BrushToggle
           ref={toggleRef}
@@ -107,11 +110,11 @@ export function MobileMenu() {
             inert={!open}
             className="flood-panel fixed inset-0 z-[95] flex min-h-[100dvh] flex-col bg-accent outline-none"
           >
-            <div className="h-[4.75rem] shrink-0" aria-hidden="true" />
+            <div className="h-[5.25rem] shrink-0" aria-hidden="true" />
 
             <nav
               aria-label="Mobile"
-              className="shell flex flex-1 flex-col justify-center pt-4 pb-6"
+              className="shell flex flex-col pt-2 pb-5"
             >
               <ul>
                 {menuLinks.map((link, index) => (
@@ -122,7 +125,7 @@ export function MobileMenu() {
                   >
                     <Link
                       href={link.href}
-                      className="flex items-baseline justify-between py-3.5 font-display text-[2.75rem] leading-[1.1] font-semibold tracking-[-0.035em] text-white"
+                      className="flex items-baseline justify-between py-3.5 font-display text-[2.25rem] leading-[1.15] font-semibold tracking-[-0.035em] text-white"
                     >
                       {link.label}
                       <span className="font-body text-sm font-normal text-white/80 tabular-nums">
@@ -134,10 +137,44 @@ export function MobileMenu() {
               </ul>
             </nav>
 
+            {/* Recent work, thumb-scrollable — the menu shows the work rather
+                than only naming it. */}
+            <div
+              className="flood-item shrink-0"
+              style={{ transitionDelay: "0.36s" }}
+            >
+              <p className="shell text-[0.6875rem] font-semibold tracking-[0.16em] text-white/70 uppercase">
+                Recent work
+              </p>
+              <ul style={{ paddingInline: "1.25rem" }}
+                className="mt-3 flex snap-x gap-3 overflow-x-auto pb-1">
+                {featuredProjects.slice(0, 5).map((project) => (
+                  <li key={project.slug} className="w-[42vw] max-w-[11rem] shrink-0 snap-start">
+                    <Link href={`/work#${project.slug}`} className="block">
+                      <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-white/15">
+                        <Image
+                          src={project.images[0].src}
+                          alt=""
+                          fill
+                          sizes="42vw"
+                          placeholder="blur"
+                          blurDataURL={blurTone(project.images[0].tone)}
+                          className="object-cover"
+                        />
+                      </div>
+                      <p className="mt-2 text-[0.8125rem] leading-snug font-medium text-white/95">
+                        {project.title}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             {/* Everything below sits in thumb reach. */}
             <div
-              style={{ transitionDelay: "0.42s" }}
-              className="flood-item shell shrink-0 pb-[calc(1.75rem+env(safe-area-inset-bottom))]"
+              style={{ transitionDelay: "0.46s" }}
+              className="flood-item shell mt-auto shrink-0 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
             >
               <Link
                 href={CTA_HREF}

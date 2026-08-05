@@ -19,7 +19,7 @@ import {
   quoteNotification,
 } from "@/lib/email/templates";
 
-const FALLBACK_FROM = "The Paint Man <onboarding@resend.dev>";
+const FALLBACK_FROM = "The Paint Men <onboarding@resend.dev>";
 
 function client(): Resend | null {
   const key = process.env.RESEND_API_KEY;

@@ -7,8 +7,8 @@
  */
 
 export const site = {
-  name: "The Paint Man",
-  legalName: "The Paint Man",
+  name: "The Paint Men",
+  legalName: "The Paint Men",
   trade: "Painter & decorator",
   tagline: "Decorating, done properly.",
 

@@ -108,7 +108,7 @@ export function ChatLauncher() {
       <svg viewBox="0 0 64 64" className="absolute inset-0 h-full w-full drop-shadow-[0_10px_26px_rgb(29_79_216/0.45)]" aria-hidden="true">
         <path
           d="M32 2c9.6 0 18.5 4.4 24 12.6 5.2 7.8 5.9 18.4 1.8 27C53.6 50.2 44.6 56.6 34.6 58c-9.6 1.4-20.2-2-26.4-9.2C2.4 41.9.6 30.6 3.7 21.4 6.8 12.2 15.3 5.4 22.8 3.4A38 38 0 0 1 32 2Z"
-          fill="var(--color-accent)"
+          fill="var(--color-accent-bright)"
         />
       </svg>
 

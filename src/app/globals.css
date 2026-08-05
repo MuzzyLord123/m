@@ -29,11 +29,19 @@
   --color-ink-soft: #4b4b47; /* 8.1:1 on paper */
   --color-ink-mute: #6a6a64; /* 5.2:1 on paper — AA for body and below */
 
-  /* Wet Paint Blue — the single accent */
-  --color-accent: #1d4fd8; /* 6.6:1 with white text */
-  --color-accent-deep: #1740b0;
-  --color-accent-ink: #12308a;
-  --color-accent-wash: #eaeffc;
+  /* Brand orange, taken from the logo.
+     Two weights, because one cannot do both jobs. The bright orange in the
+     logo is ~3:1 on white — fine for a graphic mark, but white text on it
+     fails AA, so it never carries a label. --color-accent is the deeper
+     working orange used for every button, focus ring and link;
+     --color-accent-bright is reserved for graphic moments where nothing has
+     to be read against it: the brush strokes, the drip, the scroll level and
+     the chat blob. */
+  --color-accent: #b8430b; /* 5.4:1 with white text */
+  --color-accent-bright: #f26522; /* logo orange — graphics only */
+  --color-accent-deep: #8f3308;
+  --color-accent-ink: #8a3208; /* 6.0:1 on paper, for text and errors */
+  --color-accent-wash: #fdf1ea;
 
   /* Sample-card palette — swatch/gallery contexts only, never UI chrome */
   --color-swatch-sage: #8a9a7b;
