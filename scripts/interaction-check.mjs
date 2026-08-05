@@ -31,15 +31,15 @@ const check = (label, value) => {
   await page.goto(`${BASE}/work`, { waitUntil: "load" });
   await page.waitForTimeout(500);
 
-  await page.locator("button[aria-label^='Victorian terrace']").first().click();
+  await page.locator("button[aria-label^='Kitchen extension']").first().click();
   await page.waitForTimeout(950);
-  const lightbox = page.getByRole("dialog", { name: /Victorian terrace/ });
+  const lightbox = page.getByRole("dialog", { name: /Kitchen extension/ });
   check("lightbox opens", await lightbox.isVisible());
   await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(250);
   check(
     "arrow key steps photograph",
-    (await page.locator("[role='dialog'] dd").nth(1).innerText()) === "2 of 3",
+    (await page.locator("[role='dialog'] dd").nth(1).innerText()) === "2 of 4",
   );
   await page.keyboard.press("Escape");
   await page.waitForTimeout(800);
@@ -53,9 +53,9 @@ const check = (label, value) => {
   await page.goto(`${BASE}/work`, { waitUntil: "load" });
   await page.waitForTimeout(500);
 
-  await page.locator("h2:has-text('Victorian terrace'):visible").first().click();
+  await page.locator("h2:has-text('Kitchen extension'):visible").first().click();
   await page.waitForTimeout(500);
-  const sheet = page.getByRole("dialog", { name: /Victorian terrace/ });
+  const sheet = page.getByRole("dialog", { name: /Kitchen extension/ });
   check("bottom sheet opens", await sheet.isVisible());
   await page.keyboard.press("Escape");
   await page.waitForTimeout(800);

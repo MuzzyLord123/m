@@ -42,8 +42,8 @@ export const services: Service[] = [
           "Yes, at trade price, and the saving is passed on. If you would rather choose and buy your own, that is fine — we will tell you how much you need.",
       },
     ],
-    image: "/work/project-1-01.png",
-    tone: "#cfd3d8",
+    image: "/work/kitchen-extension-01.jpg",
+    tone: "#e9e7e2",
   },
   {
     id: "exterior",
@@ -75,8 +75,8 @@ export const services: Service[] = [
           "Yes. For most semis and terraces a tower is enough. Anything three storeys or with a steep approach gets proper scaffold, priced separately and shown on the quote.",
       },
     ],
-    image: "/work/project-2-01.png",
-    tone: "#c8bcb4",
+    image: "/work/exterior-01.jpg",
+    tone: "#d6d4d0",
   },
   {
     id: "wallpapering",
@@ -108,8 +108,8 @@ export const services: Service[] = [
           "Yes, and most of our papering is exactly that. We will check the batch numbers match before we start.",
       },
     ],
-    image: "/work/project-3-01.png",
-    tone: "#aab3a4",
+    image: "/work/feature-01.jpg",
+    tone: "#c6a334",
   },
   {
     id: "spray",
@@ -141,8 +141,8 @@ export const services: Service[] = [
           "No. Doors are sprayed off-site in a controlled space. In-situ work uses water-based products and full containment, and we ventilate as we go.",
       },
     ],
-    image: "/work/project-4-01.png",
-    tone: "#d5c9b6",
+    image: "/work/new-staircase-01.jpg",
+    tone: "#e3ded7",
   },
   {
     id: "commercial",
@@ -174,8 +174,8 @@ export const services: Service[] = [
           "By measured schedule, room by room, with a written programme. You get a fixed price and a date, not a day rate that drifts.",
       },
     ],
-    image: "/work/project-10-01.png",
-    tone: "#c6cbd0",
+    image: "/work/panelled-hallway-01.jpg",
+    tone: "#dcd7d0",
   },
 ];
 

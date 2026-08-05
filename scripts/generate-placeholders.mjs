@@ -1,126 +1,114 @@
 /**
- * Generates solid-tone placeholder photography so the layout is real from day
- * one — correct aspect ratios, correct file paths, zero layout shift. Every
- * image here is a stand-in for a real photograph of the client's work and is
- * replaced file-for-file without touching a component.
+ * Writes stand-in photographs at the exact paths, extensions and aspect ratios
+ * the real ones will use, so the layout is honest before a single photo lands
+ * and swapping them in is a straight file-for-file replacement.
  *
- * Writes minimal PNGs directly (deflate + CRC) so the repo needs no image
- * dependency. Run: node scripts/generate-placeholders.mjs
+ * Each stand-in is filled with the tone sampled from the real photograph it
+ * replaces, so the page's colour balance is already right.
+ *
+ *   node scripts/generate-placeholders.mjs
+ *
+ * Delete a stand-in and drop the real photograph in its place — this script
+ * never overwrites a file that already exists.
  */
-import { deflateSync } from "node:zlib";
-import { mkdirSync, writeFileSync } from "node:fs";
+import sharp from "sharp";
+import { existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-function crc32(buf) {
-  let table = crc32.table;
-  if (!table) {
-    table = crc32.table = new Int32Array(256);
-    for (let n = 0; n < 256; n++) {
-      let c = n;
-      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-      table[n] = c;
-    }
-  }
-  let crc = -1;
-  for (let i = 0; i < buf.length; i++) crc = (crc >>> 8) ^ table[(crc ^ buf[i]) & 0xff];
-  return (crc ^ -1) >>> 0;
-}
-
-function chunk(type, data) {
-  const length = Buffer.alloc(4);
-  length.writeUInt32BE(data.length);
-  const body = Buffer.concat([Buffer.from(type, "ascii"), data]);
-  const crc = Buffer.alloc(4);
-  crc.writeUInt32BE(crc32(body));
-  return Buffer.concat([length, body, crc]);
-}
-
-/**
- * Two-tone image: a base wall colour with a subtly lighter upper band, so a
- * placeholder reads as a room rather than a flat swatch.
- */
-function png(width, height, hex) {
-  const base = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-  const lift = base.map((v) => Math.min(255, Math.round(v + 14)));
-  const shade = base.map((v) => Math.max(0, Math.round(v - 12)));
-  const horizon = Math.round(height * 0.62);
-
-  const raw = Buffer.alloc((width * 3 + 1) * height);
-  let offset = 0;
-  for (let y = 0; y < height; y++) {
-    raw[offset++] = 0; // filter: none
-    const tone = y < horizon ? lift : y > height * 0.9 ? shade : base;
-    for (let x = 0; x < width; x++) {
-      raw[offset++] = tone[0];
-      raw[offset++] = tone[1];
-      raw[offset++] = tone[2];
-    }
-  }
-
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(width, 0);
-  ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8; // bit depth
-  ihdr[9] = 2; // colour type: truecolour
-  return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk("IHDR", ihdr),
-    chunk("IDAT", deflateSync(raw, { level: 9 })),
-    chunk("IEND", Buffer.alloc(0)),
-  ]);
-}
-
 const RATIOS = {
-  "4:5": [1200, 1500],
-  "16:9": [1600, 900],
-  "1:1": [1200, 1200],
-  "3:2": [1500, 1000],
   "3:4": [1200, 1600],
+  "4:3": [1600, 1200],
+  "3:2": [1600, 1067],
+  "16:9": [1600, 900],
+  "1:1": [1400, 1400],
+  "4:5": [1200, 1500],
 };
 
-/** Decorating tones — plausible finished-room colours, not UI colours. */
-const TONES = [
-  "#d9d6cd", "#c3ccc9", "#b9ae9f", "#cfd3d8", "#c8bcb4",
-  "#aab3a4", "#d5c9b6", "#b4bcc4", "#c9b8ad", "#bfc7bd",
-  "#d2cabf", "#adb6b8", "#c6cbd0", "#bdb0a4", "#cfd6d2",
+/**
+ * path, aspect ratio, and the tone sampled from the photograph it stands in for.
+ * Keep this list in step with src/data/projects.ts.
+ */
+const IMAGES = [
+  ["work/kitchen-extension-01.jpg", "3:4", "#e9e7e2"],
+  ["work/kitchen-extension-02.jpg", "3:4", "#efece7"],
+  ["work/kitchen-extension-03.jpg", "4:3", "#b9b6ae"],
+  ["work/kitchen-extension-04.jpg", "3:4", "#d9cfc0"],
+  ["work/alcove-joinery-01.jpg", "4:3", "#a9aca4"],
+  ["work/alcove-joinery-02.jpg", "4:3", "#c6a892"],
+  ["work/new-staircase-01.jpg", "3:4", "#e3ded7"],
+  ["work/new-staircase-02.jpg", "3:4", "#cdb694"],
+  ["work/new-staircase-03.jpg", "3:4", "#ded6cb"],
+  ["work/landing-balustrade-01.jpg", "3:4", "#4d4b49"],
+  ["work/landing-balustrade-02.jpg", "3:4", "#d5c5a7"],
+  ["work/panelled-hallway-01.jpg", "3:4", "#dcd7d0"],
+  ["work/panelled-hallway-02.jpg", "3:4", "#d9d5cf"],
+  ["work/stairs-colour-01.jpg", "3:4", "#b4b5b4"],
+  ["work/stairs-colour-02.jpg", "3:4", "#4f4d4b"],
+  ["work/stairs-colour-03.jpg", "3:4", "#d5d0c8"],
+  ["work/halls-01.jpg", "3:4", "#cfccc6"],
+  ["work/halls-02.jpg", "3:4", "#cdc8c1"],
+  ["work/halls-03.jpg", "3:4", "#b7b78f"],
+  ["work/exterior-01.jpg", "3:4", "#d6d4d0"],
+  ["work/exterior-02.jpg", "4:3", "#e2ded6"],
+  ["work/exterior-03.jpg", "4:3", "#dedad3"],
+  ["work/feature-01.jpg", "3:4", "#c6a334"],
+  ["work/feature-02.jpg", "4:3", "#33322f"],
+  ["work/feature-03.jpg", "3:4", "#8fae3c"],
+
+  // Hero, about portrait and the video poster
+  ["work/hero.jpg", "3:2", "#e9e7e2"],
+  ["work/about-portrait.jpg", "4:5", "#d9d5cf"],
+  ["work/video-poster.jpg", "16:9", "#dcd7d0"],
+
+  // "Fresh off the brush" social cards
+  ["social/post-1.jpg", "1:1", "#a9aca4"],
+  ["social/post-2.jpg", "1:1", "#4d4b49"],
+  ["social/post-3.jpg", "1:1", "#d6d4d0"],
+  ["social/post-4.jpg", "1:1", "#c6a334"],
+  ["social/post-5.jpg", "1:1", "#cdb694"],
+  ["social/post-6.jpg", "1:1", "#dcd7d0"],
 ];
 
-function emit(path, ratio, toneIndex) {
-  const [w, h] = RATIOS[ratio];
+function shade(hex, amount) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const clamp = (v) => Math.min(255, Math.max(0, Math.round(v)));
+  return { r: clamp(r + amount), g: clamp(g + amount), b: clamp(b + amount) };
+}
+
+let written = 0;
+let kept = 0;
+
+for (const [path, ratio, tone] of IMAGES) {
   const file = join(root, "public", path);
+  if (existsSync(file)) {
+    kept += 1;
+    continue;
+  }
   mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, png(w, h, TONES[toneIndex % TONES.length]));
+
+  const [width, height] = RATIOS[ratio];
+  const horizon = Math.round(height * 0.62);
+
+  // A lighter upper band over the sampled tone, so a stand-in reads as a room
+  // rather than a flat swatch and the composition is legible at a glance.
+  await sharp({
+    create: { width, height, channels: 3, background: shade(tone, -10) },
+  })
+    .composite([
+      {
+        input: {
+          create: { width, height: horizon, channels: 3, background: shade(tone, 14) },
+        },
+        top: 0,
+        left: 0,
+      },
+    ])
+    .jpeg({ quality: 82, mozjpeg: true })
+    .toFile(file);
+  written += 1;
 }
 
-let tone = 0;
-
-// Hero and about-page imagery
-emit("work/hero.png", "3:2", tone++);
-emit("work/about-portrait.png", "4:5", tone++);
-emit("work/video-poster.png", "16:9", tone++);
-
-// 12 gallery projects: a lead image plus two detail shots each
-const PROJECT_RATIOS = [
-  "4:5", "16:9", "1:1", "3:4", "16:9", "4:5",
-  "1:1", "3:2", "4:5", "16:9", "3:4", "1:1",
-];
-PROJECT_RATIOS.forEach((ratio, index) => {
-  const n = index + 1;
-  emit(`work/project-${n}-01.png`, ratio, tone++);
-  emit(`work/project-${n}-02.png`, "3:2", tone++);
-  emit(`work/project-${n}-03.png`, "3:2", tone++);
-});
-
-// Before/after pairs
-for (const n of [1, 2]) {
-  emit(`work/ba-${n}-before.png`, "3:2", tone++);
-  emit(`work/ba-${n}-after.png`, "3:2", tone++);
-}
-
-// Social feed squares
-for (let n = 1; n <= 6; n++) emit(`social/post-${n}.png`, "1:1", tone++);
-
-console.log("[placeholders] written to public/work and public/social");
+console.log(`[placeholders] ${written} written, ${kept} real photographs left alone`);

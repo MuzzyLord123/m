@@ -76,13 +76,13 @@ export function Hero() {
           <div className="relative lg:-mr-[var(--shell-pad)]">
             <div className="relative aspect-[3/2] overflow-hidden rounded-[4px] bg-plaster lg:aspect-[5/4]">
               <Image
-                src="/work/hero.png"
-                alt="Front room in a Frodsham terrace after a full repaint, woodwork cut in by hand"
+                src="/work/hero.jpg"
+                alt="Open-plan kitchen extension with a vaulted ceiling and roof lights, decorated throughout"
                 fill
                 priority
                 sizes="(min-width: 1024px) 46vw, 100vw"
                 placeholder="blur"
-                blurDataURL={blurTone("#d9d6cd")}
+                blurDataURL={blurTone("#e9e7e2")}
                 className="object-cover"
               />
             </div>

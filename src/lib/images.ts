@@ -14,6 +14,7 @@ export const ASPECT = {
   "1:1": "aspect-square",
   "3:2": "aspect-[3/2]",
   "3:4": "aspect-[3/4]",
+  "4:3": "aspect-[4/3]",
 } as const;
 
 export type AspectRatio = keyof typeof ASPECT;

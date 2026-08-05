@@ -1,11 +1,26 @@
 import type { AspectRatio } from "@/lib/images";
 
+/**
+ * The gallery, built around the client's own photographs.
+ *
+ * Categories are the trades the photographs actually evidence. Wallpapering
+ * and commercial work are offered and described on the services page, but no
+ * job here shows them, and a filter that resolves to an empty grid is worse
+ * than one that is not offered. Add a category here when the photographs to
+ * fill it exist.
+ *
+ * FILENAMES: every `src` below maps to a real photograph. See PHOTO-MAP.md at
+ * the repo root for which of your images goes at which path. Drop them into
+ * `public/work/` under these names and the whole site populates — no code
+ * changes, no re-cropping, because each entry already declares the aspect ratio
+ * the photograph was shot at.
+ */
+
 export const CATEGORIES = [
   { id: "interior", label: "Interior", swatch: "var(--color-swatch-sage)" },
   { id: "exterior", label: "Exterior", swatch: "var(--color-swatch-terracotta)" },
-  { id: "wallpaper", label: "Wallpaper", swatch: "var(--color-swatch-ochre)" },
-  { id: "spray", label: "Spray", swatch: "var(--color-swatch-slate)" },
-  { id: "commercial", label: "Commercial", swatch: "var(--color-swatch-blush)" },
+  { id: "woodwork", label: "Woodwork", swatch: "var(--color-swatch-slate)" },
+  { id: "feature", label: "Feature walls", swatch: "var(--color-swatch-ochre)" },
 ] as const;
 
 export type CategoryId = (typeof CATEGORIES)[number]["id"];
@@ -14,6 +29,7 @@ export type ProjectImage = {
   src: string;
   alt: string;
   ratio: AspectRatio;
+  /** Sampled from the photograph, so the blur-up matches before it loads. */
   tone: string;
 };
 
@@ -22,9 +38,7 @@ export type Project = {
   title: string;
   area: string;
   category: CategoryId;
-  /** One line of scope. Concrete, no marketing. */
   scope: string;
-  /** Longer detail shown in the lightbox and bottom sheet. */
   detail: string;
   duration: string;
   images: ProjectImage[];
@@ -33,207 +47,167 @@ export type Project = {
   video?: { id: string; title: string };
 };
 
-const img = (
-  src: string,
-  alt: string,
-  ratio: AspectRatio,
-  tone: string,
-): ProjectImage => ({ src, alt, ratio, tone });
+const img = (src: string, alt: string, ratio: AspectRatio, tone: string): ProjectImage => ({
+  src,
+  alt,
+  ratio,
+  tone,
+});
 
 export const projects: Project[] = [
   {
-    slug: "victorian-terrace-frodsham",
-    title: "Victorian terrace, top to bottom",
-    area: "Frodsham",
+    slug: "kitchen-extension",
+    title: "Kitchen extension, bare shell to finished",
+    area: "{{TOWN}}",
     category: "interior",
-    scope: "Six rooms, hall, stairs and landing. Lime-safe emulsion throughout.",
+    scope: "Vaulted ceiling, roof lights and full open-plan decoration.",
     detail:
-      "The plaster had been papered over four times since the 1970s. We stripped it back, made good the cracks in the hallway ceiling, and put two coats on every wall. The original pine doors were rubbed down and re-glossed rather than replaced.",
-    duration: "11 days",
+      "We came in behind the builders. Fresh plaster all through, a vaulted ceiling with three roof lights and a run of angled reveals that all have to be cut in by hand — no tape will follow that line. Mist coat, two full coats, and the woodwork and slider reveals finished last so nothing was walked into.",
+    duration: "9 days",
     featured: true,
     images: [
-      img("/work/project-1-01.png", "Hallway and stairs in a Frodsham Victorian terrace, freshly painted in a warm off-white", "4:5", "#cfd3d8"),
-      img("/work/project-1-02.png", "Front room with restored pine skirting and re-glossed woodwork", "3:2", "#c8bcb4"),
-      img("/work/project-1-03.png", "Landing with new emulsion and cut-in edges against the coving", "3:2", "#aab3a4"),
+      img("/work/kitchen-extension-01.jpg", "Open-plan kitchen and diner with a vaulted ceiling, roof lights and black sliding doors to the garden", "3:4", "#e9e7e2"),
+      img("/work/kitchen-extension-02.jpg", "The same room looking back, showing the angled ceiling reveals and wall uplighters", "3:4", "#efece7"),
+      img("/work/kitchen-extension-03.jpg", "The extension before decoration, with sliding doors fitted and the floor still bare", "4:3", "#b9b6ae"),
+      img("/work/kitchen-extension-04.jpg", "Bare plaster and dust sheets before the first coat went on", "3:4", "#d9cfc0"),
     ],
     beforeAfter: {
-      before: img("/work/ba-1-before.png", "Hallway before work: peeling wallpaper and cracked plaster", "3:2", "#bdb0a4"),
-      after: img("/work/ba-1-after.png", "The same hallway after two coats of emulsion and restored woodwork", "3:2", "#cfd6d2"),
+      before: img("/work/kitchen-extension-04.jpg", "The extension in bare plaster, dust sheets down, before any paint", "3:4", "#d9cfc0"),
+      after: img("/work/kitchen-extension-02.jpg", "The same space finished, with the vaulted ceiling and reveals cut in by hand", "3:4", "#efece7"),
     },
   },
   {
-    slug: "rendered-semi-chester",
-    title: "Rendered semi, weathered south wall",
-    area: "Chester",
-    category: "exterior",
-    scope: "Full exterior. Masonry stabiliser, two coats, all sills made good.",
+    slug: "alcove-joinery",
+    title: "Alcove shelving, bare timber to finished",
+    area: "{{TOWN}}",
+    category: "woodwork",
+    scope: "New alcove units and chimney breast, filled, primed and finished.",
     detail:
-      "South-facing render had blown in three places and the previous coating was chalking badly. We cut out and repaired the render, sealed it, and put two coats of breathable masonry paint over the lot. Fascias and downpipes done at the same time while the scaffold was up.",
-    duration: "8 days",
-    featured: true,
-    images: [
-      img("/work/project-2-01.png", "Rendered semi-detached house in Chester after a full exterior repaint", "16:9", "#c8bcb4"),
-      img("/work/project-2-02.png", "Repaired render on the south-facing gable end", "3:2", "#aab3a4"),
-      img("/work/project-2-03.png", "Freshly painted fascias, soffits and downpipes", "3:2", "#d5c9b6"),
-    ],
-    beforeAfter: {
-      before: img("/work/ba-2-before.png", "Exterior before work: chalking masonry paint and blown render", "3:2", "#c9b8ad"),
-      after: img("/work/ba-2-after.png", "The same elevation after render repairs and two coats of masonry paint", "3:2", "#bfc7bd"),
-    },
-  },
-  {
-    slug: "dining-room-mural-knutsford",
-    title: "Hand-hung mural, dining room",
-    area: "Knutsford",
-    category: "wallpaper",
-    scope: "Twelve-drop panoramic mural, hung to a plumb line off the chimney breast.",
-    detail:
-      "A twelve-drop mural with no repeat, so the whole wall has to be planned before the first drop goes up. Walls were lined and sized first. The client had lived with a mis-hung version of the same paper for two years — the join over the fireplace is now invisible.",
-    duration: "3 days",
-    featured: true,
-    images: [
-      img("/work/project-3-01.png", "Dining room with a hand-hung panoramic mural across the chimney breast", "1:1", "#aab3a4"),
-      img("/work/project-3-02.png", "Close detail of a seam in the mural, matched across the drop", "3:2", "#d5c9b6"),
-      img("/work/project-3-03.png", "The finished dining room with the mural and repainted woodwork", "3:2", "#b4bcc4"),
-    ],
-  },
-  {
-    slug: "sprayed-kitchen-wilmslow",
-    title: "Sprayed kitchen, factory finish",
-    area: "Wilmslow",
-    category: "spray",
-    scope: "Twenty-two doors and drawer fronts, sprayed off-site in satin.",
-    detail:
-      "Solid oak doors, forty years old and sound. Taken off, degreased, keyed, primed and sprayed in a controlled space, then refitted with new hinges. The carcasses were brush-finished in place to match. A new kitchen would have been eleven thousand pounds.",
+      "The joiner left carcasses in bare timber and ply, and the chimney breast in fresh pink plaster. Every fixing filled twice because softwood and MDF both sink, every joint caulked, then primed and two coats. Flat colour on shelving shows every hollow, which is why the filling took longer than the painting.",
     duration: "5 days",
     featured: true,
     images: [
-      img("/work/project-4-01.png", "Kitchen in Wilmslow with sprayed satin doors and drawer fronts", "3:4", "#d5c9b6"),
-      img("/work/project-4-02.png", "Doors racked and drying after spraying", "3:2", "#b4bcc4"),
-      img("/work/project-4-03.png", "Refitted doors with new hinges and brush-finished carcasses", "3:2", "#c9b8ad"),
+      img("/work/alcove-joinery-01.jpg", "Finished alcove shelving either side of a chimney breast, painted in a soft grey-green", "4:3", "#a9aca4"),
+      img("/work/alcove-joinery-02.jpg", "The same alcoves in bare timber and ply before filling and painting", "4:3", "#c6a892"),
     ],
-    video: { id: "aqz-KE-bpKQ", title: "Spraying a kitchen: how the doors are prepared" },
+    beforeAfter: {
+      before: img("/work/alcove-joinery-02.jpg", "Alcove units in bare timber and ply, chimney breast in fresh plaster", "4:3", "#c6a892"),
+      after: img("/work/alcove-joinery-01.jpg", "The finished units and breast, filled, primed and finished in eggshell", "4:3", "#a9aca4"),
+    },
   },
   {
-    slug: "dental-practice-northwich",
-    title: "Dental practice, out of hours",
-    area: "Northwich",
-    category: "commercial",
-    scope: "Four surgeries and reception, painted overnight across two weekends.",
+    slug: "new-staircase",
+    title: "New staircase, bare pine to white",
+    area: "{{TOWN}}",
+    category: "woodwork",
+    scope: "New softwood stairs and balustrade, knotted, primed and finished.",
     detail:
-      "The practice could not close, so we worked Friday nights through to Sunday afternoons. Low-odour scrubbable emulsion throughout, all skirting and architrave in a water-based satin so the rooms were usable by Monday morning.",
-    duration: "2 weekends",
-    images: [
-      img("/work/project-5-01.png", "Dental practice reception in Northwich after an overnight repaint", "16:9", "#b4bcc4"),
-      img("/work/project-5-02.png", "Surgery room painted in low-odour scrubbable emulsion", "3:2", "#c9b8ad"),
-      img("/work/project-5-03.png", "Corridor with water-based satin woodwork", "3:2", "#bfc7bd"),
-    ],
-  },
-  {
-    slug: "new-build-snagging-tarporley",
-    title: "New build, snagging put right",
-    area: "Tarporley",
-    category: "interior",
-    scope: "Full re-decoration of a handover-standard four bed.",
-    detail:
-      "Contract finish over unfilled joints and roller marks on every ceiling. We filled, sanded and put proper coats on. The difference in a new build is almost entirely preparation — the paint is the easy part.",
-    duration: "9 days",
-    images: [
-      img("/work/project-6-01.png", "Living room in a Tarporley new build after full redecoration", "4:5", "#c9b8ad"),
-      img("/work/project-6-02.png", "Ceiling with filled and sanded plasterboard joints", "3:2", "#bfc7bd"),
-      img("/work/project-6-03.png", "Master bedroom with two full coats over the contract finish", "3:2", "#d2cabf"),
-    ],
-  },
-  {
-    slug: "sash-windows-chester",
-    title: "Twelve sash windows, conservation area",
-    area: "Chester",
-    category: "exterior",
-    scope: "Burn-off, repair and repaint in a heritage white, inside and out.",
-    detail:
-      "Listed frontage, so colour and finish were agreed with the conservation officer before a brush was lifted. Loose putty raked out and renewed, two rotten sills spliced rather than replaced, then primed, undercoated and finished by hand.",
-    duration: "14 days",
-    images: [
-      img("/work/project-7-01.png", "Twelve restored sash windows on a Chester conservation-area frontage", "1:1", "#bfc7bd"),
-      img("/work/project-7-02.png", "Renewed putty lines on a repaired sash window", "3:2", "#d2cabf"),
-      img("/work/project-7-03.png", "Spliced timber sill primed and undercoated", "3:2", "#adb6b8"),
-    ],
-  },
-  {
-    slug: "hallway-panelling-wilmslow",
-    title: "Panelled hallway, deep blue",
-    area: "Wilmslow",
-    category: "interior",
-    scope: "New MDF panelling caulked, primed and finished in eggshell.",
-    detail:
-      "The joiner left the panelling in bare MDF. Every joint caulked, every fixing filled twice because MDF sinks, then primed and two coats of eggshell. A dark colour shows every flaw, which is why the filling took longer than the painting.",
-    duration: "4 days",
+      "A brand new staircase in bare softwood, still full of knots and mill glaze. Every knot sealed before primer or it bleeds through within a year. Spindles, newels, strings and risers all by hand, and the landing balustrade to match. The hallway walls and ceiling were done in the same visit.",
+    duration: "7 days",
     featured: true,
     images: [
-      img("/work/project-8-01.png", "Hallway with new MDF panelling finished in a deep blue eggshell", "3:2", "#d2cabf"),
-      img("/work/project-8-02.png", "Caulked and filled panelling joints before priming", "3:2", "#adb6b8"),
-      img("/work/project-8-03.png", "Finished panelling with the stair spindles picked out", "3:2", "#c6cbd0"),
+      img("/work/new-staircase-01.jpg", "Finished hallway with the staircase painted white, oak floor and front door beyond", "3:4", "#e3ded7"),
+      img("/work/new-staircase-02.jpg", "The staircase in bare pine before any paint, with the ceiling still to be made good", "3:4", "#cdb694"),
+      img("/work/new-staircase-03.jpg", "Mid-decoration, with the balustrade painted and the treads still bare", "3:4", "#ded6cb"),
     ],
+    beforeAfter: {
+      before: img("/work/new-staircase-02.jpg", "The staircase in bare pine, knots unsealed, before any paint", "3:4", "#cdb694"),
+      after: img("/work/new-staircase-01.jpg", "The same stairs finished in white, with the hallway decorated around them", "3:4", "#e3ded7"),
+    },
   },
   {
-    slug: "farmhouse-kitchen-mold",
-    title: "Farmhouse kitchen and utility",
-    area: "Mold",
+    slug: "landing-balustrade",
+    title: "Landing balustrade, pine to near-black",
+    area: "{{TOWN}}",
+    category: "woodwork",
+    scope: "New landing balustrade finished in a dark satin, against existing white.",
+    detail:
+      "New pine spindles and handrail butted straight onto an old painted newel. The join is the whole job: the new timber had to be knotted and primed while the old post needed rubbing back and filling, and both had to end up looking like one piece. Finished in a dark satin so the run reads as a single line.",
+    duration: "3 days",
+    featured: true,
+    images: [
+      img("/work/landing-balustrade-01.jpg", "Landing balustrade finished in a dark satin, running along the stairwell", "3:4", "#4d4b49"),
+      img("/work/landing-balustrade-02.jpg", "The same balustrade in bare pine, butted against the old painted newel post", "3:4", "#d5c5a7"),
+    ],
+    beforeAfter: {
+      before: img("/work/landing-balustrade-02.jpg", "New pine spindles and handrail, unpainted, beside the old white newel", "3:4", "#d5c5a7"),
+      after: img("/work/landing-balustrade-01.jpg", "The finished run in dark satin, new and old timber reading as one piece", "3:4", "#4d4b49"),
+    },
+  },
+  {
+    slug: "panelled-hallway",
+    title: "Panelled hallway and entrance",
+    area: "{{TOWN}}",
     category: "interior",
-    scope: "Beams cleaned and waxed, walls in a clay white, units hand-painted.",
+    scope: "New wall panelling caulked and finished, with the stairs and doors.",
     detail:
-      "Three hundred year old oak beams that had been varnished at some point in the eighties. Cleaned back rather than stripped, then waxed. Walls in a soft clay white so the beams do the talking, and the freestanding units hand-painted in a stone.",
-    duration: "10 days",
-    images: [
-      img("/work/project-9-01.png", "Farmhouse kitchen in Mold with cleaned oak beams and clay white walls", "4:5", "#adb6b8"),
-      img("/work/project-9-02.png", "Hand-painted freestanding units in a stone colour", "3:2", "#c6cbd0"),
-      img("/work/project-9-03.png", "Utility room painted to match the main kitchen", "3:2", "#bdb0a4"),
-    ],
-  },
-  {
-    slug: "office-fit-out-wrexham",
-    title: "Office fit-out, three floors",
-    area: "Wrexham",
-    category: "commercial",
-    scope: "Sixty-two rooms and all common parts, phased around a live office.",
-    detail:
-      "Phased floor by floor over five weeks so the business never stopped. Corridors and stairwells done at weekends. Colour matched to the client's brand for the meeting rooms, everything else in a hard-wearing matt.",
-    duration: "5 weeks",
-    images: [
-      img("/work/project-10-01.png", "Open-plan office floor in Wrexham after a phased repaint", "16:9", "#c6cbd0"),
-      img("/work/project-10-02.png", "Meeting room painted to the client's brand colour", "3:2", "#bdb0a4"),
-      img("/work/project-10-03.png", "Stairwell and common parts painted at weekends", "3:2", "#cfd6d2"),
-    ],
-  },
-  {
-    slug: "nursery-wallpaper-nantwich",
-    title: "Nursery, paper and paint",
-    area: "Nantwich",
-    category: "wallpaper",
-    scope: "One papered feature wall, three walls and ceiling in a soft chalk.",
-    detail:
-      "A tight room with a chimney breast and two alcoves, which is the hardest shape to paper well. Lined first, then papered with a small repeat that had to march evenly around both alcoves. Finished in time for a due date, which concentrates the mind.",
-    duration: "2 days",
-    images: [
-      img("/work/project-11-01.png", "Nursery in Nantwich with a papered chimney breast and chalk white walls", "3:4", "#cfd6d2"),
-      img("/work/project-11-02.png", "Small-repeat wallpaper matched around an alcove", "3:2", "#d9d6cd"),
-      img("/work/project-11-03.png", "Finished nursery with painted woodwork", "3:2", "#c3ccc9"),
-    ],
-  },
-  {
-    slug: "sprayed-staircase-knutsford",
-    title: "Sprayed staircase and spindles",
-    area: "Knutsford",
-    category: "spray",
-    scope: "Fifty-eight spindles masked and sprayed in situ, two-tone.",
-    detail:
-      "Spraying spindles in place means the masking takes three times as long as the spraying. Handrail and newel posts in a dark satin, spindles and strings in white. No brush marks anywhere, which is the only reason to spray a staircase.",
+      "Shaker panelling on two walls, all of it caulked before a brush went near it — panelling lives or dies on the caulk line. Walls, panels and skirting in the same soft white at different sheens so the mouldings read without shouting, and the handrail picked out in black to match the door.",
     duration: "6 days",
     featured: true,
     images: [
-      img("/work/project-12-01.png", "Staircase in Knutsford with sprayed white spindles and a dark satin handrail", "1:1", "#d9d6cd"),
-      img("/work/project-12-02.png", "Masked spindles ready for spraying in situ", "3:2", "#c3ccc9"),
-      img("/work/project-12-03.png", "Finished two-tone staircase with no brush marks", "3:2", "#b9ae9f"),
+      img("/work/panelled-hallway-01.jpg", "Hallway with white panelling, herringbone floor, a black console and framed photographs", "3:4", "#dcd7d0"),
+      img("/work/panelled-hallway-02.jpg", "The staircase with a grey runner and black pipe handrail against the panelled wall", "3:4", "#d9d5cf"),
+    ],
+  },
+  {
+    slug: "stairs-in-colour",
+    title: "Three staircases, three finishes",
+    area: "{{SERVICE_AREA}}",
+    category: "woodwork",
+    scope: "Spindles, newels and understairs joinery in grey, near-black and white.",
+    detail:
+      "Three different houses, the same job done three ways. Turned spindles are slow — there is no way to spray them in an occupied hall, so every one is cut in by hand. Understairs cupboards get the same treatment as the balustrade so the whole run reads as one piece of joinery rather than a stair and some doors.",
+    duration: "3 to 5 days each",
+    images: [
+      img("/work/stairs-colour-01.jpg", "Staircase and understairs cupboards finished in a mid grey, with grey carpet", "3:4", "#b4b5b4"),
+      img("/work/stairs-colour-02.jpg", "Two flights with the balustrade finished in near-black against pale walls", "3:4", "#4f4d4b"),
+      img("/work/stairs-colour-03.jpg", "White balustrade above grey-green panelled understairs joinery", "3:4", "#d5d0c8"),
+    ],
+  },
+  {
+    slug: "halls-and-landings",
+    title: "Halls, stairs and landings",
+    area: "{{SERVICE_AREA}}",
+    category: "interior",
+    scope: "The hardest room in the house to decorate, done three times over.",
+    detail:
+      "Hall, stairs and landing is the job most decorators quote high for, because of the access. Ceilings over a stairwell need a proper platform rather than a ladder propped on a tread, and every wall is a cutting-in job around spindles, strings and coving. These three were all done with the families still living in them.",
+    duration: "4 days each",
+    images: [
+      img("/work/halls-01.jpg", "Hallway in warm grey with an oak floor and a run of framed photographs", "3:4", "#cfccc6"),
+      img("/work/halls-02.jpg", "Hall and stairs with a dark stained floor, striped runner and gallery wall", "3:4", "#cdc8c1"),
+      img("/work/halls-03.jpg", "Stairs and hallway in a soft olive with white balustrade and understairs panelling", "3:4", "#b7b78f"),
+    ],
+  },
+  {
+    slug: "rendered-exteriors",
+    title: "Rendered exteriors and timber detail",
+    area: "{{SERVICE_AREA}}",
+    category: "exterior",
+    scope: "Masonry paint over pebbledash and render, with bargeboards and bays.",
+    detail:
+      "Textured render and pebbledash drink paint, so these go on wet and get two full coats rather than one stretched one. Bargeboards, fascias and bay surrounds are cut in by hand off a tower. Work is planned around the forecast — masonry paint on a damp wall fails inside two winters, so we move a date rather than push on.",
+    duration: "6 to 9 days each",
+    featured: true,
+    images: [
+      img("/work/exterior-01.jpg", "Rendered semi finished in off-white with black bargeboards, fascias and a teal front door", "3:4", "#d6d4d0"),
+      img("/work/exterior-02.jpg", "Rendered frontage in white with black bay surrounds and window detailing", "4:3", "#e2ded6"),
+      img("/work/exterior-03.jpg", "White render with black bay surrounds and an arched porch", "4:3", "#dedad3"),
+    ],
+  },
+  {
+    slug: "feature-walls",
+    title: "Feature walls, three colours",
+    area: "{{SERVICE_AREA}}",
+    category: "feature",
+    scope: "Deep colours over pale walls — lined, blocked and cut in clean.",
+    detail:
+      "A strong colour on one wall is not a quick job. Dark shades need a tinted primer or you are putting four coats on, and the cut line against a pale ceiling has to be dead straight because that is the only thing anyone looks at. These three went on over existing pale emulsion with no ghosting through.",
+    duration: "1 to 2 days each",
+    images: [
+      img("/work/feature-01.jpg", "Dining room with an ochre feature wall behind a framed print", "3:4", "#c6a334"),
+      img("/work/feature-02.jpg", "A near-black feature wall going on between two oak doors, dust sheets down", "4:3", "#33322f"),
+      img("/work/feature-03.jpg", "Kitchen with a lime green feature wall against cream gloss units", "3:4", "#8fae3c"),
     ],
   },
 ];

@@ -52,13 +52,13 @@ export default function AboutPage() {
           <Reveal immediate>
             <div className="relative aspect-[4/5] overflow-hidden rounded-[4px] bg-plaster">
               <Image
-                src="/work/about-portrait.png"
-                alt="The Paint Man on site, cutting in a ceiling edge by hand"
+                src="/work/about-portrait.jpg"
+                alt="A finished hallway with new panelling, herringbone floor and painted staircase"
                 fill
                 priority
                 sizes="(min-width: 1024px) 45vw, 100vw"
                 placeholder="blur"
-                blurDataURL={blurTone("#c3ccc9")}
+                blurDataURL={blurTone("#d9d5cf")}
                 className="object-cover"
               />
             </div>
@@ -70,14 +70,14 @@ export default function AboutPage() {
         <SectionHeading
           eyebrow="Meet the decorator"
           title={<span id="video-heading">Two minutes on how we work.</span>}
-          lead="Filmed on a job in Frodsham. No script, no drone shots, just what a week on site actually looks like."
+          lead="No script and no drone shots — just what a week on site actually looks like."
         />
         <Reveal className="mt-10">
           <VideoFacade
             id="aqz-KE-bpKQ"
             title="A week on site: hall, stairs and landing"
-            poster="/work/video-poster.png"
-            tone="#b9ae9f"
+            poster="/work/video-poster.jpg"
+            tone="#dcd7d0"
             caption="Replace this with the client's own film — the component takes any YouTube ID."
             className="mx-auto max-w-4xl"
           />
