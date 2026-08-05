@@ -85,7 +85,10 @@ export function MobileMenu() {
       {/* One toggle, not two. The header row sits above the flood panel in the
           same stacking context, so it inverts to white rather than being
           duplicated underneath. */}
-      <div className="shell relative z-[96] flex h-[5.25rem] items-center justify-between">
+      <div
+        data-menu-open={open}
+        className="mobile-bar shell relative z-[96] flex h-[5.25rem] items-center justify-between"
+      >
         <Wordmark onDark={open} />
         <BrushToggle
           ref={toggleRef}
@@ -108,9 +111,20 @@ export function MobileMenu() {
             aria-hidden={!open}
             data-open={open}
             inert={!open}
-            className="flood-panel fixed inset-0 z-[95] flex min-h-[100dvh] flex-col bg-accent outline-none"
+            /* Scrollable, because the panel is taller than a short handset.
+               Five links at display size plus the work strip plus the contact
+               block runs past 844px, and the page behind is scroll-locked — so
+               without this the hours and the social links are unreachable on
+               anything smaller than a large phone. */
+            className="flood-panel fixed inset-0 z-[95] flex min-h-[100dvh] flex-col overflow-y-auto overscroll-contain bg-accent outline-none"
           >
-            <div className="h-[5.25rem] shrink-0" aria-hidden="true" />
+            {/* Reserves the bar's height, and sticks so that scrolled content
+                passes behind an opaque band rather than through the wordmark.
+                Inside the panel, so the flood still clips the two as one. */}
+            <div
+              className="sticky top-0 h-[5.25rem] shrink-0 bg-accent"
+              aria-hidden="true"
+            />
 
             <nav
               aria-label="Mobile"
@@ -125,7 +139,9 @@ export function MobileMenu() {
                   >
                     <Link
                       href={link.href}
-                      className="flex items-baseline justify-between py-3.5 font-display text-[2.25rem] leading-[1.15] font-semibold tracking-[-0.035em] text-white"
+                      /* Steps down on short handsets so the whole menu still
+                         lands inside one screen where it can. */
+                      className="flex items-baseline justify-between py-3.5 font-display text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.035em] text-white [@media(min-height:760px)]:py-3.5 [@media(min-height:760px)]:text-[2.25rem] [@media(max-height:700px)]:py-2.5"
                     >
                       {link.label}
                       <span className="font-body text-sm font-normal text-white/80 tabular-nums">

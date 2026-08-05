@@ -157,19 +157,28 @@ non-zero on failure, so they drop straight into CI.
 Lighthouse, mobile profile, against a local production build. This machine
 varies by about three points between runs, so these are medians of three.
 
-| Page        | Perf | A11y | Best practices | SEO | LCP   | CLS   | TBT    |
-| ----------- | ---- | ---- | -------------- | --- | ----- | ----- | ------ |
-| `/`         | 94   | 100  | 100            | 100 | 2.6 s | 0.000 | 180 ms |
-| `/work`     | 96   | 100  | 100            | 100 | 2.7 s | 0.002 | 90 ms  |
-| `/services` | 95   | 100  | 100            | 100 | 2.6 s | 0.010 | 180 ms |
-| `/about`    | 95   | 100  | 100            | 100 | 2.4 s | 0.003 | 170 ms |
-| `/contact`  | 92   | 100  | 100            | 100 | 2.6 s | 0.004 | 240 ms |
-| `/quote`    | 93   | 100  | 100            | 100 | 2.6 s | 0.004 | 200 ms |
-| `/blog`     | 95   | 100  | 100            | 100 | 2.5 s | 0.012 | 160 ms |
+| Page        | Perf  | A11y | Best practices | SEO | LCP   | CLS   | TBT    |
+| ----------- | ----- | ---- | -------------- | --- | ----- | ----- | ------ |
+| `/`         | 93    | 100  | 100            | 100 | 2.8 s | 0.000 | 170 ms |
+| `/work`     | 94    | 100  | 100            | 100 | 3.0 s | 0.002 | 80 ms  |
+| `/services` | 92    | 100  | 100            | 100 | 2.8 s | 0.010 | 230 ms |
+| `/about`    | 93    | 100  | 100            | 100 | 2.9 s | 0.003 | 150 ms |
+| `/contact`  | 91    | 100  | 100            | 100 | 2.9 s | 0.004 | 210 ms |
+| `/quote`    | 91    | 100  | 100            | 100 | 3.1 s | 0.004 | 180 ms |
+| `/blog`     | 95    | 100  | 100            | 100 | 2.6 s | 0.012 | 180 ms |
 
-Accessibility, best practices and SEO are 100 everywhere. CLS is effectively
-zero. Performance sits at 92–96, with four pages at or above the 95 target and
-three a point or two short.
+Accessibility, best practices and SEO are 100 everywhere, on every page, every
+run. CLS is effectively zero. Performance sits at 91–96 depending on the run;
+the home page alone has measured 92, 93, 93 and 96 on four consecutive runs of
+the identical build, which is the honest width of the noise on this machine.
+
+Read that as "low-to-mid nineties, not 95 guaranteed". The brief asked for ≥95
+mobile across all four categories and three of them clear it outright; the
+performance column does not, consistently, here. On the deployment target
+(Vercel's edge, real photographs served as AVIF/WebP by the image optimiser
+rather than the flat stand-in JPEGs) it should sit higher, but that is a
+prediction and this table is a measurement — do not treat the two as the same
+thing. Re-run `npm run audit:lighthouse` after the real photographs land.
 
 Measured on a real throttled connection (4x CPU, 1.6Mbps) rather than
 Lighthouse's Lantern model, LCP is 1.2–1.3s across the site.
@@ -182,9 +191,20 @@ all**. Every signature interaction on them is CSS:
 - The nav condense and the scroll progress bar run on
   `animation-timeline: scroll()`, so they are still scroll-linked — tracking the
   reader's hand rather than snapping at a threshold — but on the compositor with
-  nothing on the main thread. Where a browser lacks scroll timelines, an
-  IntersectionObserver sentinel toggles `data-condensed` and the same properties
-  transition over 300ms.
+  nothing on the main thread. Where a browser lacks scroll timelines — Firefox,
+  and Safari before 26, so a real share of visitors — `NavSentinel` observes a
+  zero-height element near the top of the document and toggles `data-condensed`
+  on `<html>`, and the `@supports not` branches transition the same properties
+  over 300ms. An IntersectionObserver, not a scroll listener: the only question
+  being asked is "are we past the top", which is exactly what an observer
+  answers. It is inert wherever the CSS already handles it, so the two
+  mechanisms can never fight over the same properties.
+- The mobile bar earns a paper ground and a hairline on the same timeline. It
+  does not condense — 5.25rem is already thumb-sized, and taking height away
+  would shift the page under the reader's finger — but without a ground the
+  wordmark sits directly on whatever photograph happens to be passing beneath
+  it. Open, `data-menu-open` clears the ground so the flooded panel shows
+  through.
 - The roller passes and the drip use `animation-timeline: view()`.
 - The hero brush reveal animates a registered `@property --wipe`, keeping the
   site's opening moment out of the critical path entirely.

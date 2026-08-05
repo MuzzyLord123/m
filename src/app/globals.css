@@ -457,6 +457,65 @@
   }
 }
 
+/* --------------------------------------------------------------------------
+   The mobile bar earns its own chrome the same way, on the same timeline.
+
+   It does not condense — 5.25rem is already thumb-sized and taking height away
+   would only shift the page under the reader's finger. What it needs is a
+   ground: the wordmark floats over the hero at rest, and the moment anything
+   scrolls under it the mark and the toggle become unreadable against
+   photographs. Background and hairline fade in over the first 72px.
+   -------------------------------------------------------------------------- */
+
+.mobile-bar {
+  background-color: rgb(250 250 248 / 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  border-bottom: 1px solid transparent;
+}
+
+@supports (animation-timeline: scroll()) {
+  .mobile-bar {
+    animation: mobile-bar linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 20px 72px;
+  }
+}
+
+@supports not (animation-timeline: scroll()) {
+  .mobile-bar {
+    transition:
+      background-color 0.3s var(--ease-coat),
+      backdrop-filter 0.3s var(--ease-coat),
+      border-color 0.3s var(--ease-coat);
+  }
+  [data-condensed="true"] .mobile-bar {
+    background-color: rgb(250 250 248 / 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom-color: var(--color-hairline);
+  }
+}
+
+@keyframes mobile-bar {
+  to {
+    background-color: rgb(250 250 248 / 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom-color: var(--color-hairline);
+  }
+}
+
+/* Open, the bar sits on the flooded panel and must show it through. Wins over
+   both branches above, and over the reduced-motion rest state. */
+.mobile-bar[data-menu-open="true"] {
+  animation: none;
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+}
+
 
 /* --------------------------------------------------------------------------
    Enterprise nav: a utility strip above the main bar that gives its height
@@ -603,6 +662,13 @@
   .nav-chrome {
     animation: none;
     opacity: 1;
+  }
+  .mobile-bar {
+    animation: none;
+    background-color: rgb(250 250 248 / 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom-color: var(--color-hairline);
   }
   .sending-fill {
     width: 100%;
