@@ -43,6 +43,16 @@ files the client owns day to day:
 - `src/data/social.ts` — the "Fresh off the brush" feed
 - `src/content/blog/*.mdx` — blog posts
 
+Blog posts are the one place that does **not** use the `{{TOKEN}}` placeholders.
+MDX treats `{…}` as a JavaScript expression, so posts import `site` from
+`src/config/site.ts` and interpolate the real values (`${site.town}` in the
+`meta` block, `{site.town}` in the body). Setting `site.ts` correctly is enough
+— the posts follow automatically, with nothing to find-and-replace.
+
+To add a post: drop an `.mdx` file into `src/content/blog` with a `meta` export
+and add three lines to `src/lib/blog.ts`. A missing field is a build error
+rather than a blank page.
+
 Replace the placeholder images in `public/work/` with real photography at the
 same aspect ratios and the layout holds without further changes.
 
