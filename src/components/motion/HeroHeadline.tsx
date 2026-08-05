@@ -1,7 +1,3 @@
-"use client";
-
-import { m, useReducedMotion } from "motion/react";
-
 /**
  * Signature interaction 1 — hero brush reveal.
  *
@@ -11,17 +7,17 @@ import { m, useReducedMotion } from "motion/react";
  * bristled edge across the line — the words are painted on, not faded in.
  * Lines stagger 80ms apart.
  *
- * Under prefers-reduced-motion the mask starts fully drawn and nothing moves.
- */
-
-/**
- * Mask geometry, which has to be exact.
+ * The slide is a CSS keyframe over a registered `--wipe` custom property (see
+ * `.hero-line` and `@property --wipe` in globals.css). That keeps the site's
+ * opening moment out of the JavaScript that would otherwise sit on the critical
+ * path in front of the hero image — this is a server component. Under
+ * prefers-reduced-motion the mask starts fully drawn and nothing moves.
  *
- * The image is 220% of the line's width, so the box shows image units 0–100 at
- * --wipe: 0% and units 120–220 at --wipe: 100%. Everything left of unit 100
- * must therefore be fully transparent (nothing showing at the start) and
- * everything right of unit 120 fully opaque (nothing clipped at the end). The
- * bristled edge lives in the 20-unit corridor between them.
+ * MASK GEOMETRY, which has to be exact: the box shows image units 0–100 at
+ * --wipe: 0% and units 120–220 at 100%. Everything left of unit 100 must be
+ * fully transparent (nothing showing at the start) and everything right of unit
+ * 120 fully opaque (nothing clipped at the end). The bristled edge lives in the
+ * 20-unit corridor between them.
  */
 const BRUSH = encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="100" preserveAspectRatio="none">
@@ -30,17 +26,6 @@ const BRUSH = encodeURIComponent(
   </svg>`,
 );
 
-const maskStyle = {
-  maskImage: `url("data:image/svg+xml,${BRUSH}")`,
-  WebkitMaskImage: `url("data:image/svg+xml,${BRUSH}")`,
-  maskSize: "220% 100%",
-  WebkitMaskSize: "220% 100%",
-  maskRepeat: "no-repeat",
-  WebkitMaskRepeat: "no-repeat",
-  maskPosition: "var(--wipe) 0",
-  WebkitMaskPosition: "var(--wipe) 0",
-} as const;
-
 export function HeroHeadline({
   lines,
   className = "",
@@ -48,25 +33,19 @@ export function HeroHeadline({
   lines: React.ReactNode[];
   className?: string;
 }) {
-  const reduced = useReducedMotion();
-
   return (
-    <h1 className={className}>
+    <h1
+      className={className}
+      style={{ ["--brush-mask" as string]: `url("data:image/svg+xml,${BRUSH}")` }}
+    >
       {lines.map((line, index) => (
-        <m.span
+        <span
           key={index}
-          className="block"
-          style={{ ...maskStyle, ["--wipe" as string]: reduced ? "100%" : "0%" }}
-          initial={{ ["--wipe" as string]: reduced ? "100%" : "0%" }}
-          animate={{ ["--wipe" as string]: "100%" }}
-          transition={{
-            duration: reduced ? 0 : 0.9,
-            delay: reduced ? 0 : 0.12 + index * 0.08,
-            ease: [0.16, 1, 0.3, 1],
-          }}
+          className="hero-line block"
+          style={{ animationDelay: `${0.12 + index * 0.08}s` }}
         >
           {line}
-        </m.span>
+        </span>
       ))}
     </h1>
   );

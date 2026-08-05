@@ -7,7 +7,11 @@
  *   1. Under prefers-reduced-motion every signature animation collapses to its
  *      finished state — content visible, nothing moving, no accent band left
  *      covering a section.
- *   2. Nothing anywhere attaches a scroll listener to the window.
+ *   2. Exactly one scroll listener exists, in the mobile action bar, and it is
+ *      passive. Scroll *direction* cannot come from a scroll-driven animation
+ *      or an IntersectionObserver — a timeline knows position, not heading — so
+ *      the hide-on-scroll-down behaviour needs one. Everything else on the site
+ *      is scroll-linked through CSS timelines. Any new offender fails here.
  */
 import { chromium } from "playwright";
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -29,16 +33,26 @@ function walk(dir) {
   });
 }
 
+const ALLOWED_SCROLL_LISTENER = "src/components/layout/MobileActionBar.tsx";
+
 const sources = walk("src").filter((path) => /\.(ts|tsx|mdx)$/.test(path));
 const offenders = sources.filter((path) => {
   const source = readFileSync(path, "utf8");
   return /addEventListener\(\s*["'`]scroll["'`]/.test(source) || /onscroll\s*=/.test(source);
 });
+const unexpected = offenders.filter((path) => path !== ALLOWED_SCROLL_LISTENER);
 check(
-  `zero scroll listeners in src (${sources.length} files scanned)`,
-  offenders.length === 0,
+  `only the documented scroll listener in src (${sources.length} files scanned)`,
+  unexpected.length === 0,
 );
-if (offenders.length) console.log("   ", offenders.join("\n    "));
+if (unexpected.length) console.log("   ", unexpected.join("\n    "));
+
+// The one that is allowed must stay passive, or it is not worth the exception.
+const barSource = readFileSync(ALLOWED_SCROLL_LISTENER, "utf8");
+check(
+  "the one scroll listener is passive",
+  /addEventListener\("scroll",\s*onScroll,\s*\{\s*passive:\s*true\s*\}\)/.test(barSource),
+);
 
 // ------------------------------------------------------- runtime: reduced motion
 const browser = await chromium.launch({

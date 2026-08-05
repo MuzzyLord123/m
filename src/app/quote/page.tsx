@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { QuoteForm } from "@/components/quote/QuoteForm";
-import { BookingForm } from "@/components/quote/BookingForm";
+import { BookingFormLazy } from "@/components/quote/BookingFormLazy";
 import { site } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -57,7 +57,7 @@ export default function QuotePage() {
           </div>
 
           <div className="mt-12 rounded-[4px] bg-paper p-6 sm:p-9 lg:p-10">
-            <BookingForm />
+            <BookingFormLazy />
           </div>
         </div>
       </section>

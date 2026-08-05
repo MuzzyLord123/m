@@ -154,57 +154,80 @@ non-zero on failure, so they drop straight into CI.
 
 ### Where the numbers stand
 
-Lighthouse, mobile profile, against a local production build. Scores on this
-class of machine vary by a few points between runs, so these are medians of
-three; the occasional 60-something outlier is contention, not the page.
+Lighthouse, mobile profile, against a local production build. This machine
+varies by about three points between runs, so these are medians of three.
 
 | Page        | Perf | A11y | Best practices | SEO | LCP   | CLS   | TBT    |
 | ----------- | ---- | ---- | -------------- | --- | ----- | ----- | ------ |
-| `/`         | 92   | 100  | 100            | 100 | 2.9 s | 0.019 | 190 ms |
-| `/work`     | 90   | 100  | 100            | 100 | 3.1 s | 0.000 | 220 ms |
-| `/services` | 87   | 100  | 100            | 100 | 3.6 s | 0.010 | 200 ms |
-| `/about`    | 94   | 100  | 100            | 100 | 2.7 s | 0.003 | 170 ms |
-| `/contact`  | 93   | 100  | 100            | 100 | 2.7 s | 0.004 | 200 ms |
-| `/quote`    | 89   | 100  | 100            | 100 | 2.8 s | 0.004 | 310 ms |
-| `/blog`     | 94   | 100  | 100            | 100 | 2.8 s | 0.012 | 150 ms |
+| `/`         | 94   | 100  | 100            | 100 | 2.6 s | 0.000 | 180 ms |
+| `/work`     | 96   | 100  | 100            | 100 | 2.7 s | 0.002 | 90 ms  |
+| `/services` | 95   | 100  | 100            | 100 | 2.6 s | 0.010 | 180 ms |
+| `/about`    | 95   | 100  | 100            | 100 | 2.4 s | 0.003 | 170 ms |
+| `/contact`  | 92   | 100  | 100            | 100 | 2.6 s | 0.004 | 240 ms |
+| `/quote`    | 93   | 100  | 100            | 100 | 2.6 s | 0.004 | 200 ms |
+| `/blog`     | 95   | 100  | 100            | 100 | 2.5 s | 0.012 | 160 ms |
 
-Accessibility, best practices and SEO are 100 across the site, and CLS is far
-inside its budget. **Performance is 87–94 rather than the 95+ target**, and
-Lighthouse's simulated LCP sits above 2.5s.
+Accessibility, best practices and SEO are 100 everywhere. CLS is effectively
+zero. Performance sits at 92–96, with four pages at or above the 95 target and
+three a point or two short.
 
 Measured on a real throttled connection (4x CPU, 1.6Mbps) rather than
-Lighthouse's Lantern model, LCP on the home page is **1.2s** and the LCP
-element is the hero photograph. The gap is the simulation modelling bandwidth
-contention between the critical-path JavaScript and the image.
+Lighthouse's Lantern model, LCP is 1.2–1.3s across the site.
 
-What moved the number, and what did not:
+#### What got it there
 
-- **Subsetting the fonts** to the characters the site renders (171KB to 120KB)
-  and **taking the italic faces off the preload list**: simulated LCP 4.0s to
-  ~2.9s, performance +7. The largest single win.
-- **Rewriting `Reveal` off the animation library** onto an IntersectionObserver
-  and a CSS transition. It is used 40-odd times on the home page, and this is
-  the change that keeps TBT under 300ms.
-- **Marking the first service photograph `priority`.** Its LCP element was an
-  unprioritised image at 2.9s on a real connection.
-- **`m` + `LazyMotion` instead of `motion`.** Measured, and it made no
-  difference: first load went 162KB to 163KB, because
-  `optimizePackageImports` in `next.config.mjs` was already tree-shaking the
-  library. The refactor is kept because it is the conventional shape and costs
-  nothing, but it is not the lever an earlier draft of this README claimed.
-  Loading the feature bundle through a dynamic import was tried too and was
-  actively worse (185KB), since the async chunk duplicates the barrel the
-  static imports already pull in.
+The shell, the home page and the about page carry **no animation library at
+all**. Every signature interaction on them is CSS:
 
-What is left, honestly: the remaining weight is React plus the Next runtime
-plus the animation core, and roughly 170KB of it sits ahead of the hero image.
-Getting to 95 means cutting the animation library out of the shell entirely --
-rebuilding the nav's scroll condense and the scroll progress bar on CSS
-scroll-driven animations, and the action bar on an IntersectionObserver
-sentinel. That is worth doing, but the nav condense is specified to be driven
-by a motion value rather than a class swap, so it is a design decision as much
-as a performance one and should be made deliberately rather than at the end of
-a build.
+- The nav condense and the scroll progress bar run on
+  `animation-timeline: scroll()`, so they are still scroll-linked — tracking the
+  reader's hand rather than snapping at a threshold — but on the compositor with
+  nothing on the main thread. Where a browser lacks scroll timelines, an
+  IntersectionObserver sentinel toggles `data-condensed` and the same properties
+  transition over 300ms.
+- The roller passes and the drip use `animation-timeline: view()`.
+- The hero brush reveal animates a registered `@property --wipe`, keeping the
+  site's opening moment out of the critical path entirely.
+- The nav underline, the flood menu, the toggle, the paint gauge and the success
+  tick are transitions and keyframes.
+
+First load for `/` went **162KB to 113KB**. The library now ships only with
+`/work` and, lazily, the two forms.
+
+Other changes that moved the number, in order of size:
+
+- **Reveals above the fold now render immediately.** A reveal starts at
+  `opacity: 0`, so an LCP element inside one cannot paint until hydration has
+  run and the observer has fired. That alone held the first service photograph
+  at a 2.5s LCP despite it being a preloaded 8KB file; `<Reveal immediate>` cut
+  it to 1.3s and took `/services` from 86 to 94.
+- **Font subsetting** to the characters the site renders, and taking the italics
+  off the preload list: simulated LCP 4.0s to ~2.9s.
+- **The hero headline dropped from 3.25rem to 2.875rem at mobile widths.** The
+  fallback italic is wider than the real face, so "done properly." wrapped to an
+  extra line and snapped back on swap. That was the whole of the home page's
+  0.041 CLS, now 0.000.
+- **The booking and contact forms load when scrolled near**, behind
+  placeholders of the same shape. `/contact` first load: 188KB to 105KB.
+
+#### What did not
+
+- **`m` + `LazyMotion` instead of `motion`.** 162KB to 163KB —
+  `optimizePackageImports` was already tree-shaking it. Passing the feature
+  bundle through a dynamic import was worse (185KB): the async chunk duplicates
+  the barrel the static imports pull in.
+- **`priority` alone on the services LCP image.** Necessary but not sufficient
+  while it sat inside a reveal.
+
+#### The one scroll listener
+
+`MobileActionBar` attaches a passive scroll listener, and it is the only one on
+the site. Scroll *direction* cannot come from a scroll-driven animation or an
+IntersectionObserver — a timeline knows position, not heading — and the bar has
+to hide going down and return coming up. The handler is passive, coalesced to
+one update per frame, reads one cached number and writes a data attribute; the
+movement itself is a CSS transition. `npm run audit:motion` asserts that exactly
+this one exists and that it is passive, so a new one fails the build.
 
 ## House rules the code follows
 

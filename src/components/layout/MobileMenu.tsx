@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { ArrowUpRight, Clock, EnvelopeSimple, Phone } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
@@ -23,7 +22,6 @@ const menuLinks = [...primaryNav, { href: "/contact", label: "Contact" }];
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const reduced = useReducedMotion();
   const panelRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
@@ -79,8 +77,6 @@ export function MobileMenu() {
     };
   }, [open, close]);
 
-  const flood = reduced ? 0 : 0.5;
-
   return (
     <div className="lg:hidden">
       {/* One toggle, not two. The header row sits above the flood panel in the
@@ -96,20 +92,20 @@ export function MobileMenu() {
         />
       </div>
 
-      <AnimatePresence>
-        {open && (
-          <m.div
+      <>
+          <div
             ref={panelRef}
             id="mobile-menu"
             tabIndex={-1}
-            role="dialog"
-            aria-modal="true"
+            /* Mounted at all times so opening and closing are one transition
+               run in both directions — but only a dialog while it is open. */
+            role={open ? "dialog" : undefined}
+            aria-modal={open ? true : undefined}
             aria-label="Menu"
-            initial={{ clipPath: `circle(0px at ${FLOOD_ORIGIN})` }}
-            animate={{ clipPath: `circle(150vmax at ${FLOOD_ORIGIN})` }}
-            exit={{ clipPath: `circle(0px at ${FLOOD_ORIGIN})` }}
-            transition={{ duration: flood, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[95] flex min-h-[100dvh] flex-col bg-accent outline-none"
+            aria-hidden={!open}
+            data-open={open}
+            inert={!open}
+            className="flood-panel fixed inset-0 z-[95] flex min-h-[100dvh] flex-col bg-accent outline-none"
           >
             <div className="h-[4.75rem] shrink-0" aria-hidden="true" />
 
@@ -119,16 +115,10 @@ export function MobileMenu() {
             >
               <ul>
                 {menuLinks.map((link, index) => (
-                  <m.li
+                  <li
                     key={link.href}
-                    initial={{ y: reduced ? 0 : 26, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{
-                      duration: reduced ? 0 : 0.44,
-                      delay: reduced ? 0 : 0.2 + index * 0.055,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    className="overflow-hidden border-b border-white/15"
+                    style={{ transitionDelay: `${0.2 + index * 0.055}s` }}
+                    className="flood-item overflow-hidden border-b border-white/15"
                   >
                     <Link
                       href={link.href}
@@ -139,21 +129,15 @@ export function MobileMenu() {
                         0{index + 1}
                       </span>
                     </Link>
-                  </m.li>
+                  </li>
                 ))}
               </ul>
             </nav>
 
             {/* Everything below sits in thumb reach. */}
-            <m.div
-              initial={{ y: reduced ? 0 : 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{
-                duration: reduced ? 0 : 0.4,
-                delay: reduced ? 0 : 0.42,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="shell shrink-0 pb-[calc(1.75rem+env(safe-area-inset-bottom))]"
+            <div
+              style={{ transitionDelay: "0.42s" }}
+              className="flood-item shell shrink-0 pb-[calc(1.75rem+env(safe-area-inset-bottom))]"
             >
               <Link
                 href={CTA_HREF}
@@ -198,10 +182,9 @@ export function MobileMenu() {
                   Facebook <ArrowUpRight weight="light" className="size-3.5" />
                 </a>
               </div>
-            </m.div>
-          </m.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </div>
+      </>
     </div>
   );
 }
@@ -218,7 +201,7 @@ function BrushToggle({
   onDark?: boolean;
   ref?: React.Ref<HTMLButtonElement>;
 }) {
-  const bar = `absolute left-0 h-[2.5px] rounded-full origin-center ${
+  const bar = `toggle-bar absolute left-0 h-[2.5px] rounded-full origin-center ${
     onDark ? "bg-white" : "bg-ink"
   }`;
 
@@ -233,23 +216,32 @@ function BrushToggle({
       className="relative z-[96] -mr-2 grid size-11 place-items-center rounded-full transition-transform duration-200 active:scale-[0.94]"
     >
       <span className="relative block h-[18px] w-[26px]">
-        <m.span
+        {/* Uneven at rest, an even X when open. Transitions live in
+            globals.css so no JavaScript animates them. */}
+        <span
           className={bar}
-          style={{ top: 0 }}
-          animate={open ? { width: 26, y: 8, rotate: 45 } : { width: 26, y: 0, rotate: 0 }}
-          transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            top: 0,
+            width: 26,
+            transform: open ? "translateY(8px) rotate(45deg)" : "none",
+          }}
         />
-        <m.span
+        <span
           className={bar}
-          style={{ top: 8 }}
-          animate={open ? { width: 26, opacity: 0, scaleX: 0 } : { width: 17, opacity: 1, scaleX: 1 }}
-          transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            top: 8,
+            width: open ? 26 : 17,
+            opacity: open ? 0 : 1,
+            transform: open ? "scaleX(0)" : "none",
+          }}
         />
-        <m.span
+        <span
           className={bar}
-          style={{ top: 16 }}
-          animate={open ? { width: 26, y: -8, rotate: -45 } : { width: 22, y: 0, rotate: 0 }}
-          transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            top: 16,
+            width: open ? 26 : 22,
+            transform: open ? "translateY(-8px) rotate(-45deg)" : "none",
+          }}
         />
       </span>
     </button>

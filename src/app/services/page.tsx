@@ -66,7 +66,9 @@ export default function ServicesPage() {
                   index % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""
                 }`}
               >
-                <Reveal>
+                {/* The first section sits at the fold on mobile and holds the
+                    page's LCP element — it must not wait on the observer. */}
+                <Reveal immediate={index === 0}>
                   <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-plaster-deep">
                     <Image
                       src={service.image}
@@ -83,7 +85,7 @@ export default function ServicesPage() {
                   </div>
                 </Reveal>
 
-                <Reveal delay={0.06}>
+                <Reveal delay={index === 0 ? 0 : 0.06} immediate={index === 0}>
                   <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute tabular-nums uppercase">
                     0{index + 1}
                   </p>

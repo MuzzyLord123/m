@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { m, useReducedMotion } from "motion/react";
 
 /**
  * Live chat on Tawk.to's free plan, wearing our clothes.
@@ -39,7 +38,6 @@ export function ChatLauncher() {
   const widgetId = process.env.NEXT_PUBLIC_TAWK_WIDGET_ID;
   const [status, setStatus] = useState<Status>("idle");
   const wantsOpen = useRef(false);
-  const reduced = useReducedMotion();
 
   const load = useCallback(() => {
     if (!propertyId || !widgetId || window.Tawk_API) return;
@@ -100,15 +98,11 @@ export function ChatLauncher() {
   }
 
   return (
-    <m.button
+    <button
       type="button"
       onClick={open}
       aria-label={status === "loading" ? "Opening live chat" : "Open live chat"}
-      className="fixed right-4 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-[85] grid size-14 place-items-center rounded-full text-white lg:right-6 lg:bottom-6 lg:size-16"
-      initial={false}
-      whileHover={reduced ? undefined : { scale: 1.06, rotate: -5 }}
-      whileTap={reduced ? undefined : { scale: 0.95 }}
-      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed right-4 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-[85] grid size-14 place-items-center rounded-full text-white transition-transform duration-[320ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.06] hover:-rotate-6 active:scale-95 lg:right-6 lg:bottom-6 lg:size-16"
     >
       {/* The blob is the button — paint does not land in perfect rounds */}
       <svg viewBox="0 0 64 64" className="absolute inset-0 h-full w-full drop-shadow-[0_10px_26px_rgb(29_79_216/0.45)]" aria-hidden="true">
@@ -139,6 +133,6 @@ export function ChatLauncher() {
           Connecting you to the chat
         </span>
       )}
-    </m.button>
+    </button>
   );
 }

@@ -2,17 +2,17 @@
 
 import { useCallback, useRef } from "react";
 import Image from "next/image";
-import { m, useMotionTemplate, useMotionValue, useTransform } from "motion/react";
 import { blurTone } from "@/lib/images";
 import type { ProjectImage } from "@/data/projects";
 
 /**
  * Before/after slider.
  *
- * The divider is a masked paint edge with a roller grip. Position is a motion
- * value driving a clip-path — the dragged value never touches React state, so
- * there is no re-render per pointer move. Pointer and keyboard both operable;
- * arrows nudge, shift-arrows jump, Home/End go to the ends.
+ * The divider is a masked paint edge with a roller grip. Position lives in a
+ * CSS custom property written straight to the element, driving both the
+ * clip-path and the handle offset — so a drag never re-renders React and never
+ * reads layout. Pointer and keyboard both operable; arrows nudge, shift-arrows
+ * jump, Home/End go to the ends.
  */
 export function BeforeAfter({
   before,
@@ -25,22 +25,16 @@ export function BeforeAfter({
   label: string;
   className?: string;
 }) {
-  const position = useMotionValue(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
+  const position = useRef(50);
 
-  const clipRight = useTransform(position, (value) => 100 - value);
-  const clipPath = useMotionTemplate`inset(0 ${clipRight}% 0 0)`;
-  const left = useMotionTemplate`${position}%`;
-
-  const set = useCallback(
-    (value: number) => {
-      const clamped = Math.min(100, Math.max(0, value));
-      position.set(clamped);
-      handleRef.current?.setAttribute("aria-valuenow", String(Math.round(clamped)));
-    },
-    [position],
-  );
+  const set = useCallback((value: number) => {
+    const clamped = Math.min(100, Math.max(0, value));
+    position.current = clamped;
+    containerRef.current?.style.setProperty("--ba-pos", `${clamped}%`);
+    handleRef.current?.setAttribute("aria-valuenow", String(Math.round(clamped)));
+  }, []);
 
   const fromPointer = useCallback(
     (clientX: number) => {
@@ -53,7 +47,7 @@ export function BeforeAfter({
 
   const onKeyDown = (event: React.KeyboardEvent) => {
     const step = event.shiftKey ? 10 : 2;
-    const current = position.get();
+    const current = position.current;
     const moves: Record<string, number> = {
       ArrowLeft: current - step,
       ArrowRight: current + step,
@@ -68,6 +62,7 @@ export function BeforeAfter({
   return (
     <div
       ref={containerRef}
+      style={{ ["--ba-pos" as string]: "50%" }}
       className={`relative touch-none overflow-hidden rounded-[4px] bg-plaster select-none ${className}`}
       onPointerDown={(event) => {
         event.currentTarget.setPointerCapture(event.pointerId);
@@ -90,7 +85,10 @@ export function BeforeAfter({
       />
 
       {/* Before — clipped back as the divider is dragged */}
-      <m.div style={{ clipPath }} className="absolute inset-0">
+      <div
+        className="absolute inset-0"
+        style={{ clipPath: "inset(0 calc(100% - var(--ba-pos)) 0 0)" }}
+      >
         <Image
           src={before.src}
           alt={before.alt}
@@ -101,13 +99,13 @@ export function BeforeAfter({
           blurDataURL={blurTone(before.tone)}
           className="h-full w-full object-cover"
         />
-      </m.div>
+      </div>
 
       <Tag className="left-4" text="Before" />
       <Tag className="right-4" text="After" />
 
       {/* Divider — a masked tape edge with a roller grip */}
-      <m.div
+      <div
         ref={handleRef}
         role="slider"
         tabIndex={0}
@@ -117,7 +115,7 @@ export function BeforeAfter({
         aria-valuenow={50}
         aria-orientation="horizontal"
         onKeyDown={onKeyDown}
-        style={{ left }}
+        style={{ left: "var(--ba-pos)" }}
         className="absolute inset-y-0 z-10 -ml-5 w-10 cursor-ew-resize"
       >
         <div className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 bg-paper shadow-[0_0_0_1px_rgb(60_60_50/0.18)]" />
@@ -133,7 +131,7 @@ export function BeforeAfter({
             />
           </svg>
         </div>
-      </m.div>
+      </div>
     </div>
   );
 }

@@ -33,7 +33,8 @@ const check = (label, value) => {
 
   await page.locator("button[aria-label^='Victorian terrace']").first().click();
   await page.waitForTimeout(950);
-  check("lightbox opens", await page.locator("[role='dialog']").isVisible());
+  const lightbox = page.getByRole("dialog", { name: /Victorian terrace/ });
+  check("lightbox opens", await lightbox.isVisible());
   await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(250);
   check(
@@ -42,7 +43,7 @@ const check = (label, value) => {
   );
   await page.keyboard.press("Escape");
   await page.waitForTimeout(800);
-  check("escape closes lightbox", (await page.locator("[role='dialog']").count()) === 0);
+  check("escape closes lightbox", (await lightbox.count()) === 0);
   await page.close();
 }
 
@@ -54,14 +55,15 @@ const check = (label, value) => {
 
   await page.locator("h2:has-text('Victorian terrace'):visible").first().click();
   await page.waitForTimeout(500);
-  check("bottom sheet opens", await page.locator("[role='dialog']").isVisible());
+  const sheet = page.getByRole("dialog", { name: /Victorian terrace/ });
+  check("bottom sheet opens", await sheet.isVisible());
   await page.keyboard.press("Escape");
   await page.waitForTimeout(800);
-  check("escape closes sheet", (await page.locator("[role='dialog']").count()) === 0);
+  check("escape closes sheet", (await sheet.count()) === 0);
 
   await page.locator("button[aria-label='Open menu']").click();
   await page.waitForTimeout(600);
-  check("menu floods open", await page.locator("#mobile-menu").isVisible());
+  check("menu floods open", (await page.locator('#mobile-menu[data-open="true"]').count()) === 1);
   check(
     "scroll locks",
     (await page.evaluate(() => document.documentElement.style.overflow)) === "hidden",
@@ -69,7 +71,7 @@ const check = (label, value) => {
   await page.screenshot({ path: `${SHOTS}/menu.png` });
   await page.keyboard.press("Escape");
   await page.waitForTimeout(500);
-  check("escape closes menu", (await page.locator("#mobile-menu").count()) === 0);
+  check("escape closes menu", (await page.locator('#mobile-menu[data-open="true"]').count()) === 0);
   check(
     "scroll unlocks",
     (await page.evaluate(() => document.documentElement.style.overflow)) !== "hidden",

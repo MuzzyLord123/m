@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { m, useReducedMotion } from "motion/react";
 import { blurTone } from "@/lib/images";
 
 /**
@@ -30,7 +29,6 @@ export function VideoFacade({
   className?: string;
 }) {
   const [playing, setPlaying] = useState(false);
-  const reduced = useReducedMotion();
 
   return (
     <figure className={className}>
@@ -64,14 +62,10 @@ export function VideoFacade({
             <span className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/25 to-ink/10" />
 
             <span className="absolute inset-0 grid place-items-center">
-              <m.svg
+              <svg
                 viewBox="0 0 96 96"
-                className="h-24 w-24 drop-shadow-[0_10px_28px_rgb(20_20_20/0.35)]"
+                className="h-24 w-24 drop-shadow-[0_10px_28px_rgb(20_20_20/0.35)] transition-transform duration-[340ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06] group-hover:-rotate-4 group-active:scale-95"
                 aria-hidden="true"
-                initial={false}
-                whileHover={reduced ? undefined : { scale: 1.06, rotate: -4 }}
-                whileTap={reduced ? undefined : { scale: 0.96 }}
-                transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
               >
                 {/* A blob, not a circle — paint does not land in perfect rounds */}
                 <path
@@ -79,7 +73,7 @@ export function VideoFacade({
                   fill="var(--color-accent)"
                 />
                 <path d="M40 33.5 65 48 40 62.5Z" fill="#fff" />
-              </m.svg>
+              </svg>
             </span>
 
             <span className="absolute inset-x-0 bottom-0 p-6 text-left">

@@ -7,6 +7,7 @@ import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { PaintGauge } from "./PaintGauge";
 import { PaintTick } from "./PaintTick";
+import { MotionProvider } from "@/components/motion/MotionProvider";
 import { ChipGroup, Field, Honeypot, TextArea, TextInput } from "@/components/ui/Field";
 import { submitQuote } from "@/app/actions/lead";
 import {
@@ -93,6 +94,7 @@ export function QuoteForm() {
   };
 
   return (
+    <MotionProvider>
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="relative">
       <Honeypot register={register("website")} />
 
@@ -336,13 +338,7 @@ export function QuoteForm() {
             className="relative inline-flex h-12 items-center overflow-hidden rounded-full bg-accent px-7 text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98] disabled:cursor-wait disabled:opacity-90"
           >
             {status === "sending" && (
-              <m.span
-                aria-hidden="true"
-                className="absolute inset-y-0 left-0 bg-accent-deep"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: reduced ? 0 : 1.4, ease: "linear" }}
-              />
+              <span aria-hidden="true" className="sending-fill absolute inset-y-0 left-0 bg-accent-deep" />
             )}
             <span className="relative">
               {status === "sending" ? "Sending your enquiry" : "Send my enquiry"}
@@ -358,6 +354,7 @@ export function QuoteForm() {
         </p>
       </div>
     </form>
+    </MotionProvider>
   );
 }
 

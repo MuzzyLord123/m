@@ -49,7 +49,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <Reveal delay={0.08}>
+          <Reveal immediate>
             <div className="relative aspect-[4/5] overflow-hidden rounded-[4px] bg-plaster">
               <Image
                 src="/work/about-portrait.png"

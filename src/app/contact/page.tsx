@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { EnvelopeSimple, MapPin, Phone } from "@phosphor-icons/react/dist/ssr";
-import { QuoteForm } from "@/components/quote/QuoteForm";
+import { QuoteFormLazy } from "@/components/quote/QuoteFormLazy";
 import { MapEmbed } from "@/components/media/MapEmbed";
 import { Reveal } from "@/components/motion/Reveal";
 import { site } from "@/config/site";
@@ -114,7 +114,7 @@ export default function ContactPage() {
           </div>
 
           <div className="mt-12 rounded-[4px] bg-paper p-6 sm:p-9 lg:p-12">
-            <QuoteForm />
+            <QuoteFormLazy />
           </div>
         </div>
       </section>

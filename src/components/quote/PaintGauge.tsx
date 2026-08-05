@@ -1,6 +1,3 @@
-"use client";
-
-import { m, useReducedMotion } from "motion/react";
 
 /**
  * Signature interaction 6 — the paint gauge.
@@ -17,9 +14,7 @@ export function PaintGauge({
   total: number;
   labels: string[];
 }) {
-  const reduced = useReducedMotion();
   const progress = Math.min(1, Math.max(0, step / total));
-  const ease = { duration: reduced ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] as const };
 
   return (
     <div>
@@ -40,14 +35,13 @@ export function PaintGauge({
           {/* Paint level rises from the bottom of the tin */}
           <g clipPath="url(#tin-body)">
             <rect x="3" y="8" width="24" height="24" fill="var(--color-plaster)" />
-            <m.rect
+            <rect
               x="3"
               width="24"
               height="24"
               fill="var(--color-accent)"
-              initial={false}
-              animate={{ y: 32 - 24 * progress }}
-              transition={ease}
+              y={32 - 24 * progress}
+              className="gauge-fill"
             />
           </g>
 
@@ -68,12 +62,9 @@ export function PaintGauge({
 
         {/* The track it has been laid across */}
         <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-plaster">
-          <m.div
-            className="h-full origin-left rounded-full bg-accent"
-            initial={false}
-            animate={{ scaleX: progress }}
-            transition={ease}
-            style={{ width: "100%" }}
+          <div
+            className="gauge-track h-full w-full origin-left rounded-full bg-accent"
+            style={{ transform: `scaleX(${progress})` }}
           />
         </div>
 

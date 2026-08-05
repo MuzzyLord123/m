@@ -45,7 +45,7 @@ export default function WorkPage() {
 
           <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-8">
             {beforeAfterProjects.map((project, index) => (
-              <Reveal key={project.slug} delay={index * 0.08}>
+              <Reveal key={project.slug} delay={index * 0.08} immediate={index === 0}>
                 <BeforeAfter
                   before={project.beforeAfter!.before}
                   after={project.beforeAfter!.after}

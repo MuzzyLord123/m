@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DayPicker } from "react-day-picker";
 import { addDays, format, startOfDay } from "date-fns";
 import { enGB } from "date-fns/locale";
-import { m, useReducedMotion } from "motion/react";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { PaintTick } from "./PaintTick";
 import { ChipGroup, Field, Honeypot, TextArea, TextInput } from "@/components/ui/Field";
@@ -56,7 +55,6 @@ export function BookingForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [serverError, setServerError] = useState<string | null>(null);
   const startedAt = useRef(0);
-  const reduced = useReducedMotion();
 
   const {
     register,
@@ -267,13 +265,7 @@ export function BookingForm() {
               className="relative inline-flex h-13 items-center overflow-hidden rounded-full bg-accent px-7 py-4 text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98] disabled:cursor-wait disabled:opacity-90"
             >
               {status === "sending" && (
-                <m.span
-                  aria-hidden="true"
-                  className="absolute inset-y-0 left-0 bg-accent-deep"
-                  initial={{ width: "0%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: reduced ? 0 : 1.4, ease: "linear" }}
-                />
+                <span aria-hidden="true" className="sending-fill absolute inset-y-0 left-0 bg-accent-deep" />
               )}
               <span className="relative">
                 {status === "sending" ? "Requesting the visit" : "Request this visit"}

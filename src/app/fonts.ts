@@ -30,6 +30,11 @@ export const display = localFont({
   src: [{ path: "../fonts/display-normal.woff2", weight: "100 900", style: "normal" }],
   variable: "--ff-display",
   display: "swap",
+  // Generates a size-adjusted fallback so the swap from system text to the real
+  // face barely moves anything. Without it, making the hero text paint
+  // immediately (rather than fading in after hydration) exposed the reflow and
+  // pushed CLS from 0.019 to 0.041.
+  adjustFontFallback: "Arial",
   preload: true,
   // next/font is statically analysed, so this list is inlined per call.
   fallback: ["ui-sans-serif", "system-ui", "Segoe UI", "Helvetica Neue", "sans-serif"],
@@ -39,6 +44,11 @@ export const displayItalic = localFont({
   src: [{ path: "../fonts/display-italic.woff2", weight: "100 900", style: "italic" }],
   variable: "--ff-display-italic",
   display: "swap",
+  // Generates a size-adjusted fallback so the swap from system text to the real
+  // face barely moves anything. Without it, making the hero text paint
+  // immediately (rather than fading in after hydration) exposed the reflow and
+  // pushed CLS from 0.019 to 0.041.
+  adjustFontFallback: "Arial",
   // Not preloaded. Preloading it costs ~0.7s of LCP on a throttled mobile
   // connection and buys back 0.019 of CLS — a bad trade when the budget is
   // 0.1. The hero's italic line swaps in a moment after the uprights.
@@ -51,6 +61,11 @@ export const body = localFont({
   src: [{ path: "../fonts/body-normal.woff2", weight: "400 700", style: "normal" }],
   variable: "--ff-body",
   display: "swap",
+  // Generates a size-adjusted fallback so the swap from system text to the real
+  // face barely moves anything. Without it, making the hero text paint
+  // immediately (rather than fading in after hydration) exposed the reflow and
+  // pushed CLS from 0.019 to 0.041.
+  adjustFontFallback: "Arial",
   preload: true,
   // next/font is statically analysed, so this list is inlined per call.
   fallback: ["ui-sans-serif", "system-ui", "Segoe UI", "Helvetica Neue", "sans-serif"],
@@ -60,6 +75,11 @@ export const bodyItalic = localFont({
   src: [{ path: "../fonts/body-italic.woff2", weight: "400 700", style: "italic" }],
   variable: "--ff-body-italic",
   display: "swap",
+  // Generates a size-adjusted fallback so the swap from system text to the real
+  // face barely moves anything. Without it, making the hero text paint
+  // immediately (rather than fading in after hydration) exposed the reflow and
+  // pushed CLS from 0.019 to 0.041.
+  adjustFontFallback: "Arial",
   // Not preloaded: body italics are a handful of emphasised words, all below
   // the fold, so this face can arrive whenever it is first needed.
   preload: false,

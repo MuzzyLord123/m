@@ -20,16 +20,27 @@ export function Reveal({
   delay = 0,
   className = "",
   as: Tag = "div",
+  immediate = false,
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
   as?: "div" | "li" | "span";
+  /**
+   * Render visible from the first paint, skipping the observer entirely.
+   *
+   * Set this on anything above the fold. A reveal starts at opacity 0, so an
+   * LCP element inside one cannot paint until hydration has run and the
+   * observer has fired — which is what held the first service photograph at a
+   * 2.5s LCP despite it being a preloaded 8KB file.
+   */
+  immediate?: boolean;
 }) {
   const ref = useRef<HTMLElement>(null);
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
+    if (immediate) return;
     const node = ref.current;
     if (!node) return;
 
@@ -51,12 +62,12 @@ export function Reveal({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [immediate]);
 
   return (
     <Tag
       ref={ref as never}
-      data-reveal={shown ? "in" : "out"}
+      data-reveal={immediate || shown ? "in" : "out"}
       style={delay ? { transitionDelay: `${delay}s` } : undefined}
       className={`reveal ${className}`}
     >

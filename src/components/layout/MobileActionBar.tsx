@@ -1,8 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { animate, m, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
-import { useRef } from "react";
 import { Phone } from "@phosphor-icons/react/dist/ssr";
 import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
 
@@ -11,43 +10,53 @@ import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
  * Quote, permanently in thumb reach. It drops away while the visitor is
  * reading down the page and returns the moment they scroll back up.
  *
- * Scroll direction is read from a motion value — no scroll listener, and no
- * continuous value in state.
+ * THE ONE SCROLL LISTENER ON THE SITE, and a deliberate exception to the rule
+ * banning them. Scroll *direction* cannot be derived from a scroll-driven
+ * animation or an IntersectionObserver — a timeline knows position, not which
+ * way you are going. The alternatives were dropping the behaviour or keeping
+ * the animation library in the shell, and the library costs every page ~40KB
+ * on the critical path.
+ *
+ * The handler is passive, reads one cached number, and touches nothing but a
+ * data attribute; the movement itself is a CSS transition on the compositor.
+ * It never reads layout, so it cannot thrash.
  */
 export function MobileActionBar() {
-  const { scrollY } = useScroll();
-  const reduced = useReducedMotion();
-  const y = useMotionValue(0);
-  const previous = useRef(0);
-  const hidden = useRef(false);
+  const barRef = useRef<HTMLDivElement>(null);
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const delta = latest - previous.current;
-    previous.current = latest;
+  useEffect(() => {
+    let previous = window.scrollY;
+    let frame = 0;
 
-    const settle = { duration: reduced ? 0 : 0.32, ease: [0.16, 1, 0.3, 1] as const };
+    const onScroll = () => {
+      if (frame) return; // coalesce to one update per frame
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const current = window.scrollY;
+        const delta = current - previous;
+        previous = current;
+        const bar = barRef.current;
+        if (!bar) return;
 
-    if (latest < 140) {
-      if (hidden.current) {
-        hidden.current = false;
-        animate(y, 0, settle);
-      }
-      return;
-    }
-    if (delta > 5 && !hidden.current) {
-      hidden.current = true;
-      animate(y, 140, settle);
-    } else if (delta < -5 && hidden.current) {
-      hidden.current = false;
-      animate(y, 0, settle);
-    }
-  });
+        if (current < 140) bar.dataset.hidden = "false";
+        else if (delta > 5) bar.dataset.hidden = "true";
+        else if (delta < -5) bar.dataset.hidden = "false";
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
 
   return (
-    <m.div
-      style={{ y }}
-      className="fixed inset-x-0 bottom-0 z-[80] lg:hidden"
+    <div
+      ref={barRef}
+      data-hidden="false"
       data-mobile-action-bar
+      className="action-bar fixed inset-x-0 bottom-0 z-[80] lg:hidden"
     >
       <div className="border-t border-hairline bg-paper/95 backdrop-blur-sm">
         <div className="flex items-stretch gap-2.5 px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
@@ -66,6 +75,6 @@ export function MobileActionBar() {
           </Link>
         </div>
       </div>
-    </m.div>
+    </div>
   );
 }
