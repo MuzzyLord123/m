@@ -49,6 +49,39 @@ const check = (label, value) => {
   await page.close();
 }
 
+// ------------------------------------------------------- desktop mega menu
+{
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.route("**/maps**", (route) => route.abort());
+  await page.goto(`${BASE}/`, { waitUntil: "load" });
+  await page.waitForTimeout(1200);
+
+  const panel = page.locator("#services-mega");
+  const trigger = page.locator("button[aria-controls='services-mega']");
+
+  // Park the pointer away from the header: hovering the trigger opens the
+  // panel, which would mask whether the keyboard path works on its own.
+  await page.mouse.move(1400, 820);
+  await trigger.focus();
+  await page.waitForTimeout(300);
+  check("mega menu starts closed", (await panel.getAttribute("data-open")) === "false");
+
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(500);
+  check("mega menu opens by keyboard", (await panel.getAttribute("data-open")) === "true");
+  check("trigger reports expanded", (await trigger.getAttribute("aria-expanded")) === "true");
+
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(400);
+  check("escape closes mega menu", (await panel.getAttribute("data-open")) === "false");
+
+  await page.locator("span.nav-link:has-text('Services')").hover();
+  await page.waitForTimeout(500);
+  check("mega menu opens on hover", (await panel.getAttribute("data-open")) === "true");
+  await page.screenshot({ path: `${SHOTS}/mega.png`, clip: { x: 0, y: 0, width: 1440, height: 560 } });
+  await page.close();
+}
+
 // ----------------------------------------------------------------- mobile
 {
   const page = await browser.newPage({ viewport: { width: 375, height: 812 }, hasTouch: true });

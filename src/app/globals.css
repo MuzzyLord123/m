@@ -449,6 +449,80 @@
   }
 }
 
+
+/* --------------------------------------------------------------------------
+   Enterprise nav: a utility strip above the main bar that gives its height
+   back to the page as you scroll, and the mega-menu panel beneath.
+   -------------------------------------------------------------------------- */
+
+.nav-utility {
+  height: 2.375rem;
+  opacity: 1;
+  overflow: hidden;
+}
+@supports (animation-timeline: scroll()) {
+  .nav-utility {
+    animation: nav-utility linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 80px;
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  .nav-utility {
+    transition:
+      height 0.3s var(--ease-coat),
+      opacity 0.2s var(--ease-coat);
+  }
+  [data-condensed="true"] .nav-utility {
+    height: 0;
+    opacity: 0;
+  }
+}
+@keyframes nav-utility {
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+/* The panel drops from under the bar, clipped rather than faded. */
+.mega-panel {
+  transform-origin: top;
+  transition:
+    opacity 0.24s var(--ease-coat),
+    transform 0.32s var(--ease-coat),
+    visibility 0.32s;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scaleY(0.985);
+}
+.mega-panel[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+.mega-item {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.3s var(--ease-coat),
+    transform 0.3s var(--ease-coat);
+}
+.mega-panel[data-open="true"] .mega-item {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-utility {
+    animation: none;
+  }
+  .mega-panel,
+  .mega-item {
+    transition: none;
+  }
+}
+
 /* --------------------------------------------------------------------------
    Mobile paint-flood menu. The accent expands from the toggle's own position.
    -------------------------------------------------------------------------- */

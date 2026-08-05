@@ -7,7 +7,7 @@ import { MobileMenu } from "./MobileMenu";
  */
 export function SiteHeader() {
   return (
-    <header className="fixed inset-x-0 top-0 z-[90]">
+    <header className="fixed inset-x-0 top-0 z-[90] isolate">
       <DesktopNav />
       <MobileMenu />
     </header>
