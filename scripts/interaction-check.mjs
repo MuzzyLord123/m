@@ -37,9 +37,11 @@ const check = (label, value) => {
   check("lightbox opens", await lightbox.isVisible());
   await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(250);
+  // Assert it stepped, not how many photographs the project happens to hold —
+  // that count changes every time a batch of photographs arrives.
   check(
     "arrow key steps photograph",
-    (await page.locator("[role='dialog'] dd").nth(1).innerText()) === "2 of 4",
+    /^2 of \d+$/.test(await page.locator("[role='dialog'] dd").nth(1).innerText()),
   );
   await page.keyboard.press("Escape");
   await page.waitForTimeout(800);

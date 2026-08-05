@@ -1,6 +1,6 @@
 # Where your photographs go
 
-The site is built around the 35 photographs you sent. Every one has a place
+The site is built around the 38 photographs you sent. Every one has a place
 reserved for it at a known filename, aspect ratio and blur tone.
 
 Right now each of those paths holds a **stand-in** — a flat JPEG in the colour
@@ -38,6 +38,8 @@ loses nothing.
 | Same room reversed — teal sofa, TV, vaulted ceiling, uplighters | `work/kitchen-extension-02.jpg` | 3:4 |
 | Extension shell, sliders fitted, bare floor | `work/kitchen-extension-03.jpg` | 4:3 |
 | Bare plaster, old pine door, dust sheets down | `work/kitchen-extension-04.jpg` | 3:4 |
+| Earliest shot — bare pink plaster, sliders in, garden beyond (batch 8) | `work/kitchen-extension-05.jpg` | 4:3 |
+| Finished room from the far end, kitchen and seating together (batch 8) | `work/kitchen-extension-06.jpg` | 4:3 |
 
 The last two are the **before/after pair** — 04 slides to 02.
 
@@ -118,6 +120,16 @@ than sliders. Send more angles of this one and it becomes a full project.
 | Bay window detail, surrounds and sills cut in black (batch 6) | `work/exterior-04.jpg` | 3:4 |
 | Rendered bungalow, black fascias, soffits and garage doors (batch 6) | `work/exterior-05.jpg` | 4:3 |
 
+### Commercial (batch 8)
+
+| Your photograph | Filename | Ratio |
+| --- | --- | --- |
+| Commercial unit mid-decoration, suspended ceiling and screed floor | `work/commercial-01.jpg` | 4:3 |
+
+This one brought the **Commercial filter back**. It had been removed because
+nothing evidenced it. Send two or three more and it becomes a proper project
+rather than a single photograph.
+
 ### Feature walls (batches 2, 4, 5)
 
 | Your photograph | Filename | Ratio |
@@ -162,7 +174,11 @@ blog posts and the structured data.
 The testimonials in `src/data/testimonials.ts` are written examples, not real
 customers. **Replace them with genuine ones before the site goes live.**
 
-Two other things the site describes but no photograph shows: **wallpapering**
-and **commercial** work. Both have full sections on the services page, and the
-gallery deliberately has no filter for them — an empty filter is worse than an
-absent one. Send photographs of either and I will add the category back.
+One other thing the site describes but no photograph shows: **wallpapering**.
+It has a full section on the services page, and the
+gallery deliberately has no filter for it — an empty filter is worse than an
+absent one. Send a papered room and I will add the category back, exactly as
+commercial came back in batch 8.
+
+**One duplicate:** the all-white hallway with painted floorboards arrived in
+both batch 7 and batch 8. It is mapped once, at `work/halls-07.jpg`.

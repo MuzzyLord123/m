@@ -3,11 +3,11 @@ import type { AspectRatio } from "@/lib/images";
 /**
  * The gallery, built around the client's own photographs.
  *
- * Categories are the trades the photographs actually evidence. Wallpapering
- * and commercial work are offered and described on the services page, but no
- * job here shows them, and a filter that resolves to an empty grid is worse
- * than one that is not offered. Add a category here when the photographs to
- * fill it exist.
+ * Categories are the trades the photographs actually evidence. Wallpapering is
+ * offered and described on the services page but no job here shows it, and a
+ * filter that resolves to an empty grid is worse than one that is not offered.
+ * Commercial earned its category back in batch 8. Add a category here when the
+ * photographs to fill it exist — not before.
  *
  * FILENAMES: every `src` below maps to a real photograph. See PHOTO-MAP.md at
  * the repo root for which of your images goes at which path. Drop them into
@@ -21,6 +21,7 @@ export const CATEGORIES = [
   { id: "exterior", label: "Exterior", swatch: "var(--color-swatch-terracotta)" },
   { id: "woodwork", label: "Woodwork", swatch: "var(--color-swatch-slate)" },
   { id: "feature", label: "Feature walls", swatch: "var(--color-swatch-ochre)" },
+  { id: "commercial", label: "Commercial", swatch: "var(--color-swatch-blush)" },
 ] as const;
 
 export type CategoryId = (typeof CATEGORIES)[number]["id"];
@@ -70,6 +71,8 @@ export const projects: Project[] = [
       img("/work/kitchen-extension-02.jpg", "The same room looking back, showing the angled ceiling reveals and wall uplighters", "3:4", "#efece7"),
       img("/work/kitchen-extension-03.jpg", "The extension before decoration, with sliding doors fitted and the floor still bare", "4:3", "#b9b6ae"),
       img("/work/kitchen-extension-04.jpg", "Bare plaster and dust sheets before the first coat went on", "3:4", "#d9cfc0"),
+      img("/work/kitchen-extension-05.jpg", "The extension at its earliest — bare pink plaster, sliders in, garden beyond", "4:3", "#c9b3a4"),
+      img("/work/kitchen-extension-06.jpg", "The finished open-plan room from the far end, kitchen and seating together", "4:3", "#eeece8"),
     ],
     beforeAfter: {
       before: img("/work/kitchen-extension-04.jpg", "The extension in bare plaster, dust sheets down, before any paint", "3:4", "#d9cfc0"),
@@ -216,6 +219,19 @@ export const projects: Project[] = [
       img("/work/exterior-03.jpg", "White render with black bay surrounds and an arched porch", "4:3", "#dedad3"),
       img("/work/exterior-04.jpg", "Close detail of a bay window with the surrounds and sills freshly cut in black", "3:4", "#ddd9d1"),
       img("/work/exterior-05.jpg", "Rendered bungalow in off-white with black fascias, soffits and garage doors", "4:3", "#e4dfd5"),
+    ],
+  },
+  {
+    slug: "commercial-fit-out",
+    title: "Commercial fit-out, decorated to handover",
+    area: "{{SERVICE_AREA}}",
+    category: "commercial",
+    scope: "Full unit decorated around trades still working, to a fixed handover date.",
+    detail:
+      "A commercial unit taken from bare partition to handover. Suspended ceiling grid, service runs and first-fix all still live while we worked, so it was phased around the other trades rather than after them. Hard-wearing scrubbable emulsion throughout, and everything cut in around grid, ducting and fittings that could not come off the wall.",
+    duration: "3 weeks",
+    images: [
+      img("/work/commercial-01.jpg", "Commercial unit part-way through decoration, suspended ceiling in and screed floor down", "4:3", "#e6e4e0"),
     ],
   },
   {
