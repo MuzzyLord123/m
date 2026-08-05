@@ -83,9 +83,17 @@ export function MobileMenu() {
 
   return (
     <div className="lg:hidden">
-      <div className="shell flex h-[4.75rem] items-center justify-between">
-        <Wordmark />
-        <BrushToggle ref={toggleRef} open={open} onClick={() => setOpen((v) => !v)} />
+      {/* One toggle, not two. The header row sits above the flood panel in the
+          same stacking context, so it inverts to white rather than being
+          duplicated underneath. */}
+      <div className="shell relative z-[96] flex h-[4.75rem] items-center justify-between">
+        <Wordmark onDark={open} />
+        <BrushToggle
+          ref={toggleRef}
+          open={open}
+          onDark={open}
+          onClick={() => setOpen((v) => !v)}
+        />
       </div>
 
       <AnimatePresence>
@@ -103,10 +111,7 @@ export function MobileMenu() {
             transition={{ duration: flood, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 z-[95] flex min-h-[100dvh] flex-col bg-accent outline-none"
           >
-            <div className="shell flex h-[4.75rem] shrink-0 items-center justify-between">
-              <Wordmark onDark />
-              <BrushToggle open onClick={close} onDark />
-            </div>
+            <div className="h-[4.75rem] shrink-0" aria-hidden="true" />
 
             <nav
               aria-label="Mobile"
