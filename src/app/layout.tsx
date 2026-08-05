@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { body, display } from "./fonts";
 import { site } from "@/config/site";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { MobileActionBar } from "@/components/layout/MobileActionBar";
+import { ScrollPaintLevel } from "@/components/layout/ScrollPaintLevel";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,7 +36,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        {children}
+        <ScrollPaintLevel />
+        <SiteHeader />
+        <main id="main">{children}</main>
+        <SiteFooter />
+        <MobileActionBar />
         <div className="roller-grain" aria-hidden="true" />
       </body>
     </html>

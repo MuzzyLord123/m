@@ -1,9 +1,9 @@
 export default function HomePage() {
   return (
-    <main id="main" className="shell py-32">
-      <h1 className="text-5xl md:text-7xl leading-[0.95] tracking-tight">
+    <div className="shell pt-44 pb-32">
+      <h1 className="font-display text-5xl leading-[0.95] font-semibold tracking-tight md:text-7xl">
         Decorating, done properly.
       </h1>
-    </main>
+    </div>
   );
 }
