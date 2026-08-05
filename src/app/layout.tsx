@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { MobileActionBar } from "@/components/layout/MobileActionBar";
 import { ScrollPaintLevel } from "@/components/layout/ScrollPaintLevel";
+import { ChatLauncher } from "@/components/chat/ChatLauncher";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main id="main">{children}</main>
         <SiteFooter />
         <MobileActionBar />
+        <ChatLauncher />
         <div className="roller-grain" aria-hidden="true" />
       </body>
     </html>
