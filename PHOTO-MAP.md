@@ -1,6 +1,6 @@
 # Where your photographs go
 
-The site is built around the 30 photographs you sent. Every one has a place
+The site is built around the 35 photographs you sent. Every one has a place
 reserved for it at a known filename, aspect ratio and blur tone.
 
 Right now each of those paths holds a **stand-in** — a flat JPEG in the colour
@@ -40,6 +40,15 @@ loses nothing.
 | Bare plaster, old pine door, dust sheets down | `work/kitchen-extension-04.jpg` | 3:4 |
 
 The last two are the **before/after pair** — 04 slides to 02.
+
+### Open-plan kitchen (batch 7)
+
+| Your photograph | Filename | Ratio |
+| --- | --- | --- |
+| Vaulted kitchen with roof light, grey gloss units and bifolds | `work/open-plan-kitchen-01.jpg` | 4:3 |
+
+A second extension, separate from batch 1's — different house, bifolds rather
+than sliders. Send more angles of this one and it becomes a full project.
 
 ### Alcove shelving (batch 2)
 
@@ -85,6 +94,7 @@ The last two are the **before/after pair** — 04 slides to 02.
 | Near-black balustrade, two flights | `work/stairs-colour-02.jpg` | 3:4 |
 | White balustrade over grey-green panelled understairs | `work/stairs-colour-03.jpg` | 3:4 |
 | The near-black balustrade over two levels, cream walls (batch 6) | `work/stairs-colour-04.jpg` | 3:4 |
+| Balustrade finished in white, treads stripped back and waiting (batch 7) | `work/stairs-colour-05.jpg` | 3:4 |
 
 ### Halls, stairs and landings (batches 1 + 4)
 
@@ -94,6 +104,9 @@ The last two are the **before/after pair** — 04 slides to 02.
 | Dark stained floor, striped runner, gallery wall | `work/halls-02.jpg` | 3:4 |
 | Olive hallway, white balustrade, view to the kitchen | `work/halls-03.jpg` | 3:4 |
 | Hallway mid-build — bare timber stairs, green panelling, stained-glass door (batch 6) | `work/halls-04.jpg` | 4:3 |
+| Cream spindles, panelled understairs, oak console and lamp (batch 7) | `work/halls-05.jpg` | 4:3 |
+| Panelled dado, dark wood floor, arch to the front door (batch 7) | `work/halls-06.jpg` | 3:4 |
+| All-white hallway with painted floorboards (batch 7) | `work/halls-07.jpg` | 3:4 |
 
 ### Exteriors (batches 4 + 5)
 

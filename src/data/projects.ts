@@ -77,6 +77,20 @@ export const projects: Project[] = [
     },
   },
   {
+    slug: "open-plan-kitchen",
+    title: "Open-plan kitchen, vaulted and lit",
+    area: "{{TOWN}}",
+    category: "interior",
+    scope: "Vaulted ceiling, roof light and bifold reveals, finished around a fitted kitchen.",
+    detail:
+      "The kitchen was already in when we started, which makes it a masking job as much as a painting one. Units, worktops and the bifold frames all wrapped, then the vault and its roof-light reveal cut in by hand. Spot-light rings and the ceiling line around a pitched roof are the two places a rushed job always shows.",
+    duration: "6 days",
+    featured: true,
+    images: [
+      img("/work/open-plan-kitchen-01.jpg", "Open-plan kitchen with a vaulted ceiling, roof light and bifold doors, decorated around the fitted units", "4:3", "#d8d6d2"),
+    ],
+  },
+  {
     slug: "alcove-joinery",
     title: "Alcove shelving, bare timber to finished",
     area: "{{TOWN}}",
@@ -164,6 +178,7 @@ export const projects: Project[] = [
       img("/work/stairs-colour-02.jpg", "Two flights with the balustrade finished in near-black against pale walls", "3:4", "#4f4d4b"),
       img("/work/stairs-colour-03.jpg", "White balustrade above grey-green panelled understairs joinery", "3:4", "#d5d0c8"),
       img("/work/stairs-colour-04.jpg", "The near-black balustrade carried up over two levels, against cream walls", "3:4", "#4a4845"),
+      img("/work/stairs-colour-05.jpg", "A staircase part-way through: balustrade finished in white, treads stripped back and waiting", "3:4", "#ddd9d4"),
     ],
   },
   {
@@ -171,7 +186,7 @@ export const projects: Project[] = [
     title: "Halls, stairs and landings",
     area: "{{SERVICE_AREA}}",
     category: "interior",
-    scope: "The hardest room in the house to decorate, done three times over.",
+    scope: "The hardest room in the house to decorate, done seven times over.",
     detail:
       "Hall, stairs and landing is the job most decorators quote high for, because of the access. Ceilings over a stairwell need a proper platform rather than a ladder propped on a tread, and every wall is a cutting-in job around spindles, strings and coving. These three were all done with the families still living in them.",
     duration: "4 days each",
@@ -180,6 +195,9 @@ export const projects: Project[] = [
       img("/work/halls-02.jpg", "Hall and stairs with a dark stained floor, striped runner and gallery wall", "3:4", "#cdc8c1"),
       img("/work/halls-03.jpg", "Stairs and hallway in a soft olive with white balustrade and understairs panelling", "3:4", "#b7b78f"),
       img("/work/halls-04.jpg", "A hallway part-way through: new stairs still in bare timber, panelling in green, sheets down", "4:3", "#cfc7b8"),
+      img("/work/halls-05.jpg", "Traditional hallway with cream spindles, panelled understairs and an oak console", "4:3", "#d8cfc0"),
+      img("/work/halls-06.jpg", "Bright hallway with a panelled dado, dark wood floor and an arched opening to the front door", "3:4", "#e0dcd6"),
+      img("/work/halls-07.jpg", "Hallway finished entirely in white, down to the painted floorboards", "3:4", "#eceae6"),
     ],
   },
   {
