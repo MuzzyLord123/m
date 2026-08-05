@@ -1,6 +1,6 @@
 # Where your photographs go
 
-The site is built around the 25 photographs you sent. Every one has a place
+The site is built around the 30 photographs you sent. Every one has a place
 reserved for it at a known filename, aspect ratio and blur tone.
 
 Right now each of those paths holds a **stand-in** — a flat JPEG in the colour
@@ -75,6 +75,7 @@ The last two are the **before/after pair** — 04 slides to 02.
 | --- | --- | --- |
 | Entrance — panelling, round mirror, black console, herringbone | `work/panelled-hallway-01.jpg` | 3:4 |
 | Stairs with grey runner and black pipe handrail | `work/panelled-hallway-02.jpg` | 3:4 |
+| Looking down to the black front door, vertical radiator, herringbone (batch 6) | `work/panelled-hallway-03.jpg` | 3:4 |
 
 ### Staircases in colour (batch 5)
 
@@ -83,6 +84,7 @@ The last two are the **before/after pair** — 04 slides to 02.
 | Mid-grey balustrade and understairs cupboards, grey carpet | `work/stairs-colour-01.jpg` | 3:4 |
 | Near-black balustrade, two flights | `work/stairs-colour-02.jpg` | 3:4 |
 | White balustrade over grey-green panelled understairs | `work/stairs-colour-03.jpg` | 3:4 |
+| The near-black balustrade over two levels, cream walls (batch 6) | `work/stairs-colour-04.jpg` | 3:4 |
 
 ### Halls, stairs and landings (batches 1 + 4)
 
@@ -91,6 +93,7 @@ The last two are the **before/after pair** — 04 slides to 02.
 | Warm grey hallway, oak floor, framed photographs | `work/halls-01.jpg` | 3:4 |
 | Dark stained floor, striped runner, gallery wall | `work/halls-02.jpg` | 3:4 |
 | Olive hallway, white balustrade, view to the kitchen | `work/halls-03.jpg` | 3:4 |
+| Hallway mid-build — bare timber stairs, green panelling, stained-glass door (batch 6) | `work/halls-04.jpg` | 4:3 |
 
 ### Exteriors (batches 4 + 5)
 
@@ -99,6 +102,8 @@ The last two are the **before/after pair** — 04 slides to 02.
 | Semi, black bargeboards, teal door, new fence | `work/exterior-01.jpg` | 3:4 |
 | Rendered frontage, black bays, sunny | `work/exterior-02.jpg` | 4:3 |
 | White render, black bays, arched porch | `work/exterior-03.jpg` | 4:3 |
+| Bay window detail, surrounds and sills cut in black (batch 6) | `work/exterior-04.jpg` | 3:4 |
+| Rendered bungalow, black fascias, soffits and garage doors (batch 6) | `work/exterior-05.jpg` | 4:3 |
 
 ### Feature walls (batches 2, 4, 5)
 

@@ -147,6 +147,7 @@ export const projects: Project[] = [
     images: [
       img("/work/panelled-hallway-01.jpg", "Hallway with white panelling, herringbone floor, a black console and framed photographs", "3:4", "#dcd7d0"),
       img("/work/panelled-hallway-02.jpg", "The staircase with a grey runner and black pipe handrail against the panelled wall", "3:4", "#d9d5cf"),
+      img("/work/panelled-hallway-03.jpg", "Looking down over the panelled walls to the black front door and herringbone floor", "3:4", "#d9d5cf"),
     ],
   },
   {
@@ -162,6 +163,7 @@ export const projects: Project[] = [
       img("/work/stairs-colour-01.jpg", "Staircase and understairs cupboards finished in a mid grey, with grey carpet", "3:4", "#b4b5b4"),
       img("/work/stairs-colour-02.jpg", "Two flights with the balustrade finished in near-black against pale walls", "3:4", "#4f4d4b"),
       img("/work/stairs-colour-03.jpg", "White balustrade above grey-green panelled understairs joinery", "3:4", "#d5d0c8"),
+      img("/work/stairs-colour-04.jpg", "The near-black balustrade carried up over two levels, against cream walls", "3:4", "#4a4845"),
     ],
   },
   {
@@ -177,6 +179,7 @@ export const projects: Project[] = [
       img("/work/halls-01.jpg", "Hallway in warm grey with an oak floor and a run of framed photographs", "3:4", "#cfccc6"),
       img("/work/halls-02.jpg", "Hall and stairs with a dark stained floor, striped runner and gallery wall", "3:4", "#cdc8c1"),
       img("/work/halls-03.jpg", "Stairs and hallway in a soft olive with white balustrade and understairs panelling", "3:4", "#b7b78f"),
+      img("/work/halls-04.jpg", "A hallway part-way through: new stairs still in bare timber, panelling in green, sheets down", "4:3", "#cfc7b8"),
     ],
   },
   {
@@ -184,7 +187,7 @@ export const projects: Project[] = [
     title: "Rendered exteriors and timber detail",
     area: "{{SERVICE_AREA}}",
     category: "exterior",
-    scope: "Masonry paint over pebbledash and render, with bargeboards and bays.",
+    scope: "Masonry paint over pebbledash and render, with bargeboards, bays and sills.",
     detail:
       "Textured render and pebbledash drink paint, so these go on wet and get two full coats rather than one stretched one. Bargeboards, fascias and bay surrounds are cut in by hand off a tower. Work is planned around the forecast — masonry paint on a damp wall fails inside two winters, so we move a date rather than push on.",
     duration: "6 to 9 days each",
@@ -193,6 +196,8 @@ export const projects: Project[] = [
       img("/work/exterior-01.jpg", "Rendered semi finished in off-white with black bargeboards, fascias and a teal front door", "3:4", "#d6d4d0"),
       img("/work/exterior-02.jpg", "Rendered frontage in white with black bay surrounds and window detailing", "4:3", "#e2ded6"),
       img("/work/exterior-03.jpg", "White render with black bay surrounds and an arched porch", "4:3", "#dedad3"),
+      img("/work/exterior-04.jpg", "Close detail of a bay window with the surrounds and sills freshly cut in black", "3:4", "#ddd9d1"),
+      img("/work/exterior-05.jpg", "Rendered bungalow in off-white with black fascias, soffits and garage doors", "4:3", "#e4dfd5"),
     ],
   },
   {
