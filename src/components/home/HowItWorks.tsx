@@ -6,7 +6,17 @@ import { site } from "@/config/site";
 
 /**
  * Three steps on a stepped baseline — each one drops lower than the last, like
- * a roller working down a wall — with the trust badges carried underneath.
+ * a roller working down a wall.
+ *
+ * The three guarantees below run as a FULL-BLEED BAND OF BRAND ORANGE. Two
+ * reasons. Commercially, they are the three facts that settle a nervous
+ * customer — a guarantee, a response time and an insurance figure — so they
+ * deserve the loudest surface on the page. Compositionally, the site needed
+ * orange at a rhythm rather than sprinkled: this band and the closing CTA are
+ * the two full planes, roughly a third and the end of the scroll.
+ *
+ * Near-black type on the orange throughout — white on #f26522 is about 2.9:1
+ * and fails, which is exactly the mistake the closing CTA had been shipping.
  */
 export function HowItWorks() {
   const badges = [
@@ -16,7 +26,8 @@ export function HowItWorks() {
   ];
 
   return (
-    <section className="shell py-20 lg:py-28" aria-labelledby="how-heading">
+    <section className="pt-20 pb-0 lg:pt-28" aria-labelledby="how-heading">
+      <div className="shell">
       <SectionHeading
         eyebrow="How it works"
         title={<span id="how-heading">Quote, schedule, fresh coat.</span>}
@@ -45,21 +56,29 @@ export function HowItWorks() {
         ))}
       </ol>
 
-      <Reveal delay={0.1}>
-        <ul className="mt-20 grid gap-px overflow-hidden rounded-[4px] bg-hairline sm:grid-cols-3">
-          {badges.map(({ icon: Icon, label, note }) => (
-            <li key={label} className="flex items-start gap-4 bg-paper p-7">
-              <Icon weight="light" className="size-7 shrink-0 text-accent" />
+      </div>
+
+      {/* Full-bleed. Deliberately not inside the shell. */}
+      <div className="mt-20 bg-accent lg:mt-28">
+        <ul className="shell grid divide-y divide-on-accent/15 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          {badges.map(({ icon: Icon, label, note }, index) => (
+            <Reveal
+              as="li"
+              key={label}
+              delay={0.07 * index}
+              className="flex items-start gap-4 py-8 sm:px-7 sm:first:pl-0 sm:last:pr-0 lg:py-10"
+            >
+              <Icon weight="light" className="size-7 shrink-0 text-on-accent" />
               <div>
-                <p className="font-display text-[1.0625rem] leading-snug font-semibold text-ink">
+                <p className="font-display text-[1.0625rem] leading-snug font-semibold text-on-accent">
                   {label}
                 </p>
-                <p className="mt-1 text-[0.875rem] leading-relaxed text-ink-mute">{note}</p>
+                <p className="mt-1 text-[0.875rem] leading-relaxed text-on-accent/80">{note}</p>
               </div>
-            </li>
+            </Reveal>
           ))}
         </ul>
-      </Reveal>
+      </div>
     </section>
   );
 }

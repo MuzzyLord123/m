@@ -31,11 +31,16 @@ export function SectionHeading({
         >
           {eyebrow}
         </p>
-        {/* The rule is the drip's anchor — it hangs off the underside of it. */}
-        <div
-          className={`relative mt-3 h-px w-full ${onDark ? "bg-white/25" : "bg-hairline"}`}
-          aria-hidden="true"
-        >
+        {/* The rule is the drip's anchor — it hangs off the underside of it.
+            It draws itself in as the section arrives, with a short orange lead
+            running ahead of the hairline. See .section-rule in globals.css. */}
+        <div className="relative mt-3 h-px w-full" aria-hidden="true">
+          <span
+            className={`section-rule absolute inset-0 block ${
+              onDark ? "bg-on-accent/25" : "bg-hairline"
+            }`}
+          />
+          <span className="section-rule-lead absolute inset-y-0 left-0 block w-[9%] bg-accent" />
           {drip && <DripAccent className="absolute top-full left-[13%]" />}
         </div>
       </div>

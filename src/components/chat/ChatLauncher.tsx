@@ -102,7 +102,7 @@ export function ChatLauncher() {
       type="button"
       onClick={open}
       aria-label={status === "loading" ? "Opening live chat" : "Open live chat"}
-      className="fixed right-4 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-[85] grid size-14 place-items-center rounded-full text-white transition-transform duration-[320ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.06] hover:-rotate-6 active:scale-95 lg:right-6 lg:bottom-6 lg:size-16"
+      className="fixed right-4 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-[85] grid size-14 place-items-center rounded-full text-on-accent transition-transform duration-[320ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.06] hover:-rotate-6 active:scale-95 lg:right-6 lg:bottom-6 lg:size-16"
     >
       {/* The blob is the button — paint does not land in perfect rounds */}
       <svg viewBox="0 0 64 64" className="absolute inset-0 h-full w-full drop-shadow-[0_10px_26px_rgb(29_79_216/0.45)]" aria-hidden="true">

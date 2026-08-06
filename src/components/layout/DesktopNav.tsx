@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, CaretDown, Clock, MapPin, Phone } from "@phosphor-icons/react/dist/ssr";
-import { BrushStroke } from "@/components/brand/BrushStroke";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
 import { primaryNav } from "@/lib/nav";
@@ -99,14 +98,22 @@ export function DesktopNav() {
       <div className="nav-shell relative">
         <div
           aria-hidden="true"
-          className="nav-chrome pointer-events-none absolute inset-x-0 bottom-0 h-px bg-hairline shadow-[0_10px_30px_-16px_rgb(60_60_50/0.45)]"
+          className="nav-chrome pointer-events-none absolute inset-x-0 bottom-0 h-px bg-hairline"
+        />
+        <div
+          aria-hidden="true"
+          className="nav-rule pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-accent"
         />
 
         <nav aria-label="Primary" className="shell flex h-full items-center">
-          <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-8">
+          {/* A real grid, not three floating clusters. The mark sits in its own
+              column, the pages sit immediately beside it behind a hairline so
+              they read as one navigation block rather than drifting in the
+              middle of the bar, and the actions are pinned right. */}
+          <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-7">
             <Wordmark />
 
-            <ul className="flex items-center gap-9">
+            <ul className="flex items-center gap-8 border-l border-hairline pl-7">
               {primaryNav.map((link) => {
                 const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
                 const isServices = link.href === "/services";
@@ -125,7 +132,14 @@ export function DesktopNav() {
                         <Link
                           href={link.href}
                           aria-current={active ? "page" : undefined}
-                          className="block px-0.5 py-1 text-[0.9375rem] font-medium text-ink transition-colors duration-200 hover:text-accent"
+                          /* Active is carried by COLOUR AND WEIGHT, not a rule beneath.
+                             The painted underline that used to live here read as
+                             decoration on a bar that needed structure. */
+                          className={`nav-label block py-1 text-[0.9375rem] transition-colors duration-200 ${
+                            active
+                              ? "font-semibold text-accent"
+                              : "font-medium text-ink-soft hover:text-ink"
+                          }`}
                         >
                           {link.label}
                         </Link>
@@ -148,10 +162,6 @@ export function DesktopNav() {
                             }`}
                           />
                         </button>
-                        <BrushStroke
-                          colour="var(--color-accent)"
-                          className="pointer-events-none absolute -bottom-0.5 left-0 h-[7px] w-[calc(100%-1.5rem)]"
-                        />
                       </span>
                     ) : (
                       <span className="nav-link relative inline-block" data-active={active}>
@@ -159,14 +169,17 @@ export function DesktopNav() {
                           href={link.href}
                           aria-current={active ? "page" : undefined}
                           onFocus={scheduleClose}
-                          className="block px-0.5 py-1 text-[0.9375rem] font-medium text-ink transition-colors duration-200 hover:text-accent"
+                          /* Active is carried by COLOUR AND WEIGHT, not a rule beneath.
+                             The painted underline that used to live here read as
+                             decoration on a bar that needed structure. */
+                          className={`nav-label block py-1 text-[0.9375rem] transition-colors duration-200 ${
+                            active
+                              ? "font-semibold text-accent"
+                              : "font-medium text-ink-soft hover:text-ink"
+                          }`}
                         >
                           {link.label}
                         </Link>
-                        <BrushStroke
-                          colour="var(--color-accent)"
-                          className="pointer-events-none absolute -bottom-0.5 left-0 h-[7px] w-full"
-                        />
                       </span>
                     )}
                   </li>
@@ -177,7 +190,7 @@ export function DesktopNav() {
             <div className="flex items-center justify-end gap-6">
               <a
                 href={`tel:${site.phoneHref}`}
-                className="group inline-flex items-center gap-2 text-[0.9375rem] font-medium text-ink-soft transition-colors duration-200 hover:text-accent"
+                className="group inline-flex h-11 items-center gap-2.5 rounded-full border border-hairline px-5 text-[0.9375rem] font-medium text-ink transition-[border-color,background-color,color] duration-200 hover:border-accent/50 hover:bg-accent-wash"
               >
                 <Phone
                   weight="light"

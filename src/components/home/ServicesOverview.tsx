@@ -12,7 +12,14 @@ import { blurTone } from "@/lib/images";
  * No row of equal cards anywhere.
  */
 export function ServicesOverview() {
-  const [lead, ...rest] = services;
+  /* The lead runs tall down the left over two rows; four cards fill the two
+     right-hand columns beside it; the sixth runs the full width beneath as a
+     wide row. When the trades went from five to six, `rest` became five cards
+     in a two-column stack — three rows against a two-row lead — which left the
+     bottom two-thirds of the grid empty at 1024px and above. */
+  const [lead, ...others] = services;
+  const rest = others.slice(0, 4);
+  const wide = others[4];
 
   return (
     <section className="shell py-20 lg:py-28" aria-labelledby="services-heading">
@@ -72,10 +79,10 @@ export function ServicesOverview() {
           >
             <Link
               href={`/services#${service.id}`}
-              className="group flex h-full flex-col justify-between rounded-[4px] border border-hairline bg-paper p-7 transition-[transform,border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-accent/40 hover:bg-accent-wash/50"
+              className="card-edge group flex h-full flex-col justify-between overflow-hidden rounded-[4px] border border-hairline bg-paper p-7 transition-[transform,border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-accent/40 hover:bg-accent-wash/50"
             >
               <div>
-                <p className="font-display text-[0.8125rem] font-semibold tracking-[0.1em] text-ink-mute tabular-nums">
+                <p className="font-display text-[0.8125rem] font-semibold tracking-[0.1em] text-accent tabular-nums">
                   0{index + 2}
                 </p>
                 <h3 className="mt-5 font-display text-[1.375rem] leading-tight font-semibold tracking-[-0.02em] text-ink">
@@ -95,6 +102,36 @@ export function ServicesOverview() {
             </Link>
           </Reveal>
         ))}
+
+        {wide && (
+          <Reveal delay={0.3} className="lg:col-span-3">
+            <Link
+              href={`/services#${wide.id}`}
+              className="card-edge group flex flex-col justify-between gap-6 overflow-hidden rounded-[4px] border border-hairline bg-paper p-7 transition-[transform,border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-accent/40 hover:bg-accent-wash/50 sm:flex-row sm:items-center lg:p-8"
+            >
+              <div className="flex items-start gap-6 lg:gap-8">
+                <p className="font-display text-[0.8125rem] font-semibold tracking-[0.1em] text-accent tabular-nums">
+                  0{services.length}
+                </p>
+                <div>
+                  <h3 className="font-display text-[1.375rem] leading-tight font-semibold tracking-[-0.02em] text-ink">
+                    {wide.title}
+                  </h3>
+                  <p className="measure mt-2.5 text-[0.9375rem] leading-relaxed text-ink-soft">
+                    {wide.summary}
+                  </p>
+                </div>
+              </div>
+              <span className="inline-flex shrink-0 items-center gap-2 text-[0.875rem] font-medium whitespace-nowrap text-accent">
+                See the detail
+                <ArrowRight
+                  weight="light"
+                  className="size-4 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+                />
+              </span>
+            </Link>
+          </Reveal>
+        )}
       </div>
     </section>
   );

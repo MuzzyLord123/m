@@ -493,6 +493,114 @@
 }
 
 /* --------------------------------------------------------------------------
+   Card edge. A 2px band of brand orange along the top of a card, drawn in from
+   the left on hover or keyboard focus.
+
+   It replaces the usual "border goes lighter" hover, which on a near-black
+   ground is almost invisible. scaleX on a pseudo-element, so nothing about the
+   card's box changes and there is no reflow — the border-colour transition that
+   used to carry this had to animate a paint property to say much at all.
+   -------------------------------------------------------------------------- */
+
+.card-edge {
+  position: relative;
+}
+.card-edge::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.42s var(--ease-coat);
+}
+.card-edge:hover::after,
+.card-edge:focus-visible::after,
+.card-edge:focus-within::after {
+  transform: scaleX(1);
+}
+
+/* --------------------------------------------------------------------------
+   Section rule. Every section on the site opens with an eyebrow over a hairline,
+   so that rule is the one gesture repeated most — which makes it the right place
+   to put the site's motion signature.
+
+   It draws itself left-to-right as the section arrives, with a short lead of
+   brand orange running ahead of the hairline like the leading edge of a stroke.
+   scaleX on a view() timeline: composited, tied to the reader's own scrolling
+   rather than a timer, and it cannot shift layout because the rule already
+   occupies its 1px.
+   -------------------------------------------------------------------------- */
+
+.section-rule {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.section-rule-lead {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+@supports (animation-timeline: view()) {
+  .section-rule {
+    animation: rule-draw 1s var(--ease-coat) both;
+    animation-timeline: view(block);
+    animation-range: entry 10% cover 26%;
+  }
+  .section-rule-lead {
+    animation: rule-draw 1s var(--ease-coat) both;
+    animation-timeline: view(block);
+    animation-range: entry 8% cover 18%;
+  }
+}
+@supports not (animation-timeline: view()) {
+  .section-rule,
+  .section-rule-lead {
+    transform: scaleX(1);
+  }
+}
+@keyframes rule-draw {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The bar's base rule. A hairline of brand orange that draws itself in from the
+   centre as the bar condenses — the site's structural signature, not an
+   ornament: it is the same gesture as the rule under every section eyebrow.
+
+   scaleX only, so it composites, and it sits on its own layer so it cannot
+   shift anything.
+   -------------------------------------------------------------------------- */
+
+.nav-rule {
+  transform: scaleX(0);
+  transform-origin: center;
+}
+@supports (animation-timeline: scroll()) {
+  .nav-rule {
+    animation: nav-rule linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 30px 110px;
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  .nav-rule {
+    transition: transform 0.45s var(--ease-coat);
+  }
+  [data-condensed="true"] .nav-rule {
+    transform: scaleX(1);
+  }
+}
+@keyframes nav-rule {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
    The mobile bar earns its own chrome the same way, on the same timeline.
 
    It does not condense — 5.25rem is already thumb-sized and taking height away
@@ -697,6 +805,16 @@
   .nav-chrome {
     animation: none;
     opacity: 1;
+  }
+  .nav-rule,
+  .section-rule,
+  .section-rule-lead {
+    animation: none;
+    transform: scaleX(1);
+  }
+  /* The card edge is a hover state, not an entrance — it simply appears. */
+  .card-edge::after {
+    transition: none;
   }
   .mobile-bar {
     animation: none;

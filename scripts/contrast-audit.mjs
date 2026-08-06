@@ -103,6 +103,17 @@ const PAIRS = [
   ["flood menu eyebrow — on-accent/85 on accent", blend(TOKENS.onAccent, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
   ["flood menu CTA — accent on on-accent pill", TOKENS.accent, TOKENS.onAccent, 4.5],
 
+  // The full-bleed orange CTA band. These pairs were NOT audited, and the band
+  // shipped as white on orange at 2.9:1 — a straight AA failure on the site's
+  // most important call to action. Audited now.
+  ["CTA band heading — on-accent on accent", TOKENS.onAccent, TOKENS.accent, 4.5],
+  ["CTA band body — on-accent/85 on accent", blend(TOKENS.onAccent, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
+  ["CTA band eyebrow — on-accent/85 on accent", blend(TOKENS.onAccent, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
+  ["CTA band pill — accent on on-accent", TOKENS.accent, TOKENS.onAccent, 4.5],
+  ["chat launcher glyph — on-accent on accent-bright", TOKENS.onAccent, TOKENS.accentBright, 4.5],
+  ["guarantee band label — on-accent on accent", TOKENS.onAccent, TOKENS.accent, 4.5],
+  ["guarantee band note — on-accent/80 on accent", blend(TOKENS.onAccent, 0.8, TOKENS.accent), TOKENS.accent, 4.5],
+
   // Text laid over photographs, on the theme-independent scrim
   ["gallery caption — white on scrim/90 over photo", TOKENS.white, blend(TOKENS.scrim, 0.9, "#8b847b"), 4.5],
   ["gallery caption — white/80 on scrim/90", blend(TOKENS.white, 0.8, blend(TOKENS.scrim, 0.9, "#8b847b")), blend(TOKENS.scrim, 0.9, "#8b847b"), 4.5],
