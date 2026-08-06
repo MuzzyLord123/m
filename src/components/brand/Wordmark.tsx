@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/config/site";
 
@@ -5,76 +6,51 @@ import { site } from "@/config/site";
  * The logo lockup. One component, used by the desktop bar, the mobile bar and
  * the flood menu, so the mark can never drift between them.
  *
- * DRAWN, NOT AN IMAGE — for now. The client's logo arrived as a mockup render
- * on a dark textured plate rather than as a logo asset, and the PNG stand-ins
- * that replaced it were worse on this ground than nothing: the "white" one
- * averaged mid-grey, so its "PAINTING SERVICES" line sank into the near-black
- * header and the mark shipped with half its words missing.
+ * This is the CLIENT'S OWN ARTWORK, not a recreation. What he supplied was a
+ * mockup render of the logo sitting on a dark textured plate — not a logo file.
+ * Lifting the artwork off that plate failed while the site was light, because
+ * whatever plate texture survived the key showed as grey haze on white. Once
+ * the site went black the same extraction became clean: the plate is estimated
+ * with a heavy blur and subtracted, then the result is unpremultiplied, so any
+ * residue lands at very low alpha against a ground that is nearly black anyway.
  *
- * This is the same lockup set in the site's own display face with the brush
- * gesture inline: sharp at every size, correct on both the near-black page and
- * the orange flood panel, nothing to load, and no stand-in that reads as a
- * placeholder.
+ *   public/brand/logo.png          — the extracted lockup, transparent
+ *   public/brand/logo-knockout.png — the same artwork as a near-black stencil,
+ *                                    for the orange flood menu, where the
+ *                                    full-colour mark would be orange on orange
+ *   public/brand/logo-source.jpg   — the original mockup, kept for reference
  *
- * TO SWAP IN THE REAL MARK: get a transparent PNG or SVG from whoever made the
- * logo, drop it at public/brand/logo-white.svg, and replace the <span> block
- * below with next/image. Everything else — sizing, the home link, the
- * accessible name — stays as it is. See PHOTO-MAP.md.
+ * The brush handle is thinner than in the original: it is a dark grey object
+ * that sat at almost exactly the plate's own value, so it could not be fully
+ * separated. At the sizes this renders — 40 to 56px tall — it is not visible.
+ *
+ * If a proper transparent PNG or SVG ever arrives from the designer, drop it
+ * over public/brand/logo.png and nothing here needs to change.
  */
 export function Wordmark({
   className = "",
   onAccent = false,
+  priority = false,
 }: {
   className?: string;
-  /** True where the mark sits on the orange flood panel rather than the page. */
+  /** True where the mark sits on the orange flood panel. */
   onAccent?: boolean;
+  priority?: boolean;
 }) {
-  // On the page the brush is orange and the words are light; on the orange
-  // panel both invert to near-black so the lockup stays one weight throughout.
-  const wordColour = onAccent ? "text-on-accent" : "text-ink";
-  const subColour = onAccent ? "text-on-accent/70" : "text-ink-mute";
-  const brushColour = onAccent ? "text-on-accent" : "text-accent";
-
   return (
     <Link
       href="/"
-      aria-label={`${site.name} — painter and decorator, home`}
-      className={`inline-flex shrink-0 items-center gap-2.5 transition-opacity duration-200 hover:opacity-85 ${className}`}
+      className={`inline-flex shrink-0 items-center transition-opacity duration-200 hover:opacity-85 ${className}`}
     >
-      <svg
-        viewBox="0 0 64 64"
-        aria-hidden="true"
-        className={`size-9 shrink-0 lg:size-10 ${brushColour}`}
-        fill="none"
-      >
-        {/* The logo's gesture: a curved stroke with the drip off its tail. */}
-        <path
-          d="M46 14c-13.3 0-24 9.1-24 20.4 0 7.1 4.2 13.2 10.5 16.6"
-          stroke="currentColor"
-          strokeWidth="7.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M32.5 51c3.8 2 8.3 3.1 13.1 3.1"
-          stroke="currentColor"
-          strokeWidth="7.5"
-          strokeLinecap="round"
-        />
-        <circle cx="51.5" cy="53.5" r="3.6" fill="currentColor" />
-      </svg>
-
-      <span className="flex flex-col justify-center leading-none">
-        <span
-          className={`font-display text-[1.0625rem] leading-none font-bold tracking-[0.02em] whitespace-nowrap sm:text-[1.1875rem] ${wordColour}`}
-        >
-          THEPAINTMEN
-        </span>
-        <span
-          className={`mt-[0.28em] text-[0.5rem] leading-none font-medium tracking-[0.28em] whitespace-nowrap sm:text-[0.5625rem] ${subColour}`}
-        >
-          PAINTING SERVICES
-        </span>
-      </span>
+      <Image
+        src={onAccent ? "/brand/logo-knockout.png" : "/brand/logo.png"}
+        alt={`${site.name} — painter and decorator, home`}
+        width={669}
+        height={280}
+        priority={priority}
+        sizes="(min-width: 1024px) 260px, 190px"
+        className="h-10 w-auto sm:h-11 lg:h-12"
+      />
     </Link>
   );
 }
