@@ -41,7 +41,7 @@ export default function ServicesPage() {
               <li key={service.id}>
                 <a
                   href={`#${service.id}`}
-                  className="inline-flex items-center rounded-full border border-hairline bg-paper px-4 py-2 text-[0.875rem] text-ink-soft transition-[border-color,color,background-color] duration-200 hover:border-accent hover:bg-accent-wash hover:text-accent"
+                  className="inline-flex min-h-11 items-center rounded-full border border-hairline bg-paper px-4 py-2 text-[0.875rem] text-ink-soft transition-[border-color,color,background-color] duration-200 hover:border-accent hover:bg-accent-wash hover:text-accent"
                 >
                   {service.title}
                 </a>

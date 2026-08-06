@@ -65,7 +65,7 @@ export function BookingForm() {
   } = useForm<BookingInput>({
     resolver: zodResolver(bookingSchema),
     mode: "onTouched",
-    defaultValues: { website: "", startedAt: 0, date: "" },
+    defaultValues: { website: "", elapsedMs: 0, date: "" },
   });
 
   // Dates are resolved after mount so the server and client never disagree.
@@ -84,12 +84,21 @@ export function BookingForm() {
   async function onSubmit(values: BookingInput) {
     setStatus("sending");
     setServerError(null);
-    const result = await submitBooking({ ...values, startedAt: startedAt.current });
-    if (result.ok) {
-      setStatus("sent");
-    } else {
+    try {
+      const result = await submitBooking({ ...values, elapsedMs: Date.now() - startedAt.current });
+      if (result.ok) {
+        setStatus("sent");
+      } else {
+        setStatus("error");
+        setServerError(result.error);
+      }
+    } catch {
+      // A rejected server action would otherwise leave the button disabled on
+      // "Sending…" for ever, with the booking never sent. See QuoteForm.
       setStatus("error");
-      setServerError(result.error);
+      setServerError(
+        `That did not send — check your connection and try again, or ring ${site.phone} and we will take the details over the phone.`,
+      );
     }
   }
 

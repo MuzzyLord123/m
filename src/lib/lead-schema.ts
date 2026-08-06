@@ -48,16 +48,24 @@ export const quoteSchema = z.object({
   property: z.enum(PROPERTY_OPTIONS, { message: "Tell us what sort of property it is" }),
   rooms: z.enum(ROOM_OPTIONS, { message: "Roughly how much needs doing?" }),
   timing: z.enum(TIMING_OPTIONS, { message: "When would you like it done?" }),
-  name: z.string().min(2, "Your name, so we know who we are speaking to"),
+  /* .trim() runs BEFORE the length check, so " " is caught as empty rather than
+     passing as a two-character name — and the confirmation email opens "Thanks
+     Sarah," rather than "Thanks , ". Autofill and paste both leave whitespace
+     surprisingly often. */
+  name: z.string().trim().min(2, "Your name, so we know who we are speaking to"),
   phone,
-  email: z.email("Check the email address — we send the written quote there"),
-  town: z.string().min(2, "Which town is the property in?"),
-  message: z.string().max(2000, "That is longer than we can take here — ring us instead").optional(),
+  email: z.email("Check the email address — we send the written quote there").trim(),
+  town: z.string().trim().min(2, "Which town is the property in?"),
+  message: z
+    .string()
+    .trim()
+    .max(2000, "That is longer than we can take here — ring us instead")
+    .optional(),
   hasPhotos: z.boolean().optional(),
 
   // Spam defences. Neither is ever shown to a person.
   website: z.string().max(0, "Something went wrong. Ring us instead.").optional(),
-  startedAt: z.number(),
+  elapsedMs: z.number(),
 });
 
 export type QuoteInput = z.infer<typeof quoteSchema>;
@@ -68,14 +76,18 @@ export const bookingSchema = z.object({
   /** ISO date string for the requested visit. */
   date: z.string().min(1, "Pick a day that suits you"),
   preference: z.enum(AM_PM, { message: "Morning or afternoon?" }),
-  name: z.string().min(2, "Your name, so we know who we are speaking to"),
+  name: z.string().trim().min(2, "Your name, so we know who we are speaking to"),
   phone,
-  email: z.email("Check the email address — we confirm the visit there"),
-  address: z.string().min(4, "The address we are coming to"),
-  message: z.string().max(2000, "That is longer than we can take here — ring us instead").optional(),
+  email: z.email("Check the email address — we confirm the visit there").trim(),
+  address: z.string().trim().min(4, "The address we are coming to"),
+  message: z
+    .string()
+    .trim()
+    .max(2000, "That is longer than we can take here — ring us instead")
+    .optional(),
 
   website: z.string().max(0, "Something went wrong. Ring us instead.").optional(),
-  startedAt: z.number(),
+  elapsedMs: z.number(),
 });
 
 export type BookingInput = z.infer<typeof bookingSchema>;
@@ -83,6 +95,16 @@ export type BookingInput = z.infer<typeof bookingSchema>;
 /**
  * A person cannot read four steps, decide and type their details in under four
  * seconds. A bot fills the lot instantly.
+ */
+/**
+ * Minimum time a human spends on the form. The client sends ELAPSED time, not
+ * the timestamp it started at: comparing a browser's clock against the server's
+ * means any clock skew is read as "submitted impossibly fast", and the customer
+ * is silently binned while being shown the success screen. Elapsed time is two
+ * readings of the same clock, so skew cancels out.
+ *
+ * A bot can lie about elapsed time — but it could equally lie about a start
+ * timestamp, so nothing is lost, and honest customers stop being thrown away.
  */
 export const MIN_SUBMIT_MS = 4000;
 

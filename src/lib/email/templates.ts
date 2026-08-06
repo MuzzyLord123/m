@@ -11,7 +11,7 @@ const SOFT = "#4b4b47";
 const MUTE = "#6a6a64";
 const PAPER = "#fafaf8";
 const PLASTER = "#edede9";
-const ACCENT = "#1d4fd8";
+const ACCENT = "#b8430b"; // working orange: 5.4:1 with white, unlike the logo orange
 
 function shell(title: string, body: string): string {
   return `<!doctype html>

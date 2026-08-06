@@ -25,10 +25,18 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
       type: "article",
+      /* siteName and locale have to be restated. Setting `openGraph` on a page
+         REPLACES the parent object rather than merging into it, so without
+         these a shared blog post loses the business name and the en_GB locale
+         that every other page carries. */
+      siteName: site.name,
+      locale: "en_GB",
+      url: `${site.url}/blog/${post.slug}`,
       title: post.title,
       description: post.description,
       publishedTime: post.date,
-      images: [{ url: post.image }],
+      // Dimensions let a preview reserve the right box instead of reflowing.
+      images: [{ url: post.image, width: 1600, height: 1200, alt: post.title }],
     },
   };
 }

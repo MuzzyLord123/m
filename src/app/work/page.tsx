@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GalleryDesktop } from "@/components/work/GalleryDesktop";
 import { GalleryMobile } from "@/components/work/GalleryMobile";
+import { HashTarget } from "@/components/work/HashTarget";
 import { BeforeAfter } from "@/components/work/BeforeAfter";
 import { Reveal } from "@/components/motion/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -34,13 +35,14 @@ export default function WorkPage() {
 
       <GalleryDesktop />
       <GalleryMobile />
+      <HashTarget />
 
       <section className="bg-plaster py-20 lg:py-28" aria-labelledby="ba-heading">
         <div className="shell">
           <SectionHeading
             eyebrow="Before and after"
             title={<span id="ba-heading">Drag the handle. That is the same wall.</span>}
-            lead="Preparation is most of the cost and all of the difference. These two show why."
+            lead={`Preparation is most of the cost and all of the difference. ${beforeAfterProjects.length === 1 ? "This one shows" : "These " + beforeAfterProjects.length + " show"} why.`}
           />
 
           <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-8">

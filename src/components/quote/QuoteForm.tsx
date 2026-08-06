@@ -18,7 +18,6 @@ import {
   quoteSchema,
   type QuoteInput,
 } from "@/lib/lead-schema";
-import { CATEGORIES } from "@/data/projects";
 import { site } from "@/config/site";
 
 const STEP_FIELDS: FieldPath<QuoteInput>[][] = [
@@ -30,8 +29,22 @@ const STEP_FIELDS: FieldPath<QuoteInput>[][] = [
 
 const STEP_LABELS = ["The trade", "The property", "Timing", "Your details"];
 
+/**
+ * Keyed on SERVICE_OPTIONS, not on the gallery's CATEGORIES.
+ *
+ * They are two different taxonomies that happen to share three ids. This used
+ * to spread CATEGORIES, so "wallpaper" and "spray" — which exist only as
+ * services, never as gallery categories — resolved to undefined and rendered as
+ * two blank cards among four coloured ones on the first step of the quote form.
+ * Deriving it from the options it actually labels means adding a service can no
+ * longer leave a hole here.
+ */
 const SWATCHES: Record<string, string> = {
-  ...Object.fromEntries(CATEGORIES.map((category) => [category.id, category.swatch])),
+  interior: "var(--color-swatch-sage)",
+  exterior: "var(--color-swatch-terracotta)",
+  wallpaper: "var(--color-swatch-ochre)",
+  spray: "var(--color-swatch-slate)",
+  commercial: "var(--color-swatch-blush)",
   unsure: "var(--color-plaster-deep)",
 };
 
@@ -53,7 +66,7 @@ export function QuoteForm() {
   } = useForm<QuoteInput>({
     resolver: zodResolver(quoteSchema),
     mode: "onTouched",
-    defaultValues: { website: "", startedAt: 0, hasPhotos: false },
+    defaultValues: { website: "", elapsedMs: 0, hasPhotos: false },
   });
 
   useEffect(() => {
@@ -75,12 +88,24 @@ export function QuoteForm() {
   async function onSubmit(values: QuoteInput) {
     setStatus("sending");
     setServerError(null);
-    const result = await submitQuote({ ...values, startedAt: startedAt.current });
-    if (result.ok) {
-      setStatus("sent");
-    } else {
+    try {
+      const result = await submitQuote({ ...values, elapsedMs: Date.now() - startedAt.current });
+      if (result.ok) {
+        setStatus("sent");
+      } else {
+        setStatus("error");
+        setServerError(result.error);
+      }
+    } catch {
+      /* A server action can REJECT rather than resolve — a dropped connection,
+         a deploy landing mid-submit, a cold start that times out. Without this
+         the await throws, status stays "sending", and the button sits disabled
+         reading "Sending…" for ever: the customer has typed everything out and
+         has no way to send it and no idea anything is wrong. */
       setStatus("error");
-      setServerError(result.error);
+      setServerError(
+        `That did not send — check your connection and try again, or ring ${site.phone} and we will take the details over the phone.`,
+      );
     }
   }
 

@@ -61,7 +61,8 @@ export function GalleryDesktop() {
               return (
                 <m.li
                   key={project.slug}
-                  id={project.slug}
+                  id={`desktop-${project.slug}`}
+                  data-slug={project.slug}
                   layout={!reduced}
                   initial={reduced ? false : { opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}

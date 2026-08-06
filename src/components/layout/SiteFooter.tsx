@@ -30,7 +30,7 @@ export function SiteFooter() {
               </a>
               <a
                 href={`mailto:${site.email}`}
-                className="inline-flex items-center gap-2.5 text-[0.95rem] text-ink-soft transition-colors duration-200 hover:text-accent"
+                className="inline-flex items-center gap-2.5 text-[0.95rem] text-ink-soft transition-colors duration-200 max-lg:min-h-11 hover:text-accent"
               >
                 <EnvelopeSimple weight="light" className="size-5 text-accent" />
                 {site.email}
@@ -102,14 +102,14 @@ export function SiteFooter() {
                 href={link.href}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="inline-flex items-center gap-1 text-ink-soft transition-colors duration-200 hover:text-accent"
+                className="inline-flex items-center gap-1 text-ink-soft transition-colors duration-200 max-lg:min-h-11 hover:text-accent"
               >
                 {link.label} <ArrowUpRight weight="light" className="size-3.5" />
               </a>
             ))}
             <Link
               href="/privacy"
-              className="text-ink-soft transition-colors duration-200 hover:text-accent"
+              className="inline-flex items-center text-ink-soft transition-colors duration-200 max-lg:min-h-11 hover:text-accent"
             >
               Privacy
             </Link>
@@ -136,7 +136,11 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
     <li>
       <Link
         href={href}
-        className="text-[0.9375rem] text-ink-soft transition-colors duration-200 hover:text-accent"
+        /* max-lg:min-h-11 — set at 15px in a dense column these render about
+           19px tall on a phone, under even the 24px WCAG 2.5.8 minimum. The
+           height is added only below 1024px so the desktop footer keeps its
+           tighter rhythm. */
+        className="inline-flex items-center text-[0.9375rem] text-ink-soft transition-colors duration-200 max-lg:min-h-11 hover:text-accent"
       >
         {children}
       </Link>

@@ -166,6 +166,70 @@ const check = (label, value) => {
   await page.close();
 }
 
+// ------------------------------------------------- accessibility regressions
+/* Three defects found by review, each fixed, each cheap to reintroduce and
+   invisible without a keyboard. They are asserted here so they cannot come
+   back quietly. */
+{
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+
+  // Every radiogroup must resolve its aria-labelledby to the actual question.
+  // A dangling IDREF leaves a screen reader reading bare options with no idea
+  // what is being asked, on the site's only lead channel.
+  await page.goto(`${BASE}/quote`, { waitUntil: "load" });
+  await page.waitForTimeout(600);
+  await page.locator('label:has-text("Interior decorating")').first().click();
+  await page.locator('button:has-text("Continue")').first().click();
+  await page.waitForTimeout(800);
+  const groups = await page.evaluate(() =>
+    [...document.querySelectorAll('[role="radiogroup"]')].map((g) => {
+      const id = g.getAttribute("aria-labelledby");
+      const el = id ? document.getElementById(id) : null;
+      return Boolean(el && el.textContent && el.textContent.trim().length > 0);
+    }),
+  );
+  check(
+    "every radiogroup has a resolvable accessible name",
+    groups.length > 0 && groups.every(Boolean),
+  );
+
+  // Focus opens on the dialog container, which is neither first nor last in the
+  // focusable list — so Shift+Tab is the direction that escapes.
+  await page.goto(`${BASE}/work`, { waitUntil: "load" });
+  await page.waitForTimeout(700);
+  await page.locator("li[id] button:visible").first().click();
+  await page.waitForTimeout(650);
+  await page.keyboard.press("Shift+Tab");
+  await page.waitForTimeout(200);
+  check(
+    "lightbox holds focus on Shift+Tab",
+    await page.evaluate(() => {
+      const d = document.querySelector('[role="dialog"]');
+      return Boolean(d && d.contains(document.activeElement));
+    }),
+  );
+  await page.close();
+}
+
+{
+  // The bottom sheet declares aria-modal="true"; Tab must honour it.
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.goto(`${BASE}/work`, { waitUntil: "load" });
+  await page.waitForTimeout(700);
+  await page.locator("li[id] button:visible").first().evaluate((el) => el.click());
+  await page.waitForTimeout(800);
+  let held = true;
+  for (let i = 0; i < 25 && held; i++) {
+    await page.keyboard.press("Tab");
+    held = await page.evaluate(() => {
+      const d = document.querySelector('[role="dialog"]');
+      return Boolean(d && d.contains(document.activeElement));
+    });
+  }
+  check("mobile sheet traps focus over 25 tabs", held);
+  await page.close();
+}
+
 await browser.close();
 
 console.log(results.join("\n"));

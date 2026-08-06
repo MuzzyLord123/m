@@ -59,7 +59,7 @@ export function StructuredData() {
     url: site.url,
     telephone: site.phone,
     email: site.email,
-    image: `${site.url}/work/hero.png`,
+    image: `${site.url}/work/hero.jpg`,
     priceRange: "££",
     address: {
       "@type": "PostalAddress",

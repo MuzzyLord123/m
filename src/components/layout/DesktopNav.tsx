@@ -34,26 +34,17 @@ import { blurTone } from "@/lib/images";
  */
 export function DesktopNav() {
   const pathname = usePathname();
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef(0);
   const [open, setOpen] = useState(false);
 
-  // Scroll-driven condense is CSS where supported; this is the fallback only.
-  useEffect(() => {
-    if (typeof CSS !== "undefined" && CSS.supports("animation-timeline: scroll()")) return;
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        document.documentElement.dataset.condensed = String(!entry.isIntersecting);
-      },
-      { rootMargin: "-80px 0px 0px 0px", threshold: 0 },
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, []);
+  /* The data-condensed fallback lives in NavSentinel, mounted once by
+     SiteHeader. It used to be duplicated here as well: two IntersectionObservers
+     writing the same attribute on <html>, watching different sentinels with
+     different root margins, so they could disagree and the last one to fire
+     won. This one also sat inside a subtree hidden below 1024px, where its
+     sentinel has no layout box, so it could not speak for the mobile bar it was
+     still setting the attribute for. One observer, at the header level. */
 
   // Escape closes, and so does a click anywhere outside the header.
   useEffect(() => {
@@ -85,7 +76,6 @@ export function DesktopNav() {
 
   return (
     <div ref={headerRef} className="relative hidden lg:block" onMouseLeave={scheduleClose}>
-      <div ref={sentinelRef} aria-hidden="true" className="absolute top-0 h-px w-px" />
 
       {/* 1 — utility strip */}
       <div className="nav-utility border-b border-ink/8 bg-plaster/80 backdrop-blur-sm">

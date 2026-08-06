@@ -45,9 +45,10 @@ function dateLabel(iso: string): string {
  * minimum time on the form that no bot waits out. Both fail closed but return
  * a success shape, so a bot learns nothing from the response.
  */
-function looksAutomated(input: { website?: string; startedAt: number }): boolean {
+function looksAutomated(input: { website?: string; elapsedMs: number }): boolean {
   if (input.website && input.website.length > 0) return true;
-  return Date.now() - input.startedAt < MIN_SUBMIT_MS;
+  // Elapsed time measured on the client, never a cross-clock subtraction.
+  return input.elapsedMs < MIN_SUBMIT_MS;
 }
 
 function failure(error: unknown): LeadResult {

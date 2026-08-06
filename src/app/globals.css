@@ -214,6 +214,20 @@
   transform: none;
 }
 
+/* A reveal starts at opacity 0 and is brought in by an IntersectionObserver, so
+   without JavaScript the observer never runs and the content stays invisible
+   forever — measured at 30 blocks on the home page alone.
+
+   Nobody browses with JavaScript off on purpose here, but a bundle that fails
+   to load is an ordinary network event, and the failure mode is a page that
+   renders its header and almost nothing else. The <noscript> block in the
+   document head turns this rule on, which costs nothing when scripts do run. */
+.no-js .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 /* --------------------------------------------------------------------------
    Roller stipple — the single page texture.
    Applied once, fixed, above content, non-interactive, ~3% opacity.

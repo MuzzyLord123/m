@@ -20,7 +20,12 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_GB",
     siteName: site.name,
-    url: site.url,
+    /* Deliberately no `url` here. Metadata is inherited, so a url set at the
+       root becomes og:url on EVERY page — meaning a share of /work resolved to
+       the home page and the link the customer clicked was not the page they
+       were sent. Each page carries its own alternates.canonical, which is what
+       identifies it; an absent og:url makes a crawler fall back to the URL it
+       fetched, which is correct. */
   },
   robots: { index: true, follow: true },
   alternates: { canonical: "/" },
@@ -34,6 +39,14 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-GB" className={`${display.variable} ${displayItalic.variable} ${body.variable} ${bodyItalic.variable}`}>
+      <head>
+        {/* Reveals start at opacity 0 and are brought in by an observer. If the
+            JavaScript never arrives — blocked, or simply a failed request — this
+            is what stops the page rendering as a header above empty space. */}
+        <noscript>
+          <style>{`.reveal{opacity:1!important;transform:none!important;transition:none!important}`}</style>
+        </noscript>
+      </head>
       <body className="bg-paper text-ink antialiased">
         <a href="#main" className="skip-link">
           Skip to content

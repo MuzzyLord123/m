@@ -34,7 +34,7 @@ export default function OpenGraphImage() {
               color: "#141414",
               fontWeight: 700,
               letterSpacing: 2,
-              borderBottom: "6px solid #1d4fd8",
+              borderBottom: "6px solid #b8430b",
               paddingBottom: 4,
             }}
           >
@@ -66,7 +66,7 @@ export default function OpenGraphImage() {
           <div
             style={{
               display: "flex",
-              backgroundColor: "#1d4fd8",
+              backgroundColor: "#b8430b",
               color: "#ffffff",
               fontSize: 26,
               fontWeight: 600,

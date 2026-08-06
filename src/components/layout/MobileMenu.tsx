@@ -52,9 +52,18 @@ export function MobileMenu() {
       }
       if (event.key !== "Tab" || !panelRef.current) return;
 
-      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-      );
+      /* The close toggle lives in the header row, a SIBLING of the panel, so
+         querying the panel alone left it out of the cycle: a keyboard user
+         could open the menu but never tab to the visible X, and only Escape
+         got them out. It is prepended rather than appended because it sits
+         above the links on screen, and a focus order that disagrees with the
+         reading order is its own bug. */
+      const inPanel = [
+        ...panelRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ];
+      const focusable = toggleRef.current ? [toggleRef.current, ...inPanel] : inPanel;
       if (focusable.length === 0) return;
 
       const first = focusable[0];

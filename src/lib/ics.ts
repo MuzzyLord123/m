@@ -4,6 +4,25 @@ function stamp(date: Date): string {
   return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 }
 
+/**
+ * A FLOATING iCalendar timestamp — no trailing Z, no TZID.
+ *
+ * The visit is agreed as "9am" or "1pm", meaning wall-clock time in the UK.
+ * Stamping that as UTC is wrong for the seven months the country spends in
+ * British Summer Time: a 9am visit written as 0900Z opens in the decorator's
+ * diary at 10am, and he turns up an hour after the customer expected him.
+ *
+ * RFC 5545 §3.3.5 form 1: a date-time with no suffix is interpreted in the
+ * local timezone of whoever opens it. For an appointment where both parties are
+ * in the same country, that is exactly the intended meaning — and it needs no
+ * VTIMEZONE block, which is the other, far heavier, correct answer.
+ */
+function floatingStamp(isoDate: string, hour: number, minute: number): string {
+  const hh = String(hour).padStart(2, "0");
+  const mm = String(minute).padStart(2, "0");
+  return `${isoDate.replace(/-/g, "")}T${hh}${mm}00`;
+}
+
 /** Folds long lines at 75 octets, as iCalendar requires. */
 function fold(line: string): string {
   if (line.length <= 75) return line;
@@ -46,10 +65,11 @@ export function buildVisitIcs({
   email: string;
   notes?: string;
 }): string {
-  const start = new Date(`${date}T${preference === "Afternoon" ? "13:00:00" : "09:00:00"}Z`);
-  const end = new Date(start.getTime() + 45 * 60 * 1000);
+  const startHour = preference === "Afternoon" ? 13 : 9;
+  const dtStart = floatingStamp(date, startHour, 0);
+  const dtEnd = floatingStamp(date, startHour, 45);
   const now = new Date();
-  const uid = `visit-${start.getTime()}-${phone.replace(/\D/g, "").slice(-6)}@thepaintman`;
+  const uid = `visit-${date}-${startHour}-${phone.replace(/\D/g, "").slice(-6)}@thepaintmen`;
 
   const description = [
     `Site visit request via the website.`,
@@ -73,8 +93,8 @@ export function buildVisitIcs({
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${stamp(now)}`,
-    `DTSTART:${stamp(start)}`,
-    `DTEND:${stamp(end)}`,
+    `DTSTART:${dtStart}`,
+    `DTEND:${dtEnd}`,
     fold(`SUMMARY:${escape(`Site visit — ${name}, ${address}`)}`),
     fold(`LOCATION:${escape(address)}`),
     fold(`DESCRIPTION:${escape(description)}`),

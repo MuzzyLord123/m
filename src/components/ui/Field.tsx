@@ -116,16 +116,30 @@ export function ChipGroup({
   columns?: boolean;
 }) {
   const groupId = useId();
+  const helperId = `${groupId}-helper`;
 
   return (
     <fieldset>
-      <legend className="text-[0.9375rem] font-medium text-ink">{label}</legend>
-      {helper && <p className="mt-1 text-[0.8125rem] text-ink-mute">{helper}</p>}
+      {/* The id has to live on the legend. role="radiogroup" is on the div, not
+          the fieldset, and a <legend> only implicitly names its own fieldset —
+          so without this the aria-labelledby below is a dangling IDREF and the
+          group has no accessible name at all. A screen reader then reads out
+          five bare options with the question never spoken, on the form that is
+          this site's only lead channel. */}
+      <legend id={groupId} className="text-[0.9375rem] font-medium text-ink">
+        {label}
+      </legend>
+      {helper && (
+        <p id={helperId} className="mt-1 text-[0.8125rem] text-ink-mute">
+          {helper}
+        </p>
+      )}
 
       <div
         className={`mt-3 ${columns ? "grid gap-2.5 sm:grid-cols-2" : "flex flex-wrap gap-2.5"}`}
         role="radiogroup"
         aria-labelledby={groupId}
+        aria-describedby={helper ? helperId : undefined}
       >
         {options.map((option) => {
           const active = value === option;

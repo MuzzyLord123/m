@@ -66,10 +66,17 @@ export function Lightbox({
         if (focusable.length === 0) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
+        const active = document.activeElement;
+        /* `|| active === dialogRef.current` matters: focus is put on the dialog
+           container on open, and the container is neither first nor last. Without
+           it, the very first Shift+Tab after opening is not intercepted and focus
+           walks backwards out of the dialog into the page behind — which is still
+           scroll-locked, so the visitor is tabbing through content they cannot
+           see. The mobile menu already guards this; the lightbox did not. */
+        if (event.shiftKey && (active === first || active === dialogRef.current)) {
           event.preventDefault();
           last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
+        } else if (!event.shiftKey && active === last) {
           event.preventDefault();
           first.focus();
         }

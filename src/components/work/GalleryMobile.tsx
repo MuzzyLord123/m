@@ -38,7 +38,12 @@ export function GalleryMobile() {
 
       <ul className="mt-6 grid gap-10">
         {shown.map((project) => (
-          <li key={project.slug} id={project.slug} className="scroll-mt-40">
+          <li
+            key={project.slug}
+            id={`mobile-${project.slug}`}
+            data-slug={project.slug}
+            className="scroll-mt-40"
+          >
             <button
               type="button"
               onClick={() => setOpen(project)}
@@ -93,12 +98,40 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
     if (!project) return;
     const root = document.documentElement;
     const previous = root.style.overflow;
+    /* Remembered on open, restored on close. Otherwise closing the sheet drops
+       focus back to the top of the document and a keyboard user has to tab all
+       the way down the gallery again to reach the card they just came out of. */
+    const restoreFocus = document.activeElement as HTMLElement | null;
     root.style.overflow = "hidden";
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
         onClose();
+        return;
+      }
+      /* The sheet declares aria-modal="true", which tells assistive technology
+         that everything behind it is inert — so Tab has to actually stay inside
+         it, or the promise is a lie. Without this a keyboard user tabs straight
+         out of the "modal" into the gallery behind, which is scroll-locked, so
+         they end up moving through content they cannot see. */
+      if (event.key !== "Tab" || !sheetRef.current) return;
+
+      const focusable = sheetRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && (active === first || active === sheetRef.current)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
     document.addEventListener("keydown", onKeyDown);
@@ -108,6 +141,7 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
       root.style.overflow = previous;
       document.removeEventListener("keydown", onKeyDown);
       window.clearTimeout(timer);
+      restoreFocus?.focus?.();
     };
   }, [project, onClose]);
 
