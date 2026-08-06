@@ -58,7 +58,7 @@ export default function WorkPage() {
         </section>
       )}
 
-      <section className="bg-plaster py-20 lg:py-28" aria-labelledby="ba-heading">
+      <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="ba-heading">
         <div className="shell">
           <SectionHeading
             eyebrow="Before and after"

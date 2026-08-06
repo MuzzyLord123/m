@@ -10,7 +10,6 @@ export function SectionHeading({
   lead,
   drip = false,
   align = "left",
-  onDark = false,
   className = "",
 }: {
   eyebrow: string;
@@ -18,16 +17,13 @@ export function SectionHeading({
   lead?: React.ReactNode;
   drip?: boolean;
   align?: "left" | "wide";
-  onDark?: boolean;
   className?: string;
 }) {
   return (
     <div className={className}>
       <div>
         <p
-          className={`text-[0.75rem] font-semibold tracking-[0.16em] uppercase ${
-            onDark ? "text-white/80" : "text-ink-mute"
-          }`}
+          className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase"
         >
           {eyebrow}
         </p>
@@ -36,9 +32,7 @@ export function SectionHeading({
             running ahead of the hairline. See .section-rule in globals.css. */}
         <div className="relative mt-3 h-px w-full" aria-hidden="true">
           <span
-            className={`section-rule absolute inset-0 block ${
-              onDark ? "bg-on-accent/25" : "bg-hairline"
-            }`}
+            className="section-rule absolute inset-0 block bg-hairline"
           />
           <span className="section-rule-lead absolute inset-y-0 left-0 block w-[9%] bg-accent" />
           {drip && <DripAccent className="absolute top-full left-[13%]" />}
@@ -47,17 +41,13 @@ export function SectionHeading({
 
       <div className={align === "wide" ? "mt-8" : "mt-8 lg:grid lg:grid-cols-[1.15fr_1fr] lg:gap-16"}>
         <h2
-          className={`font-display text-[2.25rem] leading-[1.02] font-semibold tracking-[-0.03em] text-balance sm:text-[2.75rem] lg:text-[3.25rem] ${
-            onDark ? "text-white" : "text-ink"
-          }`}
+          className="font-display text-[2.25rem] leading-[1.02] font-semibold tracking-[-0.03em] text-balance text-ink sm:text-[2.75rem] lg:text-[3.25rem]"
         >
           {title}
         </h2>
         {lead && (
           <p
-            className={`measure mt-5 text-[1.0625rem] leading-relaxed lg:mt-2 ${
-              onDark ? "text-white/80" : "text-ink-soft"
-            }`}
+            className="measure mt-5 text-[1.0625rem] leading-relaxed text-ink-soft lg:mt-2"
           >
             {lead}
           </p>

@@ -8,7 +8,7 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative bg-plaster pt-20 pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-14">
+    <footer className="relative bg-accent-wash pt-20 pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-14">
       <div className="shell">
         <div className="grid gap-14 lg:grid-cols-[1.6fr_1fr_1fr_1.1fr] lg:gap-10">
           {/* Identity + the two conversion actions */}

@@ -94,7 +94,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="bg-plaster py-20 lg:py-28" aria-labelledby="contact-form-heading">
+      <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="contact-form-heading">
         <div className="shell">
           <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
             Free quote

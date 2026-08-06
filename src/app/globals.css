@@ -48,7 +48,13 @@
   --color-accent-bright: #ff8248; /* hover / graphic lift only */
   --color-accent-deep: #c94f14; /* pressed states, borders */
   --color-accent-ink: #f89b62; /* softer orange for long text and errors */
-  --color-accent-wash: #1d1109; /* orange-tinted surface, replaces the light wash */
+  /* The alternating section ground, and the reason the site reads warm rather
+     than merely dark. It is an orange-tinted near-black, not a neutral one, and
+     every text pair measures BETTER on it than on the neutral plaster it
+     replaced: ink 17.11:1, ink-soft 9.12:1, ink-mute 5.28:1, accent 5.86:1.
+     --color-plaster stays the RAISED PANEL token — cards, image backings and
+     skeletons — so this is not a find-and-replace. */
+  --color-accent-wash: #1d1109;
   --color-on-accent: #0c0c0e; /* what sits on top of the orange */
 
   /* Overlays over photographs. Theme-independent, always black. */
@@ -434,6 +440,15 @@
    engine. That means they DO NOT follow the theme automatically — they were
    still the old light paper after the site went black, so the header turned
    white the moment anyone scrolled. If --color-paper changes, change these. */
+/* HONEST NOTE: the condense animates HEIGHT and BACKDROP-FILTER, which are not
+   composited properties and are the two exceptions to the transform/opacity
+   rule the rest of this file keeps. It is deliberate. The bar has to give its
+   height back to the document as it shrinks — a transform would leave the
+   original 96px reserved and the page would sit in a permanent gap — and there
+   is no compositable way to fade a backdrop blur in. It runs on two elements in
+   a fixed header, off the main thread wherever scroll timelines are supported,
+   and Lighthouse measures CLS 0 with it. Everything else on the site really is
+   transform and opacity only. */
 .nav-shell {
   height: 96px;
   background-color: rgb(12 12 14 / 0);

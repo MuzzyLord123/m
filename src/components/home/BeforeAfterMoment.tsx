@@ -7,7 +7,7 @@ export function BeforeAfterMoment() {
   if (!project?.beforeAfter) return null;
 
   return (
-    <section className="bg-plaster py-20 lg:py-28" aria-labelledby="before-after-heading">
+    <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="before-after-heading">
       <div className="shell grid items-center gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <Reveal>
           <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">

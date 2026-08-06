@@ -16,7 +16,7 @@ export function Testimonials() {
   const [lead, ...rest] = testimonials;
 
   return (
-    <section className="bg-plaster py-20 lg:py-28" aria-labelledby="testimonials-heading">
+    <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="testimonials-heading">
       <div className="shell">
         <SectionHeading
           eyebrow="What people say"

@@ -32,8 +32,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fafaf8",
-  colorScheme: "light",
+  /* All three were wrong for a dark site and all three are visible on a phone.
+     themeColor was the old paper white, so Safari and Chrome drew a near-white
+     address bar around a near-black page. colorScheme said light while
+     globals.css says dark, so form controls and scrollbars rendered for the
+     wrong theme. And without viewportFit the page never extends under the
+     notch, which means every env(safe-area-inset-*) resolves to 0px — the
+     bottom padding on the sticky action bar and the flood menu was doing
+     nothing on any notched iPhone. */
+  themeColor: "#0c0c0e",
+  colorScheme: "dark",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

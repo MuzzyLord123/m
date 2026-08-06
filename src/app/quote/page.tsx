@@ -36,7 +36,7 @@ export default function QuotePage() {
         </div>
       </section>
 
-      <section className="bg-plaster py-20 lg:py-28" aria-labelledby="booking-heading">
+      <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="booking-heading">
         <div className="shell">
           <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
             Or book a look

@@ -57,7 +57,7 @@ export default function ServicesPage() {
             key={service.id}
             id={service.id}
             aria-labelledby={`${service.id}-heading`}
-            className={`scroll-mt-28 py-16 lg:py-24 ${index % 2 === 1 ? "bg-plaster" : ""}`}
+            className={`scroll-mt-28 py-16 lg:py-24 ${index % 2 === 1 ? "bg-accent-wash" : ""}`}
           >
             <div className="shell">
               {/* Mini-hero: photograph and lead, sides alternating down the page */}

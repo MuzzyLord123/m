@@ -76,7 +76,7 @@ export default function AboutPage() {
           YouTube request until play is pressed. Drop this back in with a real
           ID and a poster when James has a film. */}
 
-      <section className="bg-plaster py-20 lg:py-28" aria-labelledby="principles-heading">
+      <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="principles-heading">
         <div className="shell">
           <SectionHeading
             eyebrow="How we work"
