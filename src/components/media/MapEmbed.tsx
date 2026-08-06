@@ -17,14 +17,22 @@ export function MapEmbed({ className = "" }: { className?: string }) {
       <Tape className="-top-3 -left-4 -rotate-[4deg]" />
       <Tape className="-right-4 -bottom-3 rotate-[3deg]" />
 
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-plaster ring-1 ring-hairline lg:aspect-[3/2]">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-plaster-deep ring-1 ring-hairline lg:aspect-[3/2]">
         {hasMapAddress ? (
           <iframe
             title={`Map showing ${site.name} in ${site.town}`}
             src={`https://www.google.com/maps?q=${query}&output=embed`}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            className="absolute inset-0 h-full w-full border-0 grayscale-[0.35] contrast-[1.05]"
+            /* Google's keyless embed has no dark theme and no styling API, so the
+               only way to stop a blazing white rectangle sitting in the middle
+               of a near-black page is to filter it. Inverting and rotating the
+               hue by 180deg is the standard trick: land and water invert to
+               dark, but the hue rotation puts the greens and blues back the
+               right way round, so it still reads as a map rather than a
+               negative. Saturation is pulled back so it does not fight the
+               orange. */
+            className="absolute inset-0 h-full w-full border-0 [filter:invert(0.92)_hue-rotate(180deg)_saturate(0.7)_contrast(0.9)_brightness(1.05)]"
           />
         ) : (
           /* Google renders a grey error tile for an address it cannot resolve,
