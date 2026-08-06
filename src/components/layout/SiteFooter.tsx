@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, EnvelopeSimple, MapPin, Phone } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
-import { site } from "@/config/site";
+import { site, socialLinks } from "@/config/site";
 import { primaryNav, serviceLinks } from "@/lib/nav";
 
 export function SiteFooter() {
@@ -96,22 +96,17 @@ export function SiteFooter() {
             © {year} {site.legalName}. {site.facts.guarantee}.
           </p>
           <div className="flex flex-wrap items-center gap-6 text-[0.8125rem]">
-            <a
-              href={site.social.instagram}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex items-center gap-1 text-ink-soft transition-colors duration-200 hover:text-accent"
-            >
-              Instagram <ArrowUpRight weight="light" className="size-3.5" />
-            </a>
-            <a
-              href={site.social.facebook}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex items-center gap-1 text-ink-soft transition-colors duration-200 hover:text-accent"
-            >
-              Facebook <ArrowUpRight weight="light" className="size-3.5" />
-            </a>
+            {socialLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-center gap-1 text-ink-soft transition-colors duration-200 hover:text-accent"
+              >
+                {link.label} <ArrowUpRight weight="light" className="size-3.5" />
+              </a>
+            ))}
             <Link
               href="/privacy"
               className="text-ink-soft transition-colors duration-200 hover:text-accent"

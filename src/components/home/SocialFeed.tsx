@@ -4,7 +4,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { socialPosts } from "@/data/social";
 import { blurTone } from "@/lib/images";
-import { site } from "@/config/site";
+import { socialLinks } from "@/config/site";
 
 const formatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -26,26 +26,22 @@ export function SocialFeed() {
             align="wide"
             className="max-w-2xl"
           />
-          <div className="flex gap-3">
-            <a
-              href={site.social.instagram}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-ink/20 px-5 text-[0.9375rem] font-medium whitespace-nowrap text-ink transition-[border-color,color,background-color] duration-200 hover:border-accent hover:bg-accent-wash hover:text-accent"
-            >
-              Instagram
-              <ArrowUpRight weight="light" className="size-4" />
-            </a>
-            <a
-              href={site.social.facebook}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-ink/20 px-5 text-[0.9375rem] font-medium whitespace-nowrap text-ink transition-[border-color,color,background-color] duration-200 hover:border-accent hover:bg-accent-wash hover:text-accent"
-            >
-              Facebook
-              <ArrowUpRight weight="light" className="size-4" />
-            </a>
-          </div>
+          {socialLinks.length > 0 && (
+            <div className="flex gap-3">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex h-11 items-center gap-2 rounded-full border border-ink/20 px-5 text-[0.9375rem] font-medium whitespace-nowrap text-ink transition-[border-color,color,background-color] duration-200 hover:border-accent hover:bg-accent-wash hover:text-accent"
+                >
+                  {link.label}
+                  <ArrowUpRight weight="light" className="size-4" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

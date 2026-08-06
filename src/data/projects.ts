@@ -1,4 +1,5 @@
 import type { AspectRatio } from "@/lib/images";
+import { site } from "@/config/site";
 
 /**
  * The gallery, built around the client's own photographs.
@@ -8,6 +9,12 @@ import type { AspectRatio } from "@/lib/images";
  * filter that resolves to an empty grid is worse than one that is not offered.
  * Commercial earned its category back in batch 8. Add a category here when the
  * photographs to fill it exist — not before.
+ *
+ * AREAS: `area` follows `site.town` / `site.serviceArea` rather than holding a
+ * literal token, so filling the config in reaches the gallery too — it used to
+ * print "{{TOWN}}" on every card no matter what the config said. Replace each
+ * one with the job's real town when the client supplies them; local search
+ * rewards it and it is the first thing a customer looks for.
  *
  * FILENAMES: every `src` below maps to a real photograph. See PHOTO-MAP.md at
  * the repo root for which of your images goes at which path. Drop them into
@@ -59,7 +66,7 @@ export const projects: Project[] = [
   {
     slug: "kitchen-extension",
     title: "Kitchen extension, bare shell to finished",
-    area: "{{TOWN}}",
+    area: site.town,
     category: "interior",
     scope: "Vaulted ceiling, roof lights and full open-plan decoration.",
     detail:
@@ -82,7 +89,7 @@ export const projects: Project[] = [
   {
     slug: "open-plan-kitchen",
     title: "Open-plan kitchen, vaulted and lit",
-    area: "{{TOWN}}",
+    area: site.town,
     category: "interior",
     scope: "Vaulted ceiling, roof light and bifold reveals, finished around a fitted kitchen.",
     detail:
@@ -96,7 +103,7 @@ export const projects: Project[] = [
   {
     slug: "alcove-joinery",
     title: "Alcove shelving, bare timber to finished",
-    area: "{{TOWN}}",
+    area: site.town,
     category: "woodwork",
     scope: "New alcove units and chimney breast, filled, primed and finished.",
     detail:
@@ -115,7 +122,7 @@ export const projects: Project[] = [
   {
     slug: "new-staircase",
     title: "New staircase, bare pine to white",
-    area: "{{TOWN}}",
+    area: site.town,
     category: "woodwork",
     scope: "New softwood stairs and balustrade, knotted, primed and finished.",
     detail:
@@ -135,7 +142,7 @@ export const projects: Project[] = [
   {
     slug: "landing-balustrade",
     title: "Landing balustrade, pine to near-black",
-    area: "{{TOWN}}",
+    area: site.town,
     category: "woodwork",
     scope: "New landing balustrade finished in a dark satin, against existing white.",
     detail:
@@ -154,7 +161,7 @@ export const projects: Project[] = [
   {
     slug: "panelled-hallway",
     title: "Panelled hallway and entrance",
-    area: "{{TOWN}}",
+    area: site.town,
     category: "interior",
     scope: "New wall panelling caulked and finished, with the stairs and doors.",
     detail:
@@ -170,7 +177,7 @@ export const projects: Project[] = [
   {
     slug: "stairs-in-colour",
     title: "Three staircases, three finishes",
-    area: "{{SERVICE_AREA}}",
+    area: site.serviceArea,
     category: "woodwork",
     scope: "Spindles, newels and understairs joinery in grey, near-black and white.",
     detail:
@@ -187,7 +194,7 @@ export const projects: Project[] = [
   {
     slug: "halls-and-landings",
     title: "Halls, stairs and landings",
-    area: "{{SERVICE_AREA}}",
+    area: site.serviceArea,
     category: "interior",
     scope: "The hardest room in the house to decorate, done seven times over.",
     detail:
@@ -206,7 +213,7 @@ export const projects: Project[] = [
   {
     slug: "rendered-exteriors",
     title: "Rendered exteriors and timber detail",
-    area: "{{SERVICE_AREA}}",
+    area: site.serviceArea,
     category: "exterior",
     scope: "Masonry paint over pebbledash and render, with bargeboards, bays and sills.",
     detail:
@@ -224,7 +231,7 @@ export const projects: Project[] = [
   {
     slug: "commercial-fit-out",
     title: "Commercial fit-out, decorated to handover",
-    area: "{{SERVICE_AREA}}",
+    area: site.serviceArea,
     category: "commercial",
     scope: "Full unit decorated around trades still working, to a fixed handover date.",
     detail:
@@ -237,7 +244,7 @@ export const projects: Project[] = [
   {
     slug: "feature-walls",
     title: "Feature walls, three colours",
-    area: "{{SERVICE_AREA}}",
+    area: site.serviceArea,
     category: "feature",
     scope: "Deep colours over pale walls — lined, blocked and cut in clean.",
     detail:

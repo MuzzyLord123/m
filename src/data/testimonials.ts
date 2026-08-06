@@ -5,7 +5,26 @@ export type Testimonial = {
   job: string;
 };
 
-export const testimonials: Testimonial[] = [
+/**
+ * REAL customer testimonials. This ships EMPTY on purpose.
+ *
+ * The five below are written examples — the names and the quotes are invented,
+ * written to show the section's tone and to size the layout. Publishing them as
+ * genuine reviews is not a grey area in the UK: the Digital Markets,
+ * Competition and Consumers Act 2024 makes fake consumer reviews a banned
+ * practice, enforceable by the CMA without going to court. So they sit in
+ * `sampleTestimonials`, the section renders nothing while `testimonials` is
+ * empty, and the site is safe to put live today.
+ *
+ * To turn the section on: move real quotes into `testimonials` below. Ask each
+ * customer first — a text message saying "happy for me to put that on the
+ * website?" is enough, and keep the reply. Three good ones beat ten bland ones,
+ * and a town name plus the job does more work than a surname.
+ */
+export const testimonials: Testimonial[] = [];
+
+/** Examples only. Never move these into `testimonials`. */
+export const sampleTestimonials: Testimonial[] = [
   {
     quote:
       "He turned up when he said he would, every single day. The hallway had been half-finished by someone else for a year and it took him two days to put right.",

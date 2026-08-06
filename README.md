@@ -1,4 +1,4 @@
-# The Paint Man
+# The Paint Men
 
 Bespoke marketing site for a UK painter & decorator. Built to do one job: turn
 visitors into enquiries.
@@ -19,6 +19,31 @@ npm run build                # production build
 
 ---
 
+## Before this goes live
+
+Nine values stand between this build and launch. Set them as `NEXT_PUBLIC_*`
+environment variables (see `.env.example`) or write them straight into
+`src/config/site.ts` — both work, and they can be mixed.
+
+**`npm run audit:content` fails while any of them is missing**, so a half
+filled-in site cannot ship by accident. It crawls the built HTML of all
+thirteen routes looking for `{{TOKEN}}` in anything a visitor can read, checks
+that an unknown URL really returns 404 rather than a soft 200, and warns if the
+canonical host is still the default. Run it before every deploy; wire it into
+CI if there is one.
+
+Two of the nine degrade gracefully rather than blocking: an unset social URL
+renders no link at all, and an unset map address makes the map panel list the
+towns covered instead of showing Google's grey error tile. The other seven
+genuinely have to be filled in.
+
+One more thing to do by hand: **`src/data/testimonials.ts` ships empty**. The
+five quotes that shaped that section are written examples with invented names,
+kept in `sampleTestimonials` and never published — presenting invented reviews
+as genuine is a banned practice under the Digital Markets, Competition and
+Consumers Act 2024. The section renders nothing until real, permitted quotes
+are moved into `testimonials`.
+
 ## Swapping in the client's details
 
 Every client-specific value lives in **`src/config/site.ts`**. Nothing is
@@ -35,8 +60,10 @@ hard-coded in a component. The file ships with placeholder tokens:
 | `{{FACEBOOK_URL}}`   | Facebook page URL                          |
 | `{{MAP_ADDRESS}}`    | Address string for the Google Maps embed   |
 
-Find-and-replace those tokens across the repo, then work through the three data
-files the client owns day to day:
+Either set the matching `NEXT_PUBLIC_*` variable (preferred — the repo stays
+generic and the client can change a number without a code change) or replace
+the token in `site.ts` with a literal. Then work through the data files the
+client owns day to day:
 
 - `src/data/projects.ts` — gallery projects (title, area, category, images, scope)
 - `src/data/testimonials.ts` — customer quotes
@@ -71,9 +98,9 @@ output). Railway detects it automatically — no Nixpacks configuration needed.
 2. In Railway: **New Project → Deploy from GitHub repo** and pick it.
 3. Railway reads the `Dockerfile` and builds. No start command needed — the
    image runs `node server.js` and binds `0.0.0.0:$PORT`.
-4. **Variables** → add everything from `.env.example`. The three
-   `NEXT_PUBLIC_*` values are baked in at build time, so Railway must have them
-   set *before* the build that ships them; changing one requires a redeploy.
+4. **Variables** → add everything from `.env.example`. Every `NEXT_PUBLIC_*`
+   value is baked in at build time, so Railway must have them set *before* the
+   build that ships them; changing one requires a redeploy.
 5. **Settings → Networking → Generate Domain**, or add the client's custom
    domain and point the DNS `CNAME` at the Railway target.
 6. Set `NEXT_PUBLIC_SITE_URL` to the final public URL and redeploy so metadata,
@@ -82,8 +109,8 @@ output). Railway detects it automatically — no Nixpacks configuration needed.
 Build the image locally the same way Railway does:
 
 ```bash
-docker build -t paintman .
-docker run -p 3000:3000 --env-file .env.local paintman
+docker build -t paintmen .
+docker run -p 3000:3000 --env-file .env.local paintmen
 ```
 
 ---
@@ -150,6 +177,7 @@ npm run audit:contrast      # WCAG ratios for every colour pair in use
 npm run audit:motion        # reduced-motion collapse + zero scroll listeners
 npm run audit:interaction   # lightbox, bottom sheet, menu, quote flow in a browser
 npm run audit:images        # every photograph loads, decodes, and is not a stand-in
+npm run audit:content       # no {{TOKEN}} reaches a visitor; 404s really 404
 npm run audit:lighthouse    # Lighthouse mobile, all four categories
 npm run shots               # screenshots at 375 / 768 / 1024 / 1440
 ```
@@ -173,7 +201,7 @@ varies by about three points between runs, so these are medians of three.
 | `/blog`     | 95    | 100  | 100            | 100 | 2.6 s | 0.012 | 180 ms |
 
 Accessibility, best practices and SEO are 100 everywhere, on every page, every
-run. CLS is effectively zero. Performance sits at 91–96 depending on the run;
+run. CLS is effectively zero. Performance sits at 89–96 depending on the run;
 the home page alone has measured 92, 93, 93 and 96 on four consecutive runs of
 the identical build, which is the honest width of the noise on this machine.
 

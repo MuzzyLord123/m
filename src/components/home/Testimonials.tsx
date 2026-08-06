@@ -7,6 +7,12 @@ import { testimonials } from "@/data/testimonials";
  * in beside and beneath it at two different widths.
  */
 export function Testimonials() {
+  /* Renders nothing until there are real quotes to show. See
+     src/data/testimonials.ts — the examples that shaped this layout are
+     deliberately not published. A missing section reads as a site that has not
+     asked for reviews yet; an invented one is a banned practice. */
+  if (testimonials.length === 0) return null;
+
   const [lead, ...rest] = testimonials;
 
   return (

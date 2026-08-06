@@ -12,6 +12,7 @@
     "audit:motion": "node scripts/motion-audit.mjs",
     "audit:interaction": "node scripts/interaction-check.mjs",
     "audit:images": "node scripts/image-check.mjs",
+    "audit:content": "node scripts/content-audit.mjs",
     "audit:lighthouse": "node scripts/lighthouse.mjs",
     "shots": "node scripts/shots.mjs"
   },

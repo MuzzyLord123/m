@@ -10,6 +10,7 @@ import { ServiceArea } from "@/components/home/ServiceArea";
 import { FinalCta } from "@/components/home/FinalCta";
 import { RollerPass } from "@/components/motion/RollerPass";
 import { site } from "@/config/site";
+import { testimonials } from "@/data/testimonials";
 
 export const metadata: Metadata = {
   title: `${site.name} — Painter & Decorator in ${site.town}`,
@@ -31,9 +32,14 @@ export default function HomePage() {
 
       <HowItWorks />
 
-      <RollerPass>
-        <Testimonials />
-      </RollerPass>
+      {/* Renders nothing while there are no real testimonials, so the roller
+          pass is conditional too — an empty band on an absent section is a
+          stray stripe across the page. */}
+      {testimonials.length > 0 && (
+        <RollerPass>
+          <Testimonials />
+        </RollerPass>
+      )}
 
       <SocialFeed />
       <ServiceArea />

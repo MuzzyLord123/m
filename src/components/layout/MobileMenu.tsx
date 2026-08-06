@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, Clock, EnvelopeSimple, Phone } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
-import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
+import { CTA_HREF, CTA_LABEL, site, socialLinks } from "@/config/site";
 import { primaryNav } from "@/lib/nav";
 import { featuredProjects } from "@/data/projects";
 import { blurTone } from "@/lib/images";
@@ -217,24 +217,21 @@ export function MobileMenu() {
                 </p>
               </div>
 
-              <div className="mt-6 flex gap-5 text-[0.8125rem] tracking-wide text-white/80 uppercase">
-                <a
-                  href={site.social.instagram}
-                  className="inline-flex items-center gap-1"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  Instagram <ArrowUpRight weight="light" className="size-3.5" />
-                </a>
-                <a
-                  href={site.social.facebook}
-                  className="inline-flex items-center gap-1"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  Facebook <ArrowUpRight weight="light" className="size-3.5" />
-                </a>
-              </div>
+              {socialLinks.length > 0 && (
+                <div className="mt-6 flex gap-5 text-[0.8125rem] tracking-wide text-white/80 uppercase">
+                  {socialLinks.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className="inline-flex items-center gap-1"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      {link.label} <ArrowUpRight weight="light" className="size-3.5" />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
       </>

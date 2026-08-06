@@ -1,4 +1,4 @@
-import { site } from "@/config/site";
+import { site, socialLinks } from "@/config/site";
 
 /**
  * LocalBusiness structured data. For a decorator this is the single highest
@@ -68,7 +68,9 @@ export function StructuredData() {
     },
     areaServed: site.towns.map((town) => ({ "@type": "City", name: town })),
     openingHoursSpecification: openingHours,
-    sameAs: [site.social.instagram, site.social.facebook],
+    /* Only real profiles. A sameAs pointing at "{{FACEBOOK_URL}}" is an
+       invalid URL in the knowledge graph and does the business no favours. */
+    sameAs: socialLinks.map((link) => link.href),
     knowsAbout: [
       "Interior decorating",
       "Exterior painting",

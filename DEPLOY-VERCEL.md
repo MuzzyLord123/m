@@ -6,6 +6,9 @@ there is no `vercel.json` to write and no build command to configure.
 ## Quickest route (drag and drop)
 
 1. `npm install` once locally, then `npm run build` to confirm it compiles.
+   Then `npx next start -p 3100 &` and `npm run audit:content` — it fails while
+   any client detail is still a placeholder, which is the one check worth
+   running before every deploy.
 2. Go to **vercel.com/new** and drag this folder onto the page, or run
    `npx vercel` from inside it and follow the prompts.
 3. Add the environment variables below in **Project → Settings → Environment
@@ -14,7 +17,7 @@ there is no `vercel.json` to write and no build command to configure.
 ## Via GitHub (better, gives you preview deployments)
 
 ```bash
-git init && git add -A && git commit -m "The Paint Man"
+git init && git add -A && git commit -m "The Paint Men"
 git remote add origin https://github.com/<you>/<repo>
 git push -u origin main
 ```
@@ -30,7 +33,12 @@ cannot deliver email until Resend is configured.
 
 | Variable                        | Needed for                        | If unset                                             |
 | ------------------------------- | --------------------------------- | ---------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`          | Metadata, OG tags, `sitemap.xml`  | Falls back to `https://thepaintman.co.uk`             |
+| `NEXT_PUBLIC_PHONE` / `_EMAIL`  | Every call and mailto link        | The page shows `{{PHONE}}` — `audit:content` fails    |
+| `NEXT_PUBLIC_TOWN` / `_SERVICE_AREA` | Titles, headings, structured data | Shows the raw token — `audit:content` fails      |
+| `NEXT_PUBLIC_YEARS`             | "N years on the tools" copy       | Shows the raw token — `audit:content` fails           |
+| `NEXT_PUBLIC_MAP_ADDRESS`       | The Google Maps panel             | Panel lists the towns covered instead. Safe           |
+| `NEXT_PUBLIC_INSTAGRAM_URL` / `_FACEBOOK_URL` | Social links       | Those links do not render at all. Safe                |
+| `NEXT_PUBLIC_SITE_URL`          | Metadata, OG tags, `sitemap.xml`  | Falls back to `https://thepaintmen.com`               |
 | `RESEND_API_KEY`                | Sending quote + booking emails    | Forms fail visibly and show the phone number instead   |
 | `LEAD_TO_EMAIL`                 | Where enquiries land              | Falls back to `site.email`                            |
 | `LEAD_FROM_EMAIL`               | Verified Resend sender            | Uses Resend's sandbox sender (owner's address only)    |
