@@ -60,7 +60,7 @@ export function GalleryMobile() {
                   blurDataURL={blurTone(project.images[0].tone)}
                   className="object-cover"
                 />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 via-ink/45 to-transparent px-5 pt-24 pb-5">
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-scrim/90 via-scrim/45 to-transparent px-5 pt-24 pb-5">
                   <h2 className="font-display text-[1.5rem] leading-tight font-semibold tracking-[-0.025em] text-white">
                     {project.title}
                   </h2>
@@ -153,7 +153,7 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
             type="button"
             aria-label="Close project"
             onClick={onClose}
-            className="absolute inset-0 bg-ink/70"
+            className="absolute inset-0 bg-scrim/70"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -237,7 +237,7 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
 
               <Link
                 href={CTA_HREF}
-                className="mt-6 flex h-13 w-full items-center justify-center rounded-full bg-accent px-6 py-4 text-base font-semibold whitespace-nowrap text-white transition-transform duration-200 active:scale-[0.98]"
+                className="mt-6 flex h-13 w-full items-center justify-center rounded-full bg-accent px-6 py-4 text-base font-semibold whitespace-nowrap text-on-accent transition-transform duration-200 active:scale-[0.98]"
               >
                 {CTA_LABEL}
               </Link>

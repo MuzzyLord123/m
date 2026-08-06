@@ -24,7 +24,7 @@ export default function ServicesPage() {
               What we do
             </p>
             <h1 className="mt-5 font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem] lg:text-[4.25rem]">
-              Five trades, one{" "}
+              Six trades, one{" "}
               <em className="inline-block pb-[0.06em] leading-[1.1] italic">decorator</em>.
             </h1>
           </div>
@@ -110,7 +110,7 @@ export default function ServicesPage() {
 
                   <Link
                     href={CTA_HREF}
-                    className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98]"
+                    className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-on-accent shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-bright active:translate-y-px active:scale-[0.98]"
                   >
                     {CTA_LABEL}
                   </Link>

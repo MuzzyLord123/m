@@ -1,28 +1,51 @@
 /**
  * WCAG contrast audit over every text/background pair the design system
- * actually uses, including the semi-transparent whites laid over the accent.
+ * actually uses, including the semi-transparent inks laid over the accent.
  *
  *   node scripts/contrast-audit.mjs
  *
  * AA is 4.5:1 for body text and 3:1 for large text (>=18.66px bold or >=24px).
  * Anything that fails here is a real failure on the page, not a theoretical one.
+ *
+ * TOKENS ARE READ FROM globals.css, not copied here. They used to be a
+ * duplicated literal, and that literal was never updated when the site was
+ * rebranded — so the audit spent two rebrands cheerfully passing 24/24 against
+ * Wet Paint Blue on a white page while the site was orange, and then black and
+ * orange. A checker that does not read the thing it checks is worse than no
+ * checker, because it is trusted.
  */
+import fs from "node:fs";
+
+const css = fs.readFileSync("src/app/globals.css", "utf8");
+
+/** Pull a --color-* value straight out of the @theme block. */
+function token(name) {
+  const match = new RegExp(`--color-${name}:\\s*(#[0-9a-fA-F]{3,8})`).exec(css);
+  if (!match) throw new Error(`--color-${name} not found in globals.css`);
+  return match[1];
+}
 
 const TOKENS = {
-  paper: "#fafaf8",
-  plaster: "#edede9",
-  plasterDeep: "#e2e2dd",
-  ink: "#141414",
-  inkSoft: "#4b4b47",
-  inkMute: "#6a6a64",
-  accent: "#1d4fd8",
-  accentDeep: "#1740b0",
-  accentInk: "#12308a",
-  accentWash: "#eaeffc",
+  paper: token("paper"),
+  plaster: token("plaster"),
+  plasterDeep: token("plaster-deep"),
+  ink: token("ink"),
+  inkSoft: token("ink-soft"),
+  inkMute: token("ink-mute"),
+  accent: token("accent"),
+  accentBright: token("accent-bright"),
+  accentDeep: token("accent-deep"),
+  accentInk: token("accent-ink"),
+  accentWash: token("accent-wash"),
+  onAccent: token("on-accent"),
+  scrim: token("scrim"),
   white: "#ffffff",
 };
 
+/** Accepts a hex string or an already-resolved [r,g,b], so blends can nest —
+    a caption sits on a scrim which itself sits on a photograph. */
 function toRgb(hex) {
+  if (Array.isArray(hex)) return hex;
   const value = hex.replace("#", "");
   return [0, 2, 4].map((i) => parseInt(value.slice(i, i + 2), 16));
 }
@@ -51,32 +74,39 @@ function ratio(foreground, background) {
 
 /** [label, foreground, background, minimum] */
 const PAIRS = [
-  ["body copy — ink-soft on paper", TOKENS.inkSoft, TOKENS.paper, 4.5],
-  ["body copy — ink-soft on plaster", TOKENS.inkSoft, TOKENS.plaster, 4.5],
+  // Body and headings on the three surfaces
   ["headings — ink on paper", TOKENS.ink, TOKENS.paper, 4.5],
   ["headings — ink on plaster", TOKENS.ink, TOKENS.plaster, 4.5],
+  ["headings — ink on plaster-deep", TOKENS.ink, TOKENS.plasterDeep, 4.5],
+  ["body copy — ink-soft on paper", TOKENS.inkSoft, TOKENS.paper, 4.5],
+  ["body copy — ink-soft on plaster", TOKENS.inkSoft, TOKENS.plaster, 4.5],
+  ["body copy — ink-soft on plaster-deep", TOKENS.inkSoft, TOKENS.plasterDeep, 4.5],
   ["small print — ink-mute on paper", TOKENS.inkMute, TOKENS.paper, 4.5],
   ["small print — ink-mute on plaster", TOKENS.inkMute, TOKENS.plaster, 4.5],
-  // plaster-deep carries no text anywhere on the site (it is a swatch block, a
-  // strip of masking tape and an image placeholder), so it is not audited here.
-  ["wordmark 'The' — ink/70 on paper", blend(TOKENS.ink, 0.7, TOKENS.paper), TOKENS.paper, 4.5],
-  ["wordmark 'The' — ink/70 on plaster", blend(TOKENS.ink, 0.7, TOKENS.plaster), TOKENS.plaster, 4.5],
-  ["wordmark 'The' — white/80 on accent", blend(TOKENS.white, 0.8, TOKENS.accent), TOKENS.accent, 4.5],
+
+  // The accent as text — the whole point of going dark
   ["links — accent on paper", TOKENS.accent, TOKENS.paper, 4.5],
   ["links — accent on plaster", TOKENS.accent, TOKENS.plaster, 4.5],
+  ["links — accent on plaster-deep", TOKENS.accent, TOKENS.plasterDeep, 4.5],
   ["chip text — accent-ink on accent-wash", TOKENS.accentInk, TOKENS.accentWash, 4.5],
   ["error text — accent-ink on paper", TOKENS.accentInk, TOKENS.paper, 4.5],
-  ["error text — accent-ink on accent-wash", TOKENS.accentInk, TOKENS.accentWash, 4.5],
-  ["primary button — white on accent", TOKENS.white, TOKENS.accent, 4.5],
-  ["primary button hover — white on accent-deep", TOKENS.white, TOKENS.accentDeep, 4.5],
-  ["CTA band body — white/85 on accent", blend(TOKENS.white, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
-  ["CTA band eyebrow — white/80 on accent", blend(TOKENS.white, 0.8, TOKENS.accent), TOKENS.accent, 4.5],
-  ["menu socials — white/80 on accent", blend(TOKENS.white, 0.8, TOKENS.accent), TOKENS.accent, 4.5],
-  ["menu contact — white/90 on accent", blend(TOKENS.white, 0.9, TOKENS.accent), TOKENS.accent, 4.5],
-  ["menu numerals — white/80 on accent", blend(TOKENS.white, 0.8, TOKENS.accent), TOKENS.accent, 4.5],
-  ["white pill on accent — accent-ink on white", TOKENS.accentInk, TOKENS.white, 4.5],
-  ["scrim caption — white/75 on ink/90 over photo", blend(TOKENS.white, 0.75, "#232323"), "#232323", 4.5],
-  ["gallery overlay — white/85 on ink/92", blend(TOKENS.white, 0.85, "#252525"), "#252525", 4.5],
+
+  // Anything sitting ON the orange takes on-accent, never white
+  ["primary button — on-accent on accent", TOKENS.onAccent, TOKENS.accent, 4.5],
+  ["primary hover — on-accent on accent-bright", TOKENS.onAccent, TOKENS.accentBright, 4.5],
+  // accent-deep carries no text: it is a border and pressed-tint colour only.
+  // It reaches 4.22:1 against ink, so hover lifts to accent-bright instead.
+  ["hover — on-accent on accent-bright", TOKENS.onAccent, TOKENS.accentBright, 4.5],
+  ["flood menu links — on-accent on accent", TOKENS.onAccent, TOKENS.accent, 4.5],
+  ["flood menu contact — on-accent/85 on accent", blend(TOKENS.onAccent, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
+  ["flood menu numerals — on-accent/85 on accent", blend(TOKENS.onAccent, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
+  ["flood menu eyebrow — on-accent/85 on accent", blend(TOKENS.onAccent, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
+  ["flood menu CTA — accent on on-accent pill", TOKENS.accent, TOKENS.onAccent, 4.5],
+
+  // Text laid over photographs, on the theme-independent scrim
+  ["gallery caption — white on scrim/90 over photo", TOKENS.white, blend(TOKENS.scrim, 0.9, "#8b847b"), 4.5],
+  ["gallery caption — white/80 on scrim/90", blend(TOKENS.white, 0.8, blend(TOKENS.scrim, 0.9, "#8b847b")), blend(TOKENS.scrim, 0.9, "#8b847b"), 4.5],
+  ["hover overlay — white/85 on scrim/92", blend(TOKENS.white, 0.85, blend(TOKENS.scrim, 0.92, "#737070")), blend(TOKENS.scrim, 0.92, "#737070"), 4.5],
 ];
 
 let failures = 0;

@@ -1,9 +1,17 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   THE PAINT MAN — DESIGN TOKENS
-   Art direction: "Fresh Coat". Clean plaster surfaces, crisp masked edges,
-   one confident accent applied with intent. Light mode only, deliberately.
+   THE PAINT MEN — DESIGN TOKENS
+   Art direction: "Night Shift". A near-black ground, warm graphite surfaces,
+   and the client's logo orange used at full strength as the single accent.
+
+   WHY DARK. The logo orange is #f26522. On white it reaches about 3:1, so
+   white text on it fails AA and the light build had to carry TWO oranges — a
+   duller one that could hold a label and the real one for graphics only. On a
+   near-black ground that problem disappears: #f26522 hits ~6.3:1 against the
+   page, so the client's actual brand colour carries every button, link, focus
+   ring and accent moment, and buttons take near-black text rather than white.
+   One orange, used properly, instead of two used apologetically.
 
    RADIUS RULE — there are exactly three radii on this site and no others:
      • buttons / chips / pills ......... rounded-full        (--radius-pill)
@@ -11,37 +19,40 @@
      • form inputs / textareas ......... 8px                 (--radius-input)
    If a new element needs a radius, it is one of these three. No exceptions.
 
-   COLOUR RULE — one accent (Wet Paint Blue) carries 100% of UI chrome:
-   every CTA, hover, focus ring, active state and accent moment. The 5-colour
-   sample-card palette below exists ONLY inside swatch and gallery contexts
-   and never appears as UI chrome.
+   COLOUR RULE — one accent carries 100% of UI chrome: every CTA, hover, focus
+   ring, active state and accent moment. The 5-colour sample-card palette below
+   exists ONLY inside swatch and gallery contexts and never appears as chrome.
+
+   SCRIM RULE — --color-scrim is true black and NEVER follows the theme. Text
+   laid over a photograph needs a dark ground whatever the surface behind it
+   is; using --color-ink for that was what made the scrims invert.
    ========================================================================== */
 
 @theme {
-  /* Surfaces — cool-leaning neutrals, locked site-wide */
-  --color-paper: #fafaf8;
-  --color-plaster: #edede9;
-  --color-plaster-deep: #e2e2dd;
-  --color-hairline: #d8d8d2;
+  /* Surfaces — warm near-blacks, locked site-wide */
+  --color-paper: #0c0c0e; /* the page ground */
+  --color-plaster: #151518; /* raised panel */
+  --color-plaster-deep: #1e1e23; /* deeper well, image backing */
+  --color-hairline: #2b2b32;
 
-  /* Ink */
-  --color-ink: #141414;
-  --color-ink-soft: #4b4b47; /* 8.1:1 on paper */
-  --color-ink-mute: #6a6a64; /* 5.2:1 on paper — AA for body and below */
+  /* Ink, inverted — measured against --color-paper */
+  --color-ink: #f7f6f4; /* ~18:1 */
+  --color-ink-soft: #b8b6b1; /* ~9.3:1 */
+  --color-ink-mute: #8b8983; /* ~5.4:1 — AA for body and below */
 
-  /* Brand orange, taken from the logo.
-     Two weights, because one cannot do both jobs. The bright orange in the
-     logo is ~3:1 on white — fine for a graphic mark, but white text on it
-     fails AA, so it never carries a label. --color-accent is the deeper
-     working orange used for every button, focus ring and link;
-     --color-accent-bright is reserved for graphic moments where nothing has
-     to be read against it: the brush strokes, the drip, the scroll level and
-     the chat blob. */
-  --color-accent: #b8430b; /* 5.4:1 with white text */
-  --color-accent-bright: #f26522; /* logo orange — graphics only */
-  --color-accent-deep: #8f3308;
-  --color-accent-ink: #8a3208; /* 6.0:1 on paper, for text and errors */
-  --color-accent-wash: #fdf1ea;
+  /* Brand orange, straight off the logo. ONE weight now: on this ground it
+     reads at ~6.3:1, so it carries labels, links and chrome without help.
+     Anything sitting ON the orange takes --color-on-accent, never white —
+     white on #f26522 is ~2.9:1 and fails. */
+  --color-accent: #f26522;
+  --color-accent-bright: #ff8248; /* hover / graphic lift only */
+  --color-accent-deep: #c94f14; /* pressed states, borders */
+  --color-accent-ink: #f89b62; /* softer orange for long text and errors */
+  --color-accent-wash: #1d1109; /* orange-tinted surface, replaces the light wash */
+  --color-on-accent: #0c0c0e; /* what sits on top of the orange */
+
+  /* Overlays over photographs. Theme-independent, always black. */
+  --color-scrim: #000000;
 
   /* Sample-card palette — swatch/gallery contexts only, never UI chrome */
   --color-swatch-sage: #8a9a7b;
@@ -73,7 +84,7 @@
 
 @layer base {
   :root {
-    color-scheme: light;
+    color-scheme: dark;
     --shell-pad: clamp(1.25rem, 5vw, 4.5rem);
   }
 
@@ -123,7 +134,7 @@
 
   ::selection {
     background-color: var(--color-accent);
-    color: #fff;
+    color: var(--color-on-accent);
   }
 
   /* One focus treatment site-wide, in the accent colour. */
@@ -141,7 +152,7 @@
     z-index: 200;
     transform: translateY(-200%);
     background: var(--color-accent);
-    color: #fff;
+    color: var(--color-on-accent);
     padding: 0.75rem 1.25rem;
     border-radius: var(--radius-pill);
     font-weight: 600;
@@ -182,19 +193,24 @@
   max-width: 65ch;
 }
 
-/* Tinted shadows — never pure black. Tinted toward the background hue. */
+/* Elevation on a near-black ground. A drop shadow does almost nothing here —
+   what reads as "lifted" is a hairline catching light along the top edge plus a
+   deep shadow beneath, so both are used together. */
 @utility shadow-lift {
   box-shadow:
-    0 1px 2px rgb(60 60 50 / 0.05),
-    0 12px 32px -12px rgb(60 60 50 / 0.18);
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 12px 32px -12px rgb(0 0 0 / 0.7);
 }
 @utility shadow-lift-deep {
   box-shadow:
-    0 2px 4px rgb(60 60 50 / 0.06),
-    0 24px 56px -18px rgb(60 60 50 / 0.28);
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 24px 56px -18px rgb(0 0 0 / 0.85);
 }
+/* The orange glow under a primary button. Was still tinted Wet Paint Blue from
+   the original brief — invisible on white, obvious the moment the ground went
+   black. */
 @utility shadow-accent {
-  box-shadow: 0 14px 34px -14px rgb(29 79 216 / 0.55);
+  box-shadow: 0 14px 34px -14px rgb(242 101 34 / 0.5);
 }
 
 /* --------------------------------------------------------------------------

@@ -42,7 +42,7 @@ const dayPickerClassNames = {
   day: "p-0.5 text-center",
   day_button:
     "grid aspect-square w-full place-items-center rounded-full text-[0.9375rem] text-ink transition-[background-color,color,transform] duration-200 hover:bg-accent-wash hover:text-accent-ink active:scale-95",
-  selected: "[&_button]:bg-accent [&_button]:text-white [&_button]:font-semibold [&_button]:hover:bg-accent-deep [&_button]:hover:text-white",
+  selected: "[&_button]:bg-accent [&_button]:text-on-accent [&_button]:font-semibold [&_button]:hover:bg-accent-bright [&_button]:hover:text-on-accent",
   today: "[&_button]:ring-1 [&_button]:ring-accent/40",
   disabled: "[&_button]:cursor-not-allowed [&_button]:text-ink-mute/35 [&_button]:hover:bg-transparent [&_button]:hover:text-ink-mute/35",
   outside: "[&_button]:text-ink-mute/30",
@@ -271,7 +271,7 @@ export function BookingForm() {
             <button
               type="submit"
               disabled={status === "sending"}
-              className="relative inline-flex h-13 items-center overflow-hidden rounded-full bg-accent px-7 py-4 text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98] disabled:cursor-wait disabled:opacity-90"
+              className="relative inline-flex h-13 items-center overflow-hidden rounded-full bg-accent px-7 py-4 text-[0.9375rem] font-semibold whitespace-nowrap text-on-accent shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-bright active:translate-y-px active:scale-[0.98] disabled:cursor-wait disabled:opacity-90"
             >
               {status === "sending" && (
                 <span aria-hidden="true" className="sending-fill absolute inset-y-0 left-0 bg-accent-deep" />

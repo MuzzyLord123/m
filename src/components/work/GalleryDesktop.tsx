@@ -90,7 +90,7 @@ export function GalleryDesktop() {
                       />
 
                       {/* Paint swipe — wipes up from the bottom edge on hover */}
-                      <div className="absolute inset-x-0 bottom-0 origin-bottom scale-y-0 bg-gradient-to-t from-ink/92 via-ink/75 to-transparent pt-16 transition-transform duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100 group-focus-visible:scale-y-100">
+                      <div className="absolute inset-x-0 bottom-0 origin-bottom scale-y-0 bg-gradient-to-t from-scrim/92 via-scrim/75 to-transparent pt-16 transition-transform duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100 group-focus-visible:scale-y-100">
                         <div className="p-6 opacity-0 transition-opacity duration-300 delay-100 group-hover:opacity-100 group-focus-visible:opacity-100">
                           <p className="font-display text-[1.25rem] leading-tight font-semibold tracking-[-0.02em] text-white">
                             {project.title}

@@ -32,7 +32,7 @@ export function HowItWorks() {
             className={index === 1 ? "lg:mt-12" : index === 2 ? "lg:mt-24" : ""}
           >
             <div className="tape-line" aria-hidden="true" />
-            <span className="mt-7 inline-grid size-16 place-items-center rounded-full bg-accent font-display text-[1.125rem] font-semibold text-white tabular-nums">
+            <span className="mt-7 inline-grid size-16 place-items-center rounded-full bg-accent font-display text-[1.125rem] font-semibold text-on-accent tabular-nums">
               {step.step}
             </span>
             <h3 className="mt-6 font-display text-[1.5rem] leading-tight font-semibold tracking-[-0.025em] text-ink">

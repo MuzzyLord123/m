@@ -8,7 +8,7 @@
  * and the same pass that audits the reduced-motion path. Set SHOT_MOTION=full
  * to capture the animated build instead.
  */
-import { chromium } from "playwright";
+import { launchBrowser } from "./browser.mjs";
 import { mkdirSync } from "node:fs";
 
 const OUT =
@@ -21,10 +21,7 @@ const reduced = process.env.SHOT_MOTION !== "full";
 const fullPage = process.env.SHOT_FULL !== "0";
 
 mkdirSync(OUT, { recursive: true });
-const browser = await chromium.launch({
-  executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
-  args: ["--no-sandbox"],
-});
+const browser = await launchBrowser();
 
 for (const path of paths) {
   for (const width of widths) {

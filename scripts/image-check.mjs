@@ -17,16 +17,13 @@
  *
  * Run against a production build: npx next start & node scripts/image-check.mjs
  */
-import { chromium } from "playwright";
+import { launchBrowser } from "./browser.mjs";
 import fs from "node:fs";
 
 const BASE = process.env.BASE_URL || "http://127.0.0.1:3111";
 const ROUTES = ["/", "/work", "/services", "/about", "/contact", "/quote", "/blog"];
 
-const browser = await chromium.launch({
-  executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
-  args: ["--no-sandbox"],
-});
+const browser = await launchBrowser();
 
 /** Every path the site is supposed to be able to show. */
 const expected = new Set([

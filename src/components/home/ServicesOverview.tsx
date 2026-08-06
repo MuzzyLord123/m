@@ -20,7 +20,7 @@ export function ServicesOverview() {
         eyebrow="What we do"
         title={
           <span id="services-heading">
-            Five trades, one <em className="italic">decorator</em>.
+            Six trades, one <em className="italic">decorator</em>.
           </span>
         }
         lead="Every job is priced and carried out by the same person who comes to look at it. Nothing is subcontracted out to whoever is free that week."

@@ -50,7 +50,7 @@ export function Hero() {
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 <Link
                   href={CTA_HREF}
-                  className="inline-flex h-14 items-center justify-center rounded-full bg-accent px-8 text-base font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-deep active:translate-y-px active:scale-[0.98]"
+                  className="inline-flex h-14 items-center justify-center rounded-full bg-accent px-8 text-base font-semibold whitespace-nowrap text-on-accent shadow-accent transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-bright active:translate-y-px active:scale-[0.98]"
                 >
                   {CTA_LABEL}
                 </Link>

@@ -4,7 +4,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { socialPosts } from "@/data/social";
 import { blurTone } from "@/lib/images";
-import { socialLinks } from "@/config/site";
+import { isPlaceholder, socialLinks } from "@/config/site";
 
 const formatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -56,12 +56,11 @@ export function SocialFeed() {
               index % 3 === 1 ? "lg:mt-12" : ""
             }`}
           >
-            <a
-              href={post.permalink}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="group block"
-            >
+            {/* A card only becomes a link once there is somewhere real to send
+                people. The permalinks fall back to the profile URL, so while
+                that is unset every card was an anchor to "{{INSTAGRAM_URL}}" —
+                six dead links on the home page. */}
+            <Card href={isPlaceholder(post.permalink) ? undefined : post.permalink}>
               <div className="relative aspect-square overflow-hidden rounded-[4px] bg-plaster">
                 <Image
                   src={post.image}
@@ -80,10 +79,20 @@ export function SocialFeed() {
               <p className="mt-2 text-[0.8125rem] text-ink-mute">
                 {formatter.format(new Date(post.date))} · {post.network === "instagram" ? "Instagram" : "Facebook"}
               </p>
-            </a>
+            </Card>
           </Reveal>
         ))}
       </ul>
     </section>
+  );
+}
+
+/** An anchor when there is a destination, a plain block when there is not. */
+function Card({ href, children }: { href?: string; children: React.ReactNode }) {
+  if (!href) return <div className="group block">{children}</div>;
+  return (
+    <a href={href} target="_blank" rel="noreferrer noopener" className="group block">
+      {children}
+    </a>
   );
 }

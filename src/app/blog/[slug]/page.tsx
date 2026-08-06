@@ -118,7 +118,7 @@ export default async function BlogPost({ params }: Params) {
           </p>
           <Link
             href={CTA_HREF}
-            className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98]"
+            className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-on-accent shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-bright active:translate-y-px active:scale-[0.98]"
           >
             {CTA_LABEL}
           </Link>

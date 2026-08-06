@@ -2,6 +2,13 @@
 
 ## The logo (read this first)
 
+The site header now DRAWS the lockup — the brush gesture as inline SVG and the
+words set in the site's own display face — rather than loading an image. The
+PNG stand-ins were worse than nothing on a black ground: the "white" one
+averaged mid-grey, so "PAINTING SERVICES" sank into the header and the mark
+shipped with half its words missing. See `src/components/brand/Wordmark.tsx`;
+swapping in a real file is a one-line change.
+
 The site header uses a clean recreation of your mark. Your original file is
 saved at `public/brand/logo-source.jpg` so it is not lost — but it is a
 **mockup render on a dark textured plate**, not a logo asset, and there is no
@@ -189,7 +196,7 @@ rather than a single photograph.
 | --- | --- | --- | --- |
 | Home page hero | `work/hero.jpg` | 3:2 | The finished kitchen extension — it is the strongest thing you sent |
 | About page portrait | `work/about-portrait.jpg` | 4:5 | You on site, if you have one. Otherwise the panelled hallway |
-| Video poster | `work/video-poster.jpg` | 16:9 | Only used if you add a video |
+| Video poster | *(removed)* | 16:9 | The about page carried a stock third-party film with a note-to-the-developer as its caption. Both are gone. Send a film and the `VideoFacade` component is still there, still click-to-load |
 
 ### Social cards
 

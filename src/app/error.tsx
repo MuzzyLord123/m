@@ -46,7 +46,7 @@ export default function Error({
           <button
             type="button"
             onClick={reset}
-            className="inline-flex h-13 items-center gap-2 rounded-full bg-accent px-7 text-base font-semibold whitespace-nowrap text-white shadow-accent transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+            className="inline-flex h-13 items-center gap-2 rounded-full bg-accent px-7 text-base font-semibold whitespace-nowrap text-on-accent shadow-accent transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
           >
             <ArrowClockwise weight="light" className="size-[1.15rem]" />
             Try again

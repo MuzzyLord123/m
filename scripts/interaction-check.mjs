@@ -6,17 +6,14 @@
  *
  * Expects a server on BASE_URL (default http://127.0.0.1:3100).
  */
-import { chromium } from "playwright";
+import { launchBrowser } from "./browser.mjs";
 
 const BASE = process.env.BASE_URL || "http://127.0.0.1:3100";
 const SHOTS =
   process.env.SHOT_DIR ||
   "/tmp/claude-0/-home-user-m/ae5f0dda-adb2-530b-b8d1-de27002a1dbd/scratchpad/shots";
 
-const browser = await chromium.launch({
-  executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
-  args: ["--no-sandbox"],
-});
+const browser = await launchBrowser();
 
 const results = [];
 const check = (label, value) => {

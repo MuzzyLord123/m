@@ -19,9 +19,39 @@ npm run build                # production build
 
 ---
 
+## The client's details
+
+James Young's real details are in `src/config/site.ts` as the defaults: the
+phone number, ten years trading, based on the Wirral, covering Merseyside,
+Cheshire and North Wales, with the map embed set to Merseyside. Each one can
+still be overridden by its `NEXT_PUBLIC_*` variable without touching code.
+
+**One thing is still missing: the email address.** `npm run audit:content` fails
+on it and will keep failing until `NEXT_PUBLIC_EMAIL` is set — deliberately,
+because an enquiry form on a site with no address behind it is worse than no
+form.
+
+## Art direction
+
+"Night Shift" — a near-black ground with the logo orange at full strength.
+
+The dark ground is not decoration. The logo orange is `#f26522`, which reaches
+about 3:1 on white: white text on it fails AA, so the light build had to carry
+**two** oranges, a duller one that could hold a label and the real one for
+graphics only. On `#0c0c0e` that problem disappears — the brand orange hits
+6.3:1 against the page, so it carries every button, link, focus ring and accent,
+and buttons take near-black text. One orange, used properly.
+
+`npm run audit:contrast` reads the tokens **out of globals.css** rather than
+duplicating them. The old version held its own copy of the palette, and that
+copy was never updated through two rebrands — so it spent months passing 24/24
+against Wet Paint Blue on a white page while the site was orange on black. A
+checker that does not read the thing it checks is worse than none, because it
+gets trusted.
+
 ## Before this goes live
 
-Nine values stand between this build and launch. Set them as `NEXT_PUBLIC_*`
+The values below stand between this build and launch. Set them as `NEXT_PUBLIC_*`
 environment variables (see `.env.example`) or write them straight into
 `src/config/site.ts` — both work, and they can be mixed.
 

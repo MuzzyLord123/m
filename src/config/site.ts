@@ -26,11 +26,13 @@ const from = (key: string, fallback: string): string => {
   return value && value.trim().length > 0 ? value.trim() : fallback;
 };
 
-const phone = from("NEXT_PUBLIC_PHONE", "{{PHONE}}");
+const phone = from("NEXT_PUBLIC_PHONE", "07970 752848");
 
 export const site = {
   name: "The Paint Men",
   legalName: "The Paint Men",
+  /** The person a customer actually deals with, start to finish. */
+  owner: "James Young",
   trade: "Painter & decorator",
   tagline: "Decorating, done properly.",
 
@@ -39,10 +41,12 @@ export const site = {
   phoneHref: phone.replace(/[^\d+]/g, "") || phone,
   email: from("NEXT_PUBLIC_EMAIL", "{{EMAIL}}"),
 
-  town: from("NEXT_PUBLIC_TOWN", "{{TOWN}}"),
-  serviceArea: from("NEXT_PUBLIC_SERVICE_AREA", "{{SERVICE_AREA}}"),
-  years: from("NEXT_PUBLIC_YEARS", "{{YEARS}}"),
-  mapAddress: from("NEXT_PUBLIC_MAP_ADDRESS", "{{MAP_ADDRESS}}"),
+  town: from("NEXT_PUBLIC_TOWN", "the Wirral"),
+  serviceArea: from("NEXT_PUBLIC_SERVICE_AREA", "Merseyside, Cheshire & North Wales"),
+  years: from("NEXT_PUBLIC_YEARS", "10"),
+  /* Merseyside, so the embed opens on the area the business works out of
+     rather than a pin on a house. */
+  mapAddress: from("NEXT_PUBLIC_MAP_ADDRESS", "Merseyside, England"),
 
   social: {
     instagram: from("NEXT_PUBLIC_INSTAGRAM_URL", "{{INSTAGRAM_URL}}"),
@@ -51,16 +55,18 @@ export const site = {
 
   /** Towns covered, shown as swatch chips in the service-area section. */
   towns: [
-    from("NEXT_PUBLIC_TOWN", "{{TOWN}}"),
+    "Birkenhead",
+    "Wallasey",
+    "Heswall",
+    "West Kirby",
+    "Bebington",
+    "Neston",
+    "Liverpool",
+    "Ellesmere Port",
     "Chester",
-    "Northwich",
-    "Knutsford",
-    "Wilmslow",
-    "Frodsham",
-    "Tarporley",
+    "Runcorn",
     "Mold",
     "Wrexham",
-    "Nantwich",
   ],
 
   hours: [

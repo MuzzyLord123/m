@@ -41,10 +41,11 @@ const STEP_LABELS = ["The trade", "The property", "Timing", "Your details"];
  */
 const SWATCHES: Record<string, string> = {
   interior: "var(--color-swatch-sage)",
-  exterior: "var(--color-swatch-terracotta)",
-  wallpaper: "var(--color-swatch-ochre)",
-  spray: "var(--color-swatch-slate)",
-  commercial: "var(--color-swatch-blush)",
+  halls: "var(--color-swatch-slate)",
+  kitchens: "var(--color-swatch-ochre)",
+  extensions: "var(--color-swatch-terracotta)",
+  exterior: "var(--color-swatch-blush)",
+  commercial: "var(--color-accent-deep)",
   unsure: "var(--color-plaster-deep)",
 };
 
@@ -351,7 +352,7 @@ export function QuoteForm() {
           <button
             type="button"
             onClick={next}
-            className="inline-flex h-12 items-center gap-2 rounded-full bg-accent px-7 text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98]"
+            className="inline-flex h-12 items-center gap-2 rounded-full bg-accent px-7 text-[0.9375rem] font-semibold whitespace-nowrap text-on-accent shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-bright active:translate-y-px active:scale-[0.98]"
           >
             Continue
             <ArrowRight weight="light" className="size-4" />
@@ -360,7 +361,7 @@ export function QuoteForm() {
           <button
             type="submit"
             disabled={status === "sending"}
-            className="relative inline-flex h-12 items-center overflow-hidden rounded-full bg-accent px-7 text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98] disabled:cursor-wait disabled:opacity-90"
+            className="relative inline-flex h-12 items-center overflow-hidden rounded-full bg-accent px-7 text-[0.9375rem] font-semibold whitespace-nowrap text-on-accent shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-bright active:translate-y-px active:scale-[0.98] disabled:cursor-wait disabled:opacity-90"
           >
             {status === "sending" && (
               <span aria-hidden="true" className="sending-fill absolute inset-y-0 left-0 bg-accent-deep" />

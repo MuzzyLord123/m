@@ -9,11 +9,12 @@ const phone = z
   });
 
 export const SERVICE_OPTIONS = [
-  { id: "interior", label: "Interior decorating", note: "Walls, ceilings, woodwork" },
-  { id: "exterior", label: "Exterior painting", note: "Render, masonry, timber" },
-  { id: "wallpaper", label: "Wallpapering", note: "Feature walls, murals, full rooms" },
-  { id: "spray", label: "Spray finishing", note: "Kitchens, staircases, wardrobes" },
-  { id: "commercial", label: "Commercial", note: "Offices, surgeries, shops" },
+  { id: "interior", label: "Interior decorating", note: "Bedrooms, living rooms, woodwork" },
+  { id: "halls", label: "Halls, stairs & landings", note: "Spindles, panelling, high walls" },
+  { id: "kitchens", label: "Kitchens, bathrooms & wet rooms", note: "Units, splashbacks, steam" },
+  { id: "extensions", label: "Extensions & loft conversions", note: "New plaster, first coats" },
+  { id: "exterior", label: "Exterior painting", note: "Render, fascias, fences" },
+  { id: "commercial", label: "Commercial", note: "Shops, offices, units" },
   { id: "unsure", label: "Not sure yet", note: "Tell us and we will work it out" },
 ] as const;
 

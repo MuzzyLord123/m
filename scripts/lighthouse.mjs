@@ -7,16 +7,15 @@
  *
  * The target is 95+ across Performance, Accessibility, Best Practices and SEO.
  */
-import { chromium } from "playwright";
+import { launchBrowser } from "./browser.mjs";
 import lighthouse from "lighthouse";
 
 const BASE = process.env.BASE_URL || "http://127.0.0.1:3100";
 const paths = (process.env.LH_PATHS || "/").split(",");
 
-const browser = await chromium.launch({
-  executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
-  args: ["--no-sandbox", "--remote-debugging-port=9222"],
-});
+// Lighthouse attaches over the DevTools protocol, so the port has to be opened
+// on launch — the shared helper takes extra args for exactly this case.
+const browser = await launchBrowser({ args: ["--remote-debugging-port=9222"] });
 
 const rows = [];
 

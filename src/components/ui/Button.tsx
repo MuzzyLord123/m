@@ -11,13 +11,13 @@ const base =
 
 const variants: Record<Variant, string> = {
   // Wet Paint Blue on paper — 6.6:1 against white text.
-  primary: "bg-accent text-white shadow-accent hover:bg-accent-deep",
+  primary: "bg-accent text-on-accent shadow-accent hover:bg-accent-bright",
   // Ink outline for the quieter of two adjacent actions.
   outline:
     "border border-ink/25 text-ink hover:border-accent hover:text-accent hover:bg-accent-wash",
   // Over photography: a scrim carries the contrast, never the photo.
   onPhoto:
-    "bg-ink/85 text-white backdrop-blur-[2px] hover:bg-ink [text-shadow:0_1px_2px_rgb(0_0_0/0.4)]",
+    "bg-scrim/85 text-white backdrop-blur-[2px] hover:bg-ink [text-shadow:0_1px_2px_rgb(0_0_0/0.4)]",
 };
 
 const sizes: Record<Size, string> = {

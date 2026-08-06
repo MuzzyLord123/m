@@ -59,7 +59,7 @@ export function VideoFacade({
             />
 
             {/* Scrim so the title and control hold contrast over any frame */}
-            <span className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/25 to-ink/10" />
+            <span className="absolute inset-0 bg-gradient-to-t from-scrim/80 via-scrim/25 to-scrim/10" />
 
             <span className="absolute inset-0 grid place-items-center">
               <svg

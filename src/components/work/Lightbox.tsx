@@ -108,7 +108,7 @@ export function Lightbox({
             type="button"
             aria-label="Close gallery"
             onClick={onClose}
-            className="absolute inset-0 cursor-zoom-out bg-ink/88 backdrop-blur-[3px]"
+            className="absolute inset-0 cursor-zoom-out bg-scrim/88 backdrop-blur-[3px]"
           />
 
           <m.div
@@ -195,7 +195,7 @@ export function Lightbox({
 
               <Link
                 href={CTA_HREF}
-                className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-accent px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-white transition-[background-color,transform] duration-200 hover:bg-accent-deep active:translate-y-px active:scale-[0.98]"
+                className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-accent px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-on-accent transition-[background-color,transform] duration-200 hover:bg-accent-bright active:translate-y-px active:scale-[0.98]"
               >
                 {CTA_LABEL}
               </Link>

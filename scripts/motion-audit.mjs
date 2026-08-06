@@ -13,7 +13,7 @@
  *      the hide-on-scroll-down behaviour needs one. Everything else on the site
  *      is scroll-linked through CSS timelines. Any new offender fails here.
  */
-import { chromium } from "playwright";
+import { launchBrowser } from "./browser.mjs";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -55,10 +55,7 @@ check(
 );
 
 // ------------------------------------------------------- runtime: reduced motion
-const browser = await chromium.launch({
-  executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
-  args: ["--no-sandbox"],
-});
+const browser = await launchBrowser();
 
 const page = await browser.newPage({
   viewport: { width: 1440, height: 900 },

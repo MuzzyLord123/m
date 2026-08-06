@@ -25,7 +25,7 @@ import { blurTone } from "@/lib/images";
  *      it condenses — height down, paper background up behind a light blur, a
  *      hairline and tinted shadow arriving. Interpolated from scroll position
  *      itself, so it tracks the reader's hand rather than snapping.
- *   3. A mega-menu under Services, carrying the five trades and a real
+ *   3. A mega-menu under Services, carrying the six trades and a real
  *      photograph of recent work rather than a list of links.
  *
  * The panel opens on hover and on focus, closes on Escape, on click outside and
@@ -188,7 +188,7 @@ export function DesktopNav() {
 
               <Link
                 href={CTA_HREF}
-                className="inline-flex h-11 items-center justify-center rounded-full bg-accent px-6 text-[0.9375rem] font-medium whitespace-nowrap text-white shadow-accent transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-deep active:translate-y-px active:scale-[0.98]"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-accent px-6 text-[0.9375rem] font-medium whitespace-nowrap text-on-accent shadow-accent transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-bright active:translate-y-px active:scale-[0.98]"
               >
                 {CTA_LABEL}
               </Link>

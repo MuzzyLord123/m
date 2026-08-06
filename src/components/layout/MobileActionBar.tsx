@@ -69,7 +69,7 @@ export function MobileActionBar() {
           </a>
           <Link
             href={CTA_HREF}
-            className="inline-flex h-12 flex-[1.35] items-center justify-center rounded-full bg-accent text-[0.9375rem] font-semibold whitespace-nowrap text-white shadow-accent transition-transform duration-200 active:scale-[0.98]"
+            className="inline-flex h-12 flex-[1.35] items-center justify-center rounded-full bg-accent text-[0.9375rem] font-semibold whitespace-nowrap text-on-accent shadow-accent transition-transform duration-200 active:scale-[0.98]"
           >
             {CTA_LABEL}
           </Link>

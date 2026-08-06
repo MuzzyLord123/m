@@ -63,7 +63,12 @@ export function BeforeAfter({
     <div
       ref={containerRef}
       style={{ ["--ba-pos" as string]: "50%" }}
-      className={`relative touch-none overflow-hidden rounded-[4px] bg-plaster select-none ${className}`}
+      /* touch-pan-y, not touch-none. touch-none surrenders every touch
+         gesture to the handler, including the vertical one — so on a phone,
+         dragging up or down anywhere over the slider did not scroll the page,
+         and /work carries four of them full-bleed. Panning stays with the
+         browser; the horizontal drag is still ours. */
+      className={`relative touch-pan-y overflow-hidden rounded-[4px] bg-plaster select-none ${className}`}
       onPointerDown={(event) => {
         event.currentTarget.setPointerCapture(event.pointerId);
         fromPointer(event.clientX);
@@ -139,7 +144,7 @@ export function BeforeAfter({
 function Tag({ text, className = "" }: { text: string; className?: string }) {
   return (
     <span
-      className={`pointer-events-none absolute bottom-4 z-10 rounded-full bg-ink/85 px-3 py-1 text-[0.6875rem] font-semibold tracking-[0.12em] text-white uppercase backdrop-blur-[2px] ${className}`}
+      className={`pointer-events-none absolute bottom-4 z-10 rounded-full bg-scrim/85 px-3 py-1 text-[0.6875rem] font-semibold tracking-[0.12em] text-white uppercase backdrop-blur-[2px] ${className}`}
     >
       {text}
     </span>

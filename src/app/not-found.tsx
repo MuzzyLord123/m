@@ -41,7 +41,7 @@ export default function NotFound() {
           <div className="mt-9 flex flex-wrap gap-3">
             <Link
               href={CTA_HREF}
-              className="inline-flex h-13 items-center rounded-full bg-accent px-7 text-base font-semibold whitespace-nowrap text-white shadow-accent transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+              className="inline-flex h-13 items-center rounded-full bg-accent px-7 text-base font-semibold whitespace-nowrap text-on-accent shadow-accent transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
             >
               {CTA_LABEL}
             </Link>
@@ -57,7 +57,7 @@ export default function NotFound() {
           <ul className="mt-10 grid gap-px overflow-hidden rounded-[8px] border border-hairline bg-hairline sm:grid-cols-2">
             {[
               { href: "/work", label: "See finished jobs", note: "Eleven projects, before and after" },
-              { href: "/services", label: "What we do", note: "Five trades, one decorator" },
+              { href: "/services", label: "What we do", note: "Six trades, one decorator" },
               { href: "/about", label: "Who you are hiring", note: "The person who prices it paints it" },
               { href: "/contact", label: "Get in touch", note: "Phone, email and where we cover" },
             ].map((link) => (

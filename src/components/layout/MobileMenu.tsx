@@ -11,7 +11,6 @@ import { featuredProjects } from "@/data/projects";
 import { blurTone } from "@/lib/images";
 import Image from "next/image";
 
-const FLOOD_ORIGIN = "calc(100% - 2.6rem) 2.55rem";
 const menuLinks = [...primaryNav, { href: "/contact", label: "Contact" }];
 
 /**
@@ -98,7 +97,7 @@ export function MobileMenu() {
         data-menu-open={open}
         className="mobile-bar shell relative z-[96] flex h-[5.25rem] items-center justify-between"
       >
-        <Wordmark onDark={open} />
+        <Wordmark onAccent={open} />
         <BrushToggle
           ref={toggleRef}
           open={open}
@@ -144,16 +143,16 @@ export function MobileMenu() {
                   <li
                     key={link.href}
                     style={{ transitionDelay: `${0.2 + index * 0.055}s` }}
-                    className="flood-item overflow-hidden border-b border-white/15"
+                    className="flood-item overflow-hidden border-b border-on-accent/20"
                   >
                     <Link
                       href={link.href}
                       /* Steps down on short handsets so the whole menu still
                          lands inside one screen where it can. */
-                      className="flex items-baseline justify-between py-3.5 font-display text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.035em] text-white [@media(min-height:760px)]:py-3.5 [@media(min-height:760px)]:text-[2.25rem] [@media(max-height:700px)]:py-2.5"
+                      className="flex items-baseline justify-between py-3.5 font-display text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.035em] text-on-accent [@media(min-height:760px)]:py-3.5 [@media(min-height:760px)]:text-[2.25rem] [@media(max-height:700px)]:py-2.5"
                     >
                       {link.label}
-                      <span className="font-body text-sm font-normal text-white/80 tabular-nums">
+                      <span className="font-body text-sm font-normal text-on-accent/85 tabular-nums">
                         0{index + 1}
                       </span>
                     </Link>
@@ -168,7 +167,7 @@ export function MobileMenu() {
               className="flood-item shrink-0"
               style={{ transitionDelay: "0.36s" }}
             >
-              <p className="shell text-[0.6875rem] font-semibold tracking-[0.16em] text-white/70 uppercase">
+              <p className="shell text-[0.6875rem] font-semibold tracking-[0.16em] text-on-accent/85 uppercase">
                 Recent work
               </p>
               <ul style={{ paddingInline: "1.25rem" }}
@@ -176,7 +175,7 @@ export function MobileMenu() {
                 {featuredProjects.slice(0, 5).map((project) => (
                   <li key={project.slug} className="w-[42vw] max-w-[11rem] shrink-0">
                     <Link href={`/work#${project.slug}`} className="block">
-                      <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-white/15">
+                      <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-on-accent/15">
                         <Image
                           src={project.images[0].src}
                           alt=""
@@ -187,7 +186,7 @@ export function MobileMenu() {
                           className="object-cover"
                         />
                       </div>
-                      <p className="mt-2 text-[0.8125rem] leading-snug font-medium text-white/95">
+                      <p className="mt-2 text-[0.8125rem] leading-snug font-medium text-on-accent/90">
                         {project.title}
                       </p>
                     </Link>
@@ -203,12 +202,12 @@ export function MobileMenu() {
             >
               <Link
                 href={CTA_HREF}
-                className="mb-6 flex h-14 w-full items-center justify-center rounded-full bg-white text-base font-semibold whitespace-nowrap text-accent-ink transition-transform duration-200 active:scale-[0.98]"
+                className="mb-6 flex h-14 w-full items-center justify-center rounded-full bg-on-accent text-base font-semibold whitespace-nowrap text-accent transition-transform duration-200 active:scale-[0.98]"
               >
                 {CTA_LABEL}
               </Link>
 
-              <div className="grid gap-3 text-white/90">
+              <div className="grid gap-3 text-on-accent/85">
                 <a href={`tel:${site.phoneHref}`} className="flex items-center gap-3 text-[0.95rem]">
                   <Phone weight="light" className="size-[1.15rem] shrink-0" />
                   {site.phone}
@@ -227,7 +226,7 @@ export function MobileMenu() {
               </div>
 
               {socialLinks.length > 0 && (
-                <div className="mt-6 flex gap-5 text-[0.8125rem] tracking-wide text-white/80 uppercase">
+                <div className="mt-6 flex gap-5 text-[0.8125rem] tracking-wide text-on-accent/85 uppercase">
                   {socialLinks.map((link) => (
                     <a
                       key={link.href}
@@ -261,7 +260,7 @@ function BrushToggle({
   ref?: React.Ref<HTMLButtonElement>;
 }) {
   const bar = `toggle-bar absolute left-0 h-[2.5px] rounded-full origin-center ${
-    onDark ? "bg-white" : "bg-ink"
+    onDark ? "bg-on-accent" : "bg-ink"
   }`;
 
   return (

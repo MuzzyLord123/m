@@ -1,4 +1,5 @@
 import createMDX from "@next/mdx";
+import remarkGfm from "remark-gfm";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -73,6 +74,14 @@ const nextConfig = {
 
 const withMDX = createMDX({
   extension: /\.mdx$/,
+  options: {
+    /* Without GFM, MDX is CommonMark only — and CommonMark has no pipe tables.
+       The room-by-room price table in the costs post was rendering as one
+       run-on paragraph of pipe characters, on the single most linkable block
+       on the site. The table/th/td components in src/mdx-components.tsx were
+       unreachable dead code until this was added. */
+    remarkPlugins: [remarkGfm],
+  },
 });
 
 export default withMDX(nextConfig);

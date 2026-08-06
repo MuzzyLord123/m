@@ -15,3 +15,9 @@ tsconfig.tsbuildinfo
 # @fontsource-variable packages. Drop real Fontshare woff2 files here under the
 # same four names and remove this rule to commit them instead.
 src/fonts/*.woff2
+
+# Stray files that were committed at the repo root by mistake: a 3.1MB
+# Windows installer and a Stable Diffusion training notebook, neither of which
+# has anything to do with this site. Removed, and blocked from coming back.
+*.exe
+*.ipynb
