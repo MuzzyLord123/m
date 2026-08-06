@@ -61,7 +61,12 @@ export function SwatchFilter({
                 className="block h-14 w-full"
                 style={{ backgroundColor: option.swatch }}
               />
-              <span className="flex items-center justify-between gap-1 px-2.5 py-2">
+              {/* min-h, because "Feature walls" is the one label that wraps to
+                  two lines at this card width — which made that single chip
+                  taller than the five beside it and broke the row's baseline.
+                  Reserving the second line keeps every chip the same height
+                  whatever a category is called. */}
+              <span className="flex min-h-[2.875rem] items-center justify-between gap-1 px-2.5 py-2">
                 <span
                   className={`text-[0.8125rem] font-medium ${active ? "text-accent" : "text-ink-soft"}`}
                 >

@@ -215,36 +215,55 @@ export function DesktopNav() {
         id="services-mega"
         data-open={open}
         onMouseEnter={cancelClose}
-        className="mega-panel absolute inset-x-0 top-full border-b border-hairline bg-paper/97 backdrop-blur-md shadow-[0_28px_60px_-30px_rgb(60_60_50/0.4)]"
+        className="mega-panel absolute inset-x-0 top-full overflow-hidden border-b border-hairline"
       >
-        <div className="shell grid grid-cols-[1.5fr_1fr] gap-12 py-10">
-          <div>
-            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
-              What we do
-            </p>
+        {/* An orange wash bled in from the top-left corner, so the panel opens
+            as a lit surface rather than a black box. Painted, not bordered:
+            nothing it does can move the layout. */}
+        <div className="mega-wash" aria-hidden="true" />
+
+        <div className="shell relative grid grid-cols-[1.6fr_1fr] pt-8 pb-9">
+          <div className="pr-14">
+            <div className="mega-item flex items-baseline justify-between">
+              <p className="text-[0.6875rem] font-semibold tracking-[0.18em] text-accent uppercase">
+                What we do
+              </p>
+              <p className="text-[0.6875rem] tracking-[0.14em] text-ink-mute uppercase tabular-nums">
+                {services.length} trades
+              </p>
+            </div>
             <div className="tape-line mt-3" aria-hidden="true" />
 
-            <ul className="mt-6 grid grid-cols-2 gap-x-8 gap-y-1">
+            {/* A ruled two-column table, not a bulleted list. Every row carries
+                its own index, a rail that fills from the top on hover and a
+                wash that wipes in behind it — the same gesture the section
+                rules use, at menu scale. */}
+            <ul className="mt-1 grid grid-cols-2 gap-x-10">
               {services.map((service, index) => (
                 <li
                   key={service.id}
-                  className="mega-item"
-                  style={{ transitionDelay: `${0.04 + index * 0.03}s` }}
+                  className="mega-item border-b border-hairline/60"
+                  style={{ transitionDelay: `${0.05 + index * 0.035}s` }}
                 >
-                  <Link
-                    href={`/services#${service.id}`}
-                    className="group flex items-start gap-3 rounded-[4px] px-3 py-3 transition-colors duration-200 hover:bg-accent-wash/60"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="mt-1.5 size-2 shrink-0 rounded-full bg-accent opacity-40 transition-opacity duration-200 group-hover:opacity-100"
-                    />
-                    <span>
-                      <span className="block font-display text-[1.0625rem] font-semibold tracking-[-0.02em] text-ink">
-                        {service.title}
+                  <Link href={`/services#${service.id}`} className="mega-row group">
+                    <span className="mega-row-rail" aria-hidden="true" />
+                    <span className="mega-row-wash" aria-hidden="true" />
+                    <span className="relative z-1 flex items-start gap-4">
+                      <span className="mt-[0.3rem] shrink-0 font-display text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-mute tabular-nums transition-colors duration-300 group-hover:text-accent">
+                        0{index + 1}
                       </span>
-                      <span className="mt-0.5 block text-[0.8125rem] leading-relaxed text-ink-mute">
-                        {service.summary}
+                      <span className="min-w-0">
+                        <span className="flex items-center gap-1.5 font-display text-[1.0625rem] leading-tight font-semibold tracking-[-0.02em] text-ink">
+                          {service.title}
+                          <ArrowRight
+                            weight="bold"
+                            aria-hidden="true"
+                            className="size-3.5 -translate-x-1 text-accent opacity-0 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0 group-hover:opacity-100"
+                          />
+                        </span>
+                        <span className="mt-1 block text-[0.8125rem] leading-relaxed text-ink-mute">
+                          {service.summary}
+                        </span>
                       </span>
                     </span>
                   </Link>
@@ -255,13 +274,25 @@ export function DesktopNav() {
 
           {/* Recent work, with a real photograph — not another column of links */}
           {lead && (
-            <div className="mega-item" style={{ transitionDelay: "0.16s" }}>
-              <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
-                Recent work
-              </p>
+            <div
+              className="mega-item border-l border-hairline pl-14"
+              style={{ transitionDelay: "0.18s" }}
+            >
+              <div className="flex items-baseline justify-between">
+                <p className="text-[0.6875rem] font-semibold tracking-[0.18em] text-accent uppercase">
+                  Recent work
+                </p>
+                <p className="text-[0.6875rem] tracking-[0.14em] text-ink-mute uppercase">
+                  {site.town}
+                </p>
+              </div>
               <div className="tape-line mt-3" aria-hidden="true" />
 
-              <Link href="/work" className="group mt-6 block">
+              <Link href="/work" className="card-edge group mt-6 block">
+                {/* 16/10, not 4/3. The taller crop pushed the photograph
+                    column past the list beside it and left an inch of dead
+                    black under the trades — the two columns now finish within
+                    a few pixels of each other. */}
                 <div className="relative aspect-[16/10] overflow-hidden rounded-[4px] bg-plaster">
                   <Image
                     src={lead.images[0].src}
@@ -270,10 +301,16 @@ export function DesktopNav() {
                     sizes="30vw"
                     placeholder="blur"
                     blurDataURL={blurTone(lead.images[0].tone)}
-                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+                  />
+                  {/* Foot of the frame darkened so the caption beneath reads as
+                      part of the card rather than floating off it. */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-scrim/60 to-transparent"
                   />
                 </div>
-                <p className="mt-3.5 font-display text-[1.0625rem] font-semibold tracking-[-0.02em] text-ink">
+                <p className="mt-3.5 font-display text-[1.0625rem] leading-tight font-semibold tracking-[-0.02em] text-ink">
                   {lead.title}
                 </p>
                 <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-mute">{lead.scope}</p>
@@ -287,6 +324,37 @@ export function DesktopNav() {
               </Link>
             </div>
           )}
+        </div>
+
+        {/* Foot rail. The panel used to end in an inch and a half of empty black
+            under the left column, because the photograph column is taller than
+            the list beside it. This is what a firm would put there: the three
+            facts a customer is actually weighing, and the way through to the
+            full page. */}
+        <div
+          className="mega-item relative border-t border-hairline bg-accent-wash/50"
+          style={{ transitionDelay: "0.24s" }}
+        >
+          <div className="shell flex h-[3.25rem] items-center justify-between text-[0.8125rem]">
+            <ul className="flex items-center gap-7 text-ink-soft">
+              {[site.facts.insurance, site.facts.guarantee, site.facts.responseTime].map((fact) => (
+                <li key={fact} className="flex items-center gap-2.5">
+                  <span aria-hidden="true" className="size-1 rounded-full bg-accent" />
+                  {fact}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/services"
+              className="group inline-flex items-center gap-2 font-medium text-ink transition-colors duration-200 hover:text-accent"
+            >
+              All {services.length} services in detail
+              <ArrowRight
+                weight="light"
+                className="size-4 text-accent transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+              />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

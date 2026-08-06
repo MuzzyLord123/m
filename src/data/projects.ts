@@ -269,6 +269,9 @@ export const projects: Project[] = [
 
 export const featuredProjects = projects.filter((project) => project.featured);
 
+/** Every photograph on the site, counted rather than claimed. */
+export const photographCount = projects.reduce((total, p) => total + p.images.length, 0);
+
 export const beforeAfterProjects = projects.filter((project) => project.beforeAfter);
 
 export function projectsByCategory(category: CategoryId | "all"): Project[] {

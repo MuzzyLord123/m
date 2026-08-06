@@ -6,7 +6,7 @@ import { FilmGallery } from "@/components/work/FilmGallery";
 import { BeforeAfter } from "@/components/work/BeforeAfter";
 import { Reveal } from "@/components/motion/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { beforeAfterProjects, projects } from "@/data/projects";
+import { beforeAfterProjects, photographCount, projects } from "@/data/projects";
 import { films, hasFilms } from "@/data/films";
 import { site } from "@/config/site";
 
@@ -20,18 +20,47 @@ export default function WorkPage() {
   return (
     <>
       <section className="pt-[7.5rem] pb-10 lg:pt-[11rem] lg:pb-14">
-        <div className="shell">
-          <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
-            Our work · {projects.length} projects
-          </p>
-          <h1 className="mt-5 max-w-4xl font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem] lg:text-[4.5rem]">
-            Finished jobs, <em className="inline-block pb-[0.06em] leading-[1.1] italic">not</em>{" "}
-            staged photographs.
-          </h1>
-          <p className="measure mt-6 text-[1.0625rem] leading-relaxed text-ink-soft">
-            Every job here was priced, prepared and painted by us. Where a room looked bad enough
-            beforehand to be worth showing, the before shot is here too.
-          </p>
+        {/* Two columns, because at 1024px and above the headline measure only
+            reaches halfway across the shell and the right-hand half of the
+            first screen was empty black. The index carries what a customer
+            would otherwise have to count for themselves. */}
+        <div className="shell grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-end lg:gap-16">
+          <div>
+            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+              Our work · {projects.length} projects
+            </p>
+            <h1 className="mt-5 font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem] lg:text-[4.25rem]">
+              Finished jobs, <em className="inline-block pb-[0.06em] leading-[1.1] italic">not</em>{" "}
+              staged photographs.
+            </h1>
+            <p className="measure mt-6 text-[1.0625rem] leading-relaxed text-ink-soft">
+              Every job here was priced, prepared and painted by us. Where a room looked bad enough
+              beforehand to be worth showing, the before shot is here too.
+            </p>
+          </div>
+
+          <Reveal immediate>
+            <dl className="lg:pb-2">
+              {[
+                { term: "Photographs", value: `${photographCount}` },
+                { term: "Projects", value: `${projects.length}` },
+                { term: "Before and after", value: `${beforeAfterProjects.length}` },
+                { term: "Covering", value: site.serviceArea },
+              ].map((row) => (
+                <div
+                  key={row.term}
+                  className="flex items-baseline justify-between gap-6 border-b border-hairline py-3.5 first:border-t"
+                >
+                  <dt className="text-[0.8125rem] tracking-[0.06em] text-ink-mute uppercase">
+                    {row.term}
+                  </dt>
+                  <dd className="text-right font-display text-[1.0625rem] font-semibold tracking-[-0.02em] text-accent tabular-nums">
+                    {row.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
         </div>
       </section>
 

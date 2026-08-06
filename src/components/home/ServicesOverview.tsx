@@ -79,9 +79,9 @@ export function ServicesOverview() {
           >
             <Link
               href={`/services#${service.id}`}
-              className="card-edge group flex h-full flex-col justify-between overflow-hidden rounded-[4px] border border-hairline bg-paper p-7 transition-[transform,border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-accent/40 hover:bg-accent-wash/50"
+              className="card-edge group flex h-full flex-col overflow-hidden rounded-[4px] border border-hairline bg-paper transition-[transform,border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-accent/40 hover:bg-accent-wash/50"
             >
-              <div>
+              <div className="p-7">
                 <p className="font-display text-[0.8125rem] font-semibold tracking-[0.1em] text-accent tabular-nums">
                   0{index + 2}
                 </p>
@@ -91,14 +91,34 @@ export function ServicesOverview() {
                 <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-ink-soft">
                   {service.summary}
                 </p>
+                <span className="mt-6 inline-flex items-center gap-2 text-[0.875rem] font-medium text-accent">
+                  See the detail
+                  <ArrowRight
+                    weight="light"
+                    className="size-4 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+                  />
+                </span>
               </div>
-              <span className="mt-7 inline-flex items-center gap-2 text-[0.875rem] font-medium text-accent">
-                See the detail
-                <ArrowRight
-                  weight="light"
-                  className="size-4 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+
+              {/* These four cards are stretched to the height of the lead card
+                  beside them, which spans two rows — so with the link pinned to
+                  the foot by justify-between, every one of them carried four
+                  inches of empty black through its middle. The photograph takes
+                  that space instead: flex-1, so it is exactly as tall as the
+                  gap was, and it is the trade's own picture rather than filler.
+                  Image at the FOOT here against the lead card's image at the
+                  head, so the grid still never repeats a card shape. */}
+              <div className="relative min-h-[7rem] flex-1 overflow-hidden">
+                <Image
+                  src={service.image}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 22vw, 100vw"
+                  placeholder="blur"
+                  blurDataURL={blurTone(service.tone)}
+                  className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
                 />
-              </span>
+              </div>
             </Link>
           </Reveal>
         ))}

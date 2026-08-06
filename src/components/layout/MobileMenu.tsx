@@ -124,37 +124,55 @@ export function MobileMenu() {
                block runs past 844px, and the page behind is scroll-locked — so
                without this the hours and the social links are unreachable on
                anything smaller than a large phone. */
-            className="flood-panel fixed inset-0 z-[95] flex min-h-[100dvh] flex-col overflow-y-auto overscroll-contain bg-accent outline-none"
+            className="flood-panel fixed inset-0 z-[95] flex min-h-[100dvh] flex-col overflow-y-auto overscroll-contain outline-none"
           >
-            {/* Reserves the bar's height, and sticks so that scrolled content
-                passes behind an opaque band rather than through the wordmark.
+            {/* Reserves the bar's height. It blurs rather than covers: the
+                panel's ground is a gradient, so an opaque band would have to
+                match it exactly and would show as a seam the moment either
+                changed. Blurring what passes underneath and fading out at the
+                bottom edge keeps the wordmark legible with nothing to match.
                 Inside the panel, so the flood still clips the two as one. */}
             <div
-              className="sticky top-0 h-[5.25rem] shrink-0 bg-accent"
+              className="sticky top-0 z-10 h-[5.25rem] shrink-0 backdrop-blur-md [mask-image:linear-gradient(to_bottom,#000_62%,transparent_100%)]"
               aria-hidden="true"
             />
 
-            <nav
-              aria-label="Mobile"
-              className="shell flex flex-col pt-2 pb-5"
-            >
-              <ul>
+            <nav aria-label="Mobile" className="shell flex flex-col pb-5">
+              <p
+                className="flood-item flex items-center justify-between pb-3 text-[0.625rem] font-semibold tracking-[0.2em] text-on-accent/85 uppercase"
+                style={{ transitionDelay: "0.14s" }}
+              >
+                <span>Menu</span>
+                <span>{site.years} years · {site.town}</span>
+              </p>
+
+              <ul className="border-t border-on-accent/25">
                 {menuLinks.map((link, index) => (
                   <li
                     key={link.href}
-                    style={{ transitionDelay: `${0.2 + index * 0.055}s` }}
-                    className="flood-item overflow-hidden border-b border-on-accent/20"
+                    /* Clips its own link, so each line rises out of the rule
+                       above it instead of fading in on the spot. */
+                    className="flood-line overflow-hidden border-b border-on-accent/25"
                   >
                     <Link
                       href={link.href}
+                      style={{ transitionDelay: `${0.18 + index * 0.06}s` }}
                       /* Steps down on short handsets so the whole menu still
                          lands inside one screen where it can. */
-                      className="flex items-baseline justify-between py-3.5 font-display text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.035em] text-on-accent [@media(min-height:760px)]:py-3.5 [@media(min-height:760px)]:text-[2.25rem] [@media(max-height:700px)]:py-2.5"
+                      className="flood-row group relative flex items-center gap-4 py-3.5 pl-3.5 [@media(max-height:700px)]:py-2.5"
                     >
-                      {link.label}
-                      <span className="font-body text-sm font-normal text-on-accent/85 tabular-nums">
+                      <span className="flood-rail" aria-hidden="true" />
+                      <span className="w-6 shrink-0 self-start pt-[0.85rem] text-[0.6875rem] font-semibold tracking-[0.08em] text-on-accent/85 tabular-nums">
                         0{index + 1}
                       </span>
+                      <span className="flex-1 font-display text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.035em] text-on-accent [@media(min-height:760px)]:text-[2.25rem]">
+                        {link.label}
+                      </span>
+                      <ArrowUpRight
+                        weight="bold"
+                        aria-hidden="true"
+                        className="size-5 shrink-0 text-on-accent/85 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-active:translate-x-1 group-active:-translate-y-1"
+                      />
                     </Link>
                   </li>
                 ))}
@@ -167,13 +185,27 @@ export function MobileMenu() {
               className="flood-item shrink-0"
               style={{ transitionDelay: "0.36s" }}
             >
-              <p className="shell text-[0.6875rem] font-semibold tracking-[0.16em] text-on-accent/85 uppercase">
-                Recent work
-              </p>
-              <ul style={{ paddingInline: "1.25rem" }}
+              <div className="shell flex items-baseline justify-between">
+                <p className="text-[0.6875rem] font-semibold tracking-[0.16em] text-on-accent/85 uppercase">
+                  Recent work
+                </p>
+                <Link
+                  href="/work"
+                  className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold tracking-[0.16em] text-on-accent/85 uppercase"
+                >
+                  All work
+                  <ArrowUpRight weight="bold" aria-hidden="true" className="size-3" />
+                </Link>
+              </div>
+              {/* scrollPaddingInline, not just paddingInline. Snap points align
+                  an item's edge to the SNAPPORT edge, which ignores padding —
+                  so the browser snapped on load and dragged the first thumbnail
+                  20px off the left gutter, out of line with every other row in
+                  the menu. The scroll padding is what the snapport reads. */}
+              <ul style={{ paddingInline: "1.25rem", scrollPaddingInline: "1.25rem" }}
                 className="mt-3 flex snap-x gap-3 overflow-x-auto pb-1">
                 {featuredProjects.slice(0, 5).map((project) => (
-                  <li key={project.slug} className="w-[42vw] max-w-[11rem] shrink-0">
+                  <li key={project.slug} className="w-[42vw] max-w-[11rem] shrink-0 snap-start">
                     <Link href={`/work#${project.slug}`} className="block">
                       <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-on-accent/15">
                         <Image
@@ -184,6 +216,12 @@ export function MobileMenu() {
                           placeholder="blur"
                           blurDataURL={blurTone(project.images[0].tone)}
                           className="object-cover"
+                        />
+                        {/* A hairline in the menu's own ink, so the photographs
+                            sit ON the orange rather than punching holes in it. */}
+                        <div
+                          aria-hidden="true"
+                          className="absolute inset-0 rounded-[4px] ring-1 ring-on-accent/25 ring-inset"
                         />
                       </div>
                       <p className="mt-2 text-[0.8125rem] leading-snug font-medium text-on-accent/90">
@@ -198,13 +236,20 @@ export function MobileMenu() {
             {/* Everything below sits in thumb reach. */}
             <div
               style={{ transitionDelay: "0.46s" }}
-              className="flood-item shell mt-auto shrink-0 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+              className="flood-item shell mt-auto shrink-0 pt-7 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
             >
+              <div className="mb-6 h-px w-full bg-on-accent/25" aria-hidden="true" />
+
               <Link
                 href={CTA_HREF}
-                className="mb-6 flex h-14 w-full items-center justify-center rounded-full bg-on-accent text-base font-semibold whitespace-nowrap text-accent transition-transform duration-200 active:scale-[0.98]"
+                className="group mb-6 flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-on-accent text-base font-semibold whitespace-nowrap text-accent transition-transform duration-200 active:scale-[0.98]"
               >
                 {CTA_LABEL}
+                <ArrowUpRight
+                  weight="bold"
+                  aria-hidden="true"
+                  className="size-4 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-active:translate-x-1 group-active:-translate-y-1"
+                />
               </Link>
 
               <div className="grid gap-3 text-on-accent/85">
