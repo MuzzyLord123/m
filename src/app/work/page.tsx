@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { GalleryDesktop } from "@/components/work/GalleryDesktop";
 import { GalleryMobile } from "@/components/work/GalleryMobile";
 import { HashTarget } from "@/components/work/HashTarget";
+import { FilmGallery } from "@/components/work/FilmGallery";
 import { BeforeAfter } from "@/components/work/BeforeAfter";
 import { Reveal } from "@/components/motion/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { beforeAfterProjects, projects } from "@/data/projects";
+import { films, hasFilms } from "@/data/films";
 import { site } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -36,6 +38,25 @@ export default function WorkPage() {
       <GalleryDesktop />
       <GalleryMobile />
       <HashTarget />
+
+      {/* Films. Renders nothing at all while src/data/films.ts is empty — an
+          empty video gallery with a "coming soon" panel is worse than a site
+          that does not claim to have films yet. Paste one entry and the whole
+          section, both treatments and the count below build themselves. */}
+      {hasFilms && (
+        <section className="py-20 lg:py-28" aria-labelledby="films-heading">
+          <div className="shell">
+            <SectionHeading
+              eyebrow="On film"
+              title={<span id="films-heading">Watch a job actually happen.</span>}
+              lead={`${films.length === 1 ? "A film" : films.length + " films"} from site — the preparation, the order of work and what the finish looks like in daylight rather than in a photograph.`}
+            />
+          </div>
+          <div className="mt-12">
+            <FilmGallery />
+          </div>
+        </section>
+      )}
 
       <section className="bg-plaster py-20 lg:py-28" aria-labelledby="ba-heading">
         <div className="shell">

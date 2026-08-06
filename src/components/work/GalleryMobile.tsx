@@ -212,6 +212,11 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
                       className="object-cover"
                     />
                   </div>
+                  {/* What was done in this frame, under the frame — no tap, no
+                      second sheet, just there while the photograph is. */}
+                  <p className="mt-3 border-l-2 border-accent pl-3 text-[0.8125rem] leading-relaxed text-ink-soft">
+                    {image.caption}
+                  </p>
                 </li>
               ))}
             </ul>

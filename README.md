@@ -98,6 +98,7 @@ client owns day to day:
 - `src/data/projects.ts` — gallery projects (title, area, category, images, scope)
 - `src/data/testimonials.ts` — customer quotes
 - `src/data/social.ts` — the "Fresh off the brush" feed
+- `src/data/films.ts` — the video gallery; ships empty, see PHOTO-MAP.md
 - `src/content/blog/*.mdx` — blog posts
 
 Blog posts are the one place that does **not** use the `{{TOKEN}}` placeholders.

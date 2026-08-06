@@ -205,6 +205,36 @@ rather than a single photograph.
 whichever photographs you use, and set the `permalink` on each to the real
 Instagram or Facebook post.
 
+## Adding James's films
+
+There is a full video gallery on `/work`, built and ready. It renders **nothing
+at all** until there is a film to show, so the page does not currently claim to
+have one.
+
+To add one, open `src/data/films.ts` and paste an entry:
+
+```ts
+{
+  id: "dQw4w9WgXcQ",              // the bit after v= in the YouTube URL
+  title: "Hall, stairs and landing in four days",
+  summary: "Panelling set out and fitted from bare walls, then the whole hall, stairs and landing decorated around it.",
+  category: "interior",            // interior | exterior | woodwork | feature | commercial
+  area: "Wirral",
+  poster: "/work/panelled-hallway-01.jpg",   // one of your own photographs
+  tone: "#737070",                 // from scripts/.tones.json, matching the poster
+  duration: "4 min",               // optional
+},
+```
+
+Nothing else needs touching. The section heading, the film count, the desktop
+projection layout and the mobile card feed all build themselves from that array.
+
+**The poster is one of your own photographs on purpose.** Using YouTube's
+thumbnail would mean a request to Google on every single page load, before
+anyone has asked to watch anything — which is exactly what the click-to-load
+player exists to avoid. Nothing is fetched from YouTube until a visitor presses
+play, and then it is `youtube-nocookie.com`.
+
 ## Two things I need from you
 
 1. **Are the staircase photographs the same job?** The bare-pine staircase, the

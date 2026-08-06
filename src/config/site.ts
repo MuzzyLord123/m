@@ -39,7 +39,7 @@ export const site = {
   phone,
   /** Digits only, used for tel: links. Derived, so it cannot drift. */
   phoneHref: phone.replace(/[^\d+]/g, "") || phone,
-  email: from("NEXT_PUBLIC_EMAIL", "{{EMAIL}}"),
+  email: from("NEXT_PUBLIC_EMAIL", "jamesdevonshireyoung@btinternet.com"),
 
   town: from("NEXT_PUBLIC_TOWN", "the Wirral"),
   serviceArea: from("NEXT_PUBLIC_SERVICE_AREA", "Merseyside, Cheshire & North Wales"),
@@ -49,7 +49,10 @@ export const site = {
   mapAddress: from("NEXT_PUBLIC_MAP_ADDRESS", "Merseyside, England"),
 
   social: {
-    instagram: from("NEXT_PUBLIC_INSTAGRAM_URL", "{{INSTAGRAM_URL}}"),
+    instagram: from(
+      "NEXT_PUBLIC_INSTAGRAM_URL",
+      "https://www.instagram.com/thepaintmenofficial",
+    ),
     facebook: from("NEXT_PUBLIC_FACEBOOK_URL", "{{FACEBOOK_URL}}"),
   },
 

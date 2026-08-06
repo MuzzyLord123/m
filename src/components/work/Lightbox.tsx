@@ -176,9 +176,24 @@ export function Lightbox({
               <h2 className="mt-3 font-display text-[1.5rem] leading-tight font-semibold tracking-[-0.025em] text-ink">
                 {project.title}
               </h2>
+              {/* The project blurb, then what was done in THIS frame. The
+                  per-photograph line changes as you step, which is the whole
+                  reason to open the lightbox rather than scroll the grid. */}
               <p className="mt-3 text-[0.9375rem] leading-relaxed text-ink-soft">
                 {project.detail}
               </p>
+
+              <div
+                key={project.images[index]?.src}
+                className="mt-5 border-l-2 border-accent pl-4"
+              >
+                <p className="text-[0.6875rem] font-semibold tracking-[0.14em] text-accent uppercase">
+                  This photograph
+                </p>
+                <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-ink">
+                  {project.images[index]?.caption}
+                </p>
+              </div>
 
               <dl className="mt-5 flex gap-8 border-t border-hairline pt-4 text-[0.875rem]">
                 <div>
