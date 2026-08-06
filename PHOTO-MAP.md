@@ -2,7 +2,14 @@
 
 ## The logo (read this first)
 
-Two files, both currently **stand-ins**:
+The site header uses a clean recreation of your mark. Your original file is
+saved at `public/brand/logo-source.jpg` so it is not lost — but it is a
+**mockup render on a dark textured plate**, not a logo asset, and there is no
+way to lift the artwork off that plate without dragging the texture and the
+drop shadows with it. I tried; it looks like a smudge on paper.
+
+What I need is a **transparent PNG or SVG export** from whoever made it. Two
+files:
 
 | File | Used on |
 | --- | --- |
@@ -33,29 +40,34 @@ as "The Paint Man" in blue, per the original brief. The logo wins, so:
   strokes, the drip, the scroll bar, the chat blob.
 
 
-The site is built around the 38 photographs you sent. Every one has a place
-reserved for it at a known filename, aspect ratio and blur tone.
+## Your photographs are in
 
-Right now each of those paths holds a **stand-in** — a flat JPEG in the colour
-sampled from your photograph, at the same aspect ratio. That is why the site
-already looks right: the layout, the crops and the colour rhythm are real, only
-the photographs are not.
+All **38 photographs are placed and live on the site** — recovered from this
+conversation, cropped to each slot's aspect ratio and written to the filenames
+below. There are no stand-ins left anywhere.
 
-## What to do
+`npm run audit:images` proves it, and it is worth running after any change that
+touches `public/`. It walks every route at phone and desktop width, opens all
+eleven projects, and asserts three things per file: the request returned 2xx,
+the browser decoded it, and the pixels are a real photograph rather than a flat
+colour. That last check is the one that matters — a stand-in loads perfectly
+and passes the first two, which is exactly how a site can look finished while
+showing forty grey rectangles. Current result: **47 of 47**.
 
-Drop your photographs into `public/work/` and `public/social/` using the
-filenames below, replacing the stand-ins. Nothing else to change — no code, no
-re-cropping, no rebuilding of the data file.
+The extra nine beyond your 38 are second crops of the strongest frames — the
+hero, the about portrait, the video poster and six square social cards — so no
+photograph is stretched into a shape it was not shot for.
+
+### Replacing one
+
+Drop a new file over the old path and rebuild. Then re-sample the blur-up
+colour, or the placeholder will be the wrong shade for a beat before the
+photograph arrives:
 
 ```bash
-# from the project folder
-cp ~/photos/kitchen-after-1.jpg public/work/kitchen-extension-01.jpg
-# …and so on, then:
-npm run build
+cp ~/photos/new-kitchen.jpg public/work/kitchen-extension-01.jpg
+npm run build && npm run audit:images
 ```
-
-`scripts/generate-placeholders.mjs` never overwrites a file that already exists,
-so once your photograph is in place it stays.
 
 ## The map
 

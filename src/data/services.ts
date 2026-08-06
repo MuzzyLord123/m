@@ -43,7 +43,7 @@ export const services: Service[] = [
       },
     ],
     image: "/work/kitchen-extension-01.jpg",
-    tone: "#e9e7e2",
+    tone: "#8b847b",
   },
   {
     id: "exterior",
@@ -76,7 +76,7 @@ export const services: Service[] = [
       },
     ],
     image: "/work/exterior-01.jpg",
-    tone: "#d6d4d0",
+    tone: "#92887d",
   },
   {
     id: "wallpapering",
@@ -109,7 +109,7 @@ export const services: Service[] = [
       },
     ],
     image: "/work/feature-01.jpg",
-    tone: "#c6a334",
+    tone: "#968970",
   },
   {
     id: "spray",
@@ -142,7 +142,7 @@ export const services: Service[] = [
       },
     ],
     image: "/work/new-staircase-01.jpg",
-    tone: "#e3ded7",
+    tone: "#78746f",
   },
   {
     id: "commercial",
@@ -175,7 +175,7 @@ export const services: Service[] = [
       },
     ],
     image: "/work/panelled-hallway-01.jpg",
-    tone: "#dcd7d0",
+    tone: "#737070",
   },
 ];
 

@@ -58,7 +58,7 @@ export default function AboutPage() {
                 priority
                 sizes="(min-width: 1024px) 45vw, 100vw"
                 placeholder="blur"
-                blurDataURL={blurTone("#d9d5cf")}
+                blurDataURL={blurTone("#747070")}
                 className="object-cover"
               />
             </div>
@@ -77,7 +77,7 @@ export default function AboutPage() {
             id="aqz-KE-bpKQ"
             title="A week on site: hall, stairs and landing"
             poster="/work/video-poster.jpg"
-            tone="#dcd7d0"
+            tone="#84796b"
             caption="Replace this with the client's own film — the component takes any YouTube ID."
             className="mx-auto max-w-4xl"
           />

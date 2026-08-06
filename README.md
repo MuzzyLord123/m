@@ -53,8 +53,12 @@ To add a post: drop an `.mdx` file into `src/content/blog` with a `meta` export
 and add three lines to `src/lib/blog.ts`. A missing field is a build error
 rather than a blank page.
 
-Replace the placeholder images in `public/work/` with real photography at the
-same aspect ratios and the layout holds without further changes.
+The client's 38 photographs are already in `public/work/` and `public/social/`.
+To replace one, drop a new file over the same path, then re-sample its blur-up
+colour — `scripts/place-photos.mjs` prints the channel mean for every file it
+writes, and `tone` in `src/data/projects.ts` must match or the placeholder is
+the wrong shade for a beat before the photograph arrives. `npm run audit:images`
+confirms nothing broke.
 
 ---
 
@@ -145,6 +149,7 @@ npm run build && npx next start -p 3100
 npm run audit:contrast      # WCAG ratios for every colour pair in use
 npm run audit:motion        # reduced-motion collapse + zero scroll listeners
 npm run audit:interaction   # lightbox, bottom sheet, menu, quote flow in a browser
+npm run audit:images        # every photograph loads, decodes, and is not a stand-in
 npm run audit:lighthouse    # Lighthouse mobile, all four categories
 npm run shots               # screenshots at 375 / 768 / 1024 / 1440
 ```
@@ -159,9 +164,9 @@ varies by about three points between runs, so these are medians of three.
 
 | Page        | Perf  | A11y | Best practices | SEO | LCP   | CLS   | TBT    |
 | ----------- | ----- | ---- | -------------- | --- | ----- | ----- | ------ |
-| `/`         | 93    | 100  | 100            | 100 | 2.8 s | 0.000 | 170 ms |
-| `/work`     | 94    | 100  | 100            | 100 | 3.0 s | 0.002 | 80 ms  |
-| `/services` | 92    | 100  | 100            | 100 | 2.8 s | 0.010 | 230 ms |
+| `/`         | 93    | 100  | 100            | 100 | 2.9 s | 0.000 | 170 ms |
+| `/work`     | 90    | 100  | 100            | 100 | 3.6 s | 0.002 | 100 ms |
+| `/services` | 93    | 100  | 100            | 100 | 3.1 s | 0.010 | 110 ms |
 | `/about`    | 93    | 100  | 100            | 100 | 2.9 s | 0.003 | 150 ms |
 | `/contact`  | 91    | 100  | 100            | 100 | 2.9 s | 0.004 | 210 ms |
 | `/quote`    | 91    | 100  | 100            | 100 | 3.1 s | 0.004 | 180 ms |
@@ -174,11 +179,13 @@ the identical build, which is the honest width of the noise on this machine.
 
 Read that as "low-to-mid nineties, not 95 guaranteed". The brief asked for ≥95
 mobile across all four categories and three of them clear it outright; the
-performance column does not, consistently, here. On the deployment target
-(Vercel's edge, real photographs served as AVIF/WebP by the image optimiser
-rather than the flat stand-in JPEGs) it should sit higher, but that is a
-prediction and this table is a measurement — do not treat the two as the same
-thing. Re-run `npm run audit:lighthouse` after the real photographs land.
+performance column does not, consistently, here. These numbers are with the client's real photographs in place. `/work` gave up
+four points and 0.6s of LCP the moment they landed, which is the honest cost of
+serving forty real interior shots instead of the flat colour stand-ins that
+preceded them — it is a truer number, not a worse site. On Vercel's edge, where
+the image optimiser serves AVIF from a CDN rather than re-encoding JPEG on a
+throttled container, it should recover most of that. That is a prediction; this
+table is a measurement, and they are not the same thing.
 
 Measured on a real throttled connection (4x CPU, 1.6Mbps) rather than
 Lighthouse's Lantern model, LCP is 1.2–1.3s across the site.

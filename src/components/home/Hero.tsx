@@ -82,7 +82,7 @@ export function Hero() {
                 priority
                 sizes="(min-width: 1024px) 46vw, 100vw"
                 placeholder="blur"
-                blurDataURL={blurTone("#e9e7e2")}
+                blurDataURL={blurTone("#88847c")}
                 className="object-cover"
               />
             </div>
