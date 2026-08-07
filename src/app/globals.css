@@ -1113,6 +1113,11 @@
 .flood-row:focus-visible .flood-rail {
   transform: none;
 }
+/* The page you are on. Same rail, already drawn — so the pressed state and the
+   current state are one mark rather than two competing ones. */
+.flood-rail-on {
+  transform: none;
+}
 
 /* Toggle: three brush strokes that morph into an X. */
 .toggle-bar {

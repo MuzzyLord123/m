@@ -147,35 +147,61 @@ export function MobileMenu() {
               </p>
 
               <ul className="border-t border-on-accent/25">
-                {menuLinks.map((link, index) => (
-                  <li
-                    key={link.href}
-                    /* Clips its own link, so each line rises out of the rule
-                       above it instead of fading in on the spot. */
-                    className="flood-line overflow-hidden border-b border-on-accent/25"
-                  >
-                    <Link
-                      href={link.href}
-                      style={{ transitionDelay: `${0.18 + index * 0.06}s` }}
-                      /* Steps down on short handsets so the whole menu still
-                         lands inside one screen where it can. */
-                      className="flood-row group relative flex items-center gap-4 py-3.5 pl-3.5 [@media(max-height:700px)]:py-2.5"
+                {menuLinks.map((link, index) => {
+                  /* Home is "/" and would otherwise match every path under it,
+                     so it is compared exactly. */
+                  const current =
+                    link.href === "/"
+                      ? pathname === "/"
+                      : pathname === link.href || pathname.startsWith(`${link.href}/`);
+
+                  return (
+                    <li
+                      key={link.href}
+                      /* Clips its own link, so each line rises out of the rule
+                         above it instead of fading in on the spot. */
+                      className="flood-line overflow-hidden border-b border-on-accent/25"
                     >
-                      <span className="flood-rail" aria-hidden="true" />
-                      <span className="w-6 shrink-0 self-start pt-[0.85rem] figures text-[0.6875rem] font-semibold text-on-accent/85">
-                        0{index + 1}
-                      </span>
-                      <span className="flex-1 font-display text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.035em] text-on-accent [@media(min-height:760px)]:text-[2.25rem]">
-                        {link.label}
-                      </span>
-                      <ArrowUpRight
-                        weight="bold"
-                        aria-hidden="true"
-                        className="size-5 shrink-0 text-on-accent/85 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-active:translate-x-1 group-active:-translate-y-1"
-                      />
-                    </Link>
-                  </li>
-                ))}
+                      <Link
+                        href={link.href}
+                        aria-current={current ? "page" : undefined}
+                        style={{ transitionDelay: `${0.18 + index * 0.06}s` }}
+                        /* Steps down on short handsets so the whole menu still
+                           lands inside one screen where it can. */
+                        className="flood-row group relative flex items-center gap-4 py-3.5 pl-3.5 [@media(max-height:700px)]:py-2.5"
+                      >
+                        {/* The rail is the pressed state; on the current page it
+                            is simply already there. Six entries is enough that
+                            "which page am I on" stops being obvious. */}
+                        <span
+                          className={`flood-rail${current ? " flood-rail-on" : ""}`}
+                          aria-hidden="true"
+                        />
+                        <span className="figures w-6 shrink-0 self-start pt-[0.85rem] text-[0.6875rem] font-semibold text-on-accent/85">
+                          0{index + 1}
+                        </span>
+                        <span
+                          /* The current page is set in the serif italic — the
+                             site's emphasis voice, used here for exactly what
+                             it means. NOT bolded with it: Instrument Serif
+                             ships one weight, and a utility that forces 600
+                             onto it gets a synthesised faux-bold, which is the
+                             most obviously wrong thing this typeface can do. */
+                          className={`flex-1 font-display text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.035em] text-on-accent [@media(min-height:760px)]:text-[2.25rem] ${
+                            current ? "italic" : ""
+                          }`}
+                        >
+                          {link.label}
+                        </span>
+                        <ArrowUpRight
+                          weight="bold"
+                          aria-hidden="true"
+                          className="size-5 shrink-0 text-on-accent/85 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-active:translate-x-1 group-active:-translate-y-1"
+                        />
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
 

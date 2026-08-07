@@ -2,8 +2,16 @@ import { services } from "@/data/services";
 
 export type NavLink = { href: string; label: string };
 
-/** The four pages that earn a place in the top nav. Nothing else. */
+/**
+ * The pages that earn a place in the top nav. Nothing else.
+ *
+ * Home is listed explicitly rather than left to the logo. A wordmark that
+ * happens to be clickable is a convention designers know and visitors do not —
+ * and on a phone, where the logo is small and the menu is a full screen of
+ * words, there was no visible way back to the home page at all.
+ */
 export const primaryNav: NavLink[] = [
+  { href: "/", label: "Home" },
   { href: "/work", label: "Work" },
   { href: "/services", label: "Services" },
   { href: "/about", label: "About" },

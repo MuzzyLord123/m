@@ -11,29 +11,106 @@ import { projects, type Project } from "@/data/projects";
 /**
  * Desktop gallery (≥1024px).
  *
- * Editorial masonry on a twelve-column grid: fractional spans, mixed aspect
- * ratios and staggered baselines, so no two rows read the same. Filtering
- * reflows through Motion layout animations rather than a hard swap.
+ * A RULED TWELVE-COLUMN GRID. Every row fills the full width, every image in a
+ * row is exactly the same height, and every caption in a row sits on the same
+ * baseline.
  *
+ * This replaces a staggered masonry — mixed aspect ratios plus mt-4/mt-20
+ * offsets on every cell — which was meant to read as editorial and read as
+ * misaligned instead. The photographs are a decorator's portfolio; what sells
+ * them is looking like the work of someone whose whole trade is straight lines.
+ *
+ * The composition still varies, but it varies in WIDTH rather than in
+ * baseline: rows alternate 7+5, 4+4+4, 5+7, 6+6. That is what keeps a fixed
+ * grid from reading as a contact sheet, and it is only possible because the
+ * cells are given explicit heights rather than aspect ratios — two cells of
+ * different widths sharing one aspect ratio have different heights, which is
+ * exactly how the old grid lost its baselines.
+ *
+ * Filtering reflows through Motion layout animations rather than a hard swap.
  * Hovering a project wipes a paint swipe up from the bottom edge to carry the
  * title, location and scope.
  */
 
-/** Span, aspect and vertical offset per position. Deliberately uneven. */
-const CELLS = [
-  { span: "col-span-5", ratio: "aspect-[4/5]", offset: "" },
-  { span: "col-span-7", ratio: "aspect-[16/9]", offset: "mt-14" },
-  { span: "col-span-4", ratio: "aspect-square", offset: "" },
-  { span: "col-span-4", ratio: "aspect-[3/4]", offset: "mt-16" },
-  { span: "col-span-4", ratio: "aspect-[16/9]", offset: "mt-6" },
-  { span: "col-span-6", ratio: "aspect-[3/2]", offset: "" },
-  { span: "col-span-6", ratio: "aspect-[4/5]", offset: "mt-20" },
-  { span: "col-span-5", ratio: "aspect-[3/2]", offset: "" },
-  { span: "col-span-7", ratio: "aspect-[16/9]", offset: "mt-10" },
-  { span: "col-span-4", ratio: "aspect-square", offset: "" },
-  { span: "col-span-4", ratio: "aspect-[3/4]", offset: "mt-12" },
-  { span: "col-span-4", ratio: "aspect-[4/5]", offset: "mt-4" },
+/**
+ * The row rhythm. Each row's spans sum to 12, and every cell in it shares one
+ * height — so the row is flush at the top and flush at the bottom.
+ */
+const ROWS = [
+  { height: "h-[24rem] xl:h-[27rem]", spans: [7, 5] },
+  { height: "h-[18rem] xl:h-[20rem]", spans: [4, 4, 4] },
+  { height: "h-[24rem] xl:h-[27rem]", spans: [5, 7] },
+  { height: "h-[21rem] xl:h-[23rem]", spans: [6, 6] },
 ];
+
+/* Tailwind scans source for literal class names, so the spans have to appear
+   as complete strings somewhere it can see them. A lookup, not a template. */
+const SPAN_CLASS: Record<number, string> = {
+  3: "col-span-3",
+  4: "col-span-4",
+  5: "col-span-5",
+  6: "col-span-6",
+  7: "col-span-7",
+  8: "col-span-8",
+  9: "col-span-9",
+  12: "col-span-12",
+};
+
+/** Splits `total` columns as evenly as possible across `n` cells. */
+function distribute(total: number, n: number): number[] {
+  const base = Math.floor(total / n);
+  const extra = total - base * n;
+  return Array.from({ length: n }, (_, i) => base + (i < extra ? 1 : 0));
+}
+
+/**
+ * The `sizes` hint for a cell of `span` columns.
+ *
+ * Every cell used to claim 45vw regardless of width, which is what a fixed
+ * `sizes` string costs once the spans stop being uniform: a four-column cell is
+ * about 29vw, so the browser was fetching a source nearly twice the width it
+ * would ever paint, eleven times over, on the page that is nothing but
+ * photographs. The shell caps at 88rem, hence the two branches.
+ */
+function sizesFor(span: number): string {
+  const fraction = span / 12;
+  const capped = Math.round(1408 * fraction);
+  const fluid = Math.round(88 * fraction);
+  return `(min-width: 88rem) ${capped}px, ${fluid}vw`;
+}
+
+/**
+ * Lays `count` projects into the row rhythm.
+ *
+ * The last row is the one that gives a grid like this away: with eleven
+ * projects the rhythm leaves a single item spanning seven columns and five
+ * columns of empty black beside it. So a short final row has its columns
+ * redistributed to fill the width — one item runs the full twelve, two run
+ * six and six. The grid always ends flush.
+ */
+function layout(count: number): { span: string; height: string; sizes: string }[] {
+  const cells: { span: string; height: string; sizes: string }[] = [];
+  let placed = 0;
+  let row = 0;
+
+  while (placed < count) {
+    const { spans, height } = ROWS[row % ROWS.length];
+    const remaining = count - placed;
+    const widths = remaining < spans.length ? distribute(12, remaining) : spans;
+
+    for (const width of widths.slice(0, remaining)) {
+      cells.push({
+        span: SPAN_CLASS[width] ?? "col-span-4",
+        height,
+        sizes: sizesFor(width),
+      });
+    }
+    placed += widths.length;
+    row += 1;
+  }
+
+  return cells;
+}
 
 export function GalleryDesktop() {
   const [filter, setFilter] = useState<Filter>("all");
@@ -41,6 +118,10 @@ export function GalleryDesktop() {
   const reduced = useReducedMotion();
 
   const shown = filter === "all" ? projects : projects.filter((p) => p.category === filter);
+
+  /* Recomputed per filter, not per project — a five-item result gets its own
+     flush grid rather than the first five cells of the eleven-item one. */
+  const cells = layout(shown.length);
 
   return (
     /* domMax rather than the root's domAnimation: the filter reflow uses
@@ -55,7 +136,7 @@ export function GalleryDesktop() {
               puts a non-list element between the ul and its li items. */}
           <AnimatePresence>
             {shown.map((project, index) => {
-              const cell = CELLS[index % CELLS.length];
+              const cell = cells[index];
               const image = project.images[0];
 
               return (
@@ -68,7 +149,7 @@ export function GalleryDesktop() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={reduced ? undefined : { opacity: 0, scale: 0.97 }}
                   transition={{ duration: reduced ? 0 : 0.42, ease: [0.16, 1, 0.3, 1] }}
-                  className={`${cell.span} ${cell.offset} scroll-mt-32`}
+                  className={`${cell.span} scroll-mt-32`}
                 >
                   <button
                     type="button"
@@ -76,14 +157,18 @@ export function GalleryDesktop() {
                     className="group block w-full cursor-zoom-in text-left"
                     aria-label={`${project.title}, ${project.area} — open photographs`}
                   >
+                    {/* A HEIGHT, not an aspect ratio. This is what puts every
+                        image in a row on the same top and bottom line however
+                        wide its cell is, and what puts the captions beneath
+                        them on one baseline. */}
                     <div
-                      className={`relative ${cell.ratio} w-full overflow-hidden rounded-[4px] bg-plaster`}
+                      className={`relative ${cell.height} w-full overflow-hidden rounded-[4px] bg-plaster`}
                     >
                       <Image
                         src={image.src}
                         alt={image.alt}
                         fill
-                        sizes="(min-width: 1536px) 40vw, 45vw"
+                        sizes={cell.sizes}
                         placeholder="blur"
                         blurDataURL={blurTone(image.tone)}
                         className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
