@@ -15,10 +15,13 @@ import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
 export function FinalCta() {
   return (
     <RollerPass tone="plaster">
-      <section className="bg-accent py-20 lg:py-28" aria-labelledby="final-cta-heading">
+      <section
+        className="orange-plane py-20 lg:py-28"
+        aria-labelledby="final-cta-heading"
+      >
         <div className="shell grid items-end gap-10 lg:grid-cols-[1.2fr_0.8fr]">
           <div>
-            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-on-accent/85 uppercase">
+            <p className="eyebrow text-on-accent/85">
               Next step
             </p>
             <h2

@@ -33,7 +33,7 @@ export default function AboutPage() {
       <section className="pt-[7.5rem] pb-12 lg:pt-[11rem] lg:pb-16">
         <div className="shell grid items-end gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
           <div>
-            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+            <p className="eyebrow text-ink-mute">
               About
             </p>
             <h1 className="mt-5 font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem] lg:text-[4rem]">
@@ -86,7 +86,7 @@ export default function AboutPage() {
             {principles.map((principle, index) => (
               <Reveal as="li" key={principle.title} delay={index * 0.07}>
                 <div className="tape-line" aria-hidden="true" />
-                <p className="mt-6 font-display text-[0.8125rem] font-semibold tracking-[0.1em] text-accent tabular-nums">
+                <p className="mt-6 figures text-[0.75rem] font-semibold text-accent">
                   0{index + 1}
                 </p>
                 <h3 className="mt-4 font-display text-[1.375rem] leading-tight font-semibold tracking-[-0.025em] text-ink">
@@ -101,20 +101,24 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="shell py-20 lg:py-28">
-        <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+      {/* The page used to close on the same near-black it opened on, with a
+          lone orange pill floating in it. A full plane instead — the brand's
+          second colour used as a surface rather than as a button. */}
+      <section className="orange-plane py-20 lg:py-28">
+        <div className="shell grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <h2 className="font-display text-[2rem] leading-[1.05] font-semibold tracking-[-0.03em] text-balance text-ink sm:text-[2.5rem]">
+            <p className="eyebrow text-on-accent/85">Before you decide</p>
+            <h2 className="headline-rise mt-5 font-display text-[2rem] leading-[1.05] font-semibold tracking-[-0.03em] text-balance text-on-accent sm:text-[2.5rem]">
               Want to see the work in person?
             </h2>
-            <p className="measure mt-4 text-[1.0625rem] leading-relaxed text-ink-soft">
+            <p className="measure mt-4 text-[1.0625rem] leading-relaxed text-on-accent/85">
               We can usually put you in touch with a customer near you who will let you look at
               a finished job. Ask when we come to quote.
             </p>
           </div>
           <Link
             href={CTA_HREF}
-            className="inline-flex h-14 items-center justify-center rounded-full bg-accent px-8 text-base font-semibold whitespace-nowrap text-on-accent shadow-accent transition-[background-color,transform] duration-200 hover:bg-accent-bright active:translate-y-px active:scale-[0.98]"
+            className="inline-flex h-14 items-center justify-center rounded-full bg-on-accent px-8 text-base font-semibold whitespace-nowrap text-accent transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px active:translate-y-px active:scale-[0.98]"
           >
             {CTA_LABEL}
           </Link>

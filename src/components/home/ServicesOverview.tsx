@@ -82,7 +82,7 @@ export function ServicesOverview() {
               className="card-edge group flex h-full flex-col overflow-hidden rounded-[4px] border border-hairline bg-paper transition-[transform,border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-accent/40 hover:bg-accent-wash/50"
             >
               <div className="p-7">
-                <p className="font-display text-[0.8125rem] font-semibold tracking-[0.1em] text-accent tabular-nums">
+                <p className="figures text-[0.75rem] font-semibold text-accent">
                   0{index + 2}
                 </p>
                 <h3 className="mt-5 font-display text-[1.375rem] leading-tight font-semibold tracking-[-0.02em] text-ink">
@@ -130,7 +130,7 @@ export function ServicesOverview() {
               className="card-edge group flex flex-col justify-between gap-6 overflow-hidden rounded-[4px] border border-hairline bg-paper p-7 transition-[transform,border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-accent/40 hover:bg-accent-wash/50 sm:flex-row sm:items-center lg:p-8"
             >
               <div className="flex items-start gap-6 lg:gap-8">
-                <p className="font-display text-[0.8125rem] font-semibold tracking-[0.1em] text-accent tabular-nums">
+                <p className="figures text-[0.75rem] font-semibold text-accent">
                   0{services.length}
                 </p>
                 <div>

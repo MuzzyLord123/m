@@ -31,7 +31,7 @@ export default function Error({
   return (
     <section className="pt-[8rem] pb-24 lg:pt-[12rem] lg:pb-32">
       <div className="shell max-w-2xl">
-        <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+        <p className="eyebrow text-ink-mute">
           Something went wrong
         </p>
         <h1 className="mt-5 font-display text-[2.5rem] leading-[1.04] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.25rem]">

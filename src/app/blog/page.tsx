@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FinalCta } from "@/components/home/FinalCta";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
@@ -17,9 +18,10 @@ export default function BlogPage() {
   const [lead, ...rest] = posts;
 
   return (
-    <section className="pt-[7.5rem] pb-24 lg:pt-[11rem] lg:pb-32">
+    <>
+      <section className="pt-[7.5rem] pb-24 lg:pt-[11rem] lg:pb-32">
       <div className="shell">
-        <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+        <p className="eyebrow text-ink-mute">
           Advice
         </p>
         <h1 className="mt-5 max-w-3xl font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem]">
@@ -108,6 +110,10 @@ export default function BlogPage() {
           ))}
         </ul>
       </div>
-    </section>
+      </section>
+
+      {/* Every page closes on the ask, on the same orange plane. */}
+      <FinalCta />
+    </>
   );
 }

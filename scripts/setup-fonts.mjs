@@ -12,9 +12,11 @@
  * ~171KB together; cut to the glyphs a British decorator's website uses, they
  * cost ~89KB, and the LCP image gets the bandwidth back.
  *
- * An existing file is never overwritten. To use the real Clash Display and
- * General Sans from Fontshare, drop them into `src/fonts` under these four
- * filenames and this script leaves them alone.
+ * An existing file is never overwritten — drop a licensed face into `src/fonts`
+ * under one of these filenames and this script leaves it alone.
+ *
+ * DELETE src/fonts/*.woff2 AND RE-RUN after changing anything below, or the
+ * old faces survive the change and nothing appears to happen.
  */
 import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -27,19 +29,32 @@ const out = join(root, "src", "fonts");
 const FONTS = [
   {
     target: "display-normal.woff2",
-    from: "@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2",
+    from: "@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2",
   },
   {
+    /* Bricolage Grotesque has no italic, and it should not have one: the
+       emphasised words on this site are a DIFFERENT VOICE, not a slanted
+       version of the same one. Instrument Serif's italic is a high-contrast
+       serif — the single face on the page that says the build was art
+       directed rather than assembled. It is a static 400 weight, which is all
+       an emphasis face needs. */
     target: "display-italic.woff2",
-    from: "@fontsource-variable/archivo/files/archivo-latin-wght-italic.woff2",
+    from: "@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2",
   },
   {
     target: "body-normal.woff2",
-    from: "@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2",
+    from: "@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2",
   },
   {
     target: "body-italic.woff2",
-    from: "@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-italic.woff2",
+    from: "@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-italic.woff2",
+  },
+  {
+    /* Eyebrows, indices, tabular figures and every uppercase label. A mono in
+       those slots is what separates a designed interface from a styled one —
+       it makes the numbers line up and the labels read as instrumentation. */
+    target: "mono-normal.woff2",
+    from: "@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2",
   },
 ];
 

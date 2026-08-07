@@ -184,7 +184,7 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
                 aria-hidden="true"
                 className="absolute inset-x-0 top-2 mx-auto h-1 w-10 rounded-full bg-ink/15"
               />
-              <p className="mt-4 text-[0.75rem] font-semibold tracking-[0.14em] text-ink-mute uppercase">
+              <p className="mt-4 eyebrow text-ink-mute">
                 {project.area}
               </p>
               <button

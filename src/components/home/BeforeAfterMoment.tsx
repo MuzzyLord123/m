@@ -10,7 +10,7 @@ export function BeforeAfterMoment() {
     <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="before-after-heading">
       <div className="shell grid items-center gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <Reveal>
-          <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+          <p className="eyebrow text-ink-mute">
             Drag to compare
           </p>
           <h2
@@ -24,13 +24,13 @@ export function BeforeAfterMoment() {
           </p>
           <dl className="mt-8 grid grid-cols-2 gap-6 border-t border-ink/12 pt-6">
             <div>
-              <dt className="text-[0.75rem] tracking-[0.12em] text-ink-mute uppercase">Where</dt>
+              <dt className="eyebrow text-ink-mute">Where</dt>
               <dd className="mt-1.5 font-display text-[1.125rem] font-semibold text-ink">
                 {project.area}
               </dd>
             </div>
             <div>
-              <dt className="text-[0.75rem] tracking-[0.12em] text-ink-mute uppercase">On site</dt>
+              <dt className="eyebrow text-ink-mute">On site</dt>
               <dd className="mt-1.5 font-display text-[1.125rem] font-semibold text-ink">
                 {project.duration}
               </dd>

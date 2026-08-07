@@ -61,7 +61,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       </div>
     ),
     th: ({ children }) => (
-      <th className="border-b border-hairline pb-2.5 pr-6 text-[0.75rem] font-semibold tracking-[0.1em] text-ink-mute uppercase">
+      <th className="border-b border-hairline pb-2.5 pr-6 eyebrow text-ink-mute">
         {children}
       </th>
     ),

@@ -15,7 +15,7 @@ export default function QuotePage() {
       <section className="pt-[7.5rem] pb-10 lg:pt-[11rem] lg:pb-12">
         <div className="shell grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div>
-            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+            <p className="eyebrow text-ink-mute">
               Free quote
             </p>
             <h1 className="mt-5 font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem] lg:text-[4.25rem]">
@@ -38,7 +38,7 @@ export default function QuotePage() {
 
       <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="booking-heading">
         <div className="shell">
-          <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+          <p className="eyebrow text-ink-mute">
             Or book a look
           </p>
           <div className="tape-line mt-3" aria-hidden="true" />

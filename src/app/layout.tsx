@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { body, bodyItalic, display, displayItalic } from "./fonts";
+import { body, bodyItalic, display, displayItalic, mono } from "./fonts";
 import { site } from "@/config/site";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -47,7 +47,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-GB" className={`${display.variable} ${displayItalic.variable} ${body.variable} ${bodyItalic.variable}`}>
+    <html
+      lang="en-GB"
+      className={`${display.variable} ${displayItalic.variable} ${body.variable} ${bodyItalic.variable} ${mono.variable}`}
+    >
       <head>
         {/* Reveals start at opacity 0 and are brought in by an observer. If the
             JavaScript never arrives — blocked, or simply a failed request — this

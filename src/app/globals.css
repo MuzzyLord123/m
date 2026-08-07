@@ -67,9 +67,10 @@
   --color-swatch-slate: #59656f;
   --color-swatch-blush: #d3a7a0;
 
-  /* Type */
+  /* Type — three voices. See src/app/fonts.ts for what each one is for. */
   --font-display: var(--ff-display), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--ff-body), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--ff-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Radius system — the only three radii that exist */
   --radius-card: 4px;
@@ -135,7 +136,20 @@
   h1.italic,
   h2.italic,
   h3.italic {
-    font-family: var(--ff-display-italic), var(--font-display);
+    /* Instrument Serif Italic. Three optical corrections, all because this is
+       a serif set inside a grotesque line rather than an italic of it:
+
+       - It runs visibly smaller at the same px than Bricolage, so 1.06em
+         brings the two to the same apparent size.
+       - The display's -0.02em tracking closes a serif's joins up; italic
+         serifs want air between the strokes, so it is relaxed to -0.005em.
+       - font-weight 400, hard. A variable-weight heading that inherits 600
+         onto a single-weight serif gets a synthesised bold, and a faux-bold
+         high-contrast italic is the most obviously wrong thing on a page. */
+    font-family: var(--ff-display-italic), ui-serif, Georgia, serif;
+    font-size: 1.06em;
+    font-weight: 400;
+    letter-spacing: -0.005em;
   }
 
   ::selection {
@@ -197,6 +211,27 @@
 /* Prose measure for editorial copy */
 @utility measure {
   max-width: 65ch;
+}
+
+/* The eyebrow. Every section on the site opens with one, which makes it the
+   most repeated piece of type here and the right place to spend a typeface.
+   Monospace, tracked out, with the figures already tabular — so an index, a
+   count and a label all set in the same slot line up with each other. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Figures that sit in a column and must align: stat rails, menu indices,
+   gallery counts. */
+@utility figures {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 /* Elevation on a near-black ground. A drop shadow does almost nothing here —
@@ -826,6 +861,188 @@
 }
 
 /* --------------------------------------------------------------------------
+   Headline rise. Every section heading comes up out of the rule above it,
+   masked rather than faded — the words arrive edge-first, the way the hero
+   wipe does, so the two read as the same gesture at two scales.
+
+   On a view() timeline, so it is tied to the reader's own scrolling and needs
+   no observer. Both the clip and the travel are on the SAME element and the
+   same timeline, which is what keeps them exactly in step: a fade plus a
+   separate transform drifts apart on a slow scroll and reads as two effects.
+
+   Guarded by @supports. Where view timelines are unsupported the heading is
+   simply present — it is never hidden waiting for something that will not run,
+   which is the failure mode that makes scroll animation dangerous for text.
+   -------------------------------------------------------------------------- */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .headline-rise {
+      animation: headline-rise 1s var(--ease-coat) both;
+      animation-timeline: view(block);
+      animation-range: entry 8% cover 22%;
+    }
+  }
+}
+
+@keyframes headline-rise {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(0.32em);
+  }
+  to {
+    clip-path: inset(-0.35em 0 -0.25em 0);
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Frame reveal. A photograph uncovers itself upward as it enters, and settles
+   back from a slight overscale — the picture arrives rather than appearing.
+
+   The clip is on the FRAME and the scale on the picture inside it, so the two
+   cannot fight: scaling a clipped element moves the clip with it and the wipe
+   edge slides, which is what makes most versions of this look loose.
+   -------------------------------------------------------------------------- */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .frame-reveal {
+      animation: frame-uncover 1s var(--ease-coat) both;
+      animation-timeline: view(block);
+      animation-range: entry 4% cover 20%;
+    }
+    .frame-reveal > img,
+    .frame-reveal > picture > img {
+      animation: frame-settle 1s var(--ease-coat) both;
+      animation-timeline: view(block);
+      animation-range: entry 4% cover 26%;
+    }
+  }
+}
+
+@keyframes frame-uncover {
+  from {
+    clip-path: inset(18% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes frame-settle {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Hero parallax. The frame is the window; the photograph moves behind it.
+
+   The image is oversized to 118% and travels from -7% to +7% of that overhang
+   as the page scrolls, so the frame is never uncovered at either end of the
+   range. Driven by scroll position rather than a timer, and only ever a
+   transform on a composited layer.
+
+   Applied to a WRAPPER around the image, never to the image itself: next/image
+   with `fill` writes position/inset/width/height as inline styles, and an
+   inline style beats a class, so the overhang set here would be dropped on the
+   floor and the travel would uncover the frame. The wrapper carries the size
+   (in the markup, where it belongs) and this carries only the movement.
+   -------------------------------------------------------------------------- */
+
+.hero-parallax {
+  will-change: transform;
+}
+
+@supports (animation-timeline: view()) {
+  .hero-parallax {
+    animation: hero-drift linear both;
+    animation-timeline: view(block);
+    /* cover, so the full travel maps to the whole time the frame is on
+       screen — entry-only ranges finish the movement before the reader has
+       scrolled far enough to notice it happening. */
+    animation-range: cover 0% cover 100%;
+  }
+}
+
+@keyframes hero-drift {
+  from {
+    transform: translate3d(0, 4%, 0);
+  }
+  to {
+    transform: translate3d(0, -4%, 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Orange plane. A full-height section on brand orange.
+
+   Flat #f26522 across a whole screen is a lot of one colour, and it flattens:
+   the eye reads it as a printed swatch rather than a wall. Every layer here
+   LIGHTENS towards --color-accent-bright — two soft corner lifts and a fine
+   brushed diagonal — because the ink on this ground is near-black, and
+   darkening it would eat the 6.2:1 the whole section depends on. Same
+   construction as the mobile flood menu, and for the same reason.
+   -------------------------------------------------------------------------- */
+
+.orange-plane {
+  background-color: var(--color-accent);
+  background-image:
+    radial-gradient(58rem 34rem at 88% -10%, rgb(255 130 72 / 0.5) 0%, transparent 62%),
+    radial-gradient(46rem 32rem at -8% 86%, rgb(255 130 72 / 0.3) 0%, transparent 66%),
+    repeating-linear-gradient(
+      118deg,
+      rgb(255 255 255 / 0.04) 0 1px,
+      rgb(255 255 255 / 0) 1px 10px
+    );
+}
+
+/* --------------------------------------------------------------------------
+   Trade marquee. A full-bleed orange band whose words track the reader's own
+   scrolling rather than a timer. See TradeMarquee.tsx for why.
+   -------------------------------------------------------------------------- */
+
+.marquee-band {
+  /* The words enter and leave rather than being sliced off at the viewport
+     edge. Masked, not overlaid with gradients: an overlay would have to be the
+     band's exact colour, and this band's colour is the one thing about it that
+     is going to be changed one day. */
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.marquee-track {
+  /* -50% is exactly one of the two identical copies, which is what makes the
+     loop seamless. Anything else shows a jump at the wrap. */
+  will-change: transform;
+}
+
+@supports (animation-timeline: scroll()) {
+  .marquee-track {
+    animation: marquee-run linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@supports not (animation-timeline: scroll()) {
+  .marquee-track {
+    animation: marquee-run 28s linear infinite;
+  }
+}
+
+@keyframes marquee-run {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
    Mobile paint-flood menu. The accent expands from the toggle's own position.
    -------------------------------------------------------------------------- */
 
@@ -922,6 +1139,18 @@
   .roller-band,
   .scroll-level {
     display: none;
+  }
+  /* The band holds still. Every word is already on screen at offset 0, so
+     nothing is hidden by stopping it. */
+  .marquee-track {
+    animation: none;
+    transform: none;
+  }
+  /* The photograph sits centred in its frame, still oversized so the frame is
+     covered, with no travel at all. */
+  .hero-parallax {
+    animation: none;
+    transform: none;
   }
   .drip {
     animation: none;

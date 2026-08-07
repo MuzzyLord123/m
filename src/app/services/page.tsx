@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Check, Plus } from "@phosphor-icons/react/dist/ssr";
 import { Reveal } from "@/components/motion/Reveal";
 import { RollerPass } from "@/components/motion/RollerPass";
+import { FinalCta } from "@/components/home/FinalCta";
 import { services } from "@/data/services";
 import { blurTone } from "@/lib/images";
 import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
@@ -20,7 +21,7 @@ export default function ServicesPage() {
       <section className="pt-[7.5rem] pb-12 lg:pt-[11rem] lg:pb-16">
         <div className="shell grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div>
-            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+            <p className="eyebrow text-ink-mute">
               What we do
             </p>
             <h1 className="mt-5 font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem] lg:text-[4.25rem]">
@@ -86,7 +87,7 @@ export default function ServicesPage() {
                 </Reveal>
 
                 <Reveal delay={index === 0 ? 0 : 0.06} immediate={index === 0}>
-                  <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute tabular-nums uppercase">
+                  <p className="eyebrow text-ink-mute tabular-nums">
                     0{index + 1}
                   </p>
                   <h2
@@ -119,7 +120,7 @@ export default function ServicesPage() {
 
               {/* FAQ — native disclosure, no JavaScript needed to open it */}
               <div className="mt-12 lg:mt-16">
-                <h3 className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+                <h3 className="eyebrow text-ink-mute">
                   Questions we get asked
                 </h3>
                 <div className="mt-4 border-t border-hairline">
@@ -146,6 +147,9 @@ export default function ServicesPage() {
         // One roller pass across the middle of the page, not on every section.
         return index === 2 ? <RollerPass key={service.id}>{section}</RollerPass> : section;
       })}
+
+      {/* Every page closes on the ask, on the same orange plane. */}
+      <FinalCta />
     </>
   );
 }

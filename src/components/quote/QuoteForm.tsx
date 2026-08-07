@@ -130,7 +130,7 @@ export function QuoteForm() {
         ref={headingRef}
         tabIndex={-1}
         aria-live="polite"
-        className="mt-10 text-[0.75rem] font-semibold tracking-[0.14em] text-ink-mute uppercase outline-none"
+        className="mt-10 eyebrow text-ink-mute uppercase outline-none"
       >
         Step {step} — {STEP_LABELS[step - 1]}
       </p>

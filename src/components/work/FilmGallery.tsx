@@ -91,7 +91,7 @@ function FilmGalleryDesktop() {
                     </span>
                   </span>
                   {film.duration && (
-                    <span className="shrink-0 rounded-full bg-scrim/70 px-3 py-1 text-[0.75rem] font-semibold tracking-[0.1em] text-white uppercase backdrop-blur-[2px]">
+                    <span className="shrink-0 rounded-full bg-scrim/70 px-3 py-1 eyebrow text-white uppercase backdrop-blur-[2px]">
                       {film.duration}
                     </span>
                   )}
@@ -115,7 +115,7 @@ function FilmGalleryDesktop() {
 
         {/* Queue */}
         <div>
-          <p className="text-[0.6875rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+          <p className="eyebrow text-ink-mute">
             {films.length} film{films.length === 1 ? "" : "s"}
           </p>
           <ul className="mt-4 grid gap-2.5" aria-label="More films">
@@ -196,7 +196,7 @@ function FilmGalleryMobile() {
                 <span className="absolute inset-0 bg-gradient-to-t from-scrim/90 via-scrim/35 to-transparent" />
                 <PlayBlob />
                 {film.duration && (
-                  <span className="absolute top-4 right-4 rounded-full bg-scrim/70 px-2.5 py-1 text-[0.6875rem] font-semibold tracking-[0.1em] text-white uppercase backdrop-blur-[2px]">
+                  <span className="absolute top-4 right-4 rounded-full bg-scrim/70 px-2.5 py-1 eyebrow text-white uppercase backdrop-blur-[2px]">
                     {film.duration}
                   </span>
                 )}
@@ -309,7 +309,7 @@ function FilmSheet({ film, onClose }: { film: Film | null; onClose: () => void }
                 aria-hidden="true"
                 className="absolute inset-x-0 top-2 mx-auto h-1 w-10 rounded-full bg-ink/20"
               />
-              <p className="mt-4 text-[0.75rem] font-semibold tracking-[0.14em] text-ink-mute uppercase">
+              <p className="mt-4 eyebrow text-ink-mute">
                 {film.area}
               </p>
               <button

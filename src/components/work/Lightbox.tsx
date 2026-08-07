@@ -160,7 +160,7 @@ export function Lightbox({
             {/* Caption panel */}
             <div className="rounded-[4px] bg-paper p-6 lg:p-7">
               <div className="flex items-start justify-between gap-4">
-                <p className="text-[0.75rem] font-semibold tracking-[0.14em] text-ink-mute uppercase">
+                <p className="eyebrow text-ink-mute">
                   {project.area}
                 </p>
                 <button
@@ -187,7 +187,7 @@ export function Lightbox({
                 key={project.images[index]?.src}
                 className="mt-5 border-l-2 border-accent pl-4"
               >
-                <p className="text-[0.6875rem] font-semibold tracking-[0.14em] text-accent uppercase">
+                <p className="eyebrow text-accent">
                   This photograph
                 </p>
                 <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-ink">

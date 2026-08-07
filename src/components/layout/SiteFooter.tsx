@@ -74,7 +74,7 @@ export function SiteFooter() {
 
         {/* Towns covered — chips, not a comma list */}
         <div className="mt-16">
-          <h2 className="text-[0.75rem] font-semibold tracking-[0.14em] text-ink-mute uppercase">
+          <h2 className="eyebrow text-ink-mute">
             Covering {site.serviceArea}
           </h2>
           <ul className="mt-4 flex flex-wrap gap-2">
@@ -123,7 +123,7 @@ export function SiteFooter() {
 function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="text-[0.75rem] font-semibold tracking-[0.14em] text-ink-mute uppercase">
+      <h2 className="eyebrow text-ink-mute">
         {title}
       </h2>
       <ul className="mt-4 grid gap-2.5">{children}</ul>

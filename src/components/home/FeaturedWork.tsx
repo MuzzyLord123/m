@@ -44,7 +44,7 @@ export function FeaturedWork() {
               className={`${OFFSETS[index] ?? "lg:mt-0"} ${index === 0 ? "sm:col-span-2 lg:col-span-1" : ""}`}
             >
               <Link href={`/work#${project.slug}`} className="group block">
-                <div className="relative overflow-hidden rounded-[4px] bg-plaster">
+                <div className="frame-reveal relative overflow-hidden rounded-[4px] bg-plaster">
                   <Image
                     src={image.src}
                     alt={image.alt}

@@ -48,7 +48,7 @@ export function ServiceArea() {
 
           <dl className="mt-10 grid gap-5 border-t border-hairline pt-8 sm:grid-cols-2">
             <div>
-              <dt className="text-[0.75rem] tracking-[0.12em] text-ink-mute uppercase">Phone</dt>
+              <dt className="eyebrow text-ink-mute">Phone</dt>
               <dd className="mt-1.5">
                 <a
                   href={`tel:${site.phoneHref}`}
@@ -59,7 +59,7 @@ export function ServiceArea() {
               </dd>
             </div>
             <div>
-              <dt className="text-[0.75rem] tracking-[0.12em] text-ink-mute uppercase">Hours</dt>
+              <dt className="eyebrow text-ink-mute">Hours</dt>
               <dd className="mt-1.5 text-[0.9375rem] text-ink-soft">
                 {site.hours[0].days}, {site.hours[0].time}
               </dd>

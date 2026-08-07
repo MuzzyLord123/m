@@ -144,7 +144,7 @@ export function BeforeAfter({
 function Tag({ text, className = "" }: { text: string; className?: string }) {
   return (
     <span
-      className={`pointer-events-none absolute bottom-4 z-10 rounded-full bg-scrim/85 px-3 py-1 text-[0.6875rem] font-semibold tracking-[0.12em] text-white uppercase backdrop-blur-[2px] ${className}`}
+      className={`pointer-events-none absolute bottom-4 z-10 rounded-full bg-scrim/85 px-3 py-1 eyebrow text-white uppercase backdrop-blur-[2px] ${className}`}
     >
       {text}
     </span>

@@ -131,7 +131,7 @@ export default async function BlogPost({ params }: Params) {
           >
             {previous ? (
               <Link href={`/blog/${previous.slug}`} className="group">
-                <span className="text-[0.75rem] tracking-[0.12em] text-ink-mute uppercase">
+                <span className="eyebrow text-ink-mute">
                   Previous
                 </span>
                 <span className="mt-2 flex items-start gap-2 font-display text-[1.125rem] leading-snug font-semibold tracking-[-0.02em] text-ink transition-colors duration-200 group-hover:text-accent">
@@ -144,7 +144,7 @@ export default async function BlogPost({ params }: Params) {
             )}
             {next && (
               <Link href={`/blog/${next.slug}`} className="group sm:text-right">
-                <span className="text-[0.75rem] tracking-[0.12em] text-ink-mute uppercase">
+                <span className="eyebrow text-ink-mute">
                   Next
                 </span>
                 <span className="mt-2 flex items-start gap-2 font-display text-[1.125rem] leading-snug font-semibold tracking-[-0.02em] text-ink transition-colors duration-200 group-hover:text-accent sm:justify-end">

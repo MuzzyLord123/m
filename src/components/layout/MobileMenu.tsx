@@ -139,7 +139,7 @@ export function MobileMenu() {
 
             <nav aria-label="Mobile" className="shell flex flex-col pb-5">
               <p
-                className="flood-item flex items-center justify-between pb-3 text-[0.625rem] font-semibold tracking-[0.2em] text-on-accent/85 uppercase"
+                className="flood-item flex items-center justify-between pb-3 eyebrow text-on-accent/85"
                 style={{ transitionDelay: "0.14s" }}
               >
                 <span>Menu</span>
@@ -162,7 +162,7 @@ export function MobileMenu() {
                       className="flood-row group relative flex items-center gap-4 py-3.5 pl-3.5 [@media(max-height:700px)]:py-2.5"
                     >
                       <span className="flood-rail" aria-hidden="true" />
-                      <span className="w-6 shrink-0 self-start pt-[0.85rem] text-[0.6875rem] font-semibold tracking-[0.08em] text-on-accent/85 tabular-nums">
+                      <span className="w-6 shrink-0 self-start pt-[0.85rem] figures text-[0.6875rem] font-semibold text-on-accent/85">
                         0{index + 1}
                       </span>
                       <span className="flex-1 font-display text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.035em] text-on-accent [@media(min-height:760px)]:text-[2.25rem]">
@@ -186,12 +186,12 @@ export function MobileMenu() {
               style={{ transitionDelay: "0.36s" }}
             >
               <div className="shell flex items-baseline justify-between">
-                <p className="text-[0.6875rem] font-semibold tracking-[0.16em] text-on-accent/85 uppercase">
+                <p className="eyebrow text-on-accent/85">
                   Recent work
                 </p>
                 <Link
                   href="/work"
-                  className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold tracking-[0.16em] text-on-accent/85 uppercase"
+                  className="inline-flex items-center gap-1 eyebrow text-on-accent/85"
                 >
                   All work
                   <ArrowUpRight weight="bold" aria-hidden="true" className="size-3" />

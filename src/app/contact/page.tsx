@@ -17,7 +17,7 @@ export default function ContactPage() {
       <section className="pt-[7.5rem] pb-12 lg:pt-[11rem] lg:pb-16">
         <div className="shell grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
           <div>
-            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+            <p className="eyebrow text-ink-mute">
               Contact
             </p>
             <h1 className="mt-5 font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem]">
@@ -31,7 +31,7 @@ export default function ContactPage() {
 
             <dl className="mt-10 grid gap-6">
               <div>
-                <dt className="text-[0.75rem] font-semibold tracking-[0.12em] text-ink-mute uppercase">
+                <dt className="eyebrow text-ink-mute">
                   Phone
                 </dt>
                 <dd className="mt-2">
@@ -45,7 +45,7 @@ export default function ContactPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-[0.75rem] font-semibold tracking-[0.12em] text-ink-mute uppercase">
+                <dt className="eyebrow text-ink-mute">
                   Email
                 </dt>
                 <dd className="mt-2">
@@ -59,7 +59,7 @@ export default function ContactPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-[0.75rem] font-semibold tracking-[0.12em] text-ink-mute uppercase">
+                <dt className="eyebrow text-ink-mute">
                   Based in
                 </dt>
                 <dd className="mt-2 inline-flex items-center gap-3 text-[1.0625rem] text-ink-soft">
@@ -70,7 +70,7 @@ export default function ContactPage() {
             </dl>
 
             <div className="mt-10 border-t border-hairline pt-8">
-              <h2 className="text-[0.75rem] font-semibold tracking-[0.12em] text-ink-mute uppercase">
+              <h2 className="eyebrow text-ink-mute">
                 Opening hours
               </h2>
               <dl className="mt-4 grid max-w-sm gap-2.5">
@@ -96,7 +96,7 @@ export default function ContactPage() {
 
       <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="contact-form-heading">
         <div className="shell">
-          <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+          <p className="eyebrow text-ink-mute">
             Free quote
           </p>
           <div className="tape-line mt-3" aria-hidden="true" />

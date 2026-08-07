@@ -15,7 +15,7 @@ export function Hero() {
           {/* Type column */}
           <div className="relative z-10 lg:pb-10">
             <Reveal immediate>
-              <p className="flex items-center gap-3 text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+              <p className="flex items-center gap-3 eyebrow text-ink-mute">
                 <span className="h-2 w-2 rounded-full bg-accent" aria-hidden="true" />
                 Painter &amp; decorator · {site.town}
               </p>
@@ -86,17 +86,31 @@ export function Hero() {
               off here. Any overshoot from the scrollbar's share of 100vw is
               caught by overflow-x: clip on the body. */}
           <div className="relative lg:[margin-right:calc(-1*(var(--shell-pad)+max(0px,(100vw-var(--spacing-shell))/2)))]">
+            {/* The photograph is 118% of its frame and drifts up through it as
+                the page scrolls — the frame is the window, the picture moves
+                behind it. On a scroll timeline, so it tracks the reader's hand
+                and runs on the compositor: no listener, no layout, nothing on
+                the main thread. See .hero-parallax in globals.css.
+
+                The oversize lives on a WRAPPER, not on the <img>. next/image's
+                `fill` writes height:100% as an INLINE style, which beats any
+                class — so setting the overhang on the image itself silently did
+                nothing and the ±4% travel uncovered the frame at both ends.
+                The wrapper is the positioned ancestor `fill` needs anyway. */}
             <div className="relative aspect-[3/2] overflow-hidden rounded-[4px] bg-plaster lg:aspect-[5/4]">
-              <Image
-                src="/work/hero.jpg"
-                alt="Open-plan kitchen extension with a vaulted ceiling and roof lights, decorated throughout"
-                fill
-                priority
-                sizes="(min-width: 1024px) 46vw, 100vw"
-                placeholder="blur"
-                blurDataURL={blurTone("#88847c")}
-                className="object-cover"
-              />
+              <div className="hero-parallax absolute inset-x-0 top-[-9%] h-[118%]">
+                <Image
+                  src="/work/hero.jpg"
+                  alt="Open-plan kitchen extension with a vaulted ceiling and roof lights, decorated throughout"
+                  fill
+                  priority
+                  fetchPriority="high"
+                  sizes="(min-width: 1024px) 46vw, 100vw"
+                  placeholder="blur"
+                  blurDataURL={blurTone("#88847c")}
+                  className="object-cover"
+                />
+              </div>
             </div>
 
             {/* Overlapping card — the asymmetry that stops this reading as a
@@ -108,7 +122,7 @@ export function Hero() {
               href="/work"
               className="card-edge group relative z-10 -mt-10 ml-4 block w-fit max-w-[16rem] rounded-[4px] bg-paper px-6 py-5 shadow-lift sm:-mt-14 sm:ml-8 lg:-mt-20 lg:ml-8"
             >
-              <p className="text-[0.6875rem] font-semibold tracking-[0.18em] text-accent uppercase">
+              <p className="eyebrow text-accent">
                 The job above
               </p>
               <p className="mt-2.5 font-display text-[1.125rem] leading-tight font-semibold tracking-[-0.025em] text-ink">

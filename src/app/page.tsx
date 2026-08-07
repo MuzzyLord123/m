@@ -9,6 +9,7 @@ import { SocialFeed } from "@/components/home/SocialFeed";
 import { ServiceArea } from "@/components/home/ServiceArea";
 import { FinalCta } from "@/components/home/FinalCta";
 import { RollerPass } from "@/components/motion/RollerPass";
+import { TradeMarquee } from "@/components/motion/TradeMarquee";
 import { site } from "@/config/site";
 import { testimonials } from "@/data/testimonials";
 
@@ -23,6 +24,12 @@ export default function HomePage() {
     <>
       <Hero />
       <ServicesOverview />
+
+      {/* The band that ties the trades above to the work below, and the third
+          orange plane in the page's rhythm. It drifts on the reader's own
+          scroll rather than a timer — see TradeMarquee.tsx. */}
+      <TradeMarquee />
+
       <FeaturedWork />
 
       {/* Roller pass on the three boundaries that carry the most weight */}

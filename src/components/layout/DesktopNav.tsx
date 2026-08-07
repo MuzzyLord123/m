@@ -225,10 +225,10 @@ export function DesktopNav() {
         <div className="shell relative grid grid-cols-[1.6fr_1fr] pt-8 pb-9">
           <div className="pr-14">
             <div className="mega-item flex items-baseline justify-between">
-              <p className="text-[0.6875rem] font-semibold tracking-[0.18em] text-accent uppercase">
+              <p className="eyebrow text-accent">
                 What we do
               </p>
-              <p className="text-[0.6875rem] tracking-[0.14em] text-ink-mute uppercase tabular-nums">
+              <p className="eyebrow text-ink-mute uppercase tabular-nums">
                 {services.length} trades
               </p>
             </div>
@@ -249,7 +249,7 @@ export function DesktopNav() {
                     <span className="mega-row-rail" aria-hidden="true" />
                     <span className="mega-row-wash" aria-hidden="true" />
                     <span className="relative z-1 flex items-start gap-4">
-                      <span className="mt-[0.3rem] shrink-0 font-display text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-mute tabular-nums transition-colors duration-300 group-hover:text-accent">
+                      <span className="mt-[0.3rem] shrink-0 figures text-[0.6875rem] font-semibold text-ink-mute transition-colors duration-300 group-hover:text-accent">
                         0{index + 1}
                       </span>
                       <span className="min-w-0">
@@ -279,10 +279,10 @@ export function DesktopNav() {
               style={{ transitionDelay: "0.18s" }}
             >
               <div className="flex items-baseline justify-between">
-                <p className="text-[0.6875rem] font-semibold tracking-[0.18em] text-accent uppercase">
+                <p className="eyebrow text-accent">
                   Recent work
                 </p>
-                <p className="text-[0.6875rem] tracking-[0.14em] text-ink-mute uppercase">
+                <p className="eyebrow text-ink-mute">
                   {site.town}
                 </p>
               </div>

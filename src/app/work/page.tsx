@@ -8,6 +8,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { beforeAfterProjects, photographCount, projects } from "@/data/projects";
 import { films, hasFilms } from "@/data/films";
+import { FinalCta } from "@/components/home/FinalCta";
 import { site } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default function WorkPage() {
             would otherwise have to count for themselves. */}
         <div className="shell grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-end lg:gap-16">
           <div>
-            <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+            <p className="eyebrow text-ink-mute">
               Our work · {projects.length} projects
             </p>
             <h1 className="mt-5 font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem] lg:text-[4.25rem]">
@@ -51,7 +52,7 @@ export default function WorkPage() {
                   key={row.term}
                   className="flex items-baseline justify-between gap-6 border-b border-hairline py-3.5 first:border-t"
                 >
-                  <dt className="text-[0.8125rem] tracking-[0.06em] text-ink-mute uppercase">
+                  <dt className="eyebrow text-ink-mute">
                     {row.term}
                   </dt>
                   <dd className="text-right font-display text-[1.0625rem] font-semibold tracking-[-0.02em] text-accent tabular-nums">
@@ -118,6 +119,9 @@ export default function WorkPage() {
           </div>
         </div>
       </section>
+
+      {/* Every page closes on the ask, on the same orange plane. */}
+      <FinalCta />
     </>
   );
 }

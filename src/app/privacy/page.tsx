@@ -50,7 +50,7 @@ export default function PrivacyPage() {
   return (
     <section className="pt-[7.5rem] pb-24 lg:pt-[11rem] lg:pb-32">
       <div className="shell">
-        <p className="text-[0.75rem] font-semibold tracking-[0.16em] text-ink-mute uppercase">
+        <p className="eyebrow text-ink-mute">
           Privacy
         </p>
         <h1 className="mt-5 max-w-3xl font-display text-[2.5rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.25rem]">
@@ -63,7 +63,7 @@ export default function PrivacyPage() {
 
         <div className="mt-14 grid gap-12 lg:grid-cols-[0.65fr_1fr] lg:gap-16">
           <nav aria-label="On this page" className="lg:sticky lg:top-32 lg:self-start">
-            <p className="text-[0.75rem] font-semibold tracking-[0.12em] text-ink-mute uppercase">
+            <p className="eyebrow text-ink-mute">
               On this page
             </p>
             <ul className="mt-4 grid gap-2.5">
