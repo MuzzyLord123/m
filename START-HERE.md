@@ -52,6 +52,7 @@ npm run audit:content     # nothing unfinished is showing to a customer
 npm run audit:images      # every photograph loads and is real
 npm run audit:interaction # menus, gallery, quote form all work
 npm run audit:contrast    # every colour pair is readable
+npm run audit:films       # every shape of YouTube link resolves
 ```
 
 `audit:content` is the important one. It fails if anything is still a
@@ -62,9 +63,38 @@ placeholder, so it cannot go live half finished.
 **1. Facebook.** Set `NEXT_PUBLIC_FACEBOOK_URL` to the page address. Until then
 the Facebook links simply do not appear — better than a link going nowhere.
 
-**2. Videos.** Open `src/data/films.ts` and paste one block per film (the format
-is written in the file). The video gallery is already built — desktop and
-mobile — and appears the moment there is a film in there.
+**2. Videos.** Open `src/data/films.ts` and paste one block per film:
+
+```ts
+{
+  url: "https://www.youtube.com/watch?v=PASTE_THE_LINK_HERE",
+  title: "Hall, stairs and landing in four days",
+  summary: "Panelling set out and fitted from bare walls, then the whole hall, stairs and landing decorated around it.",
+},
+```
+
+That is the whole job. Three lines, and only the link needs looking up.
+
+- **Paste the link however you have it.** The address bar, the Share button, a
+  Short, the phone app — all of them work, and the tracking rubbish on the end
+  (`?si=…`, `&list=…`, `&t=15s`) is stripped for you. `npm run audit:films`
+  proves it against every shape YouTube produces.
+- **You do not need to pick a photograph.** The still shown before someone
+  presses play defaults to a real photo of the same trade from the gallery — an
+  exterior film gets an exterior photo. Set `poster: "/work/whatever.jpg"` only
+  if you want a specific one.
+- **A link that cannot be read stops the build**, with the film's title in the
+  error, so a typo is caught by you rather than by a customer.
+- Optional extras: `category` (interior / exterior / woodwork / feature /
+  commercial), `area`, and `duration: "4 min"`.
+
+The video gallery is already built and tested — a projection room on desktop
+(one big player, the rest queued down the side) and a full-bleed feed on mobile
+that opens the player in a drag-to-dismiss sheet. It appears the moment there
+is a film in that file, and nothing else needs touching.
+
+Nothing is requested from YouTube until somebody actually presses play, and the
+player runs on youtube-nocookie.com.
 
 **3. Customer reviews.** Open `src/data/testimonials.ts`. It ships **empty on
 purpose**: the examples in it are invented, and publishing invented reviews as

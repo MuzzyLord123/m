@@ -11,6 +11,22 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     formats: ["image/avif", "image/webp"],
+    /**
+     * YouTube poster frames, and nothing else.
+     *
+     * This entry is what lets a film be added with nothing but its URL. Next
+     * fetches the frame from i.ytimg.com ON THE SERVER, optimises it and serves
+     * it from this domain — so a visitor who never presses play still never
+     * makes a request to Google, which is the promise the click-to-load player
+     * is built around.
+     *
+     * Scoped to the one host and the one path shape on purpose: a wildcard here
+     * turns the image optimiser into an open proxy that anyone can point at any
+     * URL and bill to this project.
+     */
+    remotePatterns: [
+      { protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" },
+    ],
   },
   experimental: {
     optimizePackageImports: ["@phosphor-icons/react", "motion"],

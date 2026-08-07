@@ -13,6 +13,7 @@
     "audit:interaction": "node scripts/interaction-check.mjs",
     "audit:images": "node scripts/image-check.mjs",
     "audit:content": "node scripts/content-audit.mjs",
+    "audit:films": "node --no-warnings scripts/films-check.mjs",
     "audit:lighthouse": "node scripts/lighthouse.mjs",
     "shots": "node scripts/shots.mjs"
   },

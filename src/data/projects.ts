@@ -272,6 +272,29 @@ export const featuredProjects = projects.filter((project) => project.featured);
 /** Every photograph on the site, counted rather than claimed. */
 export const photographCount = projects.reduce((total, p) => total + p.images.length, 0);
 
+/**
+ * A representative photograph for a trade, with the tone already sampled.
+ *
+ * This is what lets a film be added with nothing but its YouTube link: the
+ * poster frame defaults to a real photograph of the same trade rather than
+ * asking whoever is adding the film to go and pick one. An exterior film gets
+ * an exterior photograph, and the blur-up colour comes with it.
+ *
+ * `seed` walks through the projects in that category rather than always
+ * returning the first — two interior films would otherwise open on the same
+ * kitchen, which reads as a bug in the gallery rather than a default. It wraps,
+ * so more films than projects repeats rather than running out.
+ *
+ * Falls back to the first project in the gallery if a category has no
+ * photographs yet, so this can never return undefined and take a page with it.
+ */
+export function representativeImage(category: CategoryId, seed = 0): ProjectImage {
+  const matches = projects.filter((p) => p.category === category && p.images.length > 0);
+  const pool = matches.length > 0 ? matches : projects;
+  const project = pool[seed % pool.length];
+  return project.images[seed % project.images.length];
+}
+
 export const beforeAfterProjects = projects.filter((project) => project.beforeAfter);
 
 export function projectsByCategory(category: CategoryId | "all"): Project[] {

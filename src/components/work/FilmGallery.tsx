@@ -5,7 +5,48 @@ import Image from "next/image";
 import { AnimatePresence, LazyMotion, domMax, m, useReducedMotion } from "motion/react";
 import { Play, X } from "@phosphor-icons/react/dist/ssr";
 import { blurTone } from "@/lib/images";
+import { youTubePoster } from "@/lib/youtube";
 import { films, type Film } from "@/data/films";
+
+/**
+ * A film's poster, with the one failure YouTube's thumbnails actually have.
+ *
+ * maxresdefault.jpg is the 1280x720 frame and it is what you want — but YouTube
+ * only generates it above a resolution threshold, so an older or phone-shot
+ * upload simply does not have one and the request 404s. hqdefault.jpg is
+ * generated for every video ever uploaded, so it is the fallback. Without this
+ * the film would show a broken frame, and only for the videos most likely to be
+ * the client's own phone footage.
+ *
+ * Only films using YouTube's frame can fail this way; a hand-picked poster from
+ * public/work is served straight through.
+ */
+function FilmPoster({
+  film,
+  sizes,
+  className = "object-cover",
+}: {
+  film: Film;
+  sizes: string;
+  className?: string;
+}) {
+  const [src, setSrc] = useState(film.poster);
+
+  return (
+    <Image
+      src={src}
+      alt=""
+      fill
+      sizes={sizes}
+      placeholder="blur"
+      blurDataURL={blurTone(film.tone)}
+      onError={() => {
+        if (film.posterFromYouTube) setSrc(youTubePoster(film.id, "hq"));
+      }}
+      className={className}
+    />
+  );
+}
 
 /**
  * The film gallery — two separately designed treatments, exactly as the
@@ -20,9 +61,11 @@ import { films, type Film } from "@/data/films";
  *   targets, and a tap raises the same drag-to-dismiss bottom sheet the
  *   photographs use — so the two galleries feel like one site.
  *
- * NOTHING IS FETCHED FROM YOUTUBE until someone presses play. The poster is one
- * of the client's own photographs and the iframe is only mounted on demand, at
- * youtube-nocookie.com. A visitor who never plays a film never touches Google.
+ * THE VISITOR'S BROWSER NEVER TALKS TO GOOGLE until someone presses play. The
+ * iframe is mounted on demand and only at youtube-nocookie.com; the poster is
+ * either one of the client's own photographs or the film's own frame fetched
+ * BY THE SERVER through next/image and re-served from this domain. Adding a
+ * film needs nothing but its URL without giving that up.
  */
 export function FilmGallery() {
   if (films.length === 0) return null;
@@ -61,6 +104,13 @@ function FilmGalleryDesktop() {
                 src={`https://www.youtube-nocookie.com/embed/${film.id}?autoplay=1&rel=0&modestbranding=1`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
+                /* A dark ground and colour-scheme on the FRAME itself. An
+                   iframe paints its own background before its document loads,
+                   and the browser's blocked-or-failed placeholder is light
+                   grey — so a slow YouTube, an ad-blocker or a corporate proxy
+                   puts a white rectangle in the middle of a near-black page.
+                   The wrapper's background cannot help; it is underneath. */
+                style={{ colorScheme: "dark", backgroundColor: "var(--color-plaster-deep)" }}
                 className="absolute inset-0 h-full w-full border-0"
               />
             ) : (
@@ -70,13 +120,9 @@ function FilmGalleryDesktop() {
                 aria-label={`Play ${film.title}`}
                 className="group absolute inset-0 block cursor-pointer"
               >
-                <Image
-                  src={film.poster}
-                  alt=""
-                  fill
+                <FilmPoster
+                  film={film}
                   sizes="(min-width: 1024px) 62vw, 100vw"
-                  placeholder="blur"
-                  blurDataURL={blurTone(film.tone)}
                   className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
                 />
                 <span className="absolute inset-0 bg-gradient-to-t from-scrim/85 via-scrim/25 to-scrim/10" />
@@ -122,7 +168,7 @@ function FilmGalleryDesktop() {
             {films.map((item, index) => {
               const current = index === active;
               return (
-                <li key={item.id}>
+                <li key={`${item.id}-${index}`}>
                   <button
                     type="button"
                     onClick={() => select(index)}
@@ -132,15 +178,7 @@ function FilmGalleryDesktop() {
                     }`}
                   >
                     <span className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-[4px] bg-plaster-deep">
-                      <Image
-                        src={item.poster}
-                        alt=""
-                        fill
-                        sizes="112px"
-                        placeholder="blur"
-                        blurDataURL={blurTone(item.tone)}
-                        className="object-cover"
-                      />
+                      <FilmPoster film={item} sizes="112px" />
                       {current && <span className="absolute inset-0 ring-2 ring-accent ring-inset" />}
                     </span>
                     <span className="min-w-0">
@@ -175,8 +213,8 @@ function FilmGalleryMobile() {
   return (
     <div className="lg:hidden">
       <ul className="grid gap-8">
-        {films.map((film) => (
-          <li key={film.id}>
+        {films.map((film, index) => (
+          <li key={`${film.id}-${index}`}>
             <button
               type="button"
               onClick={() => setOpen(film)}
@@ -184,15 +222,7 @@ function FilmGalleryMobile() {
               aria-label={`Play ${film.title}`}
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-plaster-deep sm:aspect-video">
-                <Image
-                  src={film.poster}
-                  alt=""
-                  fill
-                  sizes="100vw"
-                  placeholder="blur"
-                  blurDataURL={blurTone(film.tone)}
-                  className="object-cover"
-                />
+                <FilmPoster film={film} sizes="100vw" />
                 <span className="absolute inset-0 bg-gradient-to-t from-scrim/90 via-scrim/35 to-transparent" />
                 <PlayBlob />
                 {film.duration && (
@@ -330,6 +360,13 @@ function FilmSheet({ film, onClose }: { film: Film | null; onClose: () => void }
                 src={`https://www.youtube-nocookie.com/embed/${film.id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
+                /* A dark ground and colour-scheme on the FRAME itself. An
+                   iframe paints its own background before its document loads,
+                   and the browser's blocked-or-failed placeholder is light
+                   grey — so a slow YouTube, an ad-blocker or a corporate proxy
+                   puts a white rectangle in the middle of a near-black page.
+                   The wrapper's background cannot help; it is underneath. */
+                style={{ colorScheme: "dark", backgroundColor: "var(--color-plaster-deep)" }}
                 className="absolute inset-0 h-full w-full border-0"
               />
             </div>
