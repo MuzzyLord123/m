@@ -12,7 +12,12 @@ export type NavLink = { href: string; label: string };
  */
 export const primaryNav: NavLink[] = [
   { href: "/", label: "Home" },
-  { href: "/work", label: "Work" },
+  /* Photographs and films are two galleries, not one page with a section in
+     it. Films were three quarters of the way down /work, behind eleven
+     projects and a before-and-after block — which is no place for the thing a
+     customer watches longest. */
+  { href: "/work", label: "Gallery" },
+  { href: "/videos", label: "Videos" },
   { href: "/services", label: "Services" },
   { href: "/about", label: "About" },
   { href: "/blog", label: "Blog" },

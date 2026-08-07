@@ -142,5 +142,78 @@ function resolve(film: FilmInput, index: number): Film {
 
 export const films: Film[] = input.map(resolve);
 
-/** True when there is anything to show. Used to hide the section and its nav. */
+/** True when James has supplied at least one real film. */
 export const hasFilms = films.length > 0;
+
+/* -------------------------------------------------------------------------- */
+/*                            PLACEHOLDER SLOTS                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Empty slots, shown on /videos while there are no films.
+ *
+ * The rule everywhere else on this site is that a section with no content
+ * renders nothing at all — an empty gallery is worse than no gallery. This is
+ * the deliberate exception, and it exists so the video gallery can be reviewed
+ * and signed off BEFORE the films exist, rather than the design being seen for
+ * the first time on the day it goes live.
+ *
+ * They are honest about what they are. Each slot says "awaiting link", the play
+ * control is outlined rather than filled, and nothing about them claims to be a
+ * film. Nobody reading the page can mistake one for a video that failed.
+ *
+ * TURNING THEM OFF: add a real film to the array above and they disappear on
+ * their own — real content always wins. To hide them without adding a film
+ * (before the site goes to customers, say), set NEXT_PUBLIC_FILM_SLOTS=0 in the
+ * host's environment variables and redeploy; /videos then says the films are
+ * being put together and offers the photographs instead.
+ */
+export type FilmSlot = {
+  slot: number;
+  title: string;
+  summary: string;
+  poster: string;
+  tone: string;
+};
+
+const SLOT_BRIEFS = [
+  {
+    title: "A hall, stairs and landing, start to finish",
+    summary: "The room James is asked about most, filmed over the four days it takes.",
+    category: "interior" as CategoryId,
+  },
+  {
+    title: "Preparation, in real time",
+    summary: "Filling, sanding, caulking and masking — the part of the job the price is mostly made of.",
+    category: "woodwork" as CategoryId,
+  },
+  {
+    title: "An exterior in a week",
+    summary: "Washing down, making good and two full coats, weather permitting.",
+    category: "exterior" as CategoryId,
+  },
+];
+
+export const filmSlots: FilmSlot[] = SLOT_BRIEFS.map((brief, index) => {
+  const image = representativeImage(brief.category, index + 1);
+  return {
+    slot: index + 1,
+    title: brief.title,
+    summary: brief.summary,
+    poster: image.src,
+    tone: image.tone,
+  };
+});
+
+/**
+ * Whether to show the slots. Real films always win; the env var only decides
+ * what happens while there are none.
+ *
+ * Defaults to ON, so the gallery is reviewable the moment the site is deployed
+ * rather than needing a variable set to become visible at all.
+ */
+export const showFilmSlots =
+  !hasFilms && process.env.NEXT_PUBLIC_FILM_SLOTS !== "0";
+
+/** True when /videos has anything at all to render. */
+export const hasVideoPage = hasFilms || showFilmSlots;

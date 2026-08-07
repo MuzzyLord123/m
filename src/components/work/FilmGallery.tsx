@@ -6,7 +6,7 @@ import { AnimatePresence, LazyMotion, domMax, m, useReducedMotion } from "motion
 import { Play, X } from "@phosphor-icons/react/dist/ssr";
 import { blurTone } from "@/lib/images";
 import { youTubePoster } from "@/lib/youtube";
-import { films, type Film } from "@/data/films";
+import { films, filmSlots, showFilmSlots, type Film } from "@/data/films";
 
 /**
  * A film's poster, with the one failure YouTube's thumbnails actually have.
@@ -68,13 +68,89 @@ function FilmPoster({
  * film needs nothing but its URL without giving that up.
  */
 export function FilmGallery() {
-  if (films.length === 0) return null;
+  if (films.length === 0) return showFilmSlots ? <FilmSlots /> : null;
 
   return (
     <LazyMotion features={domMax}>
       <FilmGalleryDesktop />
       <FilmGalleryMobile />
     </LazyMotion>
+  );
+}
+
+/* -------------------------------------------------------------------- slots */
+
+/**
+ * The gallery's shape, with the films not in it yet.
+ *
+ * Same grid as the real thing at both breakpoints — a wide lead over a pair on
+ * desktop, a stacked feed on a phone — so what is signed off here is what
+ * arrives when the links are pasted in. Every slot states plainly that it is
+ * waiting for one, and the play control is an outline rather than the filled
+ * orange blob, so no part of this can be mistaken for a film that failed to
+ * load. See filmSlots in src/data/films.ts for how to turn them off.
+ */
+function FilmSlots() {
+  return (
+    <div className="shell">
+      <ul className="grid gap-6 lg:grid-cols-2">
+        {filmSlots.map((slot, index) => (
+          <li
+            key={slot.slot}
+            className={index === 0 ? "lg:col-span-2" : undefined}
+          >
+            {/* 4:3 on a phone, 16:9 above it. A video-shaped box is only 219px
+                tall at 390px wide, which put the play control straight through
+                the middle of the caption. The taller crop is the room the two
+                need to sit clear of each other. */}
+            <div
+              className={`relative aspect-[4/3] w-full overflow-hidden rounded-[4px] border border-dashed border-hairline bg-plaster sm:aspect-video ${
+                index === 0 ? "lg:aspect-[16/9]" : ""
+              }`}
+            >
+              <Image
+                src={slot.poster}
+                alt=""
+                fill
+                sizes={index === 0 ? "(min-width: 1024px) 88vw, 100vw" : "(min-width: 1024px) 44vw, 100vw"}
+                placeholder="blur"
+                blurDataURL={blurTone(slot.tone)}
+                /* Desaturated and dimmed, so a slot never reads as finished
+                   work. The photograph is only here to show the frame. */
+                className="object-cover opacity-25 grayscale"
+              />
+
+              {/* Sits above the caption rather than through it. */}
+              <span
+                aria-hidden="true"
+                className="absolute top-[38%] left-1/2 grid size-[4.5rem] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-dashed border-ink-mute text-ink-mute lg:top-1/2 lg:size-20"
+              >
+                <Play weight="light" className="ml-0.5 size-7 lg:size-8" />
+              </span>
+
+              <span className="absolute top-4 left-4 rounded-full border border-hairline bg-paper/85 px-3 py-1 eyebrow text-ink-mute backdrop-blur-[2px]">
+                Slot {slot.slot} · awaiting link
+              </span>
+
+              {/* A scrim under the words, so they hold whatever the photograph
+                  behind them is doing. */}
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-0 bottom-0 block h-2/3 bg-gradient-to-t from-paper via-paper/80 to-transparent"
+              />
+              <span className="absolute inset-x-0 bottom-0 block p-5 lg:p-7">
+                <span className="block font-display text-[1.25rem] leading-tight font-semibold tracking-[-0.025em] text-ink lg:text-[1.5rem]">
+                  {slot.title}
+                </span>
+                <span className="measure mt-2 block text-[0.9375rem] leading-relaxed text-ink-soft">
+                  {slot.summary}
+                </span>
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

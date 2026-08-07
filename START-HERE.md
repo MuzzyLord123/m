@@ -64,7 +64,11 @@ Facebook is done — `facebook.com/thepaintmen` is in, alongside the Instagram.
 Both now appear in the footer, in the mobile menu, on the contact page, and in
 the structured data Google reads.
 
-**1. Videos.** Open `src/data/films.ts` and paste one block per film:
+**1. Videos.** There is a **Videos** page in the menu, separate from the photo
+**Gallery**. It is live now, showing three empty slots marked *"awaiting link"*
+so the design can be looked at and signed off before the films exist.
+
+Open `src/data/films.ts` and paste one block per film:
 
 ```ts
 {
@@ -89,13 +93,20 @@ That is the whole job. Three lines, and only the link needs looking up.
 - Optional extras: `category` (interior / exterior / woodwork / feature /
   commercial), `area`, and `duration: "4 min"`.
 
-The video gallery is already built and tested — a projection room on desktop
+The real gallery is already built and tested — a projection room on desktop
 (one big player, the rest queued down the side) and a full-bleed feed on mobile
-that opens the player in a drag-to-dismiss sheet. It appears the moment there
-is a film in that file, and nothing else needs touching.
+that opens the player in a drag-to-dismiss sheet. **Adding one film replaces the
+empty slots automatically.** Nothing else needs touching.
 
 Nothing is requested from YouTube until somebody actually presses play, and the
 player runs on youtube-nocookie.com.
+
+> **Before the site goes to customers**, decide about the empty slots. Adding a
+> real film removes them on its own. To hide them without adding one, set
+> `NEXT_PUBLIC_FILM_SLOTS=0` in Vercel's environment variables and redeploy —
+> the Videos page then says the films are being put together and points at the
+> photographs instead. They are honest about what they are either way, so
+> leaving them up is a judgement call, not a bug.
 
 **2. Customer reviews.** Open `src/data/testimonials.ts`. It ships **empty on
 purpose**: the examples in it are invented, and publishing invented reviews as

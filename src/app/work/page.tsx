@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { GalleryDesktop } from "@/components/work/GalleryDesktop";
 import { GalleryMobile } from "@/components/work/GalleryMobile";
 import { HashTarget } from "@/components/work/HashTarget";
-import { FilmGallery } from "@/components/work/FilmGallery";
 import { BeforeAfter } from "@/components/work/BeforeAfter";
 import { Reveal } from "@/components/motion/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { beforeAfterProjects, photographCount, projects } from "@/data/projects";
-import { films, hasFilms } from "@/data/films";
 import { FinalCta } from "@/components/home/FinalCta";
 import { site } from "@/config/site";
 
@@ -69,25 +69,6 @@ export default function WorkPage() {
       <GalleryMobile />
       <HashTarget />
 
-      {/* Films. Renders nothing at all while src/data/films.ts is empty — an
-          empty video gallery with a "coming soon" panel is worse than a site
-          that does not claim to have films yet. Paste one entry and the whole
-          section, both treatments and the count below build themselves. */}
-      {hasFilms && (
-        <section className="py-20 lg:py-28" aria-labelledby="films-heading">
-          <div className="shell">
-            <SectionHeading
-              eyebrow="On film"
-              title={<span id="films-heading">Watch a job actually happen.</span>}
-              lead={`${films.length === 1 ? "A film" : films.length + " films"} from site — the preparation, the order of work and what the finish looks like in daylight rather than in a photograph.`}
-            />
-          </div>
-          <div className="mt-12">
-            <FilmGallery />
-          </div>
-        </section>
-      )}
-
       <section className="bg-accent-wash py-20 lg:py-28" aria-labelledby="ba-heading">
         <div className="shell">
           <SectionHeading
@@ -117,6 +98,28 @@ export default function WorkPage() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* The way across to the films, mirroring the link back on /videos. */}
+      <section className="border-t border-hairline bg-accent-wash/40 py-14 lg:py-16">
+        <div className="shell flex flex-wrap items-center justify-between gap-6">
+          <div>
+            <p className="eyebrow text-accent">On film</p>
+            <p className="mt-3 font-display text-[1.5rem] leading-tight font-semibold tracking-[-0.025em] text-ink sm:text-[1.875rem]">
+              Watch a job actually happen.
+            </p>
+          </div>
+          <Link
+            href="/videos"
+            className="group inline-flex h-14 items-center justify-center gap-2.5 rounded-full border border-ink/20 px-7 text-base font-medium whitespace-nowrap text-ink transition-[border-color,color,background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-accent hover:bg-accent-wash hover:text-accent active:translate-y-px active:scale-[0.98]"
+          >
+            See the video gallery
+            <ArrowRight
+              weight="light"
+              className="size-4 text-accent transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+            />
+          </Link>
         </div>
       </section>
 

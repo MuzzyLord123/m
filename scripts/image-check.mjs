@@ -21,7 +21,7 @@ import { launchBrowser } from "./browser.mjs";
 import fs from "node:fs";
 
 const BASE = process.env.BASE_URL || "http://127.0.0.1:3111";
-const ROUTES = ["/", "/work", "/services", "/about", "/contact", "/quote", "/blog"];
+const ROUTES = ["/", "/work", "/videos", "/services", "/about", "/contact", "/quote", "/blog"];
 
 const browser = await launchBrowser();
 
