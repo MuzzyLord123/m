@@ -54,6 +54,38 @@ check(
   /addEventListener\("scroll",\s*onScroll,\s*\{\s*passive:\s*true\s*\}\)/.test(barSource),
 );
 
+/* ---------------------------------------- static: no Reveal in a side-scroller
+ *
+ * A <Reveal> starts at opacity 0 and is brought in by an IntersectionObserver
+ * against the VIEWPORT. Put one on each card of a horizontally scrolling strip
+ * and every card past the right edge of the screen never intersects, so it
+ * never fades in — permanently invisible until the visitor happens to swipe it
+ * into view, and invisible in exactly the spot where a partial next card is
+ * what invites the swipe in the first place.
+ *
+ * This shipped on the home page's social strip: four of six cards sat at
+ * opacity 0 on a 390px screen, so the section read as two posts rather than
+ * six. It passed every other check here, because the below-the-fold sweep
+ * looks down the page and this failure is sideways.
+ *
+ * The fix is always the same shape — reveal the strip as one object rather
+ * than each card — so this looks for the pattern rather than the symptom.
+ */
+const sideScrollRevealers = sources.filter((path) => {
+  const source = readFileSync(path, "utf8");
+  if (!/overflow-x-auto/.test(source) || !/<Reveal/.test(source)) return false;
+
+  // Only flag a Reveal that comes AFTER the scroller opens — a Reveal wrapping
+  // the whole strip (which is the fix) sits before it and is fine.
+  const scroller = source.indexOf("overflow-x-auto");
+  return source.indexOf("<Reveal", scroller) !== -1;
+});
+check(
+  `no per-item Reveal inside a horizontal scroller (found ${sideScrollRevealers.length})`,
+  sideScrollRevealers.length === 0,
+);
+if (sideScrollRevealers.length) console.log("   ", sideScrollRevealers.join("\n    "));
+
 // ------------------------------------------------------- runtime: reduced motion
 const browser = await launchBrowser();
 

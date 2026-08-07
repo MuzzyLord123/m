@@ -45,13 +45,27 @@ export function SocialFeed() {
         </div>
       </div>
 
-      {/* Edge-to-edge scroll strip on mobile, uneven grid on desktop */}
+      {/* Edge-to-edge scroll strip on mobile, uneven grid on desktop.
+
+          ONE Reveal around the whole strip, not one per card.
+
+          Per-card reveals were a real bug on a phone: the strip scrolls
+          sideways, so cards past the right edge of the screen never intersect
+          the viewport, their observer never fires, and they sit at opacity 0.
+          Measured at 390px, four of the six stayed invisible — the strip read
+          as if James had posted twice rather than six times, and the partial
+          next card that invites the swipe was not there to see.
+
+          It cannot be fixed with a horizontal rootMargin either: six cards at
+          74vw span more than four screens, so any margin wide enough to catch
+          the last one is wide enough to fire the whole strip on page load
+          anyway. Revealing the strip as the single object it is does the same
+          job without the failure mode. */}
+      <Reveal>
       <ul className="mt-12 flex snap-x snap-mandatory scroll-pl-[var(--shell-pad)] gap-4 overflow-x-auto px-[var(--shell-pad)] pb-2 lg:mx-auto lg:grid lg:max-w-[var(--spacing-shell)] lg:grid-cols-3 lg:gap-6 lg:overflow-visible">
         {socialPosts.slice(0, 6).map((post, index) => (
-          <Reveal
-            as="li"
+          <li
             key={post.image}
-            delay={0.04 * index}
             className={`w-[74vw] shrink-0 snap-start sm:w-[46vw] lg:w-auto ${
               index % 3 === 1 ? "lg:mt-12" : ""
             }`}
@@ -80,9 +94,10 @@ export function SocialFeed() {
                 {formatter.format(new Date(post.date))} · {post.network === "instagram" ? "Instagram" : "Facebook"}
               </p>
             </Card>
-          </Reveal>
+          </li>
         ))}
       </ul>
+      </Reveal>
     </section>
   );
 }
