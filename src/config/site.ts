@@ -53,7 +53,7 @@ export const site = {
       "NEXT_PUBLIC_INSTAGRAM_URL",
       "https://www.instagram.com/thepaintmenofficial",
     ),
-    facebook: from("NEXT_PUBLIC_FACEBOOK_URL", "{{FACEBOOK_URL}}"),
+    facebook: from("NEXT_PUBLIC_FACEBOOK_URL", "https://www.facebook.com/thepaintmen/"),
   },
 
   /** Towns covered, shown as swatch chips in the service-area section. */

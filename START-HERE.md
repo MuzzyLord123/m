@@ -58,12 +58,13 @@ npm run audit:films       # every shape of YouTube link resolves
 `audit:content` is the important one. It fails if anything is still a
 placeholder, so it cannot go live half finished.
 
-## Three things to add when you have them
+## Two things to add when you have them
 
-**1. Facebook.** Set `NEXT_PUBLIC_FACEBOOK_URL` to the page address. Until then
-the Facebook links simply do not appear — better than a link going nowhere.
+Facebook is done — `facebook.com/thepaintmen` is in, alongside the Instagram.
+Both now appear in the footer, in the mobile menu, on the contact page, and in
+the structured data Google reads.
 
-**2. Videos.** Open `src/data/films.ts` and paste one block per film:
+**1. Videos.** Open `src/data/films.ts` and paste one block per film:
 
 ```ts
 {
@@ -96,7 +97,7 @@ is a film in that file, and nothing else needs touching.
 Nothing is requested from YouTube until somebody actually presses play, and the
 player runs on youtube-nocookie.com.
 
-**3. Customer reviews.** Open `src/data/testimonials.ts`. It ships **empty on
+**2. Customer reviews.** Open `src/data/testimonials.ts`. It ships **empty on
 purpose**: the examples in it are invented, and publishing invented reviews as
 real is against the law in the UK. Ask a few customers if you can quote them,
 put the real ones in, and that section appears.

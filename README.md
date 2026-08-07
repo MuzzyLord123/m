@@ -86,9 +86,13 @@ hard-coded in a component. The file ships with placeholder tokens:
 | `{{TOWN}}`           | Base town                                  |
 | `{{SERVICE_AREA}}`   | Area covered, e.g. "Cheshire & North Wales" |
 | `{{YEARS}}`          | Years trading                              |
-| `{{INSTAGRAM_URL}}`  | Instagram profile URL                      |
-| `{{FACEBOOK_URL}}`   | Facebook page URL                          |
 | `{{MAP_ADDRESS}}`    | Address string for the Google Maps embed   |
+
+Every one of the above is filled in for The Paint Men. Phone, email, town,
+service area, years, both social profiles and the map address all carry real
+values in `site.ts`; the token mechanism stays because the `NEXT_PUBLIC_*`
+override still works and because `audit:content` uses it to prove nothing
+unfilled ever reaches a page.
 
 Either set the matching `NEXT_PUBLIC_*` variable (preferred — the repo stays
 generic and the client can change a number without a code change) or replace
