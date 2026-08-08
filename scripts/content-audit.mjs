@@ -87,6 +87,22 @@ if (!canonical) {
   );
 }
 
+/* Preview mode is the one deliberate half-built state this site has, and
+   forgetting to turn it off would ship a client a site with most of its menu
+   greyed out. This audit is the check the hand-over tells you to run before
+   launch, so it is the right place to catch it — a failure, not a warning,
+   because "ready to publish" is exactly what it is not. */
+const previewOn = await fetch(BASE + "/services").then((r) =>
+  r.text().then((html) => html.includes("This page is part of the")),
+);
+if (previewOn) {
+  failures.push(
+    "PREVIEW MODE IS ON — most pages are greyed out and show a \"not built yet\" notice. " +
+      "Set NEXT_PUBLIC_PREVIEW_MODE=0 in the host's environment variables and redeploy, " +
+      "or set PREVIEW_DEFAULT to false in src/config/preview.ts.",
+  );
+}
+
 // A 404 must actually 404, not soft-200. Search engines index soft 404s.
 const missing = await fetch(BASE + "/this-page-does-not-exist");
 if (missing.status !== 404) failures.push(`unknown URL returned ${missing.status}, expected 404`);

@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowUpRight, EnvelopeSimple, MapPin, Phone } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight, EnvelopeSimple, Lock, MapPin, Phone } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { site, socialLinks } from "@/config/site";
 import { primaryNav, serviceLinks } from "@/lib/nav";
+import { NOT_BUILT_LABEL, isBuilt } from "@/config/preview";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -107,12 +108,23 @@ export function SiteFooter() {
                 {link.label} <ArrowUpRight weight="light" className="size-3.5" />
               </a>
             ))}
-            <Link
-              href="/privacy"
-              className="inline-flex items-center text-ink-soft transition-colors duration-200 max-lg:min-h-11 hover:text-accent"
-            >
-              Privacy
-            </Link>
+            {isBuilt("/privacy") ? (
+              <Link
+                href="/privacy"
+                className="inline-flex items-center text-ink-soft transition-colors duration-200 max-lg:min-h-11 hover:text-accent"
+              >
+                Privacy
+              </Link>
+            ) : (
+              <span
+                aria-disabled="true"
+                title={NOT_BUILT_LABEL}
+                className="inline-flex cursor-not-allowed items-center gap-1.5 text-ink-mute/50 select-none max-lg:min-h-11"
+              >
+                Privacy
+                <Lock weight="light" aria-hidden="true" className="size-3.5" />
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -132,6 +144,24 @@ function FooterColumn({ title, children }: { title: string; children: React.Reac
 }
 
 function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+  /* A footer full of live links into pages the menu has just greyed out is the
+     hole every "coming soon" site leaves. Same treatment down here. */
+  if (!isBuilt(href)) {
+    return (
+      <li>
+        <span
+          aria-disabled="true"
+          title={NOT_BUILT_LABEL}
+          className="inline-flex cursor-not-allowed items-center gap-1.5 text-[0.9375rem] text-ink-mute/50 select-none max-lg:min-h-11"
+        >
+          {children}
+          <Lock weight="light" aria-hidden="true" className="size-3.5" />
+          <span className="sr-only">— {NOT_BUILT_LABEL}</span>
+        </span>
+      </li>
+    );
+  }
+
   return (
     <li>
       <Link

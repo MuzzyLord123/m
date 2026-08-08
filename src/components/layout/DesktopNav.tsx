@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, CaretDown, Clock, MapPin, Phone } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, CaretDown, Clock, Lock, MapPin, Phone } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { CTA_HREF, CTA_LABEL, site } from "@/config/site";
+import { NOT_BUILT_LABEL, isBuilt, previewMode } from "@/config/preview";
 import { primaryNav } from "@/lib/nav";
 import { services } from "@/data/services";
 import { featuredProjects } from "@/data/projects";
@@ -76,21 +77,47 @@ export function DesktopNav() {
   return (
     <div ref={headerRef} className="relative hidden lg:block" onMouseLeave={scheduleClose}>
 
-      {/* 1 — utility strip */}
-      <div className="nav-utility border-b border-ink/8 bg-plaster/80 backdrop-blur-sm">
+      {/* 1 — utility strip. In preview mode it carries the explanation for the
+             greyed items instead, which is the one place on a desktop layout
+             where a note like that belongs: already at the top, already quiet,
+             and it gives its height back on scroll like everything else. */}
+      <div
+        className={`nav-utility border-b backdrop-blur-sm ${
+          previewMode ? "border-accent/25 bg-accent-wash" : "border-ink/8 bg-plaster/80"
+        }`}
+      >
         <div className="shell flex h-[2.375rem] items-center justify-between text-[0.8125rem]">
-          <p className="flex items-center gap-2 text-ink-soft">
-            <MapPin weight="light" className="size-4 text-accent" />
-            Covering {site.serviceArea}
-          </p>
-          <div className="flex items-center gap-6 text-ink-soft">
-            <span className="flex items-center gap-2">
-              <Clock weight="light" className="size-4 text-accent" />
-              {site.hours[0].days}, {site.hours[0].time}
-            </span>
-            <span aria-hidden="true" className="h-3 w-px bg-ink/15" />
-            <span>{site.facts.responseTime}</span>
-          </div>
+          {previewMode ? (
+            <>
+              <p className="flex items-center gap-2 text-ink-soft">
+                <Lock weight="light" className="size-4 text-accent" />
+                <span className="font-medium text-accent">Preview</span>
+                <span className="text-ink-mute">
+                  — the home page and both galleries are built. The greyed pages are part of
+                  the full site.
+                </span>
+              </p>
+              <p className="flex items-center gap-2 text-ink-mute">
+                <MapPin weight="light" className="size-4 text-accent" />
+                {site.serviceArea}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="flex items-center gap-2 text-ink-soft">
+                <MapPin weight="light" className="size-4 text-accent" />
+                Covering {site.serviceArea}
+              </p>
+              <div className="flex items-center gap-6 text-ink-soft">
+                <span className="flex items-center gap-2">
+                  <Clock weight="light" className="size-4 text-accent" />
+                  {site.hours[0].days}, {site.hours[0].time}
+                </span>
+                <span aria-hidden="true" className="h-3 w-px bg-ink/15" />
+                <span>{site.facts.responseTime}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -116,7 +143,26 @@ export function DesktopNav() {
             <ul className="flex items-center gap-8 border-l border-hairline pl-7">
               {primaryNav.map((link) => {
                 const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
-                const isServices = link.href === "/services";
+                const built = isBuilt(link.href);
+                /* No mega-menu on a page that is not built — a panel of links
+                   into a locked page is worse than the greyed word alone. */
+                const isServices = link.href === "/services" && built;
+
+                if (!built) {
+                  return (
+                    <li key={link.href} className="relative">
+                      <span
+                        title={NOT_BUILT_LABEL}
+                        aria-disabled="true"
+                        className="nav-label flex cursor-not-allowed items-center gap-2 py-1 text-[0.9375rem] font-medium text-ink-mute/55 select-none"
+                      >
+                        {link.label}
+                        <Lock weight="light" aria-hidden="true" className="size-3.5" />
+                        <span className="sr-only">— {NOT_BUILT_LABEL}</span>
+                      </span>
+                    </li>
+                  );
+                }
 
                 return (
                   <li key={link.href} className="relative">

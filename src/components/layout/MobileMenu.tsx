@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Clock, EnvelopeSimple, Phone } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight, Clock, EnvelopeSimple, Lock, Phone } from "@phosphor-icons/react/dist/ssr";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { CTA_HREF, CTA_LABEL, site, socialLinks } from "@/config/site";
+import { NOT_BUILT_LABEL, isBuilt, previewMode } from "@/config/preview";
 import { primaryNav } from "@/lib/nav";
 import { featuredProjects } from "@/data/projects";
 import { blurTone } from "@/lib/images";
@@ -146,6 +147,19 @@ export function MobileMenu() {
                 <span>{site.years} years · {site.town}</span>
               </p>
 
+              {previewMode && (
+                <p
+                  className="flood-item mb-4 flex items-start gap-2.5 rounded-[4px] border border-on-accent/30 bg-on-accent/10 px-3.5 py-3 text-[0.8125rem] leading-snug text-on-accent"
+                  style={{ transitionDelay: "0.16s" }}
+                >
+                  <Lock weight="light" aria-hidden="true" className="mt-px size-4 shrink-0" />
+                  <span>
+                    This is a preview. Home and both galleries are built — the greyed pages are
+                    part of the full site.
+                  </span>
+                </p>
+              )}
+
               <ul className="border-t border-on-accent/25">
                 {menuLinks.map((link, index) => {
                   /* Home is "/" and would otherwise match every path under it,
@@ -154,6 +168,32 @@ export function MobileMenu() {
                     link.href === "/"
                       ? pathname === "/"
                       : pathname === link.href || pathname.startsWith(`${link.href}/`);
+
+                  if (!isBuilt(link.href)) {
+                    return (
+                      <li
+                        key={link.href}
+                        className="flood-line overflow-hidden border-b border-on-accent/25"
+                      >
+                        <span
+                          aria-disabled="true"
+                          style={{ transitionDelay: `${0.18 + index * 0.06}s` }}
+                          className="flood-row relative flex cursor-not-allowed items-center gap-4 py-3.5 pl-3.5 select-none [@media(max-height:700px)]:py-2.5"
+                        >
+                          <span className="figures w-6 shrink-0 self-start pt-[0.85rem] text-[0.6875rem] font-semibold text-on-accent/45">
+                            0{index + 1}
+                          </span>
+                          <span className="flex-1 font-display text-[1.875rem] leading-[1.15] font-semibold tracking-[-0.035em] text-on-accent/45 [@media(min-height:760px)]:text-[2.25rem]">
+                            {link.label}
+                          </span>
+                          <span className="flex shrink-0 items-center gap-1.5 text-[0.6875rem] text-on-accent/60">
+                            <Lock weight="light" aria-hidden="true" className="size-4" />
+                            <span className="sr-only">{NOT_BUILT_LABEL}</span>
+                          </span>
+                        </span>
+                      </li>
+                    );
+                  }
 
                   return (
                     <li

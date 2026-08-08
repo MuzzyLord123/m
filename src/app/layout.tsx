@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { body, bodyItalic, display, displayItalic, mono } from "./fonts";
 import { site } from "@/config/site";
+import { previewMode } from "@/config/preview";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { MobileActionBar } from "@/components/layout/MobileActionBar";
@@ -27,7 +28,10 @@ export const metadata: Metadata = {
        identifies it; an absent og:url makes a crawler fall back to the URL it
        fetched, which is correct. */
   },
-  robots: { index: true, follow: true },
+  /* A half-built site must never be indexed. Preview mode flips this for every
+     page at once — it is inherited — so a preview that gets shared around
+     cannot end up in Google under the client's name. */
+  robots: previewMode ? { index: false, follow: false } : { index: true, follow: true },
   alternates: { canonical: "/" },
 };
 

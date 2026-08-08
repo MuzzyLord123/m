@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { posts } from "@/lib/blog";
 import { site } from "@/config/site";
+import { isBuilt, previewMode } from "@/config/preview";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -17,14 +18,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/privacy", priority: 0.2, frequency: "yearly" },
   ];
 
+  /* A sitemap that lists pages the site is currently refusing to serve is a
+     crawl error waiting to happen, so in preview mode it lists only what is
+     actually reachable. */
+  const reachable = pages.filter((page) => isBuilt(page.path || "/"));
+
   return [
-    ...pages.map((page) => ({
+    ...reachable.map((page) => ({
       url: `${site.url}${page.path}`,
       lastModified: now,
       changeFrequency: page.frequency,
       priority: page.priority,
     })),
-    ...posts.map((post) => ({
+    ...(previewMode ? [] : posts).map((post) => ({
       url: `${site.url}/blog/${post.slug}`,
       lastModified: new Date(`${post.date}T00:00:00Z`),
       changeFrequency: "yearly" as const,

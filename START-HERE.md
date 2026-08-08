@@ -2,6 +2,33 @@
 
 The whole site is in this folder. Nothing else is needed.
 
+> ## ⚠ PREVIEW MODE IS ON
+>
+> As shipped, this deploys as a **preview**: the home page, the photo gallery
+> and the video gallery work; Services, About, Quote, Contact, Advice and
+> Privacy are greyed out in the menu with a note saying they are part of the
+> full build. Typing one of those addresses shows the same note rather than the
+> real page.
+>
+> **Every one of those pages is finished.** This is a switch, not missing work.
+>
+> ### To turn it off — the whole site, no other changes
+>
+> In Vercel: **Settings → Environment Variables**, add
+> `NEXT_PUBLIC_PREVIEW_MODE` = `0`, then redeploy.
+> (Or in code: set `PREVIEW_DEFAULT` to `false` in `src/config/preview.ts`.)
+>
+> ### Two things to know while it is on
+>
+> - **Every "Get a Free Quote" button lands on the notice**, because `/quote` is
+>   not in the preview. If you would rather show the enquiry form off, add
+>   `"/quote"` to `BUILT_PAGES` in `src/config/preview.ts` — one line.
+> - **The whole site is `noindex`** and the sitemap lists only the three live
+>   pages, so a preview can never be picked up by Google under the client's name.
+>
+> `npm run audit:content` **fails** while preview mode is on and tells you how to
+> turn it off, so this cannot reach a paying client by accident.
+
 ## Put it online (about ten minutes)
 
 1. Go to **vercel.com/new** and drag this folder onto the page.
