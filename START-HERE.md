@@ -43,6 +43,28 @@ The whole site is in this folder. Nothing else is needed.
 
 3. Redeploy. That is it — the site is live.
 
+### If you get "No entrypoint found in /vercel/path0"
+
+Vercel has not recognised this as a Next.js app, and there is only one reason:
+**it is looking at a folder that has no `package.json` directly inside it.**
+
+Unzip the file. You should end up with **one** folder containing `package.json`,
+`next.config.mjs`, `src` and `public`. Drag **that** folder — the one with
+`package.json` visible inside it — onto vercel.com/new. Not the folder that
+contains it, and not the .zip.
+
+If the deployment already exists, you do not need to start again:
+
+- **Settings → Build and Deployment → Framework Preset** — set it to
+  **Next.js**. (If a previous attempt failed, Vercel may have saved this as
+  "Other", which is what produces this exact error.)
+- **Settings → Build and Deployment → Root Directory** — if the folder you
+  uploaded had another folder inside it, set this to that inner folder's name.
+
+Then redeploy. `vercel.json` in this folder already pins the framework to
+Next.js, so Root Directory is the only thing left that can point Vercel at the
+wrong place.
+
 ### If you get a white "404: NOT_FOUND" page
 
 That is **Vercel's** error page, not the site's — the site's own 404 is black
