@@ -169,9 +169,16 @@ for (const [width, height, label] of [
       await page.waitForTimeout(400);
     }
     if (route === "/" && label === "desktop") {
-      const trigger = page.locator("button[aria-expanded]").first();
+      /* Scoped to the mega-menu's own trigger, and required to be VISIBLE.
+         `button[aria-expanded]`.first() used to match whatever came first in
+         the DOM — and in preview mode, where Services is greyed to a <span>
+         and has no button at all, that was the mobile menu toggle, which is
+         display:none at this width. Playwright then waited thirty seconds for
+         an invisible element to become hoverable and the whole audit died on a
+         timeout, reporting nothing about the images it exists to check. */
+      const trigger = page.locator('button[aria-controls="services-mega"]:visible');
       if (await trigger.count()) {
-        await trigger.hover();
+        await trigger.first().hover();
         await page.waitForTimeout(900);
         await page.mouse.move(0, 400); // let the panel close again
         await page.waitForTimeout(400);

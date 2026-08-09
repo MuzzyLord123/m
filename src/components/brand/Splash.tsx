@@ -3,31 +3,34 @@ import { BRUSH_MASK_URL_MIRRORED } from "@/lib/brush";
 import { site } from "@/config/site";
 
 /**
- * The opening moment: James's logo painted onto a black canvas by a brush.
+ * The opening moment, in two beats:
  *
- * A black plane, a brush stroke sweeping left to right, and the logo appearing
- * behind the bristled edge as if the stroke is laying it down — then the plane
- * lifts away and the site is underneath. Same brush mask as the hero headline,
- * so the site's first gesture and its second are the same gesture.
+ *   1. The brush in James's own logo lays the orange stroke down, left to
+ *      right, behind a bristled edge with a wet leading smear.
+ *   2. The wording fades up on top of it, and the mark is complete.
  *
- * THREE THINGS ABOUT THIS THAT MATTER MORE THAN THE ANIMATION
+ * Then the black plane lifts and the site is underneath. About 2.2s.
  *
- * 1. IT CANNOT TRAP ANYONE. There is no JavaScript in the dismissal — it is a
- *    CSS animation with `both` fill, ending on visibility: hidden. If scripts
- *    fail, are blocked, or never arrive, the splash still leaves. And it is
- *    pointer-events: none throughout, so even mid-animation it cannot swallow a
- *    tap meant for the page underneath.
+ * IT IS TWO IMAGES, NOT ONE. logo.png is a flat PNG, so the stroke and the type
+ * cannot move independently while they share a file. scripts/make-logo-layers.mjs
+ * splits the artwork into logo-stroke.png and logo-text.png on a rectangle that
+ * no part of the swoosh crosses, and that script fails if the two layers do not
+ * composite back to the original pixel for pixel. They are stacked here in the
+ * same box, at the same size, so together they ARE the logo.
  *
- * 2. ONCE PER VISIT. A splash on every page view is an obstacle, not a brand
- *    moment. A three-line script in the document head sets data-splash="seen"
- *    on <html> before first paint, and the CSS honours it — so this plays on
- *    arrival and never again for that session. If sessionStorage throws (private
- *    modes do), the worst case is that it plays again, which is harmless.
+ * THREE THINGS THAT MATTER MORE THAN THE ANIMATION
  *
- * 3. NO EXTRA IMAGE REQUEST. It renders /brand/logo.png at the same width the
- *    header's wordmark asks for, so it resolves to the same optimised URL and
- *    the same cache entry. A splash that downloads its own copy of the logo is
- *    competing with the hero photograph for the first bytes of the connection.
+ * 1. IT CANNOT TRAP ANYONE. No JavaScript in the dismissal — a CSS animation
+ *    with `both` fill ending on visibility: hidden. If scripts fail, are
+ *    blocked, or never arrive, the splash still leaves. pointer-events: none
+ *    from the first frame, so it cannot swallow a tap either.
+ *
+ * 2. ONCE PER VISIT, and `?splash` replays it. See SPLASH_GUARD below.
+ *
+ * 3. ONLY THE STROKE IS PRIORITY. It is the first thing on screen, so it is
+ *    fetched eagerly; the wording is not needed until a second in and would
+ *    only compete with the hero photograph for the first bytes of the
+ *    connection if it were.
  *
  * Under prefers-reduced-motion the whole thing is display: none. Someone who
  * has asked for less movement should not be shown a full-screen animation
@@ -38,33 +41,37 @@ export function Splash() {
     <div
       className="splash"
       aria-hidden="true"
-      /* The MIRRORED brush, so the stroke lays the logo down left to right.
-         The upright one uncovers from the right, which reads backwards for a
-         brush. See src/lib/brush.ts. The mask travels on a registered custom
-         property — see .splash-mark and @property --wipe in globals.css. */
+      /* The MIRRORED brush, so the stroke is laid down left to right. The
+         upright one uncovers from the right, which reads backwards for a brush.
+         See src/lib/brush.ts. */
       style={{ ["--brush-mask" as string]: BRUSH_MASK_URL_MIRRORED }}
     >
-      <div className="splash-inner">
-        {/* The logo, revealed by the brush edge rather than faded in. */}
-        <div className="splash-mark">
-          <Image
-            src="/brand/logo.png"
-            alt={site.name}
-            width={669}
-            height={280}
-            sizes="(min-width: 640px) 420px, 260px"
-            className="h-auto w-[260px] sm:w-[340px] lg:w-[420px]"
-          />
-        </div>
+      <div className="splash-logo">
+        {/* Beat one — the stroke, painted on behind the brush edge. */}
+        <Image
+          src="/brand/logo-stroke.png"
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 640px) 420px, 260px"
+          className="splash-stroke object-contain"
+        />
 
-        {/* The wet edge: an orange smear that travels a beat ahead of the
-            reveal, so the logo reads as being laid down by it. */}
-        <div className="splash-wet" aria-hidden="true" />
+        {/* Beat two — the wording, fading up into place. */}
+        <Image
+          src="/brand/logo-text.png"
+          alt={site.name}
+          fill
+          sizes="(min-width: 640px) 420px, 260px"
+          className="splash-text object-contain"
+        />
+
+        {/* The wet edge, travelling a beat ahead of the stroke. */}
+        <span className="splash-wet" aria-hidden="true" />
       </div>
 
-      {/* A hairline that draws itself under the mark as the stroke finishes —
-          the same rule that opens every section of the site. */}
-      <div className="splash-rule" aria-hidden="true" />
+      {/* The hairline, drawn last — the same rule that opens every section. */}
+      <span className="splash-rule" aria-hidden="true" />
     </div>
   );
 }
@@ -76,10 +83,10 @@ export function Splash() {
  * not having one.
  *
  * `?splash` FORCES IT, and exists because once-per-session made the splash
- * almost impossible to look at. The first load plays it, and every load after
+ * almost impossible to look at. The first load plays it and every load after
  * that in the same browser session correctly does not — which is right for a
- * visitor and useless for anyone trying to review it, or show it to a client.
- * Add ?splash to any address and it plays, as many times as you like:
+ * visitor and useless for anyone reviewing it, or showing it to a client. Add
+ * ?splash to any address and it plays, as many times as you like:
  *
  *     https://…/?splash
  *

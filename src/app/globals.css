@@ -861,22 +861,25 @@
 }
 
 /* --------------------------------------------------------------------------
-   SPLASH SCREEN — the logo painted onto a black canvas, then the canvas lifts.
+   SPLASH SCREEN — the brush lays the stroke down, then the wording arrives.
 
-   Timeline, and it is deliberately short. A splash is a held breath; the whole
-   thing is done in 1.85s and the site is interactive underneath the entire
-   time:
+   Two beats, and it is deliberately short. The site is interactive underneath
+   the whole time:
 
-     0.00 – 0.10s  black plane, nothing on it
-     0.10 – 1.00s  the brush edge crosses; the logo appears behind it
-     0.35 – 1.15s  the wet orange edge travels a beat ahead of the reveal
-     0.95 – 1.35s  the rule draws itself under the mark
-     1.45 – 1.85s  the plane lifts away upward
+     0.00 – 0.15s  black plane, nothing on it
+     0.15 – 1.05s  the brush edge crosses; the ORANGE STROKE appears behind it
+     0.40 – 1.20s  the wet edge travels a beat ahead of the stroke
+     1.00 – 1.50s  the WORDING fades up into place — the mark is complete
+     1.45 – 1.85s  the hairline draws itself underneath
+     1.85 – 2.25s  the plane lifts away upward
 
-   THE DISMISSAL IS PURE CSS — `both` fill mode ending on visibility: hidden.
-   Nothing has to run for the splash to leave, which is the only acceptable
-   design for something that covers the whole page. pointer-events: none from
-   the first frame, so it can never swallow a tap either.
+   THE DISMISSAL IS PURE CSS — `both` fill ending on visibility: hidden. Nothing
+   has to run for the splash to leave, which is the only acceptable design for
+   something that covers the whole page. pointer-events: none from the first
+   frame, so it can never swallow a tap either.
+
+   The two layers come from scripts/make-logo-layers.mjs and are stacked in one
+   box at one size, so together they are exactly the logo.
    -------------------------------------------------------------------------- */
 
 .splash {
@@ -894,27 +897,37 @@
     rgb(242 101 34 / 0.14) 0%,
     transparent 70%
   );
-  animation: splash-lift 0.4s var(--ease-coat) 1.45s both;
+  animation: splash-lift 0.4s var(--ease-coat) 1.85s both;
 }
 
-/* Returning page views in the same session, and anyone who has asked for less
-   movement. Both get the site immediately. */
+/* Returning page views in the same session. ?splash clears the flag — see
+   SPLASH_GUARD in Splash.tsx. */
 :root[data-splash="seen"] .splash {
   display: none;
 }
 
-.splash-inner {
+/* The box both layers share. next/image `fill` needs a positioned, sized
+   parent, and stacking them here is what makes the two halves one mark. */
+.splash-logo {
   position: relative;
-  display: grid;
-  place-items: center;
+  width: 260px;
+  aspect-ratio: 669 / 280;
+}
+@media (min-width: 640px) {
+  .splash-logo {
+    width: 340px;
+  }
+}
+@media (min-width: 1024px) {
+  .splash-logo {
+    width: 420px;
+  }
 }
 
-/* The mark, revealed by the brush rather than faded in. Identical mask geometry
-   to .hero-line — see src/lib/brush.ts for why the numbers are what they are. */
-.splash-mark {
-  /* 100% -> 0% with the MIRRORED brush uncovers from the LEFT. The upright
-     brush run 0% -> 100% uncovers from the right, which reads backwards for a
-     stroke laying paint down. See src/lib/brush.ts. */
+/* Beat one — the stroke, revealed by the brush rather than faded in. Mask
+   geometry identical to .hero-line; see src/lib/brush.ts for the numbers.
+   100% -> 0% against the MIRRORED brush uncovers from the LEFT. */
+.splash-stroke {
   --wipe: 100%;
   mask-image: var(--brush-mask);
   -webkit-mask-image: var(--brush-mask);
@@ -924,7 +937,7 @@
   -webkit-mask-repeat: no-repeat;
   mask-position: var(--wipe) 0;
   -webkit-mask-position: var(--wipe) 0;
-  animation: splash-paint 0.9s var(--ease-coat) 0.1s both;
+  animation: splash-paint 0.9s var(--ease-coat) 0.15s both;
 }
 @keyframes splash-paint {
   to {
@@ -932,12 +945,29 @@
   }
 }
 
-/* The wet edge. A soft orange smear that crosses the mark and fades as it
+/* Beat two — the wording. A fade with a very small rise: enough to feel placed
+   rather than switched on, not enough to read as a separate animation. */
+.splash-text {
+  opacity: 0;
+  animation: splash-word 0.5s var(--ease-coat) 1s both;
+}
+@keyframes splash-word {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The wet edge. A soft orange smear crossing with the stroke and fading as it
    leaves, so the reveal reads as wet paint being laid rather than a wipe. */
 .splash-wet {
   position: absolute;
-  top: -12%;
-  bottom: -12%;
+  top: -14%;
+  bottom: -14%;
   left: 0;
   width: 13%;
   border-radius: 50%;
@@ -950,7 +980,7 @@
   );
   filter: blur(9px);
   opacity: 0;
-  animation: splash-wet 0.8s var(--ease-coat) 0.35s both;
+  animation: splash-wet 0.8s var(--ease-coat) 0.4s both;
 }
 @keyframes splash-wet {
   0% {
@@ -964,7 +994,7 @@
     opacity: 1;
   }
   100% {
-    transform: translateX(520%);
+    transform: translateX(660%);
     opacity: 0;
   }
 }
@@ -973,14 +1003,14 @@
    used once more as the last beat of the opening. */
 .splash-rule {
   position: absolute;
-  top: calc(50% + 4.5rem);
+  top: calc(50% + 5rem);
   left: 50%;
   width: min(18rem, 62vw);
   height: 1px;
   background: linear-gradient(90deg, var(--color-accent), var(--color-hairline));
   transform: translateX(-50%) scaleX(0);
   transform-origin: left;
-  animation: splash-rule 0.4s var(--ease-coat) 0.95s both;
+  animation: splash-rule 0.4s var(--ease-coat) 1.45s both;
 }
 @keyframes splash-rule {
   to {
