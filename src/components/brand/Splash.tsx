@@ -1,36 +1,51 @@
 import Image from "next/image";
-import { BRUSH_MASK_URL_MIRRORED } from "@/lib/brush";
 import { site } from "@/config/site";
 
 /**
- * The opening moment, in two beats:
+ * How many band elements to render. How many are actually USED is `--n` in
+ * globals.css, which drops to four on a phone; the spare ones park off the
+ * right-hand edge and are clipped. This is the ceiling, not the count.
+ */
+const BANDS = 6;
+
+/**
+ * The opening moment: the logo fades up on black, then the black clears in
+ * vertical bands and the site is underneath.
  *
- *   1. The brush in James's own logo lays the orange stroke down, left to
- *      right, behind a bristled edge with a wet leading smear.
- *   2. The wording fades up on top of it, and the mark is complete.
+ *   0.20 – 1.00s  the logo fades and settles up into place
+ *   0.85 – 1.35s  a hairline draws itself underneath
+ *   1.45 – 1.73s  the logo eases away
+ *   1.55 – 2.40s  six bands lift, 60ms apart — like roller strokes clearing
+ *                 a wall, which is the one reveal that belongs on a
+ *                 decorator's site rather than being borrowed from anywhere
  *
- * Then the black plane lifts and the site is underneath. About 2.2s.
- *
- * IT IS TWO IMAGES, NOT ONE. logo.png is a flat PNG, so the stroke and the type
- * cannot move independently while they share a file. scripts/make-logo-layers.mjs
- * splits the artwork into logo-stroke.png and logo-text.png on a rectangle that
- * no part of the swoosh crosses, and that script fails if the two layers do not
- * composite back to the original pixel for pixel. They are stacked here in the
- * same box, at the same size, so together they ARE the logo.
+ * THE BANDS ARE THE BACKGROUND. The panel itself is transparent; the six bands
+ * hold the black. That is what lets the site appear THROUGH the gaps as they
+ * lift rather than the whole plane sliding off in one piece. They are absolutely
+ * positioned with a 1px overlap because six flexed children land on sub-pixel
+ * boundaries and hairline seams of the page behind show through the black.
  *
  * THREE THINGS THAT MATTER MORE THAN THE ANIMATION
  *
- * 1. IT CANNOT TRAP ANYONE. No JavaScript in the dismissal — a CSS animation
- *    with `both` fill ending on visibility: hidden. If scripts fail, are
+ * 1. IT CANNOT TRAP ANYONE. No JavaScript in the dismissal — CSS animations
+ *    with `both` fill, ending on visibility: hidden. If scripts fail, are
  *    blocked, or never arrive, the splash still leaves. pointer-events: none
  *    from the first frame, so it cannot swallow a tap either.
  *
  * 2. ONCE PER VISIT, and `?splash` replays it. See SPLASH_GUARD below.
  *
- * 3. ONLY THE STROKE IS PRIORITY. It is the first thing on screen, so it is
- *    fetched eagerly; the wording is not needed until a second in and would
- *    only compete with the hero photograph for the first bytes of the
- *    connection if it were.
+ * 3. NO EXTRA IMAGE REQUEST, AND NO PRIORITY. It renders /brand/logo.png at a
+ *    width that lands on the same srcset candidate the header already asks for,
+ *    so it is one shared request and one cache entry.
+ *
+ *    `loading="eager"` rather than `priority`, and the difference is measurable.
+ *    The optimised logo is ~33KB — over twice the weight of the hero photograph
+ *    at the size it renders — because the mark is glossy and gradient-heavy.
+ *    `priority` adds a preload link, which on a throttled connection puts those
+ *    33KB in front of the LCP element: Lighthouse went 95 -> 89 and LCP
+ *    2.8s -> 3.7s on that one attribute alone. Eager still starts the fetch
+ *    immediately, it just does not outrank the photograph. The logo has 200ms
+ *    before it is needed and 1.5s before the reveal, which is ample.
  *
  * Under prefers-reduced-motion the whole thing is display: none. Someone who
  * has asked for less movement should not be shown a full-screen animation
@@ -38,40 +53,31 @@ import { site } from "@/config/site";
  */
 export function Splash() {
   return (
-    <div
-      className="splash"
-      aria-hidden="true"
-      /* The MIRRORED brush, so the stroke is laid down left to right. The
-         upright one uncovers from the right, which reads backwards for a brush.
-         See src/lib/brush.ts. */
-      style={{ ["--brush-mask" as string]: BRUSH_MASK_URL_MIRRORED }}
-    >
-      <div className="splash-logo">
-        {/* Beat one — the stroke, painted on behind the brush edge. */}
-        <Image
-          src="/brand/logo-stroke.png"
-          alt=""
-          fill
-          priority
-          sizes="(min-width: 640px) 420px, 260px"
-          className="splash-stroke object-contain"
-        />
-
-        {/* Beat two — the wording, fading up into place. */}
-        <Image
-          src="/brand/logo-text.png"
-          alt={site.name}
-          fill
-          sizes="(min-width: 640px) 420px, 260px"
-          className="splash-text object-contain"
-        />
-
-        {/* The wet edge, travelling a beat ahead of the stroke. */}
-        <span className="splash-wet" aria-hidden="true" />
+    <div className="splash" aria-hidden="true">
+      {/* The black, in pieces. */}
+      <div className="splash-bands">
+        {Array.from({ length: BANDS }, (_, i) => (
+          <span key={i} className="splash-band" style={{ ["--i" as string]: i }} />
+        ))}
       </div>
 
-      {/* The hairline, drawn last — the same rule that opens every section. */}
-      <span className="splash-rule" aria-hidden="true" />
+      {/* Warms the black from below so the plane reads as a surface rather than
+          an absence. Fades with the logo, before the bands move, so it never
+          sits over the site. */}
+      <div className="splash-glow" />
+
+      <div className="splash-mark">
+        <Image
+          src="/brand/logo.png"
+          alt={site.name}
+          width={669}
+          height={280}
+          loading="eager"
+          sizes="(min-width: 1024px) 420px, (min-width: 640px) 340px, 260px"
+          className="h-auto w-[260px] sm:w-[340px] lg:w-[420px]"
+        />
+        <span className="splash-rule" />
+      </div>
     </div>
   );
 }

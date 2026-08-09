@@ -16,11 +16,31 @@ const SHOTS =
 const browser = await launchBrowser();
 
 const results = [];
+/* Anything the run could not exercise. Printed at the end so a skip is visible
+   rather than being indistinguishable from a pass. */
+const skipped = [];
 const check = (label, value) => {
   const line = `${value ? "PASS" : "FAIL"}  ${label}`;
   results.push(line);
   console.log(line);
 };
+
+/**
+ * Navigate, and report whether the REAL page arrived.
+ *
+ * Preview mode rewrites every unbuilt route to /preview-locked, so a block that
+ * assumes /quote is the quote form waits thirty seconds for a Continue button
+ * that is not there, throws, and takes every check after it down with it. The
+ * anchor is data-preview-locked on the locked page — the same attribute
+ * content-audit.mjs uses, so rewording that page cannot quietly disable this.
+ */
+async function open(page, path) {
+  await page.goto(`${BASE}${path}`, { waitUntil: "load" });
+  if ((await page.locator("[data-preview-locked]").count()) === 0) return true;
+  console.log(`SKIP  ${path} — preview mode shows the "not built yet" page`);
+  skipped.push(`${path} (preview mode)`);
+  return false;
+}
 
 // ---------------------------------------------------------------- gallery
 {
@@ -56,27 +76,41 @@ const check = (label, value) => {
   const panel = page.locator("#services-mega");
   const trigger = page.locator("button[aria-controls='services-mega']");
 
-  // Park the pointer away from the header: hovering the trigger opens the
-  // panel, which would mask whether the keyboard path works on its own.
-  await page.mouse.move(1400, 820);
-  await trigger.focus();
-  await page.waitForTimeout(300);
-  check("mega menu starts closed", (await panel.getAttribute("data-open")) === "false");
+  /* In preview mode Services is greyed out and renders as a <span>, so there is
+     no trigger and no panel to drive. Say so and move on. The alternative is
+     what this script used to do: wait thirty seconds for an element that cannot
+     exist, throw a TimeoutError, and report NOTHING about the gallery, the
+     mobile menu or the quote flow — a whole audit lost to one skippable block. */
+  if ((await trigger.count()) === 0) {
+    console.log("SKIP  desktop mega menu — preview mode renders Services as a <span>");
+    skipped.push("desktop mega menu (preview mode)");
+    await page.close();
+  } else {
+    // Park the pointer away from the header: hovering the trigger opens the
+    // panel, which would mask whether the keyboard path works on its own.
+    await page.mouse.move(1400, 820);
+    await trigger.focus();
+    await page.waitForTimeout(300);
+    check("mega menu starts closed", (await panel.getAttribute("data-open")) === "false");
 
-  await page.keyboard.press("Enter");
-  await page.waitForTimeout(500);
-  check("mega menu opens by keyboard", (await panel.getAttribute("data-open")) === "true");
-  check("trigger reports expanded", (await trigger.getAttribute("aria-expanded")) === "true");
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(500);
+    check("mega menu opens by keyboard", (await panel.getAttribute("data-open")) === "true");
+    check("trigger reports expanded", (await trigger.getAttribute("aria-expanded")) === "true");
 
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(400);
-  check("escape closes mega menu", (await panel.getAttribute("data-open")) === "false");
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(400);
+    check("escape closes mega menu", (await panel.getAttribute("data-open")) === "false");
 
-  await page.locator("span.nav-link:has-text('Services')").hover();
-  await page.waitForTimeout(500);
-  check("mega menu opens on hover", (await panel.getAttribute("data-open")) === "true");
-  await page.screenshot({ path: `${SHOTS}/mega.png`, clip: { x: 0, y: 0, width: 1440, height: 560 } });
-  await page.close();
+    await page.locator("span.nav-link:has-text('Services')").hover();
+    await page.waitForTimeout(500);
+    check("mega menu opens on hover", (await panel.getAttribute("data-open")) === "true");
+    await page.screenshot({
+      path: `${SHOTS}/mega.png`,
+      clip: { x: 0, y: 0, width: 1440, height: 560 },
+    });
+    await page.close();
+  }
 }
 
 // ----------------------------------------------------------------- mobile
@@ -112,9 +146,11 @@ const check = (label, value) => {
 }
 
 // ------------------------------------------------------------- quote flow
-{
+// An IIFE rather than a bare block so the preview-mode case can bail out early
+// without indenting the whole flow.
+await (async () => {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  await page.goto(`${BASE}/quote`, { waitUntil: "load" });
+  if (!(await open(page, "/quote"))) return void (await page.close());
   await page.waitForTimeout(500);
 
   await page.locator("button:has-text('Continue')").click();
@@ -161,7 +197,7 @@ const check = (label, value) => {
   check("a missing Resend key surfaces the phone fallback", fallback > 0);
   await page.screenshot({ path: `${SHOTS}/quote-error.png` });
   await page.close();
-}
+})();
 
 // ------------------------------------------------- accessibility regressions
 /* Three defects found by review, each fixed, each cheap to reintroduce and
@@ -173,22 +209,23 @@ const check = (label, value) => {
   // Every radiogroup must resolve its aria-labelledby to the actual question.
   // A dangling IDREF leaves a screen reader reading bare options with no idea
   // what is being asked, on the site's only lead channel.
-  await page.goto(`${BASE}/quote`, { waitUntil: "load" });
-  await page.waitForTimeout(600);
-  await page.locator('label:has-text("Interior decorating")').first().click();
-  await page.locator('button:has-text("Continue")').first().click();
-  await page.waitForTimeout(800);
-  const groups = await page.evaluate(() =>
-    [...document.querySelectorAll('[role="radiogroup"]')].map((g) => {
-      const id = g.getAttribute("aria-labelledby");
-      const el = id ? document.getElementById(id) : null;
-      return Boolean(el && el.textContent && el.textContent.trim().length > 0);
-    }),
-  );
-  check(
-    "every radiogroup has a resolvable accessible name",
-    groups.length > 0 && groups.every(Boolean),
-  );
+  if (await open(page, "/quote")) {
+    await page.waitForTimeout(600);
+    await page.locator('label:has-text("Interior decorating")').first().click();
+    await page.locator('button:has-text("Continue")').first().click();
+    await page.waitForTimeout(800);
+    const groups = await page.evaluate(() =>
+      [...document.querySelectorAll('[role="radiogroup"]')].map((g) => {
+        const id = g.getAttribute("aria-labelledby");
+        const el = id ? document.getElementById(id) : null;
+        return Boolean(el && el.textContent && el.textContent.trim().length > 0);
+      }),
+    );
+    check(
+      "every radiogroup has a resolvable accessible name",
+      groups.length > 0 && groups.every(Boolean),
+    );
+  }
 
   // Focus opens on the dialog container, which is neither first nor last in the
   // focusable list — so Shift+Tab is the direction that escapes.
@@ -230,4 +267,8 @@ const check = (label, value) => {
 await browser.close();
 
 console.log(results.join("\n"));
+if (skipped.length) {
+  console.log(`\nNot exercised (${skipped.length}):`);
+  for (const s of skipped) console.log("  " + s);
+}
 if (results.some((line) => line.startsWith("FAIL"))) process.exitCode = 1;

@@ -79,6 +79,11 @@
 
   /* Motion — one shared curve. Confident, physical, settles without bounce. */
   --ease-coat: cubic-bezier(0.16, 1, 0.3, 1);
+  /* The exception, used for the splash fade and nothing else. --ease-coat is an
+     expo-out: it is 80% done in the first quarter of its duration, which is
+     right for something arriving into place and wrong for a fade, where it
+     reads as a hard cut. This one spends its time evenly. */
+  --ease-fade: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Editorial rhythm */
   --spacing-gutter: 1.25rem;
@@ -861,25 +866,27 @@
 }
 
 /* --------------------------------------------------------------------------
-   SPLASH SCREEN — the brush lays the stroke down, then the wording arrives.
+   SPLASH SCREEN — the logo fades up on black, then the black clears in bands.
 
-   Two beats, and it is deliberately short. The site is interactive underneath
-   the whole time:
+     0.20 – 1.00s  the logo fades and settles up into place
+     0.85 – 1.35s  a hairline draws itself underneath
+     1.45 – 1.73s  the logo eases away
+     1.55 – 2.40s  six bands lift, 60ms apart
+     2.40s         the panel is hidden
 
-     0.00 – 0.15s  black plane, nothing on it
-     0.15 – 1.05s  the brush edge crosses; the ORANGE STROKE appears behind it
-     0.40 – 1.20s  the wet edge travels a beat ahead of the stroke
-     1.00 – 1.50s  the WORDING fades up into place — the mark is complete
-     1.45 – 1.85s  the hairline draws itself underneath
-     1.85 – 2.25s  the plane lifts away upward
+   FILL MODES ARE LOAD-BEARING HERE, and the reason is not obvious. A `both`
+   fill applies the FIRST keyframe throughout the animation's delay. Two
+   animations on one element, the second delayed, means the second one's
+   opening keyframe overrides the first one for the whole time the first is
+   trying to run. `splash-away` with `both` pinned the logo at opacity 1 from
+   the very first frame and the fade-in never played once. So: `both` only
+   where an animation starts the element in a state it must hold, `forwards`
+   for anything that takes over later.
 
-   THE DISMISSAL IS PURE CSS — `both` fill ending on visibility: hidden. Nothing
-   has to run for the splash to leave, which is the only acceptable design for
-   something that covers the whole page. pointer-events: none from the first
-   frame, so it can never swallow a tap either.
-
-   The two layers come from scripts/make-logo-layers.mjs and are stacked in one
-   box at one size, so together they are exactly the logo.
+   THE DISMISSAL IS PURE CSS, ending on visibility: hidden. Nothing has to run
+   for the splash to leave, which is the only acceptable design for something
+   covering the whole page. pointer-events: none from the first frame, so it
+   cannot swallow a tap either.
    -------------------------------------------------------------------------- */
 
 .splash {
@@ -888,16 +895,27 @@
   z-index: 200;
   display: grid;
   place-items: center;
-  background-color: var(--color-paper);
   pointer-events: none;
-  /* Warm the black very slightly from below, so the plane is a surface rather
-     than an absence. Same construction as the mega-menu's lit corner. */
-  background-image: radial-gradient(
-    50rem 28rem at 50% 118%,
-    rgb(242 101 34 / 0.14) 0%,
-    transparent 70%
-  );
-  animation: splash-lift 0.4s var(--ease-coat) 1.85s both;
+  /* NO background of its own — the bands hold the black, so the site shows
+     through the gaps as they lift rather than one plane sliding away. */
+  animation: splash-end 0.4s linear 2.4s forwards;
+}
+/* BOTH keyframes are hidden, and the fill is `forwards`, not `both`. Neither is
+   arbitrary.
+   `visibility` does not interpolate like a normal property: for any progress
+   strictly between 0 and 1, `visible` wins outright. And a 0.01s duration after
+   a 2.4s delay never lands on progress exactly 1 — floating point puts it at
+   0.9999999999999787, which reads as "in the active phase" forever. The
+   animation reported `finished` and the panel stayed `visibility: visible` for
+   the life of the page. Pinning hidden at both ends removes the interpolation
+   from the question entirely: every progress value resolves to hidden.
+   `forwards` rather than `both` because a backwards fill would apply the `from`
+   keyframe during the 2.45s delay and hide the splash before it ever played. */
+@keyframes splash-end {
+  from,
+  to {
+    visibility: hidden;
+  }
 }
 
 /* Returning page views in the same session. ?splash clears the flag — see
@@ -906,95 +924,94 @@
   display: none;
 }
 
-/* The box both layers share. next/image `fill` needs a positioned, sized
-   parent, and stacking them here is what makes the two halves one mark. */
-.splash-logo {
-  position: relative;
-  width: 260px;
-  aspect-ratio: 669 / 280;
+/* HOW MANY BANDS lives here rather than in the component, so it can change with
+   the viewport. Splash.tsx renders six; any --n below six simply parks the spare
+   ones off the right-hand edge, where overflow: hidden clips them. Six bands on
+   a 390px phone is 65px each, which reads as a venetian blind rather than a
+   decision — four at ~98px reads deliberate. Never set --n ABOVE the number of
+   spans the component renders, or the right of the screen stays black. */
+.splash-bands {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  --n: 6;
 }
-@media (min-width: 640px) {
-  .splash-logo {
-    width: 340px;
-  }
-}
-@media (min-width: 1024px) {
-  .splash-logo {
-    width: 420px;
+@media (width <= 40rem) {
+  .splash-bands {
+    --n: 4;
   }
 }
 
-/* Beat one — the stroke, revealed by the brush rather than faded in. Mask
-   geometry identical to .hero-line; see src/lib/brush.ts for the numbers.
-   100% -> 0% against the MIRRORED brush uncovers from the LEFT. */
-.splash-stroke {
-  --wipe: 100%;
-  mask-image: var(--brush-mask);
-  -webkit-mask-image: var(--brush-mask);
-  mask-size: 220% 100%;
-  -webkit-mask-size: 220% 100%;
-  mask-repeat: no-repeat;
-  -webkit-mask-repeat: no-repeat;
-  mask-position: var(--wipe) 0;
-  -webkit-mask-position: var(--wipe) 0;
-  animation: splash-paint 0.9s var(--ease-coat) 0.15s both;
+/* Absolutely positioned with a 1px overlap. Six flexed children land on
+   sub-pixel boundaries and hairline seams of the page behind show through. */
+.splash-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--i) * (100% / var(--n)));
+  width: calc(100% / var(--n) + 1px);
+  background-color: var(--color-paper);
+  /* `both`, and here it is correct: the backwards fill holds translateY(0),
+     which is where the band already is. The last band starts at 1.85s and takes
+     0.55s, landing on 2.40s — the same instant the panel goes hidden. */
+  animation: splash-band 0.55s var(--ease-coat) calc(1.55s + var(--i) * 0.06s) both;
 }
-@keyframes splash-paint {
+@keyframes splash-band {
+  from {
+    transform: translateY(0);
+  }
   to {
-    --wipe: 0%;
+    transform: translateY(-101%);
   }
 }
 
-/* Beat two — the wording. A fade with a very small rise: enough to feel placed
-   rather than switched on, not enough to read as a separate animation. */
-.splash-text {
-  opacity: 0;
-  animation: splash-word 0.5s var(--ease-coat) 1s both;
+/* Warms the black from below. Fades with the logo, before the bands move, so
+   it is never left sitting over the site. */
+.splash-glow {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    50rem 28rem at 50% 118%,
+    rgb(242 101 34 / 0.16) 0%,
+    transparent 70%
+  );
+  animation: splash-out 0.3s var(--ease-coat) 1.45s forwards;
 }
-@keyframes splash-word {
+
+.splash-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  animation:
+    splash-in 0.8s var(--ease-fade) 0.2s both,
+    splash-away 0.28s var(--ease-coat) 1.45s forwards;
+}
+@keyframes splash-in {
   from {
     opacity: 0;
-    transform: translateY(0.35rem);
+    transform: translateY(0.6rem) scale(0.965);
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
-
-/* The wet edge. A soft orange smear crossing with the stroke and fading as it
-   leaves, so the reveal reads as wet paint being laid rather than a wipe. */
-.splash-wet {
-  position: absolute;
-  top: -14%;
-  bottom: -14%;
-  left: 0;
-  width: 13%;
-  border-radius: 50%;
-  background: linear-gradient(
-    90deg,
-    rgb(242 101 34 / 0) 0%,
-    rgb(255 130 72 / 0.55) 45%,
-    rgb(242 101 34 / 0.9) 70%,
-    rgb(242 101 34 / 0) 100%
-  );
-  filter: blur(9px);
-  opacity: 0;
-  animation: splash-wet 0.8s var(--ease-coat) 0.4s both;
-}
-@keyframes splash-wet {
-  0% {
-    transform: translateX(-120%);
+/* Takes over from splash-in at 1.45s and wins on the same properties, because it
+   is later in the shorthand list. `forwards`, so it contributes nothing before
+   then — see the note at the top of this section. */
+@keyframes splash-away {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
     opacity: 0;
+    transform: scale(1.03);
   }
-  25% {
-    opacity: 1;
-  }
-  75% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(660%);
+}
+@keyframes splash-out {
+  to {
     opacity: 0;
   }
 }
@@ -1003,32 +1020,18 @@
    used once more as the last beat of the opening. */
 .splash-rule {
   position: absolute;
-  top: calc(50% + 5rem);
+  top: calc(100% + 1.75rem);
   left: 50%;
   width: min(18rem, 62vw);
   height: 1px;
   background: linear-gradient(90deg, var(--color-accent), var(--color-hairline));
   transform: translateX(-50%) scaleX(0);
   transform-origin: left;
-  animation: splash-rule 0.4s var(--ease-coat) 1.45s both;
+  animation: splash-rule 0.5s var(--ease-coat) 0.85s both;
 }
 @keyframes splash-rule {
   to {
     transform: translateX(-50%) scaleX(1);
-  }
-}
-
-@keyframes splash-lift {
-  from {
-    transform: translateY(0);
-    visibility: visible;
-  }
-  99% {
-    visibility: visible;
-  }
-  to {
-    transform: translateY(-101%);
-    visibility: hidden;
   }
 }
 

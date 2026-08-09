@@ -73,7 +73,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <Splash />
         <ScrollPaintLevel />
         <SiteHeader />
         <main id="main">{children}</main>
@@ -81,6 +80,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <MobileActionBar />
         <ChatLauncher />
         <StructuredData />
+        {/* LAST IN THE BODY ON PURPOSE, even though it covers the whole screen.
+            It is position: fixed with z-index 200, so where it sits in the DOM
+            makes no difference to what is on top — but it does decide when the
+            preload scanner finds its logo. First in the body, the logo was
+            discovered before the hero photograph and queued ahead of the page's
+            LCP element. Last, the photograph goes first. */}
+        <Splash />
         <div className="roller-grain" aria-hidden="true" />
       </body>
     </html>
