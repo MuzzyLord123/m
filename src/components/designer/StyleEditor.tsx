@@ -418,6 +418,24 @@ function PageLinkDropdown({ value, onChange, siteId }: { value: string; onChange
 
 /* ── Main StyleEditor ───────────────────────────────── */
 
+/**
+ * Selecting an element used to block for about a tenth of a second before
+ * anything moved. The cost was here: twelve sections, several hundred
+ * controls and roughly a hundred icons, all rebuilt from scratch in the same
+ * render pass as the click, because the editor context changes on every
+ * selection and this panel reads it.
+ *
+ * The click and the panel are now separated. The selection itself is urgent
+ * and lands immediately - the canvas highlights, the toolbar moves. Rebuilding
+ * the controls is deferred to a low-priority pass that React can interrupt if
+ * you select something else in the meantime, which is exactly what happens
+ * when somebody is clicking through a layout looking for the right element.
+ *
+ * The body is memoised so the urgent pass genuinely costs nothing: it is
+ * handed the previous element and bails out before rendering a single row.
+ * Without the memo the deferral would buy nothing, because the urgent pass
+ * would rebuild the same tree anyway.
+ */
 export function StyleEditor({ siteId }: { siteId?: string }) {
   const { state, dispatch, selectedElement } = useEditor();
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
@@ -426,15 +444,41 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
     effects: false, filters: false, transform: false, transition: false,
   });
 
-  const toggle = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  const toggle = React.useCallback(
+    (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] })), []);
+
+  const deferred = React.useDeferredValue(selectedElement);
 
   // The panel above already says nothing is selected, and says it better -
   // with the shortcut to do something about it. A second empty state under
   // the first, complete with a pulsing icon, was the panel explaining the
   // same nothing twice.
-  if (!selectedElement) return null;
+  if (!deferred) return null;
 
-  const bp = state.breakpoint;
+  return (
+    <StyleEditorBody
+      element={deferred}
+      bp={state.breakpoint}
+      dispatch={dispatch}
+      siteId={siteId}
+      openSections={openSections}
+      toggle={toggle}
+    />
+  );
+}
+
+type BodyProps = {
+  element: NonNullable<ReturnType<typeof useEditor>['selectedElement']>;
+  bp: ReturnType<typeof useEditor>['state']['breakpoint'];
+  dispatch: ReturnType<typeof useEditor>['dispatch'];
+  siteId?: string;
+  openSections: Record<string, boolean>;
+  toggle: (key: string) => void;
+};
+
+const StyleEditorBody = React.memo(function StyleEditorBody(
+  { element: selectedElement, bp, dispatch, siteId, openSections, toggle }: BodyProps,
+) {
   const currentStyles = { ...(selectedElement.styles.desktop ?? {}), ...(bp !== 'desktop' ? selectedElement.styles[bp] ?? {} : {}) };
 
   const updateStyle = (key: StyleKey, value: string) => {
@@ -960,4 +1004,4 @@ export function StyleEditor({ siteId }: { siteId?: string }) {
       </div>
     </ScrollArea>
   );
-}
+});
