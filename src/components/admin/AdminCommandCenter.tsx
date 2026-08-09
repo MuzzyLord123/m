@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { RefreshCw, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePlatformOwner } from '@/hooks/usePlatformOwner';
 import { composeOfficeBriefing } from '@/lib/greetings';
 import {
   GreetingHeader, Panel, PanelHeader, PanelRow, StatusBadge, Money,
@@ -48,6 +50,12 @@ interface DashboardData {
 
 export default function AdminCommandCenter() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  // The Agent Office door. Shown only to platform owners, because the gate
+  // behind it is owners-only and a locked door nobody can open is just a
+  // dead end. The gate re-checks server-side regardless - this is what you
+  // can see, not what you are allowed to do.
+  const { isOwner: isPlatformOwner } = usePlatformOwner();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [aiSummary, setAiSummary] = useState('');
@@ -307,6 +315,29 @@ export default function AdminCommandCenter() {
           </span>
         }
       />
+
+      {/* The way into the Agent Office. The gate page existed and was fully
+          built, but nothing ever routed to it, so the office was reachable
+          only by typing a /lounge URL from memory. Deliberately above the
+          loading branch: it does not depend on the dashboard's data fetch. */}
+      {isPlatformOwner && (
+        <button
+          type="button"
+          onClick={() => navigate('/admin/agent-office')}
+          className="group flex w-full items-center gap-3 rounded-[10px] border border-cyan-300/20 bg-cyan-400/[0.04] px-4 py-3 text-left transition-colors duration-150 hover:bg-cyan-400/[0.09]"
+        >
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[8px] border border-cyan-300/25 bg-cyan-400/[0.07] font-mono text-[13px] font-bold text-cyan-100">
+            Q
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[13px] font-semibold text-foreground">Agent Office</span>
+            <span className="block font-mono text-[9.5px] uppercase tracking-[0.16em] text-muted-foreground">
+              restricted · platform owners
+            </span>
+          </span>
+          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-cyan-200/70 transition-transform duration-150 group-hover:translate-x-0.5" />
+        </button>
+      )}
 
       {loading ? (
         <div className="space-y-3" aria-busy>

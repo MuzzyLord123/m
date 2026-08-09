@@ -11,9 +11,13 @@
 | **Data** | **Not migrated.** Needs a dump you run — see below |
 | **Edge functions** | Not deployed. Need their secrets first — see below |
 
-Frontend config for the new project is in `.env.new-project`. Do **not** rename it to
-`.env` until the schema and data are actually in place, or the app will point at an
-empty database.
+> **This migration is finished — the page below is a record, not a
+> checklist.** `.env` points at `tkvphfxqyoavnuibvmfp`, the schema is in
+> place, and the edge functions are deployed and serving. `.env.new-project`
+> has been deleted: it had become a byte-identical copy of `.env`, and two
+> committed files holding the same credentials is a good way to edit the
+> wrong one. Two rows in the table above ("Data", "Edge functions") describe
+> the state partway through and were never updated.
 
 ---
 

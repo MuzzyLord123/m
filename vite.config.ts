@@ -1,9 +1,43 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
+/**
+ * A production build with no Supabase configuration used to succeed.
+ *
+ * Vite never evaluates app modules while bundling, so a missing
+ * VITE_SUPABASE_URL went unnoticed at build time: it was inlined as the
+ * literal string "undefined", the deploy went green, and the site then
+ * white-screened on every route, because createClient throws during module
+ * evaluation. A dead site behind a successful build is the worst failure
+ * shape there is - nothing in the deploy log says anything is wrong.
+ *
+ * So the build asserts its own configuration instead. Missing variables
+ * stop the build and name themselves, which a host surfaces as a failed
+ * deploy with the previous version left serving.
+ */
+function requireSupabaseEnv(mode: string) {
+  const env = loadEnv(mode, process.cwd(), "VITE_");
+  const missing = [
+    "VITE_SUPABASE_URL",
+    "VITE_SUPABASE_PUBLISHABLE_KEY",
+    "VITE_SUPABASE_PROJECT_ID",
+  ].filter((k) => !env[k] && !process.env[k]);
+  if (missing.length) {
+    throw new Error(
+      `Build stopped: missing ${missing.join(", ")}.\n` +
+        "These are read at build time and inlined into the bundle; without them the " +
+        "site builds cleanly and then fails to start in the browser.\n" +
+        "Set them in your host's environment variables (Vercel: Project Settings -> " +
+        "Environment Variables), or keep the committed .env in place.",
+    );
+  }
+}
+
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  if (mode === "production") requireSupabaseEnv(mode);
+  return {
   server: {
     host: "::",
     port: 8080,
@@ -71,4 +105,5 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-}));
+  };
+});

@@ -28,3 +28,13 @@ dist-preview
 
 # Backup of the pre-migration Lovable project env
 .env.lovable-old.bak
+
+# One lockfile is the source of truth. CI and Vercel both install with
+# npm ci from package-lock.json; a second, disagreeing lockfile only
+# gives the build a chance to resolve a different dependency tree than
+# the one that was tested.
+bun.lock
+bun.lockb
+
+# tsc -b build cache
+*.tsbuildinfo

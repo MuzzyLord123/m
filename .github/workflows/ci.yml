@@ -1,0 +1,43 @@
+# Every push is built. A commit that cannot build is caught here rather
+# than on the live site. No secrets needed - this runs out of the box.
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      # `npm run typecheck` is `tsc -b`, and the -b carries the weight:
+      # tsconfig.json is "files": [] plus project references, so a plain
+      # `tsc --noEmit` walks nothing, exits 0 in under a second, and waves
+      # through a file containing a deliberate type error. This step was
+      # that no-op for exactly one commit. If you ever change this line,
+      # prove the gate still bites by pushing a deliberate error and
+      # watching it go red - a green tick means nothing on its own here.
+      #
+      # This was briefly a ratchet against a baseline of 18. All 18 lived in
+      # two hooks querying saved_templates and ai_model_settings, tables the
+      # app has always read but which were lost in the migration off Lovable
+      # and never recreated. Restoring the two tables was the actual fix, so
+      # the count is 0 and this is a plain gate again. Do not reintroduce a
+      # baseline to get a red build green - fix the cause or the number
+      # ratchets up forever.
+      - name: Typecheck
+        run: npm run typecheck
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: dist
+          retention-days: 14

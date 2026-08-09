@@ -1,0 +1,38 @@
+# Optional: deploy from GitHub Actions instead of Vercel's own Git
+# integration. OFF unless you switch it on, so it can never fail a push
+# that was never meant to deploy.
+#
+# To use it: repo Settings → Secrets and variables → Actions
+#   Variables → DEPLOY_VIA_ACTIONS = true
+#   Secrets   → VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+#
+# Most people should NOT need this - connecting the repo in the Vercel
+# dashboard already redeploys on every push. See docs/DEPLOYMENT.md.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  vercel:
+    if: vars.DEPLOY_VIA_ACTIONS == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Deploy to Vercel
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        # No --prebuilt flag: a server-side build is already the default,
+        # and `--prebuilt=false` is not a dependable way to say "off" - the
+        # CLI reads the flag's presence as the switch, so the old form
+        # risked deploying an empty .vercel/output on every run.
+        run: npx --yes vercel@latest deploy --prod --token "${{ secrets.VERCEL_TOKEN }}" --yes

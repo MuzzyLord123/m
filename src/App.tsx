@@ -30,6 +30,8 @@ const Packages = lazy(() => import("./pages/Packages"));
 const Starter = lazy(() => import("./pages/Starter"));
 const Growth = lazy(() => import("./pages/Growth"));
 const StoreCheckout = lazy(() => import("./pages/StoreCheckout"));
+const PayPage = lazy(() => import("./pages/PayPage"));
+const CheckoutSuccess = lazy(() => import("./pages/CheckoutSuccess"));
 const Professional = lazy(() => import("./pages/Professional"));
 const Enterprise = lazy(() => import("./pages/Enterprise"));
 const CustomElite = lazy(() => import("./pages/CustomElite"));
@@ -127,6 +129,9 @@ const AdminMarketingWorkshop = lazy(() => import("./pages/admin/AdminMarketingWo
 const LoungeWorkshop = lazy(() => import("./pages/lounge/LoungeWorkshop"));
 const LoungeProducts = lazy(() => import("./pages/lounge/LoungeProducts"));
 const LoungeCRM = lazy(() => import("./pages/lounge/LoungeCRM"));
+const AgentOffice = lazy(() => import("./pages/lounge/AgentOffice"));
+const AgentOfficeGate = lazy(() => import("./pages/admin/AgentOfficeGate"));
+const FleetModels = lazy(() => import("./pages/admin/FleetModels"));
 const CRMShell = lazy(() => import("./pages/lounge/crm/CRMShell"));
 const AdminManagement = lazy(() => import("./pages/admin/AdminManagement"));
 const LoungeAIBuilder = lazy(() => import("./pages/lounge/LoungeAIBuilder"));
@@ -235,6 +240,12 @@ function AnimatedRoutes() {
         <Routes location={location} key={routeKey}>
           <Route path="/" element={<PageTransition><Index /></PageTransition>} />
           <Route path="/checkout" element={<PageTransition><StoreCheckout /></PageTransition>} />
+          {/* Public: customers land here from the storefront embed to pay */}
+          <Route path="/pay/:sessionId" element={<PageTransition><PayPage /></PageTransition>} />
+          {/* Stripe's success redirect for the site-builder checkout. This
+              route was referenced by create-product-checkout long before it
+              existed, so paying customers landed on the not-found screen. */}
+          <Route path="/checkout-success" element={<PageTransition><CheckoutSuccess /></PageTransition>} />
           <Route path="/packages" element={<PageTransition><Packages /></PageTransition>} />
           {/* Additive: Pricing.tsx was imported but never routed; the admin
               visual editor already links to /pricing. */}
@@ -305,6 +316,13 @@ function AnimatedRoutes() {
           <Route path="/lounge/crm-legacy" element={<ProtectedRoute><CustomerGuard><LoungeCRM /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/ai-builder" element={<ProtectedRoute><CustomerGuard><LoungeAIBuilder /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office" element={<ProtectedRoute><CustomerGuard><LoungeOffice /></CustomerGuard></ProtectedRoute>} />
+          <Route path="/lounge/office/agent-office" element={<ProtectedRoute><AgentOffice /></ProtectedRoute>} />
+          {/* The admin-side door to the same office. AgentOfficeGate was built
+              and then never routed, so the only way in was to type the
+              /lounge URL from memory - the admin dashboard had no way there
+              at all. The gate itself does the owners-only check. */}
+          <Route path="/admin/agent-office" element={<ProtectedRoute><AgentOfficeGate /></ProtectedRoute>} />
+          <Route path="/admin/fleet-models" element={<ProtectedRoute><FleetModels /></ProtectedRoute>} />
           <Route path="/lounge/office/word/:docId" element={<ProtectedRoute><CustomerGuard><LoungeWordEditor /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/word-home" element={<ProtectedRoute><CustomerGuard><OfficeWordHome /></CustomerGuard></ProtectedRoute>} />
           <Route path="/lounge/office/excel-home" element={<ProtectedRoute><CustomerGuard><OfficeExcelHome /></CustomerGuard></ProtectedRoute>} />
@@ -424,7 +442,13 @@ const App = () => {
   const isVisualEditorFrame = typeof window !== "undefined" &&
     window.parent !== window &&
     new URLSearchParams(window.location.search).get("__edit") === "1";
-  const [showInitialSplash, setShowInitialSplash] = useState(!isVisualEditorFrame);
+  // Also on /pay/ and /checkout-success: a customer redirected from a store
+  // to complete a payment - or sent back by Stripe having just paid - must
+  // land on their order immediately, not on a brand intro.
+  const isCustomerPayPage = typeof window !== "undefined" &&
+    (window.location.pathname.startsWith("/pay/") ||
+      window.location.pathname.startsWith("/checkout-success"));
+  const [showInitialSplash, setShowInitialSplash] = useState(!isVisualEditorFrame && !isCustomerPayPage);
 
   return (
     <QueryClientProvider client={queryClient}>

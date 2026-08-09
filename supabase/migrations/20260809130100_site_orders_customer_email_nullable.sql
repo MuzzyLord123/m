@@ -1,0 +1,11 @@
+-- customer_email was NOT NULL, but the only writer (create-product-checkout)
+-- creates the order when a Stripe Checkout session is opened - before the
+-- buyer has typed an email. Stripe collects it during checkout, so it is
+-- genuinely unknown at insert time and known at verify time. NOT NULL
+-- described a sequence that cannot happen, and combined with a missing
+-- user_id it meant every insert on that path failed silently while the
+-- buyer was still handed a payment URL.
+--
+-- The column now matches reality and is backfilled during verification.
+-- Safe to relax: the table had no rows.
+ALTER TABLE public.site_orders ALTER COLUMN customer_email DROP NOT NULL;
