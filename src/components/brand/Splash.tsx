@@ -74,5 +74,16 @@ export function Splash() {
  * flashes the splash. Inlined in <head> deliberately: as a module it would run
  * after paint and the splash would appear and then vanish, which is worse than
  * not having one.
+ *
+ * `?splash` FORCES IT, and exists because once-per-session made the splash
+ * almost impossible to look at. The first load plays it, and every load after
+ * that in the same browser session correctly does not — which is right for a
+ * visitor and useless for anyone trying to review it, or show it to a client.
+ * Add ?splash to any address and it plays, as many times as you like:
+ *
+ *     https://…/?splash
+ *
+ * It clears the flag rather than just skipping the check, so a plain reload
+ * afterwards behaves like a first visit too.
  */
-export const SPLASH_GUARD = `try{var k='tpm-splash';if(sessionStorage.getItem(k)){document.documentElement.dataset.splash='seen'}else{sessionStorage.setItem(k,'1')}}catch(e){}`;
+export const SPLASH_GUARD = `try{var k='tpm-splash';if(location.search.indexOf('splash')>-1){sessionStorage.removeItem(k)}else if(sessionStorage.getItem(k)){document.documentElement.dataset.splash='seen'}else{sessionStorage.setItem(k,'1')}}catch(e){}`;
