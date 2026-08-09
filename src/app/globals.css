@@ -861,6 +861,148 @@
 }
 
 /* --------------------------------------------------------------------------
+   SPLASH SCREEN — the logo painted onto a black canvas, then the canvas lifts.
+
+   Timeline, and it is deliberately short. A splash is a held breath; the whole
+   thing is done in 1.85s and the site is interactive underneath the entire
+   time:
+
+     0.00 – 0.10s  black plane, nothing on it
+     0.10 – 1.00s  the brush edge crosses; the logo appears behind it
+     0.35 – 1.15s  the wet orange edge travels a beat ahead of the reveal
+     0.95 – 1.35s  the rule draws itself under the mark
+     1.45 – 1.85s  the plane lifts away upward
+
+   THE DISMISSAL IS PURE CSS — `both` fill mode ending on visibility: hidden.
+   Nothing has to run for the splash to leave, which is the only acceptable
+   design for something that covers the whole page. pointer-events: none from
+   the first frame, so it can never swallow a tap either.
+   -------------------------------------------------------------------------- */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background-color: var(--color-paper);
+  pointer-events: none;
+  /* Warm the black very slightly from below, so the plane is a surface rather
+     than an absence. Same construction as the mega-menu's lit corner. */
+  background-image: radial-gradient(
+    50rem 28rem at 50% 118%,
+    rgb(242 101 34 / 0.14) 0%,
+    transparent 70%
+  );
+  animation: splash-lift 0.4s var(--ease-coat) 1.45s both;
+}
+
+/* Returning page views in the same session, and anyone who has asked for less
+   movement. Both get the site immediately. */
+:root[data-splash="seen"] .splash {
+  display: none;
+}
+
+.splash-inner {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+/* The mark, revealed by the brush rather than faded in. Identical mask geometry
+   to .hero-line — see src/lib/brush.ts for why the numbers are what they are. */
+.splash-mark {
+  /* 100% -> 0% with the MIRRORED brush uncovers from the LEFT. The upright
+     brush run 0% -> 100% uncovers from the right, which reads backwards for a
+     stroke laying paint down. See src/lib/brush.ts. */
+  --wipe: 100%;
+  mask-image: var(--brush-mask);
+  -webkit-mask-image: var(--brush-mask);
+  mask-size: 220% 100%;
+  -webkit-mask-size: 220% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: var(--wipe) 0;
+  -webkit-mask-position: var(--wipe) 0;
+  animation: splash-paint 0.9s var(--ease-coat) 0.1s both;
+}
+@keyframes splash-paint {
+  to {
+    --wipe: 0%;
+  }
+}
+
+/* The wet edge. A soft orange smear that crosses the mark and fades as it
+   leaves, so the reveal reads as wet paint being laid rather than a wipe. */
+.splash-wet {
+  position: absolute;
+  top: -12%;
+  bottom: -12%;
+  left: 0;
+  width: 13%;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    rgb(242 101 34 / 0) 0%,
+    rgb(255 130 72 / 0.55) 45%,
+    rgb(242 101 34 / 0.9) 70%,
+    rgb(242 101 34 / 0) 100%
+  );
+  filter: blur(9px);
+  opacity: 0;
+  animation: splash-wet 0.8s var(--ease-coat) 0.35s both;
+}
+@keyframes splash-wet {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(520%);
+    opacity: 0;
+  }
+}
+
+/* The hairline under the mark, drawn left to right — the site's section rule,
+   used once more as the last beat of the opening. */
+.splash-rule {
+  position: absolute;
+  top: calc(50% + 4.5rem);
+  left: 50%;
+  width: min(18rem, 62vw);
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-hairline));
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: left;
+  animation: splash-rule 0.4s var(--ease-coat) 0.95s both;
+}
+@keyframes splash-rule {
+  to {
+    transform: translateX(-50%) scaleX(1);
+  }
+}
+
+@keyframes splash-lift {
+  from {
+    transform: translateY(0);
+    visibility: visible;
+  }
+  99% {
+    visibility: visible;
+  }
+  to {
+    transform: translateY(-101%);
+    visibility: hidden;
+  }
+}
+
+/* --------------------------------------------------------------------------
    Headline rise. Every section heading comes up out of the rule above it,
    masked rather than faded — the words arrive edge-first, the way the hero
    wipe does, so the two read as the same gesture at two scales.
@@ -1143,6 +1285,11 @@
   }
   .roller-band,
   .scroll-level {
+    display: none;
+  }
+  /* Someone who has asked for less movement should not be shown a full-screen
+     animation before they are allowed to read anything. */
+  .splash {
     display: none;
   }
   /* The band holds still. Every word is already on screen at offset 0, so
