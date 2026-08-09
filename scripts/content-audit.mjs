@@ -93,7 +93,7 @@ if (!canonical) {
    launch, so it is the right place to catch it — a failure, not a warning,
    because "ready to publish" is exactly what it is not. */
 const previewOn = await fetch(BASE + "/services").then((r) =>
-  r.text().then((html) => html.includes("This page is part of the")),
+  r.text().then((html) => html.includes('data-preview-locked="true"')),
 );
 if (previewOn) {
   failures.push(

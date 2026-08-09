@@ -13,9 +13,15 @@ export const metadata: Metadata = {
  * What a prospect sees when they open a page that is not part of the preview.
  *
  * It is deliberately a proper page rather than an error. Somebody is being
- * shown this to decide whether to buy the rest of the site, so it should read
- * as "here is what else there is" and not as "something went wrong" — no 404
- * styling, no apology, and a way back into the two galleries that ARE built.
+ * shown this to decide whether to commission the rest of the site, so it should
+ * read as "here is what else there is" and not as "something went wrong" — no
+ * 404 styling, no apology, and a way back into the two galleries that ARE built.
+ *
+ * WORDING MATTERS HERE. It used to say the page "is part of the full build",
+ * which reads as though the whole site exists and access is being withheld —
+ * exactly the wrong impression when the rest has not been commissioned. Every
+ * line now says the same thing: these pages have not been submitted to build
+ * yet. Keep it that way if this copy is edited.
  *
  * Reached by a rewrite from src/middleware.ts, so the address bar still shows
  * the page that was asked for.
@@ -30,19 +36,21 @@ export default function PreviewLockedPage() {
   ];
 
   return (
-    <section className="pt-[9rem] pb-24 lg:pt-[13rem] lg:pb-32">
+    /* data-preview-locked is what audit:content looks for. A grep on the
+       headline broke the safety net the moment the headline was reworded. */
+    <section data-preview-locked="true" className="pt-[9rem] pb-24 lg:pt-[13rem] lg:pb-32">
       <div className="shell">
         <p className="eyebrow text-accent">Preview</p>
 
         <h1 className="mt-5 max-w-4xl font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[3.5rem] lg:text-[4.25rem]">
-          This page is part of the{" "}
-          <em className="inline-block pb-[0.06em] leading-[1.1] italic">full</em> build.
+          This page has not been{" "}
+          <em className="inline-block pb-[0.06em] leading-[1.1] italic">built</em> yet.
         </h1>
 
         <p className="measure mt-6 text-[1.0625rem] leading-relaxed text-ink-soft">
           What you are looking at is a live preview: the home page and both galleries, built
-          properly and running on the real thing. The rest of the site is designed and waiting —
-          it is switched off here so there is something left to show you.
+          properly and running on the real thing. This page is part of the full site build, which
+          has not been submitted to build yet.
         </p>
 
         {/* The two that ARE built, as the obvious next click. */}
@@ -88,7 +96,7 @@ export default function PreviewLockedPage() {
 
         {/* What the rest of the build contains — the reason this page exists. */}
         <div className="mt-16 lg:max-w-3xl">
-          <p className="eyebrow text-ink-mute">Also in the full build</p>
+          <p className="eyebrow text-ink-mute">The rest of the full site build</p>
           <div className="tape-line mt-3" aria-hidden="true" />
           <ul className="mt-2">
             {rest.map((item, index) => (

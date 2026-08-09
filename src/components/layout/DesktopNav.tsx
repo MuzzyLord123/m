@@ -93,11 +93,16 @@ export function DesktopNav() {
                 <Lock weight="light" className="size-4 text-accent" />
                 <span className="font-medium text-accent">Preview</span>
                 <span className="text-ink-mute">
-                  — the home page and both galleries are built. The greyed pages are part of
-                  the full site.
+                  — the home page and both galleries are built. The greyed pages are part of the
+                  full site build, which has not been submitted to build yet.
                 </span>
               </p>
-              <p className="flex items-center gap-2 text-ink-mute">
+              {/* Hidden until 1280px. The preview sentence is long, and at
+                  exactly 1024 the two halves of this strip met with no gap at
+                  all — measured, not guessed. The message is the reason the
+                  strip is here in preview mode, so the service area is what
+                  gives way. */}
+              <p className="hidden items-center gap-2 text-ink-mute xl:flex">
                 <MapPin weight="light" className="size-4 text-accent" />
                 {site.serviceArea}
               </p>

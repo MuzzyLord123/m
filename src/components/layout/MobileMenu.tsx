@@ -154,8 +154,8 @@ export function MobileMenu() {
                 >
                   <Lock weight="light" aria-hidden="true" className="mt-px size-4 shrink-0" />
                   <span>
-                    This is a preview. Home and both galleries are built — the greyed pages are
-                    part of the full site.
+                    This is a preview. Home and both galleries are built. The greyed pages are
+                    part of the full site build, which has not been submitted to build yet.
                   </span>
                 </p>
               )}
