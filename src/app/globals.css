@@ -1176,8 +1176,8 @@
 }
 
 /* --------------------------------------------------------------------------
-   Trade marquee. A full-bleed orange band whose words track the reader's own
-   scrolling rather than a timer. See TradeMarquee.tsx for why.
+   Trade marquee. A full-bleed orange band whose words drift steadily to the
+   right, at one constant speed, for as long as the band is on screen.
    -------------------------------------------------------------------------- */
 
 .marquee-band {
@@ -1190,30 +1190,28 @@
 }
 
 .marquee-track {
-  /* -50% is exactly one of the two identical copies, which is what makes the
-     loop seamless. Anything else shows a jump at the wrap. */
   will-change: transform;
+  /* `linear` and `infinite`, with no delay: one direction, one speed, no pauses
+     and no easing at the wrap. An eased marquee visibly slows down twice per
+     loop, which is what makes a band look like it is stalling. */
+  animation: marquee-run 32s linear infinite;
 }
 
-@supports (animation-timeline: scroll()) {
-  .marquee-track {
-    animation: marquee-run linear both;
-    animation-timeline: scroll(root block);
-  }
-}
-
-@supports not (animation-timeline: scroll()) {
-  .marquee-track {
-    animation: marquee-run 28s linear infinite;
-  }
-}
-
+/* RIGHTWARD, AND SEAMLESS — the direction is the whole reason for the -50%
+   start. The track holds two identical copies of the six trades, so it is twice
+   as wide as it needs to be. Beginning at -50% puts the second copy where the
+   first would sit and parks the first copy off-screen to the left, which is what
+   gives the words somewhere to come FROM as they travel right. Running to 0
+   lands on the first copy in exactly the position the second copy started in:
+   the same pixels, so the restart is invisible.
+   -50% is not a tuning value. It is precisely one copy. Any other number shows a
+   jump every 32 seconds. */
 @keyframes marquee-run {
   from {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(-50%, 0, 0);
   }
   to {
-    transform: translate3d(-50%, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 

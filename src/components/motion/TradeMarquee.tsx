@@ -1,24 +1,25 @@
 import { services } from "@/data/services";
 
 /**
- * A full-bleed band of brand orange carrying the six trades, drifting sideways.
+ * A full-bleed band of brand orange carrying the six trades, drifting steadily
+ * to the right.
  *
- * WHY IT MOVES WITH THE SCROLL RATHER THAN ON A TIMER.
- * The usual marquee runs on its own clock: it is moving before you arrive, it
- * is still moving after you leave, and it says nothing about where you are.
- * This one is on a scroll timeline — the band tracks the reader's own hand,
- * accelerating when they flick and settling when they stop. It reads as part
- * of the page rather than as an ornament bolted onto it, and it costs nothing:
- * no JavaScript, no scroll listener, composited off the main thread.
+ * ONE DIRECTION, ONE SPEED. This used to run on a scroll timeline, so the band
+ * tracked the reader's hand: it drifted left as they scrolled down, ran
+ * BACKWARDS when they scrolled up, and stopped dead whenever they stopped. That
+ * is a nice idea and it reads as a fault — a band that changes direction looks
+ * like it is glitching, and a band that halts looks broken. It is now a plain
+ * 32s linear loop: the same direction and the same pace whatever the reader
+ * does, which is the only thing a marquee has to get right. Still no
+ * JavaScript, still no scroll listener, still composited off the main thread.
  *
- * Where scroll timelines are unsupported (Safari at the time of writing) it
- * falls back to a slow continuous drift, which is the ordinary marquee — worse,
- * but never broken. Under prefers-reduced-motion it simply holds still, and the
- * words are all still on screen because the strip starts at its natural offset.
+ * The list is duplicated once, and the pair starts at -50% and runs to 0 — see
+ * the keyframes in globals.css for why that particular pair of numbers is what
+ * makes a RIGHTWARD loop seamless. The duplicate is aria-hidden: a screen reader
+ * should hear the six trades once, not twice.
  *
- * The list is duplicated once and the pair translated by exactly -50%, which is
- * what makes the loop seamless. The duplicate is aria-hidden: a screen reader
- * should hear the six trades once.
+ * Under prefers-reduced-motion it holds still at offset 0, where the words are
+ * already on screen, so nothing is hidden by stopping it.
  */
 export function TradeMarquee() {
   const words = services.map((service) => service.title);
