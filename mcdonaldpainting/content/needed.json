@@ -1,0 +1,162 @@
+[
+  {
+    "id": "safecontractor",
+    "priority": 1,
+    "question": "Can you send the current SafeContractor certificate as a PDF or photograph? We need the certificate number, what the assessment covered, and the expiry date.",
+    "why": "It is the only third-party accreditation the company holds and it is the first thing a facilities manager or a school business manager looks for. At the moment the site says the words and shows nothing. With the certificate it becomes a page a buyer can forward to their compliance team.",
+    "where": "content/site.ts → accreditation, and public/compliance/ for the certificate image",
+    "blocksLaunch": true
+  },
+  {
+    "id": "insurance",
+    "priority": 1,
+    "question": "What are the public liability and employers' liability limits, who is the insurer, and when does the policy renew?",
+    "why": "Every pre-qualification questionnaire asks for these two figures and most set a minimum. Without them the compliance page says 'fully insured', which is what every decorator's site says. With them the enquiry can proceed the same day.",
+    "where": "content/site.ts → insurance",
+    "blocksLaunch": true
+  },
+  {
+    "id": "email",
+    "priority": 1,
+    "question": "Which email address should the site publish — info@mcdonaldpainting.co.uk or something on mcdonaldpaintingcontractors.co.uk? Do you own both domains, and is mail on the published one definitely being read?",
+    "why": "The site is on one domain and the published email is on another. Procurement teams whitelist sending domains, so a quote that arrives from an address that does not match the website gets held in a spam quarantine or read as a phishing attempt. Until it is settled the site shows the phone number only.",
+    "where": "content/site.ts → email",
+    "blocksLaunch": true
+  },
+  {
+    "id": "canonical-host",
+    "priority": 1,
+    "question": "Before we touch DNS: does the live site answer on www.mcdonaldpaintingcontractors.co.uk or on the bare domain, and which one is verified in Google Search Console?",
+    "why": "Changing the canonical host on cutover is the one migration mistake that cannot be quietly undone. Whichever host the current site canonicalises to is the host the new one keeps.",
+    "where": "content/site.ts → site.url, and MIGRATION.md §3",
+    "blocksLaunch": true
+  },
+  {
+    "id": "photographs",
+    "priority": 1,
+    "question": "We need the original full-resolution photographs of the high school assembly hall, the factory work and the warehouse work — off your phone, not saved down from Instagram. Anything from the shop exterior in Willaston too.",
+    "why": "These three jobs are the evidence that the company works in education and industry. Instagram re-encodes and crops everything it is given, and the new design runs photographs full width, so a saved-down copy will look soft. The school and factory images are also the hardest to go back and re-shoot.",
+    "where": "public/photographs/<job>/ and the matching content/projects/*.mdx",
+    "blocksLaunch": true
+  },
+  {
+    "id": "project-detail",
+    "priority": 2,
+    "question": "For the assembly hall, the Willaston shop and the factory or warehouse job: roughly when was it, who was the client (a school, a main contractor, a landlord?), how long were you on site, what was the coating system, and was the building in use while you worked?",
+    "why": "This is what turns a photograph into evidence. A buyer reading a project record is checking one thing — have they done this in a building like mine, while it was open. Six words of scope answers it; a gallery does not.",
+    "where": "content/projects/*.mdx frontmatter",
+    "blocksLaunch": true
+  },
+  {
+    "id": "testimonials",
+    "priority": 2,
+    "question": "The current site has a testimonials page. Where did those quotes come from, and can we attribute them — at least first name, role and organisation type? Are any of them from commercial clients rather than householders?",
+    "why": "Two commercial quotes, attributed, are worth more on this site than a dozen anonymous domestic ones. Unattributed quotes read as written in-house, which devalues the real ones sitting next to them.",
+    "where": "content/copy/testimonials.ts",
+    "blocksLaunch": true
+  },
+  {
+    "id": "headcount",
+    "priority": 2,
+    "question": "How many operatives are there, and how many separate teams can you put on site at once?",
+    "why": "This is the question behind every enquiry from a main contractor: can this firm actually resource my job. It also decides whether a multi-building programmed contract is credible.",
+    "where": "content/site.ts → workforce",
+    "blocksLaunch": false
+  },
+  {
+    "id": "founded",
+    "priority": 2,
+    "question": "What year did the company start trading? Someone needs to read the incorporation date on the Companies House record rather than work it back from the company number.",
+    "why": "Years trading is one of the four figures in the data strip and it appears in the structured data. The company number suggests 2016, but a suggestion is not a source and this is the kind of detail a buyer checks.",
+    "where": "content/site.ts → founded",
+    "blocksLaunch": false
+  },
+  {
+    "id": "registered-office",
+    "priority": 2,
+    "question": "What is the registered office address as it appears at Companies House?",
+    "why": "A contractor's footer carries the registered name, number and office. It is also on the pre-qualification questionnaire, so it may as well be somewhere it can be copied from.",
+    "where": "content/site.ts → registeredOffice",
+    "blocksLaunch": false
+  },
+  {
+    "id": "dbs",
+    "priority": 2,
+    "question": "Are the operatives who work in schools DBS checked, and does the company keep a record of it?",
+    "why": "No school will let an unchecked adult work in an occupied building, and a school business manager will not ask twice — they will move to the next contractor. If the answer is yes it belongs on the education page in the first paragraph.",
+    "where": "content/sectors/education.mdx and content/copy/compliance.ts",
+    "blocksLaunch": false
+  },
+  {
+    "id": "coating-systems",
+    "priority": 2,
+    "question": "Which coating systems and manufacturers do you actually work with on steelwork, floors and roofs — and what surface preparation grades are the team set up for?",
+    "why": "The capabilities page currently explains what these specifications involve, which is useful but generic. Naming the systems the company has applied turns it into a capability statement. Nothing is named until you name it — we are not putting a manufacturer on the site on the strength of an assumption.",
+    "where": "content/copy/capabilities.ts",
+    "blocksLaunch": false
+  },
+  {
+    "id": "references",
+    "priority": 2,
+    "question": "Are there clients who would take a reference call — ideally one in education, one in industry, and one on a maintenance contract? Have they said yes to being named, or only to being phoned?",
+    "why": "'References on request' is on every contractor's site. 'Named references available for education and industrial contracts' is a different sentence, and it is only worth writing once it is true.",
+    "where": "content/copy/compliance.ts",
+    "blocksLaunch": false
+  },
+  {
+    "id": "out-of-hours",
+    "priority": 3,
+    "question": "Do you work evenings, weekends, shutdowns and school holidays — and is there a limit on how far you will travel to do it?",
+    "why": "Occupied buildings are the whole commercial offer. A school wants the summer holiday, a factory wants the shutdown week, a restaurant wants Sunday night to Tuesday morning. If the answer is yes it needs saying plainly on every sector page.",
+    "where": "content/copy/programmed.ts and each sector page",
+    "blocksLaunch": false
+  },
+  {
+    "id": "other-accreditations",
+    "priority": 3,
+    "question": "Do you hold CHAS, Constructionline, ISO 9001 or ISO 14001, or a CSCS card scheme registration? Is anything in progress?",
+    "why": "Some frameworks will not accept a contractor without one of them. If none are held, that is fine and the site says nothing about it — but it is worth knowing which door is currently closed, and Constructionline in particular is a low bar for the work being chased.",
+    "where": "content/copy/compliance.ts",
+    "blocksLaunch": false
+  },
+  {
+    "id": "asbestos-access",
+    "priority": 3,
+    "question": "Does the team hold asbestos awareness training, and IPAF or PASMA cards for access equipment? Do you own towers and MEWPs or hire them in?",
+    "why": "Any building put up before 2000 brings the asbestos question, and industrial work is worked at height by definition. A buyer with a 1970s factory is deciding whether they will have to manage this for you.",
+    "where": "content/copy/compliance.ts",
+    "blocksLaunch": false
+  },
+  {
+    "id": "mandr-accounts",
+    "priority": 3,
+    "question": "Are the M & R Painting Contractors Instagram and Facebook accounts dead? Before anything is deleted — do they still hold photographs of jobs that are not saved anywhere else?",
+    "why": "The current site links to both sets of accounts on the same page, which reads as a company that has not finished changing its name. The links come off. The photographs behind them may be the only copies, so they get exported first.",
+    "where": "content/site.ts → socials, and MIGRATION.md §5",
+    "blocksLaunch": false
+  },
+  {
+    "id": "business-profile",
+    "priority": 3,
+    "question": "Is there a Google Business Profile, and do you have the login? If an agency set it up, we need it transferred rather than a second one created.",
+    "why": "The categories on it are currently pointed at painter and decorator work. Adding commercial and industrial painting changes which searches the company shows up in on a map. A duplicate profile splits the reviews and is a nuisance to merge.",
+    "where": "MIGRATION.md §7",
+    "blocksLaunch": false
+  },
+  {
+    "id": "vat",
+    "priority": 3,
+    "question": "What is the VAT registration number?",
+    "why": "It goes on the footer and on the capability statement, and it is on every pre-qualification questionnaire. Small thing, asked constantly.",
+    "where": "content/site.ts",
+    "blocksLaunch": false
+  },
+  {
+    "id": "wordpress-crawl",
+    "priority": 1,
+    "question": "We need read access to the current site — an admin login, or just permission to crawl it — before it is switched off.",
+    "why": "The redirect map is built from the pages we can see in the navigation. An old WordPress install always has more URLs than its menu shows, and every one that is missed becomes a 404 on cutover day. This also gets the media library out at full resolution.",
+    "where": "MIGRATION.md §1 and §2",
+    "blocksLaunch": true
+  }
+]

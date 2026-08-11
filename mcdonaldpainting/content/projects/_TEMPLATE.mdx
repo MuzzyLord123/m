@@ -1,0 +1,46 @@
+---
+# Copy this file to content/projects/<job-name>.mdx. The filename becomes the
+# address: high-school-assembly-hall.mdx → /projects/high-school-assembly-hall
+#
+# status:
+#   confirmed — every field below checked with Sean and with the client.
+#   drafted   — written from what we know; unconfirmed fields left null and
+#               shown on the page as an outstanding question.
+#   wanted    — not a job, a request. Renders as a labelled empty record saying
+#               what is missing and why. Delete the file once it is filled.
+#
+# Any field you cannot answer: leave it null. A null renders as a marked
+# question. A guess renders as a fact, and that is the one thing this site does
+# not do.
+title: 'Short, factual. What and where, no adjectives.'
+status: drafted
+sector: industrial          # must match a slug in content/sectors.ts
+summary: 'One line for the index page.'
+featured: false             # true puts it on the home page. Three of them, commercial first.
+
+# The caption block. These seven fields are the whole point of a record.
+clientType: null            # 'Secondary school', 'Main contractor', 'Managing agent'…
+scope: null                 # What was actually done. Elements, not adjectives.
+location: null              # Town. Not a postcode, not a client address.
+duration: null              # '4 days', '3 weeks over two holidays'
+system: null                # The coating system applied, as specified
+occupied: null              # true | false — was the building in use during the works
+year: null
+
+image:
+  # Either src + alt + width + height for a real photograph…
+  # src: '/photographs/<job-name>/01.jpg'
+  # alt: 'One line describing the work shown. Not "painting", not "image1".'
+  # width: 2400
+  # height: 1600
+  # credit: '@handle'       # where a client or a third party supplied the image
+  #
+  # …or `needs`, which renders a labelled empty frame stating what belongs here.
+  needs: 'What photograph belongs here, described so someone can go and take it.'
+---
+
+The body is optional and is for what does not fit in the caption block: the
+constraint that shaped the job, what was found once the paint came off, why the
+system was chosen. Two or three paragraphs at most.
+
+Write it for someone responsible for a building, not for a search engine.

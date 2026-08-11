@@ -213,16 +213,18 @@ so a staging deployment can carry it and the live site never will.
 
 ## Deploying
 
-This repo holds **two** separate Next projects: the F.A.S site at the root, and
-`neilbrookfield/` in its own directory. Whatever you deploy to, the **root directory**
-setting decides which one you get.
+This repo holds **three** separate Next projects: the F.A.S site at the root,
+`neilbrookfield/`, and `mcdonaldpainting/`, each in its own directory with its own
+`package.json`. Whatever you deploy to, the **root directory** setting decides which one
+you get — so each site is a separate project on the host, pointed at a different
+directory in the same repository.
 
 On Vercel — import `MuzzyLord123/m` at [vercel.com/new](https://vercel.com/new) and set:
 
 | Setting | Value |
 |---|---|
 | Framework | Next.js (auto-detected) |
-| Root Directory | `./` — the repo root. This is the F.A.S site. |
+| Root Directory | `./` — the repo root. This is the F.A.S site. Use `neilbrookfield` or `mcdonaldpainting` for the other two. |
 | Build / install commands | Leave alone; `vercel.json` sets them. |
 
 Then add the environment variables below under Settings → Environment Variables and
