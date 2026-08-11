@@ -1,0 +1,32 @@
+{
+  "name": "fas-painter-decorator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Website for F.A.S Painter and Decorator, Wrexham",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "tsc --noEmit",
+    "audit": "node scripts/audit.mjs"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "motion": "^13.1.0",
+    "next": "^16.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "axe-core": "^4.13.0",
+    "playwright": "^1.62.1",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
+  }
+}
