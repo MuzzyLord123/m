@@ -57,6 +57,28 @@ function blend(hex, alpha, backgroundHex) {
   return fg.map((channel, i) => Math.round(channel * alpha + bg[i] * (1 - alpha)));
 }
 
+/**
+ * The flood menu's ground.
+ *
+ * Not a flat token: --color-paper with two soft orange radials over it. The
+ * STRONGER of the two is the worst case — the lightest ground a menu line ever
+ * sits on — so that is what everything in the menu is measured against.
+ *
+ * The alpha is READ OUT OF the .flood-panel rule rather than written here, for
+ * the same reason the tokens above are. Hard-coding it would mean softening or
+ * strengthening that wash silently moves every menu pair without the audit
+ * noticing — and the one that matters, the greyed-out rows, has about 0.2 of
+ * margin over AA. There is no room for the two to drift apart.
+ */
+function floodWashAlpha() {
+  const block = /\.flood-panel\s*\{([\s\S]*?)\n\}/.exec(css);
+  if (!block) throw new Error(".flood-panel rule not found in globals.css");
+  const alphas = [...block[1].matchAll(/rgb\([^)]*\/\s*([\d.]+)\s*\)/g)].map((m) => Number(m[1]));
+  if (!alphas.length) throw new Error("no translucent washes found in .flood-panel");
+  return Math.max(...alphas);
+}
+const FLOOD_GROUND = blend(TOKENS.accent, floodWashAlpha(), TOKENS.paper);
+
 function luminance(rgb) {
   const [r, g, b] = rgb.map((channel) => {
     const c = channel / 255;
@@ -97,11 +119,24 @@ const PAIRS = [
   // accent-deep carries no text: it is a border and pressed-tint colour only.
   // It reaches 4.22:1 against ink, so hover lifts to accent-bright instead.
   ["hover — on-accent on accent-bright", TOKENS.onAccent, TOKENS.accentBright, 4.5],
-  ["flood menu links — on-accent on accent", TOKENS.onAccent, TOKENS.accent, 4.5],
-  ["flood menu contact — on-accent/85 on accent", blend(TOKENS.onAccent, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
-  ["flood menu numerals — on-accent/85 on accent", blend(TOKENS.onAccent, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
-  ["flood menu eyebrow — on-accent/85 on accent", blend(TOKENS.onAccent, 0.85, TOKENS.accent), TOKENS.accent, 4.5],
-  ["flood menu CTA — accent on on-accent pill", TOKENS.accent, TOKENS.onAccent, 4.5],
+  /* The flood menu, since it stopped being an orange plane.
+     These five used to read "on-accent on accent" and passed at 6.2:1 — for a
+     pairing the menu no longer has. They were measuring the old design while
+     the new one went unchecked, which is the most dangerous state an audit can
+     be in, because it still says PASS.
+     The ground is not a flat token either: --color-paper carries two soft
+     orange radials, and the stronger is 22% accent. That composite is the
+     lightest ground any menu line ever sits on, so it is the one worth
+     measuring — the bare token would flatter every pair here. */
+  ["flood menu links — ink on the panel's lit corner", TOKENS.ink, FLOOD_GROUND, 4.5],
+  ["flood menu contact — ink-soft on the panel's lit corner", TOKENS.inkSoft, FLOOD_GROUND, 4.5],
+  ["flood menu numerals — ink-soft on the panel's lit corner", TOKENS.inkSoft, FLOOD_GROUND, 4.5],
+  ["flood menu eyebrow — ink-soft on the panel's lit corner", TOKENS.inkSoft, FLOOD_GROUND, 4.5],
+  /* The pages preview mode greys out. Muted on purpose — but a visitor still
+     has to be able to read WHICH pages they are, so it is held to AA like
+     anything else rather than being excused as decoration. */
+  ["flood menu locked rows — ink-mute on the panel's lit corner", TOKENS.inkMute, FLOOD_GROUND, 4.5],
+  ["flood menu CTA — on-accent on the accent pill", TOKENS.onAccent, TOKENS.accent, 4.5],
 
   // The full-bleed orange CTA band. These pairs were NOT audited, and the band
   // shipped as white on orange at 2.9:1 — a straight AA failure on the site's

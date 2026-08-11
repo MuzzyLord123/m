@@ -38,7 +38,7 @@ export function SwatchFilter({
       <ul
         className={
           strip
-            ? "-mx-[var(--shell-pad)] flex snap-x scroll-pl-[var(--shell-pad)] gap-3 overflow-x-auto px-[var(--shell-pad)] pt-1 pb-3"
+            ? "-mx-[var(--shell-pad)] flex snap-x scroll-pl-[var(--shell-pad)] gap-3 overflow-x-auto overscroll-x-contain px-[var(--shell-pad)] pt-1 pb-3"
             : "flex flex-wrap gap-3"
         }
       >

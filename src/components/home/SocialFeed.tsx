@@ -62,7 +62,7 @@ export function SocialFeed() {
           anyway. Revealing the strip as the single object it is does the same
           job without the failure mode. */}
       <Reveal>
-      <ul className="mt-12 flex snap-x snap-mandatory scroll-pl-[var(--shell-pad)] gap-4 overflow-x-auto px-[var(--shell-pad)] pb-2 lg:mx-auto lg:grid lg:max-w-[var(--spacing-shell)] lg:grid-cols-3 lg:gap-6 lg:overflow-visible">
+      <ul className="mt-12 flex snap-x snap-mandatory scroll-pl-[var(--shell-pad)] gap-4 overflow-x-auto overscroll-x-contain px-[var(--shell-pad)] pb-2 lg:mx-auto lg:grid lg:max-w-[var(--spacing-shell)] lg:grid-cols-3 lg:gap-6 lg:overflow-visible">
         {socialPosts.slice(0, 6).map((post, index) => (
           <li
             key={post.image}

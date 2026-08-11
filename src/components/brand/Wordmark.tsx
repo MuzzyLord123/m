@@ -14,11 +14,19 @@ import { site } from "@/config/site";
  * with a heavy blur and subtracted, then the result is unpremultiplied, so any
  * residue lands at very low alpha against a ground that is nearly black anyway.
  *
- *   public/brand/logo.png          — the extracted lockup, transparent
- *   public/brand/logo-knockout.png — the same artwork as a near-black stencil,
- *                                    for the orange flood menu, where the
- *                                    full-colour mark would be orange on orange
+ *   public/brand/logo.png          — the lockup the site uses, transparent
+ *   public/brand/logo-original.png — the same, before the strapline was changed
+ *                                    from "PAINTING SERVICES" to "DECORATING
+ *                                    DONE PROPERLY"; see
+ *                                    scripts/make-logo-subtitle.mjs
  *   public/brand/logo-source.jpg   — the original mockup, kept for reference
+ *
+ * There used to be a logo-knockout.png here — the mark as a near-black stencil,
+ * for the mobile menu back when that menu was an orange plane and the
+ * full-colour mark would have been orange on orange. The menu is dark now, so
+ * the real mark is used everywhere and the stencil is gone. It is worth knowing
+ * it existed: a second copy of the artwork is a second thing to keep in step,
+ * and it had already fallen out of date with the strapline change.
  *
  * The brush handle is thinner than in the original: it is a dark grey object
  * that sat at almost exactly the plate's own value, so it could not be fully
@@ -29,12 +37,9 @@ import { site } from "@/config/site";
  */
 export function Wordmark({
   className = "",
-  onAccent = false,
   priority = false,
 }: {
   className?: string;
-  /** True where the mark sits on the orange flood panel. */
-  onAccent?: boolean;
   priority?: boolean;
 }) {
   return (
@@ -43,7 +48,7 @@ export function Wordmark({
       className={`inline-flex shrink-0 items-center transition-opacity duration-200 hover:opacity-85 ${className}`}
     >
       <Image
-        src={onAccent ? "/brand/logo-knockout.png" : "/brand/logo.png"}
+        src="/brand/logo.png"
         alt={`${site.name} — painter and decorator, home`}
         width={669}
         height={280}

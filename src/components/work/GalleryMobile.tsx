@@ -198,7 +198,7 @@ function ProjectSheet({ project, onClose }: { project: Project | null; onClose: 
             </div>
 
             {/* Photo strip */}
-            <ul className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
+            <ul className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-5 pb-1">
               {project.images.map((image) => (
                 <li key={image.src} className="w-[82%] shrink-0 snap-start">
                   <div className="relative aspect-[3/2] overflow-hidden rounded-[4px] bg-plaster">

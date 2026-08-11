@@ -56,7 +56,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     blockquote: ({ children }) => <PullQuote>{children}</PullQuote>,
     hr: () => <hr className="tape-line my-12" />,
     table: ({ children }) => (
-      <div className="mt-7 overflow-x-auto">
+      <div className="mt-7 overflow-x-auto overscroll-x-contain">
         <table className="w-full border-collapse text-left text-[0.9375rem]">{children}</table>
       </div>
     ),
