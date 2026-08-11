@@ -354,17 +354,27 @@
    Gallery dialog
    ========================================================================== */
 
-dialog.job-dialog::backdrop {
+dialog.job-dialog::backdrop,
+dialog.sheet-dialog::backdrop {
   background: rgb(22 19 15 / 0.82);
 }
 
-dialog.job-dialog {
+dialog.job-dialog,
+dialog.sheet-dialog {
+  /* Tailwind's preflight zeroes margin on every element, which takes out the
+     `margin: auto` a modal <dialog> relies on to centre itself. Put it back. */
+  margin: auto;
   background: transparent;
   border: 0;
   padding: 0;
   max-width: 100vw;
   max-height: 100dvh;
   color: var(--color-chalk);
+}
+
+/* the reviews sheet sits on paper, so it takes ink type */
+dialog.sheet-dialog {
+  color: var(--color-ink);
 }
 
 /* ==========================================================================

@@ -1,10 +1,10 @@
 # What I still need from you
 
-Everything on the site at the moment is either a fact you gave me — your name, your
-number, Wrexham and Coedpoeth — or something I can say about painting and decorating
-that is true of the trade. **Nothing has been invented about your business.** No years
-trading, no insurance, no qualifications, no guarantees, no review scores, no opening
-hours, no prices. If it is not on this page, it is not on the site.
+Everything on the site is either a fact you gave me — your name, your number, Wrexham
+and Coedpoeth, and now your Google reviews — or something I can say about painting and
+decorating that is true of the trade. **Nothing has been invented about your business.**
+No years trading, no insurance, no qualifications, no guarantees, no star average, no
+opening hours, no prices. If it is not on this page, it is not on the site.
 
 That is deliberate. A made-up review score or a fake "20 years' experience" is the
 fastest way to get a small trade site into trouble, and it is not needed to get the
@@ -95,7 +95,43 @@ say no, tell me and I will word it that way instead of listing places.
 
 ---
 
-## 3. Checkatrade
+## 3. Your Google reviews — mostly sorted, three loose ends
+
+The six reviews you sent are on the site. They sit under Recent work, two of them
+showing on the page and all six behind a "Read the reviews" button. They are quoted word
+for word — including the typos, because tidying somebody's review up is the first step
+towards writing it for them.
+
+Three things outstanding:
+
+- **The web address of your Google Business Profile.** Anyone reading a review on a
+  tradesman's own website is entitled to go and check it is real. Once you send the
+  link, a "Read them on Google" line appears at the bottom of the popup. Until then
+  there is nothing for them to click.
+- **Two reviews are cut off.** Google's "More" link truncated Lee Penney's and Sue
+  Jones's in the screenshots. They currently end mid-thought with a "…" and a note
+  saying so. Open each on your profile, tap More, and send the full wording.
+- **Duncan Beaumont left five stars with no words.** There is nothing to quote, so he is
+  not in the six. That is also why the button says six rather than seven.
+
+**What the site does not say**, and why: there is no "5.0", no star average, no "X happy
+customers". I have six reviews you sent me, not the true total on your profile, so any
+overall score would be a number I made up. If you tell me the real figures I can put
+them on. The reviews also are not marked up in the page's structured data — Google's own
+guidelines say reviews collected on a third-party site should not be marked up on your
+own, and doing it anyway risks a penalty.
+
+## 4. Two small things the reviews raised
+
+- **Is it "F.A.S" or "F.A.S."?** Your Google profile says *F.A.S. Painter & Decorator* —
+  full stop after the S, ampersand. The site says *F.A.S Painter and Decorator*. One of
+  them is wrong and they should match everywhere, including on Checkatrade.
+- **Do you want your first name on the site?** Your customers call you Fardin, and Sue
+  calls you Fas. At the moment your name only appears where a customer wrote it
+  themselves in a review. Say the word and I will use it in the copy — "One person on
+  the job throughout: me" reads better as a name.
+
+## 5. Checkatrade
 
 You mentioned you are listed. I need **the web address of your profile** — open the
 profile, copy what is in the browser bar, and send it over.
@@ -108,7 +144,7 @@ typed in yourself is worse than having none.
 
 ---
 
-## 4. Where should enquiries go?
+## 6. Where should enquiries go?
 
 The contact form works, but at the moment a submitted enquiry is only written to the
 server log — nobody gets told about it. **Where do you want them?**
@@ -123,7 +159,7 @@ is fine, it is the route most people will use anyway.
 
 ---
 
-## 5. The domain
+## 7. The domain
 
 What web address is this going live on? I need it before launch because it goes into
 the sitemap, the canonical tags, the link preview and the structured data that Google
@@ -131,7 +167,7 @@ reads. It is set with an environment variable called `NEXT_PUBLIC_SITE_URL`.
 
 ---
 
-## 6. Things I have deliberately NOT written — say the word and they go on
+## 8. Things I have deliberately NOT written — say the word and they go on
 
 Each of these is standard on a trade website and each one is a straight lie until you
 confirm it. Tell me which are true and I will add them:
@@ -142,9 +178,9 @@ confirm it. Tell me which are true and I will add them:
 - [ ] **Do you guarantee your work?** — and for how long, on what
 - [ ] **Do you give free quotes?** — most decorators do, but I am not going to assume it
 - [ ] **When can people ring?** — the hours you are happy to take calls
-- [ ] **Do you have public reviews anywhere?** — Checkatrade, Google, Facebook. Real ones,
-      with a link. I will not write a testimonial for you and you should not let anybody
-      else do it either.
+- [ ] **Reviews anywhere other than Google?** — Checkatrade, Facebook. Real ones with a
+      link, same as the Google ones. I will not write a testimonial for you and you
+      should not let anybody else do it either.
 - [ ] **Do you work with dulux/johnstone's/anything in particular?** — trade brands you use
 - [ ] **Do you do wallpapering?** — it is not currently mentioned anywhere
 - [ ] **Do you do spray finishing?** — same

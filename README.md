@@ -18,7 +18,7 @@ npm run audit      # accessibility + pre-flight checks (see below)
 
 ---
 
-## The three things you will actually want to do
+## The four things you will actually want to do
 
 ### 1. Swap in a photograph
 
@@ -132,6 +132,37 @@ list. Each band's `swatch` colour drives its number, its top rule and its photo 
 the order blue → off-black → sage → clay is chosen so the dark band lands mid-page and
 does not run into the off-black preparation section underneath.
 
+### 4. Add a review
+
+`content/reviews.ts`. Real ones only — the file's header comment is the rulebook and is
+worth reading before you touch it. In short:
+
+```ts
+{
+  name: 'Peter Baker',       // as it appears on the public profile
+  rating: 5,
+  body: 'Fardin arrived at the exact time he advised…',   // word for word
+  truncated: false,          // true if Google's "More" link cut it off
+  source: 'Google',
+  featured: true,            // also shown on the page, not just in the popup
+},
+```
+
+- **Quote verbatim.** Typos, odd punctuation and all. "both out en-suites" and the space
+  before the comma in Fona Olyott's are theirs. Tidying somebody's review is the first
+  step towards writing it for them.
+- **`featured: true`** puts a review on the page as well as in the popup. Two is the
+  right number there; more and it stops being a teaser.
+- **Never add an average or a total.** There is deliberately no "5.0" and no review count
+  beyond the ones actually held. See `components/StructuredData.tsx` for why there is no
+  `aggregateRating` in the structured data either — briefly, Google's guidelines say
+  reviews collected on a third-party site should not be marked up on your own.
+- A review with **no text** does not go in the list. There is nothing to quote, and
+  counting it in the "(6)" while showing five would be a small lie.
+
+The link at the bottom of the popup appears only once `googleProfileUrl` is set in
+`content/todo.ts` — same pattern as Checkatrade.
+
 **The other content files:** `content/preparation.ts` (the preparation section),
 `content/finishes.ts` (the eggshell/satin/gloss table), `content/process.ts` (the four
 steps), `content/areas.ts` (where he works), `content/site.ts` (name, phone, meta title
@@ -150,7 +181,9 @@ of trouble. Please keep to them when editing.
   and the register in `content/todo.ts`.
 - **No stock photography, ever**, and no AI-generated interiors presented as his work.
   An empty labelled block is more honest and, oddly, looks better.
-- **No fake reviews or testimonials.** Real ones with a link, or nothing.
+- **No fake reviews or testimonials.** The ones in `content/reviews.ts` are real Google
+  reviews the client supplied, quoted verbatim. No invented average, no review count
+  beyond what is actually held, and no review markup in the structured data.
 - **Checkatrade** is a plain text link and only appears once a real profile URL is set in
   `content/todo.ts`. Never the badge, the logo, a star rating or a review count — the
   badge assets are licensed to members and a self-typed rating is a liability.
