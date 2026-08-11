@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { pageMetadata } from '@/lib/metadata';
+
 import { Section, Container } from '@/components/Section';
 import { EnquiryForm } from '@/components/EnquiryForm';
 import { EmptyFrame } from '@/components/Plate';
@@ -7,16 +9,11 @@ import { Rule } from '@/components/Rule';
 import { PhoneNumber } from '@/components/Phone';
 import { decorating } from '@content/copy/decorating';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: decorating.meta.title,
   description: decorating.meta.description,
-  alternates: { canonical: '/decorating' },
-  openGraph: {
-    title: decorating.meta.title,
-    description: decorating.meta.description,
-    url: '/decorating',
-  },
-};
+  path: '/decorating',
+});
 
 export default function DecoratingPage() {
   return (

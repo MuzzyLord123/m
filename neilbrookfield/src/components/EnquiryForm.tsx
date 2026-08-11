@@ -1,8 +1,9 @@
 'use client';
 
-import { useActionState, useEffect, useRef } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 
 import { PhoneNumber } from '@/components/Phone';
+import { ChevronGlyph } from '@/components/icons';
 import { initialEnquiryState, submitEnquiry } from '@/lib/actions';
 import { contact } from '@content/copy/contact';
 
@@ -25,6 +26,9 @@ export function EnquiryForm({
 }) {
   const [state, formAction, pending] = useActionState(submitEnquiry, initialEnquiryState);
   const stampRef = useRef<HTMLInputElement>(null);
+  // Filenames are echoed back so it is obvious the photographs attached. With
+  // scripts off this list stays empty, but the files themselves still submit.
+  const [chosen, setChosen] = useState<string[]>([]);
 
   useEffect(() => {
     if (stampRef.current) stampRef.current.value = String(Date.now());
@@ -130,36 +134,64 @@ export function EnquiryForm({
             <label htmlFor="timescale" className="eyebrow">
               Rough timescale
             </label>
-            <select
-              id="timescale"
-              name="timescale"
-              defaultValue={v.timescale ?? ''}
-              className="mt-3 w-full appearance-none border border-slate bg-transparent px-4 py-3 text-[color:var(--tone-fg)] focus-visible:border-brass"
-            >
-              <option value="">No rush / not sure</option>
-              <option value="As soon as possible">As soon as you can</option>
-              <option value="Next month or two">In the next month or two</option>
-              <option value="Later this year">Later this year</option>
-              <option value="Getting prices">Just getting prices at this stage</option>
-            </select>
+            {/* The native dropdown indicator is drawn by the operating system and
+                looks like somebody else's software, so it is stripped and our own
+                chevron drawn in its place. The control underneath is still a plain
+                <select>, so it works without JavaScript and on a phone. */}
+            <div className="relative mt-3">
+              <select
+                id="timescale"
+                name="timescale"
+                defaultValue={v.timescale ?? ''}
+                className="w-full appearance-none border border-slate bg-transparent py-3 pr-12 pl-4 text-[color:var(--tone-fg)] focus-visible:border-brass"
+              >
+                <option value="">No rush / not sure</option>
+                <option value="As soon as possible">As soon as you can</option>
+                <option value="Next month or two">In the next month or two</option>
+                <option value="Later this year">Later this year</option>
+                <option value="Getting prices">Just getting prices at this stage</option>
+              </select>
+              <ChevronGlyph className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-[color:var(--tone-accent)]" />
+            </div>
           </div>
         )}
 
+        {/* The browser's own file control ("Choose Files — No file chosen") is
+            operating-system furniture and the one thing on the page that would
+            look like it came from somewhere else. The input is kept — it is what
+            submits, with or without JavaScript — but moved off-screen and driven
+            by a label styled like every other link on the site. */}
         <div>
-          <label htmlFor="photos" className="eyebrow">
-            Photographs (optional)
-          </label>
+          <p className="eyebrow">Photographs (optional)</p>
           <p className="secondary mt-2 max-w-[52ch] text-sm leading-relaxed">
             {contact.photosNote}
           </p>
+
           <input
             id="photos"
             type="file"
             name="photos"
             multiple
             accept="image/*"
-            className="mt-3 w-full border border-slate bg-transparent px-4 py-3 text-sm file:mr-4 file:border file:border-slate file:bg-transparent file:px-3 file:py-1 file:text-[color:var(--tone-fg)]"
+            onChange={(e) => setChosen(Array.from(e.target.files ?? []).map((f) => f.name))}
+            className="peer sr-only"
           />
+          <label
+            htmlFor="photos"
+            className="eyebrow link-rule mt-4 inline-block cursor-pointer peer-focus-visible:outline peer-focus-visible:outline-1 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-brass"
+          >
+            Choose photographs
+          </label>
+
+          {chosen.length ? (
+            <ul className="mt-4">
+              {chosen.map((name) => (
+                <li key={name} className="secondary border-t border-t-current/15 py-2 text-sm">
+                  {name}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
 
         <div>

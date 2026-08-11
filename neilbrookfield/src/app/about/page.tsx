@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+
+import { pageMetadata } from '@/lib/metadata';
 import Link from 'next/link';
 
 import { Section, Container } from '@/components/Section';
@@ -9,16 +11,11 @@ import { PhoneNumber } from '@/components/Phone';
 import { about } from '@content/copy/about';
 import { FOUNDED, yearsTrading } from '@content/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: about.meta.title,
   description: about.meta.description,
-  alternates: { canonical: '/about' },
-  openGraph: {
-    title: about.meta.title,
-    description: about.meta.description,
-    url: '/about',
-  },
-};
+  path: '/about',
+});
 
 /**
  * Revalidated daily.

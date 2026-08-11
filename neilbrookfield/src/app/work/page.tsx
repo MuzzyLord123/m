@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { pageMetadata } from '@/lib/metadata';
+
 import { Section, Container } from '@/components/Section';
 import { ProjectSpread } from '@/components/ProjectSpread';
 import { Rule } from '@/components/Rule';
@@ -7,12 +9,11 @@ import { Needed } from '@/components/Needed';
 import { getProjects } from '@/lib/projects';
 import { work } from '@content/copy/work';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: work.meta.title,
   description: work.meta.description,
-  alternates: { canonical: '/work' },
-  openGraph: { title: work.meta.title, description: work.meta.description, url: '/work' },
-};
+  path: '/work',
+});
 
 export default function WorkPage() {
   const projects = getProjects();

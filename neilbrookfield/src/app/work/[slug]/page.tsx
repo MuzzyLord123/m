@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
+import { pageMetadata } from '@/lib/metadata';
 import { Section, Container } from '@/components/Section';
 import { Plate, EmptyFrame } from '@/components/Plate';
 import { SpecimenStrip } from '@/components/SpecimenStrip';
@@ -30,23 +31,17 @@ export async function generateMetadata({
   if (!project) return {};
 
   const where = project.location ? ` in ${project.location}` : '';
-  const title = `${project.title}${where} | Neil Brookfield`;
-  const description = project.brief;
   const hero = project.images.find((i) => i.src);
 
-  return {
-    title,
-    description,
-    alternates: { canonical: `/work/${project.slug}` },
-    openGraph: {
-      title,
-      description,
-      url: `/work/${project.slug}`,
-      type: 'article',
-      // The sharing image is the job's own hero photograph.
-      ...(hero?.src ? { images: [{ url: hero.src, alt: hero.alt ?? project.title }] } : {}),
-    },
-  };
+  return pageMetadata({
+    title: `${project.title}${where} | Neil Brookfield`,
+    description: project.brief,
+    path: `/work/${project.slug}`,
+    type: 'article',
+    // The sharing image is the job's own hero photograph. Where the job has no
+    // photographs yet, pageMetadata falls back to the site card.
+    ...(hero?.src ? { image: { url: hero.src, alt: hero.alt ?? project.title } } : {}),
+  });
 }
 
 const mdxComponents = {

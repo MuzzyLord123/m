@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { pageMetadata } from '@/lib/metadata';
+
 import { Section, Container } from '@/components/Section';
 import { ProjectSpread } from '@/components/ProjectSpread';
 import { EnquiryForm } from '@/components/EnquiryForm';
@@ -10,16 +12,11 @@ import { PhoneNumber } from '@/components/Phone';
 import { getProjectsByType } from '@/lib/projects';
 import { kitchens } from '@content/copy/kitchens';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: kitchens.meta.title,
   description: kitchens.meta.description,
-  alternates: { canonical: '/hand-painted-kitchens' },
-  openGraph: {
-    title: kitchens.meta.title,
-    description: kitchens.meta.description,
-    url: '/hand-painted-kitchens',
-  },
-};
+  path: '/hand-painted-kitchens',
+});
 
 export default function KitchensPage() {
   const projects = getProjectsByType('kitchen');

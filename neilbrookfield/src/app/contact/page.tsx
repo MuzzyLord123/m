@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { pageMetadata } from '@/lib/metadata';
+
 import { Section, Container } from '@/components/Section';
 import { EnquiryForm } from '@/components/EnquiryForm';
 import { Needed } from '@/components/Needed';
@@ -7,16 +9,11 @@ import { Rule } from '@/components/Rule';
 import { PhoneLink } from '@/components/Phone';
 import { contact } from '@content/copy/contact';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: contact.meta.title,
   description: contact.meta.description,
-  alternates: { canonical: '/contact' },
-  openGraph: {
-    title: contact.meta.title,
-    description: contact.meta.description,
-    url: '/contact',
-  },
-};
+  path: '/contact',
+});
 
 export default function ContactPage() {
   return (

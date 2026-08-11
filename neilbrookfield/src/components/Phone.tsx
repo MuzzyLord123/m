@@ -1,5 +1,4 @@
-import { Phone as PhoneIcon } from '@phosphor-icons/react/dist/ssr';
-
+import { PhoneGlyph } from '@/components/icons';
 import { phone } from '@content/site';
 import { cn } from '@/lib/cn';
 
@@ -25,7 +24,7 @@ export function PhoneLink({
       href={phone.href}
       className={cn('inline-flex items-center gap-2 tabular whitespace-nowrap', className)}
     >
-      {withIcon ? <PhoneIcon weight="light" aria-hidden className="size-4 shrink-0" /> : null}
+      {withIcon ? <PhoneGlyph className="size-4 shrink-0" /> : null}
       <span>{label ?? phone.display}</span>
       {label ? <span className="sr-only">— {phone.display}</span> : null}
     </a>

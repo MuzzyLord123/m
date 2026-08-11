@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { pageMetadata } from '@/lib/metadata';
+
 import { Section, Container } from '@/components/Section';
 import { EnquiryForm } from '@/components/EnquiryForm';
 import { Needed } from '@/components/Needed';
@@ -9,16 +11,11 @@ import { PhoneNumber } from '@/components/Phone';
 import { workshops } from '@content/copy/workshops';
 import { workshop } from '@content/pricing';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: workshops.meta.title,
   description: workshops.meta.description,
-  alternates: { canonical: '/workshops' },
-  openGraph: {
-    title: workshops.meta.title,
-    description: workshops.meta.description,
-    url: '/workshops',
-  },
-};
+  path: '/workshops',
+});
 
 /**
  * Published pricing is a trust signal, so it is set in type — but only once the

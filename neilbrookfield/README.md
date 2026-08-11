@@ -120,9 +120,10 @@ content/
   copy/            page copy, one file per page
   projects/        one MDX file per job, plus _TEMPLATE.mdx
 src/
-  app/             routes
-  components/      the design system — Section, Plate, ProjectSpread, …
-  lib/             project loader, structured data, the enquiry action
+  app/             routes, plus icon.svg and opengraph-image.tsx
+  components/      the design system — Section, Plate, ProjectSpread, icons, …
+  lib/             project loader, structured data, page metadata, enquiry action
+  assets/fonts/    Fraunces, for rendering the sharing card at build time only
 public/photographs/<job-name>/
 scripts/check-content.mjs
 ```
@@ -142,6 +143,14 @@ brass hairline as the only decoration.
   the linen sections use darker brass and grey because the dark-section values fail contrast on paper.
 - **Never** a three-up card row, a gradient, a shadow, an all-caps headline, or a coloured button.
   Links are text with a hairline under them.
+- **Nothing here comes from an icon set or a component library.** The two icons are drawn in
+  `src/components/icons.tsx` at the same 1px weight as the hairlines, the favicon is
+  `src/app/icon.svg`, and the sharing card is composed in `src/app/opengraph-image.tsx`. The one
+  vendored asset is a Fraunces font file used to render that card at build time — see
+  `src/assets/fonts/README.md`.
+- **Native controls are restyled, not replaced.** The `<select>` keeps its own behaviour with our
+  chevron drawn over it, and the file input is moved off-screen behind a label styled like every
+  other link — so both still work on a phone and without JavaScript.
 - **Motion** is fades, one slow hero parallax, and hairlines drawing in — nothing else moves.
   - Entrances are CSS, marked with `data-reveal` and switched on by one shared observer
     (`RevealObserver`). The hidden state sits inside `@media (scripting: enabled)`, so a visitor
