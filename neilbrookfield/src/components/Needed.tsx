@@ -1,4 +1,5 @@
 import { neededById } from '@content/needed';
+import { SHOW_PLACEHOLDERS } from '@content/site';
 import { cn } from '@/lib/cn';
 
 /**
@@ -24,6 +25,9 @@ export function Needed({
   className?: string;
   minHeight?: string;
 }) {
+  // Published state: close the gap up rather than showing an empty box.
+  if (!SHOW_PLACEHOLDERS) return null;
+
   const item = neededById(id);
 
   if (!item) {

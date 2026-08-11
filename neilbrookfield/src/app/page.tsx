@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Hero } from '@/components/Hero';
 import { Section, Container } from '@/components/Section';
 import { ProjectSpread } from '@/components/ProjectSpread';
-import { Reviews } from '@/components/Reviews';
+import { Reviews, showReviews } from '@/components/Reviews';
 import { EnquiryForm } from '@/components/EnquiryForm';
 import { Needed } from '@/components/Needed';
 import { Rule } from '@/components/Rule';
@@ -102,14 +102,18 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section tone="linen">
-        <Container>
-          <Rule className="max-w-24" />
-          <p className="eyebrow mt-6">{home.reviews.eyebrow}</p>
-          <h2 className="mt-4 mb-16 text-[clamp(2rem,4.5vw,3.25rem)]">{home.reviews.heading}</h2>
-          <Reviews />
-        </Container>
-      </Section>
+      {/* Left off the page entirely while there is nothing real to put in it,
+          rather than shown as a heading over three empty boxes. */}
+      {showReviews ? (
+        <Section tone="linen">
+          <Container>
+            <Rule className="max-w-24" />
+            <p className="eyebrow mt-6">{home.reviews.eyebrow}</p>
+            <h2 className="mt-4 mb-16 text-[clamp(2rem,4.5vw,3.25rem)]">{home.reviews.heading}</h2>
+            <Reviews />
+          </Container>
+        </Section>
+      ) : null}
 
       <Section tone="night" id="enquiry">
         <Container>

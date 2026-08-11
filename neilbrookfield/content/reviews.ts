@@ -39,3 +39,10 @@ export const reviews: readonly Review[] = [
     covers: null,
   },
 ] as const;
+
+/**
+ * Whether there is anything real to show. Where there is not, the reviews
+ * section is left off the page entirely rather than shown as empty frames —
+ * see SHOW_PLACEHOLDERS in content/site.ts.
+ */
+export const hasReviewQuotes = reviews.some((r) => Boolean(r.quote));

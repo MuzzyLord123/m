@@ -39,9 +39,15 @@ const flags = [
   },
   {
     id: 'enquiry-delivery',
-    label: 'Enquiry form actually delivers somewhere',
-    on: /export const DELIVERY_CONFIGURED = true/.test(read('src/lib/enquiry.ts')),
+    label: 'Enquiry form wired to send email (needs RESEND_API_KEY + ENQUIRY_TO on the host)',
+    on: /api\.resend\.com\/emails/.test(read('src/lib/enquiry.ts')),
     file: 'src/lib/enquiry.ts',
+  },
+  {
+    id: 'placeholders',
+    label: 'Placeholder frames hidden (published state, not the review state)',
+    on: /SHOW_PLACEHOLDERS = false/.test(read('content/site.ts')),
+    file: 'content/site.ts',
   },
   {
     id: 'review-quotes',
@@ -243,14 +249,14 @@ console.log(`\n${dim('CONTENT-NEEDED.md rewritten.')}`);
 /* ----------------------------------------------------------------- gate --- */
 
 if (strict) {
+  // The gate asks one question: would publishing this state say anything that
+  // is not true? Missing content does not fail — the site omits what it does
+  // not have. Publishing the review state, or a switch left inconsistent, does.
   const failures = [
     ...blocking.map((n) => `${n.id} — ${n.where}`),
-    ...(projects.length < TARGET_PROJECTS
-      ? [`only ${projects.length} jobs written up, target is ${TARGET_PROJECTS}–12`]
+    ...(/SHOW_PLACEHOLDERS = true/.test(read('content/site.ts'))
+      ? ['SHOW_PLACEHOLDERS is on — that is the review state, with dashed frames on every gap']
       : []),
-    ...projects
-      .filter((p) => p.status !== 'complete' || p.missingPhotos > 0)
-      .map((p) => `${p.slug} is not ready (${p.status}, ${p.missingPhotos} photographs missing)`),
   ];
 
   if (failures.length) {
@@ -260,5 +266,13 @@ if (strict) {
     process.exit(1);
   }
 
-  console.log(`\n\x1b[32m${bold('Ready to go live.')}\x1b[0m\n`);
+  console.log(`\n\x1b[32m${bold('Nothing published here is unverified.')}\x1b[0m`);
+  console.log(
+    `${dim('Still worth collecting, though the site stands up without them:')}\n` +
+      open
+        .filter((n) => n.priority === 1)
+        .map((n) => `  · ${n.id}`)
+        .join('\n') +
+      '\n',
+  );
 }

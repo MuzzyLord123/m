@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { Plate } from '@/components/Plate';
 import { TYPE_LABELS, type Project, heroImage } from '@/lib/projects';
+import { SHOW_PLACEHOLDERS } from '@content/site';
 import { cn } from '@/lib/cn';
 
 /**
@@ -22,6 +23,31 @@ export function ProjectSpread({
 }) {
   const image = heroImage(project);
   const href = `/work/${project.slug}`;
+  const hasImage = Boolean(image?.src) || (Boolean(image) && SHOW_PLACEHOLDERS);
+
+  // Until the photographs arrive, a spread is a text entry rather than half a
+  // spread with a hole where the picture goes.
+  if (!hasImage) {
+    return (
+      <article>
+        <hr className="hairline mb-4 max-w-24" />
+        <p className="eyebrow">
+          {TYPE_LABELS[project.type]}
+          {project.location ? ` · ${project.location}` : ''}
+          {project.year ? ` · ${project.year}` : ''}
+        </p>
+        <h3 className="mt-4 max-w-[24ch] text-[clamp(1.75rem,3.6vw,2.75rem)]">
+          <Link href={href} className="hover:text-brass">
+            {project.title}
+          </Link>
+        </h3>
+        <p className="secondary mt-5 max-w-[58ch] text-base leading-[1.7]">{project.brief}</p>
+        <Link href={href} className="eyebrow link-rule mt-8 inline-block">
+          See the job
+        </Link>
+      </article>
+    );
+  }
 
   return (
     <article className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-x-[var(--spacing-gutter)]">

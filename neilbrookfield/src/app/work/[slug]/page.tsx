@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 
 import { pageMetadata } from '@/lib/metadata';
+import { SHOW_PLACEHOLDERS } from '@content/site';
+import { cn } from '@/lib/cn';
 import { Section, Container } from '@/components/Section';
 import { Plate, EmptyFrame } from '@/components/Plate';
 import { SpecimenStrip } from '@/components/SpecimenStrip';
@@ -63,34 +65,39 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   if (!project) notFound();
 
   const hero = heroImage(project);
-  const rest = project.images.slice(1);
+  const rest = project.images
+    .slice(1)
+    .filter((image) => image.src || SHOW_PLACEHOLDERS);
+  const showHero = Boolean(hero?.src) || (Boolean(hero) && SHOW_PLACEHOLDERS);
   const next = getNextProject(project.slug);
 
   return (
     <>
-      {/* Title block over the hero photograph. */}
-      <Section tone="night" flush className="!pt-0">
-        <div className="relative">
-          {hero?.src ? (
-            <Plate
-              image={{ ...hero, caption: undefined }}
-              ratio="16 / 9"
-              priority
-              sizes="100vw"
-              animate={false}
-            />
-          ) : (
-            <EmptyFrame
-              ratio="16 / 9"
-              need={
-                hero?.needs ??
-                'The lead photograph for this job, at original resolution from the Wix media manager.'
-              }
-            />
-          )}
-        </div>
+      {/* Title block over the hero photograph, where there is one. */}
+      <Section tone="night" flush className={showHero ? '!pt-0' : undefined}>
+        {showHero ? (
+          <div className="relative">
+            {hero?.src ? (
+              <Plate
+                image={{ ...hero, caption: undefined }}
+                ratio="16 / 9"
+                priority
+                sizes="100vw"
+                animate={false}
+              />
+            ) : (
+              <EmptyFrame
+                ratio="16 / 9"
+                need={
+                  hero?.needs ??
+                  'The lead photograph for this job, at original resolution from the Wix media manager.'
+                }
+              />
+            )}
+          </div>
+        ) : null}
 
-        <Container className="gutter-x mt-12">
+        <Container className={cn('gutter-x', showHero && 'mt-12')}>
           <p className="eyebrow">
             {TYPE_LABELS[project.type]}
             {project.location ? ` · ${project.location}` : ''}

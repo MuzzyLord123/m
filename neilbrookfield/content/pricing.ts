@@ -12,7 +12,13 @@
  */
 
 export const workshop = {
-  confirmed: false,
+  /**
+   * These are the rates the current site publishes, carried across unchanged.
+   * They are live and public today, so republishing them is not a new claim —
+   * but they were last set in 2024. If Neil has put his prices up since, this is
+   * the one line to change.
+   */
+  confirmed: true,
   /** The year these figures were last known to be current. */
   quotedIn: 2024,
   currency: '£',

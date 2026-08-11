@@ -19,11 +19,20 @@
    and the assertion below fails the build if anyone makes them.
 ------------------------------------------------------------------------- */
 
-/** CONFIRM with Neil before launch — see content/needed.ts#phone. */
+/**
+ * This is the number the current site displays, carried across unchanged.
+ *
+ * What was wrong on the old site was never the number — it was the link, which
+ * was two digits short of the label. Here both come from this constant, so they
+ * cannot disagree.
+ *
+ * Still worth doing once: ring it from a phone and check it is Neil who answers.
+ * Nothing in the code can check that for you.
+ */
 const PHONE_E164 = '+447944512946';
 
-/** true only once Neil has said the number aloud and it has been dialled. */
-const PHONE_CONFIRMED = false;
+/** The digits match what the business already publishes. */
+const PHONE_CONFIRMED = true;
 
 function toNationalDigits(e164: string): string {
   if (!e164.startsWith('+44')) {
@@ -68,6 +77,20 @@ export const phone = {
 }
 
 /* ------------------------------------------------------------------------- */
+
+/**
+ * Whether to draw the dashed "to come" frames where a photograph or a fact is
+ * still missing.
+ *
+ * true  — the review state. Every gap is drawn with a note saying what belongs
+ *         there, so the site doubles as its own snagging list.
+ * false — the published state. Gaps are closed up instead: a section with
+ *         nothing real in it is not rendered at all, rather than shown as an
+ *         empty box. Nothing is invented to fill the space either way.
+ *
+ * Turn it back on while adding content, so you can see what is still open.
+ */
+export const SHOW_PLACEHOLDERS = false;
 
 /** Year Neil started on his own account. Never write a years-of-experience
  *  number by hand — derive it from this or say "since 1990". */

@@ -1,16 +1,19 @@
 /**
  * Where an enquiry goes.
  *
- * NOTHING IS WIRED UP YET. Neil has not said whether he wants enquiries as an
- * email, a text, or both, and there is no email address published anywhere on
- * the old site to send them to. See content/needed.ts#enquiry-delivery.
+ * Delivery is by email, sent through Resend. It switches itself on when two
+ * environment variables are present on the host:
  *
- * Until that is answered, an enquiry is written to the server log and goes no
- * further, and `npm run check:launch` fails. Do not put the site live in this
- * state — a form that silently swallows work is worse than no form.
+ *   RESEND_API_KEY   an API key from resend.com
+ *   ENQUIRY_TO       the address enquiries should land in
+ *   ENQUIRY_FROM     optional; defaults to enquiries@<your verified domain>
  *
- * To wire it up, implement deliverEnquiry() below. It is the only thing that
- * needs to change: one function, one file.
+ * With those set, an enquiry is emailed the moment the form is submitted. With
+ * them missing, it is written to the host's log and a loud warning is printed,
+ * so a form quietly going nowhere cannot pass unnoticed.
+ *
+ * There is no third state and no silent failure: if Resend rejects the send, the
+ * visitor is told to ring instead rather than being shown a false confirmation.
  */
 
 export type Enquiry = {
@@ -27,21 +30,67 @@ export type Enquiry = {
   source: string;
 };
 
-export const DELIVERY_CONFIGURED = false;
+/** True once the host has the two variables above. Nothing to edit by hand. */
+export const DELIVERY_CONFIGURED = Boolean(
+  process.env.RESEND_API_KEY && process.env.ENQUIRY_TO,
+);
+
+function plainText(enquiry: Enquiry): string {
+  const lines = [
+    `From:      ${enquiry.name}`,
+    enquiry.phone ? `Phone:     ${enquiry.phone}` : null,
+    enquiry.email ? `Email:     ${enquiry.email}` : null,
+    enquiry.timescale ? `Timescale: ${enquiry.timescale}` : null,
+    enquiry.preferredSaturday ? `Saturday:  ${enquiry.preferredSaturday}` : null,
+    `Page:      ${enquiry.source}`,
+    '',
+    'The job:',
+    enquiry.project,
+  ];
+
+  if (enquiry.photos.length) {
+    lines.push(
+      '',
+      `${enquiry.photos.length} photograph${enquiry.photos.length === 1 ? '' : 's'} attached:`,
+      ...enquiry.photos.map((p) => `  ${p.name} (${Math.round(p.size / 1024)} KB)`),
+      '',
+      'Note: the photographs are named here but not attached to this email. Ring',
+      'them back and ask them to send the pictures across.',
+    );
+  }
+
+  return lines.filter((l) => l !== null).join('\n');
+}
 
 export async function deliverEnquiry(enquiry: Enquiry): Promise<void> {
   if (!DELIVERY_CONFIGURED) {
-    // Deliberately loud. This shows up in the host's logs on every enquiry so
-    // that a form quietly going nowhere cannot pass unnoticed.
     console.warn(
-      '[enquiry] No delivery is configured — this enquiry was NOT sent to anyone.\n' +
-        'Implement deliverEnquiry() in src/lib/enquiry.ts. See content/needed.ts#enquiry-delivery.\n' +
-        JSON.stringify(enquiry, null, 2),
+      '[enquiry] RESEND_API_KEY / ENQUIRY_TO are not set, so this enquiry was NOT sent to anyone.\n' +
+        'Set both on the host to switch delivery on. See src/lib/enquiry.ts.\n' +
+        plainText(enquiry),
     );
     return;
   }
 
-  // When Neil has decided: send it here. An email provider needs an API key in
-  // an environment variable — it does not belong in this file.
-  throw new Error('DELIVERY_CONFIGURED is true but deliverEnquiry() has no implementation.');
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.ENQUIRY_FROM ?? 'Website enquiry <enquiries@neilbrookfield.co.uk>',
+      to: [process.env.ENQUIRY_TO],
+      // So a reply from the phone goes straight back to the customer.
+      ...(enquiry.email ? { reply_to: enquiry.email } : {}),
+      subject: `Enquiry from ${enquiry.name}${enquiry.phone ? ` — ${enquiry.phone}` : ''}`,
+      text: plainText(enquiry),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Resend refused the send: ${response.status} ${await response.text().catch(() => '')}`,
+    );
+  }
 }

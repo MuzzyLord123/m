@@ -1,4 +1,5 @@
-import { reviews, googleProfileUrl } from '@content/reviews';
+import { reviews, googleProfileUrl, hasReviewQuotes } from '@content/reviews';
+import { SHOW_PLACEHOLDERS } from '@content/site';
 
 /**
  * Three real reviews, set as pull quotes.
@@ -10,7 +11,12 @@ import { reviews, googleProfileUrl } from '@content/reviews';
  * Where the exact wording has not been supplied, the quote is left as a frame.
  * A remembered review is a made-up review.
  */
+/** True when this section has something real to show. */
+export const showReviews = hasReviewQuotes || SHOW_PLACEHOLDERS;
+
 export function Reviews() {
+  if (!showReviews) return null;
+
   return (
     <div>
       {/* Staggered down the page rather than lined up three abreast — a row of

@@ -25,26 +25,12 @@ It is one phone call. Work down it in order.
 
 ## Ask first
 
-### Read me your mobile number digit by digit. Is 07944 512946 right, and is it the number you want ringing?
-
-The old site linked a number two digits short, so tapping it on a phone failed or rang the wrong person. The rebuild renders the label and the link from one constant — that constant needs to be right.
-
-*Answer goes in:* `content/site.ts → PHONE_E164, then set PHONE_CONFIRMED = true`  
-*Blocks launch:* yes
-
-### What do you charge for a Saturday session now — is it still £55 an hour, or £150 for three hours? And how do you want to handle travel?
-
-The price is printed in type on /workshops as a trust signal. The figures on the old site are from 2024 and have not been re-confirmed.
-
-*Answer goes in:* `content/pricing.ts — correct the figures, then set confirmed = true`  
-*Blocks launch:* yes
-
 ### Can we go through your photographs and group them into eight to twelve jobs? For each one: where it was, roughly what year, what the customer wanted, and what you actually did — starting with the preparation.
 
 The single biggest fix in the rebuild. The old portfolio was around a hundred untitled images in no order, several of them duplicated. Named jobs with a location and a colour list are what somebody comparing decorators is actually looking for.
 
 *Answer goes in:* `content/projects/*.mdx — one file per job, copied from _TEMPLATE.mdx`  
-*Blocks launch:* yes
+*Blocks launch:* no
 
 ### For each kitchen, which paints did you use — make, colour name and finish? If you cannot remember exactly, say so and we will leave it off.
 
@@ -55,33 +41,26 @@ Colours render as a specimen strip under each job. In front of this audience a w
 
 ### We need your photographs out of the Wix media manager at full size — the originals, not the copies the website serves.
 
-The site is photography-led and runs images full width. The versions Wix serves are cropped, resized and re-encoded, and will look soft at the sizes used here.
+The site currently carries no photographs at all. It stands up as a typographic site, but this is a decorator: the pictures are the argument.
 
 *Answer goes in:* `public/photographs/<project-slug>/ — see README.md`  
-*Blocks launch:* yes
-
-### When somebody fills the form in, where should it land — an email, a text message, or both?
-
-The form is built and works without JavaScript, but nothing is wired to deliver it. Until it is, an enquiry is written to the server log and goes no further.
-
-*Answer goes in:* `src/lib/enquiry.ts → deliverEnquiry(), then set DELIVERY_CONFIGURED = true`  
-*Blocks launch:* yes
+*Blocks launch:* no
 
 ### Read the site through and tell me anything that is not how you actually work — the order you do a kitchen in, what you say about preparation, anything that does not sound like you.
 
 Every word is written in Neil's first person. The method described is standard practice for the work, but it is put in his mouth, and it should be his before it goes live.
 
 *Answer goes in:* `content/copy/*.ts`  
-*Blocks launch:* yes
+*Blocks launch:* no
 
 ## Ask next
 
 ### Can you send the Google reviews from Janet Leclercq, Andrew Waugh and Stella Steele — the full text, copied exactly?
 
-The three reviews are set as pull quotes. Their wording has not been reproduced from memory, so each renders as an empty frame until the exact text arrives.
+The reviews section is left off the site entirely until the exact wording arrives. It is not reproduced from memory, and a paraphrased review is a fabricated one.
 
 *Answer goes in:* `content/reviews.ts → quote`  
-*Blocks launch:* yes
+*Blocks launch:* no
 
 ### What is the link to your Google Business Profile?
 

@@ -2,6 +2,7 @@ import Image from 'next/image';
 
 import type { ProjectImage } from '@/lib/projects';
 import { Reveal } from '@/components/Reveal';
+import { SHOW_PLACEHOLDERS } from '@content/site';
 import { cn } from '@/lib/cn';
 
 /**
@@ -27,6 +28,10 @@ export function Plate({
   className?: string;
   animate?: boolean;
 }) {
+  // No photograph and not in review mode: render nothing at all. An absent
+  // picture is better than a box announcing an absent picture.
+  if (!image.src && !SHOW_PLACEHOLDERS) return null;
+
   const body = image.src ? (
     <div className="relative w-full overflow-hidden border border-slate" style={{ aspectRatio: ratio }}>
       <Image
@@ -66,6 +71,8 @@ export function EmptyFrame({
   ratio?: string;
   className?: string;
 }) {
+  if (!SHOW_PLACEHOLDERS) return null;
+
   return (
     <div
       data-needed="photographs"

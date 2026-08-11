@@ -7,6 +7,7 @@ import { ProjectSpread } from '@/components/ProjectSpread';
 import { Rule } from '@/components/Rule';
 import { Needed } from '@/components/Needed';
 import { getProjects } from '@/lib/projects';
+import { SHOW_PLACEHOLDERS } from '@content/site';
 import { work } from '@content/copy/work';
 
 export const metadata: Metadata = pageMetadata({
@@ -42,22 +43,26 @@ export default function WorkPage() {
             ))}
           </div>
 
-          <div className="mt-24 lg:mt-32">
-            <Rule className="max-w-24" />
-            <p className="eyebrow mt-6">{work.pending.eyebrow}</p>
-            <h2 className="mt-4 max-w-[22ch] text-[clamp(1.75rem,3.5vw,2.75rem)]">
-              {work.pending.heading}
-            </h2>
-            <p className="secondary mt-6 max-w-[60ch] text-base leading-[1.7]">
-              {work.pending.body}
-            </p>
-            <Needed
-              id="project-grouping"
-              label="Eight to twelve jobs go here"
-              className="mt-12"
-              minHeight="12rem"
-            />
-          </div>
+          {/* Scaffolding copy: shown while the site is being reviewed, dropped
+              once SHOW_PLACEHOLDERS is off. */}
+          {SHOW_PLACEHOLDERS ? (
+            <div className="mt-24 lg:mt-32">
+              <Rule className="max-w-24" />
+              <p className="eyebrow mt-6">{work.pending.eyebrow}</p>
+              <h2 className="mt-4 max-w-[22ch] text-[clamp(1.75rem,3.5vw,2.75rem)]">
+                {work.pending.heading}
+              </h2>
+              <p className="secondary mt-6 max-w-[60ch] text-base leading-[1.7]">
+                {work.pending.body}
+              </p>
+              <Needed
+                id="project-grouping"
+                label="Eight to twelve jobs go here"
+                className="mt-12"
+                minHeight="12rem"
+              />
+            </div>
+          ) : null}
         </Container>
       </Section>
     </>
