@@ -1387,8 +1387,15 @@
      still here — it just went back to being an accent: two soft lifts in the
      corners, the rail on the current page, and the CTA pill.
 
-     The background paints against the panel's own box, not its scrolled
-     content, so the wash stays put while the links move under it. */
+     The background stays HERE, on the scroll container itself, and not on a
+     pseudo-element. That was tried, to get the surface onto a layer the
+     scroller could not touch, and it is a trap: `position: fixed` inside
+     .flood-panel does NOT resolve against the viewport, because the panel is
+     transformed and a transform makes it the containing block for fixed
+     descendants — at which point "fixed" behaves like absolute and scrolls with
+     the content. Measured: the orange corner wash was at the top of the screen
+     at scroll 0 and gone by the bottom. A background on the element itself is
+     the thing that genuinely does not scroll. */
   background-color: var(--color-paper);
   background-image:
     radial-gradient(46rem 32rem at 96% -8%, rgb(242 101 34 / 0.16) 0%, transparent 60%),

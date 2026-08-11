@@ -140,8 +140,25 @@ export function MobileMenu() {
                Five links at display size plus the work strip plus the contact
                block runs past 844px, and the page behind is scroll-locked — so
                without this the hours and the social links are unreachable on
-               anything smaller than a large phone. */
-            className="flood-panel fixed inset-0 z-[95] flex min-h-[100dvh] flex-col overflow-y-auto overscroll-contain outline-none"
+               anything smaller than a large phone.
+
+               100lvh, NOT 100dvh, and that is the fix for "scrolling the menu
+               fast shows the page behind it at the bottom".
+               dvh is the DYNAMIC viewport: it means "however tall the viewport
+               is right now, with whatever browser chrome is currently showing".
+               A fast flick is exactly what makes Android hide its address bar,
+               and while that bar animates away the visible area grows before a
+               position: fixed element is resized to match — so for those frames
+               the panel is the old, shorter height and there is a live strip of
+               the page underneath it at the bottom of the screen.
+               lvh is the LARGE viewport: the height with the chrome retracted,
+               which is the biggest the visible area can ever be. Sizing to that
+               means the panel is already tall enough before the bar starts
+               moving, so there is no moment where it is too short. The cost is
+               that while the address bar IS showing, the panel overhangs the
+               bottom by the height of that bar — which is invisible, because
+               what overhangs is more of the same near-black surface. */
+            className="flood-panel fixed inset-0 z-[95] flex min-h-[100lvh] flex-col overflow-y-auto overscroll-contain outline-none"
           >
             {/* Reserves the bar's height. It blurs rather than covers: the
                 panel's ground is a gradient, so an opaque band would have to
@@ -324,7 +341,14 @@ export function MobileMenu() {
 
               <Link
                 href={CTA_HREF}
-                className="group mb-6 flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-accent text-base font-semibold whitespace-nowrap text-ink transition-transform duration-200 active:scale-[0.98]"
+                /* text-on-accent, NEVER text-ink. This is an orange pill, and
+                   near-white on #f26522 is 2.9:1 — the single pairing the
+                   colour system exists to forbid. It got here by a careless
+                   find-and-replace when the panel went dark: the rule that
+                   swapped text-on-accent to text-ink ran after the one that had
+                   just correctly set this button to text-on-accent, and undid
+                   it. Anything on the orange takes on-accent. */
+                className="group mb-6 flex h-14 w-full items-center justify-center gap-2.5 rounded-full bg-accent text-base font-semibold whitespace-nowrap text-on-accent transition-transform duration-200 active:scale-[0.98]"
               >
                 {CTA_LABEL}
                 <ArrowUpRight

@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "placeholders": "node scripts/generate-placeholders.mjs",
     "audit:contrast": "node scripts/contrast-audit.mjs",
+    "audit:contrast-live": "node scripts/contrast-live.mjs",
     "audit:motion": "node scripts/motion-audit.mjs",
     "audit:interaction": "node scripts/interaction-check.mjs",
     "audit:images": "node scripts/image-check.mjs",
