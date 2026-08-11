@@ -88,28 +88,32 @@ photo: {
 Upload the biggest version available. Next.js re-encodes to AVIF/WebP and resizes on
 demand; do not shrink it first.
 
-### 3. Annotate a photograph
+### 3. Add a job to "Recent work"
 
-The callouts are the signature device of this site: a small marker on a detail, a 1px
-leader line, and a short technical label just outside the frame.
+Open `content/home.ts` and add an entry to `work.items`. Each one is a photo slot,
+so the same two-minute job as above:
 
 ```ts
-callouts: [
-  { x: 26, y: 32, side: 'left',  label: 'Glass and gaskets masked' },
-  { x: 68, y: 44, side: 'right', label: 'Adhesion primer, two topcoats' },
-],
+work: {
+  items: [
+    {
+      src: '/work/garage-door-frodsham.jpg',
+      alt: 'Steel up-and-over garage door sprayed graphite grey, Frodsham',
+      width: 2400,
+      height: 1800,
+      brief: 'A steel up-and-over garage door, finished, from the drive.',
+    },
+    // …
+  ],
+},
 ```
 
-- `x` and `y` are **percentages of the image**, so a marker stays on the detail it points
-  at from a phone up to a large monitor.
-- **Keep them off the subject.** A label across the middle of a sprayed door is a worse
-  photograph and a worse annotation.
-- `side` is which side the label sits on — pick the side with more empty space. Reserving
-  a gutter costs the photograph about 130px, so on a narrow figure put them all on one
-  side.
-- Two or three per photograph. Four is a diagram.
-- Below a figure width of `34rem` the labels become a numbered list beneath the image,
-  with matching numbers on the markers. That is automatic.
+The `callouts` still in the content files are the short technical points — "glass and
+seals masked" — and they render as the **gold tick list** beside each specialism on
+the home page. They used to be drawn onto the photograph itself with leader lines
+running out to labels in the margin. That looked like an engineering drawing rather
+than a decorator's photograph, so it was removed; the `x`/`y` positions are kept in
+the content but are no longer used for anything.
 
 ### 4. Change some copy
 
@@ -170,13 +174,22 @@ written down.
 - **Reviews are transcribed, never written.** See the top of `content/reviews.ts`.
 - **Honest limits on every service page.** The "what it will not do" sections are the most
   persuasive thing on the site precisely because nobody else writes them.
-- **Motion is small and it is all feedback.** Grid rules draw down on section entry,
-  callout leader lines draw out, the rail's current number turns gold, and hover or
-  focus warms a colour. Nothing animates on load, nothing animates a layout
-  property, and there is no parallax, no counter, no page transition and nothing
-  with a spring. Under `prefers-reduced-motion` the transition goes but the end
-  state stays — reduced motion must never mean reduced feedback.
-- **No fixed bottom call bar, no burger menu.** The nav is always visible.
+- **Motion is small and it is all feedback.** A band fades and lifts 12px as it
+  comes into view, hover or focus warms a colour, and a card's gold top edge
+  brightens. Nothing animates a layout property, and there is no parallax, no
+  counter, no page transition and nothing with a spring. Under
+  `prefers-reduced-motion` the transition goes but the end state stays — reduced
+  motion must never mean reduced feedback.
+- **No fixed bottom call bar, no burger menu.** The nav is always visible, and the
+  number is a gold button in the sticky header at every width — never behind a
+  disclosure.
+- **The layout is deliberately familiar.** An earlier version of this site arranged
+  the same content as a numbered specification document with an exposed 12-column
+  grid and technical callout diagrams over the photographs. It was more interesting
+  to look at and it was the wrong thing: somebody looking for a decorator wants to
+  recognise the page, not admire it. Hero, trust points, service cards, gallery,
+  steps, testimonials, quote form — in that order, because that is the order a
+  customer reads in.
 
 ---
 
@@ -192,22 +205,28 @@ scripts/            check-content.mjs (launch gate), shots.mjs (screenshots)
 
 A few components carry more weight than the rest:
 
-- **`Annotated.tsx`** — the annotated photograph. Read the comment at the top before
-  changing it; the positioning is a container query for a reason that took a bug to find.
+- **`Band.tsx`** — one band of the page: gold eyebrow, heading, standfirst, content.
+  Every section on every page is one of these.
+- **`kit.tsx`** — the small pieces. `WorkPhoto`, `ServiceCard`, `TrustCard`, `Step`,
+  `TickList`.
+- **`icons.tsx`** — the trade icons, drawn for this trade. A spray gun, a roller, a
+  dust extractor, a wallpaper roll. Not a library: no library has a spray gun in it,
+  and a generic icon set is what makes a trade site look bought.
 - **`SprayServiceBlock.tsx`** — renders one sprayable service. `/spraying` maps four
   through it, and a future `/upvc-spraying` landing page renders exactly one. See
   `ADS-MIGRATION.md` §7 for the six-line version of that page.
 - **`ServicePageView.tsx`** — the three standard service pages all render through this
   from a `ServicePage` object, so a fourth is an object rather than a page.
-- **`Drawn.tsx`** — the only JavaScript driving motion. Sets `data-drawn` when a block
+- **`Drawn.tsx`** — the only JavaScript driving motion. Sets `data-drawn` when a band
   enters the viewport; the CSS does the rest.
 - **`lib/conversions.ts`** — the Ads tag and the three conversion actions. Read
   `ADS-MIGRATION.md` before editing.
 
-### Design tokens — "Signwriter's Fascia"
+### Design tokens
 
-A matt near-black wall, raised satin panels, and gold used the way a signwriter
-uses it: lettering, leaf-thin rules and registration marks. Never a flood fill.
+Black and gold. A matt near-black page, raised satin cards, and gold used for
+headings, ticks, numbers, icons and the call-to-action — never as a flood fill and
+never for body copy.
 
 ```
 Surfaces — the sheen ladder, which is the thing Kenny actually sells
@@ -238,9 +257,10 @@ colour. There is no exception — not for pull quotes, not for the phone number 
 prose. Body text is `paper` or `paper-dim`, and that rule is what keeps a
 black-and-gold site readable at length.
 
-Depth comes from three CSS techniques and no bitmaps: a 0.6KB inline SVG
-turbulence tile at 5% that reads as atomised overspray, 1px inset highlights that
-read as a lit surface, and masking-film hatching in every empty photograph frame.
+Depth comes from CSS and inline SVG, never a bitmap: a 0.6KB turbulence tile at
+5% that reads as atomised overspray, 1px inset highlights that read as a lit
+surface, hatching in the photograph frames that are still empty, and one
+hand-drawn brush-stroke rule between the major bands of the page.
 
 ### Routes
 

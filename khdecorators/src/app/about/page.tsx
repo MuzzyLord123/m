@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Band } from '@/components/Band'
 import { CallLink } from '@/components/CallLink'
 import { Drawn } from '@/components/Drawn'
-import { GridRules } from '@/components/GridRules'
-import { Section } from '@/components/Section'
-import { PageShell } from '@/components/Shell'
-import { Spec } from '@/components/Spec'
+import { Needed } from '@/components/Needed'
+import { BrushIcon, PhoneIcon, SERVICE_ICONS } from '@/components/icons'
+import { TrustCard } from '@/components/kit'
 import { fill, pageMetadata } from '@/lib/metadata'
 import { about } from '@content/about'
 import { phone } from '@content/site'
+import { isPlaceholder } from '@content/types'
 
 export const metadata: Metadata = pageMetadata({
   title: about.title,
@@ -20,65 +21,76 @@ export const metadata: Metadata = pageMetadata({
  * /about — redirected to from /about-us, which is where it lived on Google Sites.
  *
  * Every word here is new. The old About page's "Services" link pointed at
- * rmdecorsolutions.co.uk — another decorator's website — which is what happens when copy
- * is taken from a template or a competitor and the links never get changed. Nothing was
+ * rmdecorsolutions.co.uk — another decorator's website — which is what happens when
+ * copy is taken from a template and the links never get changed. Nothing was
  * carried across, including the parts that read fine.
  */
 export default function AboutPage() {
-  const rail = [
-    { id: 'kenny', number: '01', label: 'Kenny' },
-    { id: 'how', number: '02', label: 'How I work' },
-    { id: 'facts', number: '03', label: 'The facts' },
-  ]
+  const icons = ['brush', 'roller', 'shop', 'extractor'] as const
 
   return (
-    <PageShell rail={rail}>
-      <Drawn className="relative py-14 md:py-20">
-        <GridRules />
-        <div className="relative lg:grid lg:grid-cols-12 lg:gap-x-6">
-          <div className="lg:col-span-8">
-            <p className="annotation-lg text-gold">About</p>
-            <h1 className="display mt-4">{about.h1}</h1>
-            <p className="measure mt-8 text-lg leading-relaxed">{fill(about.lede)}</p>
-          </div>
-        </div>
-      </Drawn>
-
-      <Section id="kenny" number="01" title="In my own words">
-        <div className="space-y-5">
-          {about.body.map((paragraph) => (
-            <p key={paragraph.slice(0, 24)} className="measure">
-              {fill(paragraph)}
+    <>
+      <section className="relative">
+        <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-14 md:px-8 md:pt-20 md:pb-16">
+          <div className="kh-reveal mx-auto max-w-[46rem] text-center">
+            <p className="annotation flex items-center justify-center gap-2 text-gold">
+              <BrushIcon className="size-5" />
+              About
             </p>
+            <h1 className="display mt-4">{about.h1}</h1>
+            <p className="mt-6 text-lg leading-relaxed text-paper-dim">{fill(about.lede)}</p>
+          </div>
+        </Drawn>
+      </section>
+
+      <Band tone="well" eyebrow="In my own words" title="How I got here, and how I work" divider>
+        <div className="mx-auto max-w-[46rem] space-y-5 text-paper-dim">
+          {about.body.map((paragraph) => (
+            <p key={paragraph.slice(0, 24)}>{fill(paragraph)}</p>
           ))}
         </div>
-      </Section>
+      </Band>
 
-      <Section id="how" number="02" title="How I work">
-        <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
-          {about.principles.map((item) => (
-            <div key={item.title} className="border-t border-edge pt-4">
-              <h3 className="display-xs">{item.title}</h3>
-              <p className="mt-3 text-paper-dim">{item.body}</p>
-            </div>
+      <Band eyebrow="How I work" title="Four things I will not budge on" align="centre">
+        <div className="grid gap-5 sm:grid-cols-2">
+          {about.principles.map((item, i) => (
+            <TrustCard
+              key={item.title}
+              title={item.title}
+              body={item.body}
+              icon={SERVICE_ICONS[icons[i % icons.length]]}
+            />
           ))}
         </div>
-      </Section>
+      </Band>
 
-      <Section id="facts" number="03" title="The facts">
-        <div className="max-w-[46rem]">
-          <Spec rows={about.spec.map((row) => ({ ...row, value: fill(row.value) }))} />
+      <Band tone="well" eyebrow="The facts" title="Everything you might want to check" divider>
+        <div className="kh-card max-w-[52rem] p-6 md:p-8">
+          <dl className="space-y-4">
+            {about.spec.map((row) => (
+              <div
+                key={row.label}
+                className="grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] items-baseline gap-4 border-b border-rule pb-4 last:border-b-0 last:pb-0"
+              >
+                <dt className="annotation">{row.label}</dt>
+                <dd className="font-medium">
+                  {isPlaceholder(row.value) ? <Needed token={row.value} /> : fill(row.value)}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-4">
-          <CallLink className="kh-btn" from="about">
+        <div className="mt-10 flex flex-wrap items-center gap-4">
+          <CallLink className="kh-btn gap-2" from="about">
+            <PhoneIcon className="size-4" />
             Ring Kenny — {phone.label}
           </CallLink>
           <Link href="/contact" className="kh-btn-ghost">
             Send me the job
           </Link>
         </div>
-      </Section>
-    </PageShell>
+      </Band>
+    </>
   )
 }

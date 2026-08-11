@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CallLink } from '@/components/CallLink'
-import { PageShell } from '@/components/Shell'
 import { ConversionOnLoad } from '@/components/ConversionOnLoad'
 import { phone } from '@content/site'
 
@@ -25,7 +24,7 @@ export const metadata: Metadata = {
  */
 export default function EnquirySentPage() {
   return (
-    <PageShell>
+    <div className="mx-auto max-w-[78rem] px-5 md:px-8">
       <ConversionOnLoad kind="form" />
 
       <div className="py-20 md:py-28">
@@ -49,6 +48,6 @@ export default function EnquirySentPage() {
           </div>
         </div>
       </div>
-    </PageShell>
+    </div>
   )
 }

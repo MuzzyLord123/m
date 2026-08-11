@@ -1,10 +1,8 @@
 import type { Metadata } from 'next'
 import { CallLink, EmailLink } from '@/components/CallLink'
 import { Drawn } from '@/components/Drawn'
-import { GridRules } from '@/components/GridRules'
 import { Needed } from '@/components/Needed'
-import { Section } from '@/components/Section'
-import { PageShell } from '@/components/Shell'
+import { Band } from '@/components/Band'
 import { pageMetadata } from '@/lib/metadata'
 import { leaveAReview } from '@content/reviews'
 import { isPlaceholder } from '@content/types'
@@ -29,9 +27,8 @@ export const metadata: Metadata = pageMetadata({
  */
 export default function LeaveAReviewPage() {
   return (
-    <PageShell>
-      <Drawn className="relative py-14 md:py-20">
-        <GridRules />
+    <div className="mx-auto max-w-[78rem] px-5 md:px-8">
+      <Drawn className="py-14 md:py-20">
         <div className="relative md:grid md:grid-cols-12 md:gap-x-6">
           <div className="md:col-span-8">
             <p className="annotation-lg text-gold">Reviews</p>
@@ -42,10 +39,10 @@ export default function LeaveAReviewPage() {
         </div>
       </Drawn>
 
-      <Section number="01" title="Where to leave it">
-        <ul className="max-w-[46rem] border-t border-rule">
+      <Band eyebrow="Two minutes" title="Where to leave it">
+        <ul className="grid max-w-[52rem] gap-5 sm:grid-cols-2">
           {leaveAReview.places.map((place) => (
-            <li key={place.name} className="border-b border-rule py-6">
+            <li key={place.name} className="kh-card p-6">
               {isPlaceholder(place.url) ? (
                 <div>
                   <p className="annotation-lg text-gold">{place.name}</p>
@@ -93,7 +90,7 @@ export default function LeaveAReviewPage() {
             Email <EmailLink className="link link-hover-target text-gold" from="leave-a-review" />
           </p>
         </div>
-      </Section>
-    </PageShell>
+      </Band>
+    </div>
   )
 }

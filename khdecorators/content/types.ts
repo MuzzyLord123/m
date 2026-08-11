@@ -59,14 +59,16 @@ export const emptyPhoto = (brief: string): Photo => ({
 })
 
 /**
- * One annotation on a photograph: a dot on the image, a 1px leader line, and a
- * short label sitting outside the frame.
+ * A short technical point about a photograph — "spray-applied, two coats".
  *
- * `x` and `y` are percentages of the image box, so they hold their position on
- * the subject at every screen width. Keep them off the subject itself — a
- * callout sitting on the middle of a sprayed door is a worse photograph and a
- * worse annotation. Below `md` the callouts collapse to a numbered list beneath
- * the image, with matching numbered dots left on it.
+ * These were once drawn ON the photograph, with leader lines running out to labels
+ * in the margin. That looked like an engineering drawing rather than a decorator's
+ * photograph and it has been removed; the labels are now rendered as a gold tick
+ * list beside the image, which is what a customer expects and reads faster.
+ *
+ * `x` and `y` are therefore no longer used for anything, and are kept only because
+ * the content still carries them and they cost nothing. If a future design wants
+ * the annotated treatment back, the positions are still here.
  */
 export type Callout = {
   /** Percent from the left edge of the image, 0–100. */
@@ -93,15 +95,32 @@ export type SpecRow = {
  * Services
  * ------------------------------------------------------------------ */
 
-/** A row in the service table on the home page, linking to its own page. */
+/**
+ * One service, shown as a card on the home page and linking to its own page.
+ *
+ * `icon` names a hand-drawn SVG in src/components/icons.tsx — a spray gun, a
+ * roller, a dust extractor. Drawn for this trade rather than taken from a
+ * library, which is the difference between a decorator's website and a template.
+ */
 export type ServiceRow = {
   /** Route, e.g. '/spraying'. */
   href: string
   name: string
   /** One line. What it covers, in the fewest words that are still specific. */
   summary: string
-  /** Applied by brush and roller, sprayed, or either. Shown as a spec column. */
+  /** Applied by brush and roller, sprayed, or either. */
   application: 'Brush & roller' | 'Spray' | 'Brush, roller or spray'
+  /** Key into SERVICE_ICONS. */
+  icon:
+    | 'spray'
+    | 'roller'
+    | 'brush'
+    | 'extractor'
+    | 'wallpaper'
+    | 'house'
+    | 'interior'
+    | 'shop'
+    | 'industrial'
 }
 
 /**

@@ -2,29 +2,33 @@ import type { Review } from '@content/types'
 import { needed } from '@content/needed'
 
 /**
- * Reviews, set in the site's own type.
+ * Reviews, as cards — the layout a customer expects testimonials to be in.
  *
- * Ink on paper, a 1px rule above each one, attribution in the annotation register.
- * No cards, no carousel, no star graphics — there is no verified numeric rating
- * behind a star on this site, and drawing five of them anyway is the kind of thing
- * that makes everything else on a page less believable. No Yell or Google logos
- * either: their brand colours would be a second and third accent on a site with one.
+ * Still no star graphics: there is no verified numeric rating behind a star on this
+ * site, and drawing five of them anyway is the thing that makes every other claim
+ * on a page less believable. No Yell or Google logos either, because their brand
+ * colours would be a second and third accent on a site that has one.
  *
- * The source is plain text, and the link goes to the original where there is one.
+ * The source is named in plain text and the link goes to the original where there
+ * is one.
  */
-export function ReviewList({ reviews }: { reviews: Review[] }) {
+export function ReviewList({
+  reviews,
+  /** `grid` for the three-up on the home page; `list` for the full archive. */
+  layout = 'list',
+}: {
+  reviews: Review[]
+  layout?: 'list' | 'grid'
+}) {
   return (
-    <ul className="space-y-0">
+    <ul className={layout === 'grid' ? 'grid gap-5 md:grid-cols-2 lg:grid-cols-3' : 'space-y-5'}>
       {reviews.map((review, i) => (
-        <li
-          key={`${review.name}-${i}`}
-          className="border-t border-rule py-8 first:border-t-0 first:pt-0"
-        >
-          <blockquote className="measure text-lg leading-relaxed">
+        <li key={`${review.name}-${i}`} className="kh-card flex flex-col p-6">
+          <blockquote className="grow text-lg leading-relaxed text-paper">
             <p>“{review.quote}”</p>
           </blockquote>
 
-          <div className="annotation mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          <div className="annotation mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-t border-rule pt-4">
             {/* As published. A Yell username stays a Yell username. */}
             <cite className="not-italic text-paper">{review.name}</cite>
 

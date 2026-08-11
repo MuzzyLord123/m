@@ -1,7 +1,8 @@
 import type { SprayService } from '@content/types'
-import { Annotated } from './Annotated'
-import { Section } from './Section'
-import { Spec } from './Spec'
+import { isPlaceholder } from '@content/types'
+import { Band } from './Band'
+import { Needed } from './Needed'
+import { Step, TickList, WorkPhoto } from './kit'
 import { fill } from '@/lib/metadata'
 
 /**
@@ -12,111 +13,105 @@ import { fill } from '@/lib/metadata'
  * component and no copy written into a page file — which is the whole reason
  * `SprayService` exists as a type. See ADS-MIGRATION.md §7 for when to split them.
  *
- * The order inside the block is the order a customer's questions arrive in: the question
- * itself, the answer, what it covers, why spraying rather than a brush, the preparation,
- * the specification, and then the limits. Limits last but never omitted — a page that
- * only says yes is a page nobody believes.
+ * The order is the order a customer's questions arrive in: the question itself,
+ * then the answer, what it covers, why spraying rather than a brush, the
+ * preparation, what is included, and the honest limits last.
  */
 export function SprayServiceBlock({
   service,
-  number,
-  /** `h2` on /spraying, which has its own h1. `h1` on a single-service landing page. */
+  index,
+  /** `h2` on /spraying, which has its own h1. `h1` on a single-service page. */
   headingLevel = 'h2',
 }: {
   service: SprayService
-  number: string
+  index: number
   headingLevel?: 'h1' | 'h2'
 }) {
+  const Heading = headingLevel
+  // Alternate the band background so four of these in a row do not read as one
+  // long undifferentiated page.
+  const tone = index % 2 === 0 ? 'plain' : 'well'
+
   return (
-    <Section id={service.slug} number={number} title={service.name} headingLevel={headingLevel}>
-      {/* The question, then the answer. This has to be the first thing read by
-          somebody who arrived from an ad for exactly this service. */}
-      <div className="border-l-2 border-gold pl-5">
-        <p className="annotation-lg text-gold">{service.question}</p>
-        <p className="measure mt-3 text-lg leading-relaxed">{service.answer}</p>
-      </div>
-
-      <div className="mt-12">
-        <Annotated
-          photo={service.photo}
-          callouts={service.callouts}
-          sizes="(min-width: 1280px) 900px, 100vw"
-          ratio="3 / 2"
-        />
-      </div>
-
-      <div className="mt-14 grid gap-x-10 gap-y-12 lg:grid-cols-2">
+    <Band id={service.slug} tone={tone} divider={index > 0}>
+      <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
-          <h3 className="annotation-lg text-gold">What I spray</h3>
-          <ul className="mt-4 border-t border-rule">
-            {service.covers.map((item) => (
-              <li key={item} className="border-b border-rule py-3">
-                {item}
-              </li>
-            ))}
-          </ul>
+          <p className="annotation text-gold">Spray finishing</p>
+          <Heading className="display-sm mt-3">{service.name}</Heading>
+
+          {/*
+            The question, then the answer. This has to be the first thing read by
+            somebody who arrived from an ad for exactly this service — it is the
+            conversion mechanism on this page.
+          */}
+          <div className="kh-card mt-7 p-6">
+            <p className="display-xs text-gold">{service.question}</p>
+            <p className="mt-4 leading-relaxed text-paper">{service.answer}</p>
+          </div>
+
+          <h3 className="annotation mt-10 text-gold">Why sprayed, not brushed</h3>
+          <TickList className="mt-4" items={service.whySpray} tone="dim" />
         </div>
 
-        <div>
-          <h3 className="annotation-lg text-gold">Why sprayed, not brushed</h3>
-          <ul className="mt-4 space-y-4">
-            {service.whySpray.map((item) => (
-              <li key={item.slice(0, 24)} className="border-t border-rule pt-4">
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+        <div className="space-y-8">
+          <WorkPhoto photo={service.photo} sizes="(min-width: 1024px) 46vw, 100vw" ratio="4 / 3" />
 
-      <div className="mt-14 grid gap-x-10 gap-y-12 lg:grid-cols-2">
-        <div>
-          <h3 className="annotation-lg text-gold">Preparation, in order</h3>
-          <p className="annotation mt-2 normal-case tracking-normal">
-            Most of the job. Most of the quote.
-          </p>
-          <ol className="mt-4 border-t border-rule">
-            {service.preparation.map((step, i) => (
-              <li
-                key={step.slice(0, 24)}
-                className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-3 border-b border-rule py-3"
-              >
-                <span className="annotation pt-1">{String(i + 1).padStart(2, '0')}</span>
-                <span>{step}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        <div>
-          <h3 className="annotation-lg text-gold">Specification</h3>
-          <p className="annotation mt-2 normal-case tracking-normal">
-            What goes on, how many coats, how long.
-          </p>
-          <div className="mt-4">
-            <Spec
-              rows={service.spec.map((row) => ({
-                ...row,
-                value: fill(row.value),
-              }))}
-            />
+          <div>
+            <h3 className="annotation text-gold">What I spray</h3>
+            <TickList className="mt-4" items={service.covers} />
           </div>
         </div>
       </div>
 
-      <div className="mt-14">
-        <h3 className="annotation-lg text-gold">What it will not do</h3>
-        <p className="annotation mt-2 normal-case tracking-normal">
-          The honest list. Read this one before you book anybody, not just me.
-        </p>
-        <ul className="mt-5 grid gap-x-10 gap-y-5 lg:grid-cols-2">
-          {service.limits.map((limit) => (
-            <li key={limit.slice(0, 24)} className="border-t border-edge pt-4">
-              {limit}
-            </li>
+      {/* Preparation */}
+      <div className="mt-16">
+        <h3 className="display-xs">Preparation, in order</h3>
+        <p className="annotation mt-2">Most of the job. Most of the quote.</p>
+        <ol className="mt-6 grid gap-4 md:grid-cols-2">
+          {service.preparation.map((step, i) => (
+            /* No title — each preparation step is a single sentence. `Step`
+               omits the heading rather than rendering an empty one. */
+            <Step key={step.slice(0, 24)} number={String(i + 1).padStart(2, '0')} body={step} />
           ))}
-        </ul>
+        </ol>
       </div>
-    </Section>
+
+      {/* What's included and the limits, side by side */}
+      <div className="mt-16 grid gap-10 lg:grid-cols-2 lg:gap-14">
+        <div>
+          <h3 className="display-xs">What’s included</h3>
+          <p className="annotation mt-2">What goes on, how many coats, how long.</p>
+          <div className="kh-card mt-6 p-6">
+            <dl className="space-y-4">
+              {service.spec.map((row) => (
+                <div
+                  key={row.label}
+                  className="grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] items-baseline gap-4 border-b border-rule pb-4 last:border-b-0 last:pb-0"
+                >
+                  <dt className="annotation">{row.label}</dt>
+                  <dd className="font-medium">
+                    {isPlaceholder(row.value) ? <Needed token={row.value} /> : fill(row.value)}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="display-xs">What it will not do</h3>
+          <p className="annotation mt-2">
+            The honest list. Read this before you book anybody, not just me.
+          </p>
+          <ul className="mt-6 space-y-4">
+            {service.limits.map((limit) => (
+              <li key={limit.slice(0, 24)} className="kh-card p-5 text-paper-dim">
+                {limit}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </Band>
   )
 }

@@ -165,14 +165,14 @@ than believed.
 
 | Metric                   | Budget    | `/` measured | `/spraying` measured | Verdict         |
 | ------------------------ | --------- | ------------ | -------------------- | --------------- |
-| Performance (mobile)     | ≥ 92      | **97**       | **98**               | Inside budget   |
+| Performance (mobile)     | ≥ 92      | **98**       | **96**               | Inside budget   |
 | Accessibility            | 100       | **100**      | **100**              | Inside budget   |
 | Best practices           | —         | 96           | 96                   | —               |
 | SEO                      | —         | 100          | 100                  | —               |
 | Cumulative Layout Shift  | ≤ 0.02    | **0.000**    | **0.000**            | Inside budget   |
-| Largest Contentful Paint | ≤ 2.0 s   | **2.5 s**    | **2.5 s**            | **Over budget** |
-| First Contentful Paint   | —         | 1.0 s        | 0.9 s                | —               |
-| Total Blocking Time      | —         | 83 ms        | 61 ms                | —               |
+| Largest Contentful Paint | ≤ 2.0 s   | **2.5 s**    | **2.8 s**            | **Over budget** |
+| First Contentful Paint   | —         | 0.9 s        | 0.9 s                | —               |
+| Total Blocking Time      | —         | 57 ms        | 89 ms                | —               |
 
 Also verified, and these are the ones that actually protect the design:
 

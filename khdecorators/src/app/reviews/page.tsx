@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Band } from '@/components/Band'
 import { Drawn } from '@/components/Drawn'
-import { GridRules } from '@/components/GridRules'
 import { ReviewList, ReviewsPending, UnsourcedNote } from '@/components/Reviews'
-import { Section } from '@/components/Section'
-import { PageShell } from '@/components/Shell'
+import { ArrowIcon } from '@/components/icons'
 import { pageMetadata } from '@/lib/metadata'
 import { sourcedReviews, unsourcedReviews } from '@content/reviews'
 
@@ -31,66 +30,56 @@ export default function ReviewsPage() {
   const hasAny = sourced.length > 0 || unsourced.length > 0
 
   return (
-    <PageShell>
-      <Drawn className="relative py-14 md:py-20">
-        <GridRules />
-        <div className="relative lg:grid lg:grid-cols-12 lg:gap-x-6">
-          <div className="lg:col-span-8">
-            <p className="annotation-lg text-gold">Reviews</p>
+    <>
+      <section className="relative">
+        <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-14 md:px-8 md:pt-20 md:pb-16">
+          <div className="kh-reveal mx-auto max-w-[46rem] text-center">
+            <p className="annotation text-gold">Reviews</p>
             <h1 className="display mt-4">What people have said</h1>
-            <p className="measure mt-8 text-lg leading-relaxed">
+            <p className="mt-6 text-lg leading-relaxed text-paper-dim">
               Quoted exactly as written, with the name as it was published and a link to the
               original where there is one. Nothing here has been tidied up, shortened in the middle,
               or written on anybody’s behalf.
             </p>
-
-            {/*
-              There is no average rating shown, and `averageRating` is null in the content
-              because there is no verified figure to state. If one is ever added it goes
-              here as plain text with its source named next to it — "4.9 on Yell from 12
-              reviews" — never as a row of stars, and never as structured data. See the
-              note in content/reviews.ts.
-            */}
-
             <p className="mt-8">
-              <Link
-                href="/leave-a-review"
-                className="link link-hover-target annotation-lg text-gold"
-              >
-                Had work done? Leave a review <span aria-hidden="true">→</span>
+              <Link href="/leave-a-review" className="kh-btn-ghost inline-flex gap-2">
+                Had work done? Leave a review
+                <ArrowIcon className="size-4" />
               </Link>
             </p>
           </div>
-        </div>
-      </Drawn>
+        </Drawn>
+      </section>
 
       {!hasAny ? (
-        <Section number="01" title="Not transcribed yet">
+        <Band tone="well" divider>
           <ReviewsPending />
-        </Section>
+        </Band>
       ) : (
         <>
           {sourced.length > 0 ? (
-            <Section
-              number="01"
+            <Band
+              tone="well"
+              eyebrow="Verified"
               title="From Yell and Google"
               standfirst="Published on a platform, with a date, and linked where the original is still up."
-              standfirstTone="annotation"
+              align="centre"
+              divider
             >
-              <ReviewList reviews={sourced} />
-            </Section>
+              <ReviewList reviews={sourced} layout="grid" />
+            </Band>
           ) : null}
 
           {unsourced.length > 0 ? (
-            <Section number="02" title="Unverified">
-              <UnsourcedNote />
-              <div className="mt-10">
-                <ReviewList reviews={unsourced} />
+            <Band eyebrow="Unverified" title="Credited by first name only" align="centre">
+              <div className="mx-auto mb-10 max-w-[52ch] text-center">
+                <UnsourcedNote />
               </div>
-            </Section>
+              <ReviewList reviews={unsourced} layout="grid" />
+            </Band>
           ) : null}
         </>
       )}
-    </PageShell>
+    </>
   )
 }

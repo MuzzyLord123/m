@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CallLink, EmailLink } from '@/components/CallLink'
-import { PageShell } from '@/components/Shell'
 import { phone } from '@content/site'
 
 export const metadata: Metadata = {
@@ -21,7 +20,7 @@ export const metadata: Metadata = {
  */
 export default function ProblemPage() {
   return (
-    <PageShell>
+    <div className="mx-auto max-w-[78rem] px-5 md:px-8">
       <div className="py-20 md:py-28">
         <div className="md:grid md:grid-cols-12 md:gap-x-6">
           <div className="md:col-span-8">
@@ -52,6 +51,6 @@ export default function ProblemPage() {
           </div>
         </div>
       </div>
-    </PageShell>
+    </div>
   )
 }

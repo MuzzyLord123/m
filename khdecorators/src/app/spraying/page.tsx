@@ -1,30 +1,22 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Annotated } from '@/components/Annotated'
+import { Band } from '@/components/Band'
 import { CallLink } from '@/components/CallLink'
 import { Drawn } from '@/components/Drawn'
 import { EnquiryForm } from '@/components/EnquiryForm'
-import { GridRules } from '@/components/GridRules'
-import { Section } from '@/components/Section'
 import { SprayServiceBlock } from '@/components/SprayServiceBlock'
-import { PageShell } from '@/components/Shell'
+import { ArrowIcon, PhoneIcon, SprayGunIcon } from '@/components/icons'
+import { Step, WorkPhoto } from '@/components/kit'
 import { pageMetadata } from '@/lib/metadata'
 import { phone } from '@content/site'
-import {
-  sprayHeroCallouts,
-  sprayHeroPhoto,
-  sprayIntro,
-  sprayProcess,
-  sprayServices,
-} from '@content/spraying'
+import { sprayHeroPhoto, sprayIntro, sprayProcess, sprayServices } from '@content/spraying'
 
 export const metadata: Metadata = pageMetadata({
   /*
    * The brief gives this title as "UPVC, garage door & exterior spraying | KH
-   * Decorators" (§8.9) but also states, as grounds for rejection, that no title may
-   * lack a place (§10). The second rule is the stricter one and the one that matters
-   * for the local searches Kenny is bidding on, so the town is in. Wording otherwise
-   * as specified, with the searched-for terms still at the front.
+   * Painting and Decorating" but also states, as grounds for rejection, that no
+   * title may lack a place. The second rule is the stricter one and the one that
+   * matters for the local searches Kenny is bidding on, so the town is in.
    */
   title: 'UPVC, garage door & exterior spraying in {town} | KH Painting and Decorating',
   description:
@@ -35,141 +27,118 @@ export const metadata: Metadata = pageMetadata({
 /**
  * The money page.
  *
- * Spraying is the thing Kenny does that the competition round here mostly does not,
- * and "UPVC spraying" and "garage door spraying" have real search volume and thin
- * competition. On the old site this was one line of body text.
+ * Spraying is the thing Kenny does that the competition round here mostly does
+ * not, "UPVC spraying" and "garage door spraying" have real search volume and thin
+ * competition, and on the old site it was one line of body text.
  *
- * Two structural decisions worth knowing about:
- *
- *  1. The question index sits above the fold. Somebody arriving from an ad for
- *     "UPVC spraying" sees their own question in the first screen and one tap takes
- *     them to the answer. That is the conversion mechanism on this page — not the
- *     hero photograph and not the button.
- *
- *  2. Every section is a `SprayService` object rendered through one component. To
- *     split /upvc-spraying out as its own ad-group landing page, add a route that
- *     renders `<SprayServiceBlock service={upvc} headingLevel="h1" />` and take its
- *     metadata from `service.landing`. No new components, no copy in JSX.
+ * The question index sits above the fold. Somebody arriving from an ad for "UPVC
+ * spraying" sees their own question in the first screen and one tap takes them to
+ * the answer. That is the conversion mechanism on this page — not the hero
+ * photograph and not the button.
  */
 export default function SprayingPage() {
-  const rail = sprayServices.map((service, i) => ({
-    id: service.slug,
-    number: String(i + 1).padStart(2, '0'),
-    label: service.name.split(/[—,]/)[0].trim(),
-  }))
-
   return (
-    <PageShell rail={rail}>
-      {/* ============================================================ *
-          Hero — and the question index
-          ============================================================ */}
-      <Drawn className="relative py-14 md:py-20">
-        <GridRules />
+    <>
+      {/* Hero and the question index */}
+      <section className="relative">
+        <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-16 md:px-8 md:pt-20 md:pb-20">
+          <div className="kh-reveal grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <p className="annotation flex items-center gap-2 text-gold">
+                <SprayGunIcon className="size-5" />
+                Spray finishing
+              </p>
 
-        <div className="relative lg:grid lg:grid-cols-12 lg:gap-x-6">
-          <div className="lg:col-span-8">
-            <p className="annotation-lg text-gold">Spray finishing</p>
-            <h1 className="display mt-4">
-              Sprayed finishes on the surfaces a brush cannot do properly
-            </h1>
-            <p className="measure mt-8 text-lg leading-relaxed">{sprayIntro.lede}</p>
+              <h1 className="display mt-4">
+                Sprayed finishes on the surfaces a brush cannot do properly
+              </h1>
 
-            {/* The question index. Whatever ad brought them, their question is here. */}
-            <nav aria-label="Questions answered on this page" className="mt-10">
-              <p className="annotation">Straight to your question</p>
-              <ul className="mt-4 border-t border-rule">
-                {sprayServices.map((service) => (
-                  <li key={service.slug} className="border-b border-rule">
-                    <Link
-                      href={`#${service.slug}`}
-                      className="group flex items-baseline justify-between gap-4 py-3"
-                    >
-                      <span className="link link-hover-target">{service.question}</span>
-                      <span aria-hidden="true" className="text-gold">
-                        ↓
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+              <p className="measure mt-6 text-lg leading-relaxed text-paper-dim">
+                {sprayIntro.lede}
+              </p>
 
-            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <CallLink className="kh-btn" from="spraying-hero">
-                Ring Kenny — {phone.label}
-              </CallLink>
-              <Link href="#quote" className="kh-btn-ghost">
-                Ask for a price
-              </Link>
+              <div className="mt-9 flex flex-wrap items-center gap-4">
+                <CallLink className="kh-btn gap-2" from="spraying-hero">
+                  <PhoneIcon className="size-4" />
+                  Ring Kenny — {phone.label}
+                </CallLink>
+                <Link href="#quote" className="kh-btn-ghost">
+                  Get a free quote
+                </Link>
+              </div>
             </div>
+
+            <WorkPhoto
+              photo={sprayHeroPhoto}
+              sizes="(min-width: 1024px) 46vw, 100vw"
+              priority
+              ratio="4 / 3"
+            />
           </div>
-        </div>
 
-        {/* Full width, so the callout labels have a gutter each side to sit in. */}
-        <div className="relative mt-14">
-          <Annotated
-            photo={sprayHeroPhoto}
-            callouts={sprayHeroCallouts}
-            sizes="(min-width: 1280px) 1000px, 100vw"
-            priority
-            ratio="16 / 7"
-          />
-        </div>
-      </Drawn>
+          {/* Whatever ad brought them, their question is in the first screen. */}
+          <nav aria-label="Questions answered on this page" className="kh-reveal mt-14">
+            <p className="annotation text-gold">Straight to your question</p>
+            <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+              {sprayServices.map((service) => (
+                <li key={service.slug}>
+                  <Link
+                    href={`#${service.slug}`}
+                    className="kh-card kh-card--link group flex items-center justify-between gap-4 p-5"
+                  >
+                    <span className="font-medium">{service.question}</span>
+                    <ArrowIcon className="size-4 shrink-0 rotate-90 text-gold transition-transform duration-150 group-hover:translate-y-1" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </Drawn>
+      </section>
 
-      {/* ============================================================ *
-          Why spraying at all
-          ============================================================ */}
-      <Section number="00" title="Why spray rather than brush">
-        <div className="space-y-5">
+      {/* Why spraying at all */}
+      <Band tone="well" eyebrow="Why spray" title="Why spray rather than brush" divider>
+        <div className="grid gap-5 md:grid-cols-3">
           {sprayIntro.body.map((paragraph) => (
-            <p key={paragraph.slice(0, 24)} className="measure">
+            <p key={paragraph.slice(0, 24)} className="kh-card p-6 text-paper-dim">
               {paragraph}
             </p>
           ))}
         </div>
-      </Section>
+      </Band>
 
-      {/* ============================================================ *
-          The four services
-          ============================================================ */}
+      {/* The four services */}
       {sprayServices.map((service, i) => (
-        <SprayServiceBlock
-          key={service.slug}
-          service={service}
-          number={String(i + 1).padStart(2, '0')}
-        />
+        <SprayServiceBlock key={service.slug} service={service} index={i} />
       ))}
 
-      {/* ============================================================ *
-          How a spray job runs
-          ============================================================ */}
-      <Section number="05" title="How a spray job runs">
-        <ol className="border-t border-rule">
+      {/* How a spray job runs */}
+      <Band
+        eyebrow="How it works"
+        title="How a spray job runs"
+        standfirst="Six steps, and the long one is the masking rather than the spraying."
+        divider
+      >
+        <ol className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {sprayProcess.map((step) => (
-            <li
-              key={step.number}
-              className="grid gap-x-6 gap-y-2 border-b border-rule py-5 md:grid-cols-12"
-            >
-              <div className="annotation md:col-span-1">{step.number}</div>
-              <h3 className="display-xs md:col-span-4">{step.title}</h3>
-              <p className="text-paper-dim md:col-span-7">{step.body}</p>
-            </li>
+            <Step key={step.number} number={step.number} title={step.title} body={step.body} />
           ))}
         </ol>
-      </Section>
+      </Band>
 
-      {/* ============================================================ *
-          Quote
-          ============================================================ */}
-      <Section
+      {/* Quote */}
+      <Band
         id="quote"
-        number="06"
+        tone="well"
+        eyebrow="Free quote"
         title="Ask about spraying"
         standfirst="Tell me what it is and roughly where you are. Spraying cannot be quoted off a photograph — I need to see what the existing coating is doing and what needs masking — but I can tell you on the phone whether it is worth me coming out."
+        divider
       >
-        <EnquiryForm from="spraying" />
-      </Section>
-    </PageShell>
+        <div className="max-w-[42rem]">
+          <EnquiryForm from="spraying" />
+        </div>
+      </Band>
+    </>
   )
 }

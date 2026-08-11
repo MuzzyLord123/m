@@ -1,16 +1,17 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Annotated } from '@/components/Annotated'
+import { Band } from '@/components/Band'
 import { CallLink } from '@/components/CallLink'
 import { Drawn } from '@/components/Drawn'
 import { EnquiryForm } from '@/components/EnquiryForm'
-import { GridRules } from '@/components/GridRules'
-import { Section } from '@/components/Section'
-import { PageShell } from '@/components/Shell'
-import { Spec } from '@/components/Spec'
+import { Needed } from '@/components/Needed'
+import { ExtractorIcon, PhoneIcon } from '@/components/icons'
+import { TrustCard, WorkPhoto } from '@/components/kit'
+import { SERVICE_ICONS } from '@/components/icons'
 import { fill, pageMetadata } from '@/lib/metadata'
 import { dustless } from '@content/dustless'
 import { phone } from '@content/site'
+import { isPlaceholder } from '@content/types'
 
 export const metadata: Metadata = pageMetadata({
   title: 'Dustless sanding — decorating in {town} | KH Painting and Decorating',
@@ -20,109 +21,130 @@ export const metadata: Metadata = pageMetadata({
 })
 
 /**
- * The second differentiator, and the answer to the objection that stops people booking
- * decorating at all: not the cost, but the fortnight of dust.
+ * The second differentiator, and the answer to the objection that stops people
+ * booking decorating at all: not the cost, but the fortnight of dust afterwards.
  */
 export default function DustlessSandingPage() {
-  const rail = [
-    { id: 'what', number: '01', label: 'What it means' },
-    { id: 'why', number: '02', label: 'Why it matters' },
-    { id: 'spec', number: '03', label: 'Specification' },
-    { id: 'limits', number: '04', label: 'Honest limits' },
-    { id: 'quote', number: '05', label: 'Ask for a price' },
-  ]
+  // The four reasons are the persuasive part of this page, so they get icons and
+  // cards rather than a two-column prose grid.
+  const icons = ['extractor', 'brush', 'roller', 'interior'] as const
 
   return (
-    <PageShell rail={rail}>
-      <Drawn className="relative py-14 md:py-20">
-        <GridRules />
-        <div className="relative lg:grid lg:grid-cols-12 lg:gap-x-6">
-          <div className="lg:col-span-8">
-            <p className="annotation-lg text-gold">Method</p>
-            <h1 className="display mt-4">Dustless sanding</h1>
-            <div className="mt-8 border-l-2 border-gold pl-5">
-              <p className="annotation-lg text-gold">{dustless.question}</p>
-              <p className="measure mt-3 text-lg leading-relaxed">{dustless.lede}</p>
+    <>
+      {/* Hero */}
+      <section className="relative">
+        <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-16 md:px-8 md:pt-20 md:pb-20">
+          <div className="kh-reveal grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <p className="annotation flex items-center gap-2 text-gold">
+                <ExtractorIcon className="size-5" />
+                My method
+              </p>
+
+              <h1 className="display mt-4">Dustless sanding</h1>
+
+              <div className="kh-card mt-7 p-6">
+                <p className="display-xs text-gold">{dustless.question}</p>
+                <p className="mt-4 leading-relaxed">{dustless.lede}</p>
+              </div>
+
+              <div className="mt-9 flex flex-wrap items-center gap-4">
+                <CallLink className="kh-btn gap-2" from="dustless-hero">
+                  <PhoneIcon className="size-4" />
+                  Ring Kenny — {phone.label}
+                </CallLink>
+                <Link href="#quote" className="kh-btn-ghost">
+                  Get a free quote
+                </Link>
+              </div>
             </div>
-            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <CallLink className="kh-btn" from="dustless-hero">
-                Ring Kenny — {phone.label}
-              </CallLink>
-              <Link href="#quote" className="kh-btn-ghost">
-                Ask for a price
-              </Link>
-            </div>
+
+            <WorkPhoto
+              photo={dustless.photo}
+              sizes="(min-width: 1024px) 46vw, 100vw"
+              priority
+              ratio="4 / 3"
+            />
           </div>
-        </div>
+        </Drawn>
+      </section>
 
-        {/* Full width, so the callout labels have a gutter each side to sit in. */}
-        <div className="relative mt-14">
-          <Annotated
-            photo={dustless.photo}
-            callouts={dustless.callouts}
-            sizes="(min-width: 1280px) 1000px, 100vw"
-            priority
-            ratio="16 / 7"
-          />
-        </div>
-      </Drawn>
-
-      <Section id="what" number="01" title="What it means in practice">
-        <div className="space-y-5">
+      {/* What it means */}
+      <Band tone="well" eyebrow="In practice" title="What it means in practice" divider>
+        <div className="grid gap-5 md:grid-cols-3">
           {dustless.what.map((paragraph) => (
-            <p key={paragraph.slice(0, 24)} className="measure">
+            <p key={paragraph.slice(0, 24)} className="kh-card p-6 text-paper-dim">
               {paragraph}
             </p>
           ))}
         </div>
-      </Section>
+      </Band>
 
-      <Section id="why" number="02" title="Why it matters when you live in the house">
-        <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
-          {dustless.whyItMatters.map((item) => (
-            <div key={item.title} className="border-t border-edge pt-4">
-              <h3 className="display-xs">{item.title}</h3>
-              <p className="mt-3 text-paper-dim">{item.body}</p>
-            </div>
+      {/* Why it matters */}
+      <Band
+        eyebrow="Why it matters"
+        title="Why it matters when you live in the house"
+        align="centre"
+      >
+        <div className="grid gap-5 sm:grid-cols-2">
+          {dustless.whyItMatters.map((item, i) => (
+            <TrustCard
+              key={item.title}
+              title={item.title}
+              body={item.body}
+              icon={SERVICE_ICONS[icons[i % icons.length]]}
+            />
           ))}
         </div>
-      </Section>
+      </Band>
 
-      <Section id="spec" number="03" title="Specification">
-        <div className="max-w-[46rem]">
-          <Spec
-            rows={dustless.spec.map((row) => ({
-              ...row,
-              value: fill(row.value),
-            }))}
-          />
+      {/* What's included */}
+      <Band tone="well" eyebrow="What's included" title="How I set up on your job" divider>
+        <div className="kh-card max-w-[52rem] p-6 md:p-8">
+          <dl className="space-y-4">
+            {dustless.spec.map((row) => (
+              <div
+                key={row.label}
+                className="grid grid-cols-[minmax(0,12rem)_minmax(0,1fr)] items-baseline gap-4 border-b border-rule pb-4 last:border-b-0 last:pb-0"
+              >
+                <dt className="annotation">{row.label}</dt>
+                <dd className="font-medium">
+                  {isPlaceholder(row.value) ? <Needed token={row.value} /> : fill(row.value)}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
-      </Section>
+      </Band>
 
-      <Section
-        id="limits"
-        number="04"
+      {/* Honest limits */}
+      <Band
+        eyebrow="Straight answers"
         title="Where the word overstates it"
-        standfirst="“Dustless” is the trade term. Here is what it actually does and does not do."
-        standfirstTone="annotation"
+        standfirst="“Dustless” is the trade term and it flatters the truth. Here is what it actually does and does not do."
       >
-        <ul className="grid gap-x-10 gap-y-5 lg:grid-cols-2">
+        <ul className="grid gap-5 lg:grid-cols-2">
           {dustless.limits.map((limit) => (
-            <li key={limit.slice(0, 24)} className="border-t border-edge pt-4">
+            <li key={limit.slice(0, 24)} className="kh-card p-5 text-paper-dim">
               {limit}
             </li>
           ))}
         </ul>
-      </Section>
+      </Band>
 
-      <Section
+      {/* Quote */}
+      <Band
         id="quote"
-        number="05"
+        tone="well"
+        eyebrow="Free quote"
         title="Ask for a price"
         standfirst="The extraction is not an extra and it is not a line on the quote — it is how I work on every job. Tell me what needs doing and I will price the decorating."
+        divider
       >
-        <EnquiryForm from="dustless-sanding" />
-      </Section>
-    </PageShell>
+        <div className="max-w-[42rem]">
+          <EnquiryForm from="dustless-sanding" />
+        </div>
+      </Band>
+    </>
   )
 }
