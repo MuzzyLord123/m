@@ -6,7 +6,7 @@ import { ConversionOnLoad } from '@/components/ConversionOnLoad'
 import { phone } from '@content/site'
 
 export const metadata: Metadata = {
-  title: 'Enquiry sent | KH Decorators',
+  title: 'Enquiry sent | KH Painting and Decorating',
   // Never index a thank-you page: it has no value in a search result and it would
   // pollute the Ads conversion picture if somebody landed on it directly.
   robots: { index: false, follow: false },

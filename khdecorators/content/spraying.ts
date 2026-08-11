@@ -85,7 +85,7 @@ const upvc: SprayService = {
     { x: 44, y: 78, side: 'right', label: 'Sills and brickwork sheeted' },
   ],
   landing: {
-    title: 'UPVC spraying in {town} | KH Decorators',
+    title: 'UPVC spraying in {town} | KH Painting and Decorating',
     description:
       'UPVC windows, doors and conservatory frames sprayed in {town} and across the north west. Degreased, keyed, primed for plastic, two topcoats. Any colour. Ring Kenny on 07538 869832.',
     h1: 'UPVC spraying',
@@ -143,7 +143,7 @@ const garageDoors: SprayService = {
     { x: 62, y: 86, side: 'right', label: 'Bottom edge rust spot-primed' },
   ],
   landing: {
-    title: 'Garage door spraying in {town} | KH Decorators',
+    title: 'Garage door spraying in {town} | KH Painting and Decorating',
     description:
       'Garage doors sprayed in {town} and across the north west. Steel, GRP and timber. Rust treated, keyed, two topcoats, sprayed in place. Any colour. Ring Kenny on 07538 869832.',
     h1: 'Garage door spraying',
@@ -201,7 +201,7 @@ const exterior: SprayService = {
     { x: 40, y: 82, side: 'left', label: 'Borders and path sheeted' },
   ],
   landing: {
-    title: 'Exterior spraying in {town} | KH Decorators',
+    title: 'Exterior spraying in {town} | KH Painting and Decorating',
     description:
       'Render, cladding, fascias and soffits sprayed in {town} and across the north west. Cleaned, made good, two coats. Weather-honest scheduling. Ring Kenny on 07538 869832.',
     h1: 'Exterior spraying',
@@ -261,7 +261,7 @@ const furniture: SprayService = {
     { x: 48, y: 84, side: 'left', label: 'Every piece labelled, refitted as it came off' },
   ],
   landing: {
-    title: 'Kitchen & furniture spraying in {town} | KH Decorators',
+    title: 'Kitchen & furniture spraying in {town} | KH Painting and Decorating',
     description:
       'Kitchen doors, wardrobes and furniture sprayed in {town} and across the north west. Doors removed, degreased, keyed, primed and sprayed flat. Ring Kenny on 07538 869832.',
     h1: 'Furniture and kitchen door spraying',

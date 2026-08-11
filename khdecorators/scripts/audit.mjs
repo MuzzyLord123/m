@@ -130,7 +130,7 @@ for (const [vpName, viewport] of VIEWPORTS) {
       if (indexable) {
         const hasPlace = /\{\{TOWN\}\}|in [A-Z]/.test(checks.title)
         if (!hasPlace) failures.push(`${path}: title names no place — "${checks.title}"`)
-        if (!/KH Decorators/.test(checks.title)) {
+        if (!/KH Painting and Decorating/.test(checks.title)) {
           failures.push(`${path}: title has no business name — "${checks.title}"`)
         }
       }
@@ -172,7 +172,7 @@ await browser.close()
 /* ---- Report -------------------------------------------------------- */
 
 const line = '─'.repeat(72)
-console.log(`\n${line}\nKH Decorators — audit\n${line}`)
+console.log(`\n${line}\nKH Painting and Decorating — audit\n${line}`)
 
 for (const note of notes) console.log(`  ✓ ${note}`)
 

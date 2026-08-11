@@ -5,7 +5,7 @@ import { PageShell } from '@/components/Shell'
 import { phone } from '@content/site'
 
 export const metadata: Metadata = {
-  title: 'That didn’t send | KH Decorators',
+  title: 'That didn’t send | KH Painting and Decorating',
   robots: { index: false, follow: false },
 }
 

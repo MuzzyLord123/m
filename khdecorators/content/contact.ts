@@ -10,7 +10,7 @@
 
 export const contact = {
   h1: 'Get in touch',
-  title: 'Contact — painter & decorator in {town} | KH Decorators',
+  title: 'Contact — painter & decorator in {town} | KH Painting and Decorating',
   description:
     'Ring Kenny on 07538 869832 or send a few lines about the job. Painting, decorating and spray finishing in {town} and across the north west.',
 

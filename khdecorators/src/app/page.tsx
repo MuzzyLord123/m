@@ -22,7 +22,7 @@ import { isPlaceholder } from '@content/types'
 export const metadata: Metadata = pageMetadata({
   // The old title was "Home". This one names the trade and the town, because those
   // are the words somebody reads in a search result before deciding to click.
-  title: 'Painters & decorators in {town} | KH Decorators',
+  title: 'Painters & decorators in {town} | KH Painting and Decorating',
   description:
     'Painter, decorator and spray finisher in {town} and across the north west. UPVC, garage doors, render and kitchen doors sprayed. Dustless sanding, so you can stay in the house. Ring Kenny on 07538 869832.',
   path: '/',

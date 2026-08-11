@@ -73,7 +73,7 @@ export const serviceRows: ServiceRow[] = [
 const interior: ServicePage = {
   slug: 'interior-decoration',
   h1: 'Interior decoration',
-  title: 'Interior painting & decorating in {town} | KH Decorators',
+  title: 'Interior painting & decorating in {town} | KH Painting and Decorating',
   description:
     'Interior decorating in {town} and across the north west. Walls, ceilings and woodwork, filled and flatted properly, sanded dustless so you can stay in the house. Ring Kenny on 07538 869832.',
   lede: 'Most of what makes an interior look right happened before the topcoat went on. The paint is the last two days of the job and the least skilled part of it. What you are paying for is the filling, the flatting and the cutting in.',
@@ -149,7 +149,7 @@ const interior: ServicePage = {
 const exterior: ServicePage = {
   slug: 'exterior-decoration',
   h1: 'Exterior decoration',
-  title: 'Exterior painting & decorating in {town} | KH Decorators',
+  title: 'Exterior painting & decorating in {town} | KH Painting and Decorating',
   description:
     'Exterior decorating in {town} and across the north west. Render, masonry and woodwork, made good before painting, two coats. Weather-honest dates. Ring Kenny on 07538 869832.',
   lede: 'Outside, the paint is doing a job rather than a decorating job — it is the thing keeping weather out of the render and off the timber. So the making good matters more than the colour, and the date depends on the forecast rather than on the diary.',
@@ -220,7 +220,7 @@ const exterior: ServicePage = {
 const wallpaper: ServicePage = {
   slug: 'wallpaper-hanging',
   h1: 'Wallpaper hanging',
-  title: 'Wallpaper hanging in {town} | KH Decorators',
+  title: 'Wallpaper hanging in {town} | KH Painting and Decorating',
   description:
     'Wallpaper hung in {town} and across the north west. Lining, plain and patterned papers, feature walls at short notice. Walls prepared properly first. Ring Kenny on 07538 869832.',
   lede: 'Papering is judged on two things: whether the seams show and whether the pattern still lines up at the far corner. Both are decided by the wall underneath and by how carefully the first length was hung.',

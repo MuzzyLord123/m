@@ -26,7 +26,7 @@ export const metadata: Metadata = pageMetadata({
    * for the local searches Kenny is bidding on, so the town is in. Wording otherwise
    * as specified, with the searched-for terms still at the front.
    */
-  title: 'UPVC, garage door & exterior spraying in {town} | KH Decorators',
+  title: 'UPVC, garage door & exterior spraying in {town} | KH Painting and Decorating',
   description:
     'Spray finishing in {town} and across the north west. UPVC windows and doors, garage doors, render, cladding, kitchen doors and furniture. Degreased, keyed, primed, two coats. Ring Kenny on 07538 869832.',
   path: '/spraying',

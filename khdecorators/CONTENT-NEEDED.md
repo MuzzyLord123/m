@@ -11,9 +11,14 @@ accident.
 
 Work down the list in order — it is written to be read out on the phone.
 
+**Already settled:** the trading name is **KH Painting and Decorating**. That was one of
+the five blocking items and it is now set throughout the site. It still needs matching on
+the Google Business Profile, in the Google Ads account and on Yell, or the three-competing-
+names problem simply moves off the website and stays everywhere else — see `LAUNCH.md` §5.
+
 ---
 
-## Part 1 — The five that block launch
+## Part 1 — The four that block launch
 
 ### 1. Which town are you based in?
 
@@ -74,21 +79,7 @@ review**, and they become real ones.
 
 ---
 
-### 4. What is the business actually called?
-
-> "KH Decorators, KH Painting and Decorating, or K.H Decorating? All three are on your site."
-
-All three appear across the current six pages, and the reviews add more variants. Google
-cannot tell they are one business, so the local signal is split three ways.
-
-Pick one, then it goes everywhere and stays: this site, the structured data, the Ads
-account, the Google Business Profile, Yell, the van.
-
-**Where it goes:** `business.name` in `content/site.ts`.
-
----
-
-### 5. Access to the Google Ads account
+### 4. Access to the Google Ads account
 
 > "Who's got the login for your Google Ads? I need to look at it before we switch over."
 
@@ -110,7 +101,7 @@ runs them, they need warning that the landing page URLs are moving.
 
 The site is honest and launchable without them. Each one makes it better.
 
-### 6. Photographs — spray work above all
+### 5. Photographs — spray work above all
 
 > "Have you got photos of the UPVC and garage doors you've sprayed? Off your phone, not off
 > the website."
@@ -137,7 +128,7 @@ the size this design runs them.
 Drop files into `public/work/` and fill in the four fields in the matching content file —
 `README.md` has the two-minute version.
 
-### 7. "Time served" — what does it mean for you?
+### 6. "Time served" — what does it mean for you?
 
 > "Which apprenticeship, where, and when did you finish?"
 
@@ -145,33 +136,33 @@ It is a real trade term and worth keeping. On its own it is vague; "four-year
 apprenticeship, finished 2006" is a fact a customer can weigh. Also: **how long have you
 been working for yourself?**
 
-### 8. Insurance
+### 7. Insurance
 
 > "Public liability — who's it with and what's the cover?"
 
 Commercial and industrial customers check before they enquire. Stating it removes a phone
 call and wins the jobs that require it.
 
-### 9. Qualifications
+### 8. Qualifications
 
 NVQ, City & Guilds, any spray training, PASMA or IPAF tickets for towers. Spray training
 and access tickets are worth naming on a page selling spray work.
 
-### 10. Working hours
+### 9. Working hours
 
 > "What hours do you want people ringing you on? Weekends?"
 
 Stops the Ads budget generating calls he cannot answer, and stops customers assuming they
 are being ignored.
 
-### 11. Guarantee on sprayed work
+### 10. Guarantee on sprayed work
 
 > "Do you guarantee sprayed UPVC, and for how long?"
 
 "Will it peel?" is the commonest objection to sprayed UPVC. A stated guarantee answers it
 in four words on the page that sells it.
 
-### 12. How long things take
+### 11. How long things take
 
 Rough durations, for the specification tables. "How long will you be here?" is one of the
 first three questions any customer has, and answering it on the page removes friction
@@ -184,12 +175,12 @@ before the enquiry:
 - A semi, outside, all elevations
 - A feature wall, and a papered room
 
-### 13. Which sander and extractor?
+### 12. Which sander and extractor?
 
 Make and model. Naming the kit is the difference between a claim and a fact on the dustless
 sanding page, and commercial customers recognise the brands.
 
-### 14. Google Business Profile and Yell
+### 13. Google Business Profile and Yell
 
 > "Have you got a Google business listing, and can you log into it?"
 
@@ -210,7 +201,6 @@ Same for the Yell listing URL, where the older reviews live.
 | Base town                  | `content/site.ts` → `town`                    | **Yes**  |
 | Service area towns         | `content/areas.ts` → `areas.towns`            | **Yes**  |
 | Reviews                    | `content/reviews.ts` → `reviews`              | **Yes**  |
-| Trading name               | `content/site.ts` → `business.name`           | **Yes**  |
 | Ads conversion labels      | host environment — see `.env.example`         | **Yes**  |
 | SMTP app password          | host environment — see `LAUNCH.md` §4          | **Yes**  |
 | Photographs                | `public/work/` + the matching content file     | No       |

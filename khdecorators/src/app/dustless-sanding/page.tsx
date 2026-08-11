@@ -13,7 +13,7 @@ import { dustless } from '@content/dustless'
 import { phone } from '@content/site'
 
 export const metadata: Metadata = pageMetadata({
-  title: 'Dustless sanding — decorating in {town} | KH Decorators',
+  title: 'Dustless sanding — decorating in {town} | KH Painting and Decorating',
   description:
     'Dustless sanding in {town} and across the north west. Dust extracted at the pad as it is made, so you can stay in the house while the decorating happens. Ring Kenny on 07538 869832.',
   path: '/dustless-sanding',

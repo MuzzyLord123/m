@@ -24,7 +24,7 @@ import './globals.css'
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Painters & decorators | KH Decorators',
+    default: 'Painters & decorators | KH Painting and Decorating',
     // Every page sets its own; this only ever applies if one forgets to.
     template: '%s',
   },

@@ -244,7 +244,7 @@ for (const file of srcFiles) {
 
 const line = '─'.repeat(72)
 
-console.log(`\n${line}\nKH Decorators — ${strict ? 'LAUNCH CHECK' : 'content check'}\n${line}`)
+console.log(`\n${line}\nKH Painting and Decorating — ${strict ? 'LAUNCH CHECK' : 'content check'}\n${line}`)
 
 if (notes.length > 0) {
   console.log('\nDone:')

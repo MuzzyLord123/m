@@ -10,7 +10,7 @@ import { leaveAReview } from '@content/reviews'
 import { isPlaceholder } from '@content/types'
 
 export const metadata: Metadata = pageMetadata({
-  title: 'Leave a review — decorating in {town} | KH Decorators',
+  title: 'Leave a review — decorating in {town} | KH Painting and Decorating',
   description:
     'Had painting, decorating or spray work done by Kenny in {town}? Links to leave a review on Google or Yell.',
   path: '/leave-a-review',

@@ -10,8 +10,9 @@ the performance figures to show Kenny afterwards.
 
 - [ ] `npm run check:launch` passes. **It does not today** — see `CONTENT-NEEDED.md`.
 - [ ] Kenny has confirmed his **base town** and his **real service area** out loud.
-- [ ] The **trading name** is settled: one of KH Decorators / KH Painting and Decorating /
-      K.H Decorating, used everywhere from then on.
+- [x] The **trading name** is settled: **KH Painting and Decorating**. Set throughout the
+      site. Still to do OUTSIDE this repo — make it match on the Google Business Profile,
+      in the Google Ads account and on Yell (§5), or the split-signal problem just moves.
 - [ ] The **reviews have been transcribed** word for word. Instructions are at the top of
       `content/reviews.ts`. They are not to be written.
 - [ ] The **Ads conversion labels** are in the host's environment (`ADS-MIGRATION.md` §2).

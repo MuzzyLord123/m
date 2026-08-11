@@ -63,7 +63,7 @@ export async function deliverEnquiry(values: EnquiryValues): Promise<DeliveryRes
     })
 
     await transport.sendMail({
-      from: `"KH Decorators website" <${config.user}>`,
+      from: `"KH Painting and Decorating website" <${config.user}>`,
       to: config.to,
       subject,
       text,

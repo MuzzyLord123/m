@@ -41,7 +41,7 @@ export function pageMetadata({
       title: resolvedTitle,
       description: resolvedDescription,
       url,
-      siteName: 'KH Decorators',
+      siteName: 'KH Painting and Decorating',
       locale: 'en_GB',
       type: 'website',
     },

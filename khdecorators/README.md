@@ -1,6 +1,6 @@
 # khdecorators.uk
 
-Website for **KH Decorators** — Kenny, a painter, decorator and spray finisher working
+Website for **KH Painting and Decorating** — Kenny, a painter, decorator and spray finisher working
 across the north west of England.
 
 This replaces a live Google Sites site that is **receiving paid traffic**. Two documents

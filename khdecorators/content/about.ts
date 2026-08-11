@@ -15,7 +15,7 @@
 
 export const about = {
   h1: 'About Kenny',
-  title: 'About Kenny — painter & decorator in {town} | KH Decorators',
+  title: 'About Kenny — painter & decorator in {town} | KH Painting and Decorating',
   description:
     'Kenny is a time-served painter, decorator and spray finisher based in {town}, working across the north west. One man, one job at a time. Ring 07538 869832.',
 

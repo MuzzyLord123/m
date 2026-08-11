@@ -54,14 +54,16 @@ export const needed: NeededItem[] = [
     blocking: true,
     from: 'Kenny',
   },
-  {
-    token: 'business.name',
-    ask: 'Confirm the exact trading name. KH Decorators, KH Painting and Decorating, or K.H Decorating?',
-    why: 'All three appear on the current site and the reviews add more. Google cannot tell they are one business, so the local signal is split three ways. Pick one and it goes on the site, the Ads account, the Google profile and Yell.',
-    appears: 'Everywhere, plus the JSON-LD name',
-    blocking: true,
-    from: 'Kenny',
-  },
+  /*
+   * ANSWERED — the trading name is "KH Painting and Decorating". It was one of the
+   * five blocking items; Kenny confirmed it, so it is set in content/site.ts and it is
+   * off this list.
+   *
+   * It is not finished until it matches in all the places OUTSIDE this repository,
+   * though, because the whole problem was three names competing: the Google Business
+   * Profile, the Google Ads account, Yell, and any other directory listing. That is a
+   * checklist item in LAUNCH.md §5 rather than a content gap here.
+   */
   {
     token: 'ADS_CONVERSION_LABELS',
     ask: 'Access to the Google Ads account, so the existing conversion actions can be found and their send_to labels copied.',

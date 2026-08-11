@@ -10,7 +10,7 @@ import { sourcedReviews, unsourcedReviews } from '@content/reviews'
 
 export const metadata: Metadata = pageMetadata({
   // Slug unchanged from the old site. The old title was the single word "Reviews".
-  title: 'Reviews — painter & decorator in {town} | KH Decorators',
+  title: 'Reviews — painter & decorator in {town} | KH Painting and Decorating',
   description:
     'What customers have said about Kenny’s painting, decorating and spray work in {town} and across the north west. Quoted verbatim, with the source and a link to the original.',
   path: '/reviews',

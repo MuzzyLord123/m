@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 import { business, phone, town } from '@content/site'
 import { isPlaceholder } from '@content/types'
 
-export const alt = 'KH Decorators — painting, decorating and spray finishing'
+export const alt = 'KH Painting and Decorating — painting, decorating and spray finishing'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 

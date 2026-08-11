@@ -63,19 +63,25 @@ export const region = 'the north west of England'
  * ------------------------------------------------------------------ */
 
 /**
- * The old site uses three names across six pages — KH Decorators, KH Painting and
- * Decorating, and K.H Decorating — and the reviews add more. Google cannot tell
- * that they are one business, which splits the local signal three ways.
+ * CONFIRMED: the trading name is **KH Painting and Decorating**.
  *
- * 'KH Decorators' is used here because it is the domain and the most frequent
- * form, but it needs saying out loud to Kenny once and then it goes everywhere:
- * this site, the JSON-LD, the Ads account, the Google Business Profile, Yell.
- * See CONTENT-NEEDED.md.
+ * The old site used three names across six pages — KH Decorators, KH Painting and
+ * Decorating, and K.H Decorating — and the reviews added more, which meant Google
+ * could not tell they were one business and the local signal was split three ways.
+ * That is now settled, and this is the only place it is written down.
+ *
+ * It has to match EVERYWHERE or the problem comes straight back: the Google
+ * Business Profile, the Google Ads account, Yell, the van, and any directory
+ * listing. See LAUNCH.md §5. The domain stays khdecorators.uk — a domain not
+ * matching the trading name is completely normal and costs nothing.
  */
 export const business = {
-  name: 'KH Decorators',
-  /** For tight spaces — the header, the footer, the OG image. */
-  shortName: 'KH Decorators',
+  name: 'KH Painting and Decorating',
+  /**
+   * For tight spaces — the header wordmark and the OG image. Same words: an
+   * abbreviation here would reintroduce exactly the inconsistency we just removed.
+   */
+  shortName: 'KH Painting and Decorating',
   trade: 'Painter, decorator & spray finisher',
   /** He works on his own. The site is written in the first person because of it. */
   tradesman: 'Kenny',
