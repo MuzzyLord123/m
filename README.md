@@ -178,6 +178,31 @@ so a staging deployment can carry it and the live site never will.
 
 ---
 
+## Deploying
+
+This repo holds **two** separate Next projects: the F.A.S site at the root, and
+`neilbrookfield/` in its own directory. Whatever you deploy to, the **root directory**
+setting decides which one you get.
+
+On Vercel — import `MuzzyLord123/m` at [vercel.com/new](https://vercel.com/new) and set:
+
+| Setting | Value |
+|---|---|
+| Framework | Next.js (auto-detected) |
+| Root Directory | `./` — the repo root. This is the F.A.S site. |
+| Build / install commands | Leave alone; `vercel.json` sets them. |
+
+Then add the environment variables below under Settings → Environment Variables and
+redeploy. `NEXT_PUBLIC_SITE_URL` is the one that matters — without it, canonical tags,
+the sitemap and the JSON-LD all point at `localhost`.
+
+Once it is connected, every push to `main` deploys automatically.
+
+`vercel.json` exists for one reason: `playwright` is a devDependency (the audit script
+uses it) and Vercel installs devDependencies, so its postinstall would pull ~150MB of
+browsers on every build. `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` stops that. Nothing at
+runtime touches Playwright.
+
 ## Environment variables
 
 | Variable | What it does |
