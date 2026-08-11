@@ -49,10 +49,13 @@ export function Section({
       {grid ? <GridRules /> : null}
 
       <div className="relative md:grid md:grid-cols-12 md:gap-x-6">
-        {/* The part marker. Two columns on desktop, a short rule on a phone. */}
+        {/*
+          The part marker: a fan-deck swatch chip carrying the numeral, then a
+          snapped chalk line — the setting-out a decorator does before starting.
+        */}
         <div className="md:col-span-2">
-          <div className="annotation-lg text-ink">{number}</div>
-          <div className="mt-2 h-px w-8 bg-ink md:w-full" />
+          <span className="kh-chip annotation-lg">{number}</span>
+          <div className="kh-chalk mt-4 w-10 md:w-full" />
         </div>
 
         <div className="mt-5 md:col-span-10 md:mt-0">
@@ -64,7 +67,7 @@ export function Section({
                 {standfirst}
               </p>
             ) : (
-              <p className="measure mt-5 text-muted">{standfirst}</p>
+              <p className="measure mt-5 text-paper-dim">{standfirst}</p>
             )
           ) : null}
 

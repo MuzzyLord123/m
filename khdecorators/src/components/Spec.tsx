@@ -35,7 +35,7 @@ export function Spec({
           className="grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] items-baseline gap-x-4 border-b border-rule py-3"
         >
           <dt className="annotation pt-1">{row.label}</dt>
-          <dd className="spec-value">
+          <dd className="spec-value font-medium text-paper">
             {isPlaceholder(row.value) ? <Needed token={row.value} /> : row.value}
           </dd>
         </div>

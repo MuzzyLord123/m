@@ -31,7 +31,7 @@ export default function EnquirySentPage() {
       <div className="py-20 md:py-28">
         <div className="md:grid md:grid-cols-12 md:gap-x-6">
           <div className="md:col-span-8">
-            <p className="annotation-lg text-ink">Enquiry sent</p>
+            <p className="annotation-lg text-gold">Enquiry sent</p>
             <h1 className="display mt-4">That’s come through.</h1>
             <p className="measure mt-8 text-lg leading-relaxed">
               I have got it and I will come back to you, usually the same day. If it is urgent, ring
@@ -39,16 +39,10 @@ export default function EnquirySentPage() {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <CallLink
-                className="annotation-lg border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85"
-                from="sent"
-              >
+              <CallLink className="kh-btn" from="sent">
                 Ring Kenny — {phone.label}
               </CallLink>
-              <Link
-                href="/"
-                className="annotation-lg border border-ink px-6 py-4 transition-colors duration-150 hover:border-signal hover:text-signal"
-              >
+              <Link href="/" className="kh-btn-ghost">
                 Back to the start
               </Link>
             </div>

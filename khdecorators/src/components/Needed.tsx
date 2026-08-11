@@ -30,18 +30,28 @@ export function Needed({ token, inline = true }: { token: string; inline?: boole
   if (inline) {
     return (
       <span
-        className="annotation inline-block border border-rule px-2 py-1 align-baseline text-muted"
+        className="annotation kh-well inline-flex items-center gap-2 border border-edge px-2 py-1 align-baseline text-paper-faint"
         title={label}
       >
+        {/* A strip of masking tape: this content is masked off, not finished. The
+            hatch sits BESIDE the text, never behind it, so nothing is harder to read. */}
+        <span
+          aria-hidden="true"
+          className="block h-3.5 w-2.5 shrink-0"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(45deg, var(--color-gold) 0 2px, transparent 2px 4px)',
+          }}
+        />
         To confirm
       </span>
     )
   }
 
   return (
-    <div className="border border-rule p-4">
-      <div className="annotation">To confirm</div>
-      <p className="measure mt-2 text-muted">{label}</p>
+    <div className="kh-well border border-edge p-4">
+      <div className="annotation text-gold">To confirm</div>
+      <p className="measure mt-2 text-paper-dim">{label}</p>
     </div>
   )
 }

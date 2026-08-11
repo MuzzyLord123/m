@@ -38,23 +38,17 @@ export default function DustlessSandingPage() {
         <GridRules />
         <div className="relative lg:grid lg:grid-cols-12 lg:gap-x-6">
           <div className="lg:col-span-8">
-            <p className="annotation-lg text-ink">Method</p>
+            <p className="annotation-lg text-gold">Method</p>
             <h1 className="display mt-4">Dustless sanding</h1>
-            <div className="mt-8 border-l border-signal pl-5">
-              <p className="annotation-lg text-ink">{dustless.question}</p>
+            <div className="mt-8 border-l-2 border-gold pl-5">
+              <p className="annotation-lg text-gold">{dustless.question}</p>
               <p className="measure mt-3 text-lg leading-relaxed">{dustless.lede}</p>
             </div>
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <CallLink
-                className="annotation-lg border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85"
-                from="dustless-hero"
-              >
+              <CallLink className="kh-btn" from="dustless-hero">
                 Ring Kenny — {phone.label}
               </CallLink>
-              <Link
-                href="#quote"
-                className="annotation-lg border border-ink px-6 py-4 transition-colors duration-150 hover:border-signal hover:text-signal"
-              >
+              <Link href="#quote" className="kh-btn-ghost">
                 Ask for a price
               </Link>
             </div>
@@ -86,9 +80,9 @@ export default function DustlessSandingPage() {
       <Section id="why" number="02" title="Why it matters when you live in the house">
         <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
           {dustless.whyItMatters.map((item) => (
-            <div key={item.title} className="border-t border-ink pt-4">
-              <h3 className="text-lg font-medium tracking-[-0.01em]">{item.title}</h3>
-              <p className="mt-3 text-muted">{item.body}</p>
+            <div key={item.title} className="border-t border-edge pt-4">
+              <h3 className="display-xs">{item.title}</h3>
+              <p className="mt-3 text-paper-dim">{item.body}</p>
             </div>
           ))}
         </div>
@@ -114,7 +108,7 @@ export default function DustlessSandingPage() {
       >
         <ul className="grid gap-x-10 gap-y-5 lg:grid-cols-2">
           {dustless.limits.map((limit) => (
-            <li key={limit.slice(0, 24)} className="border-t border-ink pt-4">
+            <li key={limit.slice(0, 24)} className="border-t border-edge pt-4">
               {limit}
             </li>
           ))}

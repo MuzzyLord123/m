@@ -10,10 +10,10 @@
     "lint": "tsc --noEmit",
     "check:content": "node scripts/check-content.mjs",
     "check:launch": "node scripts/check-content.mjs --strict",
-    "audit": "node scripts/audit.mjs"
+    "audit": "node scripts/audit.mjs",
+    "check:contrast": "node scripts/contrast.mjs"
   },
   "dependencies": {
-    "geist": "^1.7.2",
     "next": "16.3.0",
     "nodemailer": "^9.0.5",
     "react": "^19.2.8",

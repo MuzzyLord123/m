@@ -34,10 +34,10 @@ export default function LeaveAReviewPage() {
         <GridRules />
         <div className="relative md:grid md:grid-cols-12 md:gap-x-6">
           <div className="md:col-span-8">
-            <p className="annotation-lg text-ink">Reviews</p>
+            <p className="annotation-lg text-gold">Reviews</p>
             <h1 className="display mt-4">Leave a review</h1>
             <p className="measure mt-8 text-lg leading-relaxed">{leaveAReview.lede}</p>
-            <p className="measure mt-5 text-muted">{leaveAReview.ask}</p>
+            <p className="measure mt-5 text-paper-dim">{leaveAReview.ask}</p>
           </div>
         </div>
       </Drawn>
@@ -48,8 +48,8 @@ export default function LeaveAReviewPage() {
             <li key={place.name} className="border-b border-rule py-6">
               {isPlaceholder(place.url) ? (
                 <div>
-                  <p className="annotation-lg text-ink">{place.name}</p>
-                  <p className="mt-3 text-muted">{place.note}</p>
+                  <p className="annotation-lg text-gold">{place.name}</p>
+                  <p className="mt-3 text-paper-dim">{place.note}</p>
                   <div className="mt-4">
                     <Needed
                       token={
@@ -68,13 +68,13 @@ export default function LeaveAReviewPage() {
                       href={place.url}
                       rel="noopener"
                       target="_blank"
-                      className="text-xl font-medium tracking-[-0.01em] text-signal underline decoration-1 underline-offset-4 hover:decoration-2"
+                      className="display-xs text-gold underline decoration-1 underline-offset-4 transition-colors duration-150 hover:text-gold-lift hover:decoration-2"
                     >
                       Review me on {place.name}
                       <span aria-hidden="true"> ↗</span>
                       <span className="sr-only"> (opens in a new tab)</span>
                     </a>
-                    <p className="mt-3 max-w-[46ch] text-muted">{place.note}</p>
+                    <p className="mt-3 max-w-[46ch] text-paper-dim">{place.note}</p>
                   </div>
                 </div>
               )}
@@ -82,15 +82,15 @@ export default function LeaveAReviewPage() {
           ))}
         </ul>
 
-        <p className="measure mt-10 text-muted">{leaveAReview.alternative}</p>
+        <p className="measure mt-10 text-paper-dim">{leaveAReview.alternative}</p>
 
         <div className="mt-6 flex flex-wrap items-baseline gap-x-8 gap-y-3">
           <p className="annotation">
             Text or ring{' '}
-            <CallLink className="link link-hover-target text-signal" from="leave-a-review" />
+            <CallLink className="link link-hover-target text-gold" from="leave-a-review" />
           </p>
           <p className="annotation">
-            Email <EmailLink className="link link-hover-target text-signal" from="leave-a-review" />
+            Email <EmailLink className="link link-hover-target text-gold" from="leave-a-review" />
           </p>
         </div>
       </Section>

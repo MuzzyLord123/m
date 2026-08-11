@@ -9,9 +9,13 @@ export const contentType = 'image/png'
 /**
  * The share card.
  *
- * The site's own language reduced to one frame: cool white, the exposed grid, ink
- * type, and the signal blue used once. No photograph — there are none yet, and a
+ * The site's own language reduced to one frame: the matt ground, the setting-out
+ * grid, paper type and one gold rule. No photograph — there are none yet, and a
  * share card built around an empty slot is worse than one built around type.
+ *
+ * The colours are written out as literals rather than read from the theme, because
+ * `ImageResponse` renders outside the document and has no CSS variables to resolve.
+ * They must be kept in step with the `@theme` block in globals.css by hand.
  *
  * Rendered with the runtime's default sans rather than Geist: `ImageResponse` needs a
  * ttf, otf or woff, and the `geist` package ships woff2 only. Loading a second copy of
@@ -29,8 +33,8 @@ export default function OpenGraphImage() {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        backgroundColor: '#F6F7F5',
-        color: '#101413',
+        backgroundColor: '#12100E',
+        color: '#EFEAE2',
         padding: '72px',
         position: 'relative',
       }}
@@ -45,7 +49,7 @@ export default function OpenGraphImage() {
             bottom: 0,
             left: `${(i / 12) * 100}%`,
             width: '1px',
-            backgroundColor: '#E7EAE8',
+            backgroundColor: '#2C2823',
           }}
         />
       ))}
@@ -62,7 +66,7 @@ export default function OpenGraphImage() {
             fontSize: 20,
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            color: '#5C635F',
+            color: '#ADA79D',
           }}
         >
           {business.name}
@@ -72,7 +76,7 @@ export default function OpenGraphImage() {
             fontSize: 20,
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            color: '#5C635F',
+            color: '#ADA79D',
           }}
         >
           01
@@ -80,7 +84,7 @@ export default function OpenGraphImage() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ width: '96px', height: '2px', backgroundColor: '#1D3BD6' }} />
+        <div style={{ width: '96px', height: '2px', backgroundColor: '#C9A227' }} />
         {/* One interpolated string, not text plus an expression: satori requires a
               div with more than one child node to declare its display mode, and
               `text {place}` counts as two children. */}
@@ -99,7 +103,7 @@ export default function OpenGraphImage() {
           style={{
             marginTop: 32,
             fontSize: 26,
-            color: '#5C635F',
+            color: '#ADA79D',
             maxWidth: '820px',
           }}
         >
@@ -115,13 +119,13 @@ export default function OpenGraphImage() {
           alignItems: 'baseline',
         }}
       >
-        <div style={{ fontSize: 34, color: '#1D3BD6' }}>{phone.label}</div>
+        <div style={{ fontSize: 34, color: '#C9A227' }}>{phone.label}</div>
         <div
           style={{
             fontSize: 20,
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            color: '#5C635F',
+            color: '#ADA79D',
           }}
         >
           khdecorators.uk

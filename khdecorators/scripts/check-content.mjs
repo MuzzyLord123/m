@@ -239,12 +239,47 @@ for (const file of srcFiles) {
 }
 
 /* ------------------------------------------------------------------ *
+ * 8. The palette still meets WCAG AA
+ * ------------------------------------------------------------------ */
+
+/*
+ * Imported rather than reimplemented, so there is one contrast checker. A dark
+ * theme with a gold accent is exactly where accessibility regresses quietly: a
+ * later tweak to one hex can drop a pair below 4.5:1 and nothing looks wrong.
+ */
+try {
+  const { PALETTE, ratio } = await import('./contrast.mjs')
+  const bodyPairs = [
+    [PALETTE.paper, PALETTE.matt],
+    [PALETTE.paperDim, PALETTE.satin],
+    [PALETTE.paperFaint, PALETTE.satin],
+    [PALETTE.gold, PALETTE.matt],
+    [PALETTE.matt, PALETTE.gold],
+  ]
+  const bad = bodyPairs.filter(([f, b]) => ratio(f, b) < 4.5)
+  if (bad.length > 0) {
+    problems.push(
+      `${bad.length} palette pair(s) are below 4.5:1 for body text. ` +
+        'Run `npm run check:contrast` for the detail.',
+    )
+  } else {
+    notes.push('Palette contrast: every body pair clears WCAG AA.')
+  }
+} catch (error) {
+  warnings.push(
+    `Could not run the contrast check: ${error instanceof Error ? error.message : String(error)}`,
+  )
+}
+
+/* ------------------------------------------------------------------ *
  * Report
  * ------------------------------------------------------------------ */
 
 const line = '─'.repeat(72)
 
-console.log(`\n${line}\nKH Painting and Decorating — ${strict ? 'LAUNCH CHECK' : 'content check'}\n${line}`)
+console.log(
+  `\n${line}\nKH Painting and Decorating — ${strict ? 'LAUNCH CHECK' : 'content check'}\n${line}`,
+)
 
 if (notes.length > 0) {
   console.log('\nDone:')

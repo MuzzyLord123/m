@@ -159,45 +159,65 @@ Same for the Yell listing URL into `profiles.yell`.
 
 ### After: measured on this build
 
-Median of three Lighthouse runs, mobile form factor, simulated throttling, production
-build served locally. Commands are in §8 so this can be reproduced rather than believed.
+Median of three sequential Lighthouse runs, mobile form factor, simulated throttling,
+production build served locally. Commands are in §8 so this can be reproduced rather
+than believed.
 
-| Metric                   | Budget (brief §10) | `/` measured | `/spraying` measured | Verdict            |
-| ------------------------ | ------------------ | ------------ | -------------------- | ------------------ |
-| Performance (mobile)     | ≥ 92               | **97**       | **97**               | Inside budget      |
-| Accessibility            | 100                | **100**      | **100**              | Inside budget      |
-| Best practices           | —                  | 96           | 96                   | —                  |
-| SEO                      | —                  | 100          | 100                  | —                  |
-| Cumulative Layout Shift  | ≤ 0.02             | **0.000**    | **0.000**            | Inside budget      |
-| Largest Contentful Paint | ≤ 2.0 s            | **2.7 s**    | **2.7 s**            | **Over budget**    |
-| First Contentful Paint   | —                  | 1.0 s        | 0.9 s                | —                  |
-| Total Blocking Time      | —                  | 63 ms        | 62 ms                | —                  |
+| Metric                   | Budget    | `/` measured | `/spraying` measured | Verdict         |
+| ------------------------ | --------- | ------------ | -------------------- | --------------- |
+| Performance (mobile)     | ≥ 92      | **97**       | **98**               | Inside budget   |
+| Accessibility            | 100       | **100**      | **100**              | Inside budget   |
+| Best practices           | —         | 96           | 96                   | —               |
+| SEO                      | —         | 100          | 100                  | —               |
+| Cumulative Layout Shift  | ≤ 0.02    | **0.000**    | **0.000**            | Inside budget   |
+| Largest Contentful Paint | ≤ 2.0 s   | **2.5 s**    | **2.5 s**            | **Over budget** |
+| First Contentful Paint   | —         | 1.0 s        | 0.9 s                | —               |
+| Total Blocking Time      | —         | 83 ms        | 61 ms                | —               |
 
-**LCP is the one figure outside the brief's budget, and it is worth being straight about
-why rather than rounding it down.**
+Also verified, and these are the ones that actually protect the design:
 
-The largest element on both pages is a paragraph of text, not an image. It paints at FCP
-(1.0s) in the metric-matched fallback face, then repaints when the 70KB Geist Variable
-file lands — and LCP records the later paint. Everything that can be done for it already
-has been: the font is self-hosted, preloaded, `font-display: swap`, and metrically matched
-to its fallback, which is why CLS is a flat zero. There is no render-blocking script, no
-image on the critical path, and the Ads tag loads `afterInteractive`.
+- `npm run check:contrast` — every text and border pair in the palette clears WCAG AA
+  for the use it is put to. The ratios are computed, not asserted.
+- `npm run audit` — axe-core over 13 pages at a phone width and a desktop width, with
+  no violations, including the `best-practice` rules. Plus a `prefers-reduced-motion`
+  pass confirming nothing stays hidden when the animations are switched off.
+
+**LCP is the one figure outside budget, and it is worth being straight about why.**
+
+The largest element on both pages is a paragraph of text, not an image. It paints at
+FCP in the metric-matched fallback face, then repaints when the Archivo file lands, and
+LCP records the later paint. Everything that can be done for it has been: one variable
+font rather than several files, self-hosted, preloaded, `display: swap`, and
+metrically matched to its fallback — which is why CLS is a flat zero.
+
+Three font configurations were measured before settling on one:
+
+| Configuration                      | home LCP | `/spraying` CLS |
+| ---------------------------------- | -------- | --------------- |
+| Two families, display not preloaded | 2.0 s    | 0.019           |
+| Two families, display preloaded     | 2.6 s    | 0.000           |
+| **One variable family, preloaded**  | 2.5 s    | **0.000**       |
+
+The first row looks like it wins on LCP, and it was rejected anyway: 0.019 against a
+0.02 ceiling is passing with no margin at all, and a longer heading on a slower device
+puts it over. Run-to-run LCP noise on the build machine was around ±0.6 s — larger than
+the difference between these rows — so the deterministic column was the one worth
+optimising.
 
 Two things left, in order:
 
-1. **Measure it again on the live host before deciding anything.** These figures come from
-   a plain Node server on a shared build machine under Lighthouse's simulated slow 4G. In
+1. **Measure it again on the live host before changing anything.** These figures come
+   from a plain Node server on a shared build machine under simulated slow 4G. In
    production the font and HTML come off a CDN. Use PageSpeed Insights on the real URL —
    that is also the number Google itself uses.
-2. **If it is still over 2.0s and Kenny would rather have the speed:** change the font to
-   `display: 'optional'`. LCP would drop to roughly FCP, about 1.0s. The cost is that a
-   first-time visitor on a slow connection sees the fallback face for that visit, and
-   "one typeface doing all the work" is the whole discipline of this design — so it is a
-   design decision, not a performance tweak, and it should be Kenny's call rather than
-   made quietly in a config file.
+2. **If it is still over 2.0 s and Kenny would rather have the speed:** change the font
+   to `display: 'optional'` in `src/app/fonts.ts`. LCP would drop to roughly FCP. The
+   cost is that a first-time visitor on a slow connection sees the fallback face for
+   that visit. That is a design decision, not a performance tweak, so it should be his
+   call rather than made quietly in a config file.
 
-A change that made this build fake the number — a smaller display size, a lazier font, an
-image LCP — would be worth less than the honest 2.7s.
+A change that made this build fake the number — smaller display type, a lazier font, an
+image LCP — would be worth less than the honest 2.5 s.
 
 ### Before: measure this on the old site, and do it first
 
@@ -211,9 +231,9 @@ and write the numbers in:
 | ------------------------ | --------------------- | ------------------ |
 | Performance (mobile)     | `{{TODO}}`            | 97                 |
 | Accessibility            | `{{TODO}}`            | 100                |
-| Largest Contentful Paint | `{{TODO}}`            | 2.7 s              |
+| Largest Contentful Paint | `{{TODO}}`            | 2.5 s              |
 | Cumulative Layout Shift  | `{{TODO}}`            | 0.000              |
-| Total page weight        | `{{TODO}}`            | ~250 KB            |
+| Total page weight        | `{{TODO}}`            | ~230 KB            |
 
 Expect the old site to be a long way behind, mostly because of the embedded Google Form
 and Google Sites' own scripts. That gap is the argument for the rebuild, and on paid
@@ -227,12 +247,18 @@ traffic it is money rather than vanity — so it is worth writing down and showi
 npm run build
 npx next start -p 3000
 
-# Mobile Lighthouse, one page. Run it three times and take the median — a single
-# run on a busy machine swings by up to 8 points on performance.
+# Mobile Lighthouse, one page. Run it three times SEQUENTIALLY and take the median —
+# a single run on a busy machine swings by up to 8 points on performance and 0.6s on
+# LCP, and running them concurrently makes the server the bottleneck instead of the
+# page, which produces nonsense.
 npx lighthouse@12 http://localhost:3000/ \
   --only-categories=performance,accessibility,best-practices,seo \
   --form-factor=mobile --screenEmulation.mobile \
   --output=html --output-path=./lh-home.html
+
+# The two checks that protect the design rather than measuring it.
+npm run check:contrast     # computes every palette pair against WCAG AA
+npm run audit              # axe-core, 13 pages, two widths, reduced-motion pass
 ```
 
 Screenshots of every page at desktop and phone widths:

@@ -142,11 +142,17 @@ written down.
 
 **Enforced by the tooling** — `npm run check:launch` fails, or the utility does not exist:
 
-- No `rounded-*`, `shadow-*`, `blur-*` or any colour outside the five tokens. Those
-  Tailwind scales are reset to `initial` in `globals.css`, so the classes are not
-  generated. You cannot type `rounded-md` by accident.
-- No second typeface. `--font-*` is reset for the same reason; Geist Sans is the only
-  family defined.
+- No colour outside the palette, no `blur-*`, and only the two radii and three
+  shadows the design actually defines. Tailwind's stock scales are reset to
+  `initial` in `globals.css`, so those classes are never generated — you cannot
+  type `rounded-lg` or `bg-red-500` by accident.
+- No second typeface. `--font-*` is reset for the same reason; Archivo is the only
+  family defined. See `src/app/fonts.ts` for why it is one family and not two.
+- **Every text/background pair is contrast-checked by `npm run check:contrast`,**
+  which computes the ratios rather than trusting them. Gold on near-black is the
+  classic trap — it lands around 3–4:1, looks fine and fails — so the gold in this
+  palette was picked at a luminance that clears 4.5:1 on every surface it is used
+  on. Change a hex and run the check.
 - No `aggregateRating` in the structured data. Third-party ratings marked up as
   first-party risks a manual action against the whole site.
 - No hotlinks to `googleusercontent.com`, no embedded Google Form, no link to
@@ -164,10 +170,12 @@ written down.
 - **Reviews are transcribed, never written.** See the top of `content/reviews.ts`.
 - **Honest limits on every service page.** The "what it will not do" sections are the most
   persuasive thing on the site precisely because nobody else writes them.
-- **Motion is four things**: grid rules drawing down, callout leader lines drawing out,
-  the rail's current number turning blue, and a form underline thickening on focus.
-  Nothing else moves. No parallax, no counters, no page transitions, nothing with a
-  spring.
+- **Motion is small and it is all feedback.** Grid rules draw down on section entry,
+  callout leader lines draw out, the rail's current number turns gold, and hover or
+  focus warms a colour. Nothing animates on load, nothing animates a layout
+  property, and there is no parallax, no counter, no page transition and nothing
+  with a spring. Under `prefers-reduced-motion` the transition goes but the end
+  state stays — reduced motion must never mean reduced feedback.
 - **No fixed bottom call bar, no burger menu.** The nav is always visible.
 
 ---
@@ -196,17 +204,43 @@ A few components carry more weight than the rest:
 - **`lib/conversions.ts`** — the Ads tag and the three conversion actions. Read
   `ADS-MIGRATION.md` before editing.
 
-### Design tokens
+### Design tokens — "Signwriter's Fascia"
+
+A matt near-black wall, raised satin panels, and gold used the way a signwriter
+uses it: lettering, leaf-thin rules and registration marks. Never a flood fill.
 
 ```
---paper   #F6F7F5   cool near-white, the whole site
---ink     #101413
---muted   #5C635F
---rule    #D7DCD8   the exposed grid, and every frame
---signal  #1D3BD6   links, callout lines, active states, the CTA — nothing else
+Surfaces — the sheen ladder, which is the thing Kenny actually sells
+--matt        #12100E   the page. Warm near-black, deliberately not #000
+--satin       #1F1C18   raised panel: tables, quotes, the header
+--satin-hot   #2B2519   satin warmed with gold, for hover
+--well        #0A0908   recess: inputs, table heads, footer, chips
+
+Text — three tiers, all AA on every surface they are used on
+--paper       #EFEAE2   body and headings
+--paper-dim   #ADA79D   secondary: nav, table labels, captions
+--paper-faint #948D82   micro-labels
+
+Gold — signwriter's brass, four steps
+--gold        #C9A227   headings, numerals, rules, the CTA fill
+--gold-lift   #E2C55F   hover, and the focus ring
+--gold-press  #A07D18   :active fill
+--gold-deep   #8C6D14   borders and 24px+ text ONLY. Never body copy.
+
+Lines
+--edge        #787166   MEANINGFUL borders: inputs, frames, tables
+--rule        #2C2823   DECORATIVE hairlines: the setting-out grid, row rules
+--alert       #F47962   the one status colour
 ```
 
-Signal blue is on roughly 4% of any screen. Everything structural is ink and rules.
+**Gold is never body copy.** It is a heading, numeral, rule, icon and button-fill
+colour. There is no exception — not for pull quotes, not for the phone number in
+prose. Body text is `paper` or `paper-dim`, and that rule is what keeps a
+black-and-gold site readable at length.
+
+Depth comes from three CSS techniques and no bitmaps: a 0.6KB inline SVG
+turbulence tile at 5% that reads as atomised overspray, 1px inset highlights that
+read as a lit surface, and masking-film hatching in every empty photograph frame.
 
 ### Routes
 

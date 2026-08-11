@@ -102,7 +102,7 @@ export function Annotated({
             empty-slot text does its own clipping instead.
           */}
           <div
-            className="relative border border-rule"
+            className={`kh-frame relative ${hasImage ? '' : 'kh-frame--empty'}`}
             style={{ aspectRatio: hasImage ? undefined : ratio }}
           >
             {hasImage ? (
@@ -133,7 +133,7 @@ export function Annotated({
                     y1={`${c.y}%`}
                     x2={c.side === 'left' ? '0%' : '100%'}
                     y2={`${c.y}%`}
-                    stroke="var(--color-signal)"
+                    stroke="var(--color-gold)"
                     strokeWidth="1"
                     vectorEffect="non-scaling-stroke"
                     style={
@@ -164,9 +164,9 @@ export function Annotated({
               >
                 {/* A square, not a circle. Nothing on this site has a radius, and a
                     tick mark is what an engineering drawing would use anyway. */}
-                <span className="block size-[5px] shrink-0 bg-signal" />
+                <span className="block size-[7px] shrink-0 border border-matt bg-gold" />
                 {/* The number is only needed while the label is not adjacent. */}
-                <span className="annotation bg-paper px-1 text-signal @[34rem]:hidden">{c.n}</span>
+                <span className="annotation bg-matt px-1 text-gold @[34rem]:hidden">{c.n}</span>
               </span>
             ))}
 
@@ -174,7 +174,7 @@ export function Annotated({
             {(annotate ? numbered : []).map((c) => (
               <span
                 key={c.n}
-                className="callout-label annotation absolute hidden w-[7.5rem] leading-snug @[34rem]:block"
+                className="callout-label annotation absolute hidden w-[7.5rem] leading-snug text-paper @[34rem]:block"
                 style={
                   {
                     top: `${c.y}%`,
@@ -200,7 +200,7 @@ export function Annotated({
           <ol className={`mt-4 space-y-2 ${annotate ? '@[34rem]:hidden' : ''}`}>
             {numbered.map((c) => (
               <li key={c.n} className="flex gap-3">
-                <span className="annotation shrink-0 pt-0.5 text-signal">{c.n}</span>
+                <span className="annotation shrink-0 pt-0.5 text-gold">{c.n}</span>
                 <span className="annotation">{c.label}</span>
               </li>
             ))}
@@ -215,23 +215,29 @@ export function Annotated({
 }
 
 /**
- * An unfilled photograph slot. A ruled frame, the annotation register, and the brief
- * for the shot we are waiting on. It looks like an empty field on a specification
- * sheet, which is exactly what it is.
+ * An unfilled photograph slot: a panel masked off and waiting for a spray pass.
  *
- * The brief is clamped rather than allowed to run: these frames are sometimes only a
- * couple of hundred pixels wide, and text spilling out of the bottom of its own border
- * looks like a broken page rather than a deliberate placeholder.
+ * These frames are large and there are a lot of them, because Kenny's photographs
+ * have not arrived yet. So the empty state has to be composed rather than merely
+ * labelled — the content is centred as a small plate on the masking film, which
+ * reads as a deliberate placeholder in a schedule of works. Pinned to the bottom
+ * corner of a 1200×520 rectangle, the same words read as a void with a caption.
+ *
+ * The brief is clamped: some of these frames are only a couple of hundred pixels
+ * wide, and text spilling out of the bottom of its own border looks like a fault.
  */
 function EmptySlot({ brief }: { brief: string }) {
   return (
     // Clipping happens here rather than on the frame, so the callout labels outside
     // the frame survive. See the note above.
-    <div className="absolute inset-0 flex flex-col justify-between gap-3 overflow-hidden p-4 md:p-6">
-      <div className="annotation shrink-0">Photograph to come</div>
-      <p className="line-clamp-3 max-w-[46ch] text-sm text-muted @[26rem]:line-clamp-4 @[40rem]:line-clamp-none">
-        {brief}
-      </p>
+    <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-5 md:p-8">
+      <div className="kh-well max-w-[34rem] border border-edge px-5 py-4 text-center">
+        <p className="annotation text-gold">Photograph to come</p>
+        <div className="mx-auto mt-3 h-px w-8 bg-gold-deep" />
+        <p className="mt-3 line-clamp-3 text-sm text-paper-dim @[26rem]:line-clamp-4 @[40rem]:line-clamp-none">
+          {brief}
+        </p>
+      </div>
     </div>
   )
 }

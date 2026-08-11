@@ -62,7 +62,7 @@ export function Rail({ items }: { items: readonly RailItem[] }) {
                 href={`#${item.id}`}
                 aria-current={active ? 'true' : undefined}
                 className={`annotation block transition-colors duration-200 ${
-                  active ? 'text-signal' : 'text-muted hover:text-ink'
+                  active ? 'text-gold' : 'text-paper-dim hover:text-paper'
                 }`}
               >
                 <span className="tabular-nums">{item.number}</span>

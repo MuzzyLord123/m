@@ -31,8 +31,8 @@ export function SprayServiceBlock({
     <Section id={service.slug} number={number} title={service.name} headingLevel={headingLevel}>
       {/* The question, then the answer. This has to be the first thing read by
           somebody who arrived from an ad for exactly this service. */}
-      <div className="border-l border-signal pl-5">
-        <p className="annotation-lg text-ink">{service.question}</p>
+      <div className="border-l-2 border-gold pl-5">
+        <p className="annotation-lg text-gold">{service.question}</p>
         <p className="measure mt-3 text-lg leading-relaxed">{service.answer}</p>
       </div>
 
@@ -47,7 +47,7 @@ export function SprayServiceBlock({
 
       <div className="mt-14 grid gap-x-10 gap-y-12 lg:grid-cols-2">
         <div>
-          <h3 className="annotation-lg text-ink">What I spray</h3>
+          <h3 className="annotation-lg text-gold">What I spray</h3>
           <ul className="mt-4 border-t border-rule">
             {service.covers.map((item) => (
               <li key={item} className="border-b border-rule py-3">
@@ -58,7 +58,7 @@ export function SprayServiceBlock({
         </div>
 
         <div>
-          <h3 className="annotation-lg text-ink">Why sprayed, not brushed</h3>
+          <h3 className="annotation-lg text-gold">Why sprayed, not brushed</h3>
           <ul className="mt-4 space-y-4">
             {service.whySpray.map((item) => (
               <li key={item.slice(0, 24)} className="border-t border-rule pt-4">
@@ -71,7 +71,7 @@ export function SprayServiceBlock({
 
       <div className="mt-14 grid gap-x-10 gap-y-12 lg:grid-cols-2">
         <div>
-          <h3 className="annotation-lg text-ink">Preparation, in order</h3>
+          <h3 className="annotation-lg text-gold">Preparation, in order</h3>
           <p className="annotation mt-2 normal-case tracking-normal">
             Most of the job. Most of the quote.
           </p>
@@ -89,7 +89,7 @@ export function SprayServiceBlock({
         </div>
 
         <div>
-          <h3 className="annotation-lg text-ink">Specification</h3>
+          <h3 className="annotation-lg text-gold">Specification</h3>
           <p className="annotation mt-2 normal-case tracking-normal">
             What goes on, how many coats, how long.
           </p>
@@ -105,13 +105,13 @@ export function SprayServiceBlock({
       </div>
 
       <div className="mt-14">
-        <h3 className="annotation-lg text-ink">What it will not do</h3>
+        <h3 className="annotation-lg text-gold">What it will not do</h3>
         <p className="annotation mt-2 normal-case tracking-normal">
           The honest list. Read this one before you book anybody, not just me.
         </p>
         <ul className="mt-5 grid gap-x-10 gap-y-5 lg:grid-cols-2">
           {service.limits.map((limit) => (
-            <li key={limit.slice(0, 24)} className="border-t border-ink pt-4">
+            <li key={limit.slice(0, 24)} className="border-t border-edge pt-4">
               {limit}
             </li>
           ))}

@@ -26,7 +26,7 @@ export function ReviewList({ reviews }: { reviews: Review[] }) {
 
           <div className="annotation mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
             {/* As published. A Yell username stays a Yell username. */}
-            <cite className="not-italic text-ink">{review.name}</cite>
+            <cite className="not-italic text-paper">{review.name}</cite>
 
             {review.source !== 'unsourced' ? <span>{review.source}</span> : null}
 
@@ -39,7 +39,7 @@ export function ReviewList({ reviews }: { reviews: Review[] }) {
                 href={review.url}
                 rel="nofollow noopener"
                 target="_blank"
-                className="text-signal hover:underline"
+                className="text-gold hover:underline"
               >
                 Read it <span aria-hidden="true">↗</span>
                 <span className="sr-only"> (opens in a new tab)</span>
@@ -96,7 +96,7 @@ export function ReviewsPending() {
   const entry = needed.find((n) => n.token === 'reviews')
 
   return (
-    <div className="border border-rule p-6 md:p-8">
+    <div className="kh-panel border-l-2 border-gold p-6 md:p-8">
       <div className="annotation">
         To be transcribed — {entry?.blocking ? 'blocks launch' : 'not blocking'}
       </div>
@@ -106,7 +106,7 @@ export function ReviewsPending() {
         first name — and they need copying across word for word, with the names and dates exactly as
         they were published.
       </p>
-      <p className="measure mt-4 text-muted">
+      <p className="measure mt-4 text-paper-dim">
         Nothing plausible has been put here in the meantime. An invented testimonial is a lie to the
         next customer and a structured-data violation, and it would undermine every other claim on
         the site. The instructions for transcribing them are at the top of{' '}

@@ -36,7 +36,7 @@ export default function ReviewsPage() {
         <GridRules />
         <div className="relative lg:grid lg:grid-cols-12 lg:gap-x-6">
           <div className="lg:col-span-8">
-            <p className="annotation-lg text-ink">Reviews</p>
+            <p className="annotation-lg text-gold">Reviews</p>
             <h1 className="display mt-4">What people have said</h1>
             <p className="measure mt-8 text-lg leading-relaxed">
               Quoted exactly as written, with the name as it was published and a link to the
@@ -55,7 +55,7 @@ export default function ReviewsPage() {
             <p className="mt-8">
               <Link
                 href="/leave-a-review"
-                className="link link-hover-target annotation-lg text-signal"
+                className="link link-hover-target annotation-lg text-gold"
               >
                 Had work done? Leave a review <span aria-hidden="true">→</span>
               </Link>

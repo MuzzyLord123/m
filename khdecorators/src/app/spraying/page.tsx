@@ -68,7 +68,7 @@ export default function SprayingPage() {
 
         <div className="relative lg:grid lg:grid-cols-12 lg:gap-x-6">
           <div className="lg:col-span-8">
-            <p className="annotation-lg text-ink">Spray finishing</p>
+            <p className="annotation-lg text-gold">Spray finishing</p>
             <h1 className="display mt-4">
               Sprayed finishes on the surfaces a brush cannot do properly
             </h1>
@@ -85,7 +85,7 @@ export default function SprayingPage() {
                       className="group flex items-baseline justify-between gap-4 py-3"
                     >
                       <span className="link link-hover-target">{service.question}</span>
-                      <span aria-hidden="true" className="text-signal">
+                      <span aria-hidden="true" className="text-gold">
                         ↓
                       </span>
                     </Link>
@@ -95,16 +95,10 @@ export default function SprayingPage() {
             </nav>
 
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <CallLink
-                className="annotation-lg border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85"
-                from="spraying-hero"
-              >
+              <CallLink className="kh-btn" from="spraying-hero">
                 Ring Kenny — {phone.label}
               </CallLink>
-              <Link
-                href="#quote"
-                className="annotation-lg border border-ink px-6 py-4 transition-colors duration-150 hover:border-signal hover:text-signal"
-              >
+              <Link href="#quote" className="kh-btn-ghost">
                 Ask for a price
               </Link>
             </div>
@@ -158,8 +152,8 @@ export default function SprayingPage() {
               className="grid gap-x-6 gap-y-2 border-b border-rule py-5 md:grid-cols-12"
             >
               <div className="annotation md:col-span-1">{step.number}</div>
-              <h3 className="text-lg font-medium tracking-[-0.01em] md:col-span-4">{step.title}</h3>
-              <p className="text-muted md:col-span-7">{step.body}</p>
+              <h3 className="display-xs md:col-span-4">{step.title}</h3>
+              <p className="text-paper-dim md:col-span-7">{step.body}</p>
             </li>
           ))}
         </ol>

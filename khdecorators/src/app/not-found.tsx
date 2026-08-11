@@ -20,7 +20,7 @@ export default function NotFound() {
       <div className="py-20 md:py-28">
         <div className="md:grid md:grid-cols-12 md:gap-x-6">
           <div className="md:col-span-8">
-            <p className="annotation-lg text-ink">404</p>
+            <p className="annotation-lg text-gold">404</p>
             <h1 className="display mt-4">That page isn’t here</h1>
             <p className="measure mt-8 text-lg leading-relaxed">
               It may have moved when the site was rebuilt. Everything is listed below, or ring me
@@ -28,10 +28,7 @@ export default function NotFound() {
             </p>
 
             <div className="mt-10">
-              <CallLink
-                className="annotation-lg inline-block border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85"
-                from="404"
-              >
+              <CallLink className="kh-btn" from="404">
                 Ring Kenny — {phone.label}
               </CallLink>
             </div>

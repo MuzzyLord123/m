@@ -40,16 +40,10 @@ export function ServicePageView({ service }: { service: ServicePage }) {
             <h1 className="display">{service.h1}</h1>
             <p className="measure mt-8 text-lg leading-relaxed">{service.lede}</p>
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <CallLink
-                className="annotation-lg border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85"
-                from={`${service.slug}-hero`}
-              >
+              <CallLink className="kh-btn" from={`${service.slug}-hero`}>
                 Ring Kenny — {phone.label}
               </CallLink>
-              <Link
-                href="#quote"
-                className="annotation-lg border border-ink px-6 py-4 transition-colors duration-150 hover:border-signal hover:text-signal"
-              >
+              <Link href="#quote" className="kh-btn-ghost">
                 Ask for a price
               </Link>
             </div>
@@ -92,8 +86,8 @@ export function ServicePageView({ service }: { service: ServicePage }) {
               className="grid gap-x-6 gap-y-2 border-b border-rule py-6 md:grid-cols-12"
             >
               <div className="annotation md:col-span-1">{String(i + 1).padStart(2, '0')}</div>
-              <h3 className="text-lg font-medium tracking-[-0.01em] md:col-span-4">{step.title}</h3>
-              <p className="text-muted md:col-span-7">{step.body}</p>
+              <h3 className="display-xs md:col-span-4">{step.title}</h3>
+              <p className="text-paper-dim md:col-span-7">{step.body}</p>
             </li>
           ))}
         </ol>
@@ -119,7 +113,7 @@ export function ServicePageView({ service }: { service: ServicePage }) {
       >
         <ul className="grid gap-x-10 gap-y-5 lg:grid-cols-2">
           {service.limits.map((limit) => (
-            <li key={limit.slice(0, 24)} className="border-t border-ink pt-4">
+            <li key={limit.slice(0, 24)} className="border-t border-edge pt-4">
               {limit}
             </li>
           ))}

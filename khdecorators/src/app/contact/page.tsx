@@ -37,15 +37,12 @@ export default function ContactPage() {
         <GridRules />
         <div className="relative lg:grid lg:grid-cols-12 lg:gap-x-6">
           <div className="lg:col-span-7">
-            <p className="annotation-lg text-ink">Contact</p>
+            <p className="annotation-lg text-gold">Contact</p>
             <h1 className="display mt-4">{contact.h1}</h1>
             <p className="measure mt-8 text-lg leading-relaxed">{contact.lede}</p>
 
             <div className="mt-10">
-              <CallLink
-                className="annotation-lg inline-block border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85"
-                from="contact-hero"
-              >
+              <CallLink className="kh-btn" from="contact-hero">
                 Ring Kenny — {phone.label}
               </CallLink>
             </div>

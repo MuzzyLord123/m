@@ -97,7 +97,7 @@ export function EnquiryForm({ from = 'form' }: { from?: string }) {
 
   if (state === 'sent') {
     return (
-      <div className="border-t border-ink pt-6" role="status">
+      <div className="kh-panel border-l-2 border-gold p-6" role="status">
         <h3 className="display-sm">{contact.form.success.heading}</h3>
         <p className="measure mt-4">
           {contact.form.success.body.split('{phone}')[0]}
@@ -115,7 +115,7 @@ export function EnquiryForm({ from = 'form' }: { from?: string }) {
       method="post"
       onSubmit={handleSubmit}
       noValidate
-      className="max-w-[42rem]"
+      className="kh-panel max-w-[42rem] p-6 md:p-8"
     >
       <div className="space-y-8">
         <Field
@@ -165,28 +165,24 @@ export function EnquiryForm({ from = 'form' }: { from?: string }) {
       <input type="hidden" name={TIMESTAMP_FIELD} value={startedAt.current} />
 
       <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-        <button
-          type="submit"
-          disabled={state === 'sending'}
-          className="annotation-lg border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85 disabled:opacity-60"
-        >
+        <button type="submit" disabled={state === 'sending'} className="kh-btn disabled:opacity-60">
           {state === 'sending' ? 'Sending…' : contact.form.submit}
         </button>
 
         <p className="annotation">
-          or ring <CallLink className="link link-hover-target text-signal" from={from} />
+          or ring <CallLink className="link link-hover-target text-gold" from={from} />
         </p>
       </div>
 
-      <p className="mt-6 max-w-[46ch] text-sm text-muted">{contact.form.privacy}</p>
+      <p className="mt-6 max-w-[46ch] text-sm text-paper-dim">{contact.form.privacy}</p>
 
       {/* One live region for both outcomes, so a screen reader announces the result
           without the form jumping about. */}
       <div aria-live="polite" className="mt-6 empty:mt-0">
         {state === 'failed' ? (
-          <div className="border-t border-ink pt-5">
-            <p className="annotation-lg text-ink">{contact.form.error.heading}</p>
-            <p className="measure mt-3 text-muted">
+          <div className="kh-panel border-l-2 border-alert p-5">
+            <p className="annotation-lg text-gold">{contact.form.error.heading}</p>
+            <p className="measure mt-3 text-paper-dim">
               {contact.form.error.body.split('{phone}')[0]}
               <CallLink className="link link-hover-target" from="form-error" />
               {(contact.form.error.body.split('{phone}')[1] ?? '').split('{email}')[0]}
@@ -196,7 +192,7 @@ export function EnquiryForm({ from = 'form' }: { from?: string }) {
           </div>
         ) : null}
         {errors.form && state !== 'failed' ? (
-          <p className="annotation-lg text-ink">
+          <p className="annotation-lg text-gold">
             That didn’t send. Ring {phone.label} or email {email}.
           </p>
         ) : null}
@@ -233,7 +229,7 @@ function Field({
     autoComplete,
     'aria-invalid': error ? (true as const) : undefined,
     'aria-describedby': describedBy,
-    className: 'field-input w-full text-ink placeholder:text-muted',
+    className: 'field-input',
   }
 
   return (
@@ -244,7 +240,7 @@ function Field({
       </label>
 
       {hint ? (
-        <p id={hintId} className="mt-1 text-sm text-muted">
+        <p id={hintId} className="mt-1 text-sm text-paper-dim">
           {hint}
         </p>
       ) : null}
@@ -256,7 +252,8 @@ function Field({
       )}
 
       {error ? (
-        <p id={errorId} className="annotation mt-2 text-ink">
+        <p id={errorId} className="annotation mt-2 text-alert">
+          <span className="sr-only">Error: </span>
           {error}
         </p>
       ) : null}

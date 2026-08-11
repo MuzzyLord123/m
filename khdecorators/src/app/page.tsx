@@ -52,16 +52,10 @@ export default function HomePage() {
             <p className="measure mt-8 text-lg leading-relaxed">{fill(home.hero.lede)}</p>
 
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <Link
-                href="#quote"
-                className="annotation-lg border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85"
-              >
+              <Link href="#quote" className="kh-btn">
                 {home.hero.ctaPrimary}
               </Link>
-              <CallLink
-                className="annotation-lg border border-ink px-6 py-4 text-ink transition-colors duration-150 hover:border-signal hover:text-signal"
-                from="hero"
-              >
+              <CallLink className="kh-btn-ghost" from="hero">
                 {home.hero.ctaSecondary} — {phone.label}
               </CallLink>
             </div>
@@ -121,8 +115,8 @@ export default function HomePage() {
           {home.specialist.items.map((item) => (
             <article key={item.number} className="grid gap-8 lg:grid-cols-12 lg:gap-x-6">
               <div className="lg:col-span-5">
-                <div className="annotation-lg text-ink">{item.number}</div>
-                <h3 className="mt-3 text-2xl font-medium tracking-[-0.012em]">{item.name}</h3>
+                <div className="annotation-lg text-gold">{item.number}</div>
+                <h3 className="display-sm mt-3">{item.name}</h3>
                 <div className="mt-5 space-y-4">
                   {item.body.map((paragraph) => (
                     <p key={paragraph.slice(0, 24)} className="measure">
@@ -131,10 +125,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="mt-6">
-                  <Link
-                    href={item.href}
-                    className="link link-hover-target annotation-lg text-signal"
-                  >
+                  <Link href={item.href} className="link link-hover-target annotation-lg text-gold">
                     {item.linkLabel} <span aria-hidden="true">→</span>
                   </Link>
                 </p>
@@ -164,7 +155,7 @@ export default function HomePage() {
       >
         <table className="w-full border-collapse text-left">
           <thead>
-            <tr className="border-b border-ink">
+            <tr className="border-b border-edge">
               <th scope="col" className="annotation py-3 pr-4">
                 Service
               </th>
@@ -183,9 +174,9 @@ export default function HomePage() {
                   <Link href={row.href} className="link link-hover-target">
                     {row.name}
                   </Link>
-                  <span className="mt-2 block text-sm text-muted sm:hidden">{row.summary}</span>
+                  <span className="mt-2 block text-sm text-paper-dim sm:hidden">{row.summary}</span>
                 </th>
-                <td className="hidden py-4 pr-4 align-top text-muted sm:table-cell">
+                <td className="hidden py-4 pr-4 align-top text-paper-dim sm:table-cell">
                   {row.summary}
                 </td>
                 <td className="annotation w-[24%] py-4 align-top">{row.application}</td>
@@ -211,9 +202,11 @@ export default function HomePage() {
               className="grid gap-x-6 gap-y-2 border-b border-rule py-6 md:grid-cols-12"
             >
               <div className="annotation md:col-span-1">{step.number}</div>
-              <h3 className="text-lg font-medium tracking-[-0.01em] md:col-span-3">{step.title}</h3>
-              <p className="text-muted md:col-span-6">{step.body}</p>
-              <p className="annotation md:col-span-2 md:text-right">{step.note}</p>
+              <h3 className="display-xs md:col-span-3">{step.title}</h3>
+              <p className="text-paper-dim md:col-span-5">{step.body}</p>
+              {/* 3 columns, not 2: tracked uppercase needs the room, and at 2 the
+                  longest note wrapped to three lines against the page edge. */}
+              <p className="annotation md:col-span-3 md:text-right">{step.note}</p>
             </li>
           ))}
         </ol>
@@ -232,7 +225,7 @@ export default function HomePage() {
           <>
             <ReviewList reviews={reviews} />
             <p className="mt-8">
-              <Link href="/reviews" className="link link-hover-target annotation-lg text-signal">
+              <Link href="/reviews" className="link link-hover-target annotation-lg text-gold">
                 {home.reviews.allLabel} <span aria-hidden="true">→</span>
               </Link>
             </p>
@@ -295,7 +288,7 @@ export default function HomePage() {
             <dt className="annotation">Phone</dt>
             <dd className="mt-2">
               <CallLink
-                className="text-xl font-medium tracking-[-0.01em] text-signal underline decoration-1 underline-offset-4 hover:decoration-2"
+                className="display-xs text-gold underline decoration-1 underline-offset-4 transition-colors duration-150 hover:text-gold-lift hover:decoration-2"
                 from="home-contact"
               />
             </dd>

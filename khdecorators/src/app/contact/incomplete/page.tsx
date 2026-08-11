@@ -22,28 +22,22 @@ export default function IncompletePage() {
       <div className="py-20 md:py-28">
         <div className="md:grid md:grid-cols-12 md:gap-x-6">
           <div className="md:col-span-8">
-            <p className="annotation-lg text-ink">Not sent</p>
+            <p className="annotation-lg text-gold">Not sent</p>
             <h1 className="display mt-4">I need one more thing</h1>
             <p className="measure mt-8 text-lg leading-relaxed">
               To come back to you I need a name and either a phone number or an email address. One
               of those was missing, so nothing has been sent.
             </p>
-            <p className="measure mt-5 text-muted">
+            <p className="measure mt-5 text-paper-dim">
               Sorry — you will have to type it again. Or skip the form altogether and ring me, which
               is quicker anyway.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <CallLink
-                className="annotation-lg border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85"
-                from="incomplete"
-              >
+              <CallLink className="kh-btn" from="incomplete">
                 Ring Kenny — {phone.label}
               </CallLink>
-              <Link
-                href="/contact"
-                className="annotation-lg border border-ink px-6 py-4 transition-colors duration-150 hover:border-signal hover:text-signal"
-              >
+              <Link href="/contact" className="kh-btn-ghost">
                 Back to the form
               </Link>
             </div>

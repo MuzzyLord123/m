@@ -14,16 +14,17 @@ import { Needed } from './Needed'
  */
 export function Footer() {
   return (
-    <footer className="border-t border-ink">
+    <footer className="kh-well border-t-2 border-gold-deep">
+      <div className="kh-chalk" />
       <div className="mx-auto max-w-[90rem] px-5 py-12 md:px-8 md:py-16">
         <div className="grid gap-10 md:grid-cols-12 md:gap-6">
           {/* Contact */}
           <div className="md:col-span-4">
-            <h2 className="annotation-lg text-ink">Get hold of me</h2>
+            <h2 className="annotation-lg text-gold">Get hold of me</h2>
             <div className="mt-5 space-y-3">
               <p>
                 <CallLink
-                  className="text-xl font-medium tracking-[-0.01em] text-signal underline decoration-1 underline-offset-4 hover:decoration-2"
+                  className="display-xs text-gold underline decoration-1 underline-offset-4 transition-colors duration-150 hover:text-gold-lift hover:decoration-2"
                   from="footer"
                 />
               </p>
@@ -39,7 +40,7 @@ export function Footer() {
 
           {/* Where */}
           <div className="md:col-span-4">
-            <h2 className="annotation-lg text-ink">Where I work</h2>
+            <h2 className="annotation-lg text-gold">Where I work</h2>
             <p className="mt-5">
               {isPlaceholder(town) ? (
                 <>
@@ -62,22 +63,26 @@ export function Footer() {
 
           {/* Index */}
           <div className="md:col-span-4">
-            <h2 className="annotation-lg text-ink">Pages</h2>
+            <h2 className="annotation-lg text-gold">Pages</h2>
             <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2">
               <li>
-                <Link href="/" prefetch={false} className="annotation hover:text-ink">
+                <Link href="/" prefetch={false} className="annotation hover:text-paper">
                   Home
                 </Link>
               </li>
               {nav.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} prefetch={false} className="annotation hover:text-ink">
+                  <Link href={item.href} prefetch={false} className="annotation hover:text-paper">
                     {item.label}
                   </Link>
                 </li>
               ))}
               <li>
-                <Link href="/leave-a-review" prefetch={false} className="annotation hover:text-ink">
+                <Link
+                  href="/leave-a-review"
+                  prefetch={false}
+                  className="annotation hover:text-paper"
+                >
                   Leave a review
                 </Link>
               </li>

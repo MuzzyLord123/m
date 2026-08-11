@@ -37,7 +37,7 @@ export default function AboutPage() {
         <GridRules />
         <div className="relative lg:grid lg:grid-cols-12 lg:gap-x-6">
           <div className="lg:col-span-8">
-            <p className="annotation-lg text-ink">About</p>
+            <p className="annotation-lg text-gold">About</p>
             <h1 className="display mt-4">{about.h1}</h1>
             <p className="measure mt-8 text-lg leading-relaxed">{fill(about.lede)}</p>
           </div>
@@ -57,9 +57,9 @@ export default function AboutPage() {
       <Section id="how" number="02" title="How I work">
         <div className="grid gap-x-10 gap-y-8 lg:grid-cols-2">
           {about.principles.map((item) => (
-            <div key={item.title} className="border-t border-ink pt-4">
-              <h3 className="text-lg font-medium tracking-[-0.01em]">{item.title}</h3>
-              <p className="mt-3 text-muted">{item.body}</p>
+            <div key={item.title} className="border-t border-edge pt-4">
+              <h3 className="display-xs">{item.title}</h3>
+              <p className="mt-3 text-paper-dim">{item.body}</p>
             </div>
           ))}
         </div>
@@ -71,16 +71,10 @@ export default function AboutPage() {
         </div>
 
         <div className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-4">
-          <CallLink
-            className="annotation-lg border border-signal bg-signal px-6 py-4 text-paper transition-opacity duration-150 hover:opacity-85"
-            from="about"
-          >
+          <CallLink className="kh-btn" from="about">
             Ring Kenny — {phone.label}
           </CallLink>
-          <Link
-            href="/contact"
-            className="annotation-lg border border-ink px-6 py-4 transition-colors duration-150 hover:border-signal hover:text-signal"
-          >
+          <Link href="/contact" className="kh-btn-ghost">
             Send me the job
           </Link>
         </div>
