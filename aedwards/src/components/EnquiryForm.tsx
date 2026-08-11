@@ -3,8 +3,8 @@
 import { useActionState, useEffect, useRef } from 'react'
 import { contact } from '@content/copy'
 import { phone } from '@content/site'
-import { ELAPSED_FIELD, HONEYPOT_FIELD } from '@/lib/enquiry-fields'
-import { submitEnquiry, type EnquiryState } from '@/lib/actions'
+import { ELAPSED_FIELD, HONEYPOT_FIELD, type EnquiryState } from '@/lib/enquiry-fields'
+import { submitEnquiry } from '@/lib/actions'
 
 /**
  * Three fields, mono labels, underline inputs on the field colour, no boxes.

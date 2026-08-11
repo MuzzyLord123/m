@@ -1,6 +1,7 @@
 node_modules
 .next
 out
+*.zip
 .env*
 !.env.example
 *.tsbuildinfo

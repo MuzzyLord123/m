@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "STATIC_EXPORT=1 next build",
+    "pack": "node scripts/pack-static.mjs",
     "start": "next start",
     "lint": "tsc --noEmit",
     "check:content": "node scripts/check-content.mjs",

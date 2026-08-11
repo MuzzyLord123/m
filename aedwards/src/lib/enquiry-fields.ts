@@ -7,6 +7,16 @@
  * browser bundle, even harmlessly.
  */
 
+/**
+ * What the form gets back. Lives here rather than in actions.ts so that the
+ * form, the real action and the static-export stub can all share it without
+ * anything importing a 'use server' module just to borrow a type.
+ */
+export type EnquiryState = {
+  status: 'idle' | 'ok' | 'invalid' | 'error'
+  message?: string
+}
+
 /** Field name for the honeypot. Plausible to a bot, off-screen to a human. */
 export const HONEYPOT_FIELD = 'website'
 

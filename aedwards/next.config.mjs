@@ -1,47 +1,58 @@
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { SECURITY_HEADERS } from './hosting/headers.mjs'
 
 /*
- * The site loads nothing from anywhere else — both typefaces are self-hosted by
- * next/font, there are no analytics, no embeds, no CDN and no third-party
- * anything. So everything can be locked to 'self'.
+ * Static export mode: `npm run build:static`.
  *
- * script-src and style-src carry 'unsafe-inline' and it is worth being straight
- * about what that costs. Next inlines its own bootstrap script, the JSON-LD
- * block is an inline script, and the first field's colours are an inline style
- * tag. The alternative is a per-request nonce, which requires middleware and
- * makes every page dynamic — trading the entire static prerender, and the
- * performance budget with it, for a hardening measure on a brochure site that
- * renders no user input back to the page.
+ * Produces a plain folder of HTML, CSS and JS in out/ that can be dropped on
+ * any host — Netlify, Cloudflare Pages, a cPanel public_html, an S3 bucket.
+ * No Node, no server, no build step at the far end.
  *
- * What the policy still buys, and buys cheaply: no script can be loaded from
- * another origin, no plugin content at all, no <base> rewrite, and the form
- * cannot be pointed at somebody else's server.
+ * Two things do not survive the trip, and both are in HOSTING.md:
+ *
+ *   - The headers below are applied by a Node server, which a static host is
+ *     not. public/_headers and public/.htaccess carry the same policy for
+ *     Netlify/Cloudflare and Apache respectively; anything else has to be
+ *     configured on the host.
+ *   - Server Actions do not exist without a server, so the enquiry form cannot
+ *     work. It is already hidden until an email address is configured, so
+ *     nothing is lost today — but a static host can never turn it on. If Andy
+ *     wants the form, the site needs a Node host (or Vercel) instead.
+ *
+ * The default build is unchanged and keeps both.
  */
-const CSP = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'self'",
-  "form-action 'self'",
-  "img-src 'self' data:",
-  "font-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline'",
-  "connect-src 'self'",
-  'upgrade-insecure-requests',
-].join('; ')
+const STATIC_EXPORT = process.env.STATIC_EXPORT === '1'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
+  ...(STATIC_EXPORT
+    ? {
+        output: 'export',
+        // There is no image optimiser on a static host. No photographs on the
+        // site yet either, so this costs nothing today — but when Andy's
+        // originals arrive, resize them before they go in public/photographs.
+        images: { unoptimized: true },
+        // Write /reviews/index.html rather than /reviews.html, so hosts that
+        // do not rewrite extensionless URLs still serve the right thing.
+        trailingSlash: true,
+      }
+    : {}),
+
   // This app is a sibling of two other sites in the same repository, each with
   // its own lockfile. Without this, the bundler walks up and picks whichever
   // lockfile it finds first as the workspace root.
   turbopack: {
     root: path.dirname(fileURLToPath(import.meta.url)),
+
+    // A static export cannot contain a Server Action — not even an unused one,
+    // because the 'use server' directive fails the export on sight. Swap the
+    // action module for a stub; the form is not rendered on a static host
+    // anyway. See src/lib/actions.static.ts.
+    ...(STATIC_EXPORT ? { resolveAlias: { '@/lib/actions': './src/lib/actions.static.ts' } } : {}),
   },
 
   images: {
@@ -53,29 +64,10 @@ const nextConfig = {
     imageSizes: [256, 384, 512],
   },
 
+  // Served here on a Node host. On a static host the same list is written into
+  // _headers and .htaccess by scripts/pack-static.mjs — see hosting/headers.mjs.
   async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-          // Nothing on this site needs a camera, a microphone or a location.
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
-          },
-          // Two years, subdomains included. Deliberately NOT preloaded: preload
-          // is a one-way door and the domain has not even been registered yet.
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains',
-          },
-          { key: 'Content-Security-Policy', value: CSP },
-        ],
-      },
-    ]
+    return [{ source: '/:path*', headers: SECURITY_HEADERS }]
   },
 }
 

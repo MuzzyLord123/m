@@ -19,6 +19,13 @@ export const alt = `${business.name} — painter and decorator, ${business.town}
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
+/**
+ * Nothing here depends on the request, so the card is rendered once at build
+ * and served as a file. Required for `npm run build:static`, and the right
+ * behaviour for the normal build too.
+ */
+export const dynamic = 'force-static'
+
 async function loadFont(family: string, weight: number): Promise<ArrayBuffer | null> {
   try {
     const css = await fetch(

@@ -2,12 +2,12 @@
 
 import { contact } from '@content/copy'
 import { deliver } from './enquiry'
-import { ELAPSED_FIELD, HONEYPOT_FIELD, looksAutomated } from './enquiry-fields'
-
-export type EnquiryState = {
-  status: 'idle' | 'ok' | 'invalid' | 'error'
-  message?: string
-}
+import {
+  ELAPSED_FIELD,
+  HONEYPOT_FIELD,
+  looksAutomated,
+  type EnquiryState,
+} from './enquiry-fields'
 
 /** Generous, but not a place to paste a novel. */
 const LIMITS = { name: 120, phone: 40, job: 2000 } as const

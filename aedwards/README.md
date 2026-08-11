@@ -202,6 +202,16 @@ likely to be somebody's only visit.
 **Environment.** See `.env.example`. Everything is read at build time, so
 setting a variable on a running host changes nothing until it is rebuilt.
 
+**Two ways to deploy.** `npm run build` for a Node host or Vercel — keeps the
+enquiry form and serves the headers itself. `npm run pack` for anywhere else: it
+static-exports the site, generates `_headers` (Netlify, Cloudflare Pages) and
+`.htaccess` (Apache, cPanel) from the same `hosting/headers.mjs` the Node build
+uses, and zips the result at 0.46 MB. A static host cannot run a Server Action,
+so that build swaps the enquiry action for a stub and the contact field shows
+the phone number — which is what it does today anyway, since no email address is
+configured. Measured on the exported bundle, served gzipped: mobile 97, desktop
+100, accessibility 100, CLS 0.000.
+
 ## One deliberate departure from the brief
 
 The brief specifies `#B4462C` for the burnt red field. It cannot carry 7:1 text
