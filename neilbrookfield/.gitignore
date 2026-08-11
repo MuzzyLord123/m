@@ -5,3 +5,11 @@ out
 !.env.example
 *.tsbuildinfo
 .DS_Store
+
+# Throwaway scripts written while auditing or debugging the site — Playwright
+# probes, one-off checks and the like. Anything worth keeping belongs in
+# scripts/ under a real name, without the underscore.
+scripts/_*
+/*.mjs
+!next.config.mjs
+!postcss.config.mjs

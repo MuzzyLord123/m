@@ -1,0 +1,64 @@
+neilbrookfield.co.uk — the rebuilt website
+==========================================
+
+WHAT THIS IS
+------------
+The complete source of the new website for Neil Brookfield, decorator, Chester.
+Eight pages, all the copy, all the design. It is a Next.js site, which means it
+is built from source rather than being a folder of HTML files you can
+double-click.
+
+
+TO SEE IT ON YOUR OWN MACHINE
+-----------------------------
+You need Node.js 20 or newer (nodejs.org). Then, in this folder:
+
+    npm install
+    npm run dev
+
+Open http://localhost:3000 in a browser.
+
+
+TO PUT IT ON THE INTERNET
+-------------------------
+Any host that runs Next.js will do. The simplest is Vercel: create an account,
+point it at this folder or at the GitHub repository, and it builds and hosts it.
+
+Two things to set on the host so the enquiry form actually delivers:
+
+    RESEND_API_KEY   an API key from resend.com (free tier is plenty)
+    ENQUIRY_TO       the email address enquiries should land in
+
+Without those, the form still works but the enquiry is only written to the
+server log.
+
+BEFORE pointing neilbrookfield.co.uk at it, read MIGRATION.md. It matters: it
+covers keeping the old page addresses working, and keeping Google Search Console
+access through the switchover. Getting that wrong loses years of search ranking.
+
+
+WHAT IS STILL MISSING
+---------------------
+The site is honest about what it does not have rather than making it up.
+
+  * No photographs. Neil's pictures were not available. Every layout is built
+    for them and they drop into public/photographs/ — see README.md.
+  * One job written up, not eight to twelve. The rest need Neil sat down with
+    his photographs for an hour.
+  * No customer reviews. The three real Google reviews are known by name but
+    their exact wording was never supplied, so the section is left off rather
+    than paraphrased.
+
+CONTENT-NEEDED.md lists all of it as plain questions, in the order to ask them.
+
+
+THE FILES
+---------
+  START-HERE.txt      this
+  README.md           how to add a job, swap a photograph, change a price
+  MIGRATION.md        how to go live without losing search rankings
+  CONTENT-NEEDED.md   what to ask Neil, in order
+
+  content/            all the words and facts, in plain files
+  src/                the site itself
+  public/photographs/ where the photographs go
