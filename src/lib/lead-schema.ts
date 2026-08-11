@@ -1,9 +1,37 @@
 import { z } from "zod";
 
+/**
+ * Every free-text field a visitor can send goes through this first.
+ *
+ * WHY IT EXISTS. These values end up in an email sent FROM the client's own
+ * DKIM-signed domain, and one of them — the email address — decides who
+ * receives it. Unbounded text with no character class made that a usable relay:
+ * a "name" of `URGENT: your invoice is overdue https://evil.tld/pay` passed
+ * validation, was interpolated into the confirmation email's headline, and was
+ * delivered to any address the sender chose, SPF- and DKIM-passing, from the
+ * decorator's domain. Escaping was never the missing piece — the payload is
+ * plain text, and mail clients linkify bare URLs themselves.
+ *
+ * It strips Unicode control and format characters (\p{Cc} covers CR and LF,
+ * \p{Cf} covers the bidi overrides that let text be displayed in a different
+ * order from the way it is stored) and collapses runs of whitespace. Newlines
+ * are the specific one that matters: these values reach a mail subject line,
+ * and a subject containing CRLF is header injection.
+ */
+const text = (max: number) =>
+  z
+    .string()
+    .transform((value) =>
+      value
+        .replace(/[\p{Cc}\p{Cf}]/gu, " ")
+        .replace(/\s+/g, " ")
+        .trim(),
+    )
+    .pipe(z.string().max(max, "That is longer than we can take here — ring us instead"));
+
 /** UK numbers, loosely: digits, spaces, brackets, +44. Ten digits minimum. */
-const phone = z
-  .string()
-  .min(1, "We need a number to ring you back on")
+const phone = text(30)
+  .pipe(z.string().min(1, "We need a number to ring you back on"))
   .refine((value) => (value.replace(/\D/g, "").length ?? 0) >= 10, {
     message: "That does not look like a full phone number",
   });
@@ -49,19 +77,16 @@ export const quoteSchema = z.object({
   property: z.enum(PROPERTY_OPTIONS, { message: "Tell us what sort of property it is" }),
   rooms: z.enum(ROOM_OPTIONS, { message: "Roughly how much needs doing?" }),
   timing: z.enum(TIMING_OPTIONS, { message: "When would you like it done?" }),
-  /* .trim() runs BEFORE the length check, so " " is caught as empty rather than
-     passing as a two-character name — and the confirmation email opens "Thanks
-     Sarah," rather than "Thanks , ". Autofill and paste both leave whitespace
-     surprisingly often. */
-  name: z.string().trim().min(2, "Your name, so we know who we are speaking to"),
+  /* text() normalises BEFORE the length check, so " " is caught as empty rather
+     than passing as a two-character name — and the confirmation email opens
+     "Thanks Sarah," rather than "Thanks , ". Autofill and paste both leave
+     whitespace surprisingly often. The caps are what stop a name being used as
+     a message: they are generous for a real one and useless for a payload. */
+  name: text(80).pipe(z.string().min(2, "Your name, so we know who we are speaking to")),
   phone,
-  email: z.email("Check the email address — we send the written quote there").trim(),
-  town: z.string().trim().min(2, "Which town is the property in?"),
-  message: z
-    .string()
-    .trim()
-    .max(2000, "That is longer than we can take here — ring us instead")
-    .optional(),
+  email: z.email("Check the email address — we send the written quote there").trim().max(254),
+  town: text(80).pipe(z.string().min(2, "Which town is the property in?")),
+  message: text(2000).optional(),
   hasPhotos: z.boolean().optional(),
 
   // Spam defences. Neither is ever shown to a person.
@@ -77,15 +102,11 @@ export const bookingSchema = z.object({
   /** ISO date string for the requested visit. */
   date: z.string().min(1, "Pick a day that suits you"),
   preference: z.enum(AM_PM, { message: "Morning or afternoon?" }),
-  name: z.string().trim().min(2, "Your name, so we know who we are speaking to"),
+  name: text(80).pipe(z.string().min(2, "Your name, so we know who we are speaking to")),
   phone,
-  email: z.email("Check the email address — we confirm the visit there").trim(),
-  address: z.string().trim().min(4, "The address we are coming to"),
-  message: z
-    .string()
-    .trim()
-    .max(2000, "That is longer than we can take here — ring us instead")
-    .optional(),
+  email: z.email("Check the email address — we confirm the visit there").trim().max(254),
+  address: text(200).pipe(z.string().min(4, "The address we are coming to")),
+  message: text(2000).optional(),
 
   website: z.string().max(0, "Something went wrong. Ring us instead.").optional(),
   elapsedMs: z.number(),

@@ -24,6 +24,27 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (pathname === "/preview-locked" || isBuilt(pathname)) return NextResponse.next();
 
+  /* A SERVER ACTION MUST NEVER BE REWRITTEN. This is the one line in the file
+     that is not about what a visitor sees, and it closes a hole that took the
+     whole site down from a single request.
+     /quote and /contact are the only routes that own Server Actions, and both
+     are gated — so an action POST to /quote was rewritten here to
+     /preview-locked, which owns no actions. Next's action handler responds to
+     an unknown action by re-dispatching it to the page that does own it: it
+     fetches this site's own origin at /quote, which arrives back at this
+     middleware, is rewritten again, and forwards again. Measured on this build,
+     one POST produced roughly 1,500 internal requests per second and ~14,700
+     open sockets in ten seconds before the server died on EMFILE. No
+     authentication needed — the action id is readable in a public JS chunk.
+     404 rather than next(): while the preview is up the mailer is meant to be
+     switched off, and that is what the locked page tells people. If the forms
+     should work during a preview, put "/quote" and "/contact" in BUILT_PAGES so
+     nothing is rewritten — but never leave an action's owning page rewritten to
+     a page that does not own it. */
+  if (request.method === "POST" && request.headers.has("next-action")) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   /* Only a REAL page of this site gets the notice. Rewriting everything turned
      every mistyped address into a 200 — a soft 404, which search engines index
      and which the content audit fails the build over. Anything unknown falls

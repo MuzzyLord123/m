@@ -36,7 +36,23 @@ const PREVIEW_DEFAULT = true;
 
 const flag = process.env.NEXT_PUBLIC_PREVIEW_MODE;
 
-export const previewMode = flag === undefined || flag === "" ? PREVIEW_DEFAULT : flag === "1";
+/**
+ * ON unless the flag says otherwise, and the flag is read forgivingly.
+ *
+ * It used to be `flag === "1"`, which meant every other truthy spelling turned
+ * preview mode OFF rather than on: setting NEXT_PUBLIC_PREVIEW_MODE=true — the
+ * obvious thing to type into a Vercel dashboard — published the whole
+ * half-finished site, which is the exact failure the flag exists to prevent.
+ * "0", "false", "off" and "no" switch it off; anything else that is set leaves
+ * it on; unset falls back to PREVIEW_DEFAULT. The asymmetry is deliberate: a
+ * typo should fail towards showing less, never towards publishing more.
+ */
+const OFF = new Set(["0", "false", "off", "no"]);
+
+export const previewMode =
+  flag === undefined || flag.trim() === ""
+    ? PREVIEW_DEFAULT
+    : !OFF.has(flag.trim().toLowerCase());
 
 /**
  * The pages the prospect can actually open: the home page and the two

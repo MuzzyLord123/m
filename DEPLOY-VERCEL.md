@@ -44,6 +44,14 @@ cannot deliver email until Resend is configured.
 | `LEAD_FROM_EMAIL`               | Verified Resend sender            | Uses Resend's sandbox sender (owner's address only)    |
 | `NEXT_PUBLIC_TAWK_PROPERTY_ID`  | Live chat                         | No chat launcher renders, no script loads             |
 | `NEXT_PUBLIC_TAWK_WIDGET_ID`    | Live chat                         | As above                                              |
+| `NEXT_PUBLIC_PREVIEW_MODE`      | **Going live.** `0` publishes the whole site | **Unset means preview mode is ON** — the quote form is unreachable and every page is noindex |
+| `NEXT_PUBLIC_FILM_SLOTS`        | Empty-state cards in the video gallery | Shows 3 "awaiting a link" placeholders           |
+
+> **Read the preview row before you launch.** With `NEXT_PUBLIC_PREVIEW_MODE`
+> unset, the site deploys in preview mode: every "Get a Free Quote" button lands
+> on a "not built yet" notice, the enquiry form cannot be reached, and nothing is
+> indexed. The address bar still shows `/quote`, so it does not look broken — it
+> looks finished and takes no leads. Set it to `0` when the site goes live.
 
 The three `NEXT_PUBLIC_*` values are inlined into the client bundle **at build
 time**, so set them before the build that ships them. Changing one later needs a

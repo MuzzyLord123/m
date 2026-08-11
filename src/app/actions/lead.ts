@@ -1,7 +1,9 @@
 "use server";
 
+import { headers } from "next/headers";
 import { Resend } from "resend";
 import { site } from "@/config/site";
+import { consumeLeadAllowance } from "@/lib/rate-limit";
 import { buildVisitIcs } from "@/lib/ics";
 import {
   bookingSchema,
@@ -51,6 +53,43 @@ function looksAutomated(input: { website?: string; elapsedMs: number }): boolean
   return input.elapsedMs < MIN_SUBMIT_MS;
 }
 
+/**
+ * The caller's IP, as far as the platform will tell us.
+ *
+ * x-forwarded-for is spoofable in general — but on Vercel the edge REWRITES it,
+ * so the left-most entry is the real client for requests that actually reached
+ * the platform. Off-platform (the Docker/standalone path behind an unknown
+ * proxy) it is only as trustworthy as that proxy, which is why the global daily
+ * cap below does not depend on it.
+ */
+async function callerIp(): Promise<string> {
+  const h = await headers();
+  return (
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip")?.trim() ||
+    "unknown"
+  );
+}
+
+/**
+ * One gate for both actions. Returns null to proceed, or the result to send
+ * back.
+ *
+ * A rate-limited caller gets the SAME friendly failure a real send error
+ * produces, and never a distinct "you are being limited" — a distinguishable
+ * response is a signal to tune against. A legitimate customer who somehow trips
+ * it still gets the phone number, which is the outcome that matters.
+ */
+async function overLimit(email: string, what: string): Promise<LeadResult | null> {
+  const verdict = consumeLeadAllowance(await callerIp(), email);
+  if (verdict.ok) return null;
+  console.warn(`[lead] ${what} refused by rate limit`, { reason: verdict.reason });
+  return {
+    ok: false,
+    error: `That did not send. Ring ${site.phone} and we will take the details over the phone.`,
+  };
+}
+
 function failure(error: unknown): LeadResult {
   console.error("[lead] send failed", error);
   return {
@@ -68,12 +107,20 @@ export async function submitQuote(raw: QuoteInput): Promise<LeadResult> {
   const input = parsed.data;
   if (looksAutomated(input)) return { ok: true };
 
+  /* After the bot checks, before anything is sent: a submission that was never
+     going to produce an email must not spend a real customer's allowance. */
+  const limited = await overLimit(input.email, "quote");
+  if (limited) return limited;
+
   const resend = client();
   if (!resend) {
-    console.warn("[lead] RESEND_API_KEY is not set — quote not delivered", {
-      name: input.name,
-      email: input.email,
-    });
+    /* No PII in the log line. It used to carry the customer's name and email,
+       which put them in Vercel's runtime logs — a third place the data lives,
+       outside the "emailed to us and stored in our email account" the privacy
+       notice describes, and one nobody would think to include in a subject
+       access request. The lead is lost either way at this point; logging who it
+       was does not recover it. */
+    console.warn("[lead] RESEND_API_KEY is not set — quote not delivered");
     return {
       ok: false,
       error: `Our email is not connected yet. Ring ${site.phone} and we will take the details now.`,
@@ -116,12 +163,12 @@ export async function submitBooking(raw: BookingInput): Promise<LeadResult> {
   const input = parsed.data;
   if (looksAutomated(input)) return { ok: true };
 
+  const limited = await overLimit(input.email, "booking");
+  if (limited) return limited;
+
   const resend = client();
   if (!resend) {
-    console.warn("[lead] RESEND_API_KEY is not set — booking not delivered", {
-      name: input.name,
-      date: input.date,
-    });
+    console.warn("[lead] RESEND_API_KEY is not set — booking not delivered");
     return {
       ok: false,
       error: `Our email is not connected yet. Ring ${site.phone} and we will book the visit now.`,

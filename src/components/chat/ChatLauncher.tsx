@@ -1,6 +1,24 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+
+/**
+ * The two routes that collect personal data. The chat is not offered on either.
+ *
+ * Tawk's widget is remote, mutable, unversioned code that runs in this site's
+ * own origin — SRI is impossible because the loader changes without notice, so
+ * a compromise of Tawk's CDN or account is indistinguishable from a normal
+ * update. Anywhere it runs, it can read the DOM. On /quote and /contact the DOM
+ * contains someone's name, phone number, email address and the address of their
+ * house, being typed in a field at a time.
+ *
+ * Nothing about that is a prediction that Tawk will be compromised. It is that
+ * the cost of not offering chat on two pages is a visitor pressing Call
+ * instead, and the cost of the other outcome is the client's customers' contact
+ * details. That trade only goes one way.
+ */
+const NO_CHAT_ROUTES = ["/quote", "/contact"];
 
 /**
  * Live chat on Tawk.to's free plan, wearing our clothes.
@@ -37,6 +55,7 @@ type Status = "idle" | "loading" | "ready";
 export function ChatLauncher() {
   const propertyId = process.env.NEXT_PUBLIC_TAWK_PROPERTY_ID;
   const widgetId = process.env.NEXT_PUBLIC_TAWK_WIDGET_ID;
+  const pathname = usePathname();
   const [status, setStatus] = useState<Status>("idle");
   const wantsOpen = useRef(false);
 
@@ -88,6 +107,10 @@ export function ChatLauncher() {
 
   // With no Tawk credentials configured, nothing renders and nothing loads.
   if (!propertyId || !widgetId) return null;
+  // Nor on the pages where someone is typing their details in. See above.
+  if (NO_CHAT_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
+    return null;
+  }
 
   function open() {
     if (window.Tawk_API?.maximize) {

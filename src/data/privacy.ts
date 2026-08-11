@@ -36,7 +36,16 @@ export const policySections: PolicySection[] = [
   {
     heading: "What we collect",
     body: [
-      "If you fill in the quote form or ask for a site visit, we collect your name, phone number, email address, the town or address of the job, and whatever you write in the message box. That is all we ask for and all we keep.",
+      /* THIS LIST MUST MATCH src/lib/lead-schema.ts. It used to name five
+         fields and finish "That is all we ask for and all we keep" — a closure
+         claim, on the one item of a privacy notice anyone can check, while the
+         form was collecting six more: the trade picked, the property type, how
+         many rooms, how soon, and for a site visit the address, the day and
+         whether morning or afternoon. Property type plus extent of work plus
+         urgency is a fair picture of someone's house and their finances, and it
+         is exactly what a notice exists to declare. If a field is ever added to
+         that schema, add it here in the same commit. */
+      "If you fill in the quote form we collect your name, phone number, email address, the town the job is in, which trade you picked, what sort of property it is, roughly how many rooms need doing, how soon you want it done, and whatever you write in the message box. If you ask for a site visit we also take the address we are coming to, the day you would like, and whether morning or afternoon suits you. We do not ask for anything else.",
       "We do not run analytics on this site. There is no tracking pixel, no advertising tag, and no cookie set by us.",
       "Two small things are saved in your browser's own storage, and neither is a cookie — they are never sent to us and nobody else can read them. One remembers that you have seen the opening animation, so it does not play again in the same visit. The other remembers that you have closed the privacy notice, so it does not ask you twice. You can clear both by clearing this site's data in your browser.",
     ],
@@ -59,8 +68,9 @@ export const policySections: PolicySection[] = [
   {
     heading: "Where it is kept",
     body: [
-      "This website is hosted by Vercel, and enquiries reach us by email. Both keep data on servers inside the UK and the European Economic Area, or in countries covered by UK adequacy arrangements. Nothing is stored in a database on this site — there is no account to create and no login.",
-      "Vercel keeps short-lived technical logs of requests to the site, including IP addresses, in order to serve pages and block abuse. We do not read them and cannot search them by person.",
+      "This website is hosted by Vercel, and enquiries reach us by email through Resend. Nothing is stored in a database on this site — there is no account to create and no login.",
+      "Vercel, Resend and Tawk.to are all American companies, so sending an enquiry involves your details being transferred to the United States. Those transfers are covered by the standard contractual clauses those companies publish, together with the UK Addendum to them. If you would rather not send anything through the website at all, ring us on the number at the bottom of this page and none of it applies.",
+      "Vercel keeps short-lived technical logs of requests to the site, including IP addresses, in order to serve pages and block abuse. We do not read them and cannot search them by person, and nothing you type into a form is written to them.",
     ],
   },
   {

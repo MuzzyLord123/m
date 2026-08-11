@@ -84,7 +84,7 @@ export function StructuredData() {
     <script
       type="application/ld+json"
       // The payload is built from our own config, never from user input.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: ldJson(data) }}
     />
   );
 }
@@ -117,6 +117,26 @@ export function ArticleStructuredData({
   };
 
   return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(data) }} />
   );
+}
+
+/**
+ * JSON-LD, serialised so it cannot escape its own <script> tag.
+ *
+ * `JSON.stringify` does not escape `<`, so a value containing the literal
+ * `</script>` ends the block early and everything after it is parsed as HTML —
+ * the classic JSON-in-HTML injection. Nothing in src/config or src/data
+ * currently contains one, so this is not a live hole; it is a hole that opens
+ * the first time a value here comes from anywhere less trusted than a file in
+ * this repo, and it costs one replace to close permanently.
+ *
+ * U+2028/U+2029 go with it: legal in JSON, illegal in a JavaScript string
+ * literal, and a silent parse error in older consumers.
+ */
+function ldJson(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
 }

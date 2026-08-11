@@ -178,7 +178,9 @@ function FilmGalleryDesktop() {
               <iframe
                 title={film.title}
                 src={`https://www.youtube-nocookie.com/embed/${film.id}?autoplay=1&rel=0&modestbranding=1`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                referrerPolicy="strict-origin-when-cross-origin"
+                sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox"
                 allowFullScreen
                 /* A dark ground and colour-scheme on the FRAME itself. An
                    iframe paints its own background before its document loads,
@@ -434,7 +436,9 @@ function FilmSheet({ film, onClose }: { film: Film | null; onClose: () => void }
               <iframe
                 title={film.title}
                 src={`https://www.youtube-nocookie.com/embed/${film.id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                referrerPolicy="strict-origin-when-cross-origin"
+                sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox"
                 allowFullScreen
                 /* A dark ground and colour-scheme on the FRAME itself. An
                    iframe paints its own background before its document loads,

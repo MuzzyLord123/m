@@ -62,6 +62,39 @@ export function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/**
+ * A first name, or nothing.
+ *
+ * THIS IS A SECURITY CONTROL, not a formatting nicety, and it is the reason the
+ * greeting can be trusted. The confirmation email goes to an address the sender
+ * typed in, from the client's DKIM-signed domain, and this string is its
+ * headline — so whatever passes through here is content the business appears to
+ * have written, delivered to someone who may never have visited the site.
+ *
+ * It used to be `input.name.split(" ")[0]`, which splits on the ASCII space
+ * ONLY: any payload without one came through whole. `escapeHtml` did not help,
+ * because the payload is plain text and it is the mail client that turns a bare
+ * URL into a link.
+ *
+ * So the greeting is allow-listed rather than sanitised: letters, marks,
+ * apostrophes and hyphens, 2–40 characters. Anything else — a URL, a sentence,
+ * a phone number, an emoji — yields "" and the caller falls back to a greeting
+ * with no name in it. A real first name outside that set is possible and the
+ * cost is small and one-directional: that person is greeted "Thanks, we have
+ * it." Being unable to grant an attacker a headline is worth more.
+ */
+export function greetingName(name: string): string {
+  const first = name.trim().split(/\s+/)[0] ?? "";
+  return /^[\p{L}\p{M}'’-]{2,40}$/u.test(first) ? first : "";
+}
+
+/** "Thanks Sarah, we have it." — or "Thanks, we have it." if the name is not
+    one we are willing to put in a headline. See greetingName. */
+function greeting(name: string, tail: string): string {
+  const first = greetingName(name);
+  return first ? `Thanks ${escapeHtml(first)}, ${tail}` : `Thanks, ${tail}`;
+}
+
 /** To the decorator: everything needed to price the job and ring back. */
 export function quoteNotification(input: {
   service: string;
@@ -104,7 +137,7 @@ ${
 export function quoteConfirmation(input: { name: string; service: string }): string {
   return shell(
     "We have your enquiry",
-    `<h1 style="margin:0 0 6px;font:600 22px/1.2 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${INK};">Thanks ${escapeHtml(input.name.split(" ")[0])}, we have it.</h1>
+    `<h1 style="margin:0 0 6px;font:600 22px/1.2 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${INK};">${greeting(input.name, "we have it.")}</h1>
 <p style="margin:0 0 20px;">Your enquiry about ${escapeHtml(input.service.toLowerCase())} has landed with us. Here is what happens next.</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;">
 ${["We ring you within one working day to talk it through.", "We come and look at the job, and measure up.", "A written, itemised price lands in your inbox within 48 hours."]
@@ -159,7 +192,7 @@ export function bookingConfirmation(input: {
 }): string {
   return shell(
     "Your site visit request",
-    `<h1 style="margin:0 0 6px;font:600 22px/1.2 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${INK};">Thanks ${escapeHtml(input.name.split(" ")[0])}, that is requested.</h1>
+    `<h1 style="margin:0 0 6px;font:600 22px/1.2 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${INK};">${greeting(input.name, "that is requested.")}</h1>
 <p style="margin:0 0 18px;">You have asked for a visit on <strong style="color:${INK};">${escapeHtml(input.dateLabel)}</strong>, ${escapeHtml(input.preference.toLowerCase())}.</p>
 <p style="margin:0 0 18px;">Nothing is booked until we have spoken. We will ring within one working day to fix the time properly, because a decorator who is still up a ladder at four o'clock should not be promising you a two o'clock visit.</p>
 <p style="margin:0;">If that day stops working, ring <a href="tel:${escapeHtml(site.phoneHref)}" style="color:${ACCENT};">${escapeHtml(site.phone)}</a> and we will move it.</p>`,
