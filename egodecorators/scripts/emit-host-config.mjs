@@ -140,9 +140,57 @@ const headers = `# GENERATED — do not edit by hand.
   Content-Type: image/png
 `;
 
+/* ----------------------------------------------------------- vercel.json -- */
+/*
+   Vercel reads neither .htaccess nor _redirects. Without this file a static
+   upload serves the pages and silently drops every redirect — the site looks
+   fine and the entire migration is gone.
+
+   Vercel matches sources with path-to-regexp, the same as Next, so the patterns
+   carry across unchanged.
+*/
+
+const vercel = {
+  $schema: 'https://openapi.vercel.sh/vercel.json',
+  cleanUrls: true,
+  trailingSlash: false,
+  redirects: [
+    // Both forms of each named URL, so an old link with its trailing slash
+    // resolves in one hop instead of being normalised first.
+    ...NAMED.flatMap((r) => [
+      { source: r.source, destination: r.destination, statusCode: 301 },
+      { source: `${r.source}/`, destination: r.destination, statusCode: 301 },
+    ]),
+    ...CATCH_ALLS.map((r) => ({
+      source: r.source,
+      destination: r.destination,
+      statusCode: 301,
+    })),
+  ],
+  headers: [
+    {
+      source: '/(.*)',
+      headers: [
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+      ],
+    },
+    {
+      // Exported without a file extension, so the type has to be stated or no
+      // sharing preview renders anywhere.
+      source: '/opengraph-image',
+      headers: [{ key: 'Content-Type', value: 'image/png' }],
+    },
+  ],
+};
+
 fs.writeFileSync(path.join(out, '.htaccess'), htaccess);
 fs.writeFileSync(path.join(out, '_redirects'), redirects);
 fs.writeFileSync(path.join(out, '_headers'), headers);
+fs.writeFileSync(path.join(out, 'vercel.json'), JSON.stringify(vercel, null, 2) + '\n');
 
 const rules = NAMED.length * 2 + CATCH_ALLS.length;
-console.log(`Wrote out/.htaccess, out/_redirects and out/_headers — ${rules} redirect rules.`);
+console.log(
+  `Wrote out/.htaccess, out/_redirects, out/_headers and out/vercel.json — ${rules} redirect rules.`,
+);

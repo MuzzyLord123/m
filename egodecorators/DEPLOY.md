@@ -23,15 +23,27 @@ library at full resolution — that cannot be done after the old hosting lapses.
 
 ## Option A — `source/` (recommended)
 
-### Vercel or Netlify
+### Vercel, from the Git repository — easiest thing on this page
 
-1. Push `source/` to a Git repository, or drag the folder into the dashboard.
-2. Framework preset: **Next.js**. Build command `npm run build`. No output
-   directory to set.
-3. Add the domain, let the certificate issue, then follow `MIGRATION.md §5`.
+The project already lives in a repository, so there is nothing to upload:
 
-Nothing needs configuring beyond that. Redirects and headers come from
-`next.config.mjs`, which is in the bundle.
+1. Vercel → **Add New… → Project → Import Git Repository** → `MuzzyLord123/m`.
+2. **Root Directory: `egodecorators`.** This is the one setting that matters —
+   the repository holds several sites and Vercel needs pointing at this one.
+   It will detect Next.js by itself.
+3. Deploy. Then add the domain and follow `MIGRATION.md §5`.
+
+Redirects, headers and image optimisation all come from `next.config.mjs`.
+Nothing else to configure.
+
+### Vercel or Netlify, from the folder
+
+Push `source/` to a repository, or drag **the `source/` folder itself** in.
+Framework preset **Next.js**, build command `npm run build`, no output directory.
+
+> Do not drag the whole unzipped folder in. Vercel looks for a site at the top
+> level of whatever it is given, and the top level of that folder is this file
+> plus two directories — so it reports "No root page" and nothing loads.
 
 ### Any Node host
 
@@ -48,14 +60,22 @@ Node 20 or newer.
 ## Option B — `static/` (shared hosting, cPanel, or a bucket)
 
 Upload the **contents** of `static/` to the web root — usually `public_html`.
-Include the dotfiles: `.htaccess` is what makes the redirects work, and it is
-easy to miss because most file managers hide it.
+Not the `static` folder itself: `index.html` has to end up at the top level, or
+the host has no page to serve at `/`.
+
+Include the dotfiles. `.htaccess` is what makes the redirects work and most file
+managers hide it by default.
 
 - **Apache / cPanel** — `.htaccess` is read automatically. It needs
   `mod_rewrite`, which is on almost everywhere. It also sets the security
   headers, the cache lifetimes, and the content type for the sharing image.
 - **Netlify / Cloudflare Pages** — `_redirects` and `_headers` are read
   automatically. Drag the folder in; there is no build step.
+- **Vercel, as static files** — reads `vercel.json`, and neither of the other
+  two. It carries the same redirects, plus `cleanUrls` so `/repairs` serves
+  `repairs.html`. Without that file Vercel would serve the pages and silently
+  drop every redirect: the site would look perfectly fine and the whole
+  migration would be gone.
 - **nginx, S3, or anything else** — none of those files are read. Translate the
   rules yourself: every line in `_redirects` is `from  to  301`, and the list is
   short.
