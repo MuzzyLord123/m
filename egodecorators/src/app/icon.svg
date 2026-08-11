@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!--
+    The seam, and nothing else. At 16px two letterforms would be mush, so the
+    mark reduces to the one thing the site is actually about: a hard centre line
+    with a different state either side of it.
+  -->
+  <rect width="32" height="32" fill="#0A0A0A"/>
+  <rect x="4" y="8" width="10" height="16" fill="#6E6E6E"/>
+  <rect x="18" y="8" width="10" height="16" fill="#FFFFFF"/>
+  <rect x="15" y="0" width="2" height="32" fill="#FFFFFF"/>
+</svg>

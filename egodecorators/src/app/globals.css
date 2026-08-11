@@ -1,0 +1,460 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Ego Decorators — "Seam"
+
+   The work is a transition: rotten, flaking, tired, then repaired and finished.
+   So the site is built on a split. A hard 2px seam runs down the centre of every
+   wide screen and content alternates across it.
+
+   The palette is the argument. The site is black and white; photographs are
+   greyscale until the work is done. There is no accent colour anywhere, because
+   the colour in this site IS the paint they applied. If a screen looks like it
+   needs colour, what it needs is a photograph of finished work.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --color-black: #0a0a0a;
+  --color-white: #ffffff;
+
+  /* Metadata only — dates, locations, source lines.
+     #6e6e6e on #ffffff is 5.1:1, which clears AA at the 11px the metadata is
+     set in. Do not lighten it. */
+  --color-grey: #6e6e6e;
+
+  /* The same role on an ink band. #6e6e6e on #0a0a0a is only 3.9:1 and fails,
+     so inverted sections resolve to this instead: 5.7:1. Sections pick the
+     right one from data-tone; no component has to remember. */
+  --color-grey-ink: #8a8a8a;
+
+  /* Secondary rules. Never a border on a box — there are no boxes. */
+  --color-hair: #e2e2e2;
+  --color-hair-ink: #303030;
+
+  --font-display: var(--font-syne), 'Arial Black', sans-serif;
+  --font-body: var(--font-familjen), system-ui, sans-serif;
+
+  /* Density 4: more informative than a poster, tighter than a magazine. */
+  --spacing-band: clamp(3.5rem, 8vh, 6.5rem);
+  --spacing-gutter: clamp(1.25rem, 4vw, 3.5rem);
+
+  /* The seam is 2px. It is 2px everywhere, and it is the only border on the
+     site that is not a hairline rule. */
+  --seam-width: 2px;
+
+  --ease-seam: cubic-bezier(0.16, 0.84, 0.28, 1);
+
+  /* Design decisions enforced by the framework rather than by willpower: every
+     radius, shadow and blur utility is deleted from the build, so no component
+     can quietly acquire one. */
+  --radius-*: initial;
+  --shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --blur-*: initial;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* A band declares its tone once; type, rules and metadata inside it resolve. */
+  [data-tone='paper'] {
+    --tone-bg: var(--color-white);
+    --tone-fg: var(--color-black);
+    --tone-meta: var(--color-grey);
+    --tone-hair: var(--color-hair);
+    background-color: var(--tone-bg);
+    color: var(--tone-fg);
+  }
+
+  [data-tone='ink'] {
+    --tone-bg: var(--color-black);
+    --tone-fg: var(--color-white);
+    --tone-meta: var(--color-grey-ink);
+    --tone-hair: var(--color-hair-ink);
+    background-color: var(--tone-bg);
+    color: var(--tone-fg);
+  }
+
+  body {
+    /* Default tone, so anything outside a band still resolves. */
+    --tone-bg: var(--color-white);
+    --tone-fg: var(--color-black);
+    --tone-meta: var(--color-grey);
+    --tone-hair: var(--color-hair);
+
+    background-color: var(--color-white);
+    color: var(--color-black);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Focus is visible and square, like everything else. */
+  :focus-visible {
+    outline: var(--seam-width) solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* The mobile menu is a native <details>. Its disclosure triangle is a piece
+     of browser furniture and this site has no icons, so it goes. */
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::marker {
+    content: '';
+  }
+
+  ::selection {
+    background: var(--color-black);
+    color: var(--color-white);
+  }
+
+  [data-tone='ink'] ::selection {
+    background: var(--color-white);
+    color: var(--color-black);
+  }
+}
+
+@layer components {
+  /* ----------------------------------------------------------------- type -- */
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.5rem, 7vw, 6.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+  }
+
+  /* Headings inside a split column. Smaller than the wordmark, same voice. */
+  .display-sm {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  /* Dates, locations, source labels. The only place --grey is allowed. */
+  .meta {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 11px;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--tone-meta);
+  }
+
+  .lede {
+    font-size: clamp(1.125rem, 1.8vw, 1.375rem);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .prose-body p {
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .prose-body p + p {
+    margin-top: 1.1em;
+  }
+
+  /* ----------------------------------------------------------------- rules -- */
+
+  .hair {
+    border: 0;
+    border-top: 1px solid var(--tone-hair);
+  }
+
+  /* ----------------------------------------------------------------- links -- */
+
+  /*
+     Links get an arrow and an underline that grows from the seam side — from
+     the right on a left-hand column, from the left on a right-hand column, so
+     the movement always travels away from the centre line. There are no icons
+     anywhere on this site; the arrow is a character.
+  */
+  .link-seam {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5ch;
+    color: inherit;
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    background-position: var(--underline-from, left) 100%;
+    transition: background-size 320ms var(--ease-seam);
+    padding-bottom: 2px;
+  }
+
+  .link-seam:hover,
+  .link-seam:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /* In a left-hand column the seam is to the right, so the rule grows leftwards
+     out of it. Set by the split primitive, not by hand. */
+  [data-seam-side='right'] .link-seam {
+    --underline-from: right;
+  }
+
+  [data-seam-side='left'] .link-seam {
+    --underline-from: left;
+  }
+
+  .link-arrow::after {
+    content: '→';
+    display: inline-block;
+    transition: transform 320ms var(--ease-seam);
+  }
+
+  .link-seam:hover .link-arrow::after,
+  .link-seam:focus-visible .link-arrow::after {
+    transform: translateX(0.25em);
+  }
+
+  /* ------------------------------------------------------------ the seam --- */
+
+  /*
+     One fixed element, the full height of the viewport, at dead centre.
+
+     It is painted white and composited with `difference`, so it resolves to
+     black over the paper bands and to white over the ink bands without
+     knowing which it is crossing. That is what keeps it a single unbroken
+     line down the whole page instead of a series of segments that have to
+     agree with each other.
+
+     Below md it is not drawn at all — the split stacks and horizontal rules do
+     the same job.
+  */
+  .seam {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: var(--seam-width);
+    margin-left: calc(var(--seam-width) / -2);
+    background: var(--color-white);
+    mix-blend-mode: difference;
+    pointer-events: none;
+    z-index: 30;
+    transform-origin: top center;
+  }
+
+  /* Drawn top-to-bottom on first paint, once per session.
+     A blocking script in <head> stamps data-seam-drawn on <html> when this
+     session has already seen it, so the decision is made before first paint —
+     no flash, and no hydration mismatch, because the element itself never
+     changes. */
+  html:not([data-seam-drawn]) .seam {
+    animation: seam-draw 600ms var(--ease-seam) both;
+  }
+
+  @keyframes seam-draw {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  /* ------------------------------------------------------- split primitive -- */
+
+  /*
+     Two columns either side of the seam. The left column is right-aligned into
+     it and the right column is left-aligned out of it, so the centre line is
+     the axis everything hangs off.
+
+     Below md the columns stack and the seam becomes a horizontal rule between
+     them.
+  */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-gutter);
+  }
+
+  @media (min-width: 48rem) {
+    .split {
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .split > [data-seam-side='right'] {
+      text-align: right;
+      padding-right: var(--spacing-gutter);
+      justify-items: end;
+    }
+
+    .split > [data-seam-side='left'] {
+      text-align: left;
+      padding-left: var(--spacing-gutter);
+    }
+
+    /* Type is allowed to cross the seam at large sizes. That tension is the
+       design, and it is opt-in per element rather than accidental. */
+    .cross-seam {
+      position: relative;
+      z-index: 31;
+    }
+  }
+
+  /* Stacked, the seam is a rule rather than a line. */
+  @media (max-width: 47.99rem) {
+    .split > [data-seam-side='left'] {
+      border-top: var(--seam-width) solid currentColor;
+      padding-top: var(--spacing-gutter);
+    }
+
+    /* Rows where one half is only a label do not get a section break. */
+    .split-no-rule > [data-seam-side='left'] {
+      border-top: 0;
+      padding-top: 0;
+    }
+  }
+
+  /*
+     The wordmark is the one split that must not stack: "EG" and "O" have to
+     stay on the same line and read as one word. Narrow, the two spans simply
+     flow together; wide, they become the two halves of the split and the seam
+     lands in the gap between the G and the O.
+  */
+  .wordmark-split {
+    display: block;
+  }
+
+  @media (min-width: 48rem) {
+    .wordmark-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: baseline;
+    }
+
+    .wordmark-split > :first-child {
+      text-align: right;
+    }
+
+    .wordmark-split > :last-child {
+      text-align: left;
+    }
+  }
+
+  /* ------------------------------------------------------------- comparison -- */
+
+  /*
+     Before is greyscale, after is in colour. This is the entire palette logic
+     of the site: the colour in a photograph is the paint they put on.
+  */
+  .is-before img {
+    filter: grayscale(1) contrast(1.1);
+  }
+
+  /*
+     The signature: colour arrives as the finished work comes into view.
+
+     It runs once per image, and nothing else in the band is allowed to animate
+     while it happens — that is what keeps it feeling deliberate rather than
+     like a page full of things fading in. The scale settle is small on purpose;
+     it should read as the image landing, not as a zoom.
+  */
+  /*
+     The default state of every reveal on this site is the FINISHED state. The
+     grey, offset, invisible starting states below are all scoped to
+     `html[data-js]`, which the inline observer stamps before first paint.
+
+     So a visitor with no JavaScript — or with JavaScript that failed — gets the
+     headings in place and the photographs in colour, rather than a page of
+     empty space with the words sitting in the markup where only a crawler can
+     read them.
+  */
+  .arrive {
+    transition:
+      filter 900ms var(--ease-seam),
+      transform 900ms var(--ease-seam);
+  }
+
+  html[data-js] .arrive:not([data-arrived]) {
+    filter: grayscale(1) contrast(1.1);
+    transform: scale(1.012);
+    will-change: filter, transform;
+  }
+
+  .slide-seam {
+    transition:
+      opacity 450ms var(--ease-seam),
+      transform 450ms var(--ease-seam);
+    transition-delay: var(--slide-delay, 0ms);
+  }
+
+  html[data-js] .slide-seam:not([data-in]) {
+    opacity: 0;
+    transform: translateX(var(--slide-from, 0));
+  }
+
+  /* --------------------------------------------------------- pending frame -- */
+
+  /*
+     Where a fact or a photograph is missing, the page says so. It does not fill
+     the space with Latin, with stock photography, or with a stranger's logo —
+     which is precisely how the old site came to have all three.
+  */
+  .pending {
+    border: 1px dashed var(--tone-meta);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: clamp(1rem, 2.5vw, 2rem);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion.
+
+   After-images arrive already in colour, type appears in place, and the seam is
+   simply there rather than drawn. The drag comparison keeps working — it is a
+   control, not an animation.
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-seam-drawn]) .seam {
+    animation: none;
+  }
+
+  /* The signature arrival is skipped, not slowed: the colour is simply there,
+     the type is in place, and the comparison still drags. */
+  html[data-js] .arrive:not([data-arrived]),
+  html[data-js] .slide-seam:not([data-in]) {
+    filter: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
