@@ -107,13 +107,20 @@ baseline up, and the corner swatch fills with the next colour over 300ms as its
 field arrives. That's the lot. No parallax, no counters, no marquee, no
 scroll-jacking, no page transitions.
 
+The hero headline is the exception: it uses `RevealAtLoad`, which is the same
+380ms reveal driven by CSS on load and carrying no JavaScript at all. Above the
+fold there is nothing for an observer to wait for, and holding the biggest type
+on the site at `opacity: 0` until hydration disqualifies it as a
+largest-contentful-paint candidate — it cost 0.6s of mobile LCP and three
+Lighthouse points.
+
 `prefers-reduced-motion` collapses the crossfade to a hard switch at the section
 boundary and turns the clip reveals into opacity fades — handled in CSS on
 `[data-clip]`, so there is no second JavaScript path to keep in step. Without
 JavaScript the page holds field one's colours and every word on it still clears
 7:1, because there is only ever one foreground/background pair in play.
 
-### One trap worth not falling into twice
+### Two traps worth not falling into twice
 
 An element clipped with `inset(100%)` reports an `intersectionRatio` of **0** to
 IntersectionObserver in Chrome, however much of it is on screen. So an in-view
@@ -122,6 +129,15 @@ fire: the type is hidden because it hasn't been revealed, and it is never
 revealed because being hidden makes it measure as invisible. `Reveal.tsx` and
 `Swatch.tsx` therefore observe an unclipped wrapper and animate a child. Don't
 collapse them.
+
+**Mandatory scroll snap across a section taller than the viewport strands
+whatever is below the fold** — the browser snaps back to one of the two section
+edges and the middle becomes unreachable at rest. Measured on a 320×568 screen,
+fields one and two overrun by 14px and 62px, which is a service list and a
+corner swatch nobody can get to. Mobile therefore gets mandatory snap only above
+700px of viewport height, and proximity below it. `Field` also takes
+`snap={false}` for anything known to be tall, which is how the contact field is
+handled at every size.
 
 ## Rules the build enforces
 
@@ -143,6 +159,48 @@ build:
 
 And `npm run check:launch` fails while any fact the site prints is still
 unverified.
+
+## Production
+
+**Everything is static.** Every route prerenders — including `/reviews` and one
+page per review source. The source filter is a set of real pages
+(`/reviews/yell`) rather than a query string, which keeps them prerendered,
+gives each view its own address and means the filter works with JavaScript off.
+Filtered views are `noindex` with a canonical pointing at `/reviews`, so the
+site doesn't compete with itself.
+
+**Measured**, on the production build, at the budget in `LAUNCH.md`:
+
+| | mobile | desktop |
+|---|---|---|
+| Performance | 98 | 100 |
+| Accessibility | 100 | 100 |
+| Best practices | 100 | 100 |
+| SEO | 100 | 100 |
+| CLS | 0.000 | 0.000 |
+| LCP | 2.2s | 0.6s |
+
+Plus zero axe violations across WCAG A/AA/AAA on every page at 1440×900 and
+390×844, and no horizontal overflow at any width from 320px up.
+
+**Headers**, set in `next.config.mjs`: `Content-Security-Policy`,
+`Strict-Transport-Security` (two years, subdomains, deliberately not preloaded
+while the domain is still unregistered), `Permissions-Policy`,
+`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`. The CSP locks
+everything to `self` — there is genuinely nothing third-party on this site — but
+carries `'unsafe-inline'` for scripts and styles, and the comment above it is
+honest about what that does and doesn't buy.
+
+**Error boundaries.** `error.tsx` and `global-error.tsx` both put his phone
+number on the screen in display type. If the site is broken, the number is the
+only thing on it worth having. `global-error.tsx` styles itself inline because
+it replaces the root layout and cannot assume the stylesheet loaded — but it
+still imports the phone number from `content/site.ts`, because "the number
+appears in exactly one place" is not a rule that gets suspended on the page most
+likely to be somebody's only visit.
+
+**Environment.** See `.env.example`. Everything is read at build time, so
+setting a variable on a running host changes nothing until it is rebuilt.
 
 ## One deliberate departure from the brief
 
@@ -202,10 +260,12 @@ content/          Facts and copy. The single source of truth for all of it.
   copy.ts         Every word that isn't a review or a fact
   photos.ts       Photographs (currently none)
   needed.json     Every open question
-src/app/          Routes
-src/components/   Field, Reveal, Swatch, Repaint, ReviewBlock, TopStrip, form
+src/app/          Routes, plus error.tsx and global-error.tsx
+src/components/   Field, Reveal, RevealAtLoad, Swatch, Repaint, ReviewBlock,
+                  ReviewsArchive, TopStrip, form
 src/lib/          Formatting, enquiry delivery, spam traps, the server action
 scripts/          The launch gate
+.env.example      Every variable, and what happens without it
 ```
 
 Stack: Next.js App Router (RSC by default), Tailwind v4 with the fields as

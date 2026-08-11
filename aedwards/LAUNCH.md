@@ -152,16 +152,29 @@ Already built, but worth understanding:
 
 ## 11. Performance and accessibility budget
 
-Run Lighthouse on mobile after deploying:
+The budget:
 
 - Performance **≥ 95**. This site is type and colour with no images; there is no
   excuse.
 - Accessibility **100**.
 - CLS **≤ 0.01**.
 
+Measured on the production build before launch — re-run after deploying, since a
+real host and a real network are not a laptop:
+
+| | mobile | desktop |
+|---|---|---|
+| Performance | 98 | 100 |
+| Accessibility | 100 | 100 |
+| Best practices | 100 | 100 |
+| SEO | 100 | 100 |
+| CLS | 0.000 | 0.000 |
+| LCP | 2.2s | 0.6s |
+
 Contrast is enforced in the code: `content/fields.ts` fails the build if any
 field's text drops below 7:1. Every page has been checked with axe across
-WCAG A, AA and AAA with zero violations at both desktop and mobile sizes.
+WCAG A, AA and AAA with zero violations at both desktop and mobile sizes, and
+there is no horizontal overflow at any width from 320px up.
 
 ## 12. Before you point the domain at it
 

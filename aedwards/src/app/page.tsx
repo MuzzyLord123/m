@@ -29,6 +29,7 @@ import { Pending } from '@/components/Pending'
 import { PhotoStrip } from '@/components/PhotoStrip'
 import { Rating } from '@/components/Rating'
 import { Reveal } from '@/components/Reveal'
+import { RevealAtLoad } from '@/components/RevealAtLoad'
 import { ReviewBlock } from '@/components/ReviewBlock'
 import { StructuredData } from '@/components/StructuredData'
 
@@ -77,9 +78,12 @@ export default function HomePage() {
       label: intro.label,
       node: (
         <>
-          <Reveal>
+          {/* Above the fold, so the reveal is CSS on load rather than an
+              observer — see RevealAtLoad. This headline is the largest thing on
+              the site and it should not be waiting for a bundle. */}
+          <RevealAtLoad>
             <h1 className="t-name">{intro.name}</h1>
-          </Reveal>
+          </RevealAtLoad>
           <p className="t-line mt-[clamp(1.5rem,4vh,2.5rem)]">{intro.line}</p>
           <Rating className="mt-[clamp(2.5rem,7vh,4rem)]" />
           <a

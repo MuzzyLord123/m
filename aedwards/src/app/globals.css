@@ -56,7 +56,20 @@
     scroll-behavior: smooth;
   }
 
-  @media (max-width: 767px) {
+  /*
+    Mandatory snap on mobile, but only where a field actually fits the screen.
+
+    Mandatory snapping across a section taller than the viewport strands
+    whatever sits below the fold: the browser snaps back to one of the two
+    section edges and the middle becomes unreachable at rest. Measured on a
+    320x568 screen, fields one and two overrun by 14px and 62px — which is the
+    service list and a corner swatch nobody can get to.
+
+    Above 700px of viewport height every field fits and mandatory is the right
+    behaviour. Below it the page falls back to proximity, which snaps when it
+    is convenient and never traps anything.
+  */
+  @media (max-width: 767px) and (min-height: 700px) {
     html {
       scroll-snap-type: y mandatory;
     }
@@ -106,6 +119,52 @@
 }
 
 @layer components {
+  /* -------------------------------------------------- reveal, without JS --- */
+  /*
+    The same 380ms clip reveal as Reveal.tsx, driven by CSS on load instead of
+    by an intersection observer.
+
+    This exists for the one headline that is already on screen when the page
+    arrives. Waiting for JavaScript to reveal it costs more than the effect is
+    worth: the biggest text on the site sits at opacity 0 until hydration, which
+    disqualifies it as a largest-contentful-paint candidate and pushes the
+    measured LCP out to whenever the bundle happens to land. Above the fold
+    there is nothing to observe anyway — it is already in view.
+
+    Everything below the fold still uses Reveal.tsx, which has something real to
+    wait for.
+  */
+  @keyframes reveal-from-baseline {
+    from {
+      clip-path: inset(100% 0 0 0);
+      opacity: 0;
+    }
+    to {
+      clip-path: inset(0% 0 0 0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes reveal-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .reveal-at-load {
+    animation: reveal-from-baseline 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Clip reveals become opacity reveals, same as [data-clip] elsewhere. */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-at-load {
+      animation-name: reveal-fade;
+    }
+  }
+
   /* ------------------------------------------------------------- display --- */
   /* Bricolage Grotesque, 700–800, flush left, ragged right, never centred,
      never all-caps. */
