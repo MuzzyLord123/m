@@ -17,10 +17,19 @@ const menuLinks = [...primaryNav, { href: "/contact", label: "Contact" }];
 /**
  * Mobile navigation (<1024px).
  *
- * The toggle is three brush strokes that morph into an X. Opening floods the
- * screen from the toggle itself — a clip-path circle expanding out of the
- * button — then the oversized links stagger up from below. Closing reverses the
- * flood. Scroll is locked, focus is trapped, Escape exits.
+ * The toggle is three brush strokes that morph into an X. Opening slides the
+ * panel down over the page and the oversized links stagger up from below.
+ * Closing reverses it. Scroll is locked, focus is trapped, Escape exits.
+ *
+ * IT SLIDES RATHER THAN FLOODING. The panel used to arrive as a clip-path
+ * circle expanding out of the toggle, which is where the "screen behind flashes
+ * for a split second and looks glitched" report came from — see the note on
+ * .flood-panel in globals.css for why the geometry made that unavoidable. The
+ * stagger was cut back at the same time: the first row now starts at 0.12s
+ * instead of 0.18s and steps 40ms instead of 60ms, so the last of seven lands
+ * around 0.36s rather than 0.54s. The old timing left the covered panel empty
+ * for a beat before anything appeared in it, which read as a second stall right
+ * after the first.
  *
  * THE PANEL IS DARK, not orange. It was a full-strength accent plane with
  * near-black type on it, which measured at 6.2:1 and still read badly: a whole
@@ -148,7 +157,7 @@ export function MobileMenu() {
             <nav aria-label="Mobile" className="shell flex flex-col pb-5">
               <p
                 className="flood-item flex items-center justify-between pb-3 eyebrow text-ink-soft"
-                style={{ transitionDelay: "0.14s" }}
+                style={{ transitionDelay: "0.08s" }}
               >
                 <span>Menu</span>
                 <span>{site.years} years · {site.town}</span>
@@ -157,7 +166,7 @@ export function MobileMenu() {
               {previewMode && (
                 <p
                   className="flood-item mb-4 flex items-start gap-2.5 rounded-[4px] border border-ink/20 bg-ink/6 px-3.5 py-3 text-[0.875rem] leading-snug text-ink"
-                  style={{ transitionDelay: "0.16s" }}
+                  style={{ transitionDelay: "0.10s" }}
                 >
                   <Lock weight="light" aria-hidden="true" className="mt-px size-4 shrink-0" />
                   <span>
@@ -184,7 +193,7 @@ export function MobileMenu() {
                       >
                         <span
                           aria-disabled="true"
-                          style={{ transitionDelay: `${0.18 + index * 0.06}s` }}
+                          style={{ transitionDelay: `${0.12 + index * 0.04}s` }}
                           className="flood-row relative flex cursor-not-allowed items-center gap-4 py-3.5 pl-3.5 select-none [@media(max-height:700px)]:py-2.5"
                         >
                           <span className="figures w-6 shrink-0 self-start pt-[0.85rem] text-[0.75rem] font-semibold text-ink-mute">
@@ -212,7 +221,7 @@ export function MobileMenu() {
                       <Link
                         href={link.href}
                         aria-current={current ? "page" : undefined}
-                        style={{ transitionDelay: `${0.18 + index * 0.06}s` }}
+                        style={{ transitionDelay: `${0.12 + index * 0.04}s` }}
                         /* Steps down on short handsets so the whole menu still
                            lands inside one screen where it can. */
                         className="flood-row group relative flex items-center gap-4 py-3.5 pl-3.5 [@media(max-height:700px)]:py-2.5"
@@ -256,7 +265,7 @@ export function MobileMenu() {
                 than only naming it. */}
             <div
               className="flood-item shrink-0"
-              style={{ transitionDelay: "0.36s" }}
+              style={{ transitionDelay: "0.24s" }}
             >
               <div className="shell flex items-baseline justify-between">
                 <p className="eyebrow text-ink-soft">
@@ -308,7 +317,7 @@ export function MobileMenu() {
 
             {/* Everything below sits in thumb reach. */}
             <div
-              style={{ transitionDelay: "0.46s" }}
+              style={{ transitionDelay: "0.32s" }}
               className="flood-item shell mt-auto shrink-0 pt-7 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
             >
               <div className="mb-6 h-px w-full bg-ink/14" aria-hidden="true" />

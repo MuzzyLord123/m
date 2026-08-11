@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 /**
  * Live chat on Tawk.to's free plan, wearing our clothes.
@@ -9,9 +9,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * chat instead, so the only thing a visitor sees before they engage is a paint
  * blob in the brand colour.
  *
- * The script is not on the page at load. It is injected after the visitor's
- * first interaction (during idle time), or immediately if they press this
- * button first — so live chat contributes nothing at all to LCP.
+ * The script is not on the page at load, and it is not warmed up in the
+ * background either. It is injected when someone presses this button and at no
+ * other moment — so live chat contributes nothing to LCP, and a visitor who
+ * never wants to chat never meets Tawk.to at all.
  *
  * Note: on the free plan the chat *window* carries a small "powered by
  * tawk.to" line. That is the trade for a chat that costs nothing to run. The
@@ -67,23 +68,23 @@ export function ChatLauncher() {
     document.head.appendChild(script);
   }, [propertyId, widgetId]);
 
-  // Warm the script up after the visitor's first interaction, in idle time.
-  // Pointer and key events only — this site attaches no scroll listeners.
-  useEffect(() => {
-    if (!propertyId || !widgetId) return;
+  /* THE SCRIPT LOADS ON THE BUTTON, AND ONLY ON THE BUTTON.
+     There used to be a warm-up here: a one-shot pointerdown/keydown/touchstart
+     listener that injected Tawk during idle time after the visitor's FIRST
+     interaction anywhere on the page. It was a performance idea and it was a
+     privacy bug, because the first interaction is a tap on a photograph or the
+     menu — not a decision about live chat. In practice it loaded Tawk for
+     essentially every visitor, which hands a third party the visitor's IP and
+     lets it set its own storage before anyone has asked for chat.
 
-    const events: (keyof WindowEventMap)[] = ["pointerdown", "keydown", "touchstart"];
-    const onFirstInteraction = () => {
-      events.forEach((event) => window.removeEventListener(event, onFirstInteraction));
-      const idle = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 1200));
-      idle(() => load());
-    };
+     It also made the privacy page untrue. That page says, in the client's name,
+     "It loads only when you choose to open it — the script is not on the page
+     until then." That is now what the code does.
 
-    events.forEach((event) =>
-      window.addEventListener(event, onFirstInteraction, { once: true, passive: true }),
-    );
-    return () => events.forEach((event) => window.removeEventListener(event, onFirstInteraction));
-  }, [load, propertyId, widgetId]);
+     The cost is real and small: the first open waits for the script instead of
+     finding it already there, which the button covers with its loading label.
+     A second or two on a deliberate action is a fair trade for not loading a
+     third-party script into the page of someone who never wanted it. */
 
   // With no Tawk credentials configured, nothing renders and nothing loads.
   if (!propertyId || !widgetId) return null;

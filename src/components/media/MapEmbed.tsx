@@ -1,16 +1,33 @@
+"use client";
+
+import { useState } from "react";
+import { MapPin } from "@phosphor-icons/react/dist/ssr";
 import { hasMapAddress, site } from "@/config/site";
 
 /**
  * Google Maps, the keyless way: the public `maps?q=…&output=embed` iframe. No
  * API key, no billing account, no quota to watch.
  *
- * It is lazy-loaded and its box reserves full height up front, so nothing
- * shifts when the map arrives. The frame around it is ours — a plaster panel
- * with masking-tape corners — so the embed reads as part of the site rather
- * than a window cut into it.
+ * IT IS A FAÇADE, and that is a privacy decision rather than a performance one.
+ * This map sits on the HOME page (ServiceArea), so when the iframe loaded on
+ * sight it meant every single visitor's IP address went to Google, and Google's
+ * storage was set in their browser, before they had asked for anything and
+ * without any lawful basis to point at. loading="lazy" did not help: it defers
+ * the request until the box is near the viewport, and the box is near the
+ * viewport on the way down every home page visit.
+ *
+ * It also sat oddly next to the rest of the site. The video player is
+ * click-to-load, the live chat is click-to-load — the map was the one embed
+ * quietly contacting a third party on arrival, which is precisely the claim the
+ * privacy page makes that the site should not be breaking.
+ *
+ * Nothing is fetched from Google until someone presses the button. The frame,
+ * the towns and the address are ours and render server-side, so what a visitor
+ * who never presses it sees is a complete panel, not a placeholder.
  */
 export function MapEmbed({ className = "" }: { className?: string }) {
   const query = encodeURIComponent(site.mapAddress);
+  const [loaded, setLoaded] = useState(false);
 
   return (
     <div className={`relative ${className}`}>
@@ -18,12 +35,30 @@ export function MapEmbed({ className = "" }: { className?: string }) {
       <Tape className="-right-4 -bottom-3 rotate-[3deg]" />
 
       <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-plaster-deep ring-1 ring-hairline lg:aspect-[3/2]">
-        {hasMapAddress ? (
+        {hasMapAddress && !loaded ? (
+          <button
+            type="button"
+            onClick={() => setLoaded(true)}
+            className="group absolute inset-0 flex flex-col items-center justify-center gap-4 px-8 text-center"
+          >
+            <span className="grid size-14 place-items-center rounded-full bg-accent text-on-accent transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-active:scale-95">
+              <MapPin weight="fill" aria-hidden="true" className="size-6" />
+            </span>
+            <span className="font-display text-[1.125rem] font-semibold text-ink">
+              Show the map
+            </span>
+            <span className="max-w-[26rem] text-[0.9375rem] leading-relaxed text-ink-mute">
+              {site.serviceArea}. The map is loaded from Google, so it is only
+              fetched once you ask for it.
+            </span>
+          </button>
+        ) : hasMapAddress ? (
           <iframe
             title={`Map showing ${site.name} in ${site.town}`}
             src={`https://www.google.com/maps?q=${query}&output=embed`}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            /* No loading="lazy" — it only exists once someone has asked for it,
+               so deferring it again would just delay what they pressed for. */
+            referrerPolicy="no-referrer"
             /* Google's keyless embed has no dark theme and no styling API, so the
                only way to stop a blazing white rectangle sitting in the middle
                of a near-black page is to filter it. Inverting and rotating the

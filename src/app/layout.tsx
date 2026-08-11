@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { MobileActionBar } from "@/components/layout/MobileActionBar";
 import { ScrollPaintLevel } from "@/components/layout/ScrollPaintLevel";
 import { ChatLauncher } from "@/components/chat/ChatLauncher";
+import { PrivacyNotice } from "@/components/legal/PrivacyNotice";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { SPLASH_GUARD, Splash } from "@/components/brand/Splash";
 import "./globals.css";
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteFooter />
         <MobileActionBar />
         <ChatLauncher />
+        <PrivacyNotice />
         <StructuredData />
         {/* LAST IN THE BODY ON PURPOSE, even though it covers the whole screen.
             It is position: fixed with z-index 200, so where it sits in the DOM

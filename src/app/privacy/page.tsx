@@ -14,6 +14,7 @@ const sections = [
     body: [
       "If you fill in the quote form or ask for a site visit, we collect your name, phone number, email address, the town or address of the job, and whatever you write in the message box. That is all we ask for and all we keep.",
       "We do not run analytics on this site. There is no tracking pixel, no advertising tag, and no cookie set by us.",
+      "Two small things are saved in your browser's own storage, and neither is a cookie — they are never sent to us and nobody else can read them. One remembers that you have seen the opening animation, so it does not play again in the same visit. The other remembers that you have closed the privacy notice, so it does not ask you twice. You can clear both by clearing this site's data in your browser.",
     ],
   },
   {
@@ -28,7 +29,7 @@ const sections = [
     body: [
       "Emails from this website are delivered by Resend, an email provider, which processes the contents of your enquiry in order to send it. Their privacy notice is at resend.com/legal/privacy-policy.",
       "The live chat is provided by Tawk.to. If you open a chat, your messages and basic connection details are handled by them. It loads only when you choose to open it — the script is not on the page until then.",
-      "The map on the contact page is an embed from Google Maps and loads only when you scroll to it. Google may set cookies through that embed. Nothing plays from YouTube until you press play on a video.",
+      "The map is an embed from Google Maps, and Google may set cookies through it. It is not loaded until you press the button on it, so if you never do, your browser never contacts Google. Nothing plays from YouTube until you press play on a video, and nothing is fetched from YouTube before that either.",
     ],
   },
   {

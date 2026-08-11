@@ -14,6 +14,7 @@
     "audit:images": "node scripts/image-check.mjs",
     "audit:content": "node scripts/content-audit.mjs",
     "audit:films": "node --no-warnings scripts/films-check.mjs",
+    "audit:privacy": "node scripts/privacy-check.mjs",
     "audit:lighthouse": "node scripts/lighthouse.mjs",
     "shots": "node scripts/shots.mjs"
   },

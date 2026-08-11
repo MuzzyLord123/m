@@ -9,6 +9,11 @@ const nextConfig = {
   ...(process.env.VERCEL ? {} : { output: "standalone" }),
   pageExtensions: ["ts", "tsx", "mdx"],
   reactStrictMode: true,
+  /* Next sends `X-Powered-By: Next.js` on every response by default. It is not
+     a vulnerability on its own — but it names the framework and therefore the
+     CVE list worth trying, for free, to anyone running a scanner. There is no
+     reason to answer that question. */
+  poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
     /**
@@ -66,6 +71,22 @@ const nextConfig = {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
           },
+          /* Severs window.opener between this page and anything it opens
+             cross-origin, so a page opened from here cannot reach back and
+             navigate it. `same-origin-allow-popups` rather than plain
+             `same-origin` on purpose: the live chat opens its own window, and
+             the strict value would cut that off from the widget that opened it.
+             NOTE — deliberately no Cross-Origin-Embedder-Policy. COEP requires
+             every cross-origin subresource to opt in with CORP, and the YouTube
+             player and the Google Maps embed do not. Adding it would silently
+             blank both. */
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+          // Legacy Flash/Acrobat cross-domain policy files. None exist here, and
+          // this says so rather than leaving the question open.
+          { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+          // Asks the browser to key this origin's agent cluster by origin, so a
+          // same-site but cross-origin document cannot share a process with it.
+          { key: "Origin-Agent-Cluster", value: "?1" },
         ],
       },
       {

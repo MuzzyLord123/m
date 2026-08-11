@@ -1237,12 +1237,107 @@
 }
 
 /* --------------------------------------------------------------------------
+   Privacy notice. A panel, not a barrier — see PrivacyNotice.tsx for why this
+   site has a notice rather than a consent banner.
+
+   POSITION IS A COLLISION PROBLEM, not a preference. Three fixed things already
+   live at the bottom of a phone screen: the action bar (z-80, full width), the
+   chat blob (z-85, bottom-right) and the safe-area inset. The notice sits above
+   the action bar and above the blob in the stack, so for the few seconds it is
+   up it is the only thing being asked of anyone. On a wide screen it moves to
+   the bottom LEFT instead, where it cannot reach the chat blob at all.
+   -------------------------------------------------------------------------- */
+
+.privacy-notice {
+  position: fixed;
+  z-index: 86;
+  left: var(--shell-pad);
+  right: var(--shell-pad);
+  /* Clears the action bar and the notch, using the same expression the bar and
+     the chat blob use, so the three stay in step if any of them changes. */
+  bottom: calc(5.75rem + env(safe-area-inset-bottom));
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background-color: var(--color-plaster);
+  border: 1px solid var(--color-hairline);
+  padding: 1.15rem 1.15rem 1.25rem;
+  box-shadow:
+    0 24px 60px -20px rgb(0 0 0 / 0.8),
+    0 2px 10px -4px rgb(0 0 0 / 0.6);
+  animation: privacy-in 0.44s var(--ease-coat) both;
+}
+@media (width >= 64rem) {
+  .privacy-notice {
+    right: auto;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    max-width: 30rem;
+    padding: 1.35rem 1.5rem 1.5rem;
+  }
+}
+.privacy-notice[data-leaving="true"] {
+  animation: privacy-out 0.3s var(--ease-coat) both;
+}
+@keyframes privacy-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.25rem, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes privacy-out {
+  to {
+    opacity: 0;
+    transform: translate3d(0, 0.75rem, 0) scale(0.99);
+  }
+}
+
+/* The site's section rule, used once more at the top of the panel: it draws
+   itself in from the left as the panel lands, so the notice arrives the way a
+   section heading does rather than appearing like an alert. */
+.privacy-notice-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--color-accent), transparent 88%);
+  animation: privacy-rule 0.66s var(--ease-coat) 0.16s both;
+}
+@keyframes privacy-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
    Mobile paint-flood menu. The accent expands from the toggle's own position.
    -------------------------------------------------------------------------- */
 
+/* IT SLIDES. It used to be a clip-path circle expanding out of the toggle, and
+   that is where the "screen behind flashes and looks glitched" report came
+   from — it was not a rendering fault, it was the geometry.
+   A circle anchored at the top-right reaches the BOTTOM-LEFT corner last, so
+   for most of its 500ms there is a hard-edged wedge of the page still showing
+   through. Over a dark section nobody notices; over the services cards or a
+   photograph it is a bright torn triangle, and it read as a glitch because a
+   diagonal tear is not a shape anything on this site makes on purpose. Frozen
+   and stepped, the wedge was still there 60ms in.
+   A translate covers the full width at every instant, so there is no corner to
+   be last and nothing to see through — the panel is opaque the whole way down.
+   It is also the one property, with opacity, that the compositor can animate
+   without touching layout or paint, which matters on a mid-range Android where
+   an animating clip-path is repainted every frame. */
 .flood-panel {
-  clip-path: circle(0px at calc(100% - 2.6rem) 2.55rem);
-  transition: clip-path 0.5s var(--ease-coat);
+  transform: translate3d(0, -100%, 0);
+  transition: transform 0.34s var(--ease-coat);
 
   /* A DARK ground, not the accent. The panel used to be a full-strength orange
      plane with near-black ink on it. It measured fine — 6.2:1 — but measuring
@@ -1269,7 +1364,7 @@
     );
 }
 .flood-panel[data-open="true"] {
-  clip-path: circle(150vmax at calc(100% - 2.6rem) 2.55rem);
+  transform: translate3d(0, 0, 0);
 }
 /* The eyebrow is 11px site-wide, which is right for a label sitting above a
    heading you are already reading and too small for a menu you are scanning at
@@ -1282,8 +1377,8 @@
   opacity: 0;
   transform: translateY(26px);
   transition:
-    opacity 0.44s var(--ease-coat),
-    transform 0.44s var(--ease-coat);
+    opacity 0.38s var(--ease-coat),
+    transform 0.38s var(--ease-coat);
 }
 .flood-panel[data-open="true"] .flood-item {
   opacity: 1;
@@ -1295,7 +1390,7 @@
    hero wipe does. */
 .flood-row {
   transform: translateY(110%);
-  transition: transform 0.62s var(--ease-coat);
+  transition: transform 0.5s var(--ease-coat);
 }
 .flood-panel[data-open="true"] .flood-row {
   transform: none;
@@ -1374,6 +1469,21 @@
   .drip {
     animation: none;
     transform: scaleY(1);
+  }
+  /* The panel is simply there or not there. Sliding a full screen of content
+     down over the page is exactly the kind of large-area movement someone who
+     asked for less of it does not want. */
+  .flood-panel {
+    transition: none;
+  }
+  /* The notice still appears — it just does not travel to get there. */
+  .privacy-notice,
+  .privacy-notice[data-leaving="true"] {
+    animation: none;
+  }
+  .privacy-notice-rule {
+    animation: none;
+    transform: scaleX(1);
   }
   .flood-panel[data-open="true"] .flood-item {
     opacity: 1;
