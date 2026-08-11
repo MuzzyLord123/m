@@ -124,9 +124,32 @@ confirms nothing broke.
 
 ---
 
+## Dependency overrides
+
+`package.json` carries an `overrides` block, and JSON cannot hold a comment, so
+the reason lives here:
+
+- **`sharp: ^0.35.0`** — Next pins `sharp ^0.34.3`, and every 0.34.x carries the
+  libvips advisories in GHSA-f88m-g3jw-g9cj. sharp is the image optimiser behind
+  `/_next/image`, which is a public unauthenticated endpoint, so it is worth
+  lifting. Alpine gets a prebuilt musl binary at 0.35, so no toolchain is
+  needed, and Next's whole sharp surface is unchanged across the bump.
+- **`postcss: ^8.5.23`** — Next pins `postcss 8.4.31` exactly, which is inside
+  the range for the stringify XSS and path-traversal advisories. Build-time
+  only, so the practical risk here is low; it was lifted because it is free —
+  the compiled CSS is byte-for-byte identical before and after, verified by
+  hashing `.next/static/css/*.css` across both builds.
+
+Together these take `npm audit --omit=dev` from three high to zero. The
+alternative `npm audit fix` proposes is `next@16`, a major upgrade, which is not
+something to do to a live site to clear a build-time advisory.
+
+If you upgrade Next and it ships newer versions of either, delete the block and
+re-run `npm audit --omit=dev` to check it is still clean.
+
 ## Deploying to Railway
 
-The repo ships a multi-stage `Dockerfile` (Node 20 alpine, Next standalone
+The repo ships a multi-stage `Dockerfile` (Node 22 alpine, Next standalone
 output). Railway detects it automatically — no Nixpacks configuration needed.
 
 1. Push this repo to GitHub.

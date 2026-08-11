@@ -158,11 +158,20 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
           },
-          // HTTPS only, once the domain is live. Vercel and Railway both serve
-          // TLS by default, so this is safe from the first deploy.
+          /* HTTPS only, once the domain is live. Vercel and Railway both serve
+             TLS by default, so this is safe from the first deploy.
+             NO `preload` TOKEN. It is not a local setting — it is a public
+             declaration that the domain owner consents to submission at
+             hstspreload.org, and anyone who can read the header can submit on
+             the owner's behalf. Combined with includeSubDomains that pins every
+             subdomain of the client's domain to HTTPS for two years, and
+             getting off the preload list takes months. For a one-man business
+             whose DNS someone else may well be managing, that is a decision to
+             take deliberately, not a header default. If it is ever wanted: ramp
+             max-age, audit the subdomains, then add the token and submit. */
           {
             key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
+            value: "max-age=63072000; includeSubDomains",
           },
           /* Severs window.opener between this page and anything it opens
              cross-origin, so a page opened from here cannot reach back and

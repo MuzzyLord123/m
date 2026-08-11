@@ -82,8 +82,21 @@ export function ChatLauncher() {
     const script = document.createElement("script");
     script.async = true;
     script.src = `https://embed.tawk.to/${propertyId}/${widgetId}`;
-    script.charset = "UTF-8";
-    script.setAttribute("crossorigin", "*");
+    /* No crossorigin, no charset. crossorigin="*" was not a wildcard — the
+       attribute takes only "anonymous" or "use-credentials", so an invalid
+       value fell back to "anonymous" and fetched the script in CORS mode for
+       no benefit: crossorigin without integrity guarantees nothing, and SRI is
+       impossible here because Tawk's loader is mutable by design. charset has
+       been removed from the HTML spec and is a no-op on a created script.
+       What was actually missing is a failure path. The button sets "loading"
+       before appending and only Tawk_API.onLoad clears it, so a blocked or
+       offline script left the launcher announcing "Opening live chat" forever
+       with nothing coming. */
+    script.onerror = () => {
+      setStatus("idle");
+      wantsOpen.current = false;
+      delete window.Tawk_API;
+    };
     document.head.appendChild(script);
   }, [propertyId, widgetId]);
 

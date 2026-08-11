@@ -89,8 +89,16 @@ export const quoteSchema = z.object({
   message: text(2000).optional(),
   hasPhotos: z.boolean().optional(),
 
-  // Spam defences. Neither is ever shown to a person.
-  website: z.string().max(0, "Something went wrong. Ring us instead.").optional(),
+  /* Spam defences. Neither is ever shown to a person.
+
+     NO max(0) HERE, and that is the whole point. It used to reject a filled
+     honeypot at the schema, which meant two things: the honeypot branch in
+     looksAutomated() was unreachable dead code, and a real customer whose
+     password manager or browser autofilled the hidden "website" field was told
+     "Some details are missing" on a form with no visible error — an invisible
+     field they cannot find, and a lost job. The action decides now, and it
+     answers a bot with a success shape so it learns nothing. */
+  website: z.string().optional(),
   elapsedMs: z.number(),
 });
 
@@ -99,8 +107,15 @@ export type QuoteInput = z.infer<typeof quoteSchema>;
 export const AM_PM = ["Morning", "Afternoon", "Either"] as const;
 
 export const bookingSchema = z.object({
-  /** ISO date string for the requested visit. */
-  date: z.string().min(1, "Pick a day that suits you"),
+  /* ISO date string for the requested visit. z.iso.date() rather than a
+     min(1) string: the value is handed straight to Intl.DateTimeFormat and to
+     the .ics builder, and "not-a-date" passed validation and then threw
+     RangeError: Invalid time value OUTSIDE the try/catch — a 500 rather than
+     the phone-number fallback the customer should get. Format only; the
+     weekday-within-four-weeks rule stays with the date picker, because
+     re-deriving "today" on the server invites an off-by-one on every timezone
+     boundary and would reject real bookings. */
+  date: z.iso.date("Pick a day that suits you"),
   preference: z.enum(AM_PM, { message: "Morning or afternoon?" }),
   name: text(80).pipe(z.string().min(2, "Your name, so we know who we are speaking to")),
   phone,
@@ -108,7 +123,7 @@ export const bookingSchema = z.object({
   address: text(200).pipe(z.string().min(4, "The address we are coming to")),
   message: text(2000).optional(),
 
-  website: z.string().max(0, "Something went wrong. Ring us instead.").optional(),
+  website: z.string().optional(),
   elapsedMs: z.number(),
 });
 

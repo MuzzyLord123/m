@@ -193,9 +193,18 @@ export function Honeypot({
   register: React.InputHTMLAttributes<HTMLInputElement> & { ref?: React.Ref<HTMLInputElement> };
 }) {
   return (
+    /* No <label>, and the input is not called anything a password manager
+       recognises. A hidden field labelled "Website" is exactly what autofill
+       looks for, and every customer it filled in was silently binned. */
     <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
-      <label htmlFor="website">Website</label>
-      <input id="website" type="text" tabIndex={-1} autoComplete="off" {...register} />
+      <input
+        id="contact-ref"
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        {...register}
+      />
     </div>
   );
 }

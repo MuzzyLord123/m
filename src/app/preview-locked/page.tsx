@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Images, VideoCamera } from "@phosphor-icons/react/dist/ssr";
 import { site } from "@/config/site";
 import { photographCount, projects } from "@/data/projects";
+import { previewMode } from "@/config/preview";
 
 export const metadata: Metadata = {
   title: "Not built yet",
@@ -27,6 +29,14 @@ export const metadata: Metadata = {
  * the page that was asked for.
  */
 export default function PreviewLockedPage() {
+  /* This route outlives the preview unless it is told not to. The middleware
+     returns early once the gate is off, so nothing rewrites to here — but the
+     page itself stayed a live 200 telling visitors, in the client's name, that
+     their site is unfinished and listing which pages "have not been submitted
+     to build yet". It is also absent from ALL_PAGES, so the not-built handling
+     does not cover it either. It exists only while the preview does. */
+  if (!previewMode) notFound();
+
   const rest = [
     { label: "Services", note: "The six trades, in detail, with the FAQs customers actually ask" },
     { label: "About", note: "Who turns up, how the work is run, what the guarantee covers" },

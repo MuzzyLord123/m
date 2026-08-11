@@ -23,7 +23,17 @@ import { useEffect } from "react";
 export function HashTarget() {
   useEffect(() => {
     const go = () => {
-      const slug = decodeURIComponent(window.location.hash.slice(1));
+      /* decodeURIComponent throws URIError on a malformed escape — /work#% is
+       enough. This runs from a rAF callback and a hashchange listener, so the
+       throw lands outside React and error.tsx never sees it. The raw fragment
+       is a fine fallback; CSS.escape below makes it safe to interpolate either
+       way. */
+    let slug = window.location.hash.slice(1);
+    try {
+      slug = decodeURIComponent(slug);
+    } catch {
+      /* malformed escape — match on the raw fragment instead */
+    }
       if (!slug) return;
 
       const candidates = document.querySelectorAll<HTMLElement>(

@@ -37,7 +37,16 @@ function fold(line: string): string {
 }
 
 function escape(value: string): string {
-  return value.replace(/[\\;,]/g, (match) => `\\${match}`).replace(/\n/g, "\\n");
+  /* CRLF first, then a bare CR, then LF — in that order, so a Windows newline
+     becomes one \n rather than two. A raw CR was previously emitted into the
+     file untouched, and CR is a line terminator in iCalendar: an address
+     containing one could open a property, or a whole VALARM block, inside the
+     .ics the customer is asked to open in their calendar. The trailing sweep
+     removes anything else in the control range. */
+  return value
+    .replace(/[\\;,]/g, (match) => `\\${match}`)
+    .replace(/\r\n|\r|\n/g, "\\n")
+    .replace(/[\p{Cc}]/gu, "");
 }
 
 /**

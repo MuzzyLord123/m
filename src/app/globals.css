@@ -1258,17 +1258,31 @@
      it belongs to the frame instead of sitting on top of it. */
   left: 0;
   right: 0;
-  /* Sits exactly on top of the Call / Get a Free Quote bar, so the two read as
-     one stack with no dead band between them and the site's main CTA is never
-     covered. --action-bar-h is MEASURED and published by MobileActionBar; it
-     reports 0px above the lg breakpoint, where that bar does not exist, so the
-     same rule puts the sheet on the screen edge there. The fallback matters
-     only for the frame before the measurement lands. */
-  bottom: var(--action-bar-h, 0px);
-  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  /* THE SCREEN EDGE, not the top of the action bar. It sat at
+     bottom: var(--action-bar-h) so the Call / Get a Free Quote row stayed
+     visible underneath — but both bars are the same near-black, so what that
+     actually looked like was the sheet stopping short with a strip of nothing
+     below it. The CTA row is worth less for the few seconds this is up than the
+     sheet looking deliberate, and the row comes back the moment it is
+     dismissed. */
+  bottom: 0;
+  /* A real radius, not the 4px card radius. The RADIUS RULE at the top of this
+     file says there are three radii on this site and no others — this is the
+     one documented exception, and it is a considered one: a card radius on a
+     panel fused to three screen edges is invisible, so at 4px this simply read
+     as a rectangle. A bottom sheet is not a card; the curve is what says it
+     slid up from off-screen rather than being part of the page. */
+  border-radius: 1.25rem 1.25rem 0 0;
+  /* Clips the accent rule to the curve. The rule is a full-width absolutely
+     positioned span with square ends, so without this it overhangs both top
+     corners and the radius reads as a mistake rather than a shape. */
+  overflow: hidden;
   background-color: var(--color-plaster);
   border-top: 1px solid var(--color-hairline);
-  padding: 1rem var(--shell-pad) 1.15rem;
+  /* The safe-area inset is now this element's problem: nothing sits between it
+     and the bottom of the phone, so without it the buttons land under the home
+     indicator on a notched handset. */
+  padding: 1.15rem var(--shell-pad) calc(1.15rem + env(safe-area-inset-bottom));
   box-shadow: 0 -18px 50px -20px rgb(0 0 0 / 0.85);
   animation: privacy-in 0.4s var(--ease-coat) both;
 }

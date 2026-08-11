@@ -99,4 +99,4 @@ export function Splash() {
  * It clears the flag rather than just skipping the check, so a plain reload
  * afterwards behaves like a first visit too.
  */
-export const SPLASH_GUARD = `try{var k='tpm-splash';if(location.search.indexOf('splash')>-1){sessionStorage.removeItem(k)}else if(sessionStorage.getItem(k)){document.documentElement.dataset.splash='seen'}else{sessionStorage.setItem(k,'1')}}catch(e){}`;
+export const SPLASH_GUARD = `try{var k='tpm-splash';if(new URLSearchParams(location.search).has('splash')){sessionStorage.removeItem(k)}else if(sessionStorage.getItem(k)){document.documentElement.dataset.splash='seen'}else{sessionStorage.setItem(k,'1')}}catch(e){}`;

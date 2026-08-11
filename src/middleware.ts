@@ -40,7 +40,14 @@ export function middleware(request: NextRequest) {
      switched off, and that is what the locked page tells people. If the forms
      should work during a preview, put "/quote" and "/contact" in BUILT_PAGES so
      nothing is rewritten — but never leave an action's owning page rewritten to
-     a page that does not own it. */
+     a page that does not own it.
+
+     IT MUST STAY ABOVE THE isKnownPage CHECK BELOW. That ordering is not
+     tidiness, it is half the fix: an action POST to a path this site does not
+     have looped too. It renders /_not-found, which owns no actions, so Next
+     forwards it to /contact — which this middleware then rewrites, and round it
+     goes. Moving this guard below isKnownPage, or scoping it to known pages,
+     reopens the hole through any nonsense URL. */
   if (request.method === "POST" && request.headers.has("next-action")) {
     return new NextResponse(null, { status: 404 });
   }
