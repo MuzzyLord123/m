@@ -51,6 +51,40 @@ export function MobileActionBar() {
     };
   }, []);
 
+  /**
+   * Publishes this bar's height as --action-bar-h on the root.
+   *
+   * Anything that has to sit ON TOP of the bar needs to know how tall it is,
+   * and the honest answer is "whatever its content came out as" — it changes
+   * with the safe-area inset, with the text, and with the font. The privacy
+   * sheet used a hand-written 5.75rem and was 23px out on a 412px handset,
+   * which showed as a dead band of nothing between the two.
+   *
+   * A measured value also handles the wide breakpoint for free: the bar is
+   * lg:hidden, so above 1024px it has no box at all and this reports 0px, which
+   * is exactly the offset a bottom-anchored panel wants there.
+   */
+  useEffect(() => {
+    const bar = barRef.current;
+    if (!bar) return;
+    const publish = () => {
+      const height = bar.getBoundingClientRect().height;
+      document.documentElement.style.setProperty("--action-bar-h", `${Math.round(height)}px`);
+    };
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(bar);
+    /* The breakpoint changes whether the bar has a box at all, and a
+       display:none element stops firing resize entries — so the viewport is
+       watched too. */
+    window.addEventListener("resize", publish);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", publish);
+      document.documentElement.style.removeProperty("--action-bar-h");
+    };
+  }, []);
+
   return (
     <div
       ref={barRef}

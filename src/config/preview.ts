@@ -49,8 +49,17 @@ export const previewMode = flag === undefined || flag === "" ? PREVIEW_DEFAULT :
  * consistent (the enquiry flow is part of the full build) but it does mean the
  * prospect cannot try the form. Add "/quote" to this array if you would rather
  * show it off; nothing else needs changing.
+ *
+ * /privacy IS ON THIS LIST AND SHOULD STAY ON IT. It is not a page being shown
+ * off — it is the legal notice for a live site that collects names, phone
+ * numbers, email addresses and job addresses through a form, and a privacy
+ * notice nobody can open is not a privacy notice. It was gated with everything
+ * else at first, which left the link in the footer and in the privacy pop-up
+ * pointing at "this page has not been built yet" while the site was publicly
+ * reachable and collecting details. It is deliberately NOT in the menu, so
+ * unlocking it does not change what the prospect is being shown.
  */
-export const BUILT_PAGES = ["/", "/work", "/videos"] as const;
+export const BUILT_PAGES = ["/", "/work", "/videos", "/privacy"] as const;
 
 /**
  * Every page this site actually has.

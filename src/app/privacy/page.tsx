@@ -1,51 +1,22 @@
 import type { Metadata } from "next";
 import { site } from "@/config/site";
+import { POLICY_UPDATED, policySections } from "@/data/privacy";
+import { previewMode } from "@/config/preview";
 
 export const metadata: Metadata = {
   title: "Privacy",
   description: `What ${site.name} does with the details you send through this website, and what we do not do with them.`,
   alternates: { canonical: "/privacy" },
-  robots: { index: true, follow: true },
+  /* This page sets its own robots rule, which OVERRIDES the site-wide one in
+     layout.tsx rather than merging with it — so a hard `index: true` here would
+     have made /privacy the one indexable page on a preview build that is
+     noindex everywhere else. It only mattered once /privacy was unlocked in
+     preview mode; before that the middleware never served it. Follows the same
+     flag as everything else now. */
+  robots: previewMode ? { index: false, follow: false } : { index: true, follow: true },
 };
 
-const sections = [
-  {
-    heading: "What we collect",
-    body: [
-      "If you fill in the quote form or ask for a site visit, we collect your name, phone number, email address, the town or address of the job, and whatever you write in the message box. That is all we ask for and all we keep.",
-      "We do not run analytics on this site. There is no tracking pixel, no advertising tag, and no cookie set by us.",
-      "Two small things are saved in your browser's own storage, and neither is a cookie — they are never sent to us and nobody else can read them. One remembers that you have seen the opening animation, so it does not play again in the same visit. The other remembers that you have closed the privacy notice, so it does not ask you twice. You can clear both by clearing this site's data in your browser.",
-    ],
-  },
-  {
-    heading: "What we do with it",
-    body: [
-      "We use your details to price your job, arrange a visit and carry out the work. Your enquiry is emailed to us and stored in our email account.",
-      "We never sell your details, never pass them to anyone for marketing, and never add you to a mailing list. You will not hear from us again after a quote unless you get in touch.",
-    ],
-  },
-  {
-    heading: "Who else touches it",
-    body: [
-      "Emails from this website are delivered by Resend, an email provider, which processes the contents of your enquiry in order to send it. Their privacy notice is at resend.com/legal/privacy-policy.",
-      "The live chat is provided by Tawk.to. If you open a chat, your messages and basic connection details are handled by them. It loads only when you choose to open it — the script is not on the page until then.",
-      "The map is an embed from Google Maps, and Google may set cookies through it. It is not loaded until you press the button on it, so if you never do, your browser never contacts Google. Nothing plays from YouTube until you press play on a video, and nothing is fetched from YouTube before that either.",
-    ],
-  },
-  {
-    heading: "How long we keep it",
-    body: [
-      "Quote enquiries are kept for two years, so that we can look back at what was agreed if you come back to us. Records relating to work we have carried out are kept for six years, which is what our insurer and HMRC require.",
-    ],
-  },
-  {
-    heading: "Your rights",
-    body: [
-      "You can ask us what we hold about you, ask us to correct it, or ask us to delete it. Ring or email and we will do it — there is no form to fill in.",
-      "If you are not happy with how we have handled your details you can complain to the Information Commissioner's Office at ico.org.uk.",
-    ],
-  },
-];
+
 
 export default function PrivacyPage() {
   return (
@@ -68,7 +39,7 @@ export default function PrivacyPage() {
               On this page
             </p>
             <ul className="mt-4 grid gap-2.5">
-              {sections.map((section) => (
+              {policySections.map((section) => (
                 <li key={section.heading}>
                   <a
                     href={`#${slug(section.heading)}`}
@@ -82,7 +53,7 @@ export default function PrivacyPage() {
           </nav>
 
           <div className="grid gap-10">
-            {sections.map((section) => (
+            {policySections.map((section) => (
               <section key={section.heading} id={slug(section.heading)} className="scroll-mt-32">
                 <div className="tape-line" aria-hidden="true" />
                 <h2 className="mt-6 font-display text-[1.5rem] leading-tight font-semibold tracking-[-0.025em] text-ink">
@@ -100,8 +71,7 @@ export default function PrivacyPage() {
             ))}
 
             <p className="text-[0.875rem] text-ink-mute">
-              {site.legalName}, {site.town}. Contact {site.email} or {site.phone} about anything
-              on this page.
+              Last updated {POLICY_UPDATED}. {site.legalName}, {site.town}.
             </p>
           </div>
         </div>

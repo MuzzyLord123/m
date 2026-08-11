@@ -1251,48 +1251,70 @@
 .privacy-notice {
   position: fixed;
   z-index: 86;
-  left: var(--shell-pad);
-  right: var(--shell-pad);
-  /* Clears the action bar and the notch, using the same expression the bar and
-     the chat blob use, so the three stay in step if any of them changes. */
-  bottom: calc(5.75rem + env(safe-area-inset-bottom));
-  overflow: hidden;
-  border-radius: var(--radius-card);
+  /* ON THE BOTTOM EDGE, not floating above it. As a card with a margin all
+     round there was a strip of page visible underneath it, between the card and
+     the action bar, and a gap that size reads as a mistake rather than as
+     spacing. Flush left, right and bottom, with only the top corners rounded,
+     it belongs to the frame instead of sitting on top of it. */
+  left: 0;
+  right: 0;
+  /* Sits exactly on top of the Call / Get a Free Quote bar, so the two read as
+     one stack with no dead band between them and the site's main CTA is never
+     covered. --action-bar-h is MEASURED and published by MobileActionBar; it
+     reports 0px above the lg breakpoint, where that bar does not exist, so the
+     same rule puts the sheet on the screen edge there. The fallback matters
+     only for the frame before the measurement lands. */
+  bottom: var(--action-bar-h, 0px);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
   background-color: var(--color-plaster);
-  border: 1px solid var(--color-hairline);
-  padding: 1.15rem 1.15rem 1.25rem;
-  box-shadow:
-    0 24px 60px -20px rgb(0 0 0 / 0.8),
-    0 2px 10px -4px rgb(0 0 0 / 0.6);
-  animation: privacy-in 0.44s var(--ease-coat) both;
+  border-top: 1px solid var(--color-hairline);
+  padding: 1rem var(--shell-pad) 1.15rem;
+  box-shadow: 0 -18px 50px -20px rgb(0 0 0 / 0.85);
+  animation: privacy-in 0.4s var(--ease-coat) both;
 }
+/* Wide screens: still on the bottom edge, but a full-width band of text is
+   unreadable, so the CONTENT is what gets constrained — in the site's own
+   shell width, like every other row on the page. */
 @media (width >= 64rem) {
   .privacy-notice {
-    right: auto;
-    bottom: 1.5rem;
-    left: 1.5rem;
-    max-width: 30rem;
-    padding: 1.35rem 1.5rem 1.5rem;
+    padding: 1.15rem var(--shell-pad) 1.25rem;
   }
+}
+.privacy-notice-inner {
+  width: 100%;
+  max-width: var(--spacing-shell);
+  margin-inline: auto;
 }
 .privacy-notice[data-leaving="true"] {
   animation: privacy-out 0.3s var(--ease-coat) both;
 }
+/* It comes up out of the bottom edge rather than fading in on the spot — a
+   sheet that is part of the frame should arrive from the frame. No scale: a
+   full-width element scaling is a full-width element that does not line up with
+   the screen for the length of the animation. */
 @keyframes privacy-in {
   from {
-    opacity: 0;
-    transform: translate3d(0, 1.25rem, 0) scale(0.985);
+    transform: translate3d(0, 100%, 0);
   }
   to {
-    opacity: 1;
-    transform: none;
+    transform: translate3d(0, 0, 0);
   }
 }
 @keyframes privacy-out {
   to {
-    opacity: 0;
-    transform: translate3d(0, 0.75rem, 0) scale(0.99);
+    transform: translate3d(0, 100%, 0);
   }
+}
+
+/* The policy, once opened. Capped and scrollable so the sheet can never grow
+   past the screen it is sitting on — on a short handset the whole policy is
+   several screens long, and a panel that tall would push its own dismiss button
+   out of reach. overscroll-contain so scrolling to the end of it does not then
+   start scrolling the page behind. */
+.privacy-notice-policy {
+  max-height: min(46vh, 26rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* The site's section rule, used once more at the top of the panel: it draws
