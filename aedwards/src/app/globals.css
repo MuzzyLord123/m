@@ -1,0 +1,245 @@
+@import 'tailwindcss';
+
+/*
+  A Edwards Decorating — "Colour Change".
+
+  The entire visual system is six colours and two typefaces. There are no cards,
+  no boxes, no borders, no shadows, no gradients, no rounded corners and no
+  icons anywhere on this site. If something needs one of those to read, it is
+  the wrong thing.
+
+  Colour lives in exactly one place at runtime: --bg and --fg on :root. Sections
+  are transparent; the page's colour is the body's colour; Repaint.tsx
+  interpolates it as you scroll. That is why a section cannot get its colours
+  out of step with the page — there is only one pair.
+*/
+
+@theme {
+  /* The fields. Kept in step with content/fields.ts, which is the source of
+     truth and which fails the build if a pairing drops under 7:1. */
+  --color-f1: #1e3a34; /* deep green    */
+  --color-f2: #e8e2d4; /* stone         */
+  --color-f3: #3b2e3e; /* aubergine     */
+  --color-f4: #c3d3ce; /* pale duck egg */
+  --color-f5: #14171a; /* near black    */
+  --color-f6: #872c14; /* burnt red     */
+
+  /* The only two foregrounds. */
+  --color-ink: #14171a;
+  --color-bone: #f2efe7;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, sfmono-regular, menlo, monospace;
+}
+
+/*
+  Registered so the browser can interpolate them as colours rather than as
+  strings, and so an unset value falls back to field one instead of to nothing.
+*/
+@property --bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1e3a34;
+}
+@property --fg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f2efe7;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* One idea per field, so the page moves field by field. Proximity on
+       desktop leaves ordinary scrolling alone; mobile gets mandatory. */
+    scroll-snap-type: y proximity;
+    scroll-behavior: smooth;
+  }
+
+  @media (max-width: 767px) {
+    html {
+      scroll-snap-type: y mandatory;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    /* Clip reveals become opacity reveals. Removing the clip outright leaves
+       the fade as the only thing that moves, which is what reduced motion
+       asks for — and it means there is no second JavaScript code path to keep
+       in step with this one. */
+    [data-clip] {
+      clip-path: none !important;
+    }
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    /* Nothing here relies on a hairline, so switch off subpixel surprises on
+       the very large display type. */
+    text-rendering: optimizeLegibility;
+  }
+
+  /* The focus ring is the current foreground, so it is legible on every field
+     and changes colour with the page like everything else. */
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 4px;
+  }
+
+  ::selection {
+    background-color: var(--fg);
+    color: var(--bg);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@layer components {
+  /* ------------------------------------------------------------- display --- */
+  /* Bricolage Grotesque, 700–800, flush left, ragged right, never centred,
+     never all-caps. */
+
+  .t-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.75rem, 9vw, 8rem);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+  }
+
+  .t-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.25rem, 6.4vw, 5rem);
+    line-height: 0.94;
+    letter-spacing: -0.02em;
+  }
+
+  /* A review quote fills its field: 40px to 72px. */
+  .t-quote {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.5rem, 5.2vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .t-line {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.25rem, 2.6vw, 2rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+
+  /* --------------------------------------------------------------- mono --- */
+  /* DM Mono, 13–15px. Uppercase for labels only. Numbers always mono. */
+
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+  }
+
+  .mono-sm {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+  }
+
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* The phone. Mono, because numbers are always mono, and large because it is
+     the only thing on the site anyone has to be able to find. */
+  .t-phone {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: clamp(1.75rem, 5.5vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+
+  /* Field eleven's, the largest type on the site. */
+  .t-phone-max {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: clamp(2.25rem, 7.5vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  /* --------------------------------------------------------------- grid --- */
+  /* Twelve columns, offset: the text block starts at column two and runs to
+     nine, which leaves the bottom right of most fields empty. Density 2. */
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(0.75rem, 2vw, 1.5rem);
+  }
+
+  .field-col {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 768px) {
+    .field-col {
+      grid-column: 2 / 10;
+    }
+  }
+
+  /* Underline inputs on the field colour. No boxes. */
+  .field-input {
+    width: 100%;
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    padding: 0.5rem 0;
+    border: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--fg) 45%, transparent);
+    border-radius: 0;
+    appearance: none;
+  }
+
+  .field-input:focus {
+    outline: none;
+    border-bottom-color: var(--fg);
+  }
+
+  .field-input::placeholder {
+    color: color-mix(in srgb, var(--fg) 45%, transparent);
+  }
+}
+
+@layer utilities {
+  /* Used by the honeypot. Off-screen rather than display:none — some bots skip
+     hidden fields, and this one is meant to be filled in. */
+  .trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+}
