@@ -50,7 +50,7 @@ export function PhotoSlot({
 
   return (
     <div
-      className={`relative flex flex-col justify-end overflow-hidden ${className}`}
+      className={`swatch-edge relative flex flex-col justify-end overflow-hidden ${className}`}
       style={{ backgroundColor: swatchHex[swatch] }}
       role="img"
       aria-label={`Space reserved for a photograph: ${photo.brief}`}

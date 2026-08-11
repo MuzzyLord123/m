@@ -112,8 +112,25 @@ then the on-page gallery is the whole of it.
 }
 ```
 
-Nothing in the components needs touching. Adding a fifth service works — the band
-layouts cycle — but four is a deliberate number and five will read as a list.
+Nothing in the components needs touching.
+
+**One thing to know before reordering them.** The four bands are four different
+compositions, not one layout mirrored down the page — that zigzag is the thing that
+makes a site look like it came out of a builder. Position in the array decides which
+composition a service gets:
+
+| Position | Composition |
+|---|---|
+| 1st | Split band, photo running off the right edge of the screen |
+| 2nd | Inset band, photo sitting under its own heading rather than beside it |
+| 3rd | Split band, portrait photo running off the left edge |
+| 4th | Stacked band, text over a letterbox the full width of the page |
+
+So move a service and it changes shape. The layouts cycle, so a fifth service picks up
+the first composition again — but four is a deliberate number and five will read as a
+list. Each band's `swatch` colour drives its number, its top rule and its photo block;
+the order blue → off-black → sage → clay is chosen so the dark band lands mid-page and
+does not run into the off-black preparation section underneath.
 
 **The other content files:** `content/preparation.ts` (the preparation section),
 `content/finishes.ts` (the eggshell/satin/gloss table), `content/process.ts` (the four

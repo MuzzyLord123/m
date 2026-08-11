@@ -39,7 +39,7 @@ export const services: Service[] = [
       'Deep fills done twice — filler sinks as it goes off',
       'Walls wiped down after sanding; paint will not key to dust',
     ],
-    swatch: 'clay',
+    swatch: 'black',
     photo: emptyPhoto(
       'Mid-job: filled and sanded wall before painting, with the filler patches still showing. Close in, landscape.',
     ),
@@ -69,7 +69,7 @@ export const services: Service[] = [
       'Sheets lifted and the floor swept before I go each evening',
       'Landlords and letting agents: whole flats between tenancies',
     ],
-    swatch: 'black',
+    swatch: 'clay',
     photo: emptyPhoto(
       'A commercial or communal space — shop, office, hallway or stairwell — after painting. Landscape, wide.',
     ),
