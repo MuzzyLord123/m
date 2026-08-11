@@ -163,7 +163,15 @@ After cutover:
 
 The single highest-value thing to recover before switch-off.
 
-1. Export `wp-content/uploads` at original resolution.
+0. **Run `npm run import:gallery` first** — it is twenty seconds and it does most of this
+   for you. It reads the gallery and the other public pages, rewrites every image URL to
+   the original upload rather than the resized copy WordPress serves, downloads them into
+   `public/photographs/gallery/`, and writes a manifest with each file's pixel size and
+   the alt text the old site used. It has never been run from the build environment,
+   which has no route out to the public internet — run it from a normal connection.
+1. Export `wp-content/uploads` at original resolution. The importer only sees what is
+   linked from a page; the media library holds everything ever uploaded, including the
+   photographs from jobs that never made it onto the site.
 2. Pull the best job photography off the Instagram account — but treat it as a **reference list,
    not a source**. Instagram crops and re-encodes; get the originals from Sean's phone.
 3. Watch the permission trail. At least one Instagram post credits a client account
@@ -219,3 +227,11 @@ operation. This is the entire reason for steps 3 and 8.
       the server log only — they are not lost, but nobody is being told about them.
 - [ ] **Re-run Lighthouse on the live domain** and keep the numbers next to the ones in `PITCH.md`.
 - [ ] **Check the 404 report weekly for a month.** Every 404 is a URL missing from §2.
+- [ ] **Privacy.** `/privacy` needs two answers before it is finished — the address a data
+      request should go to, and how long enquiries are kept. Both are in
+      `CONTENT-NEEDED.md`. Worth also checking whether the company is registered with the
+      ICO; most businesses holding customer records are required to be, it is about £40 a
+      year, and a procurement team checking will look for it.
+- [ ] **Consent.** Confirm in the browser that declining analytics results in no request
+      to `googletagmanager.com`. It is a two-minute check in the network tab and it is the
+      difference between a compliant site and a decorative banner.

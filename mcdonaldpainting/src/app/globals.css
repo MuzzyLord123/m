@@ -225,6 +225,106 @@
   }
 
   /* -----------------------------------------------------------------------
+     Sheet marks.
+
+     Registration ticks at the corners of the header block and a reference
+     running up the left edge. Both come straight off a controlled drawing: the
+     ticks are where the sheet would be trimmed, the reference is what tells you
+     which document you are holding when it is face down on a desk.
+
+     It is the detail that stops a page reading as a web page with a dark
+     background and starts it reading as a submission. Decorative in the strict
+     sense, so all of it is aria-hidden and none of it is in the tab order.
+  ----------------------------------------------------------------------- */
+  .sheet-marks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .sheet-marks span {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--rule);
+    border-style: solid;
+    border-width: 0;
+  }
+  .sheet-marks span:nth-child(1) {
+    top: 0;
+    left: 0;
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+  .sheet-marks span:nth-child(2) {
+    top: 0;
+    right: 0;
+    border-top-width: 1px;
+    border-right-width: 1px;
+  }
+  .sheet-marks span:nth-child(3) {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+  }
+  .sheet-marks span:nth-child(4) {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+  }
+
+  /* The reference, reading bottom-to-top up the left margin. Hidden below the
+     breakpoint where there is a margin to put it in. */
+  .sheet-reference {
+    position: absolute;
+    left: calc(var(--spacing-gutter) * -1 + 0.5rem);
+    bottom: 0;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
+
+  /* -----------------------------------------------------------------------
+     A row that marks itself under the cursor.
+
+     The gutter marker is a 3px hi-vis bar that appears at the left edge of a
+     table row or an index row on hover and focus. It is the same gesture as the
+     Confirm block and the primary button — hi-vis means "this one", and it is
+     the only thing on the site allowed to say it.
+  ----------------------------------------------------------------------- */
+  .row-mark {
+    position: relative;
+  }
+  .row-mark::before {
+    content: '';
+    position: absolute;
+    left: -1.25rem;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--color-hivis);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 180ms var(--ease-sheet);
+  }
+  .row-mark:hover::before,
+  .row-mark:focus-within::before {
+    transform: scaleY(1);
+  }
+  /* On a concrete ground hi-vis is 1.5:1 and disappears, so the marker there is
+     graphite. Same gesture, a colour that can actually be seen. */
+  [data-ground='concrete'] .row-mark::before {
+    background: var(--color-graphite);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .row-mark::before {
+      transition: none;
+    }
+  }
+
+  /* -----------------------------------------------------------------------
      Prose, for the MDX bodies. Narrow measure, no decoration.
   ----------------------------------------------------------------------- */
   .prose-sheet {

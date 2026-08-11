@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Sans, Schibsted_Grotesk } from 'next/font/google';
 
 import { Analytics } from '@/components/Analytics';
+import { Consent } from '@/components/Consent';
 import { Footer } from '@/components/Footer';
 import { Nav } from '@/components/Nav';
 import { RevealObserver } from '@/components/RevealObserver';
@@ -110,6 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main id="main">{children}</main>
         <Footer />
         <RevealObserver />
+        <Consent />
         <Analytics />
       </body>
     </html>

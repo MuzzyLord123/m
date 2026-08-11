@@ -94,6 +94,18 @@ The site works without these. Each one makes it noticeably better at the job it 
 
 *Where the answer goes:* `content/site.ts → workforce`
 
+### What address should a privacy request be sent to, and is the company registered with the Information Commissioner's Office?
+
+**Why it matters.** The privacy notice has to say where to write. Most businesses holding customer records are required to register with the ICO — it is about £40 a year, and a procurement team checking will look for it.
+
+*Where the answer goes:* `content/copy/privacy.ts`
+
+### How long do you keep enquiries and quotes? A sensible answer is six years for anything that turned into a job, twelve months for the rest — but it has to be your answer.
+
+**Why it matters.** A privacy notice that states a retention period nobody agreed to is worse than one that admits the gap. Six years is the contract limitation period, which is why it is the usual answer for quotes.
+
+*Where the answer goes:* `content/copy/privacy.ts`
+
 ### Are there clients who would take a reference call — ideally one in education, one in industry, and one on a maintenance contract? Have they said yes to being named, or only to being phoned?
 
 **Why it matters.** 'References on request' is on every contractor's site. 'Named references available for education and industrial contracts' is a different sentence, and it is only worth writing once it is true.

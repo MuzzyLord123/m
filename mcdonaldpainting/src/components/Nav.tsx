@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { phone } from '@content/site';
+import { Wordmark } from '@/components/Wordmark';
 
 /**
  * Navigation.
@@ -50,15 +51,8 @@ export function Nav() {
         className="fixed inset-x-0 top-0 z-50 border-b border-line bg-graphite/95 backdrop-blur-[2px]"
       >
         <div className="shell flex h-16 items-center justify-between gap-6 md:h-20">
-          <Link
-            href="/"
-            className="flex items-baseline gap-3"
-            aria-label="McDonald Painting Contractors, home"
-          >
-            <span className="font-display text-[17px] font-extrabold tracking-[-0.02em] text-bone md:text-[19px]">
-              McDonald
-            </span>
-            <span className="t-label hidden sm:inline">Painting Contractors</span>
+          <Link href="/" aria-label="McDonald Painting Contractors, home">
+            <Wordmark compact />
           </Link>
 
           <div className="flex items-center gap-5 md:gap-8">

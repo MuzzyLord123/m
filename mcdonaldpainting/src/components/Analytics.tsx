@@ -1,23 +1,27 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+import { CONSENT_EVENT, readConsent, type Consent } from '@/lib/consent';
 
 /**
- * GA4 and nothing else.
+ * GA4 and nothing else — and not until it is allowed.
+ *
+ * The tag is not rendered at all until someone has said yes. That is stricter
+ * than the usual arrangement, where the script loads on arrival and a banner
+ * asks permission afterwards for something that has already happened, and it is
+ * what UK PECR actually requires. It also means a visitor who declines carries
+ * no third-party JavaScript at all.
  *
  * Two events are worth more to Sean than every pageview on the site put
- * together, because they are the two that show the site is doing the job the
- * rebuild was paid for:
+ * together, because they are the two that show the rebuild is working:
  *
  *   capability_statement_download — a buyer took the PDF and left a work email.
  *   enquiry_type_selected         — how many enquiries are tender and commercial
  *                                   rather than domestic.
  *
  * Phone taps are tracked too, since on mobile that is the conversion.
- *
- * Nothing loads unless NEXT_PUBLIC_GA_ID is set, so a preview build sends no
- * data anywhere and Lighthouse measures the site rather than the tag.
  */
 
 declare global {
@@ -34,11 +38,23 @@ export function track(event: string, params: Record<string, string> = {}) {
 
 export function Analytics() {
   const id = process.env.NEXT_PUBLIC_GA_ID;
+  const [allowed, setAllowed] = useState(false);
+
+  useEffect(() => {
+    setAllowed(readConsent()?.analytics === true);
+
+    const onDecision = (e: Event) => {
+      setAllowed((e as CustomEvent<Consent>).detail?.analytics === true);
+    };
+    window.addEventListener(CONSENT_EVENT, onDecision);
+    return () => window.removeEventListener(CONSENT_EVENT, onDecision);
+  }, []);
 
   // One delegated listener for every [data-analytics] element on the site, so a
-  // link does not have to become a client component to be measurable.
+  // link does not have to become a client component to be measurable. It is
+  // harmless without consent — track() is a no-op until gtag exists.
   useEffect(() => {
-    if (!id) return;
+    if (!id || !allowed) return;
     const onClick = (e: MouseEvent) => {
       const el = (e.target as HTMLElement | null)?.closest?.('[data-analytics]');
       if (!el) return;
@@ -46,9 +62,9 @@ export function Analytics() {
     };
     document.addEventListener('click', onClick);
     return () => document.removeEventListener('click', onClick);
-  }, [id]);
+  }, [id, allowed]);
 
-  if (!id) return null;
+  if (!id || !allowed) return null;
 
   return (
     <>

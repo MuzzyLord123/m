@@ -12,6 +12,8 @@ import {
   socials,
 } from '@content/site';
 import { Confirm } from '@/components/Confirm';
+import { CookiesLink } from '@/components/CookiesLink';
+import { Mark } from '@/components/Wordmark';
 
 /**
  * The footer carries what a contractor's footer carries: the registered name,
@@ -30,7 +32,8 @@ export function Footer() {
       <div className="shell py-[var(--spacing-band)]">
         <div className="grid12 gap-y-12">
           <div className="col-span-12 lg:col-span-5">
-            <p className="font-display text-[1.5rem] font-extrabold leading-none tracking-[-0.02em] text-bone">
+            <Mark size={34} className="text-bone" />
+            <p className="mt-5 font-display text-[1.5rem] font-extrabold leading-none tracking-[-0.02em] text-bone">
               McDonald Painting Contractors
             </p>
             <p className="t-label mt-3">Commercial and industrial painting contractors</p>
@@ -88,6 +91,7 @@ export function Footer() {
                 { label: 'Site records', href: '/projects' },
                 { label: 'About', href: '/about' },
                 { label: 'Enquiries', href: '/contact' },
+                { label: 'Privacy', href: '/privacy' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="text-[15px] text-concrete hover:text-hivis">
@@ -158,7 +162,10 @@ export function Footer() {
             © {year} {site.legalName}
             {founded.year ? ` · Trading since ${founded.year}` : ''}
           </p>
-          <p className="t-label">Registered in England and Wales</p>
+          <div className="flex items-center gap-6">
+            <CookiesLink />
+            <p className="t-label">Registered in England and Wales</p>
+          </div>
         </div>
       </div>
     </footer>

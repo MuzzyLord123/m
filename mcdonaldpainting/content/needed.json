@@ -158,5 +158,21 @@
     "why": "The redirect map is built from the pages we can see in the navigation. An old WordPress install always has more URLs than its menu shows, and every one that is missed becomes a 404 on cutover day. This also gets the media library out at full resolution.",
     "where": "MIGRATION.md §1 and §2",
     "blocksLaunch": true
+  },
+  {
+    "id": "privacy-contact",
+    "priority": 2,
+    "question": "What address should a privacy request be sent to, and is the company registered with the Information Commissioner's Office?",
+    "why": "The privacy notice has to say where to write. Most businesses holding customer records are required to register with the ICO — it is about £40 a year, and a procurement team checking will look for it.",
+    "where": "content/copy/privacy.ts",
+    "blocksLaunch": false
+  },
+  {
+    "id": "privacy-retention",
+    "priority": 2,
+    "question": "How long do you keep enquiries and quotes? A sensible answer is six years for anything that turned into a job, twelve months for the rest — but it has to be your answer.",
+    "why": "A privacy notice that states a retention period nobody agreed to is worse than one that admits the gap. Six years is the contract limitation period, which is why it is the usual answer for quotes.",
+    "where": "content/copy/privacy.ts",
+    "blocksLaunch": false
   }
 ]

@@ -69,16 +69,25 @@ export function NumberedItem({
   number,
   title,
   children,
+  headingLevel = 'h3',
 }: {
   number: string;
   title: string;
   children: React.ReactNode;
+  /**
+   * h3 under a section heading, h2 where these items are the page's own
+   * top-level structure — as on /privacy, which has no section heading above
+   * them. Jumping from h1 straight to h3 is a real navigation problem for
+   * anyone moving through the page by heading.
+   */
+  headingLevel?: 'h2' | 'h3';
 }) {
+  const Heading = headingLevel;
   return (
     <div className="grid12 gap-y-4 border-t border-[var(--rule)] py-8" data-reveal>
       <div className="col-span-12 lg:col-span-3">
         <p className="t-figure text-[clamp(1.5rem,2.4vw,2.25rem)]">{number}</p>
-        <h3 className="t-sub mt-3">{title}</h3>
+        <Heading className="t-sub mt-3">{title}</Heading>
       </div>
       <div className="col-span-12 lg:col-span-8 lg:col-start-5">{children}</div>
     </div>

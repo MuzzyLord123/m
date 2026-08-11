@@ -141,6 +141,24 @@ empty placeholder image as its source.
 **New.** No slider. The page opens like the cover sheet of a tender submission: what you are,
 where you work, the accreditation, the company number, and one thing to do next.
 
+### 10. The cookie notice is not a formality.
+
+**Now.** The current site has no privacy notice and no consent notice that we can see.
+
+**Why it matters.** Under UK law, analytics cookies need permission *before* they are set.
+Almost every small business site gets this wrong in the same way: the tracking loads the
+moment you arrive and a banner asks permission afterwards for something that has already
+happened. It is the kind of thing nobody chases a painting contractor about — until a
+procurement team's own compliance officer looks at your website before adding you to a
+supplier list.
+
+**New.** Nothing loads until the visitor chooses. Decline and no Google script is requested
+by the page at all — we tested it in a browser and watched the network. The two buttons are
+the same size, because refusing has to be as easy as agreeing. There is a proper privacy
+page that says what is collected, where it goes and how to ask for it, and the table of
+what gets stored on a visitor's device is generated from the same file the code reads, so
+the page cannot describe something the site does not do.
+
 ---
 
 ## Something no other painting contractor near you will have
@@ -220,6 +238,12 @@ not how fast it says it.
 - **There are no testimonials on the site yet.** Your current site has a testimonials page, but we
   have not been able to read it from here, and a quote has to be word for word. The two slots are
   on the page waiting.
+- **Your photographs are not on it yet.** The machine this was built on cannot reach
+  `mcdonaldpaintingcontractors.co.uk` — the network it sits on refuses the connection — so
+  nobody here has been able to open your gallery. There is a script in the build that pulls
+  every photograph off the live site at full resolution and lists them with their sizes; it
+  is one command from any normal laptop. Every place a photograph belongs is already built
+  and currently shows a labelled frame saying what shot is wanted.
 - **Nothing has been switched over.** The current site is still live and untouched. `MIGRATION.md`
   is the order of operations for the day you decide to move, including carrying your Google
   Search Console access across so the site's search history is not lost.

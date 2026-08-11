@@ -21,7 +21,7 @@ export function SectorIndexList({ ground = 'concrete' }: { ground?: 'concrete' |
           <Link
             href={sector.href}
             data-reveal
-            className="group grid grid-cols-[3.5rem_1fr] items-baseline gap-x-6 py-7 md:grid-cols-[6rem_1fr_auto] md:gap-x-10"
+            className="row-mark group grid grid-cols-[3.5rem_1fr] items-baseline gap-x-6 py-7 md:grid-cols-[6rem_1fr_auto] md:gap-x-10"
             style={{ '--stagger': `${i * 40}ms` } as React.CSSProperties}
           >
             <span className="t-figure block text-[clamp(1.75rem,3vw,2.75rem)] transition-colors group-hover:text-[var(--mark)] group-focus-visible:text-[var(--mark)]">

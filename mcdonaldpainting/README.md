@@ -14,6 +14,7 @@ npm start
 npm run lint           # typecheck
 npm run check:content  # what is still missing; rewrites CONTENT-NEEDED.md
 npm run check:launch   # the same, but fails while anything blocking is open
+npm run import:gallery # pull the photographs off the live WordPress site
 ```
 
 ---
@@ -112,6 +113,56 @@ All copy is in `/content`. No component contains a sentence that is meant to be 
 
 ---
 
+## Getting the photographs off the old site
+
+```bash
+npm run import:gallery            # downloads into public/photographs/gallery/
+npm run import:gallery -- --dry   # list what it would fetch, download nothing
+```
+
+It reads the gallery and the other public pages, finds every image — including the
+ones only present in `srcset` and in gallery data attributes — rewrites each URL to the
+**original** upload rather than the resized copy WordPress serves, downloads anything
+not already present, and writes `manifest.json` with each file's pixel size, byte size,
+source URL and the alt text the old site used.
+
+It flags anything under 1600px wide, because this design runs photographs full width and
+a resized copy will look soft at that size.
+
+What it deliberately does not do is put photographs onto pages. Which image belongs to
+which job is a judgement that needs somebody who knows the jobs; the manifest is the
+worksheet for that conversation. Paste the file path, alt text and dimensions into the
+matching file in `content/projects/`.
+
+> **This has never been run from here.** The machine this site was built on has no route
+> out to the public internet — the network policy answers `403` to
+> `mcdonaldpaintingcontractors.co.uk` — so the gallery has never been loaded. The script
+> works from any normal connection and says so clearly if it cannot reach the site.
+
+---
+
+## Privacy and consent
+
+Analytics do not load until somebody says yes. Not "the banner appears while the tag
+loads behind it" — the GA4 script is not rendered at all until consent is given, which is
+what UK PECR actually requires and is not how most sites with a cookie banner behave.
+
+- `src/lib/consent.ts` — the model, the storage key, and `STORED_ITEMS`, which is the
+  single list of everything the site puts on a device.
+- `src/components/Consent.tsx` — the notice. Both choices are one click and the same
+  size; a big "Accept" beside a buried "Manage" is a dark pattern and refusing has to be
+  as easy as agreeing.
+- `src/components/Analytics.tsx` — renders nothing until `analytics === true`.
+- `/privacy` — the notice, with the storage table rendered from `STORED_ITEMS`, so the
+  page describing what is stored and the code that stores it cannot disagree.
+- The **Cookies** link in the footer reopens the panel, because a choice you cannot
+  revisit is not a choice.
+
+Verified in a real browser: no choice → zero requests to Google; decline → zero; accept →
+exactly one, the gtag script.
+
+---
+
 ## The capability statement
 
 `GET /capability-statement.pdf` renders a six-page PDF **on request**, from the same content files
@@ -159,6 +210,13 @@ Sections declare a ground with `data-ground` and everything inside resolves agai
 component has to remember which colour it is sitting on — and `npm run check:content` fails the
 build if hi-vis type turns up inside a concrete ground anyway.
 
+Two devices carry the document register beyond the type. Registration ticks sit at the corners
+of every sheet header, and the company name and number run bottom-to-top up the left margin —
+both straight off a controlled drawing, both `aria-hidden` because the same information is in
+the metadata table in text. Table rows and index rows take a hi-vis marker in the gutter on
+hover, which is the same gesture as the primary button: hi-vis means "this one", and it is the
+only thing on the site allowed to say it.
+
 Grounds, type scale and the motion are all in `src/app/globals.css`, with the reasoning next to
 each decision.
 
@@ -170,6 +228,8 @@ each decision.
 | `SectorIndexList` / `SectorIndexOverlay` | The numbered index that replaces an eight-tab nav. |
 | `DataStrip` | Three or four checkable figures, set large, rules between. Never animated counters. |
 | `SiteRecord` | A full-bleed photograph with the seven-field caption block. This is the one that turns a gallery into evidence. |
+| `Wordmark` / `Mark` | The coating build in section — substrate, primer, intermediate, finish, the finish coat in hi-vis. It is the drawing on every steelwork specification this company prices against. A roller or a swoosh would say "decorator". |
+| `Consent` | The cookie notice, drawn as a site notice and wired to actually gate the analytics. |
 | `SpecTable` | The schedule of works. A table, because a buyer compares it against theirs. |
 | `Confirm` | An outstanding fact, shown as a question rather than filled in. |
 

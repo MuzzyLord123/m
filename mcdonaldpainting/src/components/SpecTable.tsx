@@ -45,7 +45,7 @@ export function SpecTable({ ground = 'concrete' }: { ground?: 'concrete' | 'grap
           {SERVICES.map((row) => (
             <tr
               key={row.service}
-              className="border-b border-[var(--rule-soft)] odd:bg-[var(--raised)]"
+              className="row-mark border-b border-[var(--rule-soft)] odd:bg-[var(--raised)]"
             >
               <th scope="row" className="py-5 pr-6 align-top text-[15px] font-medium">
                 {row.anchor ? (

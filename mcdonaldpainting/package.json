@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "check:content": "node scripts/check-content.mjs",
-    "check:launch": "node scripts/check-content.mjs --strict"
+    "check:launch": "node scripts/check-content.mjs --strict",
+    "import:gallery": "node scripts/import-gallery.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.6.0",

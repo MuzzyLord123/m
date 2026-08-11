@@ -42,7 +42,19 @@ export function SheetHeader({
   return (
     <header data-ground="graphite" className="pt-28 pb-[var(--spacing-band)] md:pt-36">
       <div className="shell">
-        <div className="grid12 gap-y-10">
+        <div className="relative grid12 gap-y-10">
+          {/* Registration ticks and the sheet reference. Decorative — the same
+              information is in the metadata table beside them, in text. */}
+          <div className="sheet-marks hidden lg:block" aria-hidden>
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+          <p className="sheet-reference t-label hidden lg:block" aria-hidden>
+            {site.legalName} · {site.companyNumber}
+          </p>
+
           <div className="col-span-12 lg:col-span-8">
             {eyebrow ? (
               <p className="t-label mb-6" data-reveal="now">
