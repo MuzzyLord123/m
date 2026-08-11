@@ -238,6 +238,9 @@ runtime touches Playwright.
 
 ## Environment variables
 
+`.env.example` has these written out with comments — copy it to `.env.local` for local
+work, or paste the values into your host's dashboard.
+
 | Variable | What it does |
 |---|---|
 | `NEXT_PUBLIC_SITE_URL` | The live origin, e.g. `https://example.co.uk`. Drives canonical tags, the sitemap, Open Graph and the JSON-LD `url`. **Set this before launch.** Falls back to `http://localhost:3000`. |
