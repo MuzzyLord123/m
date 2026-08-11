@@ -17,6 +17,11 @@ export const alt = 'Ego Decorators — painters, decorators and exterior repair,
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
+// Generated once at build time, never per request. Required for the static
+// export used by the shared-hosting bundle, and the right behaviour anyway —
+// the card does not change between requests.
+export const dynamic = 'force-static';
+
 async function syne(): Promise<ArrayBuffer | null> {
   try {
     // The old user-agent matters: Google serves TTF to it, and satori cannot

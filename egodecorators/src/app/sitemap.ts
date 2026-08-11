@@ -18,6 +18,10 @@ const PAGES: { path: string; priority: number }[] = [
   { path: '/contact', priority: 0.6 },
 ];
 
+// Generated at build time. Required by the static-export bundle, and correct
+// for the Node deployment too — neither file varies per request.
+export const dynamic = 'force-static';
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 

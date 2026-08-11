@@ -14,7 +14,7 @@
  */
 
 /** Pages that moved one-for-one. Both titles read off the live site. */
-const PAGES = [
+export const PAGES = [
   { source: '/about-us', destination: '/about' }, // CONFIRMED
   { source: '/contact-us', destination: '/contact' }, // CONFIRMED
   { source: '/pages', destination: '/' }, // CONFIRMED — theme's page index, no equivalent
@@ -31,7 +31,7 @@ const PAGES = [
  * again. If those jobs are later written up with photographs, repoint these at
  * the project pages; MIGRATION.md says so too.
  */
-const RECENT_WORK = [
+export const RECENT_WORK = [
   // CONFIRMED — "ReAgent Project"
   { source: '/recent_work/reagent-project', destination: '/projects/reagent-offices-and-warehouse' },
   // INFERRED — "Damaged Window". The only exterior window job on the old site,
@@ -52,14 +52,14 @@ const RECENT_WORK = [
  * 2022, one from 2017 — all three are job write-ups rather than articles, so
  * they go where that work now lives. An empty blog is worse than no blog.
  */
-const BLOG = [
+export const BLOG = [
   { source: '/2022/02/08/home-makeover', destination: '/interior' },
   { source: '/2022/02/08/living-room', destination: '/interior' },
   { source: '/2017/02/08/coffee-shop', destination: '/commercial' },
 ];
 
 /** Anything else under a retired prefix, so no old link can dead-end. */
-const CATCH_ALLS = [
+export const CATCH_ALLS = [
   { source: '/recent_work/:slug*', destination: '/projects' },
   { source: '/category/:slug*', destination: '/projects' },
   { source: '/tag/:slug*', destination: '/projects' },
@@ -74,6 +74,7 @@ const CATCH_ALLS = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  ...(process.env.STATIC_EXPORT ? { output: 'export', images: { unoptimized: true } } : {}),
   reactStrictMode: true,
   poweredByHeader: false,
 
@@ -82,6 +83,12 @@ const nextConfig = {
   // wrong workspace root.
   turbopack: {
     root: import.meta.dirname,
+    // Static hosting has no server, so Next refuses to export a Server Action
+    // at all. For that build only, the enquiry action is swapped for a stub
+    // that says so. See DEPLOY.md for which bundle to use.
+    ...(process.env.STATIC_EXPORT
+      ? { resolveAlias: { '@/app/contact/actions': './src/lib/enquiry-static-stub.ts' } }
+      : {}),
   },
 
   images: {

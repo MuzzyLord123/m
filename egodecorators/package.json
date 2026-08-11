@@ -2,14 +2,15 @@
   "name": "egodecorators",
   "version": "1.0.0",
   "private": true,
-  "description": "egodecorators.com — Ego Decorators, painting, decorating and exterior repair, Neston",
+  "description": "egodecorators.com \u2014 Ego Decorators, painting, decorating and exterior repair, Neston",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "tsc --noEmit",
     "check:content": "node scripts/check-content.mjs",
-    "check:launch": "node scripts/check-content.mjs --strict"
+    "check:launch": "node scripts/check-content.mjs --strict",
+    "build:static": "STATIC_EXPORT=1 next build && node scripts/emit-host-config.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
