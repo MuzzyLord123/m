@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import { Compare } from '@/components/Compare';
+import { Compare, ComparePair } from '@/components/Compare';
 import { RATIO_CLASS, SPAN_CLASS, type ResolvedPlate } from '@/lib/gallery';
 
 /**
@@ -37,15 +37,11 @@ export function GalleryPlate({
   return (
     <figure className={`col-span-12 ${spanClass}`} data-reveal>
       {complete ? (
-        plate.kind === 'comparison' ? (
-          <Compare
-            before={plate.before}
-            after={plate.after}
-            ratioClass={ratioClass}
-            sizes={sizes}
-            priority={index === 0}
-          />
-        ) : (
+        /* `single` is tested first, not last. The other two share one union
+           member (`kind: 'comparison' | 'pair'`), so excluding 'comparison'
+           does not narrow the type down to the single-image shape — testing
+           for 'single' up front does. */
+        plate.kind === 'single' ? (
           <div className={`relative w-full overflow-hidden bg-steel ${ratioClass}`}>
             <Image
               src={plate.src}
@@ -56,6 +52,22 @@ export function GalleryPlate({
               className="reveal-plate object-cover"
             />
           </div>
+        ) : plate.kind === 'comparison' ? (
+          <Compare
+            before={plate.before}
+            after={plate.after}
+            ratioClass={ratioClass}
+            sizes={sizes}
+            priority={index === 0}
+          />
+        ) : (
+          <ComparePair
+            before={plate.before}
+            after={plate.after}
+            ratioClass={ratioClass}
+            /* Each half is roughly half the plate, so the hint halves too. */
+            sizes={sizes.replace('100vw', '50vw').replace('66vw', '33vw')}
+          />
         )
       ) : (
         <EmptyPlate item={item} ratioClass={ratioClass} />
@@ -65,7 +77,8 @@ export function GalleryPlate({
         <div className="flex items-baseline justify-between gap-4">
           <p className="t-label">
             Plate {number}
-            {plate.kind === 'comparison' ? ' · Before and after' : ''}
+            {plate.kind === 'comparison' ? ' · Before and after, drag to compare' : ''}
+            {plate.kind === 'pair' ? ' · Before and after' : ''}
           </p>
           <p className="t-label shrink-0">{sectorEntry.label}</p>
         </div>

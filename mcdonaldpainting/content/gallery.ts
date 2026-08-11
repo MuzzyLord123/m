@@ -21,7 +21,14 @@
  *   kind: 'single'      one photograph.
  *   kind: 'comparison'  before and after, with a divider the reader drags.
  *                       Both files must be shot from the same position and
- *                       cropped to the same shape or the comparison lies.
+ *                       cropped to the same shape, because a divider between
+ *                       two different viewpoints is not a comparison — it is a
+ *                       wipe between two pictures, and it flatters the work by
+ *                       hiding the join.
+ *   kind: 'pair'        before and after, side by side and labelled. This is
+ *                       the honest treatment when the two frames do not line
+ *                       up, which is most of the time — the photographs were
+ *                       taken by somebody doing a job, not building a website.
  *
  * ── span and ratio ─────────────────────────────────────────────────────────
  *
@@ -65,7 +72,7 @@ export type Plate =
       alt: string;
     })
   | (Shared & {
-      kind: 'comparison';
+      kind: 'comparison' | 'pair';
       before: { src: string; alt: string };
       after: { src: string; alt: string };
     });
@@ -113,6 +120,46 @@ export const PLATES: readonly Plate[] = [
     after: {
       src: '/photographs/gallery/fitted-bedroom-after.jpg',
       alt: 'The finished alcove: painted wardrobe and overhead cupboards either side of a dressing table with an oak top and a mirror.',
+    },
+  },
+  {
+    id: 'kitchen-wall-units',
+    kind: 'comparison',
+    sector: 'residential',
+    caption: 'Kitchen wall units, pine to painted',
+    detail:
+      'Existing units painted in place rather than replaced. Doors, frames, the extractor canopy and the carved detail all taken back, primed and finished; tiling and worktops untouched.',
+    span: 12,
+    ratio: '4/3',
+    before: {
+      src: '/photographs/gallery/kitchen-wall-units-before.jpg',
+      alt: 'Knotty pine kitchen wall cupboards either side of a pine extractor canopy, above a tiled splashback with a patterned border.',
+    },
+    after: {
+      src: '/photographs/gallery/kitchen-wall-units-after.jpg',
+      alt: 'The same cupboards and canopy painted sage green, the carved panel detail picked out and the tiling left as it was.',
+    },
+  },
+  {
+    id: 'kitchen-base-units',
+    /* Side by side, not a divider. The two photographs were taken from
+       different positions — one wide across the sink, one into the oven corner
+       — and a draggable seam between them would be a wipe between two pictures
+       pretending to be one view. Shown as a labelled pair, they are honest. */
+    kind: 'pair',
+    sector: 'residential',
+    caption: 'Kitchen base units and oven housing',
+    detail:
+      'The same kitchen at floor level: base units, drawer fronts and the oven housing painted to match the wall units, with the appliances, worktops and floor kept in place throughout.',
+    span: 12,
+    ratio: '4/3',
+    before: {
+      src: '/photographs/gallery/kitchen-base-units-before.jpg',
+      alt: 'Pine kitchen base units along two walls with a sink, washing machine and built-in double oven, on a patterned tiled floor.',
+    },
+    after: {
+      src: '/photographs/gallery/kitchen-base-units-after.jpg',
+      alt: 'The same base units and oven housing painted sage green, with the brass handles refitted and the floor unchanged.',
     },
   },
   {

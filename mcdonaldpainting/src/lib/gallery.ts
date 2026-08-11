@@ -41,9 +41,9 @@ function resolve(image: { src: string; alt: string }): ResolvedImage {
 }
 
 function imagesOf(plate: Plate): ResolvedImage[] {
-  return plate.kind === 'comparison'
-    ? [resolve(plate.before), resolve(plate.after)]
-    : [resolve({ src: plate.src, alt: plate.alt })];
+  return plate.kind === 'single'
+    ? [resolve({ src: plate.src, alt: plate.alt })]
+    : [resolve(plate.before), resolve(plate.after)];
 }
 
 let cache: ResolvedPlate[] | null = null;
@@ -103,7 +103,8 @@ export function galleryCounts() {
   return {
     plates: all.length,
     photographs: all.reduce((n, p) => n + p.images.length, 0),
-    comparisons: all.filter((p) => p.plate.kind === 'comparison').length,
+    // Both kinds are a before and after; only one of them has a divider.
+    comparisons: all.filter((p) => p.plate.kind !== 'single').length,
     awaiting: all.filter((p) => !p.complete).length,
   };
 }
