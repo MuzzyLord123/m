@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" fill="#101518" />
+  <rect x="12" y="17" width="40" height="1.5" fill="#A9822F" />
+  <text
+    x="32"
+    y="46"
+    fill="#F4EFE8"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="26"
+    font-weight="400"
+    text-anchor="middle"
+  >NB</text>
+</svg>

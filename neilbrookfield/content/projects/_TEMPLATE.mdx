@@ -1,0 +1,87 @@
+---
+# ---------------------------------------------------------------------------
+# HOW TO ADD A JOB
+#
+# 1. Copy this file. Name it after the job, in lower case with hyphens:
+#       hand-painted-kitchen-christleton.mdx
+#    That filename becomes the web address: /work/hand-painted-kitchen-christleton
+# 2. Fill the fields in below. Delete any you cannot answer — an absent field is
+#    handled; a guessed one is not.
+# 3. Put the photographs in  public/photographs/<same-name-as-this-file>/
+# 4. Run  npm run check:content  to see what is still missing.
+#
+# Files starting with an underscore are ignored, so this one never appears on
+# the site.
+# ---------------------------------------------------------------------------
+
+# What the job was. Shown as the heading. Keep the place name out of it —
+# location has its own field.
+title: 'Hand-painted kitchen'
+
+# kitchen | interior | exterior | furniture | effects
+type: kitchen
+
+# Where it was. Village or area is plenty — no house numbers, no street names.
+# DELETE THIS LINE if it has not been checked with the customer.
+location: 'Christleton'
+
+# The year the work was done. Delete if unsure — a wrong year is worse than none.
+year: 2024
+
+# true puts it on the home page. Three at a time is the design.
+featured: false
+
+# complete        — checked, photographs in, ready to publish
+# awaiting-photos — words are right, photographs still to come
+# from-review     — written up from a customer review, not yet confirmed by Neil
+status: complete
+
+# Only used by the two unconfirmed statuses. Shown to the reader.
+# note: 'Neil still to confirm the paints used.'
+
+# One sentence: what the customer wanted. Not what you did.
+brief: >-
+  The kitchen was sound but dated, and the family wanted it lighter without
+  taking it out.
+
+# What was actually done, in the order it was done. Preparation first — that is
+# the part the reputation is built on, so it goes at the top and is never
+# summarised as "prepared surfaces".
+work:
+  - 'Doors and drawer fronts off, numbered, hinges and handles bagged with each one.'
+  - 'Everything degreased twice, heavier around the hob and the kettle.'
+  - 'Chips and old handle holes filled, edges made good, then the whole lot flatted back so no sheen was left.'
+  - 'Adhesion primer suited to the doors, then sanded again once the grain had lifted.'
+  - 'Two thin coats of eggshell, brushed and laid off, rubbed down between coats.'
+  - 'Doors rehung and the gaps set, handles on, floor cleared.'
+
+# ONLY paints Neil has confirmed. A wrong paint name in front of this audience
+# is worse than no paint name — delete the whole block rather than guess.
+# hex must be the actual colour: it is rendered as a specimen square.
+colours:
+  - name: 'Colour name'
+    hex: '#c9c2b4'
+    product: 'Manufacturer, finish' # e.g. 'Farrow & Ball, estate eggshell'
+
+# The photographs, in the order they should be read down the page. The first one
+# is the hero and is also used as the social sharing image.
+#
+# With a photograph:      src + alt (+ optional caption, width, height)
+# Without one yet:        needs — one line saying which photograph belongs here
+#
+# alt is one line describing the work shown. Not "kitchen", not "image1".
+images:
+  - src: '/photographs/hand-painted-kitchen-christleton/01.jpg'
+    alt: 'Hand-painted kitchen island in a pale grey-green, with the range behind it.'
+    caption: 'The island, two coats of eggshell over an adhesion primer.'
+    width: 2400
+    height: 1600
+  - needs: 'Close-up of a door edge showing the brushed finish.'
+---
+
+Anything written here appears under the photographs as the write-up, in Neil's
+own words. A short paragraph or two about the decision that mattered on this job
+— why a colour was changed in the room, what turned up under the old paint, what
+the customer was worried about and what was done about it.
+
+Markdown works: **bold**, _italic_, and links.
