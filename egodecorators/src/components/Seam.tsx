@@ -75,9 +75,26 @@ export function Seam({
   // The single source of truth for the divider, in per cent.
   const pct = useMotionValue(50);
 
+  /**
+   * Where the divider is heading, as opposed to where it currently is.
+   *
+   * Keyboard steps have to accumulate off this rather than off `pct.get()`.
+   * Reading the live value means a held arrow key measures from wherever the
+   * last 200ms animation had got to — about a fifth of a step in — so the
+   * divider crawls instead of sweeping. Stepping off the target makes each
+   * press worth a full 2%, however fast they arrive.
+   */
+  const target = useRef(50);
+
   // Clip the (grey) before layer to everything left of the divider.
-  const clipRight = useTransform(pct, (v) => 100 - v);
-  const beforeClip = useMotionTemplate`inset(0 ${clipRight}% 0 0)`;
+  //
+  // Built in ONE useTransform straight off `pct` rather than as a template over
+  // a derived value. Chaining them — useTransform to get 100-v, then
+  // useMotionTemplate over that — renders the correct string on mount and then
+  // never updates again: the intermediate value does not drive the template.
+  // The handle kept tracking while the image sat frozen at 50%, which is a
+  // miserable bug to spot by eye because the control still feels alive.
+  const beforeClip = useTransform(pct, (v) => `inset(0 ${100 - v}% 0 0)`);
   const handleLeft = useMotionTemplate`${pct}%`;
 
   /**
@@ -113,7 +130,9 @@ export function Seam({
       const rect = frame.getBoundingClientRect();
       if (rect.width === 0) return;
       // 1:1 with the pointer. No easing, no spring, no smoothing while dragging.
-      pct.set(clamp(((clientX - rect.left) / rect.width) * 100));
+      const next = clamp(((clientX - rect.left) / rect.width) * 100);
+      target.current = next;
+      pct.set(next);
     },
     [pct],
   );
@@ -123,7 +142,8 @@ export function Seam({
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    animate(pct, settleTarget(pct.get()), {
+    target.current = settleTarget(pct.get());
+    animate(pct, target.current, {
       duration: reduced ? 0 : SETTLE_MS / 1000,
       ease: [0.16, 0.84, 0.28, 1],
     });
@@ -162,18 +182,23 @@ export function Seam({
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       const step = e.shiftKey ? 10 : 2;
+      const from = target.current;
       let next: number | null = null;
 
-      if (e.key === 'ArrowLeft') next = pct.get() - step;
-      else if (e.key === 'ArrowRight') next = pct.get() + step;
-      else if (e.key === 'PageDown') next = pct.get() - 10;
-      else if (e.key === 'PageUp') next = pct.get() + 10;
+      if (e.key === 'ArrowLeft') next = from - step;
+      else if (e.key === 'ArrowRight') next = from + step;
+      else if (e.key === 'PageDown') next = from - 10;
+      else if (e.key === 'PageUp') next = from + 10;
       else if (e.key === 'Home') next = 0;
       else if (e.key === 'End') next = 100;
 
       if (next === null) return;
       e.preventDefault();
-      animate(pct, clamp(next), { duration: SETTLE_MS / 1000, ease: [0.16, 0.84, 0.28, 1] });
+      target.current = clamp(next);
+      animate(pct, target.current, {
+        duration: SETTLE_MS / 1000,
+        ease: [0.16, 0.84, 0.28, 1],
+      });
     },
     [pct],
   );

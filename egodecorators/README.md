@@ -98,6 +98,28 @@ profiles all come from `content/site.ts`.
 
 ---
 
+### 4. Turn the enquiry form on
+
+The form on `/contact` is built, tested and switched off. It renders only once
+an inbox is confirmed, because a form that delivers nowhere is worse than no
+form: the customer believes they have got in touch, and then waits.
+
+1. Set `ENQUIRY_WEBHOOK_URL` (see `.env.example`) to anything that accepts a
+   JSON POST — a form service, an automation step, your own handler. It is
+   provider-agnostic on purpose: switching provider is a change of env var, not
+   a change of code, and nothing paid is required.
+2. Send a real enquiry through the live form.
+3. Watch it arrive in the inbox somebody actually reads.
+4. **Then** set `DELIVERY_CONFIGURED = true` in `src/lib/enquiry.ts`.
+
+In that order. The flag means "a human has watched a test enquiry land", not
+"the code looks right". Until it is on, `/contact` shows the phone number and
+the email address — which is the correct behaviour, not a placeholder.
+
+The form posts through a server action, so it works with JavaScript disabled.
+It has a honeypot, and a spam submission is answered as though it succeeded —
+telling a bot it failed only teaches it.
+
 ## The rules the code enforces
 
 Most of these exist because the old site broke them.

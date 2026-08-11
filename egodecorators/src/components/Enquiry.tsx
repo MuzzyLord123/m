@@ -1,21 +1,30 @@
 import { DELIVERY_CONFIGURED } from '@/lib/enquiry';
 import { email, phone } from '@content/site';
 import { Pending } from '@/components/Pending';
+import { EnquiryForm } from '@/components/EnquiryForm';
+import { SeamLink } from '@/components/SeamLink';
 
 /**
- * The enquiry block.
+ * The enquiry block at the foot of a page.
  *
- * There is no form on this site yet, and that is deliberate. A contact form
- * that delivers nowhere is worse than no form at all: the customer believes
- * they have got in touch, and then waits. Until an inbox is confirmed and a
- * test enquiry has actually arrived in it, the page gives the two routes that
- * are known to work — the phone and the email address.
+ * Two routes that are known to work — the phone and the email address — are on
+ * every page. The form itself is only on /contact: a five-field form under
+ * every article would be heavy, and this site is set at a density where it
+ * would read as nagging.
  *
- * Flip DELIVERY_CONFIGURED in src/lib/enquiry.ts once that is true, and wire
- * the action. The markup for the form belongs here, next to this comment, so
- * that whoever does it cannot miss the reason it was left out.
+ * The form appears only once an inbox has been confirmed. Until then the page
+ * says so rather than collecting enquiries into a void — see src/lib/enquiry.ts.
  */
-export function Enquiry({ heading, body }: { heading: string; body: string }) {
+export function Enquiry({
+  heading,
+  body,
+  withForm = false,
+}: {
+  heading: string;
+  body: string;
+  /** /contact only. */
+  withForm?: boolean;
+}) {
   return (
     <div>
       <h2 className="display-sm">{heading}</h2>
@@ -37,14 +46,19 @@ export function Enquiry({ heading, body }: { heading: string; body: string }) {
         </dd>
       </dl>
 
-      {!DELIVERY_CONFIGURED ? (
-        <Pending
-          id="enquiry-delivery"
-          label="Enquiry form — not live yet"
-          className="mt-8"
-          minHeight="0"
-        />
-      ) : null}
+      {withForm ? (
+        DELIVERY_CONFIGURED ? (
+          <div className="mt-10">
+            <EnquiryForm />
+          </div>
+        ) : (
+          <Pending id="enquiry-delivery" label="Enquiry form — not live yet" className="mt-10" />
+        )
+      ) : (
+        <p className="mt-8">
+          <SeamLink href="/contact">Send us the details instead</SeamLink>
+        </p>
+      )}
     </div>
   );
 }

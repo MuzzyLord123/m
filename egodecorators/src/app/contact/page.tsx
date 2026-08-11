@@ -38,7 +38,9 @@ export default function ContactPage() {
                 </ul>
               </div>
             }
-            right={<Enquiry heading={contact.direct.heading} body={contact.direct.body} />}
+            right={
+              <Enquiry heading={contact.direct.heading} body={contact.direct.body} withForm />
+            }
           />
         </Container>
       </Band>
