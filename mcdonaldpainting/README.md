@@ -113,6 +113,58 @@ All copy is in `/content`. No component contains a sentence that is meant to be 
 
 ---
 
+## The gallery
+
+`/gallery` replaces the old `/projects-gallery/`. Photographs, numbered as plates, each one
+declaring how wide it sits and what shape it is — so the page has a rhythm somebody chose
+rather than one a masonry script fell into. Where both states of a job exist they become a
+single before-and-after plate with a divider the reader drags.
+
+### Adding a photograph
+
+1. Put the file in `public/photographs/gallery/`.
+2. Add an entry to `content/gallery.ts`.
+
+That is the whole procedure. No dimensions to measure, no code to touch.
+
+**You can list a photograph before you have uploaded it.** A plate whose file is not on
+disk renders as a labelled frame stating the filename it is waiting for and what the shot
+should show. That is what makes it possible to write up fifty photographs in one sitting
+and upload them across a week without the page being wrong in between — and the "still
+uploading" banner at the top of the page removes itself when the last file lands.
+
+### `span` and `ratio`
+
+`span` is how many of twelve columns the plate takes at desktop — 4, 6, 8 or 12. On a phone
+every plate is full width. `ratio` is the shape it is cropped to: `3/4` for an upright,
+`4/3` or `3/2` for a landscape. Matching the ratio to the photograph is what stops a
+gallery looking like a contact sheet.
+
+### The before/after divider
+
+`src/components/Compare.tsx`. The control is a real `<input type="range">` stretched over
+the plate, which is where most of the quality comes from: dragging, touch, click-to-jump,
+arrow keys, Home and End, screen-reader announcement and the focus ring all arrive for free
+and behave the way the operating system says they should. The usual hand-rolled version — a
+div, a pointerdown listener and some maths — works with a mouse and fails with everything
+else.
+
+One thing in there is load-bearing and is worth not undoing. **The thumb must have an
+explicit width in real CSS.** A range thumb with `appearance: none` and no width resolves
+to the full width of the track — measured at 1259.98px on a 1260px control — and the
+browser then computes every click as 0, so the divider snaps to one end wherever you press.
+The keyboard keeps working perfectly throughout, which is exactly how a bug like that
+ships unnoticed. It is written as plain CSS in `globals.css` because Tailwind's
+`w-[--thumb]` compiles to `width: --thumb`, which is not valid CSS and is silently dropped.
+
+Verified across all three input modes: click at 25% → 24, drag → tracks, `Home`/`End` →
+0/100, touch tap at 30% → 27.
+
+Both pairs must be shot from roughly the same position. A comparison between two different
+viewpoints is not a comparison.
+
+---
+
 ## Getting the photographs off the old site
 
 ```bash

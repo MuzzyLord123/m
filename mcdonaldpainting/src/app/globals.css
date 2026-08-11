@@ -325,6 +325,58 @@
   }
 
   /* -----------------------------------------------------------------------
+     The before/after divider.
+
+     The control is a real range input stretched over the whole plate, which is
+     what buys keyboard, touch, click-to-jump and screen-reader support without
+     writing any of it. Two rules here are load-bearing, and the first one cost
+     an hour to find:
+
+     THE THUMB MUST HAVE AN EXPLICIT WIDTH. A range thumb with `appearance:
+     none` and no width resolves to the full width of the track — measured at
+     1259.98px on a 1260px control. The browser then computes the value as
+     (x - thumb/2) / (track - thumb), the denominator is zero or negative, and
+     every single click anywhere on the plate returns 0. The keyboard still
+     works perfectly, which is exactly how this ships unnoticed.
+
+     It is written here as plain CSS rather than as Tailwind arbitrary values
+     because `w-[--thumb]` compiles to `width: --thumb`, which is not valid CSS
+     and is silently dropped — which is how the thumb lost its width in the
+     first place.
+  ----------------------------------------------------------------------- */
+  .compare-range {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: ew-resize;
+  }
+  .compare-range::-webkit-slider-runnable-track {
+    height: 100%;
+    background: transparent;
+  }
+  .compare-range::-moz-range-track {
+    height: 100%;
+    background: transparent;
+  }
+  /* 44px: the smallest target that is honest about being draggable on a phone,
+     and the size the accessibility guidance asks for. Transparent, because the
+     visible handle is drawn separately so it can carry the hi-vis marking. */
+  .compare-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: 0;
+  }
+  .compare-range::-moz-range-thumb {
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: 0;
+  }
+
+  /* -----------------------------------------------------------------------
      Prose, for the MDX bodies. Narrow measure, no decoration.
   ----------------------------------------------------------------------- */
   .prose-sheet {

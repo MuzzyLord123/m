@@ -18,7 +18,9 @@
 /** Pages that exist on the live site today. */
 const KNOWN_PAGES = [
   { source: '/about-mcdonald-painting-contractors', destination: '/about' },
-  { source: '/projects-gallery', destination: '/projects' },
+  // The old page was a gallery, and there is a gallery again, so this is the
+  // honest destination. The records page is linked prominently from it.
+  { source: '/projects-gallery', destination: '/gallery' },
   { source: '/health-safety', destination: '/compliance' },
   { source: '/testimonials', destination: '/about#testimonials' },
   { source: '/contact-us', destination: '/contact' },

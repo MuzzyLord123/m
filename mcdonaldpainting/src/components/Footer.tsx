@@ -89,6 +89,7 @@ export function Footer() {
                 { label: 'Programmed maintenance', href: '/programmed-maintenance' },
                 { label: 'Compliance', href: '/compliance' },
                 { label: 'Site records', href: '/projects' },
+                { label: 'Photographs', href: '/gallery' },
                 { label: 'About', href: '/about' },
                 { label: 'Enquiries', href: '/contact' },
                 { label: 'Privacy', href: '/privacy' },

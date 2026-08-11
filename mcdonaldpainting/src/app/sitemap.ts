@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/capabilities', priority: 0.9 },
     { path: '/compliance', priority: 0.8 },
     { path: '/projects', priority: 0.7 },
+    { path: '/gallery', priority: 0.7 },
     { path: '/about', priority: 0.6 },
     { path: '/contact', priority: 0.6 },
     { path: '/privacy', priority: 0.2 },

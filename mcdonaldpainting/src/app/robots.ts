@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       // The filtered views of the records page are the same records in a
       // different order. Useful to link to, not worth indexing four times.
-      disallow: ['/projects?'],
+      disallow: ['/projects?', '/gallery?'],
     },
     sitemap: `${site.url}/sitemap.xml`,
   };

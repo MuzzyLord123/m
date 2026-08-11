@@ -25,6 +25,7 @@ const PAGES = [
   { label: 'Programmed maintenance', href: '/programmed-maintenance' },
   { label: 'Compliance and accreditation', href: '/compliance' },
   { label: 'Site records', href: '/projects' },
+  { label: 'Photographs', href: '/gallery' },
   { label: 'About the company', href: '/about' },
   { label: 'Enquiries', href: '/contact' },
 ];
