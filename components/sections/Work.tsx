@@ -3,6 +3,7 @@ import { galleryCopy, jobs } from '@/content/gallery'
 import { swatchHex } from '@/lib/swatches'
 import { Tape } from '../Tape'
 import { RollerReveal } from '../RollerReveal'
+import { Reviews } from '../Reviews'
 import { GalleryDesktop } from '../gallery/GalleryDesktop'
 import { GalleryMobile } from '../gallery/GalleryMobile'
 
@@ -66,6 +67,13 @@ export function Work() {
         <div className="mt-10 md:mt-14">
           <GalleryDesktop jobs={jobs} />
           <GalleryMobile jobs={jobs} />
+        </div>
+
+        {/* Proof belongs together: the work, then what people said about it.
+            Until the photographs land, this is the only real evidence on the
+            page — which is exactly why it is not tucked away at the bottom. */}
+        <div className="mt-16 border-t-4 border-ink pt-12 md:mt-20 md:pt-14">
+          <Reviews />
         </div>
       </div>
     </section>

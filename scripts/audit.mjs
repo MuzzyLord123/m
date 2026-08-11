@@ -102,6 +102,40 @@ if (handle) {
   log((await handle.getAttribute('aria-valuenow')) === '0', 'Home jumps to 0')
 }
 
+// ---- reviews dialog ------------------------------------------------------
+const reviewsBtn = page.locator('button', { hasText: 'Read the reviews' }).first()
+log((await reviewsBtn.count()) > 0, 'reviews trigger present')
+await reviewsBtn.scrollIntoViewIfNeeded()
+await reviewsBtn.click()
+await page.waitForTimeout(400)
+log(await page.$eval('dialog.sheet-dialog', (d) => d.open), 'reviews dialog opens')
+
+// axe only scans what is visible, so the dialog has to be open for this to mean anything
+const dlgAxe = await new AxeBuilder({ page })
+  .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'])
+  .analyze()
+log(dlgAxe.violations.length === 0, `axe with reviews dialog open: ${dlgAxe.violations.length} violations`)
+for (const v of dlgAxe.violations) console.log(`   [${v.impact}] ${v.id} — ${v.help}`)
+
+const quoted = await page.$$eval('dialog.sheet-dialog blockquote', (n) => n.length)
+log(quoted === 6, `dialog quotes all 6 reviews (found ${quoted})`)
+
+const focusInside = await page.evaluate(() =>
+  document.querySelector('dialog.sheet-dialog')?.contains(document.activeElement),
+)
+log(focusInside === true, 'focus is trapped inside the open dialog')
+
+await page.keyboard.press('Escape')
+await page.waitForTimeout(300)
+log(!(await page.$eval('dialog.sheet-dialog', (d) => d.open)), 'Escape closes the reviews dialog')
+
+// no invented social proof anywhere: no overall score, no third-party review markup
+const proof = await page.$eval('body', (e) => e.innerText)
+const scoreClaim = /\b(5\.0|4\.9|rated\s+\d|\d+\s*\+?\s*(happy\s+)?(customers|reviews)\b)/i.test(proof)
+log(!scoreClaim, 'no aggregate rating or review-count claim in the copy')
+log(!('aggregateRating' in ld) && !('review' in ld) && !('reviews' in ld),
+  'no third-party review markup in JSON-LD')
+
 // ---- form: JS path -------------------------------------------------------
 await page.fill('#enquiry-name', 'Test Person')
 await page.fill('#enquiry-phone', '01978 000000')
