@@ -1,0 +1,250 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Specimen board
+   The site is dark by default. Colour lives in the photographs; the chrome is
+   ink, linen, and a single brass hairline. There are no gradients, no fills of
+   brass, and no shadows anywhere — depth comes from hairlines and space.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --color-night: #101518;
+  --color-linen: #f4efe8;
+  --color-brass: #a9822f;
+  --color-slate: #2a363e;
+  --color-muted: #9ba3a6;
+
+  /* Same two roles, darkened for the linen spreads.
+     #a9822f on linen is 3.1:1 and #9ba3a6 on linen is 2.2:1 — both fail AA at
+     the 12px the eyebrows are set in. These are 5.4:1 and 5.3:1 and read as the
+     same two colours. Sections pick the right pair from data-tone; no component
+     has to remember. */
+  --color-brass-ink: #7a5c1e;
+  --color-muted-ink: #5a6469;
+
+  --font-display: var(--font-fraunces), Georgia, 'Times New Roman', serif;
+  --font-body: var(--font-newsreader), Georgia, 'Times New Roman', serif;
+
+  /* Section rhythm. Density 2 — let it breathe. */
+  --spacing-section: clamp(6rem, 12vh, 10rem);
+  --spacing-gutter: clamp(1.5rem, 5vw, 6rem);
+
+  --ease-spread: cubic-bezier(0.16, 0.84, 0.28, 1);
+
+  /* Design decisions enforced by the framework, not by willpower:
+     every radius and every shadow utility is deleted from the build. */
+  --radius-*: initial;
+  --shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  /* Alternating spreads. A section declares its tone once and everything inside
+     it — type, eyebrows, hairlines, secondary text — resolves correctly. */
+  [data-tone='night'] {
+    --tone-bg: var(--color-night);
+    --tone-fg: var(--color-linen);
+    --tone-accent: var(--color-brass);
+    --tone-secondary: var(--color-muted);
+    background-color: var(--tone-bg);
+    color: var(--tone-fg);
+  }
+
+  [data-tone='linen'] {
+    --tone-bg: var(--color-linen);
+    --tone-fg: var(--color-night);
+    --tone-accent: var(--color-brass-ink);
+    --tone-secondary: var(--color-muted-ink);
+    background-color: var(--tone-bg);
+    color: var(--tone-fg);
+  }
+
+  body {
+    background-color: var(--color-night);
+    color: var(--color-linen);
+    font-family: var(--font-body);
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.7;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-variation-settings:
+      'opsz' 120,
+      'SOFT' 12,
+      'WONK' 0;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  /* Prices and dates set in tabular figures so columns line up. */
+  time,
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  ::selection {
+    background-color: var(--color-brass);
+    color: var(--color-night);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-brass);
+    outline-offset: 3px;
+  }
+
+  /* Wix set format-detection: telephone=no, which killed tap-to-call on the old
+     site. Nothing here reinstates it — the number is a real <a href="tel:"> and
+     is allowed to behave like one. */
+}
+
+@layer components {
+  /* Vertical rhythm and gutters, from the tokens above. Density 2. */
+  .section-y {
+    padding-block: var(--spacing-section);
+  }
+
+  .gutter-x {
+    padding-inline: var(--spacing-gutter);
+  }
+
+  /* Eyebrow / caption / colour name. Newsreader small caps, brass, letterspaced. */
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.75rem; /* 12px */
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    font-variant-caps: all-small-caps;
+    font-feature-settings: 'c2sc', 'smcp';
+    color: var(--tone-accent, var(--color-brass));
+  }
+
+  .eyebrow-muted {
+    color: var(--tone-secondary, var(--color-muted));
+  }
+
+  .secondary {
+    color: var(--tone-secondary, var(--color-muted));
+  }
+
+  /* The only decoration in the whole build. */
+  .hairline {
+    border: 0;
+    border-top: 1px solid var(--tone-accent, var(--color-brass));
+    opacity: 0.55;
+  }
+
+  .measure {
+    max-width: 64ch;
+  }
+
+  /* Text link: hairline underline that thickens on hover, nothing else. */
+  .link-rule {
+    display: inline-block;
+    border-bottom: 1px solid
+      color-mix(in oklab, var(--tone-accent, var(--color-brass)) 70%, transparent);
+    padding-bottom: 0.2rem;
+    transition:
+      border-color 300ms var(--ease-spread),
+      color 300ms var(--ease-spread);
+  }
+
+  .link-rule:hover {
+    border-bottom-color: var(--tone-accent, var(--color-brass));
+    color: var(--tone-accent, var(--color-brass));
+  }
+
+  /* MDX body copy on project pages. */
+  .prose-neil > * + * {
+    margin-top: 1.5rem;
+  }
+
+  .prose-neil p {
+    max-width: 64ch;
+  }
+
+  .prose-neil h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-top: 3rem;
+  }
+
+  .prose-neil a {
+    border-bottom: 1px solid color-mix(in oklab, var(--color-brass) 70%, transparent);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Entrance animations.
+
+   The hidden state is deliberately inside @media (scripting: enabled). A browser
+   with JavaScript switched off never applies it and shows the page as written,
+   rather than a screen of invisible text waiting for an observer that is never
+   going to run. See src/components/Reveal.tsx.
+--------------------------------------------------------------------------- */
+@media (scripting: enabled) {
+  [data-reveal] {
+    opacity: 0;
+    transition:
+      opacity 700ms var(--ease-spread),
+      transform 700ms var(--ease-spread);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  /* Images: 1.03 → 1, 700ms. */
+  [data-reveal='image'] {
+    transform: scale(1.03);
+  }
+
+  /* Hairlines: drawn left to right, 500ms. */
+  [data-reveal='rule'] {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition-duration: 500ms;
+  }
+
+  /* Text: a fade, 600ms. Nothing slides. */
+  [data-reveal='text'] {
+    transition-duration: 600ms;
+  }
+
+  [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Reduced motion: a hard stop. Everything that moved becomes an instant state
+   change, and anything waiting to be revealed is simply visible. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
