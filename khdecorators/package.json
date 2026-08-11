@@ -1,0 +1,33 @@
+{
+  "name": "khdecorators",
+  "version": "1.0.0",
+  "private": true,
+  "description": "khdecorators.uk — KH Decorators, painting, decorating and spray finishing, north west England",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "tsc --noEmit",
+    "check:content": "node scripts/check-content.mjs",
+    "check:launch": "node scripts/check-content.mjs --strict",
+    "audit": "node scripts/audit.mjs"
+  },
+  "dependencies": {
+    "geist": "^1.7.2",
+    "next": "16.3.0",
+    "nodemailer": "^9.0.5",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.2.0",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "axe-core": "^4.13.0",
+    "playwright": "^1.62.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
+  }
+}

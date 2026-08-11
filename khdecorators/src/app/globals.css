@@ -1,0 +1,307 @@
+@import 'tailwindcss';
+
+/* ==================================================================== *
+ *  KH Decorators — "Datasheet"
+ *
+ *  Cool white, an exposed grid, one signal colour, and photographs that
+ *  carry technical annotations. He sprays finishes and sands dustless;
+ *  that is precision work, so the site is built like a specification
+ *  document rather than a brochure.
+ *
+ *  The rules are enforced here rather than trusted to discipline:
+ *  radius, shadow, blur and every colour outside the five tokens below
+ *  are reset to `initial`, which DELETES those Tailwind utilities. There
+ *  is no `rounded-md` to type by accident, no `shadow-lg`, no `bg-red-500`.
+ *  If a utility does not exist, it cannot creep into the design.
+ * ==================================================================== */
+
+@theme {
+  /* --- Reset everything Tailwind ships by default ------------------- */
+
+  /* All 250-odd default colours removed. Five tokens, no accidents. */
+  --color-*: initial;
+  /* rounded-none is the only corner on this site, so the scale goes. */
+  --radius-*: initial;
+  /* No shadow, no gradient, no glow. Not a soft one, not a subtle one. */
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --blur-*: initial;
+  /* One family. The mono and serif stacks are removed so there is no
+     second typeface available to reach for. */
+  --font-*: initial;
+
+  /* --- The five colours -------------------------------------------- */
+
+  --color-paper: #f6f7f5; /* cool near-white, the whole site */
+  --color-ink: #101413;
+  --color-muted: #5c635f;
+  --color-rule: #d7dcd8; /* the exposed 1px grid, and every frame */
+  --color-signal: #1d3bd6; /* links, callout lines, active states, the CTA */
+
+  /* Needed by Tailwind's reset and a couple of utilities. */
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* --- Type -------------------------------------------------------- */
+
+  /* Geist Sans, self-hosted by next/font. One family across the whole
+     site: hierarchy comes from size, weight and tracking, never from a
+     second face. */
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --text-body: 1.0625rem; /* 17px */
+  --text-body--line-height: 1.65;
+
+  /* --- Motion (§7) -------------------------------------------------- */
+
+  --ease-draw: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ==================================================================== *
+ *  Base
+ * ==================================================================== */
+
+@layer base {
+  html {
+    /* The sticky rail and the in-page section links both need this. */
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numbers in specification tables and annotations line up in columns. */
+  table,
+  .annotation,
+  .spec-value {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* One visible focus treatment, in the signal colour, everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 2px;
+  }
+
+  /* Nothing on this site has a rounded corner, including form controls
+     and images, which get one from the user agent on some platforms. */
+  * {
+    border-radius: 0;
+  }
+
+  ::selection {
+    background-color: var(--color-signal);
+    color: var(--color-paper);
+  }
+}
+
+/* ==================================================================== *
+ *  Utilities
+ * ==================================================================== */
+
+/**
+ * The annotation style. Used for section numbers, specification labels,
+ * photograph callouts, table headers and attribution — everywhere the
+ * document needs to speak in a smaller register. 11–12px, 500, uppercase,
+ * wide tracking, muted, tabular numerals.
+ */
+@utility annotation {
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/** The same register, one step up, where it carries more weight. */
+@utility annotation-lg {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/** Display type. 500 weight, tight leading, slightly negative tracking. */
+@utility display {
+  font-size: clamp(2rem, 4.5vw, 4rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+@utility display-sm {
+  font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+/** Body measure. 68 characters is the limit for comfortable reading. */
+@utility measure {
+  max-width: 68ch;
+}
+
+/**
+ * A body-copy link. The only decorated inline element on the site, and
+ * the signal colour's main job. Underline offset so it does not collide
+ * with descenders.
+ */
+@utility link {
+  color: var(--color-signal);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-thickness 120ms var(--ease-draw);
+}
+@utility link-hover-target {
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* ==================================================================== *
+ *  Motion — §7, and nothing beyond it
+ *
+ *  Three things move on this site: the grid rules draw downward, the
+ *  callout leader lines draw outward, and a form underline thickens on
+ *  focus. No wipes, no parallax, no counters, no page transitions,
+ *  nothing with a spring.
+ * ==================================================================== */
+
+@layer components {
+  /* --- Grid column rules ------------------------------------------- */
+
+  .grid-rule {
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 400ms var(--ease-draw);
+    transition-delay: var(--rule-delay, 0ms);
+  }
+
+  [data-drawn='true'] .grid-rule {
+    transform: scaleY(1);
+  }
+
+  /* --- Annotation callouts ----------------------------------------- */
+
+  /* The leader line is an SVG path; it draws by retracting its dash
+     offset. The label fades in as the line lands, not before. */
+  .callout-line {
+    stroke-dasharray: var(--line-length, 100);
+    stroke-dashoffset: var(--line-length, 100);
+    transition: stroke-dashoffset 300ms var(--ease-draw);
+    transition-delay: var(--callout-delay, 0ms);
+  }
+
+  .callout-dot {
+    opacity: 0;
+    transition: opacity 160ms var(--ease-draw);
+    transition-delay: var(--callout-delay, 0ms);
+  }
+
+  .callout-label {
+    opacity: 0;
+    transition: opacity 300ms var(--ease-draw);
+    /* +220ms so the label arrives as the line reaches it. */
+    transition-delay: calc(var(--callout-delay, 0ms) + 220ms);
+  }
+
+  [data-drawn='true'] .callout-line {
+    stroke-dashoffset: 0;
+  }
+  [data-drawn='true'] .callout-dot,
+  [data-drawn='true'] .callout-label {
+    opacity: 1;
+  }
+
+  /* --- Form fields -------------------------------------------------- */
+
+  /* The rule under a field thickens to signal blue on focus. That is the
+     whole interaction language of the form. */
+  .field-input {
+    --field-pad: 0.625rem;
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-rule);
+    padding-bottom: var(--field-pad);
+    font-size: var(--text-body);
+    transition:
+      border-color 140ms var(--ease-draw),
+      border-bottom-width 140ms var(--ease-draw);
+  }
+
+  .field-input:hover {
+    border-bottom-color: var(--color-muted);
+  }
+
+  .field-input:focus {
+    outline: none;
+    border-bottom-color: var(--color-signal);
+    border-bottom-width: 2px;
+    /* Keep the text where it was — a 1px growth would nudge the baseline. */
+    padding-bottom: calc(var(--field-pad) - 1px);
+  }
+
+  /* A field that failed validation. Rule only — no red, there is no red. */
+  .field-input[aria-invalid='true'] {
+    border-bottom-color: var(--color-ink);
+    border-bottom-width: 2px;
+  }
+}
+
+/* ==================================================================== *
+ *  Reduced motion
+ *
+ *  All reveals become instant and the callout labels render in place.
+ *  Nothing is hidden behind an animation that never runs — the
+ *  IntersectionObserver still marks blocks as drawn, but there is
+ *  nothing left to transition.
+ * ==================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-rule,
+  .callout-line,
+  .callout-dot,
+  .callout-label,
+  .field-input {
+    transition: none !important;
+    transition-delay: 0ms !important;
+  }
+
+  .grid-rule {
+    transform: scaleY(1);
+  }
+
+  .callout-line {
+    stroke-dashoffset: 0;
+  }
+
+  .callout-dot,
+  .callout-label {
+    opacity: 1;
+  }
+}

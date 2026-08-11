@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!--
+    The grid, at favicon size. Four column rules on cool white with the third in
+    signal blue — the same device the site is built from, reduced to the smallest
+    thing that still reads at 16px. No letterforms: "KH" set in a favicon is
+    illegible at this size and it would need the typeface loading to draw it.
+  -->
+  <rect width="32" height="32" fill="#F6F7F5"/>
+  <rect x="6" y="4" width="1.5" height="24" fill="#101413"/>
+  <rect x="12" y="4" width="1.5" height="24" fill="#101413"/>
+  <rect x="18" y="4" width="1.5" height="24" fill="#1D3BD6"/>
+  <rect x="24" y="4" width="1.5" height="24" fill="#101413"/>
+</svg>
