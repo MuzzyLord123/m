@@ -72,6 +72,37 @@ Field 10 renders itself the moment `content/photos.ts` has anything in it, and
 is absent until then. The site is designed to stand up with no photography at
 all.
 
+### The five service pages
+
+`/interior-painting` · `/exterior-painting` · `/wallpapering` ·
+`/wood-finishes` · `/commercial-decorating`
+
+One per line of work on his own Yell listing, built from `content/services.ts`
+through a single `ServicePage` component. Same fields, same repaint — a service
+page is not a different kind of page, it is the same page about a narrower
+thing. Each starts at a different point in the palette, so five pages from one
+component open on five different colours and never repeat one back to back.
+
+The shape is proof-led, not pitch-led: what the job is, what it covers, the part
+people underestimate, then **the reviews that are actually about that work**.
+Reviews carry service tags derived from `job` — what they evidence — not from
+their wording. Where a service has no review, the page says so and points at the
+archive rather than borrowing one that was about a different job. Two pages are
+in that position today and they say so.
+
+Town pages would have been the obvious five and they are deliberately absent:
+no town is confirmed, and a set of near-identical pages with the place name
+swapped is a doorway page whatever it is called.
+
+The copy is allowed to describe *the work* — what wallpapering involves, why
+exterior jobs wait for weather — because that is true of the trade. It puts no
+method claims, guarantees, turnaround times or prices in Andy's mouth. He should
+still read the five pages and cross out anything he does not do; that is
+`content/needed.json#service-page-copy`.
+
+There is still no menu. The service list on field 2 of the home page is the
+index, and each service page links to the other four.
+
 ## The motion
 
 The repaint *is* the motion. Almost nothing else moves.
@@ -130,14 +161,26 @@ revealed because being hidden makes it measure as invisible. `Reveal.tsx` and
 `Swatch.tsx` therefore observe an unclipped wrapper and animate a child. Don't
 collapse them.
 
-**Mandatory scroll snap across a section taller than the viewport strands
-whatever is below the fold** — the browser snaps back to one of the two section
-edges and the middle becomes unreachable at rest. Measured on a 320×568 screen,
-fields one and two overrun by 14px and 62px, which is a service list and a
-corner swatch nobody can get to. Mobile therefore gets mandatory snap only above
-700px of viewport height, and proximity below it. `Field` also takes
-`snap={false}` for anything known to be tall, which is how the contact field is
-handled at every size.
+**Mandatory scroll snap strands content, in two different ways, and the obvious
+fix for the first causes the second.**
+
+A section taller than the viewport has no legal resting position in its middle,
+so the browser snaps back to an edge and the middle becomes unreachable.
+Measured on a 320×568 screen, fields one and two overrun by 14px and 62px —
+a service list and a corner swatch nobody can get to. Mobile therefore gets
+mandatory snap only above 700px of viewport height, and proximity below it.
+
+The first attempt at the rest of it was `scroll-snap-align: none` on tall
+fields, and that is worse: under mandatory snap a field with no snap point has
+no resting position *at all*, so the browser rests on the previous field and you
+never reach it. On a 390×844 phone that made the bottom of every service page —
+the phone number at its largest, and the links to the other four pages —
+unreachable, with scroll stopping at 3376 of 4220.
+
+So every field keeps its snap point, and `Field` instead takes `tall`, which
+steps the whole page down to proximity on mobile. There is a test for this:
+scroll each page to the bottom with real wheel events on four viewports and
+assert the last field is actually reachable.
 
 ## Rules the build enforces
 

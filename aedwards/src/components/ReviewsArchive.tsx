@@ -51,7 +51,7 @@ export function ReviewsArchive({ source }: { source: ReviewSource | 'all' }) {
     <>
       <Ground colour={head} />
 
-      <Field colour={head} next={PALETTE_ORDER[0]} label={reviewsPage.title} snap={false}>
+      <Field colour={head} next={PALETTE_ORDER[0]} label={reviewsPage.title} tall>
         <h1 className="t-display max-w-[16ch]">{reviewsPage.headline}</h1>
         <p className="mono mt-[clamp(2rem,5vh,3rem)] max-w-[52ch]">{reviewsPage.intro}</p>
         <Rating className="mt-[clamp(2rem,5vh,3rem)]" />
@@ -66,8 +66,8 @@ export function ReviewsArchive({ source }: { source: ReviewSource | 'all' }) {
                 aria-current={filter.key === source ? 'true' : undefined}
                 className={
                   filter.key === source
-                    ? 'underline underline-offset-[6px]'
-                    : 'underline-offset-[6px] hover:underline'
+                    ? 'tap underline underline-offset-[6px]'
+                    : 'tap underline-offset-[6px] hover:underline'
                 }
               >
                 {filter.label}
@@ -84,7 +84,7 @@ export function ReviewsArchive({ source }: { source: ReviewSource | 'all' }) {
           next={PALETTE_ORDER[(i + 1) % PALETTE_ORDER.length]}
           label={`Review · ${sourceLabel[review.source]}`}
           height="row"
-          snap={false}
+
         >
           <ReviewBlock review={review} variant="row" />
         </Field>
@@ -95,7 +95,7 @@ export function ReviewsArchive({ source }: { source: ReviewSource | 'all' }) {
         written down here — saying so, with the number, is the whole difference
         between an archive and a sales page.
       */}
-      <Field colour={PALETTE.f5} next={null} label="The rest" height="row" snap={false} id="the-rest">
+      <Field colour={PALETTE.f5} next={null} label="The rest" height="row" id="the-rest">
         {notShown > 0 ? (
           <p className="t-line max-w-[26ch]">
             <span className="tabular-nums">{notShown}</span> more ratings sit on the Yell
@@ -110,7 +110,7 @@ export function ReviewsArchive({ source }: { source: ReviewSource | 'all' }) {
           href={yellListingUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mono-label mt-10 inline-flex items-center gap-3 underline underline-offset-[6px]"
+          className="mono-label tap mt-10 gap-3 underline underline-offset-[6px]"
         >
           Read them on Yell
           <span aria-hidden="true">→</span>

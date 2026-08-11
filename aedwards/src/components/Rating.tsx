@@ -23,7 +23,7 @@ export function Rating({ className = '' }: { className?: string }) {
         href={yellRating.sourceUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mono inline-flex flex-wrap items-baseline gap-x-3 gap-y-1 underline-offset-[6px] hover:underline focus-visible:underline"
+        className="mono tap flex-wrap gap-x-3 gap-y-1 underline-offset-[6px] hover:underline focus-visible:underline"
       >
         <span className="tabular-nums">
           {formatRating(yellRating.average)}

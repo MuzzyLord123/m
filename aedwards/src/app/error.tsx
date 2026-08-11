@@ -18,7 +18,7 @@ export default function Error({ reset }: { error: Error & { digest?: string }; r
     >
       <p className="mono-label">Something broke</p>
       <h1 className="t-display mt-[clamp(1.5rem,4vh,3rem)]">Sorry — this page is not loading.</h1>
-      <a href={phone.href} className="t-phone mt-10 block tabular-nums">
+      <a href={phone.href} className="t-phone tap mt-10 tabular-nums">
         {phone.display}
       </a>
       <p className="mono-label mt-10">

@@ -22,10 +22,22 @@ export type FieldProps = {
   label?: string
   id?: string
   /**
-   * Off for fields taller than the viewport. Mandatory snap on a section the
-   * screen cannot hold traps content below the fold on some browsers.
+   * Set on any field that can grow taller than the viewport — the contact
+   * field, mainly, and more so once the enquiry form is switched on.
+   *
+   * It does NOT remove this field's snap point. Removing it was the first
+   * attempt and it was worse than the problem: under mandatory snap a field
+   * with `scroll-snap-align: none` has no snap position at all, so the browser
+   * rests on the previous field instead and you cannot reach this one. On a
+   * 390x844 phone that left the bottom of every service page — the phone
+   * number at its largest, and the links to the other four pages —
+   * unreachable, with scroll stopping at 3376 of 4220.
+   *
+   * Instead it steps the whole page down to proximity snapping on mobile.
+   * Proximity still snaps when you land near a boundary, and it can never
+   * strand anything, because every resting position is legal.
    */
-  snap?: boolean
+  tall?: boolean
   /**
    * 'screen' is the home page: one idea, one viewport. 'row' is the archive at
    * /reviews, where the fields are shorter so the page keeps moving.
@@ -39,31 +51,45 @@ export function Field({
   next,
   label,
   id,
-  snap = true,
+  tall = false,
   height = 'screen',
   children,
 }: FieldProps) {
   return (
-    <section
-      id={id}
-      data-field=""
-      data-bg={colour.bg}
-      data-fg={colour.fg}
-      style={{ scrollSnapAlign: snap ? 'start' : 'none' }}
-      className={
-        height === 'screen'
-          ? 'relative flex min-h-[100svh] flex-col justify-start px-[max(1.25rem,4vw)] pt-[clamp(5rem,18svh,11rem)] pb-[clamp(5.5rem,12svh,9rem)]'
-          : 'relative flex min-h-[68svh] flex-col justify-center px-[max(1.25rem,4vw)] pt-[clamp(4.5rem,10svh,7rem)] pb-[clamp(5.5rem,10svh,7rem)]'
-      }
-    >
-      <div className="field-grid w-full">
-        <div className="field-col">
-          {label ? <p className="mono-label mb-[clamp(1.5rem,4vh,3rem)]">{label}</p> : null}
-          {children}
-        </div>
-      </div>
+    <>
+      {/* Emitted by the field that knows it might overflow, so a page carrying
+          one opts itself down to proximity snapping without every page having
+          to declare it. Identical across fields, so it collapses to one rule. */}
+      {tall ? (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: '@media (max-width:767px){html{scroll-snap-type:y proximity}}',
+          }}
+        />
+      ) : null}
 
-      {next ? <Swatch next={next} /> : null}
-    </section>
+      <section
+        id={id}
+        data-field=""
+        data-bg={colour.bg}
+        data-fg={colour.fg}
+        // Every field keeps a snap point. See the note on `tall` above.
+        style={{ scrollSnapAlign: 'start' }}
+        className={
+          height === 'screen'
+            ? 'relative flex min-h-[100svh] flex-col justify-start px-[max(1.25rem,4vw)] pt-[clamp(5rem,18svh,11rem)] pb-[clamp(5.5rem,12svh,9rem)]'
+            : 'relative flex min-h-[68svh] flex-col justify-center px-[max(1.25rem,4vw)] pt-[clamp(4.5rem,10svh,7rem)] pb-[clamp(5.5rem,10svh,7rem)]'
+        }
+      >
+        <div className="field-grid w-full">
+          <div className="field-col">
+            {label ? <p className="mono-label mb-[clamp(1.5rem,4vh,3rem)]">{label}</p> : null}
+            {children}
+          </div>
+        </div>
+
+        {next ? <Swatch next={next} /> : null}
+      </section>
+    </>
   )
 }

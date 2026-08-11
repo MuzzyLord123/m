@@ -12,6 +12,10 @@
  * the copy says.
  */
 
+import { services } from './services'
+
+const serviceSlugs: readonly string[] = services.map((s) => s.slug)
+
 /* ------------------------------------------------------------- field one --- */
 
 export const intro = {
@@ -26,18 +30,38 @@ export const intro = {
 export const argument = {
   label: 'How I work',
   sentence: 'I turn up when I say I will, I keep the place tidy, and I get it right.',
-  /** His own listing, his own order. */
+  /**
+   * His own listing, his own words, his own order — this list is not edited to
+   * suit the site's page structure.
+   *
+   * `slug` points at the service page that covers that line of work, where one
+   * exists. More than one line can point at the same page: floor painting is
+   * part of the interior page, industrial painting is part of the commercial
+   * page. This list is also the site's only index of those pages, because the
+   * top strip is a phone number and a name and it stays that way.
+   */
   services: [
-    'Interior painting',
-    'Exterior painting',
-    'Wallpapering',
-    'Wood finishes and staining',
-    'Floor painting',
-    'Protective coatings',
-    'Industrial painting',
-    'Domestic and commercial',
+    { label: 'Interior painting', slug: 'interior-painting' },
+    { label: 'Exterior painting', slug: 'exterior-painting' },
+    { label: 'Wallpapering', slug: 'wallpapering' },
+    { label: 'Wood finishes and staining', slug: 'wood-finishes' },
+    { label: 'Floor painting', slug: 'interior-painting' },
+    { label: 'Protective coatings', slug: 'commercial-decorating' },
+    { label: 'Industrial painting', slug: 'commercial-decorating' },
+    { label: 'Domestic and commercial', slug: 'commercial-decorating' },
   ],
 } as const
+
+/* A link into a page that does not exist is a 404 on the busiest field of the
+   site. Fails the build instead. */
+for (const entry of argument.services) {
+  if (!serviceSlugs.includes(entry.slug)) {
+    throw new Error(
+      `content/copy.ts links "${entry.label}" to service page "${entry.slug}", ` +
+        `which is not in content/services.ts.`,
+    )
+  }
+}
 
 /* ------------------------------------------------------------ field four --- */
 

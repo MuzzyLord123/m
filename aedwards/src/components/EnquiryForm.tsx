@@ -40,7 +40,7 @@ export function EnquiryForm() {
     return (
       <div>
         <p className="mono">{contact.form.sent}</p>
-        <a href={phone.href} className="t-phone mt-6 block tabular-nums">
+        <a href={phone.href} className="t-phone tap mt-6 tabular-nums">
           {phone.display}
         </a>
       </div>
@@ -106,7 +106,7 @@ export function EnquiryForm() {
         <p role="status" className="mono mt-8">
           {state.message}
           {state.status === 'error' ? (
-            <a href={phone.href} className="mt-2 block tabular-nums underline underline-offset-[6px]">
+            <a href={phone.href} className="tap mt-2 tabular-nums underline underline-offset-[6px]">
               {phone.display}
             </a>
           ) : null}

@@ -194,6 +194,17 @@
     letter-spacing: -0.02em;
   }
 
+  /* A list set in display type, which is how the service pages show scope. On a
+     phone it is the thing that fills the field, so it is deliberately bigger
+     than body copy and tight enough to stack. */
+  .t-list {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+
   .t-line {
     font-family: var(--font-display);
     font-weight: 700;
@@ -227,21 +238,28 @@
     text-transform: uppercase;
   }
 
-  /* The phone. Mono, because numbers are always mono, and large because it is
-     the only thing on the site anyone has to be able to find. */
+  /*
+    The phone. Mono, because numbers are always mono, and large because it is
+    the only thing on the site anyone has to be able to find.
+
+    The lower bounds are set by arithmetic, not taste. "07928 784903" is twelve
+    characters and DM Mono advances 0.6em, so the number is 7.2 x the font size
+    wide. On a 320px screen the field leaves 280px, which caps it at 38px —
+    anything larger and the phone number, of all things, runs off the phone.
+  */
   .t-phone {
     font-family: var(--font-mono);
     font-weight: 500;
-    font-size: clamp(1.75rem, 5.5vw, 4rem);
+    font-size: clamp(2rem, 7vw, 4rem);
     line-height: 1;
     letter-spacing: 0.01em;
   }
 
-  /* Field eleven's, the largest type on the site. */
+  /* The contact field's, the largest type on the site. */
   .t-phone-max {
     font-family: var(--font-mono);
     font-weight: 500;
-    font-size: clamp(2.25rem, 7.5vw, 5.5rem);
+    font-size: clamp(2.25rem, 10vw, 5.5rem);
     line-height: 1;
     letter-spacing: 0;
   }
@@ -292,6 +310,21 @@
 }
 
 @layer utilities {
+  /*
+    A real tap target.
+
+    Mono is 13–15px on this site, so a link set in it is a 21px-tall box — and
+    a 21px target on a phone is a link you miss, which on the top strip means
+    missing the phone number. This makes the box 44px without making the type
+    bigger: the text stays the size the design wants and the thing your thumb
+    hits is the size a thumb is.
+  */
+  .tap {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
   /* Used by the honeypot. Off-screen rather than display:none — some bots skip
      hidden fields, and this one is meant to be filled in. */
   .trap {

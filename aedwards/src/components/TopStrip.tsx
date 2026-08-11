@@ -17,11 +17,16 @@ import { business, phone } from '@content/site'
 export function TopStrip() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex h-11 items-center justify-between gap-4 px-[max(1.25rem,4vw)] md:h-14">
-      <Link href="/" className="mono-sm truncate uppercase">
+      {/* Both fill the strip's full height. The number here is the primary
+          call to action on a phone and it was a 21px target before this. */}
+      <Link href="/" className="mono-sm flex h-full items-center truncate uppercase">
         {business.name}
       </Link>
 
-      <a href={phone.href} className="mono-sm shrink-0 whitespace-nowrap tabular-nums">
+      <a
+        href={phone.href}
+        className="mono-sm flex h-full shrink-0 items-center whitespace-nowrap tabular-nums"
+      >
         {phone.display}
       </a>
     </header>

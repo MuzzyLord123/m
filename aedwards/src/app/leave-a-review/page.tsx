@@ -32,7 +32,7 @@ export default function LeaveAReviewPage() {
   return (
     <>
       <Ground colour={PALETTE.f2} />
-      <Field colour={PALETTE.f2} next={null} label={leaveAReview.title} snap={false}>
+      <Field colour={PALETTE.f2} next={null} label={leaveAReview.title}>
         <Reveal>
           <h1 className="t-display max-w-[14ch]">{leaveAReview.headline}</h1>
         </Reveal>
@@ -44,7 +44,7 @@ export default function LeaveAReviewPage() {
               href={yellListingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mono-label inline-flex items-center gap-3 underline underline-offset-[6px]"
+              className="mono-label tap gap-3 underline underline-offset-[6px]"
             >
               Leave a review on Yell
               <span aria-hidden="true">→</span>
@@ -56,7 +56,7 @@ export default function LeaveAReviewPage() {
                 href={google}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mono-label inline-flex items-center gap-3 underline underline-offset-[6px]"
+                className="mono-label tap gap-3 underline underline-offset-[6px]"
               >
                 Leave a review on Google
                 <span aria-hidden="true">→</span>

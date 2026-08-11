@@ -59,7 +59,7 @@ type Section = {
   colour: FieldColour
   label?: string
   id?: string
-  snap?: boolean
+  tall?: boolean
   node: ReactNode
 }
 
@@ -88,7 +88,7 @@ export default function HomePage() {
           <Rating className="mt-[clamp(2.5rem,7vh,4rem)]" />
           <a
             href={phone.href}
-            className="t-phone mt-[clamp(2rem,5vh,3rem)] block tabular-nums"
+            className="t-phone tap mt-[clamp(2rem,5vh,3rem)] tabular-nums"
           >
             {phone.display}
           </a>
@@ -105,9 +105,21 @@ export default function HomePage() {
           <Reveal>
             <p className="t-display max-w-[16ch]">{argument.sentence}</p>
           </Reveal>
-          <ul className="mono mt-[clamp(2.5rem,7vh,4rem)] grid max-w-[42rem] gap-x-8 gap-y-1 sm:grid-cols-2">
+          {/* Also the site's index of the service pages — there is no menu, so
+              this list is how you get to them. Each row is its own tap target
+              with room around it, which is why they are not set as a tight
+              list on a phone. */}
+          <ul className="mono mt-[clamp(2rem,6vh,3.5rem)] grid max-w-[42rem] gap-x-8 sm:grid-cols-2">
             {argument.services.map((service) => (
-              <li key={service}>{service}</li>
+              <li key={service.label}>
+                <Link
+                  href={`/${service.slug}`}
+                  className="tap gap-3 underline-offset-[6px] hover:underline focus-visible:underline"
+                >
+                  {service.label}
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </li>
             ))}
           </ul>
         </>
@@ -203,7 +215,7 @@ export default function HomePage() {
 
           <Link
             href="/reviews"
-            className="mono-label mt-[clamp(2.5rem,7vh,4rem)] inline-flex items-center gap-3 underline underline-offset-[6px]"
+            className="mono-label tap mt-[clamp(2.5rem,7vh,4rem)] gap-3 underline underline-offset-[6px]"
           >
             {archiveLink}
             <span aria-hidden="true">→</span>
@@ -268,7 +280,7 @@ export default function HomePage() {
       id: 'call',
       // Taller than the viewport once the form is on it. Mandatory snap on a
       // section the screen cannot hold strands whatever is below the fold.
-      snap: false,
+      tall: true,
       node: (
         <>
           <Reveal>
@@ -276,7 +288,7 @@ export default function HomePage() {
           </Reveal>
           <a
             href={phone.href}
-            className="t-phone-max mt-[clamp(1.5rem,4vh,2.5rem)] block tabular-nums"
+            className="t-phone-max tap mt-[clamp(1.5rem,4vh,2.5rem)] tabular-nums"
           >
             {phone.display}
           </a>
@@ -298,7 +310,7 @@ export default function HomePage() {
           </div>
 
           <p className="mono-sm mt-[clamp(3rem,9vh,5rem)]">
-            <Link href="/leave-a-review" className="underline underline-offset-[6px]">
+            <Link href="/leave-a-review" className="tap underline underline-offset-[6px]">
               Had a job done? Leave a review →
             </Link>
           </p>
@@ -318,7 +330,7 @@ export default function HomePage() {
           next={sections[i + 1]?.colour ?? null}
           label={section.label}
           id={section.id}
-          snap={section.snap}
+          tall={section.tall}
         >
           {section.node}
         </Field>

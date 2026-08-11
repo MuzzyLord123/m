@@ -72,6 +72,22 @@
     "blocksLaunch": true
   },
   {
+    "id": "service-page-copy",
+    "priority": 1,
+    "question": "Read the five work pages — interior, exterior, wallpapering, wood finishes, commercial — and tell me anything on them you do not actually do, or would not say. Do you do decking? Communal stairwells? Do you take on landlords?",
+    "why": "The service lists come off his own Yell listing, and the rest describes the work rather than his method, on purpose. But five pages in his voice that he has never read is exactly the sort of thing that ends up quoted back at him on a job. Ten minutes with him and a phone is enough.",
+    "where": "content/services.ts — correct or delete anything he crosses off",
+    "blocksLaunch": false
+  },
+  {
+    "id": "out-of-hours",
+    "priority": 2,
+    "question": "For shops and offices — will you work evenings or weekends so they can stay open? And do you quote for free on commercial jobs the same as domestic?",
+    "why": "Both are ordinary things a commercial customer wants to know and both are currently left off the commercial page, because neither is confirmed. Promising out-of-hours work he does not do is a booking he has to cancel.",
+    "where": "content/services.ts → the commercial-decorating entry",
+    "blocksLaunch": false
+  },
+  {
     "id": "photographs",
     "priority": 2,
     "question": "Can you send me the photos off your phone — the originals, straight out of the camera roll, not off Yell? Say which room and which village each one is.",

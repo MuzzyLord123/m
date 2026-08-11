@@ -41,6 +41,7 @@
  */
 
 import { yellListingUrl } from './site'
+import { services as serviceList } from './services'
 
 export type ReviewSource = 'yell' | 'google' | 'website'
 
@@ -59,6 +60,16 @@ export type Review = {
   job: string | null
   /** Deep link to the review, or to the listing it is published on. Required. */
   sourceUrl: string
+  /**
+   * Which service pages this review is evidence for, by slug.
+   *
+   * Derived from `job`, which is established — not from the wording, which is
+   * not yet known. A review with no recorded job gets no tags: a service page
+   * shows the reviews that are actually about that work, or it says it has
+   * none and points at the archive. It never borrows one that was about
+   * something else.
+   */
+  services?: readonly string[]
   /** Reviews gathered on this site only: written permission to publish. */
   permission?: boolean
 }
@@ -110,6 +121,7 @@ export const reviews: readonly Review[] = [
     excerpt: null,
     job: 'Three bedrooms',
     sourceUrl: yellListingUrl,
+    services: ['interior-painting'],
   },
   {
     id: 'yell-darrenj-427',
@@ -120,6 +132,7 @@ export const reviews: readonly Review[] = [
     excerpt: null,
     job: 'Full exterior repaint',
     sourceUrl: yellListingUrl,
+    services: ['exterior-painting'],
   },
   {
     id: 'yell-andm-6',
@@ -130,6 +143,7 @@ export const reviews: readonly Review[] = [
     excerpt: null,
     job: 'Exterior woodwork and render, May 2025',
     sourceUrl: yellListingUrl,
+    services: ['exterior-painting', 'wood-finishes'],
   },
   {
     id: 'yell-lightning',
@@ -138,8 +152,11 @@ export const reviews: readonly Review[] = [
     date: '2024-12-13',
     rating: null,
     excerpt: null,
+    // An extra room and a paint-spilled carpet rescued: interior work, though
+    // the room itself is not recorded.
     job: null,
     sourceUrl: yellListingUrl,
+    services: ['interior-painting'],
   },
   {
     id: 'yell-ianh-1759',
@@ -163,6 +180,11 @@ export function reviewById(id: string): Review | undefined {
 
 export function reviewsBySource(source: ReviewSource | 'all'): readonly Review[] {
   return source === 'all' ? reviews : reviews.filter((r) => r.source === source)
+}
+
+/** The reviews that are evidence for a given service page. Often none. */
+export function reviewsForService(slug: string): readonly Review[] {
+  return reviews.filter((r) => r.services?.includes(slug))
 }
 
 /** Sources actually present in the data — the /reviews filter is built from this. */
@@ -207,6 +229,16 @@ function assertReviews(list: readonly Review[]): void {
         `${where} has no sourceUrl. A review a reader cannot go and verify is ` +
           `not evidence, and this site is nothing but evidence.`,
       )
+    }
+
+    for (const slug of r.services ?? []) {
+      if (!serviceList.some((s) => s.slug === slug)) {
+        throw new Error(
+          `${where} is tagged with service "${slug}", which is not in ` +
+            `content/services.ts. A mistyped tag means a service page quietly ` +
+            `loses the only proof it had.`,
+        )
+      }
     }
 
     if (r.source === 'website' && r.permission !== true) {

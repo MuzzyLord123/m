@@ -22,7 +22,7 @@ export function ReviewCredit({ review }: { review: Review }) {
       href={review.sourceUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="mono-sm inline-flex flex-wrap items-baseline gap-x-3 gap-y-1 underline-offset-[6px] hover:underline focus-visible:underline"
+      className="mono-sm tap flex-wrap gap-x-3 gap-y-1 underline-offset-[6px] hover:underline focus-visible:underline"
     >
       <span>{review.reviewer}</span>
       <span aria-hidden="true">·</span>

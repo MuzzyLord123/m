@@ -60,6 +60,14 @@ domain while it is still open.
 
 **Answer goes in:** `content/reviews.ts → the `excerpt` field on each review. Read REVIEWS.md first, it is written for a non-developer.`
 
+## service-page-copy
+
+**Ask:** Read the five work pages — interior, exterior, wallpapering, wood finishes, commercial — and tell me anything on them you do not actually do, or would not say. Do you do decking? Communal stairwells? Do you take on landlords?
+
+**Why:** The service lists come off his own Yell listing, and the rest describes the work rather than his method, on purpose. But five pages in his voice that he has never read is exactly the sort of thing that ends up quoted back at him on a job. Ten minutes with him and a phone is enough.
+
+**Answer goes in:** `content/services.ts — correct or delete anything he crosses off`
+
 ## service-towns — **blocks launch**
 
 **Ask:** Which towns do you actually go to? Flint obviously — but Deeside? Connah's Quay? Holywell? Mold? Buckley? Chester? Where do you stop?
@@ -91,6 +99,14 @@ domain while it is still open.
 **Why:** The enquiry form has nowhere to deliver to without one, so it is hidden and the page shows the phone number instead. An invented address that bounces is worse than no form.
 
 **Answer goes in:** `content/site.ts → email, and ENQUIRY_TO in the host's environment`
+
+## out-of-hours
+
+**Ask:** For shops and offices — will you work evenings or weekends so they can stay open? And do you quote for free on commercial jobs the same as domestic?
+
+**Why:** Both are ordinary things a commercial customer wants to know and both are currently left off the commercial page, because neither is confirmed. Promising out-of-hours work he does not do is a booking he has to cancel.
+
+**Answer goes in:** `content/services.ts → the commercial-decorating entry`
 
 ## yell-claimed
 
