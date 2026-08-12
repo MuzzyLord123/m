@@ -100,21 +100,26 @@ Ask him to say which room and which village each one is. Drop them in
 appears on the front page by itself. If nothing arrives, the section stays cut
 and the site is fine — it was designed to stand up with no photography at all.
 
-## 8. Set up an email address and switch the form on
+## 8. Set up an email address and switch the form over
 
-There's no email address on file, so the enquiry form doesn't render; the
-contact section shows his phone number instead.
+The enquiry form is on the site and it works — but with no email address on
+file it works by handing the finished message to the customer's own phone: it
+opens a text to Andy with what they wrote already in it, and they press send.
 
-Once he has one (`andy@aedwardsdecorating.co.uk` off the new domain is the
-obvious move), set **either**:
+That is a perfectly good way to run it, and for a sole trader with a mobile it
+may be the best one. Nothing is broken and nothing needs doing here unless he
+wants enquiries in an inbox as well.
+
+If he does — `andy@aedwardsdecorating.co.uk` off the new domain is the obvious
+move — set **either**:
 
 - `ENQUIRY_WEBHOOK_URL` — posts each enquiry as JSON to whatever he uses, or
 - `RESEND_API_KEY` plus `ENQUIRY_TO` — emails it to him.
 
-The form appears on its own once one of them is set — but **the site has to be
-rebuilt after you set it.** The home page is prerendered, so the variable is
-read at build time, not per request. Set it in the host's environment, then
-trigger a fresh deploy.
+The form switches from the text hand-off to a posted form once one of them is
+set — but **the site has to be rebuilt after you set it.** The pages are
+prerendered, so the variable is read at build time, not per request. Set it in
+the host's environment, then trigger a fresh deploy.
 
 Send a test enquiry and make sure it actually arrives before telling him it
 works.

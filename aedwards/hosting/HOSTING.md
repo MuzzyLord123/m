@@ -33,12 +33,14 @@ Whichever you use, two things to check:
 
 ## Two things this bundle cannot do
 
-**The enquiry form is not in it.** A static site has no server to receive a form
-submission, so the contact section shows Andy's phone number instead. That is
-also what it does on the full version right now, because he has no email address
-set up yet — so nothing is missing today. But if he later wants a working form,
-the site has to move to a host that runs Node (Vercel and Netlify both do this
-for free), and be rebuilt with `npm run build` rather than `npm run build:static`.
+**The enquiry form cannot post to a server.** A static site has no server to
+receive a submission. The form is still here and still works: it opens a text to
+Andy with the customer's message already in it, and they press send. On a phone,
+which is where his customers are, that is a perfectly good way to run it.
+
+If he later wants enquiries arriving in an inbox instead, the site has to move
+to a host that runs Node (Vercel and Netlify both do it for free) and be built
+with `npm run build` rather than `npm run build:static`.
 
 **Security headers depend on the host.** `_headers` covers Netlify and
 Cloudflare Pages; `.htaccess` covers Apache and most cPanel hosting. If yours is

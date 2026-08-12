@@ -295,18 +295,11 @@ export default function HomePage() {
           <p className="mono mt-8 max-w-[40ch]">{contact.line}</p>
 
           <div className="mt-[clamp(3rem,9vh,5rem)]">
-            {DELIVERY_CONFIGURED ? (
-              <EnquiryForm />
-            ) : (
-              <>
-                {/* No email address on file, so there is nowhere to deliver an
-                    enquiry. A form that quietly drops them would be worse than
-                    no form — see src/lib/enquiry.ts. The number is already the
-                    largest thing on this field; it is not repeated here. */}
-                <p className="mono max-w-[40ch]">{contact.form.unconfigured}</p>
-                <Pending id="email" />
-              </>
-            )}
+            {/* There is no email address on file, so with nothing configured
+                the form hands the message to the phone it is being filled in
+                on rather than posting it into a void. See EnquiryForm. */}
+            <EnquiryForm configured={DELIVERY_CONFIGURED} />
+            <Pending id="email" />
           </div>
 
           <p className="mono-sm mt-[clamp(3rem,9vh,5rem)]">

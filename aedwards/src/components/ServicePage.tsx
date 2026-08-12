@@ -4,6 +4,8 @@ import { PALETTE_ORDER, type FieldColour } from '@content/fields'
 import { otherServices, paletteFor, type Service } from '@content/services'
 import { reviewsForService, sourceLabel, yellRating } from '@content/reviews'
 import { business, phone } from '@content/site'
+import { DELIVERY_CONFIGURED } from '@/lib/enquiry'
+import { EnquiryForm } from './EnquiryForm'
 import { Field } from './Field'
 import { Ground } from './Ground'
 import { Rating } from './Rating'
@@ -146,6 +148,12 @@ export function ServicePage({ service }: { service: Service }) {
           <p className="mono mt-6 max-w-[40ch]">
             Ring or text. If I am up a ladder I will call you back.
           </p>
+
+          {/* Seeded with this page's service, so he knows which job they mean
+              and they have one less thing to type. */}
+          <div className="mt-[clamp(3rem,8vh,4.5rem)]">
+            <EnquiryForm configured={DELIVERY_CONFIGURED} context={service.name} />
+          </div>
 
           <p className="mono-label mt-[clamp(2.5rem,7vh,4rem)]">The rest of the work</p>
           <ul className="mt-4 flex flex-col">

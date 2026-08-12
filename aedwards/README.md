@@ -340,10 +340,46 @@ Currently absent on purpose:
   expire; a lapsed claim printed on a website is worse than no claim.
 - **Specific towns.** "North Wales and the Chester area" is his own wording and
   is published. Named towns are not, until he names them.
-- **The enquiry form.** No email address on file, so there is nowhere to deliver
-  to. The contact field shows his phone number instead. Set
-  `ENQUIRY_WEBHOOK_URL`, or `RESEND_API_KEY` and `ENQUIRY_TO`, and the form
-  appears by itself.
+## The form
+
+Three fields — name, number, what needs doing — on the home page's contact
+field and at the foot of every service page, where it arrives seeded with that
+page's service so he knows which job they mean.
+
+**It is typed into in display type, not 15px mono.** Everything else on this
+site that matters is set large, and there is no good reason a customer's own
+name should be the one thing they squint at while typing it on a phone. Mono
+numerals count the fields off, `01 02 03`. Underlines and nothing else: no box,
+no radius, no inner shadow, no grey fill. The rule is 2px at rest and at focus
+and only changes colour, so nothing shifts by a pixel as you tab. The submit is
+a full-bleed band of burnt red — the same device the menu is built from — rather
+than a button-shaped rectangle floating in the middle of a field, and it is the
+only saturated thing on that screen.
+
+**Where it sends** is decided at build time by whether a delivery target is
+configured, and there are two honest answers rather than one dishonest one:
+
+- **Configured** (`ENQUIRY_WEBHOOK_URL`, or `RESEND_API_KEY` with
+  `ENQUIRY_TO`) — a server action posts or emails it. Works without JavaScript.
+- **Not configured**, which is today, because Andy has no email address — the
+  form hands the finished message to the phone it is being filled in on. It
+  opens a text, addressed to him, with what they wrote already in it. They press
+  send.
+
+The second is not a consolation prize. He is a sole trader whose only confirmed
+contact channel is a mobile, his customers are on phones, and a text lands where
+he will actually see it. Nothing is claimed to have been sent that was not — the
+customer sends it themselves and it is in their own sent messages. The
+alternative was hiding the form until somebody sets up an inbox, and a
+decorator's website with nowhere to leave your name is a worse site. Set either
+variable and rebuild, and it becomes an ordinary posted form with no hand-off.
+
+Composing a text needs scripting, so that mode removes itself without
+JavaScript and the phone number takes its place — a form that silently does
+nothing is worse than no form. The posted mode has no such caveat.
+
+Both modes carry the same honeypot and timing trap, and both show a bot exactly
+what they show a customer.
 
 ## Layout
 

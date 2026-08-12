@@ -149,9 +149,15 @@ export const contact = {
     /** Shown in place of the form once it has gone. */
     sent: 'Got it. I will ring you back.',
     error: 'That did not send. Ring or text instead:',
-    /** Shown instead of the form until a delivery address is configured. */
-    unconfigured:
-      'The form goes live once Andy has an email address set up. Until then, ring or text the number above.',
+    /**
+     * Andy has no email address yet, so there is nowhere for a form to post to.
+     * Rather than hide it, the form hands the finished message to the phone it
+     * is being filled in on — see src/components/EnquiryForm.tsx.
+     */
+    smsNote: 'This opens a text to Andy with your message in it. You still press send.',
+    smsSubmit: 'Text it to Andy',
+    handedOff: 'Your text should be open, ready to send.',
+    handedOffFallback: 'If nothing opened, ring or text this number:',
   },
 } as const
 
