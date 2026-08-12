@@ -1,0 +1,380 @@
+@import 'tailwindcss';
+
+/*
+  A Edwards Decorating — "Colour Change".
+
+  The entire visual system is six colours and two typefaces. There are no cards,
+  no boxes, no borders, no shadows, no gradients, no rounded corners and no
+  icons anywhere on this site. If something needs one of those to read, it is
+  the wrong thing.
+
+  Colour lives in exactly one place at runtime: --bg and --fg on :root. Sections
+  are transparent; the page's colour is the body's colour; Repaint.tsx
+  interpolates it as you scroll. That is why a section cannot get its colours
+  out of step with the page — there is only one pair.
+*/
+
+@theme {
+  /* The fields. Kept in step with content/fields.ts, which is the source of
+     truth and which fails the build if a pairing drops under 7:1. */
+  --color-f1: #1e3a34; /* deep green    */
+  --color-f2: #e8e2d4; /* stone         */
+  --color-f3: #3b2e3e; /* aubergine     */
+  --color-f4: #c3d3ce; /* pale duck egg */
+  --color-f5: #14171a; /* near black    */
+  --color-f6: #872c14; /* burnt red     */
+
+  /* The only two foregrounds. */
+  --color-ink: #14171a;
+  --color-bone: #f2efe7;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, sfmono-regular, menlo, monospace;
+}
+
+/*
+  Registered so the browser can interpolate them as colours rather than as
+  strings, and so an unset value falls back to field one instead of to nothing.
+*/
+@property --bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1e3a34;
+}
+@property --fg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f2efe7;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* One idea per field, so the page moves field by field. Proximity on
+       desktop leaves ordinary scrolling alone; mobile gets mandatory. */
+    scroll-snap-type: y proximity;
+    scroll-behavior: smooth;
+  }
+
+  /*
+    Mandatory snap on mobile, but only where a field actually fits the screen.
+
+    Mandatory snapping across a section taller than the viewport strands
+    whatever sits below the fold: the browser snaps back to one of the two
+    section edges and the middle becomes unreachable at rest. Measured on a
+    320x568 screen, fields one and two overrun by 14px and 62px — which is the
+    service list and a corner swatch nobody can get to.
+
+    Above 700px of viewport height every field fits and mandatory is the right
+    behaviour. Below it the page falls back to proximity, which snaps when it
+    is convenient and never traps anything.
+  */
+  @media (max-width: 767px) and (min-height: 700px) {
+    html {
+      scroll-snap-type: y mandatory;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    /* Clip reveals become opacity reveals. Removing the clip outright leaves
+       the fade as the only thing that moves, which is what reduced motion
+       asks for — and it means there is no second JavaScript code path to keep
+       in step with this one. */
+    [data-clip] {
+      clip-path: none !important;
+    }
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    /* Nothing here relies on a hairline, so switch off subpixel surprises on
+       the very large display type. */
+    text-rendering: optimizeLegibility;
+  }
+
+  /* The focus ring is the current foreground, so it is legible on every field
+     and changes colour with the page like everything else. */
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 4px;
+  }
+
+  ::selection {
+    background-color: var(--fg);
+    color: var(--bg);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@layer components {
+  /* -------------------------------------------------- reveal, without JS --- */
+  /*
+    The same 380ms clip reveal as Reveal.tsx, driven by CSS on load instead of
+    by an intersection observer.
+
+    This exists for the one headline that is already on screen when the page
+    arrives. Waiting for JavaScript to reveal it costs more than the effect is
+    worth: the biggest text on the site sits at opacity 0 until hydration, which
+    disqualifies it as a largest-contentful-paint candidate and pushes the
+    measured LCP out to whenever the bundle happens to land. Above the fold
+    there is nothing to observe anyway — it is already in view.
+
+    Everything below the fold still uses Reveal.tsx, which has something real to
+    wait for.
+  */
+  @keyframes reveal-from-baseline {
+    from {
+      clip-path: inset(100% 0 0 0);
+      opacity: 0;
+    }
+    to {
+      clip-path: inset(0% 0 0 0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes reveal-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .reveal-at-load {
+    animation: reveal-from-baseline 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Clip reveals become opacity reveals, same as [data-clip] elsewhere. */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-at-load {
+      animation-name: reveal-fade;
+    }
+  }
+
+  /* ------------------------------------------------------------- display --- */
+  /* Bricolage Grotesque, 700–800, flush left, ragged right, never centred,
+     never all-caps. */
+
+  .t-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.75rem, 9vw, 8rem);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+  }
+
+  .t-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.25rem, 6.4vw, 5rem);
+    line-height: 0.94;
+    letter-spacing: -0.02em;
+  }
+
+  /* A review quote fills its field: 40px to 72px. */
+  .t-quote {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.5rem, 5.2vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  /* A list set in display type, which is how the service pages show scope. On a
+     phone it is the thing that fills the field, so it is deliberately bigger
+     than body copy and tight enough to stack. */
+  .t-list {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+
+  .t-line {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.25rem, 2.6vw, 2rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+
+  /* --------------------------------------------------------------- mono --- */
+  /* DM Mono, 13–15px. Uppercase for labels only. Numbers always mono. */
+
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+  }
+
+  .mono-sm {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+  }
+
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /*
+    The phone. Mono, because numbers are always mono, and large because it is
+    the only thing on the site anyone has to be able to find.
+
+    The lower bounds are set by arithmetic, not taste. "07928 784903" is twelve
+    characters and DM Mono advances 0.6em, so the number is 7.2 x the font size
+    wide. On a 320px screen the field leaves 280px, which caps it at 38px —
+    anything larger and the phone number, of all things, runs off the phone.
+  */
+  .t-phone {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: clamp(2rem, 7vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+
+  /* The contact field's, the largest type on the site. */
+  .t-phone-max {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: clamp(2.25rem, 10vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  /* --------------------------------------------------------------- grid --- */
+  /* Twelve columns, offset: the text block starts at column two and runs to
+     nine, which leaves the bottom right of most fields empty. Density 2. */
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(0.75rem, 2vw, 1.5rem);
+  }
+
+  .field-col {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 768px) {
+    .field-col {
+      grid-column: 2 / 10;
+    }
+  }
+
+  /*
+    The enquiry fields.
+
+    Typed into in display type, not in 15px mono. Everything else on this site
+    that matters is set large, and there is no good reason a customer's own
+    name should be the one thing they have to squint at while typing it on a
+    phone. An underline and nothing else — no box, no radius, no inner shadow,
+    no grey fill.
+
+    The rule is 2px at both states and only changes colour on focus, so nothing
+    shifts by a pixel when you tab between them.
+  */
+  .enquiry-input {
+    width: 100%;
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.375rem, 3vw, 2rem);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    /* Enough that the field itself clears 44px on a phone, not just the label
+       above it. */
+    padding: 0.4em 0;
+    border: 0;
+    border-bottom: 2px solid color-mix(in srgb, var(--fg) 30%, transparent);
+    border-radius: 0;
+    appearance: none;
+  }
+
+  .enquiry-input:focus {
+    outline: none;
+    border-bottom-color: var(--fg);
+  }
+
+  /* The focus ring would sit outside the underline and read as a box. The
+     underline going solid is the focus indicator, and it is a 3:1 change. */
+  .enquiry-input:focus-visible {
+    outline: none;
+  }
+}
+
+@layer utilities {
+  /*
+    Below 420px the strip cannot hold the name, the phone number and a labelled
+    menu button at once. So while the menu is open the number steps aside and
+    the button gets its word: a bare bar with nothing next to it is a guess,
+    and the number is not lost — the panel ends with it, four times the size.
+
+    Done with :has() rather than by threading the open state back up into the
+    strip, because the button already publishes that state in aria-expanded and
+    two sources of truth for one boolean is one too many. Browsers without
+    :has() simply keep the closed layout, which is the safe way round.
+
+    In the utilities layer on purpose. These fight `flex` and `hidden`, which
+    are utilities, and cascade layers are decided by layer order before
+    specificity — the same rule sitting in the components layer loses to a
+    single-class utility every time, silently.
+  */
+  @media (max-width: 419px) {
+    header:has(button[aria-expanded='true']) [data-strip-phone] {
+      display: none;
+    }
+
+    header:has(button[aria-expanded='true']) [data-menu-word] {
+      display: inline;
+    }
+  }
+
+  /*
+    A real tap target.
+
+    Mono is 13–15px on this site, so a link set in it is a 21px-tall box — and
+    a 21px target on a phone is a link you miss, which on the top strip means
+    missing the phone number. This makes the box 44px without making the type
+    bigger: the text stays the size the design wants and the thing your thumb
+    hits is the size a thumb is.
+  */
+  .tap {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* Used by the honeypot. Off-screen rather than display:none — some bots skip
+     hidden fields, and this one is meant to be filled in. */
+  .trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+}
