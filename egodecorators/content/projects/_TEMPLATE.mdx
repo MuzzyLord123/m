@@ -1,0 +1,61 @@
+---
+# Copy this file, rename it to the slug you want in the URL, and fill it in.
+# The filename becomes the URL: content/projects/parkgate-sash-windows.mdx
+# is served at /projects/parkgate-sash-windows.
+#
+# The build validates all of this. It will fail loudly with the filename in the
+# message rather than shipping a gap, so nothing here is optional-by-accident.
+
+title: What the job was, in a few words
+
+# Town is enough. Leave as null rather than guessing — an unconfirmed location
+# renders as a labelled frame, and a guessed one is worse than an empty one.
+location: null
+year: null
+
+# domestic | commercial | industrial
+type: domestic
+
+# featured jobs appear on the home page and at the top of /projects.
+featured: false
+
+# complete       — checked, photographs in, ready to publish.
+# awaiting-photos — words confirmed, photographs still to come.
+# from-old-site  — carried over from the WordPress site and not yet re-confirmed.
+#                  Renders with a visible note. Do not leave one of these live.
+status: awaiting-photos
+
+# One sentence: what was wrong when we got there. Not what we did.
+problem: >-
+  The state it was in.
+
+# What we did, in the order we did it. Preparation first — it is most of the job
+# and it is the part that gets skipped by the people you are being compared to.
+work:
+  - Cut out and made good.
+  - Primed.
+  - Two coats.
+
+# The comparison. THE SAME VIEW, twice — same spot, same framing, same distance.
+# Two photographs of different walls reads as a con and the whole design depends
+# on this being honest.
+#
+# While a photograph is missing, give `needs:` and the slot renders as a
+# labelled frame saying what belongs there. Once it exists, swap `needs` for
+# `src`, `alt`, `width` and `height`. `alt` describes the work shown — the build
+# rejects anything shaped like "image1".
+before:
+  needs: The view before we started — same spot as the after shot.
+after:
+  needs: The same view finished.
+
+# Optional extra photographs, shown down the page. Same rules on alt text.
+gallery: []
+---
+
+Write it in the first person plural — you are a team, not a man. Say what was
+wrong before you say what you put on it, because that is the order the customer
+experienced it in and it is the order that makes the price make sense.
+
+Two or three short paragraphs is plenty. What was behind it when you opened it
+up is always more interesting than the colour.

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "comparison-pairs",
+    "priority": 1,
+    "question": "Four jobs, and for each one a photograph of the same view before you started and after you finished. Same spot, same framing, same rough distance — if the two pictures are of different walls the comparison reads as a con and we will not publish it.",
+    "why": "The whole site is built on before-and-after. Every page has at least one comparison and the home page leads with one. Until these exist the design has nothing in it — the frames render as labelled empty slots saying which photograph is missing.",
+    "where": "public/photographs/<job-slug>/, then before/after in content/projects/<slug>.mdx",
+    "blocksLaunch": true
+  },
+  {
+    "id": "woodwork-closeups",
+    "priority": 1,
+    "question": "Close-ups of the repair work itself: rot opened up, the soft timber cut out, a splice going in, filler back and sanded, primed, and the finished paint. Six or eight photographs would carry the whole repairs page.",
+    "why": "/repairs is the page meant to win the work nobody else bids for, and it is the one thing a competitor on the same bought theme cannot copy. Words alone will not do it — the reader needs to see that you have opened these up before.",
+    "where": "public/photographs/repairs/, then content/copy/repairs.ts",
+    "blocksLaunch": true
+  },
+  {
+    "id": "review-quotes",
+    "priority": 1,
+    "question": "The four reviews, copied and pasted from Yell exactly as the customer typed them — including the odd spelling. And tell us which of them is the commercial job, the one about working around a business that could not move its things out of the way, because that one belongs on the commercial page.",
+    "why": "Reviews are quoted verbatim and attributed exactly as published. A paraphrase presented as a quotation is a fabricated review, so the quotes stay empty and the site shows a labelled frame until the real text is pasted in. The summaries currently in the file came from a search index, not from the reviews, which is why none of them is on the page.",
+    "where": "content/reviews.ts",
+    "blocksLaunch": true
+  },
+  {
+    "id": "team",
+    "priority": 1,
+    "question": "Who is in the team, and what is everyone's actual role? Reviews name Edward (Ted), Mario and a Lauren. Is 'family run' right, and if so who is related to whom?",
+    "why": "/about is written about the people, because the reviews are about the people — customers name Ted and Mario, not the company. We will not describe a team we have not had confirmed.",
+    "where": "content/copy/about.ts",
+    "blocksLaunch": true
+  },
+  {
+    "id": "founded",
+    "priority": 1,
+    "question": "What year did the business start trading?",
+    "why": "The old site says '15 Years Extensive Experience'. That was written in 2022 and has been wrong every year since. The rebuild stores the year once and computes from it, so it can never go stale — but it needs the year.",
+    "where": "content/site.ts (FOUNDED)",
+    "blocksLaunch": true
+  },
+  {
+    "id": "project-facts",
+    "priority": 2,
+    "question": "For each job we write up: where was it (town is enough) and roughly what year?",
+    "why": "A job with a place and a date is evidence. A job without them is a photograph. Location also does the local search work that Neston, Wirral and Flintshire pages depend on.",
+    "where": "location and year in content/projects/<slug>.mdx",
+    "blocksLaunch": false
+  },
+  {
+    "id": "reagent-permission",
+    "priority": 2,
+    "question": "Did ReAgent agree to being named on the website, and is anyone there happy to be quoted?",
+    "why": "The ReAgent job is the strongest commercial proof on the site. Naming a client is fine when they have agreed; it is not when they have not. If they would rather not be named the write-up runs as 'a chemical manufacturer in Runcorn' instead.",
+    "where": "content/projects/reagent-offices-and-warehouse.mdx",
+    "blocksLaunch": true
+  },
+  {
+    "id": "google-profile",
+    "priority": 2,
+    "question": "Is there a Google Business Profile for Ego Decorators, and who has the login?",
+    "why": "The old site's social icon labelled 'google' actually pointed at Yell. Either there is a real profile and we link it, or there is not and one should be created — Neston plus a service area, no full address. Either way the link stops lying.",
+    "where": "content/site.ts (profiles.google) and content/reviews.ts",
+    "blocksLaunch": true
+  },
+  {
+    "id": "yell-rating",
+    "priority": 2,
+    "question": "Read the Yell listing and note the exact rating and review count, and the date you read it.",
+    "why": "The rating is shown as plain text with its source and the date it was read — never as a star graphic and never as aggregateRating in the structured data, which is against Google's policy for third-party ratings. A search index reported 4.9 from 29 reviews in August 2026, but that was not read off the listing itself so it is not published.",
+    "where": "content/reviews.ts (yellRating)",
+    "blocksLaunch": false
+  },
+  {
+    "id": "insurance",
+    "priority": 2,
+    "question": "What public liability cover is held, for how much, and with whom? Any trade qualifications or memberships worth naming?",
+    "why": "Commercial clients ask before they ask the price. Offices, warehouses, churches and care homes all want it in writing, so it belongs on /commercial rather than buried.",
+    "where": "content/copy/commercial.ts",
+    "blocksLaunch": false
+  },
+  {
+    "id": "base-town",
+    "priority": 2,
+    "question": "Is the business based in Neston or West Kirby? The old site and the Yell listing say Neston; the Checkatrade profile says West Kirby.",
+    "why": "Local search needs one consistent town across the website, Google, Yell and Checkatrade. Two different towns across profiles splits the signal and makes both weaker.",
+    "where": "content/site.ts (site.base)",
+    "blocksLaunch": true
+  },
+  {
+    "id": "other-profiles",
+    "priority": 3,
+    "question": "Are the Checkatrade profile (checkatrade.com/trades/egodecorators) and the Facebook page both yours and both current?",
+    "why": "They turned up in search and neither is linked from the old site. If they are yours they are worth linking and keeping consistent; if they are stale they are worth closing. Nothing gets linked until you confirm it.",
+    "where": "content/site.ts (profiles)",
+    "blocksLaunch": false
+  },
+  {
+    "id": "hours",
+    "priority": 3,
+    "question": "What hours do you work, and how quickly do you normally come out to price a job?",
+    "why": "Both questions every enquiry asks. Answering them on /contact saves a phone call each way, and 'we will come out within a week' is worth more than any adjective.",
+    "where": "content/copy/contact.ts",
+    "blocksLaunch": false
+  },
+  {
+    "id": "enquiry-delivery",
+    "priority": 1,
+    "question": "Which inbox should the enquiry form deliver to, and does anyone check it daily?",
+    "why": "A contact form that goes nowhere is worse than no form at all — the customer thinks they have been in touch and never hears back. Until this is wired the form is not shown and the page gives the phone and the email instead.",
+    "where": "src/lib/enquiry.ts",
+    "blocksLaunch": true
+  },
+  {
+    "id": "media-export",
+    "priority": 1,
+    "question": "Admin login for the WordPress site, so the media library can be exported at full resolution before the site is switched off.",
+    "why": "The photographs are the only asset on the old site worth keeping. They must come out of the media library at original resolution, not be saved off the live pages, which serve cropped and re-encoded copies. Once the hosting lapses they are gone.",
+    "where": "public/photographs/ — see MIGRATION.md",
+    "blocksLaunch": true
+  }
+]
