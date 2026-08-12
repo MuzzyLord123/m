@@ -1,17 +1,33 @@
 /**
  * Rewrites the line under the wordmark in the client's logo.
  *
- *   node scripts/make-logo-subtitle.mjs ["NEW TEXT"]
+ *   node scripts/make-logo-subtitle.mjs ["Bold part" "italic part"]
  *
  * The logo arrived as a flattened PNG — swoosh, wordmark and strapline baked
  * into one raster with no layers and no vector source. So changing the
  * strapline means erasing those pixels and drawing new ones.
  *
- * WHAT MAKES THAT SAFE HERE. The strapline sits in its own clear rectangle:
- * x 186–584, y 148–192 contains 3,954 opaque pixels and ZERO saturated-orange
- * ones, measured before anything was touched. Nothing of the swoosh or the
- * wordmark passes through it, so clearing it to transparent removes the old
- * line and nothing else. If the artwork is ever replaced, re-measure before
+ * IT IS THE SITE'S OWN HEADLINE, SET THE SITE'S OWN WAY. The strapline is
+ * "Decorating, done properly." in the two faces the hero uses for exactly that
+ * sentence: Bricolage Grotesque semibold for "Decorating," and Instrument Serif
+ * Italic for "done properly." — the same pairing, the same weights, the same
+ * optical corrections. It reads as the lockup and the page saying one thing in
+ * one voice rather than a logo with a caption.
+ *
+ * The italic carries the three corrections globals.css applies wherever this
+ * pair appears, and they are not optional here either:
+ *   - 1.06em, because Instrument Serif runs visibly smaller than Bricolage at
+ *     the same pixel size
+ *   - weight 400, hard. It ships ONE weight, and asking for 600 gets a
+ *     synthesised faux-bold, which is the most obviously wrong thing this
+ *     typeface can do
+ *   - tracking relaxed to -0.005em against the display's -0.035em, because a
+ *     serif italic wants air between the strokes that a grotesque does not
+ *
+ * WHAT MAKES THE ERASE SAFE. The old strapline sat in its own clear rectangle:
+ * x 186–584, y 148–192 held 3,954 opaque pixels and ZERO saturated-orange ones,
+ * measured before anything was touched. Nothing of the swoosh or the wordmark
+ * passes through it. If the artwork is ever replaced, re-measure before
  * trusting these numbers.
  *
  * IDEMPOTENT, AND REVERSIBLE. It always reads logo-original.png — created from
@@ -20,192 +36,178 @@
  * logo.png and re-run to get back to a known state; keep logo-original.png to
  * get the client's untouched artwork back.
  *
- * MATCHING THE ORIGINAL. Sampled off the old strapline: cap height 22px,
- * baseline y=180, centred on x=383 (the wordmark's centre, not the image's),
- * and a metallic fade that runs #ceced2 at ~96% alpha down to white at ~50% —
- * it gets brighter and thinner towards the baseline, which is what reads as
- * brushed metal. The face is Instrument Sans, already a dependency of this
- * site: the original is an unidentified geometric sans with no source file, and
- * a near-match that is IN the project beats a guess that has to be licensed.
- * Tracking and size are fitted to the target width rather than fixed, so a
- * longer or shorter phrase stays inside the lockup.
+ * The metallic fade is sampled off the original strapline: #ceced2 at ~96%
+ * alpha down to white at ~50%, brighter and thinner towards the baseline, which
+ * is what reads as brushed metal.
  */
 import sharp from "sharp";
 import fs from "node:fs";
 import { launchBrowser } from "./browser.mjs";
 
-const TEXT = process.argv[2] ?? "DECORATING DONE PROPERLY";
+const BOLD = process.argv[2] ?? "Decorating,";
+const ITALIC = process.argv[3] ?? "done properly.";
 
 const SRC = "public/brand/logo-original.png";
 const OUT = "public/brand/logo.png";
 
-/* The clear rectangle, and the type metrics, both measured off the original. */
-const ERASE = { left: 186, top: 148, width: 399, height: 45 };
-const CAP_HEIGHT = 22; // px, from cap top y=158 to baseline y=180
+/* The clear rectangle, and the type metrics, both measured off the original.
+   The box runs to y=204 rather than the 192 the all-caps line needed. That is
+   not a guess: x 186-584 was sampled row by row and holds ZERO opaque pixels
+   from y=186 all the way past y=210, so the descenders of a mixed-case line
+   have room and nothing of the artwork is at risk. The wordmark's lowest orange
+   pixel in this column is y=141, which is what sets the ceiling. */
+const ERASE = { left: 186, top: 148, width: 399, height: 56 };
+/**
+ * Cap height, in px, of the bold half — the same 22 the original strapline
+ * used, so the lockup keeps its proportions.
+ *
+ * It was briefly dropped to 19 out of caution about the descenders on a
+ * mixed-case line, which cost about a fifth of the strapline's size for no
+ * reason: measuring the artwork showed the space below is empty for another
+ * twenty pixels. Worth stating because the strapline is rendered at roughly
+ * 2.5mm tall in the site header, where every pixel of cap height is the
+ * difference between a legible line and a grey smudge.
+ */
+const CAP_HEIGHT = 22;
 const BASELINE = 180;
 const CENTRE = 385;
 const MAX_WIDTH = 396; // keeps the line inside the cleared box, x 186-584
-const SS = 4; // supersample, then downscale — the edges are 22px tall
+const SS = 4; // supersample, then downscale — the ink is under 20px tall
 
 if (!fs.existsSync(SRC)) {
   fs.copyFileSync(OUT, SRC);
   console.log(`kept the untouched artwork as ${SRC}`);
 }
 
-const FONT = "node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2";
-if (!fs.existsSync(FONT)) throw new Error(`font not found: ${FONT} — run npm install`);
-const fontData = fs.readFileSync(FONT).toString("base64");
-
-const browser = await launchBrowser();
-const page = await browser.newPage({ viewport: { width: 1600, height: 400 }, deviceScaleFactor: 1 });
-
-/**
- * Renders the line at `size`/`tracking` and reports the ink box, so the fit
- * below is measured rather than guessed. Cap height is measured off a capital
- * H rather than derived from the font size — the ratio differs per face, and
- * getting it wrong is the difference between a lockup and a near miss.
- */
-async function measure(size, tracking) {
-  return page.evaluate(
-    async ({ text, size, tracking, fontData }) => {
-      if (!document.getElementById("f")) {
-        const s = document.createElement("style");
-        s.id = "f";
-        s.textContent = `@font-face{font-family:IS;src:url(data:font/woff2;base64,${fontData}) format('woff2');font-weight:100 800;font-display:block}
-          html,body{margin:0;background:transparent}
-          #t{position:absolute;left:40px;top:40px;font-family:IS;white-space:pre;color:#fff}`;
-        document.head.appendChild(s);
-        const d = document.createElement("div");
-        d.id = "t";
-        document.body.appendChild(d);
-        await document.fonts.load("400 100px IS");
-        await document.fonts.ready;
-      }
-      const t = document.getElementById("t");
-      t.style.fontSize = size + "px";
-      t.style.letterSpacing = tracking + "em";
-      t.style.fontWeight = "400";
-      t.textContent = text;
-      const w = t.getBoundingClientRect().width;
-      t.textContent = "H";
-      const cap = t.getBoundingClientRect().height; // line box, not cap
-      // Cap height properly: measure the painted rows of an H on a canvas.
-      const c = document.createElement("canvas");
-      c.width = Math.ceil(size * 2);
-      c.height = Math.ceil(size * 2);
-      const g = c.getContext("2d");
-      g.font = `400 ${size}px IS`;
-      g.textBaseline = "alphabetic";
-      g.fillStyle = "#fff";
-      g.fillText("H", 5, size * 1.5);
-      const d2 = g.getImageData(0, 0, c.width, c.height).data;
-      let top = -1, bot = -1;
-      for (let y = 0; y < c.height; y++) {
-        for (let x = 0; x < c.width; x++) {
-          if (d2[(y * c.width + x) * 4 + 3] > 20) {
-            if (top < 0) top = y;
-            bot = y;
-            break;
-          }
-        }
-      }
-      t.textContent = text;
-      return { width: w, capHeight: bot - top + 1, lineBox: cap };
-    },
-    { text: TEXT, size, tracking, fontData },
-  );
+/* The site's own subset faces, not the upstream packages — so the logo cannot
+   drift onto a different cut of the typeface from the one the page renders. */
+const FACES = {
+  display: "src/fonts/display-normal.woff2",
+  italic: "src/fonts/display-italic.woff2",
+};
+for (const [name, path] of Object.entries(FACES)) {
+  if (!fs.existsSync(path)) {
+    throw new Error(`font not found: ${path} — run "npm run build" to generate the subsets`);
+  }
+  FACES[name] = fs.readFileSync(path).toString("base64");
 }
 
-/* Fit, in that order: tracking first, then size.
-   The old strapline was 17 characters at wide tracking. A longer phrase cannot
-   keep both, and of the two it is the TRACKING that has to give first — a
-   strapline set a little smaller still reads as the same lockup, whereas one
-   set tight enough to fit at the old size stops looking like a strapline at
-   all. TRACKING_FLOOR is where a spaced capital line stops reading as spaced;
-   below it, size gives instead. Negative tracking is never acceptable here. */
-const TRACKING_OPEN = 0.18;
-const TRACKING_FLOOR = 0.055;
+const browser = await launchBrowser();
+const page = await browser.newPage({ viewport: { width: 2200, height: 400 }, deviceScaleFactor: 1 });
 
-let size = 30;
-for (let i = 0; i < 12; i++) {
-  const m = await measure(size, TRACKING_OPEN);
+await page.setContent(`<!doctype html><html><head><style>
+  @font-face { font-family: D; src: url(data:font/woff2;base64,${FACES.display}) format('woff2'); font-weight: 200 800; font-display: block }
+  @font-face { font-family: I; src: url(data:font/woff2;base64,${FACES.italic}) format('woff2'); font-weight: 400; font-style: italic; font-display: block }
+  html, body { margin: 0; background: transparent }
+  #line { position: absolute; left: 0; top: 0; white-space: pre; color: #fff; font-family: D; font-weight: 600; letter-spacing: -0.035em }
+  /* The three corrections, matching globals.css. */
+  #line i { font-family: I; font-style: italic; font-weight: 400; font-size: 1.06em; letter-spacing: -0.005em }
+</style></head><body><div id="line"><b id="bold"></b> <i id="ital"></i></div></body></html>`);
+
+await page.evaluate(
+  ({ bold, italic }) => {
+    document.getElementById("bold").textContent = bold;
+    document.getElementById("ital").textContent = italic;
+  },
+  { bold: BOLD, italic: ITALIC },
+);
+await page.evaluate(async () => {
+  await Promise.all([document.fonts.load("600 100px D"), document.fonts.load("italic 400 100px I")]);
+  await document.fonts.ready;
+});
+
+/**
+ * Ink width of the whole line, and cap height measured off a real capital in
+ * the display face — the cap-height-to-em ratio differs per typeface, and
+ * deriving it from the font size is the difference between a lockup and a near
+ * miss.
+ */
+async function measure(size) {
+  return page.evaluate((px) => {
+    const line = document.getElementById("line");
+    line.style.fontSize = px + "px";
+    const width = line.getBoundingClientRect().width;
+    const c = document.createElement("canvas");
+    c.width = c.height = Math.ceil(px * 3);
+    const g = c.getContext("2d");
+    g.font = `600 ${px}px D`;
+    g.textBaseline = "alphabetic";
+    g.fillStyle = "#fff";
+    g.fillText("D", 5, px * 2);
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    let top = -1, bottom = -1;
+    for (let y = 0; y < c.height; y++) {
+      for (let x = 0; x < c.width; x++) {
+        if (d[(y * c.width + x) * 4 + 3] > 20) {
+          if (top < 0) top = y;
+          bottom = y;
+          break;
+        }
+      }
+    }
+    return { width, capHeight: bottom - top + 1 };
+  }, size);
+}
+
+/* Size to the cap height first, then shrink only if the line is too wide.
+   Tracking is not a fitting lever here: both halves carry the tracking their
+   face needs, and squeezing either would stop it matching the hero. */
+let size = 26;
+for (let i = 0; i < 14; i++) {
+  const m = await measure(size);
   const err = CAP_HEIGHT / m.capHeight;
   if (Math.abs(1 - err) < 0.005) break;
   size *= err;
 }
-let tracking = TRACKING_OPEN;
-for (let i = 0; i < 40 && tracking > TRACKING_FLOOR; i++) {
-  const m = await measure(size, tracking);
-  if (m.width <= MAX_WIDTH) break;
-  tracking = Math.max(TRACKING_FLOOR, tracking - 0.005);
-}
-for (let i = 0; i < 40; i++) {
-  const m = await measure(size, tracking);
+for (let i = 0; i < 30; i++) {
+  const m = await measure(size);
   if (m.width <= MAX_WIDTH) break;
   size *= Math.max(0.97, MAX_WIDTH / m.width);
 }
-const fitted = await measure(size, tracking);
+const fitted = await measure(size);
 console.log(
-  `fitted: size ${size.toFixed(2)}px, tracking ${tracking.toFixed(3)}em -> ` +
-    `${fitted.width.toFixed(1)}px wide, cap height ${fitted.capHeight}px (target ${CAP_HEIGHT})`,
+  `fitted: ${size.toFixed(2)}px -> ${fitted.width.toFixed(1)}px wide, ` +
+    `cap height ${fitted.capHeight}px (target ${CAP_HEIGHT}, max width ${MAX_WIDTH})`,
 );
 if (fitted.width > MAX_WIDTH + 1) {
-  console.log(`WARNING: still ${Math.round(fitted.width)}px wide, over the ${MAX_WIDTH}px the lockup allows`);
+  console.log(`WARNING: ${Math.round(fitted.width)}px is wider than the lockup allows`);
 }
 
-/* Paint it at 4x with the metallic fade, on transparent. background-clip:text
-   so the gradient is the ink itself rather than a box behind it. */
-const strip = await page.evaluate(
-  async ({ text, size, tracking, fontData, ss, cap }) => {
-    document.getElementById("t")?.remove();
-    const s = document.createElement("style");
-    s.textContent = `@font-face{font-family:IS2;src:url(data:font/woff2;base64,${fontData}) format('woff2');font-weight:100 800;font-display:block}`;
-    document.head.appendChild(s);
-    await document.fonts.load(`400 ${size * ss}px IS2`);
-    await document.fonts.ready;
-    const d = document.createElement("div");
-    d.id = "paint";
-    d.textContent = text;
-    Object.assign(d.style, {
-      position: "absolute",
-      left: "0px",
-      top: "0px",
-      fontFamily: "IS2",
-      fontWeight: "400",
-      fontSize: `${size * ss}px`,
-      letterSpacing: `${tracking}em`,
-      lineHeight: `${cap * ss * 2}px`,
-      whiteSpace: "pre",
-      /* Brighter and thinner towards the baseline — sampled off the original,
-         which runs #ceced2 at ~96% alpha down to white at ~50%. */
+/* Paint at 4x with the metallic fade. background-clip: text so the gradient is
+   the ink itself rather than a box behind it; on the container, so the two
+   faces share one continuous fade instead of restarting at the italic. */
+await page.evaluate(
+  ({ px, ss }) => {
+    const line = document.getElementById("line");
+    line.style.fontSize = px * ss + "px";
+    Object.assign(line.style, {
       backgroundImage:
         "linear-gradient(to bottom, rgba(206,206,210,0.97) 0%, rgba(214,214,219,0.92) 45%," +
         " rgba(236,234,240,0.72) 74%, rgba(255,255,255,0.5) 100%)",
       WebkitBackgroundClip: "text",
       backgroundClip: "text",
       color: "transparent",
+      lineHeight: "1.35",
     });
-    document.body.appendChild(d);
-    const r = d.getBoundingClientRect();
-    return { w: Math.ceil(r.width), h: Math.ceil(r.height) };
   },
-  { text: TEXT, size, tracking, fontData, ss: SS, cap: CAP_HEIGHT },
+  { px: size, ss: SS },
 );
 
-const shot = await page.locator("#paint").screenshot({ omitBackground: true });
+const shot = await page.locator("#line").screenshot({ omitBackground: true });
 await browser.close();
 
-/* Trim to the ink, so placement is driven by the glyphs and not by whatever
-   leading the line box happened to carry. */
+/* Trim to the ink so placement is driven by the glyphs, not by whatever leading
+   the line box happened to carry. */
 const trimmed = await sharp(shot).trim({ threshold: 1 }).toBuffer();
 const meta = await sharp(trimmed).metadata();
 const targetW = Math.round(meta.width / SS);
 const targetH = Math.round(meta.height / SS);
-const line = await sharp(trimmed).resize(targetW, targetH, { fit: "fill", kernel: "lanczos3" }).toBuffer();
+const line = await sharp(trimmed)
+  .resize(targetW, targetH, { fit: "fill", kernel: "lanczos3" })
+  .toBuffer();
 
-/* The trimmed strip starts at the cap top and ends at the baseline-ish bottom
-   of the descender-free, all-caps line, so its top sits CAP_HEIGHT above the
-   baseline. */
+/* The trimmed strip starts at the tallest ink — the capital D — so its top sits
+   CAP_HEIGHT above the baseline. */
 const left = Math.round(CENTRE - targetW / 2);
 const top = Math.round(BASELINE - CAP_HEIGHT);
 
@@ -231,5 +233,11 @@ await sharp(cleared)
   .png({ compressionLevel: 9 })
   .toFile(OUT);
 
-console.log(`"${TEXT}"  ->  ${OUT}`);
-console.log(`   placed ${targetW}x${targetH}px at x=${left}, y=${top} (baseline ${BASELINE}, centre ${CENTRE})`);
+console.log(`"${BOLD} ${ITALIC}"  ->  ${OUT}`);
+console.log(
+  `   placed ${targetW}x${targetH}px at x=${left}, y=${top} ` +
+    `(baseline ${BASELINE}, centre ${CENTRE}, bottom of ink y=${top + targetH})`,
+);
+if (top + targetH > ERASE.top + ERASE.height) {
+  console.log(`   WARNING: ink reaches y=${top + targetH}, past the cleared box at y=${ERASE.top + ERASE.height}`);
+}
