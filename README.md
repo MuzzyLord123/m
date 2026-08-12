@@ -1,11 +1,30 @@
 # F.A.S Painter and Decorator
 
-Website for a painter and decorator working in Wrexham and Coedpoeth. One page, one
+Website for a painter and decorator working in Wrexham and Coedpoeth. Five pages, one
 job: make the phone ring.
 
 Next.js (App Router) · Tailwind v4 · TypeScript. No CMS, no database, no logins. All
 the words live in `/content` as TypeScript files, so copy can be changed without going
 anywhere near a component.
+
+## The five pages
+
+| Page | What is on it |
+|---|---|
+| `/` | Hero, the four things he does, two real reviews, where he works, the number |
+| `/what-i-do` | The four service bands, then the eggshell / satin / gloss table |
+| `/how-i-work` | The preparation section, then the four steps a job runs through |
+| `/recent-work` | Gallery, the before/after slider, and all six Google reviews |
+| `/contact` | Where he works with the radius sketch, then the phone and the form |
+
+`navPages` in `content/site.ts` is the single source for all of it — the desktop bar,
+the mobile menu and `sitemap.xml` are all generated from that one array, so a page
+cannot exist in the menu and be missing from the sitemap, or the other way round. Add a
+page there and to `app/(site)/`, and it appears in all three.
+
+Each page is keyed to a colour. It paints the bar across the top of that page, the
+underline that slides along the desktop bar, and the spine beside that page in the
+mobile menu — three places, one colour, so you always know where you are.
 
 ```bash
 npm install
@@ -89,9 +108,9 @@ Open `content/gallery.ts` and add an entry to the `jobs` array:
 - `caption`, `place` and `finish` may be `null` while you are waiting on the details —
   the slot just shows without a caption rather than showing an empty one.
 
-There is no `/gallery` page and no per-job pages yet, on purpose: they only earn their
-place once there are three or more real jobs with before-and-after photographs. Until
-then the on-page gallery is the whole of it.
+There are no per-job `/work/[slug]` pages yet, on purpose: they only earn their place
+once there are three or more real jobs with before-and-after photographs. Until then
+`/recent-work` is the whole of it.
 
 ### 3. Change a service description
 
@@ -99,7 +118,7 @@ then the on-page gallery is the whole of it.
 
 ```ts
 {
-  id: 'woodwork',                 // also the anchor link, e.g. /#woodwork
+  id: 'woodwork',                 // also the anchor, e.g. /what-i-do#woodwork
   swatchLabel: 'Woodwork',        // small label above the heading
   title: 'Woodwork finishing',
   body: 'Doors, skirting, architrave…',   // aim for 40–60 words
@@ -181,6 +200,9 @@ of trouble. Please keep to them when editing.
   and the register in `content/todo.ts`.
 - **No stock photography, ever**, and no AI-generated interiors presented as his work.
   An empty labelled block is more honest and, oddly, looks better.
+- **The phone is never more than one tap away on a handheld.** The call bar is fixed to
+  the bottom of the screen and sits outside the menu. Do not move it into the menu —
+  that turns one action into two.
 - **No fake reviews or testimonials.** The ones in `content/reviews.ts` are real Google
   reviews the client supplied, quoted verbatim. No invented average, no review count
   beyond what is actually held, and no review markup in the structured data.
@@ -254,17 +276,28 @@ work, or paste the values into your host's dashboard.
 ```
 app/
   layout.tsx            fonts, metadata, the grain overlay, the no-JS fallback
-  page.tsx              the single page, in conversion order
   globals.css           design tokens (@theme) and every hand-written rule
+  (site)/               the five public pages
+    layout.tsx          nav, footer and the fixed call bar
+    page.tsx            home
+    what-i-do/ how-i-work/ recent-work/ contact/
   api/enquiry/route.ts  the contact form handler
   enquiry/sent|problem  where the form lands with JavaScript switched off
   opengraph-image.tsx   link preview, built from the brand block
   sitemap.ts robots.ts icon.tsx
-components/             everything on the page; sections/ holds the eight bands
+components/             everything on the pages; sections/ holds the bands
+  nav/DesktopNav.tsx    sticky bar, sliding painted underline
+  nav/MobileMenu.tsx    the burger and the dust-sheet panel
+  nav/MobileBars.tsx    top bar and the fixed call bar
 content/                all the words
 lib/                    swatch colours, review-mode flag
 scripts/audit.mjs       the pre-flight check
 ```
+
+`(site)` is a route group, so it does not appear in any URL. It exists so the
+`/enquiry/*` pages — where the form lands with JavaScript off — stay stripped back to
+the logotype, the message and the phone number, with nothing to navigate away into at
+the moment somebody has just got in touch.
 
 **Colour.** Tokens are in the `@theme` block at the top of `app/globals.css`. Paper base,
 ink type, flat colour blocks, no gradients anywhere. The orange comes in three steps —
@@ -277,6 +310,19 @@ this site has to clear 4.5:1.
 Instrument Sans for body copy. Both self-hosted by `next/font` — there is no request to
 Google from the browser.
 
+**Navigation.** Two separate builds, not one responsive fudge. Desktop is a thin sticky
+bar with an underline that slides between pages and takes the colour of the one it lands
+on. Handheld gets a burger — three painted strokes of different lengths in three swatch
+colours rather than the usual three grey bars — opening a full-screen sheet that drops
+from the top, one painted spine per page, labels in Archivo Expanded, and the phone
+number at the bottom of it. Both the menu and the reviews dialog are native
+`<dialog>` elements, so focus trapping, Escape and focus restoration come for free and
+there is no drawer library anywhere.
+
+The fixed call bar sits underneath all of it and is never inside the menu. Opening a
+menu to find a phone number is two actions; this way it stays one tap, and it needs no
+JavaScript at all.
+
 **Motion.** Deliberately little of it, and almost none of it JavaScript:
 
 | Effect | How |
@@ -286,6 +332,7 @@ Google from the browser.
 | The "how a job runs" line drawing itself | CSS scroll-driven animation, `stroke-dashoffset` |
 | Hero parallax | CSS scroll-driven animation, no scroll handler |
 | Before/after divider | The one place the animation library is used — a `MotionValue` so dragging never re-renders. Loaded after hydration, below the fold. |
+| Mobile menu | CSS: the sheet drops from the top, rows and spines lay in one after another |
 
 Nothing loops. Everything has a `prefers-reduced-motion` path, and with JavaScript
 switched off the roller covers are removed entirely rather than left sitting over the
@@ -300,12 +347,15 @@ npm run build && npm start          # in one terminal
 npm run audit                       # in another
 ```
 
-`scripts/audit.mjs` runs axe on desktop and mobile and then checks the things this site
-is not allowed to get wrong: exactly one `h1`, no skipped heading levels, the phone
-number formatted identically in all six places it appears, structured data that omits
-the fields we cannot confirm, no banned marketing phrases, at most four masking-tape
-labels, the before/after handle working from the keyboard, both form paths (with and
-without JavaScript), and the page still being readable with JavaScript off.
+`scripts/audit.mjs` runs axe over all five pages on desktop and mobile — 124 checks —
+and then checks the things this site is not allowed to get wrong: one `h1` per page, no
+skipped heading levels, a canonical matching the path, the phone number formatted
+identically everywhere it appears, structured data that omits the fields we cannot
+confirm, no banned marketing phrases, at most four masking-tape labels a page, the
+mobile menu opening and trapping focus and closing itself after navigating, axe run
+again with the menu open and with the reviews dialog open (axe only scans what is
+visible, so a closed dialog tells you nothing), the before/after handle working from the
+keyboard, both form paths, and every page still readable with JavaScript off.
 
 Point it somewhere else with `AUDIT_URL=https://… npm run audit`.
 

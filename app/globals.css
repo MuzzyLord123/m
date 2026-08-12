@@ -378,6 +378,74 @@ dialog.sheet-dialog {
 }
 
 /* ==========================================================================
+   Mobile menu — a dust sheet dropping over the page
+   ========================================================================== */
+
+dialog.menu-dialog {
+  margin: 0;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--color-ink);
+  overflow: hidden;
+}
+
+dialog.menu-dialog::backdrop {
+  background: rgb(22 19 15 / 0.4);
+}
+
+/* the sheet itself unrolls from the top */
+dialog.menu-dialog[open] .menu-sheet {
+  animation: sheet-drop 400ms var(--ease-roller) both;
+}
+
+@keyframes sheet-drop {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* rows land one after another, like a chart being laid out */
+dialog.menu-dialog[open] .menu-row {
+  animation: menu-row-in 300ms var(--ease-bleed) both;
+  animation-delay: calc(180ms + var(--i) * 45ms);
+}
+
+@keyframes menu-row-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the swatch block beside each row paints itself in */
+dialog.menu-dialog[open] .menu-swatch {
+  animation: menu-swatch-in 320ms var(--ease-roller) both;
+  animation-delay: calc(200ms + var(--i) * 45ms);
+  transform-origin: top center;
+}
+
+@keyframes menu-swatch-in {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* ==========================================================================
    Reduced motion — reveals instant, parallax off, wipes become opacity
    ========================================================================== */
 

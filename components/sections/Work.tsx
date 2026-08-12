@@ -24,20 +24,27 @@ const BeforeAfter = dynamic(() =>
  * The first job with a before-and-after pair gets the draggable comparison at
  * full width; the rest fall into the grid (desktop) or the carousel (mobile).
  */
-export function Work() {
+export function Work({ showHead = true }: { showHead?: boolean } = {}) {
   const pair = jobs.find((j) => j.beforeAfter !== null)
 
   return (
-    <section id="work" aria-labelledby="work-heading" className="bg-paper">
+    <section
+      id="work"
+      aria-labelledby={showHead ? 'work-heading' : undefined}
+      aria-label={showHead ? undefined : 'Recent work'}
+      className="bg-paper"
+    >
       <div className="mx-auto w-full max-w-[1240px] px-5 py-16 md:px-8 md:py-24">
         <div className="grid grid-cols-12 gap-x-8 gap-y-6">
-          <div className="col-span-12 md:col-span-6 md:col-start-1">
-            <Tape>{galleryCopy.eyebrow}</Tape>
-            <h2 id="work-heading" className="mt-6 text-[clamp(1.9rem,4.4vw,3.1rem)] text-ink">
-              {galleryCopy.heading}
-            </h2>
-          </div>
-          <div className="col-span-12 self-end md:col-span-5 md:col-start-8">
+          {showHead ? (
+            <div className="col-span-12 md:col-span-6 md:col-start-1">
+              <Tape>{galleryCopy.eyebrow}</Tape>
+              <h2 id="work-heading" className="mt-6 text-[clamp(1.9rem,4.4vw,3.1rem)] text-ink">
+                {galleryCopy.heading}
+              </h2>
+            </div>
+          ) : null}
+          <div className={`col-span-12 self-end md:col-span-5 ${showHead ? 'md:col-start-8' : 'md:col-start-1'}`}>
             <p className="max-w-[46ch] font-body text-ink-soft">{galleryCopy.body}</p>
             {jobs.every((j) => j.photo.src === null) ? (
               <p className="mt-4 max-w-[46ch] border-l-4 border-orange pl-4 font-body text-[0.95rem] text-ink">
@@ -73,7 +80,7 @@ export function Work() {
             Until the photographs land, this is the only real evidence on the
             page — which is exactly why it is not tucked away at the bottom. */}
         <div className="mt-16 border-t-4 border-ink pt-12 md:mt-20 md:pt-14">
-          <Reviews />
+          <Reviews headingLevel={showHead ? 'h3' : 'h2'} />
         </div>
       </div>
     </section>

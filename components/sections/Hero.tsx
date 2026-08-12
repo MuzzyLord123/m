@@ -1,4 +1,5 @@
-import { ArrowDown } from '@phosphor-icons/react/dist/ssr'
+import Link from 'next/link'
+import { ArrowRight } from '@phosphor-icons/react/dist/ssr'
 import { hero } from '@/content/hero'
 import { PhotoSlot } from '../PhotoSlot'
 import { CallLink } from '../CallLink'
@@ -54,14 +55,14 @@ export function Hero() {
             <CallLink variant="slab" label={hero.callLabel} />
           </div>
 
-          <a
-            href="#work"
+          <Link
+            href={hero.secondaryHref}
             className="stroke-link mt-7 inline-flex items-center gap-2 font-body text-[0.98rem] font-medium text-chalk"
             style={{ backgroundImage: 'linear-gradient(#FFFDF8, #FFFDF8)' }}
           >
             {hero.secondary}
-            <ArrowDown size={17} weight="regular" strokeWidth={1.5} aria-hidden />
-          </a>
+            <ArrowRight size={17} weight="regular" strokeWidth={1.5} aria-hidden />
+          </Link>
         </div>
       </div>
     </section>

@@ -1,39 +1,28 @@
 import { Logotype } from '../Logotype'
 import { CallLink } from '../CallLink'
+import { MobileMenu } from './MobileMenu'
 
 /**
- * Mobile navigation. Deliberately NOT a responsive version of the desktop bar.
+ * Handheld chrome, in two parts.
  *
- * No hamburger, no drawer. A compact top bar carrying the logotype and two
- * links, and a fixed call bar across the bottom of the screen that is there
- * from the first pixel of scroll. The phone is always one tap away.
+ * A compact top bar carrying the logotype and the burger, and a fixed call bar
+ * across the bottom of the screen that is there from the first pixel of scroll.
  *
- * Both are plain markup — no JavaScript is involved in reaching the phone.
+ * The call bar is deliberately NOT inside the menu. Opening a menu to find a
+ * phone number is two actions; this way the number is always one tap, whether
+ * the menu has ever been opened or not. It is also plain markup — no JavaScript
+ * is involved in reaching the phone.
  */
 
 export function MobileTopBar() {
   return (
     <header className="sticky top-0 z-40 border-b border-ink/12 bg-paper md:hidden">
-      <nav
-        aria-label="Main"
-        className="mx-auto flex h-[52px] w-full items-center justify-between px-5"
-      >
-        <a href="#top" aria-label="F.A.S Painter &amp; Decorator, back to top">
+      <div className="mx-auto flex h-[52px] w-full items-center justify-between px-5">
+        <a href="/" aria-label="F.A.S Painter &amp; Decorator, home">
           <Logotype />
         </a>
-        <ul className="flex items-center gap-5">
-          <li>
-            <a href="#work" className="font-body text-[0.9rem] font-medium text-ink">
-              Work
-            </a>
-          </li>
-          <li>
-            <a href="#contact" className="font-body text-[0.9rem] font-medium text-ink">
-              Contact
-            </a>
-          </li>
-        </ul>
-      </nav>
+        <MobileMenu />
+      </div>
     </header>
   )
 }

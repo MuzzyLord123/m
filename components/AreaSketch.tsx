@@ -5,8 +5,25 @@
  * Not a Google Maps embed — a third-party iframe on the main page costs more in
  * load time than it gives back, and this was never a wayfinding problem. Only
  * the two places the client confirmed are marked.
+ *
+ * `tone` switches the whole thing for a dark background rather than trying to
+ * recolour it from the outside. Orange stays orange in both — it is the marker
+ * on the town he is based in, and it clears 3:1 against paper and green alike.
  */
-export function AreaSketch({ className = '' }: { className?: string }) {
+export function AreaSketch({
+  className = '',
+  tone = 'ink',
+}: {
+  className?: string
+  tone?: 'ink' | 'chalk'
+}) {
+  const chalk = tone === 'chalk'
+  const line = chalk ? '#FFFDF8' : '#4A443C'
+  const ring = chalk ? '#FFFDF8' : '#1F3D33'
+  const label = chalk ? '#FFFDF8' : '#16130F'
+  const mark = chalk ? '#FFFDF8' : '#1F3D33'
+  const caption = chalk ? '#FFFDF8' : '#4A443C'
+
   return (
     <svg
       viewBox="0 0 420 340"
@@ -18,17 +35,18 @@ export function AreaSketch({ className = '' }: { className?: string }) {
       <path
         d="M212 36 C 312 30, 392 96, 396 168 C 400 244, 322 306, 214 310 C 110 314, 26 250, 28 168 C 30 92, 116 40, 212 36"
         fill="none"
-        stroke="#4A443C"
+        stroke={line}
         strokeWidth="2"
         strokeDasharray="10 8"
         strokeLinecap="round"
+        opacity={chalk ? 0.75 : 1}
       />
 
       {/* inner ring */}
       <path
         d="M214 62 C 300 58, 366 106, 364 176 C 362 240, 296 288, 212 290 C 128 292, 66 240, 68 174 C 70 110, 134 66, 214 62"
         fill="none"
-        stroke="#1F3D33"
+        stroke={ring}
         strokeWidth="2.5"
         strokeLinecap="round"
       />
@@ -37,17 +55,17 @@ export function AreaSketch({ className = '' }: { className?: string }) {
       <path
         d="M176 166 C 192 160, 202 172, 214 180"
         fill="none"
-        stroke="#4A443C"
+        stroke={line}
         strokeWidth="1.6"
         strokeLinecap="round"
       />
 
       {/* Coedpoeth */}
-      <rect x="163" y="158" width="12" height="12" fill="#1F3D33" />
+      <rect x="163" y="158" width="12" height="12" fill={mark} />
       <text
         x="92"
         y="146"
-        fill="#16130F"
+        fill={label}
         fontSize="16"
         fontWeight="700"
         style={{ fontFamily: 'var(--font-display)', fontStretch: '125%' }}
@@ -60,7 +78,7 @@ export function AreaSketch({ className = '' }: { className?: string }) {
       <text
         x="237"
         y="190"
-        fill="#16130F"
+        fill={label}
         fontSize="19"
         fontWeight="700"
         style={{ fontFamily: 'var(--font-display)', fontStretch: '125%' }}
@@ -71,8 +89,9 @@ export function AreaSketch({ className = '' }: { className?: string }) {
       <text
         x="8"
         y="332"
-        fill="#4A443C"
+        fill={caption}
         fontSize="12.5"
+        opacity={chalk ? 0.85 : 1}
         style={{ fontFamily: 'var(--font-body)', letterSpacing: '0.12em' }}
       >
         SKETCH — NOT TO SCALE
