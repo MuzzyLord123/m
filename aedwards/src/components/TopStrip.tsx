@@ -1,34 +1,38 @@
 import Link from 'next/link'
 import { business, phone } from '@content/site'
+import { Menu } from './Menu'
 
 /**
- * There is no navigation, in the usual sense.
- *
  * A mono strip fixed to the top of the viewport, inheriting whatever colours
- * the page is currently painted: name on the left, phone on the right, both
- * plain text. No menu, no burger, no overlay — the home page is a sequence you
- * scroll, and the only thing anyone needs is the number, which is why it never
- * leaves the screen.
+ * the page is currently painted: name on the left, then the phone number, then
+ * the menu. Plain text and one small hard-edged mark, nothing else.
  *
- * 44px tall on mobile, so the number is a real tap target at the size a thumb
- * actually is.
+ * It carried no navigation at all until the site grew from three pages to
+ * eight — at which point a service page had no route to the reviews, which are
+ * the entire argument. The menu is in Menu.tsx and it is built out of this
+ * site's own palette rather than bolted on. The number stays where it was, to
+ * the left of it, because it is still the thing most people came for.
+ *
+ * 44px tall on mobile, and every control in it fills that full height, so they
+ * are real tap targets at the size a thumb actually is.
  */
 
 export function TopStrip() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 flex h-11 items-center justify-between gap-4 px-[max(1.25rem,4vw)] md:h-14">
-      {/* Both fill the strip's full height. The number here is the primary
-          call to action on a phone and it was a 21px target before this. */}
+    <header className="fixed inset-x-0 top-0 z-50 flex h-11 items-center gap-4 px-[max(1.25rem,4vw)] md:h-14">
       <Link href="/" className="mono-sm flex h-full items-center truncate uppercase">
         {business.name}
       </Link>
 
       <a
+        data-strip-phone
         href={phone.href}
-        className="mono-sm flex h-full shrink-0 items-center whitespace-nowrap tabular-nums"
+        className="mono-sm ml-auto flex h-full shrink-0 items-center whitespace-nowrap tabular-nums"
       >
         {phone.display}
       </a>
+
+      <Menu />
     </header>
   )
 }

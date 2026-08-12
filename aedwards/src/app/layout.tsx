@@ -62,7 +62,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           perfectly readable page.
         */}
         <noscript>
-          <style>{`[data-clip]{clip-path:none!important;opacity:1!important}`}</style>
+          <style>{
+            // The clip reveals never run without JavaScript, so the type they
+            // are hiding would stay hidden. This puts it back.
+            //
+            // The menu button is hidden instead of fixed, because a menu that
+            // opens is the one thing here that genuinely needs scripting. The
+            // site does not depend on it: every page is reachable from the
+            // service list on the home page and from the links at the foot of
+            // each service page. Better no control than a dead one.
+            `[data-clip]{clip-path:none!important;opacity:1!important}` +
+            `[aria-controls="menu-panel"]{display:none!important}`
+          }</style>
         </noscript>
       </head>
       <body className="antialiased">

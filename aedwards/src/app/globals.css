@@ -311,6 +311,32 @@
 
 @layer utilities {
   /*
+    Below 420px the strip cannot hold the name, the phone number and a labelled
+    menu button at once. So while the menu is open the number steps aside and
+    the button gets its word: a bare bar with nothing next to it is a guess,
+    and the number is not lost — the panel ends with it, four times the size.
+
+    Done with :has() rather than by threading the open state back up into the
+    strip, because the button already publishes that state in aria-expanded and
+    two sources of truth for one boolean is one too many. Browsers without
+    :has() simply keep the closed layout, which is the safe way round.
+
+    In the utilities layer on purpose. These fight `flex` and `hidden`, which
+    are utilities, and cascade layers are decided by layer order before
+    specificity — the same rule sitting in the components layer loses to a
+    single-class utility every time, silently.
+  */
+  @media (max-width: 419px) {
+    header:has(button[aria-expanded='true']) [data-strip-phone] {
+      display: none;
+    }
+
+    header:has(button[aria-expanded='true']) [data-menu-word] {
+      display: inline;
+    }
+  }
+
+  /*
     A real tap target.
 
     Mono is 13–15px on this site, so a link set in it is a 21px-tall box — and

@@ -174,6 +174,25 @@ export const leaveAReview = {
   line: 'If I have done work for you, a couple of lines helps more than anything else I could pay for. Thank you.',
 } as const
 
+/* ------------------------------------------------------------------ menu --- */
+
+/**
+ * Built from the service list rather than typed out again, so a new service
+ * page turns up in the menu on its own and cannot be forgotten.
+ *
+ * Order matters: it is the order the palette bands come out in.
+ */
+export const menu = {
+  open: 'Menu',
+  close: 'Close',
+  links: [
+    { href: '/', label: 'Home' },
+    ...services.map((s) => ({ href: `/${s.slug}`, label: s.name })),
+    { href: '/reviews', label: 'Reviews' },
+    { href: '/leave-a-review', label: 'Leave a review' },
+  ],
+} as const
+
 /* ------------------------------------------------------------- not found --- */
 
 export const notFound = {

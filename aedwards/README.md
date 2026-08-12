@@ -48,9 +48,9 @@ work.
 - **No cards, boxes, borders, shadows, gradients, rounded corners or icons.**
   Not one, anywhere. The colour fields are the whole visual system. Arrows are
   `→` in the mono face.
-- **No navigation.** A mono strip fixed to the top: name left, phone right. The
-  home page is a sequence you scroll, and the only thing anyone needs is the
-  number, which is why it never leaves the screen.
+- **Almost no navigation.** A mono strip fixed to the top: name, phone, menu.
+  The number never leaves the screen, because it is still the thing most people
+  came for.
 
 ### The eleven fields
 
@@ -100,8 +100,44 @@ method claims, guarantees, turnaround times or prices in Andy's mouth. He should
 still read the five pages and cross out anything he does not do; that is
 `content/needed.json#service-page-copy`.
 
-There is still no menu. The service list on field 2 of the home page is the
-index, and each service page links to the other four.
+The service list on field 2 of the home page is also an index of them, and each
+service page links to the other four.
+
+## The menu
+
+The brief said no burger, and it was right when it was written: the site was one
+scrolling sequence plus two side pages, and the only thing anyone needed was the
+phone number. At eight pages a service page had no route to the reviews at all —
+which on this site is the argument — so there is one now.
+
+The point was to make it belong here rather than bolt a generic one on.
+
+**The mark** is three hard-edged bars in the current foreground: no rounding, no
+box, no stroke icon out of a set, the same 2px weight as the mono type beside
+it. They are `var(--fg)` rather than palette colours because the strip repaints
+on scroll and a stone bar would vanish the moment the page turned stone. Open,
+the three bars collapse into **one** — not a cross, because a cross is the cross
+every site has, and there is a word next to it doing that job better.
+
+**The panel is the site in miniature.** Every link is a full-bleed band of one
+field colour, in palette order, so opening the menu is the same experience as
+scrolling the page: the six colours stacked, type flush left, ending with the
+phone number at four times the size it is in the strip. Each band takes its
+foreground from `content/fields.ts`, so all nine clear 7:1 by construction. They
+wipe in from the baseline up, staggered, using the same reveal as the display
+type everywhere else.
+
+Below 420px the strip cannot hold a name, a phone number and a labelled button
+at once, so while the panel is open the number steps aside and the button takes
+its word. Nothing is lost — the number is the last band.
+
+Escape closes it, focus returns to the button, Tab wraps inside the panel, the
+page behind does not scroll, and a route change closes it. Without JavaScript
+the button is hidden rather than left dead: every page is still reachable from
+the home page's service list and the links at the foot of each service page.
+
+The link list is built from `content/services.ts`, so a new service page appears
+in the menu on its own.
 
 ## The motion
 
@@ -151,7 +187,7 @@ boundary and turns the clip reveals into opacity fades — handled in CSS on
 JavaScript the page holds field one's colours and every word on it still clears
 7:1, because there is only ever one foreground/background pair in play.
 
-### Two traps worth not falling into twice
+### Three traps worth not falling into twice
 
 An element clipped with `inset(100%)` reports an `intersectionRatio` of **0** to
 IntersectionObserver in Chrome, however much of it is on screen. So an in-view
@@ -181,6 +217,13 @@ So every field keeps its snap point, and `Field` instead takes `tall`, which
 steps the whole page down to proximity on mobile. There is a test for this:
 scroll each page to the bottom with real wheel events on four viewports and
 assert the last field is actually reachable.
+
+**A CSS rule in Tailwind's `components` layer loses to a single-class utility,
+silently.** Cascade layers are resolved by layer order *before* specificity, so
+`header:has(button[aria-expanded='true']) [data-strip-phone] { display: none }`
+sitting in `@layer components` was beaten by `.flex` in `@layer utilities` — the
+rule was in the stylesheet, matched the element, and did nothing. Rules that
+fight utilities belong in the utilities layer.
 
 ## Rules the build enforces
 
