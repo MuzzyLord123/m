@@ -1,16 +1,16 @@
 import type { MetadataRoute } from 'next'
-import { siteUrl } from '@/content/site'
+import { navPages, siteUrl } from '@/content/site'
 
 /**
- * One page, so one URL. The /enquiry/* pages are form outcomes and are marked
- * noindex, so they stay out of here.
+ * Driven by the same array as the navigation, so a page cannot exist in the
+ * menu and be missing from the sitemap, or the other way round.
+ *
+ * The /enquiry/* pages are form outcomes and marked noindex, so they stay out.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: `${siteUrl}/`,
-      changeFrequency: 'monthly',
-      priority: 1,
-    },
-  ]
+  return navPages.map((page) => ({
+    url: `${siteUrl}${page.href === '/' ? '/' : page.href}`,
+    changeFrequency: 'monthly',
+    priority: page.href === '/' ? 1 : 0.8,
+  }))
 }

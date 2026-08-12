@@ -9,6 +9,7 @@ export const hero = {
   sub: 'Interiors, exteriors and woodwork — prepared properly, then painted.',
   callLabel: 'Ring me',
   secondary: 'See recent work',
+  secondaryHref: '/recent-work',
   photo: emptyPhoto(
     'The hero shot: the best finished room you have, taken wide and level from the doorway in daylight. Landscape, as big a file as your phone will give.',
   ),

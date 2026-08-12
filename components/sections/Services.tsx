@@ -25,16 +25,27 @@ import { SectionHead } from '../SectionHead'
 const EDGE_LEFT = 'md:pl-[max(2rem,calc((100vw-1240px)/2+2rem))]'
 const EDGE_RIGHT = 'md:pr-[max(2rem,calc((100vw-1240px)/2+2rem))]'
 
-export function Services() {
+export function Services({ showHead = true }: { showHead?: boolean } = {}) {
+  // With the section head hidden the page masthead is the h1 directly above,
+  // so the band titles step up to h2 rather than leaving a gap at h3.
+  const bandLevel = showHead ? 'h3' : 'h2'
+
   return (
-    <section id="services" aria-labelledby="services-heading" className="bg-paper">
-      <div className="mx-auto w-full max-w-[1240px] px-5 pt-16 pb-6 md:px-8 md:pt-24 md:pb-10">
-        <SectionHead
-          eyebrow="What I do"
-          heading={<span id="services-heading">Four things, done properly.</span>}
-          className="md:max-w-[34ch]"
-        />
-      </div>
+    <section
+      id="services"
+      aria-labelledby={showHead ? 'services-heading' : undefined}
+      aria-label={showHead ? undefined : 'What I do'}
+      className="bg-paper"
+    >
+      {showHead ? (
+        <div className="mx-auto w-full max-w-[1240px] px-5 pt-16 pb-6 md:px-8 md:pt-24 md:pb-10">
+          <SectionHead
+            eyebrow="What I do"
+            heading={<span id="services-heading">Four things, done properly.</span>}
+            className="md:max-w-[34ch]"
+          />
+        </div>
+      ) : null}
 
       {services.map((service, i) => {
         const variant = i % 4
@@ -49,7 +60,7 @@ export function Services() {
               {rule}
               <div className="md:grid md:grid-cols-2 md:items-stretch">
                 <div className={`px-5 py-12 md:py-24 md:pr-14 ${EDGE_LEFT}`}>
-                  <Copy service={service} index={i} colour={colour} />
+                  <Copy service={service} index={i} colour={colour} level={bandLevel} />
                 </div>
                 <RollerReveal colour={colour} className="md:h-full">
                   <PhotoSlot
@@ -71,7 +82,7 @@ export function Services() {
               {rule}
               <div className="mx-auto grid w-full max-w-[1240px] grid-cols-12 gap-x-8 gap-y-9 px-5 py-12 md:px-8 md:py-24">
                 <div className="col-span-12 md:col-span-8">
-                  <Heading service={service} index={i} colour={colour} />
+                  <Heading service={service} index={i} colour={colour} level={bandLevel} />
                 </div>
                 <div className="col-span-12 md:col-span-6 md:col-start-1">
                   <RollerReveal colour={colour}>
@@ -103,7 +114,7 @@ export function Services() {
                 <div
                   className={`px-5 py-12 md:col-start-2 md:row-start-1 md:py-24 md:pl-14 ${EDGE_RIGHT}`}
                 >
-                  <Copy service={service} index={i} colour={colour} />
+                  <Copy service={service} index={i} colour={colour} level={bandLevel} />
                 </div>
                 <RollerReveal colour={colour} className="md:col-start-1 md:row-start-1 md:h-full">
                   <PhotoSlot
@@ -124,7 +135,7 @@ export function Services() {
             {rule}
             <div className="mx-auto grid w-full max-w-[1240px] grid-cols-12 gap-x-8 gap-y-10 px-5 py-12 md:px-8 md:pt-24 md:pb-16">
               <div className="col-span-12 md:col-span-6">
-                <Heading service={service} index={i} colour={colour} />
+                <Heading service={service} index={i} colour={colour} level={bandLevel} />
                 <p className="mt-6 max-w-[52ch] font-body text-ink-soft">{service.body}</p>
               </div>
               <div className="col-span-12 md:col-span-4 md:col-start-9 md:self-end">
@@ -150,7 +161,18 @@ export function Services() {
 
 /* ---------------------------------------------------------------------- */
 
-function Heading({ service, index, colour }: { service: Service; index: number; colour: string }) {
+function Heading({
+  service,
+  index,
+  colour,
+  level,
+}: {
+  service: Service
+  index: number
+  colour: string
+  level: 'h2' | 'h3'
+}) {
+  const Title = level
   return (
     <>
       <p className="flex items-baseline gap-4">
@@ -165,9 +187,9 @@ function Heading({ service, index, colour }: { service: Service; index: number; 
           {service.swatchLabel}
         </span>
       </p>
-      <h3 className="mt-4 max-w-[18ch] text-[clamp(1.7rem,3.4vw,2.5rem)] text-ink">
+      <Title className="mt-4 max-w-[18ch] text-[clamp(1.7rem,3.4vw,2.5rem)] text-ink">
         {service.title}
-      </h3>
+      </Title>
     </>
   )
 }
@@ -194,10 +216,20 @@ function Detail({ service, className = '' }: { service: Service; className?: str
   )
 }
 
-function Copy({ service, index, colour }: { service: Service; index: number; colour: string }) {
+function Copy({
+  service,
+  index,
+  colour,
+  level,
+}: {
+  service: Service
+  index: number
+  colour: string
+  level: 'h2' | 'h3'
+}) {
   return (
     <div className="max-w-[36rem]">
-      <Heading service={service} index={index} colour={colour} />
+      <Heading service={service} index={index} colour={colour} level={level} />
       <p className="mt-5 max-w-[52ch] font-body text-ink-soft">{service.body}</p>
       <Detail service={service} className="mt-7" />
     </div>

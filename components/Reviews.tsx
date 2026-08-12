@@ -20,7 +20,9 @@ import { googleProfileUrl } from '@/content/todo'
  * Deliberately absent: any overall score. We hold six reviews the client sent
  * us, not his profile's true total, so the site never puts a number on it.
  */
-export function Reviews() {
+export function Reviews({ headingLevel = 'h3' }: { headingLevel?: 'h2' | 'h3' } = {}) {
+  const Heading = headingLevel
+
   const dialogRef = useRef<HTMLDialogElement | null>(null)
   const [open, setOpen] = useState(false)
 
@@ -37,7 +39,9 @@ export function Reviews() {
     <>
       <div className="grid grid-cols-12 gap-x-8 gap-y-8">
         <div className="col-span-12 md:col-span-4">
-          <h3 className="text-[clamp(1.5rem,2.8vw,2.1rem)] text-ink">{reviewsCopy.heading}</h3>
+          <Heading className="text-[clamp(1.5rem,2.8vw,2.1rem)] text-ink">
+            {reviewsCopy.heading}
+          </Heading>
           <p className="mt-4 max-w-[38ch] font-body text-[0.95rem] text-ink-soft">
             {reviewsCopy.standfirst}
           </p>
