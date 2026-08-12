@@ -27,9 +27,9 @@ function Caption({ record }: { record: SiteRecordData }) {
   return (
     <dl className="grid grid-cols-1 gap-x-[var(--spacing-gutter)] sm:grid-cols-2 lg:grid-cols-4">
       {captionFields(record).map((field) => (
-        <div key={field.label} className="border-t border-line py-3">
+        <div key={field.label} className="border-t border-[var(--rule)] py-3">
           <dt className="t-label">{field.label}</dt>
-          <dd className="mt-1.5 text-[15px] leading-[1.4] text-bone">
+          <dd className="mt-1.5 text-[15px] leading-[1.4] text-[var(--ink)]">
             {field.value ?? <ConfirmInline id="project-detail" label={field.label} />}
           </dd>
         </div>
@@ -49,10 +49,10 @@ function EmptyFrame({ brief }: { brief: string }) {
        at full plate height is 700px of nothing, which reads as a broken page
        rather than as a brief — and this site has several of them until the
        photographs arrive. */
-    <div className="flex min-h-[13rem] w-full items-end border border-line border-t-[3px] border-t-hivis bg-steel p-6 md:min-h-[17rem] md:p-10">
+    <div className="flex min-h-[13rem] w-full items-end border border-[var(--rule)] border-t-[3px] border-t-[var(--flag)] bg-[var(--raised)] p-6 md:min-h-[17rem] md:p-10">
       <div className="max-w-[52ch]">
-        <p className="t-label !text-hivis">Photograph to come</p>
-        <p className="mt-3 text-[15px] leading-[1.5] text-concrete">{brief}</p>
+        <p className="t-label !text-[var(--mark)]">Photograph to come</p>
+        <p className="mt-3 text-[15px] leading-[1.5] text-[var(--muted)]">{brief}</p>
       </div>
     </div>
   );
@@ -81,7 +81,7 @@ export function SiteRecord({
   const Heading = headingLevel;
 
   return (
-    <article data-ground="graphite" className="pb-[var(--spacing-band)]" data-reveal>
+    <article data-ground="paper" className="pb-[var(--spacing-band)]" data-reveal>
       <div className="shell">
         <div className="relative overflow-hidden">
           {record.image.src ? (
@@ -113,17 +113,17 @@ export function SiteRecord({
         <div className="mt-8 grid12 gap-y-8">
           <div className="col-span-12 lg:col-span-8">
             <Heading className={tall ? 't-section' : 't-sub'}>
-              <Link href={href} className="hover:decoration-hivis underline decoration-transparent decoration-1 underline-offset-[6px] transition-[text-decoration-color]">
+              <Link href={href} className="hover:decoration-[var(--flag)] underline decoration-transparent decoration-1 underline-offset-[6px] transition-[text-decoration-color]">
                 {record.title}
               </Link>
             </Heading>
-            <p className="mt-4 max-w-[58ch] text-concrete">{record.summary}</p>
+            <p className="mt-4 max-w-[58ch] text-[var(--muted)]">{record.summary}</p>
             {record.image.credit ? (
               <p className="t-label mt-4">Photograph {record.image.credit}</p>
             ) : null}
           </div>
           <div className="col-span-12 lg:col-span-4 lg:col-start-9 lg:text-right">
-            <Link href={href} className="t-label !text-hivis inline-flex items-center gap-2 hover:underline underline-offset-4">
+            <Link href={href} className="t-label !text-[var(--mark)] inline-flex items-center gap-2 hover:underline underline-offset-4">
               Full record
               <Arrow />
             </Link>
@@ -148,17 +148,17 @@ export function SiteRecord({
  */
 export function WantedRecord({ record }: { record: SiteRecordData }) {
   return (
-    <article className="border-t border-line py-10" data-reveal>
+    <article className="border-t border-[var(--rule)] py-10" data-reveal>
       <div className="grid12 gap-y-6">
         <div className="col-span-12 lg:col-span-3">
           <p className="t-label">{record.sectorEntry.number} · {record.sectorEntry.label}</p>
-          <p className="t-label !text-hivis mt-2">Record wanted</p>
+          <p className="t-label !text-[var(--mark)] mt-2">Record wanted</p>
         </div>
         <div className="col-span-12 lg:col-span-9">
           <h3 className="t-sub">{record.title}</h3>
-          <p className="mt-3 max-w-[58ch] text-concrete">{record.summary}</p>
+          <p className="mt-3 max-w-[58ch] text-[var(--muted)]">{record.summary}</p>
           {record.image.needs ? (
-            <p className="mt-4 max-w-[58ch] border-l-[3px] border-line pl-4 text-[15px] leading-[1.5] text-concrete">
+            <p className="mt-4 max-w-[58ch] border-l-[3px] border-[var(--rule)] pl-4 text-[15px] leading-[1.5] text-[var(--muted)]">
               <span className="t-label block mb-1">Photograph wanted</span>
               {record.image.needs}
             </p>

@@ -48,7 +48,7 @@ export default async function ProjectsPage({
           <Link
             href="/projects"
             aria-current={active ? undefined : 'page'}
-            className={`t-label ${active ? '!text-bone hover:!text-hivis' : '!text-hivis underline underline-offset-4'}`}
+            className={`t-label ${active ? '!text-[var(--ink)] hover:!text-[var(--mark)]' : '!text-[var(--mark)] underline underline-offset-4'}`}
           >
             {projects.filter.all}
           </Link>
@@ -58,7 +58,7 @@ export default async function ProjectsPage({
               href={`/projects?sector=${s.slug}`}
               aria-current={active === s.slug ? 'page' : undefined}
               className={`t-label ${
-                active === s.slug ? '!text-hivis underline underline-offset-4' : '!text-bone hover:!text-hivis'
+                active === s.slug ? '!text-[var(--mark)] underline underline-offset-4' : '!text-[var(--ink)] hover:!text-[var(--mark)]'
               }`}
             >
               {s.number} {s.label}
@@ -81,7 +81,7 @@ export default async function ProjectsPage({
         </div>
       ) : (
         <Band ground="graphite">
-          <p className="t-lead max-w-[52ch] text-concrete">
+          <p className="t-lead max-w-[52ch] text-[var(--muted)]">
             No published record in this sector yet. What is wanted, and why, is below.
           </p>
         </Band>

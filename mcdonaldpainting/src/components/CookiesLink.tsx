@@ -18,7 +18,7 @@ export function CookiesLink({ className = '' }: { className?: string }) {
     <button
       type="button"
       onClick={() => window.dispatchEvent(new Event(CONSENT_REOPEN))}
-      className={`t-label !text-concrete text-left hover:!text-hivis ${className}`}
+      className={`t-label !text-[var(--muted)] text-left hover:!text-[var(--mark)] ${className}`}
     >
       Cookies
     </button>

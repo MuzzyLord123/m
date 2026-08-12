@@ -31,7 +31,7 @@ export default function CompliancePage() {
 
       {/* The summary table. This is the block a compliance team screenshots. */}
       <Band ground="steel">
-        <dl className="border-t border-line">
+        <dl className="border-t border-[var(--rule)]">
           {[
             {
               label: 'Accreditation',
@@ -76,7 +76,7 @@ export default function CompliancePage() {
           ].map((row) => (
             <div
               key={row.label}
-              className="grid12 gap-y-2 border-b border-line py-4"
+              className="grid12 gap-y-2 border-b border-[var(--rule)] py-4"
               data-reveal
             >
               <dt className="col-span-12 lg:col-span-3">
@@ -84,7 +84,7 @@ export default function CompliancePage() {
               </dt>
               <dd className="col-span-12 lg:col-span-9">
                 {row.value ? (
-                  <span className="text-[15px] leading-[1.5] text-bone">{row.value}</span>
+                  <span className="text-[15px] leading-[1.5] text-[var(--ink)]">{row.value}</span>
                 ) : (
                   <Confirm id={row.confirm!} className="max-w-[56ch]" />
                 )}
@@ -94,7 +94,7 @@ export default function CompliancePage() {
         </dl>
       </Band>
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <div className="grid12 gap-y-8">
           <div className="col-span-12 lg:col-span-4">
             <h2 className="t-section" data-reveal>
@@ -125,7 +125,7 @@ export default function CompliancePage() {
           </div>
           <div className="col-span-12 lg:col-span-7 lg:col-start-6">
             {compliance.insurance.body.map((para) => (
-              <p key={para.slice(0, 24)} className="t-body max-w-[64ch] text-concrete">
+              <p key={para.slice(0, 24)} className="t-body max-w-[64ch] text-[var(--muted)]">
                 {para}
               </p>
             ))}
@@ -138,7 +138,7 @@ export default function CompliancePage() {
         </div>
       </Band>
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <SectionHead title="How the work is run" />
         <div className="mt-8">
           {compliance.arrangements.map((item) => (
@@ -162,7 +162,7 @@ export default function CompliancePage() {
             <h2 className="t-section" data-reveal>
               <span className="reveal-type">{compliance.references.title}</span>
             </h2>
-            <p className="t-body mt-6 max-w-[62ch] text-concrete">{compliance.references.body}</p>
+            <p className="t-body mt-6 max-w-[62ch] text-[var(--muted)]">{compliance.references.body}</p>
             <Confirm
               id={compliance.references.confirm}
               note={compliance.references.confirmNote}

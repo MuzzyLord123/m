@@ -29,7 +29,7 @@ export function DataStrip({
   ground = 'graphite',
 }: {
   figures: readonly Figure[];
-  ground?: 'graphite' | 'steel';
+  ground?: 'paper' | 'mist' | 'graphite' | 'steel';
 }) {
   return (
     <section
@@ -47,9 +47,9 @@ export function DataStrip({
               style={{ '--stagger': `${i * 90}ms` } as React.CSSProperties}
             >
               <dt className="t-label order-2 mt-4">{f.label}</dt>
-              <dd className="t-figure order-1 mt-5 text-bone">{f.figure}</dd>
+              <dd className="t-figure order-1 mt-5 text-[var(--ink)]">{f.figure}</dd>
               {f.note ? (
-                <dd className="order-3 mt-3 max-w-[34ch] text-[15px] leading-[1.5] text-concrete">
+                <dd className="order-3 mt-3 max-w-[34ch] text-[15px] leading-[1.5] text-[var(--muted)]">
                   {f.note}
                 </dd>
               ) : null}

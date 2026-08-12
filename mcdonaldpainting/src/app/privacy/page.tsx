@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         ]}
       />
 
-      <Band ground="concrete">
+      <Band ground="mist">
         {privacy.sections.map((section) => (
           <NumberedItem
             key={section.number}
@@ -66,7 +66,7 @@ export default function PrivacyPage() {
             Everything this site stores on your device, what it is for and how long it lasts
           </caption>
           <thead>
-            <tr className="border-y border-line">
+            <tr className="border-y border-[var(--rule)]">
               <th scope="col" className="t-label w-[20%] py-4 pr-6 align-bottom">Name</th>
               <th scope="col" className="t-label w-[24%] py-4 pr-6 align-bottom">Type</th>
               <th scope="col" className="t-label w-[36%] py-4 pr-6 align-bottom">What it is for</th>
@@ -75,20 +75,20 @@ export default function PrivacyPage() {
           </thead>
           <tbody>
             {STORED_ITEMS.map((item) => (
-              <tr key={item.name} className="border-b border-line odd:bg-steel">
-                <th scope="row" className="py-5 pr-6 align-top font-display text-[15px] font-bold text-bone">
+              <tr key={item.name} className="border-b border-[var(--rule)] odd:bg-[var(--raised)]">
+                <th scope="row" className="py-5 pr-6 align-top font-display text-[15px] font-bold text-[var(--ink)]">
                   {item.name}
                 </th>
-                <td className="py-5 pr-6 align-top text-[15px] leading-[1.5] text-concrete">
+                <td className="py-5 pr-6 align-top text-[15px] leading-[1.5] text-[var(--muted)]">
                   {item.kind}
-                  <span className="t-label mt-2 block !text-hivis">
+                  <span className="t-label mt-2 block !text-[var(--mark)]">
                     {item.category === 'essential' ? 'Always set' : 'Only if you allow it'}
                   </span>
                 </td>
-                <td className="py-5 pr-6 align-top text-[15px] leading-[1.5] text-concrete">
+                <td className="py-5 pr-6 align-top text-[15px] leading-[1.5] text-[var(--muted)]">
                   {item.purpose}
                 </td>
-                <td className="py-5 align-top text-[15px] leading-[1.5] text-concrete">
+                <td className="py-5 align-top text-[15px] leading-[1.5] text-[var(--muted)]">
                   {item.expires}
                 </td>
               </tr>
@@ -98,19 +98,19 @@ export default function PrivacyPage() {
 
         <dl className="md:hidden">
           {STORED_ITEMS.map((item) => (
-            <div key={item.name} className="border-b border-line py-6 first:border-t">
-              <dt className="font-display text-[16px] font-bold text-bone">{item.name}</dt>
-              <dd className="t-label mt-2 !text-hivis">
+            <div key={item.name} className="border-b border-[var(--rule)] py-6 first:border-t">
+              <dt className="font-display text-[16px] font-bold text-[var(--ink)]">{item.name}</dt>
+              <dd className="t-label mt-2 !text-[var(--mark)]">
                 {item.category === 'essential' ? 'Always set' : 'Only if you allow it'}
               </dd>
-              <dd className="mt-3 text-[15px] leading-[1.5] text-concrete">{item.purpose}</dd>
+              <dd className="mt-3 text-[15px] leading-[1.5] text-[var(--muted)]">{item.purpose}</dd>
               <dd className="t-label mt-3">{item.kind} · {item.expires}</dd>
             </div>
           ))}
         </dl>
 
-        <p className="mt-10 max-w-[62ch] text-[15px] leading-[1.6] text-concrete">
-          To change your mind, use the <strong className="font-medium text-bone">Cookies</strong>{' '}
+        <p className="mt-10 max-w-[62ch] text-[15px] leading-[1.6] text-[var(--muted)]">
+          To change your mind, use the <strong className="font-medium text-[var(--ink)]">Cookies</strong>{' '}
           link at the bottom of any page. It reopens the notice and the choice is remade from
           scratch.
         </p>

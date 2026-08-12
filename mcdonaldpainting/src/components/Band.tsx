@@ -1,10 +1,14 @@
 /**
  * A band is a full-width section with a declared ground.
  *
- * Grounds alternate and the change between them is a hard cut — no fade, no
- * gradient, no transition. Two colours meeting on a straight line is the whole
- * separation system on this site, alongside rules; there are no cards, no
- * shadows and no rounded corners to do the job instead.
+ * `paper` and `mist` carry most of the site; `graphite` and `steel` are navy
+ * bands used for emphasis, roughly one in three. That ratio is the difference
+ * between a contractor's website and a design studio's: light grounds read as
+ * a company with a reception desk, and an all-dark site reads as a portfolio.
+ *
+ * The change between grounds is a hard cut — no fade, no gradient. Two colours
+ * meeting on a straight line is the separation system, alongside rules. There
+ * are no cards, no shadows and no rounded corners doing the job instead.
  */
 export function Band({
   ground,
@@ -13,7 +17,7 @@ export function Band({
   children,
   label,
 }: {
-  ground: 'graphite' | 'concrete' | 'steel';
+  ground: 'paper' | 'mist' | 'graphite' | 'steel' | 'concrete';
   id?: string;
   className?: string;
   children: React.ReactNode;
@@ -54,7 +58,7 @@ export function SectionHead({
           <span className="reveal-type">{title}</span>
         </h2>
         {standfirst ? (
-          <p className="t-lead mt-6 max-w-[60ch] opacity-90">{standfirst}</p>
+          <p className="t-lead mt-6 max-w-[60ch] text-[var(--muted)]">{standfirst}</p>
         ) : null}
       </div>
       {children ? (

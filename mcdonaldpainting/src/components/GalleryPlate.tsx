@@ -42,7 +42,7 @@ export function GalleryPlate({
            does not narrow the type down to the single-image shape — testing
            for 'single' up front does. */
         plate.kind === 'single' ? (
-          <div className={`relative w-full overflow-hidden bg-steel ${ratioClass}`}>
+          <div className={`relative w-full overflow-hidden bg-[var(--raised)] ${ratioClass}`}>
             <Image
               src={plate.src}
               alt={plate.alt}
@@ -73,7 +73,7 @@ export function GalleryPlate({
         <EmptyPlate item={item} ratioClass={ratioClass} />
       )}
 
-      <figcaption className="mt-4 border-t border-line pt-3">
+      <figcaption className="mt-4 border-t border-[var(--rule)] pt-3">
         <div className="flex items-baseline justify-between gap-4">
           <p className="t-label">
             Plate {number}
@@ -82,9 +82,9 @@ export function GalleryPlate({
           </p>
           <p className="t-label shrink-0">{sectorEntry.label}</p>
         </div>
-        <p className="mt-2 text-[15px] leading-[1.5] text-bone">{plate.caption}</p>
+        <p className="mt-2 text-[15px] leading-[1.5] text-[var(--ink)]">{plate.caption}</p>
         {plate.detail ? (
-          <p className="mt-2 max-w-[54ch] text-[14px] leading-[1.55] text-concrete">
+          <p className="mt-2 max-w-[54ch] text-[14px] leading-[1.55] text-[var(--muted)]">
             {plate.detail}
           </p>
         ) : null}
@@ -106,15 +106,15 @@ function EmptyPlate({ item, ratioClass }: { item: ResolvedPlate; ratioClass: str
 
   return (
     <div
-      className={`flex w-full flex-col justify-end border border-line border-t-[3px] border-t-hivis bg-steel p-5 ${ratioClass}`}
+      className={`flex w-full flex-col justify-end border border-[var(--rule)] border-t-[3px] border-t-[var(--flag)] bg-[var(--raised)] p-5 ${ratioClass}`}
     >
-      <p className="t-label !text-hivis">
+      <p className="t-label !text-[var(--mark)]">
         {missing.length > 1 ? `${missing.length} photographs to come` : 'Photograph to come'}
       </p>
       <ul className="mt-3 space-y-1.5">
         {missing.map((image) => (
-          <li key={image.src} className="text-[13px] leading-[1.5] text-concrete">
-            <code className="font-display font-bold text-bone">
+          <li key={image.src} className="text-[13px] leading-[1.5] text-[var(--muted)]">
+            <code className="font-display font-bold text-[var(--ink)]">
               {image.src.split('/').pop()}
             </code>
             <span className="block">{image.alt}</span>

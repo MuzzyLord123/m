@@ -38,18 +38,18 @@ export default async function ContactPage({
           <a
             href={phone.href}
             data-analytics="phone"
-            className="t-label !text-graphite inline-flex items-center gap-3 bg-hivis px-6 py-4 hover:bg-bone"
+            className="t-label !text-[var(--color-navy)] inline-flex items-center gap-3 bg-[var(--color-amber)] px-6 py-4 hover:bg-[#c98d18]"
           >
             {phone.who} — {phone.display}
             <Arrow />
           </a>
-          <p className="mt-4 max-w-[44ch] text-[15px] leading-[1.5] text-concrete">
+          <p className="mt-4 max-w-[44ch] text-[15px] leading-[1.5] text-[var(--muted)]">
             {contact.direct.note}
           </p>
         </div>
       </SheetHeader>
 
-      <Band ground="concrete" id="capability-statement">
+      <Band ground="mist" id="capability-statement">
         <SectionHead
           title="Send an enquiry"
           standfirst="Pick the type first — it changes what is worth telling us. A tender enquiry can also take the capability statement straight away."
@@ -68,7 +68,7 @@ export default async function ContactPage({
             <a
               href={phone.href}
               data-analytics="phone"
-              className="mt-6 block font-display text-[clamp(2rem,4vw,3.25rem)] font-extrabold leading-none tracking-[-0.02em] text-bone hover:text-hivis"
+              className="mt-6 block font-display text-[clamp(2rem,4vw,3.25rem)] font-extrabold leading-none tracking-[-0.02em] text-[var(--ink)] hover:text-[var(--mark)]"
             >
               {phone.display}
             </a>
@@ -77,7 +77,7 @@ export default async function ContactPage({
             {email.confirmed ? (
               <a
                 href={`mailto:${email.published}`}
-                className="mt-8 block text-[17px] text-concrete underline underline-offset-4 hover:text-hivis"
+                className="mt-8 block text-[17px] text-[var(--muted)] underline underline-offset-4 hover:text-[var(--mark)]"
               >
                 {email.published}
               </a>
@@ -92,10 +92,10 @@ export default async function ContactPage({
 
           <div className="col-span-12 lg:col-span-5 lg:col-start-8">
             <p className="t-label mb-2">{contact.registered.title}</p>
-            <p className="mb-6 max-w-[42ch] text-[15px] leading-[1.5] text-concrete">
+            <p className="mb-6 max-w-[42ch] text-[15px] leading-[1.5] text-[var(--muted)]">
               {contact.registered.note}
             </p>
-            <dl className="border-t border-line">
+            <dl className="border-t border-[var(--rule)]">
               {[
                 { label: 'Registered name', value: site.legalName },
                 { label: 'Company number', value: site.companyNumber },
@@ -107,9 +107,9 @@ export default async function ContactPage({
                 { label: 'Coverage', value: coverage.wider },
                 { label: 'Local coverage', value: coverage.localLong },
               ].map((row) => (
-                <div key={row.label} className="grid grid-cols-[9rem_1fr] gap-4 border-b border-line py-3">
+                <div key={row.label} className="grid grid-cols-[9rem_1fr] gap-4 border-b border-[var(--rule)] py-3">
                   <dt className="t-label pt-0.5">{row.label}</dt>
-                  <dd className="text-[15px] leading-[1.4] text-bone">{row.value}</dd>
+                  <dd className="text-[15px] leading-[1.4] text-[var(--ink)]">{row.value}</dd>
                 </div>
               ))}
             </dl>

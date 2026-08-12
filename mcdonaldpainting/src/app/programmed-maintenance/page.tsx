@@ -48,7 +48,7 @@ export default function ProgrammedMaintenancePage() {
         <CapabilityStatementAction />
       </SheetHeader>
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <div className="grid12">
           <div className="col-span-12 lg:col-span-8">
             <h2 className="t-section" data-reveal>
@@ -68,7 +68,7 @@ export default function ProgrammedMaintenancePage() {
         <div className="mt-10">
           {programmed.stages.map((stage) => (
             <NumberedItem key={stage.number} number={stage.number} title={stage.title}>
-              <p className="max-w-[64ch] text-[15px] leading-[1.6] text-concrete">{stage.body}</p>
+              <p className="max-w-[64ch] text-[15px] leading-[1.6] text-[var(--muted)]">{stage.body}</p>
               {'confirm' in stage && stage.confirm ? (
                 <Confirm
                   id={stage.confirm}
@@ -81,7 +81,7 @@ export default function ProgrammedMaintenancePage() {
         </div>
       </Band>
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <div className="grid12 gap-y-10">
           <div className="col-span-12 lg:col-span-7">
             <h2 className="t-section" data-reveal>
@@ -119,7 +119,7 @@ export default function ProgrammedMaintenancePage() {
               <span className="reveal-type">{programmed.honest.title}</span>
             </h2>
             {programmed.honest.body.map((para) => (
-              <p key={para.slice(0, 24)} className="t-body mt-6 max-w-[64ch] text-concrete">
+              <p key={para.slice(0, 24)} className="t-body mt-6 max-w-[64ch] text-[var(--muted)]">
                 {para}
               </p>
             ))}
@@ -127,7 +127,7 @@ export default function ProgrammedMaintenancePage() {
         </div>
       </Band>
 
-      <Band ground="concrete" id="enquiries">
+      <Band ground="mist" id="enquiries">
         <SectionHead
           title="Talk to us about a programme"
           standfirst="A first conversation is about the building and the constraint on it, not about paint. If you have a schedule of areas or a set of plans, send them and we will come back with what a survey would cost and what it would produce."

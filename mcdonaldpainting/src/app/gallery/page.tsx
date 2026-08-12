@@ -59,9 +59,9 @@ export default async function GalleryPage({
           the moment the last file lands — nothing to remember to delete. */}
       {counts.awaiting ? (
         <Band ground="steel" className="!py-10">
-          <div className="border-l-[3px] border-hivis pl-5">
-            <p className="t-label !text-hivis">Uploading</p>
-            <p className="mt-2 max-w-[68ch] text-[15px] leading-[1.55] text-bone">
+          <div className="border-l-[3px] border-[var(--flag)] pl-5">
+            <p className="t-label !text-[var(--mark)]">Uploading</p>
+            <p className="mt-2 max-w-[68ch] text-[15px] leading-[1.55] text-[var(--ink)]">
               {counts.awaiting} of {counts.plates} plates are waiting for their files. Each one
               below states the filename it wants; drop it into{' '}
               <code className="font-display font-bold">public/photographs/gallery/</code> and the
@@ -78,7 +78,7 @@ export default async function GalleryPage({
             <Link
               href="/gallery"
               aria-current={active ? undefined : 'page'}
-              className={`t-label ${active ? '!text-bone hover:!text-hivis' : '!text-hivis underline underline-offset-4'}`}
+              className={`t-label ${active ? '!text-[var(--ink)] hover:!text-[var(--mark)]' : '!text-[var(--mark)] underline underline-offset-4'}`}
             >
               All sectors
             </Link>
@@ -89,8 +89,8 @@ export default async function GalleryPage({
                 aria-current={active === f.slug ? 'page' : undefined}
                 className={`t-label ${
                   active === f.slug
-                    ? '!text-hivis underline underline-offset-4'
-                    : '!text-bone hover:!text-hivis'
+                    ? '!text-[var(--mark)] underline underline-offset-4'
+                    : '!text-[var(--ink)] hover:!text-[var(--mark)]'
                 }`}
               >
                 {f.number} {f.label}
@@ -110,7 +110,7 @@ export default async function GalleryPage({
 
       <DataStrip figures={gallery.figures} ground="steel" />
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <SectionHead title={gallery.records.title} standfirst={gallery.records.standfirst}>
           <Link
             href="/projects"

@@ -45,9 +45,9 @@ export function Wordmark({
 }) {
   return (
     <span className={`inline-flex items-center gap-3 ${className}`}>
-      <Mark size={compact ? 22 : 26} className="shrink-0 text-bone" />
+      <Mark size={compact ? 22 : 26} className="shrink-0 text-[var(--ink)]" />
       <span className="inline-flex items-baseline gap-2.5">
-        <span className="font-display text-[17px] font-extrabold leading-none tracking-[-0.02em] text-bone md:text-[19px]">
+        <span className="font-display text-[17px] font-extrabold leading-none tracking-[-0.02em] text-[var(--ink)] md:text-[19px]">
           McDonald
         </span>
         <span className={`t-label ${compact ? 'hidden sm:inline' : ''}`}>

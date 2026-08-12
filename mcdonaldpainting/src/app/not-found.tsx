@@ -24,14 +24,14 @@ export default function NotFound() {
         <a
           href={phone.href}
           data-analytics="phone"
-          className="t-label !text-graphite inline-flex items-center gap-3 bg-hivis px-6 py-4 hover:bg-bone"
+          className="t-label !text-[var(--color-navy)] inline-flex items-center gap-3 bg-[var(--color-amber)] px-6 py-4 hover:bg-[#c98d18]"
         >
           Or ring {phone.who} — {phone.display}
         </a>
       </SheetHeader>
 
-      <Band ground="concrete">
-        <SectorIndexList ground="concrete" />
+      <Band ground="paper">
+        <SectorIndexList ground="paper" />
         <p className="mt-10">
           <Link href="/" className="t-label underline decoration-1 underline-offset-4">
             Back to the front page

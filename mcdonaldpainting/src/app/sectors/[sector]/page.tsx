@@ -93,7 +93,7 @@ export default async function SectorPage({
         )}
       </SheetHeader>
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <SectionHead number="01" title="What these buildings need" />
         <dl className="mt-10 border-t border-[var(--rule)]">
           {page.surfaces.map((item) => (
@@ -118,16 +118,16 @@ export default async function SectorPage({
         <SectionHead number="02" title={page.phasing.title} />
         <dl className="mt-10 grid grid-cols-1 gap-x-[var(--spacing-gutter)] gap-y-8 md:grid-cols-2 lg:grid-cols-3">
           {page.phasing.points.map((point) => (
-            <div key={point.label} className="border-t border-line pt-5" data-reveal>
-              <dt className="t-sub text-bone">{point.label}</dt>
-              <dd className="mt-3 text-[15px] leading-[1.55] text-concrete">{point.note}</dd>
+            <div key={point.label} className="border-t border-[var(--rule)] pt-5" data-reveal>
+              <dt className="t-sub text-[var(--ink)]">{point.label}</dt>
+              <dd className="mt-3 text-[15px] leading-[1.55] text-[var(--muted)]">{point.note}</dd>
             </div>
           ))}
         </dl>
       </Band>
 
       {page.body ? (
-        <Band ground="concrete">
+        <Band ground="mist">
           <div className="grid12">
             <div className="col-span-12 lg:col-span-8">
               <div className="prose-sheet">
@@ -165,7 +165,7 @@ export default async function SectorPage({
         </Band>
       ) : null}
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <SectionHead number="05" title="Compliance that matters here" />
         <dl className="mt-10 border-t border-[var(--rule)]">
           {page.compliance.map((item) => (

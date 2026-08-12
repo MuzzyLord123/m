@@ -26,7 +26,7 @@ export default function AboutPage() {
         <CapabilityStatementAction />
       </SheetHeader>
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <div className="grid12 gap-y-10">
           <div className="col-span-12 lg:col-span-7">
             <h2 className="t-section" data-reveal>
@@ -75,7 +75,7 @@ export default function AboutPage() {
               <span className="reveal-type">{about.history.title}</span>
             </h2>
             {about.history.body.map((para) => (
-              <p key={para.slice(0, 24)} className="t-body mt-6 max-w-[62ch] text-concrete">
+              <p key={para.slice(0, 24)} className="t-body mt-6 max-w-[62ch] text-[var(--muted)]">
                 {para}
               </p>
             ))}
@@ -84,7 +84,7 @@ export default function AboutPage() {
         </div>
       </Band>
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <SectionHead title={about.method.title} />
         <div className="mt-8">
           {about.method.steps.map((step) => (

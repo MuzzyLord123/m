@@ -138,8 +138,15 @@ empty placeholder image as its source.
 
 **Why it matters.** Sliders are ignored by visitors and slow to load. This one is also broken.
 
-**New.** No slider. The page opens like the cover sheet of a tender submission: what you are,
-where you work, the accreditation, the company number, and one thing to do next.
+**New.** No slider. The page opens like the cover sheet of a submission: what you are, where
+you work, the accreditation, the company number, and one thing to do next — on white, in
+navy, with your accreditation and company number visible before anybody scrolls.
+
+A note on how it looks, since you will be asked. The site is white and deep navy with a
+single amber accent, because that is what contractors at the top of this market look like
+and it is what a facilities manager expects to find. An earlier version of this rebuild was
+dark and used a neon yellow; it looked striking and it read as an architecture practice
+rather than as a firm you would put on a tender list. It was redrawn.
 
 ### 10. The cookie notice is not a formality.
 

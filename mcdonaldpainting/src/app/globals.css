@@ -1,44 +1,64 @@
 @import 'tailwindcss';
 
 /* ---------------------------------------------------------------------------
-   Capability
-   The reference is a tender document and a plant hire yard. Two grounds,
-   graphite and concrete, cut hard against each other. Type is monumental and
-   sentence case. Data is set in tables with rules, not in cards with shadows.
-   Hi-vis yellow behaves the way it does on a site — a marking, applied to the
-   thing you are meant to act on, and nowhere else.
+   Enterprise contractor.
+   White is the ground. Deep navy carries the weight and the emphasis bands.
+   Amber is the accent — the same signal as a site marking, without the neon.
+   Two families: Schibsted Grotesk for display, IBM Plex Sans for text and for
+   every figure, because it has proper tabular numerals.
 --------------------------------------------------------------------------- */
 
 @theme {
-  --color-graphite: #14181b; /* primary ground */
-  --color-steel: #232a2f; /* raised blocks, table stripes */
-  --color-concrete: #cfc9be; /* the warm counter-ground */
-  --color-bone: #f4f2ee; /* type on graphite */
-  --color-hivis: #e4ff32; /* active state, one primary action per page */
-  --color-line: #39424a; /* rules */
+  /* -------------------------------------------------------------------------
+     Enterprise contractor.
 
-  /* Contrast, measured, so nobody has to re-derive it later:
-       bone     on graphite  16.4:1
-       concrete on graphite  11.2:1
-       hi-vis   on graphite  16.3:1
-       graphite on concrete  10.2:1
-       line     on concrete   6.2:1   ← the label colour on light grounds
-       hi-vis   on concrete   1.5:1   ← which is why it is never placed there.
-     Hi-vis on a concrete ground is a bug, not a style choice. There is a check
+     The first cut of this site was graphite and neon yellow — a tender-document
+     idea, and a good-looking one, but it read as an architecture studio rather
+     than as a firm a hospital trust appoints. Contractors at this end of the
+     market are light, navy, structured and photograph-led. So: white is the
+     ground, deep navy carries the weight, and the accent is amber rather than
+     hi-vis — the same signal from the same world, without the neon.
+  ------------------------------------------------------------------------- */
+
+  --color-navy: #0e1a29; /* dark bands, headings on light */
+  --color-slate: #17293e; /* raised blocks on dark */
+  --color-paper: #ffffff; /* the primary ground */
+  --color-mist: #f1f4f7; /* the secondary light band */
+  --color-amber: #e0a020; /* accent: fills, rules, the primary action */
+  --color-rule: #d7dee5; /* rules on light */
+  --color-rule-dark: #2b4159; /* rules on dark */
+  --color-text: #33455c; /* body copy on light */
+  --color-label: #5a6e86; /* label type on light */
+  --color-muted: #a7b8cc; /* secondary copy on dark */
+
+  /* The original names stay as aliases so every existing class keeps working
+     and keeps meaning something. Measured contrast, so nobody re-derives it:
+
+       navy   on white   18.1:1      white on navy    18.1:1
+       text   on white    9.8:1      muted on navy     8.9:1
+       label  on white    5.2:1      label on mist     4.8:1
+       amber  on navy     7.9:1      navy  on amber    7.9:1
+       amber  on white    2.3:1  ←   which is why amber is never text on light.
+
+     Amber is a fill and a rule on light grounds, never a word. There is a check
      for it in scripts/check-content.mjs. */
+  --color-graphite: var(--color-navy);
+  --color-steel: var(--color-slate);
+  --color-bone: var(--color-paper);
+  --color-concrete: var(--color-muted);
+  --color-hivis: var(--color-amber);
+  --color-line: var(--color-rule-dark);
 
   --font-display: var(--font-schibsted), 'Helvetica Neue', Arial, sans-serif;
   --font-text: var(--font-plex), 'Helvetica Neue', Arial, sans-serif;
 
-  /* 72px gutters at desktop, collapsing to something usable on a phone. */
   --spacing-gutter: clamp(1.25rem, 5vw, 4.5rem);
   --spacing-band: clamp(4rem, 9vh, 7.5rem);
 
   --ease-sheet: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  /* Decisions enforced by the build rather than by memory. There are no
-     rounded corners and no shadows on this site, so the utilities that would
-     produce them are deleted rather than merely avoided. */
+  /* Enforced by the build rather than by memory: no rounded corners, no
+     shadows. Sharp edges and rules are what make a document look engineered. */
   --radius-*: initial;
   --shadow-*: initial;
   --drop-shadow-*: initial;
@@ -62,8 +82,8 @@
   }
 
   body {
-    background-color: var(--color-graphite);
-    color: var(--color-bone);
+    background-color: var(--color-paper);
+    color: var(--color-text);
     font-family: var(--font-text);
     font-size: 17px;
     line-height: 1.6;
@@ -72,62 +92,90 @@
 
   /* -----------------------------------------------------------------------
      Grounds.
-     A section declares its ground once; everything inside resolves against it —
-     type, labels, rules, raised blocks. No component has to remember which
-     colour it is sitting on, which is how hi-vis ends up somewhere it fails.
+
+     A section declares its ground once and everything inside resolves against
+     it — type, labels, rules, raised blocks, and the accent. No component has
+     to remember which colour it is sitting on, which is how an accent ends up
+     somewhere it cannot be read.
+
+     `paper` and `mist` are the two light grounds and they carry most of the
+     site. `navy` and `slate` are for emphasis: the pages that need weight, and
+     the bands that separate one argument from the next.
   ----------------------------------------------------------------------- */
+  [data-ground='paper'],
+  [data-ground='concrete'] {
+    --ground: var(--color-paper);
+    --ink: var(--color-navy);
+    --body: var(--color-text);
+    --label: var(--color-label);
+    --muted: var(--color-text);
+    --rule: var(--color-rule);
+    --rule-soft: #e8edf1;
+    --raised: var(--color-mist);
+    /* The text-safe accent. Amber is 2.3:1 on white, so on a light ground the
+       mark is navy — the gesture survives, the legibility does not suffer. */
+    --mark: var(--color-navy);
+    /* The fill accent. Amber everywhere, because as a block with dark type on
+       it, or as a 3px rule, it reads perfectly on either ground. */
+    --flag: var(--color-amber);
+    background-color: var(--ground);
+    color: var(--body);
+  }
+
+  [data-ground='mist'] {
+    --ground: var(--color-mist);
+    --ink: var(--color-navy);
+    --body: var(--color-text);
+    --label: var(--color-label);
+    --muted: var(--color-text);
+    --rule: var(--color-rule);
+    --rule-soft: #e2e8ee;
+    --raised: var(--color-paper);
+    --mark: var(--color-navy);
+    --flag: var(--color-amber);
+    background-color: var(--ground);
+    color: var(--body);
+  }
+
   [data-ground='graphite'] {
-    --ground: var(--color-graphite);
-    --ink: var(--color-bone);
-    --label: var(--color-concrete);
-    --rule: var(--color-line);
-    --rule-soft: color-mix(in srgb, var(--color-line) 60%, transparent);
-    --raised: var(--color-steel);
-    /* Hi-vis is legible here, so it is allowed here. */
-    --mark: var(--color-hivis);
+    --ground: var(--color-navy);
+    --ink: var(--color-paper);
+    --body: var(--color-muted);
+    --label: var(--color-muted);
+    --muted: var(--color-muted);
+    --rule: var(--color-rule-dark);
+    --rule-soft: color-mix(in srgb, var(--color-rule-dark) 60%, transparent);
+    --raised: var(--color-slate);
+    /* Amber is 7.9:1 on navy, so here it is allowed to be a word. */
+    --mark: var(--color-amber);
+    --flag: var(--color-amber);
     background-color: var(--ground);
     color: var(--ink);
   }
 
   [data-ground='steel'] {
-    --ground: var(--color-steel);
-    --ink: var(--color-bone);
-    --label: var(--color-concrete);
-    --rule: var(--color-line);
-    --rule-soft: color-mix(in srgb, var(--color-line) 60%, transparent);
-    --raised: #2b333a;
-    --mark: var(--color-hivis);
-    background-color: var(--ground);
-    color: var(--ink);
-  }
-
-  [data-ground='concrete'] {
-    --ground: var(--color-concrete);
-    --ink: var(--color-graphite);
-    --label: var(--color-line);
-    --rule: color-mix(in srgb, var(--color-line) 55%, transparent);
-    --rule-soft: color-mix(in srgb, var(--color-line) 22%, transparent);
-    --raised: color-mix(in srgb, var(--color-line) 7%, transparent);
-    /* On concrete, hi-vis is 1.5:1 and effectively invisible. The mark falls
-       back to graphite so a component that reaches for it still reads. */
-    --mark: var(--color-graphite);
+    --ground: var(--color-slate);
+    --ink: var(--color-paper);
+    --body: var(--color-muted);
+    --label: var(--color-muted);
+    --muted: var(--color-muted);
+    --rule: var(--color-rule-dark);
+    --rule-soft: color-mix(in srgb, var(--color-rule-dark) 60%, transparent);
+    --raised: #1f3450;
+    --mark: var(--color-amber);
+    --flag: var(--color-amber);
     background-color: var(--ground);
     color: var(--ink);
   }
 
   ::selection {
-    background: var(--color-hivis);
-    color: var(--color-graphite);
+    background: var(--color-amber);
+    color: var(--color-navy);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-hivis);
+    outline: 2px solid var(--mark, var(--color-navy));
     outline-offset: 2px;
-  }
-
-  /* On a concrete ground a hi-vis focus ring disappears. Graphite, same width. */
-  [data-ground='concrete'] :focus-visible {
-    outline-color: var(--color-graphite);
   }
 }
 

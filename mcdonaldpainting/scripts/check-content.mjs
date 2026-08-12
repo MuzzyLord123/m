@@ -171,12 +171,16 @@ for (const file of contentFiles) {
 /* ------------------------------------------------------------------ 3 ---- */
 
 const TOKENS = {
-  graphite: '#14181B',
-  steel: '#232A2F',
-  concrete: '#CFC9BE',
-  bone: '#F4F2EE',
-  hivis: '#E4FF32',
-  line: '#39424A',
+  navy: '#0E1A29',
+  slate: '#17293E',
+  paper: '#FFFFFF',
+  mist: '#F1F4F7',
+  amber: '#E0A020',
+  rule: '#D7DEE5',
+  ruleDark: '#2B4159',
+  text: '#33455C',
+  label: '#5A6E86',
+  muted: '#A7B8CC',
 };
 
 function luminance(hex) {
@@ -192,16 +196,19 @@ function contrast(a, b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/** Pairs the site actually uses, and the minimum each has to clear. */
+/** Every foreground/background pair the site actually uses. */
 const PAIRS = [
-  ['bone', 'graphite', 4.5, 'body type on the primary ground'],
-  ['concrete', 'graphite', 4.5, 'secondary type and labels on graphite'],
-  ['hivis', 'graphite', 4.5, 'the primary action and active states'],
-  ['graphite', 'concrete', 4.5, 'body type on the light ground'],
-  ['line', 'concrete', 4.5, 'label type on the light ground'],
-  ['bone', 'steel', 4.5, 'type on raised blocks'],
-  ['concrete', 'steel', 4.5, 'labels on raised blocks'],
-  ['graphite', 'hivis', 4.5, 'the label inside a hi-vis button'],
+  ['navy', 'paper', 4.5, 'headings on the primary ground'],
+  ['text', 'paper', 4.5, 'body copy on the primary ground'],
+  ['label', 'paper', 4.5, 'label type on the primary ground'],
+  ['navy', 'mist', 4.5, 'headings on the secondary light band'],
+  ['text', 'mist', 4.5, 'body copy on the secondary light band'],
+  ['label', 'mist', 4.5, 'label type on the secondary light band'],
+  ['paper', 'navy', 4.5, 'type on the dark bands'],
+  ['muted', 'navy', 4.5, 'secondary copy on the dark bands'],
+  ['muted', 'slate', 4.5, 'secondary copy on raised dark blocks'],
+  ['amber', 'navy', 4.5, 'the accent as type, on dark only'],
+  ['navy', 'amber', 4.5, 'the label inside the primary action'],
 ];
 
 for (const [fg, bg, min, what] of PAIRS) {
@@ -213,21 +220,27 @@ for (const [fg, bg, min, what] of PAIRS) {
   }
 }
 
-// The one the palette makes easy to get wrong, asserted as a rule rather than
-// left to whoever is writing the next component.
-const hivisOnConcrete = contrast(TOKENS.hivis, TOKENS.concrete);
-if (hivisOnConcrete >= 4.5) {
+/**
+ * The one mistake this palette makes easy.
+ *
+ * Amber is 2.3:1 on white. It is a fill and a rule on light grounds — a block
+ * with navy type on it, or a 3px marking — and it is never a word. On the dark
+ * bands it is 7.9:1 and may be type. The `--mark` variable resolves to the right
+ * one per ground so a component never has to remember; this checks that nobody
+ * has reached past it and hardcoded the amber.
+ */
+const amberOnPaper = contrast(TOKENS.amber, TOKENS.paper);
+if (amberOnPaper >= 4.5) {
   warnings.push(
-    'contrast: hi-vis now passes on concrete — the tokens have changed and the "never place it there" rule in globals.css should be revisited.',
+    'contrast: amber now passes on white — the palette has changed and the "fills only, never type" rule in globals.css should be revisited.',
   );
 }
 
-// And checked in the source: a hi-vis text utility inside a concrete ground.
 for (const file of walk(path.join(root, 'src'))) {
   const text = fs.readFileSync(file, 'utf8');
-  if (/data-ground=["']concrete["'][\s\S]{0,400}?text-hivis/.test(text)) {
+  if (/data-ground=["'](paper|mist)["'][\s\S]{0,400}?(text-\[var\(--color-amber\)\]|text-amber|text-hivis)/.test(text)) {
     problems.push(
-      `${path.relative(root, file)}: hi-vis type inside a concrete ground — ${hivisOnConcrete.toFixed(2)}:1.`,
+      `${path.relative(root, file)}: amber type on a light ground — ${amberOnPaper.toFixed(2)}:1. Use var(--mark), which is navy there.`,
     );
   }
 }

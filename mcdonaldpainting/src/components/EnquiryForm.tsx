@@ -51,10 +51,10 @@ export function EnquiryForm({
 
   if (state.status === 'success') {
     return (
-      <div data-ground="graphite" className="border-l-[3px] border-hivis p-8">
-        <p className="t-label !text-hivis">Sent</p>
-        <h3 className="t-sub mt-3 text-bone">Thank you — that has gone through.</h3>
-        <p className="mt-4 max-w-[52ch] text-concrete">
+      <div data-ground="graphite" className="border-l-[3px] border-[var(--flag)] p-8">
+        <p className="t-label !text-[var(--mark)]">Sent</p>
+        <h3 className="t-sub mt-3 text-[var(--ink)]">Thank you — that has gone through.</h3>
+        <p className="mt-4 max-w-[52ch] text-[var(--muted)]">
           {state.download
             ? 'The capability statement should be downloading now. If it has not started, the link is below. Sean will follow it up.'
             : `Sean will come back to you. If it is urgent, ${phone.display} is faster than waiting for a reply.`}
@@ -62,7 +62,7 @@ export function EnquiryForm({
         {state.download ? (
           <a
             href={state.download}
-            className="t-label !text-graphite mt-6 inline-flex items-center gap-3 bg-hivis px-5 py-3 hover:bg-bone"
+            className="t-label !text-[var(--color-navy)] mt-6 inline-flex items-center gap-3 bg-[var(--color-amber)] px-5 py-3 hover:bg-[#c98d18]"
           >
             Download the capability statement
             <Arrow />
@@ -94,7 +94,7 @@ export function EnquiryForm({
               <label
                 key={t.id}
                 className={`cursor-pointer p-5 transition-colors ${
-                  active ? 'bg-hivis text-graphite' : 'bg-[var(--ground)] hover:bg-[var(--raised)]'
+                  active ? 'bg-[var(--color-amber)] text-[var(--color-navy)]' : 'bg-[var(--ground)] hover:bg-[var(--raised)]'
                 }`}
               >
                 <input
@@ -109,11 +109,11 @@ export function EnquiryForm({
                   className="sr-only"
                 />
                 <span
-                  className={`t-label block ${active ? '!text-graphite' : ''}`}
+                  className={`t-label block ${active ? '!text-[var(--color-navy)]' : ''}`}
                 >
                   {t.label}
                 </span>
-                <span className="mt-2 block text-[14px] leading-[1.45] opacity-80">{t.blurb}</span>
+                <span className="mt-2 block text-[14px] leading-[1.45]">{t.blurb}</span>
               </label>
             );
           })}
@@ -123,7 +123,7 @@ export function EnquiryForm({
       <p className="t-label mt-6">Useful to include</p>
       <ul className="mt-2 space-y-1.5">
         {selected.wants.map((want) => (
-          <li key={want} className="pl-5 text-[15px] leading-[1.5] opacity-85 relative">
+          <li key={want} className="pl-5 text-[15px] leading-[1.5] relative">
             <span
               aria-hidden
               className="absolute left-0 top-[0.62em] h-px w-3 bg-[var(--label)]"
@@ -192,7 +192,7 @@ export function EnquiryForm({
       </div>
 
       {state.message ? (
-        <p className="mt-6 border-l-[3px] border-hivis bg-graphite px-4 py-3 text-[15px] text-bone">
+        <p className="mt-6 border-l-[3px] border-[var(--flag)] bg-graphite px-4 py-3 text-[15px] text-[var(--ink)]">
           {state.message}
         </p>
       ) : null}
@@ -201,7 +201,7 @@ export function EnquiryForm({
         <button
           type="submit"
           disabled={pending}
-          className="t-label !text-graphite inline-flex items-center gap-3 bg-hivis px-6 py-4 hover:bg-bone disabled:opacity-60"
+          className="t-label !text-[var(--color-navy)] inline-flex items-center gap-3 bg-[var(--color-amber)] px-6 py-4 hover:bg-[#c98d18] disabled:opacity-60"
         >
           {pending
             ? 'Sending…'

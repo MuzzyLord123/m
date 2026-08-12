@@ -248,29 +248,51 @@ curl -s -o /tmp/cs.pdf http://localhost:3000/capability-statement.pdf && file /t
 
 ## Design
 
-The reference is a tender document and a plant hire yard, not a decorating brochure.
+An enterprise contractor, not a design studio.
 
-Two grounds — **graphite** `#14181B` and **concrete** `#CFC9BE` — alternating, and the change
-between them is always a hard cut. Display type is **Schibsted Grotesk** in sentence case; text
-and every figure on the site is **IBM Plex Sans**, which is here for its tabular numerals.
-Hi-vis yellow `#E4FF32` behaves the way it does on a real site: a marking, applied to the thing
-you are meant to act on, and nowhere else. There are no gradients, no shadows, no rounded corners
-and no icons except one 12px arrow.
+The first cut of this site was graphite and neon yellow — a tender-document idea, and a
+good-looking one, but it read as an architecture practice rather than as a firm a hospital
+trust appoints. It was redrawn. **White is the ground and carries most of the site; deep
+navy `#0E1A29` carries the headings and roughly one band in three; amber `#E0A020` is the
+accent** — the same signal as a site marking, without the neon.
 
-**Hi-vis on a concrete ground is 1.5:1 and effectively invisible.** It is never placed there.
-Sections declare a ground with `data-ground` and everything inside resolves against it, so no
-component has to remember which colour it is sitting on — and `npm run check:content` fails the
-build if hi-vis type turns up inside a concrete ground anyway.
+The ratio is the point. Light grounds read as a company with a reception desk; an all-dark
+site reads as a portfolio. Bands alternate `paper` → `mist` → `navy`, and the change between
+them is a hard cut — no fade, no gradient. Two colours meeting on a straight line is the
+separation system, alongside rules. There are no cards, no shadows and no rounded corners.
 
-Two devices carry the document register beyond the type. Registration ticks sit at the corners
-of every sheet header, and the company name and number run bottom-to-top up the left margin —
-both straight off a controlled drawing, both `aria-hidden` because the same information is in
-the metadata table in text. Table rows and index rows take a hi-vis marker in the gutter on
-hover, which is the same gesture as the primary button: hi-vis means "this one", and it is the
-only thing on the site allowed to say it.
+Display type is **Schibsted Grotesk** in sentence case, text and every figure is **IBM Plex
+Sans** — which is here for its tabular numerals. There are no icons except one 12px arrow.
 
-Grounds, type scale and the motion are all in `src/app/globals.css`, with the reasoning next to
-each decision.
+### The accent has one rule
+
+**Amber is 2.3:1 on white and 7.9:1 on navy.** So on light grounds it is a fill and a rule
+— a block with navy type on it, or a 3px marking — and it is never a word. On the dark bands
+it is allowed to be type.
+
+Nothing has to remember this. Sections declare a ground with `data-ground` and everything
+inside resolves against it: `--ink`, `--body`, `--label`, `--rule`, `--raised`, plus two
+accents — `--mark` (text-safe: amber on dark, navy on light) and `--flag` (the amber fill,
+the same on both). `npm run check:content` fails the build if amber type turns up inside a
+light ground anyway.
+
+Measured contrast, so nobody re-derives it:
+
+| | |
+| --- | --- |
+| navy on white / white on navy | 18.1:1 |
+| body text on white | 9.8:1 |
+| muted on navy | 8.9:1 |
+| label on white / on mist | 5.2:1 / 4.8:1 |
+| amber on navy / navy on amber | 7.9:1 |
+| **amber on white** | **2.3:1 — never type** |
+
+### A note on dimming with opacity
+
+There is none left, and it is worth saying why. `opacity-80` on secondary copy looks fine on
+a dark ground and drops under 4.5:1 the moment the same component lands on white. Going
+light turned three of those into real contrast failures at once. Every "quieter" colour on
+this site is now an explicit token, not a transparency.
 
 ### The structural devices
 

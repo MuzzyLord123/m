@@ -31,10 +31,10 @@ export default function CapabilitiesPage() {
         <CapabilityStatementAction />
       </SheetHeader>
 
-      <Band ground="concrete">
+      <Band ground="paper">
         <SectionHead number="01" title={capabilities.table.title} standfirst={capabilities.table.note} />
         <div className="mt-10">
-          <SpecTable ground="concrete" />
+          <SpecTable ground="paper" />
         </div>
       </Band>
 
@@ -42,7 +42,7 @@ export default function CapabilitiesPage() {
         <Band
           key={section.id}
           id={section.id}
-          ground={i % 2 === 0 ? 'graphite' : 'concrete'}
+          ground={i % 2 === 0 ? 'graphite' : 'paper'}
         >
           <div className="grid12 gap-y-8">
             <div className="col-span-12 lg:col-span-3">
@@ -82,14 +82,14 @@ export default function CapabilitiesPage() {
 
       <Band ground="graphite">
         <SectionHead title={capabilities.answered.title} />
-        <dl className="mt-10 border-t border-line">
+        <dl className="mt-10 border-t border-[var(--rule)]">
           {capabilities.answered.items.map((item) => (
-            <div key={item.q} className="grid12 gap-y-3 border-b border-line py-7" data-reveal>
+            <div key={item.q} className="grid12 gap-y-3 border-b border-[var(--rule)] py-7" data-reveal>
               <dt className="col-span-12 lg:col-span-4">
-                <span className="t-sub text-bone">{item.q}</span>
+                <span className="t-sub text-[var(--ink)]">{item.q}</span>
               </dt>
               <dd className="col-span-12 lg:col-span-8">
-                <p className="max-w-[64ch] text-[15px] leading-[1.55] text-concrete">{item.a}</p>
+                <p className="max-w-[64ch] text-[15px] leading-[1.55] text-[var(--muted)]">{item.a}</p>
               </dd>
             </div>
           ))}

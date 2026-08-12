@@ -47,8 +47,8 @@ export function Nav() {
   return (
     <>
       <header
-        data-ground="graphite"
-        className="fixed inset-x-0 top-0 z-50 border-b border-line bg-graphite/95 backdrop-blur-[2px]"
+        data-ground="paper"
+        className="fixed inset-x-0 top-0 z-50 border-b border-[var(--rule)] bg-white/95 backdrop-blur-[6px]"
       >
         <div className="shell flex h-16 items-center justify-between gap-6 md:h-20">
           <Link href="/" aria-label="McDonald Painting Contractors, home">
@@ -58,7 +58,7 @@ export function Nav() {
           <div className="flex items-center gap-5 md:gap-8">
             <a
               href={phone.href}
-              className="t-label !text-bone hover:!text-hivis"
+              className="t-label !text-[var(--ink)] hover:!text-[var(--mark)]"
               data-analytics="phone"
             >
               {phone.display}
@@ -69,7 +69,7 @@ export function Nav() {
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-controls="sector-index"
-              className="t-label !text-graphite bg-hivis px-4 py-2.5 hover:bg-bone"
+              className="t-label !text-[var(--color-navy)] bg-[var(--color-amber)] px-4 py-2.5 hover:bg-[#c98d18]"
             >
               {open ? 'Close' : 'Index'}
             </button>

@@ -15,7 +15,7 @@ import { PROGRAMMED_LABELS, SERVICES } from '@content/services';
  * rows, a steel stripe on alternate rows, tabular figures, and a layout that
  * turns into stacked records rather than a horizontal scroll on a phone.
  */
-export function SpecTable({ ground = 'concrete' }: { ground?: 'concrete' | 'graphite' }) {
+export function SpecTable({ ground = 'paper' }: { ground?: 'paper' | 'mist' | 'graphite' }) {
   return (
     <div data-ground={ground}>
       {/* Desktop: a real table. Screen readers get the row and column

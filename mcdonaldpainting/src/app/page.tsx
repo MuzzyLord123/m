@@ -34,21 +34,21 @@ export default function HomePage() {
         <CapabilityStatementAction />
       </SheetHeader>
 
-      <DataStrip figures={home.figures} ground="steel" />
+      <DataStrip figures={home.figures} ground="mist" />
 
       {/* Ground change: hard cut, graphite to concrete. */}
-      <Band ground="concrete">
+      <Band ground="paper">
         <SectionHead title={home.sectorIndex.title} standfirst={home.sectorIndex.standfirst} />
         <div className="mt-12">
-          <SectorIndexList ground="concrete" />
+          <SectorIndexList ground="paper" />
         </div>
       </Band>
 
-      <Band ground="graphite" className="!pb-10">
+      <Band ground="paper" className="!pb-10">
         <SectionHead title={home.work.title} standfirst={home.work.standfirst}>
           <Link
             href={home.work.cta.href}
-            className="t-label !text-hivis inline-flex items-center gap-2 hover:underline underline-offset-4"
+            className="t-label !text-[var(--mark)] inline-flex items-center gap-2 hover:underline underline-offset-4"
           >
             {home.work.cta.label}
             <Arrow />
@@ -56,13 +56,13 @@ export default function HomePage() {
         </SectionHead>
       </Band>
 
-      <div data-ground="graphite">
+      <div data-ground="paper">
         {records.map((record, i) => (
           <SiteRecord key={record.slug} record={record} size="full" priority={i === 0} />
         ))}
       </div>
 
-      <Band ground="concrete">
+      <Band ground="mist">
         <div className="grid12 gap-y-10">
           <div className="col-span-12 lg:col-span-7">
             <h2 className="t-section" data-reveal>
@@ -75,7 +75,7 @@ export default function HomePage() {
             ))}
             <Link
               href={home.programmed.cta.href}
-              className="t-label mt-8 inline-flex items-center gap-2 underline decoration-1 underline-offset-4 hover:!text-graphite"
+              className="t-label mt-8 inline-flex items-center gap-2 underline decoration-1 underline-offset-4 hover:!text-[var(--color-navy)]"
             >
               {home.programmed.cta.label}
               <Arrow />
@@ -104,7 +104,7 @@ export default function HomePage() {
         <SectionHead title={home.compliance.title} standfirst={home.compliance.standfirst}>
           <Link
             href={home.compliance.cta.href}
-            className="t-label !text-hivis inline-flex items-center gap-2 hover:underline underline-offset-4"
+            className="t-label !text-[var(--mark)] inline-flex items-center gap-2 hover:underline underline-offset-4"
           >
             {home.compliance.cta.label}
             <Arrow />
@@ -113,18 +113,18 @@ export default function HomePage() {
 
         <dl className="mt-12 grid grid-cols-1 gap-x-[var(--spacing-gutter)] sm:grid-cols-2 lg:grid-cols-4">
           {compliance.arrangements.slice(0, 4).map((item) => (
-            <div key={item.number} className="border-t border-line py-5" data-reveal>
+            <div key={item.number} className="border-t border-[var(--rule)] py-5" data-reveal>
               <dt className="t-label">{item.number}</dt>
-              <dd className="t-sub mt-3 text-bone">{item.title}</dd>
+              <dd className="t-sub mt-3 text-[var(--ink)]">{item.title}</dd>
             </div>
           ))}
         </dl>
       </Band>
 
-      <Band ground="concrete" id="testimonials">
+      <Band ground="mist" id="testimonials">
         <SectionHead title={about.testimonials.title} standfirst={about.testimonials.standfirst} />
         <div className="mt-12">
-          <Testimonials ground="concrete" />
+          <Testimonials ground="paper" />
         </div>
       </Band>
 

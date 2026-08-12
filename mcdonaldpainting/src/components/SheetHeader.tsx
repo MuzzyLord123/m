@@ -5,9 +5,15 @@ import { SECTORS } from '@content/sectors';
  * The sheet header.
  *
  * Every page opens with one, and it is the device that sets the register for
- * the whole site: a page title in display type on graphite, with a metadata
- * table down the right in label type and rules. It is the cover sheet of a
- * tender submission, not a hero.
+ * the whole site: a page title in display type on white, with a metadata table
+ * down the right in label type and rules, and an amber rule across the top.
+ * It is the cover sheet of a submission, not a hero photograph.
+ *
+ * It is on white rather than on a dark ground for one reason, and it is the
+ * whole reason this site was redrawn: a dark, austere header reads as an
+ * architecture practice. A light one with navy type, a metadata table and a
+ * visible accreditation reads as a contractor, which is what a facilities
+ * manager is trying to find.
  *
  * The four default rows — coverage, sectors, accreditation, company number —
  * are the four things a buyer landing from a search wants to establish before
@@ -40,8 +46,10 @@ export function SheetHeader({
   children?: React.ReactNode;
 }) {
   return (
-    <header data-ground="graphite" className="pt-28 pb-[var(--spacing-band)] md:pt-36">
-      <div className="shell">
+    <header data-ground="paper" className="pt-24 pb-[var(--spacing-band)] md:pt-32">
+      {/* The accent, once, across the top of every page. */}
+      <div className="h-[3px] w-full bg-[var(--color-amber)]" aria-hidden />
+      <div className="shell pt-14 md:pt-16">
         <div className="relative grid12 gap-y-10">
           {/* Registration ticks and the sheet reference. Decorative — the same
               information is in the metadata table beside them, in text. */}
@@ -78,7 +86,7 @@ export function SheetHeader({
             </h1>
 
             {standfirst ? (
-              <p className="t-lead mt-8 max-w-[62ch] text-concrete">{standfirst}</p>
+              <p className="t-lead mt-8 max-w-[62ch] text-[var(--muted)]">{standfirst}</p>
             ) : null}
 
             {children ? <div className="mt-10">{children}</div> : null}
@@ -86,14 +94,14 @@ export function SheetHeader({
 
           {/* The metadata table. 4 of 12 columns, rules top and between. */}
           <div className="col-span-12 lg:col-span-4 lg:col-start-9">
-            <dl className="border-t border-line">
+            <dl className="border-t border-[var(--rule)]">
               {meta.map((row) => (
                 <div
                   key={row.label}
-                  className="grid grid-cols-[7.5rem_1fr] gap-4 border-b border-line py-3"
+                  className="grid grid-cols-[7.5rem_1fr] gap-4 border-b border-[var(--rule)] py-3"
                 >
                   <dt className="t-label pt-0.5">{row.label}</dt>
-                  <dd className="text-[15px] leading-[1.4] text-bone">{row.value}</dd>
+                  <dd className="text-[15px] leading-[1.4] text-[var(--ink)]">{row.value}</dd>
                 </div>
               ))}
             </dl>
@@ -102,12 +110,12 @@ export function SheetHeader({
             {/* The contact box. A tender cover sheet carries one, and without
                 it this column is a short table above a lot of nothing —
                 which on a page arguing for density is the wrong signal. */}
-            <div className="mt-10 border-t border-line pt-5">
+            <div className="mt-10 border-t border-[var(--rule)] pt-5">
               <p className="t-label">Enquiries</p>
               <a
                 href={phone.href}
                 data-analytics="phone"
-                className="mt-2 block font-display text-[1.75rem] font-extrabold leading-none tracking-[-0.02em] text-bone hover:text-hivis"
+                className="mt-2 block font-display text-[1.75rem] font-extrabold leading-none tracking-[-0.02em] text-[var(--ink)] hover:text-[var(--mark)]"
               >
                 {phone.display}
               </a>

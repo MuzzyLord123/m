@@ -13,7 +13,7 @@ import { Arrow } from '@/components/Arrow';
  * Numbers are display type. Rules between rows. Hi-vis on hover and focus, and
  * nowhere else.
  */
-export function SectorIndexList({ ground = 'concrete' }: { ground?: 'concrete' | 'graphite' }) {
+export function SectorIndexList({ ground = 'paper' }: { ground?: 'paper' | 'mist' | 'graphite' }) {
   return (
     <ol data-ground={ground} className="border-t border-[var(--rule)]">
       {SECTORS.map((sector, i) => (
@@ -31,7 +31,7 @@ export function SectorIndexList({ ground = 'concrete' }: { ground?: 'concrete' |
               <span className="t-section block transition-colors group-hover:text-[var(--mark)] group-focus-visible:text-[var(--mark)]">
                 {sector.label}
               </span>
-              <span className="mt-2 block max-w-[54ch] text-[15px] leading-[1.5] opacity-80">
+              <span className="mt-2 block max-w-[54ch] text-[15px] leading-[1.5] text-[var(--muted)]">
                 {sector.summary}
               </span>
             </span>

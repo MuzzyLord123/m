@@ -13,7 +13,7 @@ import { Confirm } from '@/components/Confirm';
  * as published. And no aggregateRating in the structured data, ever, unless it
  * comes from the company's own verified Business Profile.
  */
-export function Testimonials({ ground = 'concrete' }: { ground?: 'concrete' | 'graphite' }) {
+export function Testimonials({ ground = 'mist' }: { ground?: 'paper' | 'mist' | 'graphite' }) {
   if (TESTIMONIALS.length) {
     return (
       <div className="grid gap-x-[var(--spacing-gutter)] gap-y-10 md:grid-cols-2">
@@ -23,7 +23,7 @@ export function Testimonials({ ground = 'concrete' }: { ground?: 'concrete' | 'g
             <figcaption className="mt-5">
               <p className="t-label">{t.attribution}</p>
               {t.context ? <p className="t-label mt-1">{t.context}</p> : null}
-              {t.source ? <p className="t-label mt-1 opacity-70">{t.source}</p> : null}
+              {t.source ? <p className="t-label mt-1">{t.source}</p> : null}
             </figcaption>
           </figure>
         ))}
@@ -36,7 +36,10 @@ export function Testimonials({ ground = 'concrete' }: { ground?: 'concrete' | 'g
       {TESTIMONIAL_SLOTS.map((slot, i) => (
         <div key={i} className="border-t border-[var(--rule)] pt-6">
           <p className="t-label">Quote {i + 1} of 2</p>
-          <p className="t-lead mt-4 max-w-[36ch] opacity-70">{slot.want}</p>
+          {/* The label colour, not the body colour at 70% — an opacity that
+              looks "quieter" on a dark ground drops under 4.5:1 on a light one,
+              which is exactly what happened when this site went light. */}
+          <p className="t-lead mt-4 max-w-[36ch] text-[var(--label)]">{slot.want}</p>
           <Confirm
             id={slot.needed}
             className="mt-6"

@@ -79,10 +79,10 @@ export function Compare({
           </span>
         </div>
 
-        <span className="t-label pointer-events-none absolute left-4 top-4 bg-graphite/85 px-2.5 py-1.5 !text-bone">
+        <span className="t-label pointer-events-none absolute left-4 top-4 bg-[var(--color-navy)]/85 px-2.5 py-1.5 !text-bone">
           Before
         </span>
-        <span className="t-label pointer-events-none absolute right-4 top-4 bg-graphite/85 px-2.5 py-1.5 !text-bone">
+        <span className="t-label pointer-events-none absolute right-4 top-4 bg-[var(--color-navy)]/85 px-2.5 py-1.5 !text-bone">
           After
         </span>
 
@@ -131,7 +131,7 @@ export function ComparePair({
           <div className={`relative w-full overflow-hidden bg-steel ${ratioClass}`}>
             <Image src={image.src} alt={image.alt} fill sizes={sizes} className="object-cover" />
           </div>
-          <figcaption className="t-label absolute left-3 top-3 bg-graphite/85 px-2.5 py-1.5 !text-bone">
+          <figcaption className="t-label absolute left-3 top-3 bg-[var(--color-navy)]/85 px-2.5 py-1.5 !text-bone">
             {label}
           </figcaption>
         </figure>

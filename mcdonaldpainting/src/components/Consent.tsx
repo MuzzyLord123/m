@@ -119,7 +119,7 @@ export function Consent() {
           <button
             type="button"
             onClick={() => decide(true)}
-            className="t-label !text-graphite bg-hivis px-4 py-3.5 hover:bg-bone"
+            className="t-label !text-graphite bg-hivis px-4 py-3.5 hover:bg-[#c98d18]"
           >
             Allow analytics
           </button>

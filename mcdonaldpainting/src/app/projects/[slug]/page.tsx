@@ -92,10 +92,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                 />
               </>
             ) : (
-              <div className="flex min-h-[15rem] w-full items-end border border-line border-t-[3px] border-t-hivis bg-steel p-6 md:min-h-[20rem] md:p-10">
+              <div className="flex min-h-[15rem] w-full items-end border border-[var(--rule)] border-t-[3px] border-t-[var(--flag)] bg-[var(--raised)] p-6 md:min-h-[20rem] md:p-10">
                 <div className="max-w-[52ch]">
-                  <p className="t-label !text-hivis">Photograph to come</p>
-                  <p className="mt-3 text-[15px] leading-[1.5] text-concrete">
+                  <p className="t-label !text-[var(--mark)]">Photograph to come</p>
+                  <p className="mt-3 text-[15px] leading-[1.5] text-[var(--muted)]">
                     {record.image.needs}
                   </p>
                 </div>
@@ -110,15 +110,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
       <Band ground="graphite">
         <p className="t-label mb-5">Record</p>
-        <dl className="border-t border-line">
+        <dl className="border-t border-[var(--rule)]">
           {captionFields(record).map((field) => (
-            <div key={field.label} className="grid12 gap-y-1 border-b border-line py-4">
+            <div key={field.label} className="grid12 gap-y-1 border-b border-[var(--rule)] py-4">
               <dt className="col-span-12 lg:col-span-3">
                 <span className="t-label">{field.label}</span>
               </dt>
               <dd className="col-span-12 lg:col-span-9">
                 {field.value ? (
-                  <span className="text-[15px] leading-[1.5] text-bone">{field.value}</span>
+                  <span className="text-[15px] leading-[1.5] text-[var(--ink)]">{field.value}</span>
                 ) : (
                   <ConfirmInline id="project-detail" label={`${field.label} — not yet confirmed`} />
                 )}
@@ -137,7 +137,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
       </Band>
 
       {record.body ? (
-        <Band ground="concrete">
+        <Band ground="mist">
           <div className="grid12">
             <div className="col-span-12 lg:col-span-8">
               <div className="prose-sheet">
@@ -152,9 +152,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         <SectionHead title="Other records">
           <CapabilityStatementAction note="Three site records, the capability schedule and the compliance detail, as one PDF." />
         </SectionHead>
-        <ul className="mt-10 border-t border-line">
+        <ul className="mt-10 border-t border-[var(--rule)]">
           {others.map((other) => (
-            <li key={other.slug} className="border-b border-line">
+            <li key={other.slug} className="border-b border-[var(--rule)]">
               <Link
                 href={`/projects/${other.slug}`}
                 className="group grid12 items-baseline gap-y-2 py-6"
@@ -165,10 +165,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                   </span>
                 </span>
                 <span className="col-span-12 lg:col-span-7">
-                  <span className="t-sub text-bone group-hover:text-hivis">{other.title}</span>
+                  <span className="t-sub text-[var(--ink)] group-hover:text-[var(--mark)]">{other.title}</span>
                 </span>
                 <span className="col-span-12 lg:col-span-2 lg:text-right">
-                  <span className="t-label !text-hivis inline-flex items-center gap-2">
+                  <span className="t-label !text-[var(--mark)] inline-flex items-center gap-2">
                     Record
                     <Arrow />
                   </span>

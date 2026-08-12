@@ -95,7 +95,7 @@ export default function SectorIndexOverlay({
         >
           <button
             type="button"
-            className="absolute inset-0 h-full w-full cursor-default bg-graphite/60"
+            className="absolute inset-0 h-full w-full cursor-default bg-[var(--color-navy)]/60"
             aria-label="Close index"
             onClick={onClose}
             tabIndex={-1}
@@ -119,7 +119,7 @@ export default function SectorIndexOverlay({
               <button
                 type="button"
                 onClick={onClose}
-                className="t-label !text-graphite bg-hivis px-4 py-2.5 hover:bg-bone"
+                className="t-label !text-graphite bg-hivis px-4 py-2.5 hover:bg-[#c98d18]"
               >
                 Close
               </button>
