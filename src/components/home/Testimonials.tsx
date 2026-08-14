@@ -71,9 +71,28 @@ function sizeFor(quote: string): string {
  * it so a twelve-word review does not sit at the top of a box sized for a
  * fifty-word one.
  *
- * It also means all eight reviews are in the served HTML, so they are readable
- * by a crawler and by anyone with JavaScript off — who gets the first review,
+ * It also means every review is in the served HTML, so they are readable by a
+ * crawler and by anyone with JavaScript off — who gets the first review,
  * statically, rather than an empty box.
+ *
+ * A COUNTER AND ONE BAR, NOT A ROW OF TICKS. This used to show one tick per
+ * review, each filling over the dwell time. That is a lovely control for eight
+ * reviews and a worthless one for twenty-one: the row is a fixed width, so every
+ * review added makes each tick thinner, and at twenty-one they are about 5px of
+ * hairline 6px apart. Nobody can tell twenty-one of those apart, nobody is
+ * aiming a thumb at one, and they stopped reading as a control at all.
+ *
+ * So the row is now "3 / 21" and a single bar that fills over the dwell time.
+ * The counter says where you are and how many there are, which is what the ticks
+ * were really for; the bar keeps the indicator-is-the-timer idea; and the
+ * previous/next buttons do the navigating, which is all anyone did with the
+ * ticks anyway. It also ends a WCAG 2.2 SC 2.5.8 problem rather than managing
+ * it — there is no longer an undersized target to argue an exception for.
+ *
+ * The count in that counter is NOT the same claim as a count in the header, and
+ * the difference matters — see the note in src/data/testimonials.ts. "3 / 21"
+ * describes this rail and anyone can check it by pressing next. "21 reviews on
+ * Facebook" would assert a total on someone else's page.
  *
  * IT STOPS WHEN IT SHOULD, which is most of the accessibility of the thing:
  *   - on hover and on focus-within, so it cannot move under a reader's eye or
@@ -239,24 +258,25 @@ export function Testimonials() {
 
           {count > 1 && (
             <div className="mt-7 flex items-center gap-4">
-              {/* Ticks, not dots — the site's hairline language. The active one
-                  fills over the dwell time, so the indicator IS the timer. */}
-              <ol className="flex flex-1 items-center gap-1.5">
-                {testimonials.map((item, position) => (
-                  <li key={`${item.name}-tick`} className="flex-1">
-                    <button
-                      type="button"
-                      onClick={() => setIndex(position)}
-                      aria-label={`Review ${position + 1} of ${count}, ${item.name}`}
-                      aria-current={position === index ? "true" : undefined}
-                      className="review-tick"
-                      data-active={position === index}
-                      data-running={position === index && running}
-                      style={{ ["--dwell" as string]: `${DWELL_MS}ms` }}
-                    />
-                  </li>
-                ))}
-              </ol>
+              {/* Both are hidden from assistive tech: the sr-only live region
+                  below already says "Review 3 of 21", and a timer bar has
+                  nothing to announce. */}
+              <p
+                className="eyebrow shrink-0 tabular-nums text-ink-mute"
+                aria-hidden="true"
+              >
+                {index + 1} / {count}
+              </p>
+              {/* One hairline that fills over the dwell time — the site's own
+                  rule language, and still the timer. Keyed on index so the fill
+                  restarts from empty on every change, including a manual one. */}
+              <div className="review-rail flex-1" data-running={running} aria-hidden="true">
+                <span
+                  key={index}
+                  className="review-rail-fill"
+                  style={{ ["--dwell" as string]: `${DWELL_MS}ms` }}
+                />
+              </div>
 
               <div className="flex shrink-0 items-center gap-1">
                 <Control label="Previous review" onClick={() => go(-1)}>
@@ -281,7 +301,9 @@ export function Testimonials() {
         </div>
 
         {/* Read by nobody who can see the section, and the only way someone on a
-            screen reader knows where they are in it without the ticks. */}
+            screen reader knows where they are in it — the counter beside the
+            bar is the visual equivalent, and is aria-hidden so this is not
+            announced twice. */}
         <p className="sr-only" aria-live="polite">
           Review {index + 1} of {count}: {current.name}, {current.date}.
         </p>
