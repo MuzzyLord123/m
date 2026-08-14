@@ -26,6 +26,7 @@ const from = (key: string, fallback: string): string => {
   return value && value.trim().length > 0 ? value.trim() : fallback;
 };
 
+/** Confirmed by the client. */
 const phone = from("NEXT_PUBLIC_PHONE", "07970 752848");
 
 export const site = {
@@ -39,6 +40,8 @@ export const site = {
   phone,
   /** Digits only, used for tel: links. Derived, so it cannot drift. */
   phoneHref: phone.replace(/[^\d+]/g, "") || phone,
+  /* Confirmed by the client. This is where every quote-form submission lands,
+     so a wrong value here loses enquiries silently rather than erroring. */
   email: from("NEXT_PUBLIC_EMAIL", "jamesdevonshireyoung@btinternet.com"),
 
   town: from("NEXT_PUBLIC_TOWN", "the Wirral"),
@@ -48,13 +51,21 @@ export const site = {
      rather than a pin on a house. */
   mapAddress: from("NEXT_PUBLIC_MAP_ADDRESS", "Merseyside, England"),
 
+  /* Both confirmed by the client, and both stored bare — handle only, no query
+     string and no trailing slash.
+
+     The Instagram link arrived as .../thepaintmenofficial?igsh=…&igsi=… because
+     that is what Instagram's Share button produces. Those are share-attribution
+     tokens tied to the copy that made them, not part of the address: the profile
+     resolves without them, they would sit in the markup of every page, and
+     shipping one means every visitor who clicks hands Instagram a tag saying
+     which share their click came from. There is no reason to do that on the
+     client's behalf. Same reasoning as the trailing slash on the Facebook URL,
+     which Facebook 301s away — both are noise the visitor pays for.
+
+     If either is ever replaced, strip back to the handle first. */
   social: {
-    instagram: from(
-      "NEXT_PUBLIC_INSTAGRAM_URL",
-      "https://www.instagram.com/thepaintmenofficial",
-    ),
-    /* Confirmed by the client. No trailing slash — Facebook 301s the slashed
-       form to this one, so the slash just bought every visitor a redirect. */
+    instagram: from("NEXT_PUBLIC_INSTAGRAM_URL", "https://www.instagram.com/thepaintmenofficial"),
     facebook: from("NEXT_PUBLIC_FACEBOOK_URL", "https://www.facebook.com/thepaintmen"),
   },
 
