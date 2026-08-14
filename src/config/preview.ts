@@ -1,38 +1,54 @@
 /**
- * PREVIEW MODE — the half-built site you send a prospect.
+ * PREVIEW MODE — the half-built site you send a prospect. NOW OFF.
  * ============================================================================
  *
- * The whole site is finished. This exists so a prospect can be sent a live
- * link showing the home page and the two galleries, with the rest of the menu
- * greyed out and marked as not built yet.
+ * The whole site is finished. This exists so a prospect can be sent a live link
+ * showing the home page and the two galleries, with the rest of the menu greyed
+ * out and marked as not built yet. That job is done: PREVIEW_DEFAULT is false,
+ * so every page is reachable, nothing is greyed, and there is no trace of any of
+ * this in the HTML.
  *
- * TO TURN IT OFF — which is the whole point of it being one switch:
+ * TO PUT IT BACK ON, for a second prospect:
  *
  *   In Vercel:  Settings -> Environment Variables -> set
- *               NEXT_PUBLIC_PREVIEW_MODE to 0, then redeploy.
+ *               NEXT_PUBLIC_PREVIEW_MODE to 1, then redeploy.
  *
- *   Or in code: change PREVIEW_DEFAULT below to false.
+ * The variable wins over the default either way, so the switch works in both
+ * directions without editing code.
  *
- * The site is then complete: every page reachable, nothing greyed, nothing
- * blocked, and no trace of any of this in the HTML.
+ * WHAT TURNING IT OFF CHANGED, beyond the menu:
+ *   - /services, /about, /quote, /contact and /blog are reachable. That
+ *     includes the enquiry flow — every "Get a Free Quote" button on the site
+ *     points at /quote, and those landed on the notice until now.
+ *   - the site-wide noindex is gone and the sitemap lists every page, so search
+ *     engines will index it. Worth knowing which host that is: canonical tags
+ *     point at site.url, so if NEXT_PUBLIC_SITE_URL is unset every page tells
+ *     Google the real one lives at thepaintmen.com.
  *
  * A SAFETY NET, because forgetting to turn this off would ship a crippled site
  * to a paying client: `npm run audit:content` FAILS while preview mode is on
  * and says so in plain words. That audit is the one the hand-over tells you to
  * run before launch, so this cannot go live by accident.
- *
- * Preview mode also sets noindex site-wide and trims the sitemap to the built
- * pages, so a half-site is never picked up by Google on the way past.
  */
 
 /**
  * Whether preview mode is on when no environment variable says otherwise.
  *
- * True, because the immediate need is the prospect preview. Set the env var to
- * "0" for the real launch — or flip this to false once the sale is done and you
- * never want to think about it again.
+ * FALSE — the site is unlocked. The prospect preview is done, so the default is
+ * now the full site: every page reachable, nothing greyed out, indexable.
+ *
+ * IF THE SITE STILL SHOWS AS LOCKED AFTER A DEPLOY, this line is not the
+ * problem — an environment variable is beating it. NEXT_PUBLIC_PREVIEW_MODE
+ * takes precedence over this default whenever it is set to anything other than
+ * "0"/"false"/"off"/"no", which is deliberate (see the note below on failing
+ * towards showing less). Delete the variable in the host's dashboard, or set it
+ * to 0, and redeploy.
+ *
+ * To put the site back behind the preview — for a second prospect, say — set
+ * NEXT_PUBLIC_PREVIEW_MODE=1 rather than editing this back, so the code stays
+ * describing the finished state.
  */
-const PREVIEW_DEFAULT = true;
+const PREVIEW_DEFAULT = false;
 
 const flag = process.env.NEXT_PUBLIC_PREVIEW_MODE;
 

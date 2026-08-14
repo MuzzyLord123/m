@@ -35,7 +35,24 @@
 import { launchBrowser } from "./browser.mjs";
 
 const BASE = process.env.BASE_URL || "http://127.0.0.1:3100";
-const ROUTES = ["/", "/work", "/videos", "/privacy"];
+/* Every page of the site, not just the four that used to be reachable.
+   This list was ["/", "/work", "/videos", "/privacy"] while preview mode gated
+   the rest — correct then, and silently wrong the moment the site was unlocked,
+   because six public pages would have gone on passing a check that never opened
+   them. A route list that mirrors a feature flag has to be revisited when the
+   flag moves; keeping the full list here means it never needs to be again. */
+const ROUTES = [
+  "/",
+  "/work",
+  "/videos",
+  "/services",
+  "/about",
+  "/quote",
+  "/contact",
+  "/blog",
+  "/blog/cost-to-paint-a-three-bed-house",
+  "/privacy",
+];
 
 const MEASURE = () => {
   const toRgb = (value) => {

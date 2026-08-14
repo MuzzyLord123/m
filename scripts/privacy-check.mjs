@@ -35,7 +35,22 @@
 import { launchBrowser } from "./browser.mjs";
 
 const BASE = process.env.BASE_URL || "http://127.0.0.1:3100";
-const ROUTES = ["/", "/work", "/videos"];
+/* Every page, for the same reason as in contrast-live.mjs: this was the set of
+   pages preview mode left reachable, and the promise being tested — that nothing
+   on this site talks to a third party unasked — is a promise about ALL of it.
+   /quote and /contact matter most of the three that were added: they are the
+   pages carrying forms, so they are where a stray embed would cost the most. */
+const ROUTES = [
+  "/",
+  "/work",
+  "/videos",
+  "/services",
+  "/about",
+  "/quote",
+  "/contact",
+  "/blog",
+  "/privacy",
+];
 
 /** Storage keys the privacy page names. Anything else is undisclosed. */
 const DISCLOSED = new Set(["tpm-splash", "tpm-privacy-ack"]);
