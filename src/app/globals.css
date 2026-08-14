@@ -1266,7 +1266,7 @@
    ~9px at sixteen, ~5px at twenty-one. Nobody distinguishes twenty-one 5px
    hairlines, nobody aims a thumb at one, and it stopped reading as a control.
 
-   A single bar plus a "3 / 21" counter keeps what the ticks were actually for —
+   A single bar plus a position-over-total counter keeps what they were for —
    where am I, how many are there, how long until it moves — at any list length,
    and leaves navigation to the 36px arrows beside it. It also deletes a WCAG 2.2
    SC 2.5.8 target-size problem rather than arguing an exception for it: the bar

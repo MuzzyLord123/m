@@ -27,15 +27,31 @@ export type Testimonial = {
  * rather one did not appear at all, delete the entry — that is a fair choice,
  * and a different one from rewriting it.
  *
- * SHORTENED IS NOT THE SAME AS EDITED, and four of these are shortened. On
- * Facebook a long recommendation is cut off behind a "See more" link, so what
- * the screenshots showed of Debbie Sindall's, Daniel Hewitt's, Paul Hughes's and
- * Gina Kirkham's reviews was not the whole thing — Debbie's stopped mid-word at
- * "genuine, happy pers…" and Gina's at "very little disrupt…". Where that
- * happened the quote here is a CONTIGUOUS run from the start of the review,
- * ending at a full stop. Nothing is spliced from two places, nothing is
- * reworded, and no missing text is guessed at. If the full versions are wanted,
- * open the review on Facebook, press See more and paste the rest in.
+ * SHORTENED IS NOT THE SAME AS EDITED, and five of these are shortened. Every
+ * one is a CONTIGUOUS run from the start of the review, ending at a full stop.
+ * Nothing is spliced from two places, nothing is reworded, and no missing text
+ * is guessed at. There are two different reasons for it, and they are worth
+ * keeping apart:
+ *
+ *   - FACEBOOK CUT IT, for Debbie Sindall's, Daniel Hewitt's, Paul Hughes's and
+ *     Gina Kirkham's. A long recommendation hides its tail behind a "See more"
+ *     link, so the screenshots did not show the whole thing — Debbie's stopped
+ *     mid-word at "genuine, happy pers…" and Gina's at "very little disrupt…".
+ *     The rest was never available to paste. If the full versions are wanted,
+ *     open the review on Facebook, press See more and paste the rest in.
+ *
+ *   - WE CUT IT, for Frankie Williams's, and only that one. Her screenshot was
+ *     expanded, so the full text was there: about 770 characters, roughly double
+ *     the longest review here. Every slide shares one grid cell sized to the
+ *     longest, so carrying it whole would have added around 260px of height to a
+ *     section that sits on the home page — against a brief that says it must not
+ *     bloat the home page. The alternative was a fifth, smaller type step, and
+ *     18px is already the floor (see sizeFor in Testimonials.tsx). So the quote
+ *     is the opening of hers rather than all of it.
+ *
+ * Both cuts drop praise and nothing else, so every excerpt here understates its
+ * review rather than flattering it. That is the direction an excerpt is allowed
+ * to err in; the reverse would not be.
  *
  * ONE QUOTE DROPS A LEADING LINE. Carla May's begins with "5 Star" on a line of
  * its own, above the prose. It is a rating label rather than something she
@@ -71,9 +87,10 @@ export type Testimonial = {
  * That link is also why the header does NOT claim a number. Printing the array's
  * length as "N recommendations on Facebook" would assert a total nobody here has
  * counted, while excluding one — a claim that is both unverifiable and
- * unflattering the moment someone does count. The switcher's own "3 / 21"
- * counter is a different thing and is fine: it describes THIS rail, which anyone
- * can verify by pressing next, and says nothing about what is on Facebook.
+ * unflattering the moment someone does count. The switcher's own position-over-
+ * total counter is a different thing and is fine: it describes THIS rail, which
+ * anyone can verify by pressing next, and says nothing about what is on
+ * Facebook.
  *
  * NO TOWN OR JOB FIELD any more. The old shape asked for both, and a Facebook
  * recommendation gives neither. Inventing "Chester" or "Hall, stairs and
@@ -244,5 +261,35 @@ export const testimonials: Testimonial[] = [
       "James has just completed a full re-paint of a large 3 bedroom semi-detached house that had just been plastered throughout in just over three weeks. Literally cannot fault the job he has done, attention to detail is second to none.",
     name: "Daniel Hewitt",
     date: "January 2018",
+  },
+  {
+    quote:
+      "Just had our conservatory painted by James and we couldn't be happier, really excellent job done without any fuss or mess. He's a busy man so we had to wait a couple of weeks but it's worth the wait!",
+    name: "Ed Naylor",
+    date: "October 2020",
+  },
+  {
+    /* "James done my hall" and "He also done my bathroom" are hers, as are the
+       two hearts. */
+    quote:
+      "James done my hall, stairs and landing. He also done my bathroom and kitchen, I would highly recommend him. James is an excellent professional, trustworthy, reliable and honest. I had no worries about him being in my home alone while I was in work. James's work is second to none and I would hire him again, very happy customer ❤️❤️",
+    name: "Jeanette Tillett",
+    date: "October 2020",
+  },
+  {
+    /* SHORTENED BY US, not by Facebook — the only one, and see the note on that
+       above. The screenshot showed this one EXPANDED ("See less"), so the full
+       review is known: it runs about 770 characters, roughly double the longest
+       here, and every slide shares one cell sized to the longest. Carrying it
+       whole would have added around 260px to a section that appears on the home
+       page, against a brief that it must not bloat the home page.
+
+       This is the opening, contiguous, ending at a full stop. What is cut is
+       four more sentences of praise and a sign-off, so the excerpt understates
+       the review rather than flattering it. "on the exterior our house" is hers. */
+    quote:
+      "James has just completed a fabulous job on the exterior our house. He has also decorated two bedrooms and a lounge for us. His work is exemplary and he is a true perfectionist in every sense of the word. He is friendly, approachable, extremely honest and trustworthy and hardworking.",
+    name: "Frankie Williams",
+    date: "July 2024",
   },
 ];

@@ -30,7 +30,7 @@ const DWELL_MS = 7000;
  * open-ended, which was fine while the longest review was 310 characters. James
  * Churchill's is 418, and one open-ended bucket then spanned 211 to 418 — a
  * two-to-one range set at one size, so the longest review alone decided the
- * height of the box that all sixteen sit in. Splitting it at 300 costs one
+ * height of the box that all of them sit in. Splitting it at 300 costs one
  * branch and keeps the tallest slide roughly where it already was.
  *
  * The smallest step is 18px on a phone, which is a floor and not a starting
@@ -82,17 +82,18 @@ function sizeFor(quote: string): string {
  * hairline 6px apart. Nobody can tell twenty-one of those apart, nobody is
  * aiming a thumb at one, and they stopped reading as a control at all.
  *
- * So the row is now "3 / 21" and a single bar that fills over the dwell time.
- * The counter says where you are and how many there are, which is what the ticks
- * were really for; the bar keeps the indicator-is-the-timer idea; and the
- * previous/next buttons do the navigating, which is all anyone did with the
- * ticks anyway. It also ends a WCAG 2.2 SC 2.5.8 problem rather than managing
- * it — there is no longer an undersized target to argue an exception for.
+ * So the row is now a position-over-total counter and a single bar that fills
+ * over the dwell time. The counter says where you are and how many there are,
+ * which is what the ticks were really for; the bar keeps the
+ * indicator-is-the-timer idea; and the previous/next buttons do the navigating,
+ * which is all anyone did with the ticks anyway. None of it cares how long the
+ * list gets. It also ends a WCAG 2.2 SC 2.5.8 problem rather than managing it —
+ * there is no longer an undersized target to argue an exception for.
  *
  * The count in that counter is NOT the same claim as a count in the header, and
- * the difference matters — see the note in src/data/testimonials.ts. "3 / 21"
- * describes this rail and anyone can check it by pressing next. "21 reviews on
- * Facebook" would assert a total on someone else's page.
+ * the difference matters — see the note in src/data/testimonials.ts. It
+ * describes this rail, and anyone can check it by pressing next. A count in the
+ * header would assert a total on someone else's page.
  *
  * IT STOPS WHEN IT SHOULD, which is most of the accessibility of the thing:
  *   - on hover and on focus-within, so it cannot move under a reader's eye or
@@ -259,8 +260,8 @@ export function Testimonials() {
           {count > 1 && (
             <div className="mt-7 flex items-center gap-4">
               {/* Both are hidden from assistive tech: the sr-only live region
-                  below already says "Review 3 of 21", and a timer bar has
-                  nothing to announce. */}
+                  below already announces the position and the total, and a
+                  timer bar has nothing to announce. */}
               <p
                 className="eyebrow shrink-0 tabular-nums text-ink-mute"
                 aria-hidden="true"
