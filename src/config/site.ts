@@ -53,7 +53,9 @@ export const site = {
       "NEXT_PUBLIC_INSTAGRAM_URL",
       "https://www.instagram.com/thepaintmenofficial",
     ),
-    facebook: from("NEXT_PUBLIC_FACEBOOK_URL", "https://www.facebook.com/thepaintmen/"),
+    /* Confirmed by the client. No trailing slash — Facebook 301s the slashed
+       form to this one, so the slash just bought every visitor a redirect. */
+    facebook: from("NEXT_PUBLIC_FACEBOOK_URL", "https://www.facebook.com/thepaintmen"),
   },
 
   /** Towns covered, shown as swatch chips in the service-area section. */
