@@ -149,7 +149,14 @@ export function Testimonials() {
               rel="noreferrer noopener"
               className="inline-flex items-center gap-1 eyebrow text-ink-mute transition-colors duration-200 hover:text-accent"
             >
-              {count} recommendations on Facebook
+              {/* NO COUNT HERE, deliberately. "11 recommendations on Facebook"
+                  asserts a total nobody has counted, from a page that also
+                  carries reviews this rail does not show — a claim that is
+                  unverifiable and stops being flattering the moment a visitor
+                  checks. The link does the work instead: it goes to the page,
+                  where all of them are, which is the honest way to publish a
+                  selection. See src/data/testimonials.ts. */}
+              Read them on Facebook
               <ArrowUpRight weight="bold" aria-hidden="true" className="size-3" />
             </a>
           </div>
