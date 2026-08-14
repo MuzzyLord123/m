@@ -25,6 +25,34 @@ git push -u origin main
 Then **vercel.com/new → Import Git Repository**. Every push to `main` ships to
 production; every branch gets its own preview URL.
 
+### If this site shares a repository with other sites
+
+The above assumes one repository holds one site. This one does not. The
+repository it currently lives in — `MuzzyLord123/The-Paint-Man` — holds several
+decorators' sites, one per branch:
+
+    claude/paint-man-website-build-8hd2cu   <- this site
+    claude/neil-brookfield-rebuild-ih8852
+    claude/fas-painter-decorator-site-4exfgd
+    claude/edwards-decorating-site-dvsn5l
+    ... and others
+
+They all occupy the same paths — `src/`, `public/`, `package.json` — so they
+cannot be merged into one branch. Whatever is on `main` is whichever site was
+merged there last, which is why **`main` is not this site's production branch and
+merging into it is not how this site ships.**
+
+So set the production branch per project instead. One time, in Vercel:
+
+> **Project → Settings → Git → Production Branch** → `claude/paint-man-website-build-8hd2cu` → Save, then redeploy.
+
+After that every push to this branch deploys to production automatically, with
+nothing to merge and nothing to remember. Each site in the repository wants its
+own Vercel project pointed at its own branch the same way.
+
+Until that is set, pushes still deploy — as a *preview* URL per branch, which
+Vercel creates automatically. The production URL just is not this site.
+
 ## Environment variables
 
 Copy from `.env.example`. Nothing here is required to get the site *rendering* —
