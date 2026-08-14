@@ -1264,32 +1264,66 @@
    time, so the progress indicator and the timer are the same object rather than
    two things that can disagree. The fill is driven by the same --dwell the
    interval uses, passed in from the component. */
+/* THE BUTTON IS THE TARGET; THE 2px LINE INSIDE IT IS WHAT YOU SEE. The button
+   used to BE the line — 2px tall, and as wide as one-eighth of the row. At eight
+   reviews that was a ~19px-wide target, which was already mean; at sixteen it is
+   ~9px, and every review James sends makes it thinner. A 9x2px control is not
+   one you can reliably hit with a thumb.
+
+   So the button is 24px tall — the WCAG 2.2 SC 2.5.8 minimum — and completely
+   transparent, with the hairline painted by ::before at its centre. Nothing
+   moves: the controls row is already 36px tall because of the arrow buttons, so
+   a 24px tick row sits inside the height the row already had.
+
+   The WIDTH still cannot reach 24px without the ticks overlapping each other,
+   and that is the one dimension left short. It is covered by SC 2.5.8's
+   "equivalent control" exception rather than ignored: the previous/next arrows
+   are 36px, sit beside the ticks, and reach every review in the rail. The ticks
+   are a shortcut and a progress read-out, not the only way through.
+
+   If the list ever passes roughly twenty, stop adding ticks — swap the row for a
+   single fill bar with a "7 / 24" counter. Hairlines 4px apart stop reading as
+   anything at all. */
 .review-tick {
   position: relative;
   display: block;
   width: 100%;
+  height: 24px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* The hairline. Centred in the target, not filling it. */
+.review-tick::before,
+.review-tick::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: calc(50% - 1px);
   height: 2px;
-  overflow: hidden;
   border-radius: 2px;
+}
+.review-tick::before {
   background-color: var(--color-ink);
   opacity: 0.18;
   transition: opacity 0.3s var(--ease-coat);
-  cursor: pointer;
 }
-.review-tick:hover,
-.review-tick:focus-visible {
+.review-tick:hover::before,
+.review-tick:focus-visible::before {
   opacity: 0.5;
 }
-.review-tick[data-active="true"] {
+.review-tick[data-active="true"]::before {
   opacity: 0.28;
 }
-.review-tick[data-active="true"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
+/* The fill, over the hairline. */
+.review-tick::after {
   transform-origin: left;
-  transform: scaleX(1);
+  transform: scaleX(0);
   background-color: var(--color-accent);
+}
+.review-tick[data-active="true"]::after {
+  transform: scaleX(1);
 }
 /* Only the running one animates. Paused, hovered or reduced-motion leaves the
    bar filled, which reads as "this is the current one" rather than as a timer

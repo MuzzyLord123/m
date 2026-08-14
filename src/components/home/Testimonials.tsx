@@ -25,6 +25,19 @@ const DWELL_MS = 7000;
  *
  * The thresholds are character counts because that is what actually drives the
  * wrap; word counts vary too much with word length to be useful here.
+ *
+ * THERE ARE FOUR STEPS BECAUSE THREE STOPPED BEING ENOUGH. The bottom bucket was
+ * open-ended, which was fine while the longest review was 310 characters. James
+ * Churchill's is 418, and one open-ended bucket then spanned 211 to 418 — a
+ * two-to-one range set at one size, so the longest review alone decided the
+ * height of the box that all sixteen sit in. Splitting it at 300 costs one
+ * branch and keeps the tallest slide roughly where it already was.
+ *
+ * The smallest step is 18px on a phone, which is a floor and not a starting
+ * point: it is above the 16px the body text uses, and going below it to win back
+ * height would be shrinking a customer's words to fit a layout. If a review ever
+ * arrives long enough to need that, shorten the quote instead — see
+ * src/data/testimonials.ts on excerpting.
  */
 function sizeFor(quote: string): string {
   if (quote.length <= 110) {
@@ -33,7 +46,10 @@ function sizeFor(quote: string): string {
   if (quote.length <= 210) {
     return "text-[1.5rem] leading-[1.3] sm:text-[1.75rem] lg:text-[2rem]";
   }
-  return "text-[1.25rem] leading-[1.4] sm:text-[1.5rem] lg:text-[1.625rem]";
+  if (quote.length <= 300) {
+    return "text-[1.25rem] leading-[1.4] sm:text-[1.5rem] lg:text-[1.625rem]";
+  }
+  return "text-[1.125rem] leading-[1.45] sm:text-[1.3125rem] lg:text-[1.4375rem]";
 }
 
 /**
