@@ -5,6 +5,7 @@ import { Header } from '@/components/Header'
 import { JsonLd } from '@/components/JsonLd'
 import { businessSchema, siteSchema } from '@/lib/schema'
 import { siteUrl } from '@content/site'
+import { isIndexable } from '@/lib/indexable'
 import { archivo } from './fonts'
 import './globals.css'
 
@@ -18,7 +19,11 @@ export const metadata: Metadata = {
   description:
     'Painting, decorating and spray finishing across the north west of England. UPVC, garage doors, render and furniture sprayed. Dustless sanding.',
   formatDetection: { telephone: true },
-  robots: { index: true, follow: true },
+  // Belt and braces with robots.txt: a meta tag also covers pages reached by a
+  // direct link, which robots.txt alone does not stop being indexed.
+  robots: isIndexable()
+    ? { index: true, follow: true }
+    : { index: false, follow: false, nocache: true },
 }
 
 export const viewport: Viewport = {
