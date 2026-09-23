@@ -31,7 +31,7 @@ export default function LeaveAReviewPage() {
       <Drawn className="py-14 md:py-20">
         <div className="relative md:grid md:grid-cols-12 md:gap-x-6">
           <div className="md:col-span-8">
-            <p className="annotation-lg text-gold">Reviews</p>
+            <p className="kh-eyebrow annotation">Reviews</p>
             <h1 className="display mt-4">Leave a review</h1>
             <p className="measure mt-8 text-lg leading-relaxed">{leaveAReview.lede}</p>
             <p className="measure mt-5 text-paper-dim">{leaveAReview.ask}</p>

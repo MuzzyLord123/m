@@ -1,3 +1,4 @@
+import { photos } from './photos'
 import { emptyPhoto, type Photo, type SprayService } from './types'
 
 /**
@@ -76,9 +77,7 @@ const upvc: SprayService = {
     'Sprayed UPVC is a coating on top of the plastic, not the colour of the plastic itself. It is a very good finish, and it is not the same thing as a factory-fused foil. Anyone telling you it is identical has not looked closely at either.',
     'Dark colours on a south-facing elevation run hotter than white did. It is generally fine on modern frames and it is worth a conversation before you pick black.',
   ],
-  photo: emptyPhoto(
-    'A house of UPVC windows part-sprayed — ideally mid-job with the glass masked and one frame finished, so the before and after are in the same shot. Taken square on in flat daylight.',
-  ),
+  photo: photos.rearConservatory,
   callouts: [
     { x: 26, y: 30, side: 'left', label: 'Glass and gaskets masked' },
     { x: 68, y: 46, side: 'right', label: 'Adhesion primer, two topcoats' },
@@ -134,9 +133,7 @@ const garageDoors: SprayService = {
     'The door cannot be used until the coating has hardened off. On a single door that is usually the rest of the day, and I will tell you when rather than guess.',
     'A door with a heavy pebbled or embossed texture will look like a well-finished textured door, not like a flat one. Spraying follows the surface it is given.',
   ],
-  photo: emptyPhoto(
-    'A steel up-and-over garage door, finished, shot square on from the drive in flat light. A second frame of the masking in progress — surround and drive sheeted — is just as useful.',
-  ),
+  photo: photos.renderGarage,
   callouts: [
     { x: 50, y: 22, side: 'right', label: 'Surround masked, lintel cut in' },
     { x: 30, y: 55, side: 'left', label: 'Chalked coating removed, keyed' },
@@ -192,9 +189,7 @@ const exterior: SprayService = {
     'A coating is not a repair. Damp coming through a wall, failed render, a blocked cavity or a leaking gutter will still be there under fresh paint, and covering it up makes it harder to find later.',
     'Pebbledash that is already loose will keep coming off. Spraying it does not glue it back on.',
   ],
-  photo: emptyPhoto(
-    'A rendered elevation part-way through, ideally with the masking and sheeting visible at ground level and the spray gun in shot. Flat overcast light rather than sun.',
-  ),
+  photo: photos.whiteBrickSemi,
   callouts: [
     { x: 22, y: 24, side: 'left', label: 'Cracks raked out and made good' },
     { x: 74, y: 40, side: 'right', label: 'Two coats, sprayed wet edge to wet edge' },
@@ -316,9 +311,7 @@ export const sprayProcess: { number: string; title: string; body: string }[] = [
 ]
 
 /** The empty-slot brief for the hero photograph on /spraying. */
-export const sprayHeroPhoto: Photo = emptyPhoto(
-  'The best single spray photograph there is — ideally UPVC or a garage door mid-job, masked, with the gun in shot. This is the first thing paid traffic sees on this page.',
-)
+export const sprayHeroPhoto: Photo = photos.brickGarage
 
 export const sprayHeroCallouts = [
   { x: 24, y: 36, side: 'left' as const, label: 'Masked before anything is opened' },

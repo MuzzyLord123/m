@@ -48,74 +48,42 @@ data, the footer and the contact page at once.
 
 ### 2. Add a photograph
 
-Every image is a **slot**. While a slot is empty it renders as a ruled frame carrying a
-description of the shot needed — never a stock photo, never an AI-generated interior.
+Every photograph on the site is one of Kenny's, and they all live in one catalogue:
+**`content/photos.ts`**. 51 came off the old site (`scripts/import-live-photos.mjs`, which
+also strips the GPS position a phone photo can carry).
 
-1. Put the file in `public/work/` (e.g. `public/work/upvc-hoole.jpg`).
-2. Find the slot in the matching content file and fill in four fields:
-
-| Where it appears        | File                  |
-| ----------------------- | --------------------- |
-| Home hero               | `content/home.ts`     |
-| Home, the two specialisms | `content/home.ts`   |
-| `/spraying`             | `content/spraying.ts` |
-| `/dustless-sanding`     | `content/dustless.ts` |
-| The three service pages | `content/services.ts` |
-
-Change this:
+1. Put the file in `public/work/` (e.g. `public/work/upvc-hoole.jpg`). Upload the biggest
+   version there is — Next.js makes the smaller sizes itself.
+2. Add an entry to `photos` in `content/photos.ts`:
 
 ```ts
-photo: emptyPhoto('A house of UPVC windows part-sprayed…'),
+upvcHoole: photo(
+  'upvc-hoole',            // the file name, without .jpg
+  2400,                    // its REAL width in pixels
+  1600,                    // its REAL height in pixels
+  'exterior',              // exterior | interior | wallpaper — which gallery it hangs in
+  'UPVC sprayed anthracite grey, Hoole',                 // the caption
+  'UPVC window frames sprayed anthracite grey on a semi-detached house in Hoole', // alt
+),
 ```
 
-to this:
+- `width` and `height` are the **real pixel dimensions of the file**. Wrong values are a
+  layout-shift failure.
+- `alt` describes what can be seen, for screen readers and Google Images.
+- The caption says what can be seen, not what was done, unless Kenny has said what was
+  done. "Timbers and render, two coats" sells harder than "mock-Tudor detached" — but only
+  if it is true.
 
-```ts
-photo: {
-  src: '/work/upvc-hoole.jpg',
-  alt: 'UPVC window frames sprayed anthracite grey, Hoole',
-  width: 2400,
-  height: 1600,
-  brief: 'A house of UPVC windows part-sprayed…',
-},
-```
+It appears in `/gallery` straight away, under its category, and on the matching service
+page. To use it anywhere else — a hero, a service card, a spray slot — refer to it by
+name, e.g. `photo: photos.upvcHoole` in `content/spraying.ts`.
 
-- `width` and `height` are the **real pixel dimensions of the file**. They hold the
-  layout still while it loads; wrong values are a layout-shift failure, and CLS is in
-  the performance budget.
-- `alt` describes the work, for screen readers and Google Images. "UPVC window frames
-  sprayed anthracite grey, Hoole", not "painting".
-- `brief` can stay as it is — it is only shown while the slot is empty.
+### 3. Change what the home page shows
 
-Upload the biggest version available. Next.js re-encodes to AVIF/WebP and resizes on
-demand; do not shrink it first.
-
-### 3. Add a job to "Recent work"
-
-Open `content/home.ts` and add an entry to `work.items`. Each one is a photo slot,
-so the same two-minute job as above:
-
-```ts
-work: {
-  items: [
-    {
-      src: '/work/garage-door-frodsham.jpg',
-      alt: 'Steel up-and-over garage door sprayed graphite grey, Frodsham',
-      width: 2400,
-      height: 1800,
-      brief: 'A steel up-and-over garage door, finished, from the drive.',
-    },
-    // …
-  ],
-},
-```
-
-The `callouts` still in the content files are the short technical points — "glass and
-seals masked" — and they render as the **gold tick list** beside each specialism on
-the home page. They used to be drawn onto the photograph itself with leader lines
-running out to labels in the margin. That looked like an engineering drawing rather
-than a decorator's photograph, so it was removed; the `x`/`y` positions are kept in
-the content but are no longer used for anything.
+`homeGallery` at the bottom of `content/photos.ts` is the twelve on the home page, in
+order. The hero is `home.hero.photo` in `content/home.ts`; the service cards take theirs
+from `photo` on each row in `content/services.ts`. The two before-and-after pairs are
+`pairs` in `content/photos.ts`.
 
 ### 4. Change some copy
 
@@ -133,6 +101,7 @@ It is all in `/content`, as ordinary TypeScript strings:
 | `contact.ts`           | `/contact` and the form's labels                     |
 | `areas.ts`             | Where he works                                       |
 | `reviews.ts`           | Reviews, and `/leave-a-review`                       |
+| `photos.ts`            | Every photograph: file, size, alt, caption, gallery  |
 | `needed.ts`            | The register of unanswered questions                 |
 
 `{town}` in any string is substituted at render time. `{{ANYTHING_IN_CAPS}}` is an
@@ -176,22 +145,22 @@ written down.
 - **Reviews are transcribed, never written.** See the top of `content/reviews.ts`.
 - **Honest limits on every service page.** The "what it will not do" sections are the most
   persuasive thing on the site precisely because nobody else writes them.
-- **Motion is small and it is all feedback.** A band fades and lifts 12px as it
-  comes into view, hover or focus warms a colour, and a card's gold top edge
-  brightens. Nothing animates a layout property, and there is no parallax, no
-  counter, no page transition and nothing with a spring. Under
-  `prefers-reduced-motion` the transition goes but the end state stays — reduced
-  motion must never mean reduced feedback.
-- **No fixed bottom call bar, no burger menu.** The nav is always visible, and the
-  number is a gold button in the sticky header at every width — never behind a
-  disclosure.
-- **The layout is deliberately familiar.** An earlier version of this site arranged
-  the same content as a numbered specification document with an exposed 12-column
-  grid and technical callout diagrams over the photographs. It was more interesting
-  to look at and it was the wrong thing: somebody looking for a decorator wants to
-  recognise the page, not admire it. Hero, trust points, service cards, gallery,
-  steps, testimonials, quote form — in that order, because that is the order a
-  customer reads in.
+- **Motion is quiet and it is tied to the reader.** On load the hero photograph settles
+  from a slight overscale, the gilt frame comes in and the lines rise one after another.
+  As the page scrolls, bands rise into place, photographs uncover upward, the keyline
+  inside each photograph settles, and the light runs once across each gilded phrase. All
+  of it is transform and opacity on CSS scroll timelines — no animation library, no
+  scroll listener — and **nothing is hidden waiting for JavaScript**: where scroll
+  timelines are unsupported, or motion is reduced, content is simply there. `npm run
+  audit` checks both.
+- **No burger menu, no fixed bottom call bar.** On a phone every page sits in one row
+  under the logo that swipes sideways; from 1280px it is one line. The number is a gold
+  button in the header at every width. A menu you have to open is a menu most paid
+  visitors never open — and the bottom bar belongs to another site in this portfolio.
+- **It must not look like the other sites in this portfolio.** The Paint Men is flat
+  orange, a grotesque with a serif-italic word, pill buttons, a split hero, brush and
+  roller and drip animations, a marquee and a flood menu. Neil Brookfield is blue-black,
+  brass and all-serif. None of those signatures appears here — see "Design tokens".
 
 ---
 
@@ -202,78 +171,86 @@ content/            every word on the site, typed
 src/app/            routes — one directory per page
 src/components/     the design system
 src/lib/            conversions, schema, metadata, form validation, delivery
-scripts/            check-content.mjs (launch gate), shots.mjs (screenshots)
+src/fonts/          the subset Archivo file (see src/app/fonts.ts)
+public/work/        Kenny's photographs
+public/brand/       his logo, lifted off its background, and the KH mark alone
+scripts/            check-content.mjs (launch gate), audit.mjs (axe + motion),
+                    contrast.mjs, import-live-photos.mjs, subset-font.py, shots.mjs
 ```
 
 A few components carry more weight than the rest:
 
-- **`Band.tsx`** — one band of the page: gold eyebrow, heading, standfirst, content.
-  Every section on every page is one of these.
-- **`kit.tsx`** — the small pieces. `WorkPhoto`, `ServiceCard`, `TrustCard`, `Step`,
-  `TickList`.
-- **`icons.tsx`** — the trade icons, drawn for this trade. A spray gun, a roller, a
-  dust extractor, a wallpaper roll. Not a library: no library has a spray gun in it,
-  and a generic icon set is what makes a trade site look bought.
-- **`SprayServiceBlock.tsx`** — renders one sprayable service. `/spraying` maps four
-  through it, and a future `/upvc-spraying` landing page renders exactly one. See
-  `ADS-MIGRATION.md` §7 for the six-line version of that page.
-- **`ServicePageView.tsx`** — the three standard service pages all render through this
-  from a `ServicePage` object, so a fourth is an object rather than a page.
-- **`Drawn.tsx`** — the only JavaScript driving motion. Sets `data-drawn` when a band
-  enters the viewport; the CSS does the rest.
+- **`Hero.tsx`** — the opening of every page: one of his photographs full-bleed in a gilt
+  frame, the headline with one phrase in gold leaf, the two buttons, and a plaque saying
+  what the photograph shows. `size="full"` on the home page.
+- **`Band.tsx`** — one band of the page: eyebrow, heading (with `gild` for the phrase in
+  gold leaf), standfirst, content. Every section on every page is one of these.
+- **`kit.tsx`** — `WorkPhoto` (a photograph in its gilt mount), `ServiceCard`,
+  `TrustCard`, `Step`, `TickList`, and `Diptych` for the before-and-after pairs.
+- **`Gallery.tsx`** — a swipeable rail on a phone, a masonry wall from a tablet up, and
+  a full-screen `<dialog>` lightbox. One set of markup, so nothing downloads twice.
+- **`QuoteBand.tsx`** — the free-quote section at the foot of every service page.
+- **`Spotlight.tsx`** — the soft light that follows the pointer across a card. One
+  delegated listener, desktop only.
+- **`icons.tsx`** — the trade icons, drawn for this trade. No icon library has a spray gun.
+- **`SprayServiceBlock.tsx`** and **`ServicePageView.tsx`** — `/spraying`'s four services
+  and the three standard service pages, each rendered from a content object, so a new
+  one is an object rather than a page.
 - **`lib/conversions.ts`** — the Ads tag and the three conversion actions. Read
   `ADS-MIGRATION.md` before editing.
 
-### Design tokens
+### Design tokens — "Gilded Fascia"
 
-Black and gold. A matt near-black page, raised satin cards, and gold used for
-headings, ticks, numbers, icons and the call-to-action — never as a flood fill and
-never for body copy.
+The old painter-and-decorator's shopfront: black lacquer, gold-leaf lettering, gilt
+keylines. Painters were the signwriters and gilders of every high street, black and gold
+is the palette they lettered in, and Kenny's own logo is metallic gold on black.
 
 ```
-Surfaces — the sheen ladder, which is the thing Kenny actually sells
---matt        #12100E   the page. Warm near-black, deliberately not #000
---satin       #1F1C18   raised panel: tables, quotes, the header
---satin-hot   #2B2519   satin warmed with gold, for hover
---well        #0A0908   recess: inputs, table heads, footer, chips
+Surfaces — lacquer
+--matt        #0E0C0A   the page. Warm black, deliberately not #000
+--satin       #191612   raised panel: cards, the header once scrolled
+--satin-hot   #241E15   satin warmed with gold, for hover
+--well        #080706   recess: inputs, the footer
 
-Text — three tiers, all AA on every surface they are used on
---paper       #EFEAE2   body and headings
---paper-dim   #ADA79D   secondary: nav, table labels, captions
+Text — all AA on every surface they are used on
+--paper       #F1ECE3   body and headings
+--paper-dim   #ADA79D   secondary
 --paper-faint #948D82   micro-labels
 
-Gold — signwriter's brass, four steps
---gold        #C9A227   headings, numerals, rules, the CTA fill
+Gold — the flat UI gold, four steps
+--gold        #C9A227   labels, icons, the button fill
 --gold-lift   #E2C55F   hover, and the focus ring
 --gold-press  #A07D18   :active fill
---gold-deep   #8C6D14   borders and 24px+ text ONLY. Never body copy.
+--gold-deep   #8C6D14   keylines and 24px+ text only
 
-Lines
---edge        #787166   MEANINGFUL borders: inputs, frames, tables
---rule        #2C2823   DECORATIVE hairlines: the setting-out grid, row rules
---alert       #F47962   the one status colour
+Gold leaf (--leaf) — a metallic gradient for display-size lettering only; its darkest
+band still measures 4.0:1 on the page.
 ```
 
-**Gold is never body copy.** It is a heading, numeral, rule, icon and button-fill
-colour. There is no exception — not for pull quotes, not for the phone number in
-prose. Body text is `paper` or `paper-dim`, and that rule is what keeps a
-black-and-gold site readable at length.
+**Type is one variable face used at three widths.** Archivo's width axis runs 62–125:
+headings are set wide (112–118%), labels wider still (125%) in tracked capitals, body copy
+at the normal width, and the process numerals in the narrowest cut. See
+`src/app/fonts.ts` for why it is one self-hosted, subset file.
 
-Depth comes from CSS and inline SVG, never a bitmap: a 0.6KB turbulence tile at
-5% that reads as atomised overspray, 1px inset highlights that read as a lit
-surface, hatching in the photograph frames that are still empty, and one
-hand-drawn brush-stroke rule between the major bands of the page.
+**Signatures, all this site's own:** a keyline inside every photograph like a gilt slip in
+a frame; the light that runs across gilded lettering; square-cornered buttons lettered in
+wide capitals with a band of light crossing on hover; a double gilt moulding between
+bands; outlined condensed numerals; a full-bleed photographic hero in a gilt frame.
+
+**Gold is never body copy.** It is a heading, label, numeral, rule, icon and button-fill
+colour.
 
 ### Routes
 
 | Route                  | Notes                                            |
 | ---------------------- | ------------------------------------------------ |
-| `/`                    | Eight numbered sections. `/home` 301s here       |
+| `/`                    | `/home` 301s here                                |
 | `/spraying`            | The commercial page. Question index above the fold |
 | `/dustless-sanding`    | The method                                       |
 | `/interior-decoration` | Slug unchanged from the old site — indexed        |
 | `/exterior-decoration` | Slug unchanged                                   |
 | `/wallpaper-hanging`   | Slug unchanged                                   |
+| `/gallery`             | Every photograph, by kind of work                |
 | `/reviews`             | Slug unchanged                                   |
 | `/about`               | `/about-us` 301s here                            |
 | `/contact`             | `/contact-us` 301s here                          |

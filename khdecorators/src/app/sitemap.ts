@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/interior-decoration', priority: 0.7, changeFrequency: 'yearly' },
     { path: '/exterior-decoration', priority: 0.7, changeFrequency: 'yearly' },
     { path: '/wallpaper-hanging', priority: 0.6, changeFrequency: 'yearly' },
+    { path: '/gallery', priority: 0.6, changeFrequency: 'monthly' },
     { path: '/reviews', priority: 0.6, changeFrequency: 'monthly' },
     { path: '/about', priority: 0.5, changeFrequency: 'yearly' },
     { path: '/contact', priority: 0.8, changeFrequency: 'yearly' },

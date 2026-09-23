@@ -36,15 +36,17 @@ export function SprayServiceBlock({
     <Band id={service.slug} tone={tone} divider={index > 0}>
       <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
-          <p className="annotation text-gold">Spray finishing</p>
-          <Heading className="display-sm mt-3">{service.name}</Heading>
+          <p className="kh-eyebrow annotation">
+            Spray finishing · {String(index + 1).padStart(2, '0')}
+          </p>
+          <Heading className="display-sm mt-5">{service.name}</Heading>
 
           {/*
             The question, then the answer. This has to be the first thing read by
             somebody who arrived from an ad for exactly this service — it is the
             conversion mechanism on this page.
           */}
-          <div className="kh-card mt-7 p-6">
+          <div className="kh-card mt-8 border-l-2 border-l-gold p-7">
             <p className="display-xs text-gold">{service.question}</p>
             <p className="mt-4 leading-relaxed text-paper">{service.answer}</p>
           </div>
@@ -90,7 +92,7 @@ export function SprayServiceBlock({
                 >
                   <dt className="annotation">{row.label}</dt>
                   <dd className="font-medium">
-                    {isPlaceholder(row.value) ? <Needed token={row.value} /> : fill(row.value)}
+                    {isPlaceholder(fill(row.value)) ? <Needed token={fill(row.value)} /> : fill(row.value)}
                   </dd>
                 </div>
               ))}

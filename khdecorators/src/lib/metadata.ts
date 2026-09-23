@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { siteUrl, town } from '@content/site'
+import { isPlaceholder } from '@content/types'
 
 /**
  * Page titles and descriptions.
@@ -17,6 +18,17 @@ import { siteUrl, town } from '@content/site'
 /** Substitute the shared placeholders into a string of copy. */
 export function fill(text: string): string {
   return text.replaceAll('{town}', town)
+}
+
+/**
+ * The place to put in a headline: the town once it is confirmed, and until then
+ * "the north west" — which the old site already states, so it is true rather
+ * than invented. Visible copy only. The page titles keep `{town}`, so the launch
+ * check still fails until the real town is in, and the site stays out of search
+ * results while it is missing (see src/lib/indexable.ts).
+ */
+export function place(): string {
+  return isPlaceholder(town) ? 'the north west' : town
 }
 
 export function pageMetadata({

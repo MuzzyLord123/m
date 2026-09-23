@@ -3,6 +3,7 @@ import { Analytics } from '@/components/Analytics'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { JsonLd } from '@/components/JsonLd'
+import { Spotlight } from '@/components/Spotlight'
 import { businessSchema, siteSchema } from '@/lib/schema'
 import { siteUrl } from '@content/site'
 import { isIndexable } from '@/lib/indexable'
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <JsonLd data={businessSchema()} />
         <JsonLd data={siteSchema()} />
         <Analytics />
+        <Spotlight />
       </body>
     </html>
   )

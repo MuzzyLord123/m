@@ -1,15 +1,13 @@
-import Link from 'next/link'
 import type { ServicePage } from '@content/types'
 import { isPlaceholder } from '@content/types'
 import { Band } from './Band'
-import { CallLink } from './CallLink'
-import { Drawn } from './Drawn'
-import { EnquiryForm } from './EnquiryForm'
+import { Hero } from './Hero'
 import { Needed } from './Needed'
-import { PhoneIcon, TickIcon } from './icons'
-import { Step, TickList, WorkPhoto } from './kit'
+import { QuoteBand } from './QuoteBand'
+import { Gallery } from './Gallery'
+import { Step, TickList } from './kit'
+import { byCategory } from '@content/photos'
 import { fill } from '@/lib/metadata'
-import { phone } from '@content/site'
 
 /**
  * The three standard service pages — interior, exterior, wallpapering — all render
@@ -24,35 +22,15 @@ import { phone } from '@content/site'
 export function ServicePageView({ service }: { service: ServicePage }) {
   return (
     <>
-      {/* Hero */}
-      <section className="relative">
-        <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-16 md:px-8 md:pt-20 md:pb-20">
-          <div className="kh-reveal grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <p className="annotation text-gold">Service</p>
-              <h1 className="display mt-4">{service.h1}</h1>
-              <p className="measure mt-6 text-lg leading-relaxed text-paper-dim">{service.lede}</p>
-
-              <div className="mt-9 flex flex-wrap items-center gap-4">
-                <CallLink className="kh-btn gap-2" from={`${service.slug}-hero`}>
-                  <PhoneIcon className="size-4" />
-                  Ring Kenny — {phone.label}
-                </CallLink>
-                <Link href="#quote" className="kh-btn-ghost">
-                  Get a free quote
-                </Link>
-              </div>
-            </div>
-
-            <WorkPhoto
-              photo={service.photo}
-              sizes="(min-width: 1024px) 46vw, 100vw"
-              priority
-              ratio="4 / 3"
-            />
-          </div>
-        </Drawn>
-      </section>
+      <Hero
+        photo={service.photo}
+        eyebrow={service.eyebrow ?? 'Service'}
+        title={service.h1}
+        gild={service.gild}
+        lede={service.lede}
+        plaque={'caption' in service.photo ? String(service.photo.caption) : undefined}
+        from={`${service.slug}-hero`}
+      />
 
       {/* What it covers */}
       <Band id="covers" tone="well" eyebrow="What it covers" title="The work itself" divider>
@@ -95,7 +73,7 @@ export function ServicePageView({ service }: { service: ServicePage }) {
               >
                 <dt className="annotation">{row.label}</dt>
                 <dd className="font-medium">
-                  {isPlaceholder(row.value) ? <Needed token={row.value} /> : fill(row.value)}
+                  {isPlaceholder(fill(row.value)) ? <Needed token={fill(row.value)} /> : fill(row.value)}
                 </dd>
               </div>
             ))}
@@ -119,41 +97,20 @@ export function ServicePageView({ service }: { service: ServicePage }) {
         </ul>
       </Band>
 
-      {/* Quote */}
-      <Band
-        id="quote"
-        tone="well"
-        eyebrow="Free quote"
-        title="Ask for a price"
-        standfirst="A couple of lines about the job and a town is enough to start with. I will ring you back rather than send a brochure."
-        divider
-      >
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] lg:gap-16">
-          <EnquiryForm from={service.slug} />
+      {service.gallery ? (
+        <Band
+          id="work"
+          eyebrow="My own photographs"
+          title="Some of the jobs"
+          gild="jobs"
+          standfirst="Tap any of them to see it larger."
+          divider
+        >
+          <Gallery items={byCategory(service.gallery)} label={`${service.h1}: photographs`} />
+        </Band>
+      ) : null}
 
-          <div className="lg:pt-2">
-            <h3 className="annotation text-gold">Or just ring me</h3>
-            <p className="mt-4">
-              <CallLink
-                className="display-xs text-gold underline decoration-1 underline-offset-4 transition-colors duration-150 hover:text-gold-lift hover:decoration-2"
-                from={`${service.slug}-quote`}
-              />
-            </p>
-            <ul className="kh-ticks mt-8">
-              {[
-                'Free, and no obligation attached to it',
-                'Same-day answer, usually',
-                'One job at a time, so the dates are real',
-              ].map((item) => (
-                <li key={item}>
-                  <TickIcon className="mt-1 size-5 text-gold" />
-                  <span className="text-paper-dim">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </Band>
+      <QuoteBand from={service.slug} />
     </>
   )
 }

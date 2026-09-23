@@ -159,65 +159,69 @@ Same for the Yell listing URL into `profiles.yell`.
 
 ### After: measured on this build
 
-Median of three sequential Lighthouse runs, mobile form factor, simulated throttling,
-production build served locally. Commands are in §8 so this can be reproduced rather
-than believed.
+The redesign ("Gilded Fascia", see `README.md`) opens every page on one of Kenny's own
+photographs, full-bleed, under a headline set in the wide cut of Archivo. That was measured,
+not assumed. Median of three sequential Lighthouse 13 runs, mobile form factor, production
+build served locally. Commands are in §8.
 
-| Metric                   | Budget    | `/` measured | `/spraying` measured | Verdict         |
-| ------------------------ | --------- | ------------ | -------------------- | --------------- |
-| Performance (mobile)     | ≥ 92      | **98**       | **96**               | Inside budget   |
-| Accessibility            | 100       | **100**      | **100**              | Inside budget   |
-| Best practices           | —         | 96           | 96                   | —               |
-| SEO                      | —         | 100          | 100                  | —               |
-| Cumulative Layout Shift  | ≤ 0.02    | **0.000**    | **0.000**            | Inside budget   |
-| Largest Contentful Paint | ≤ 2.0 s   | **2.5 s**    | **2.8 s**            | **Over budget** |
-| First Contentful Paint   | —         | 0.9 s        | 0.9 s                | —               |
-| Total Blocking Time      | —         | 57 ms        | 89 ms                | —               |
+| Metric                   | Budget  | `/` simulated | `/spraying` simulated | `/` real throttling | `/spraying` real throttling |
+| ------------------------ | ------- | ------------- | --------------------- | ------------------- | --------------------------- |
+| Performance (mobile)     | ≥ 92    | **95**        | **94**                | 90                  | 90                          |
+| Accessibility            | 100     | **100**       | **100**               | —                   | —                           |
+| Best practices           | —       | 96            | 96                    | —                   | —                           |
+| SEO                      | —       | 69 (noindex)  | 69 (noindex)          | —                   | —                           |
+| Cumulative Layout Shift  | ≤ 0.02  | **0.000**     | **0.000**             | 0.003               | 0.007                       |
+| Largest Contentful Paint | ≤ 2.0 s | **2.8 s**     | **3.0 s**             | **2.1 s**           | **2.1 s**                   |
+| First Contentful Paint   | —       | 1.0 s         | 1.0 s                 | 2.1 s               | 2.1 s                       |
+| Total Blocking Time      | —       | 82 ms         | 104 ms                | 305 ms              | 326 ms                      |
 
-Also verified, and these are the ones that actually protect the design:
+"Simulated" is Lighthouse's default (Lantern modelling slow 4G from a fast trace). "Real
+throttling" is `--throttling-method=devtools`: the page actually loaded over a throttled
+connection with a 4× slowed CPU. **SEO reads 69 only because the site is deliberately
+`noindex` while the town is a placeholder** — see `src/lib/indexable.ts`. It returns to 100
+the moment the town is filled in. Best practices is 96 because the Ads tag cannot load
+from the build machine; it is not a fault in the site.
 
-- `npm run check:contrast` — every text and border pair in the palette clears WCAG AA
-  for the use it is put to. The ratios are computed, not asserted.
-- `npm run audit` — axe-core over 13 pages at a phone width and a desktop width, with
-  no violations, including the `best-practice` rules. Plus a `prefers-reduced-motion`
-  pass confirming nothing stays hidden when the animations are switched off.
+Also verified, and these are the ones that protect the design:
 
-**LCP is the one figure outside budget, and it is worth being straight about why.**
+- `npm run check:contrast` — every text and border pair clears WCAG AA for its use,
+  including the darkest band of the gold-leaf gradient on every surface it is laid on.
+- `npm run audit` — axe-core over 14 pages at a phone and a desktop width, no violations;
+  every scroll reveal ends fully opaque once in view; the hero's entrance finishes inside
+  three seconds; and with reduced motion on, every animated element renders in place.
 
-The largest element on both pages is a paragraph of text, not an image. It paints at
-FCP in the metric-matched fallback face, then repaints when the Archivo file lands, and
-LCP records the later paint. Everything that can be done for it has been: one variable
-font rather than several files, self-hosted, preloaded, `display: swap`, and
-metrically matched to its fallback — which is why CLS is a flat zero.
+**LCP is over budget in the simulated column, and at the budget with real throttling.
+The two disagree for a reason worth knowing before anyone tries to "fix" it.**
 
-Three font configurations were measured before settling on one:
+The largest element is the hero headline, not the photograph (Chrome does not count an
+image that fills the whole viewport). It is set wider than any fallback font can imitate,
+so its final paint is when the Archivo file lands. Under real throttling that file arrives
+with the stylesheet and the headline paints once, finished, at first paint — LCP equals
+FCP. Lantern instead counts every request that happened to finish before that paint in the
+fast trace, JavaScript included, as if it were blocking; that is where most of the
+simulated 2.8 s comes from.
 
-| Configuration                      | home LCP | `/spraying` CLS |
-| ---------------------------------- | -------- | --------------- |
-| Two families, display not preloaded | 2.0 s    | 0.019           |
-| Two families, display preloaded     | 2.6 s    | 0.000           |
-| **One variable family, preloaded**  | 2.5 s    | **0.000**       |
+What was done for it, measured one change at a time on the home page (simulated):
 
-The first row looks like it wins on LCP, and it was rejected anyway: 0.019 against a
-0.02 ceiling is passing with no margin at all, and a longer heading on a slower device
-puts it over. Run-to-run LCP noise on the build machine was around ±0.6 s — larger than
-the difference between these rows — so the deterministic column was the one worth
-optimising.
+| Change                                                        | home LCP |
+| ------------------------------------------------------------- | -------- |
+| Redesign as first built                                       | 3.1 s    |
+| Headline rises but no longer fades in (opacity 0 is not "painted") | 2.84 s |
+| Logos no longer preloaded, so they do not compete with the hero | (in the above) |
+| Font subset to the 136 glyphs used, weight axis 400–800: 87 KB → 47 KB | 2.81 s |
 
-Two things left, in order:
+The font subset barely moved the simulated figure, which is itself the evidence that the
+file size was not the bottleneck; it is kept because it is 40 KB less for every visitor
+on a real connection.
 
-1. **Measure it again on the live host before changing anything.** These figures come
-   from a plain Node server on a shared build machine under simulated slow 4G. In
-   production the font and HTML come off a CDN. Use PageSpeed Insights on the real URL —
-   that is also the number Google itself uses.
-2. **If it is still over 2.0 s and Kenny would rather have the speed:** change the font
-   to `display: 'optional'` in `src/app/fonts.ts`. LCP would drop to roughly FCP. The
-   cost is that a first-time visitor on a slow connection sees the fallback face for
-   that visit. That is a design decision, not a performance tweak, so it should be his
-   call rather than made quietly in a config file.
+Before changing anything else:
 
-A change that made this build fake the number — smaller display type, a lazier font, an
-image LCP — would be worth less than the honest 2.5 s.
+1. **Measure on the live host.** Use PageSpeed Insights on the real URL — its field data
+   is the number Google uses for landing-page experience.
+2. **If it is still over 2.0 s and Kenny would rather have the speed than the lettering on
+   a first visit:** `display: 'optional'` in `src/app/fonts.ts` makes LCP equal FCP, at
+   the cost of a first-time visitor on a slow connection seeing the fallback face for that
+   visit. That is a design decision rather than a tweak, so it is his call.
 
 ### Before: measure this on the old site, and do it first
 
@@ -247,7 +251,8 @@ traffic it is money rather than vanity — so it is worth writing down and showi
 npm run build
 npx next start -p 3000
 
-# Mobile Lighthouse, one page. Run it three times SEQUENTIALLY and take the median —
+# Mobile Lighthouse, one page (add --throttling-method=devtools for the real-throttling
+# column). Run it three times SEQUENTIALLY and take the median —
 # a single run on a busy machine swings by up to 8 points on performance and 0.6s on
 # LCP, and running them concurrently makes the server the bottleneck instead of the
 # page, which produces nonsense.

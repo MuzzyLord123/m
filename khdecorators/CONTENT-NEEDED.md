@@ -18,7 +18,7 @@ names problem simply moves off the website and stays everywhere else — see `LA
 
 ---
 
-## Part 1 — The four that block launch
+## Part 1 — The three that block launch
 
 ### 1. Which town are you based in?
 
@@ -55,27 +55,19 @@ structured data and the Google Business Profile service area.
 
 ---
 
-### 3. The reviews — transcribed, not written
+### 3. The reviews — DONE
 
-> "Can you send me the reviews as they're written, or point me at the pages?"
+All seventeen are in, copied word for word off the old site's reviews page: seven Yell
+reviews with their usernames and dates, the two Google reviews from named reviewers, and
+the eight credited by first name and initial, which sit in their own group with no date
+and no link. Each was checked by script against the page it came from. See the top of
+`content/reviews.ts`.
 
-He has a good collection already: Yell reviews from 2021–22 with usernames and dates, two
-Google reviews from named reviewers, and a further set credited only by a first name and an
-initial. One of them describes an office repaint quoted at five days, finished halfway
-through day four, with the space left immaculate. **That review is worth more than every
-adjective on this site put together.**
+Two things would make them stronger, and both are quick:
 
-They are empty in the build because the wording was not reachable when it was made, and
-they cannot be filled in on his behalf: writing something that sounds like a happy customer
-is fabricating a testimonial for a trading business.
-
-**Instructions for transcribing them are at the top of `content/reviews.ts`** — verbatim,
-30 words or fewer, name exactly as published, date only where one is shown, source named,
-linked where the original is still up.
-
-The first-name-only ones have nothing to verify them, so they go in a separate group,
-labelled, with no date and no link. **Better still: ask those customers for a Google
-review**, and they become real ones.
+- **The Yell listing and Google profile addresses** (item 13). With them, every Yell and
+  Google review links to where it can be checked.
+- **Ask the first-name-only customers for a Google review**, and they become real ones.
 
 ---
 
@@ -101,32 +93,27 @@ runs them, they need warning that the landing page URLs are moving.
 
 The site is honest and launchable without them. Each one makes it better.
 
-### 5. Photographs — spray work above all
+### 5. Photographs — three shots still wanted
 
-> "Have you got photos of the UPVC and garage doors you've sprayed? Off your phone, not off
-> the website."
+**51 of his photographs are already on the site**, taken off the old one at the largest
+size Google would give (see `content/photos.ts`) — exteriors, wallpaper, interiors, and
+two before-and-after pairs of render work that are the best proof on the site. What the old
+site did not have, and what would help most:
 
-**The most valuable non-blocking item on the list.** The annotated photograph is the
-signature device of this design and `/spraying` is the page the paid traffic is meant to
-land on. Until there are spray photographs, those frames show a marked "photograph to
-come" box with a description of the shot needed.
+> "Have you got photos of UPVC or kitchen doors you've sprayed, and the sander with the
+> extractor on it? Off your phone."
 
-What is wanted, in priority order:
-
-1. **UPVC windows or doors** mid-job — masked up, gun in shot, ideally with one frame done
-   and one not. That single photograph does more than the whole page of copy.
-2. **A garage door**, square on from the drive, finished. And the masking in progress if he
-   has it.
+1. **UPVC windows or doors mid-job** — masked up, gun in shot, ideally one frame done and
+   one not. `/spraying` is the page the paid traffic lands on, and its UPVC section is
+   using a conservatory photograph until then.
+2. **Kitchen doors laid out and sprayed.** That slot on `/spraying` still shows a marked
+   "photograph to come".
 3. **The dustless sanding setup** — sander and extractor connected, in a room that is
-   obviously still lived in. The contrast is the whole argument.
-4. Rendered elevations, finished interiors, kitchen doors laid out and sprayed.
+   obviously still lived in. `/dustless-sanding` is using a sheeted hallway until then.
 
-**Send the originals from the phone or camera.** Do not save them off the current site:
-`lh3.googleusercontent.com` serves cropped, re-encoded copies and they will look soft at
-the size this design runs them.
-
-Drop files into `public/work/` and fill in the four fields in the matching content file —
-`README.md` has the two-minute version.
+**Send the originals from the phone.** Google Sites stored the old ones at 2048px at most,
+which is fine for the site but no bigger. Drop files into `public/work/` and add an entry
+to `content/photos.ts` — `README.md` has the two-minute version.
 
 ### 6. "Time served" — what does it mean for you?
 
@@ -200,7 +187,7 @@ Same for the Yell listing URL, where the older reviews live.
 | -------------------------- | --------------------------------------------- | -------- |
 | Base town                  | `content/site.ts` → `town`                    | **Yes**  |
 | Service area towns         | `content/areas.ts` → `areas.towns`            | **Yes**  |
-| Reviews                    | `content/reviews.ts` → `reviews`              | **Yes**  |
+| Reviews                    | `content/reviews.ts` → `reviews`              | Done     |
 | Ads conversion labels      | host environment — see `.env.example`         | **Yes**  |
 | SMTP app password          | host environment — see `LAUNCH.md` §4          | **Yes**  |
 | Photographs                | `public/work/` + the matching content file     | No       |

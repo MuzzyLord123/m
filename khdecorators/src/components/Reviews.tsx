@@ -21,42 +21,84 @@ export function ReviewList({
   layout?: 'list' | 'grid'
 }) {
   return (
-    <ul className={layout === 'grid' ? 'grid gap-5 md:grid-cols-2 lg:grid-cols-3' : 'space-y-5'}>
+    <ul
+      className={
+        layout === 'grid'
+          ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3'
+          : 'columns-1 gap-6 md:columns-2 xl:columns-3 [&>li]:mb-6 [&>li]:break-inside-avoid'
+      }
+    >
       {reviews.map((review, i) => (
-        <li key={`${review.name}-${i}`} className="kh-card flex flex-col p-6">
-          <blockquote className="grow text-lg leading-relaxed text-paper">
-            <p>“{review.quote}”</p>
+        <li key={`${review.name}-${i}`} className="kh-card flex flex-col p-7 md:p-8">
+          <span aria-hidden="true" className="gilt display-hero -mb-4 block leading-none">
+            “
+          </span>
+          <blockquote className="grow text-[1.0625rem] leading-relaxed text-paper">
+            <p>{review.quote}</p>
           </blockquote>
-
-          <div className="annotation mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-t border-rule pt-4">
-            {/* As published. A Yell username stays a Yell username. */}
-            <cite className="not-italic text-paper">{review.name}</cite>
-
-            {review.source !== 'unsourced' ? <span>{review.source}</span> : null}
-
-            {review.date ? (
-              <time dateTime={review.date}>{formatReviewDate(review.date)}</time>
-            ) : null}
-
-            {review.url ? (
-              <a
-                href={review.url}
-                rel="nofollow noopener"
-                target="_blank"
-                className="text-gold hover:underline"
-              >
-                Read it <span aria-hidden="true">↗</span>
-                <span className="sr-only"> (opens in a new tab)</span>
-              </a>
-            ) : null}
-
-            {review.context ? (
-              <span className="normal-case tracking-normal">{review.context}</span>
-            ) : null}
-          </div>
+          <Attribution review={review} />
         </li>
       ))}
     </ul>
+  )
+}
+
+/**
+ * One review, large, across the page. The home page's single moment of proof
+ * between the specialisms and the services.
+ */
+export function PullQuote({ review }: { review: Review }) {
+  return (
+    <section aria-label="A customer review" className="relative overflow-hidden border-y border-rule bg-satin/50">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(50rem_24rem_at_50%_0%,rgb(201_162_39/0.09),transparent_70%)]"
+      />
+      <figure className="shell kh-reveal relative py-20 text-center md:py-28">
+        <span aria-hidden="true" className="gilt gilt-sheen block font-display text-[6rem] leading-[0.6] md:text-[8rem]">
+          “
+        </span>
+        <blockquote className="mx-auto mt-8 max-w-[52rem]">
+          <p className="font-display text-[1.375rem] leading-snug font-semibold tracking-[-0.015em] text-paper [font-stretch:108%] text-balance md:text-[2.125rem]">
+            {review.quote}
+          </p>
+        </blockquote>
+        <figcaption className="mt-10 flex justify-center">
+          <Attribution review={review} centred />
+        </figcaption>
+      </figure>
+    </section>
+  )
+}
+
+/** The name as published, the source in plain text, the date, the link. */
+function Attribution({ review, centred = false }: { review: Review; centred?: boolean }) {
+  return (
+    <div
+      className={`annotation mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-1.5 border-t border-rule pt-5 ${
+        centred ? 'justify-center border-t-0 pt-0' : ''
+      }`}
+    >
+      {/* As published. A Yell username stays a Yell username. */}
+      <cite className="not-italic text-gold">{review.name}</cite>
+
+      {review.source !== 'unsourced' ? <span>{review.source}</span> : null}
+
+      {review.date ? <time dateTime={review.date}>{formatReviewDate(review.date)}</time> : null}
+
+      {review.url ? (
+        <a href={review.url} rel="nofollow noopener" target="_blank" className="text-gold hover:underline">
+          Read it <span aria-hidden="true">↗</span>
+          <span className="sr-only"> (opens in a new tab)</span>
+        </a>
+      ) : null}
+
+      {review.context ? (
+        <span className="basis-full text-[0.8125rem] font-normal tracking-normal normal-case text-paper-faint [font-stretch:100%]">
+          {review.context}
+        </span>
+      ) : null}
+    </div>
   )
 }
 

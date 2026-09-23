@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Band } from '@/components/Band'
-import { Drawn } from '@/components/Drawn'
+import type { CSSProperties } from 'react'
+import { Hero } from '@/components/Hero'
+import { photos } from '@content/photos'
 import { ReviewList, ReviewsPending, UnsourcedNote } from '@/components/Reviews'
-import { ArrowIcon } from '@/components/icons'
 import { pageMetadata } from '@/lib/metadata'
 import { sourcedReviews, unsourcedReviews } from '@content/reviews'
 
@@ -31,25 +32,23 @@ export default function ReviewsPage() {
 
   return (
     <>
-      <section className="relative">
-        <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-14 md:px-8 md:pt-20 md:pb-16">
-          <div className="kh-reveal mx-auto max-w-[46rem] text-center">
-            <p className="annotation text-gold">Reviews</p>
-            <h1 className="display mt-4">What people have said</h1>
-            <p className="mt-6 text-lg leading-relaxed text-paper-dim">
-              Quoted exactly as written, with the name as it was published and a link to the
-              original where there is one. Nothing here has been tidied up, shortened in the middle,
-              or written on anybody’s behalf.
-            </p>
-            <p className="mt-8">
-              <Link href="/leave-a-review" className="kh-btn-ghost inline-flex gap-2">
-                Had work done? Leave a review
-                <ArrowIcon className="size-4" />
-              </Link>
-            </p>
-          </div>
-        </Drawn>
-      </section>
+      <Hero
+        photo={photos.staircase}
+        focus="50% 40%"
+        eyebrow={`Reviews · ${sourced.length + unsourced.length} of them`}
+        title="What people have said"
+        gild="said"
+        lede="Quoted exactly as written, with the name as it was published. Nothing here has been tidied up, shortened in the middle, or written on anybody’s behalf."
+        plaque={photos.staircase.caption}
+        from="reviews-hero"
+        quoteHref="/contact"
+      >
+        <p className="hero-in mt-6" style={{ '--i': 5 } as CSSProperties}>
+          <Link href="/leave-a-review" className="link link-hover-target text-[0.9375rem]">
+            Had work done? Leave a review
+          </Link>
+        </p>
+      </Hero>
 
       {!hasAny ? (
         <Band tone="well" divider>

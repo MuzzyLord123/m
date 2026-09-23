@@ -1,47 +1,51 @@
-import { Archivo } from 'next/font/google'
+import localFont from 'next/font/local'
 
 /**
- * One family: Archivo, variable, latin subset, self-hosted by next/font.
+ * One family: Archivo, variable, self-hosted from this repository.
  *
  * ## Why Archivo
  *
- * Sturdy and slightly industrial — the register of proper trade signage and a van
- * livery, rather than a luxury brand. Deliberately NOT a serif: the sibling
- * decorator site in this portfolio is Fraunces on near-black, and two
- * black-and-gold sites sharing a display serif would look like the same studio
- * built both. Not condensed either, for the same reason.
+ * A late-nineteenth-century grotesque, drawn with a WIDTH axis from 62 to 125 —
+ * and the width is the whole design. Headings are set wide, the way a
+ * signwriter letters a shop fascia; the small labels wider still and tracked
+ * out; body copy at the normal width; the big process numerals in the
+ * narrowest cut. One file does the job a second and third family would, and
+ * the design reads as lettering rather than as a template's font pairing.
+ * Deliberately NOT a serif: the sibling decorator site in this portfolio is
+ * Fraunces on near-black, and two black-and-gold sites sharing a display serif
+ * would look like one studio built both.
  *
- * It is a text-and-display design, so it carries 600 at 68px for the headings and
- * 400 at 17px for body copy without either end looking borrowed.
+ * ## Why self-hosted, and subset
  *
- * ## Why ONE family, when the design wanted two
+ * Google's `latin` file of Archivo with both axes is 87KB, and it is on the
+ * critical path: the hero headline is the LCP element on every page, and it
+ * is set wider than any fallback can imitate, so the page is not finished
+ * painting until this file has arrived. Measured on a Lighthouse mobile run,
+ * the full file put the home page's LCP at 2.84s.
  *
- * This started as Archivo for display plus IBM Plex Sans for body. That is four
- * font files — one variable plus three static weights — and the cost was measured,
- * not guessed:
+ * `src/fonts/archivo-kh.woff2` is the same font cut down to what the site uses:
  *
- *   two families, display not preloaded:  home LCP 2.0s, /spraying CLS 0.019
- *   two families, display preloaded:      home LCP 2.6s, CLS 0.000
- *   one variable family, preloaded:       see LAUNCH.md §7 for the figures
+ *   - every character that appears in the built pages, plus all of ASCII, the
+ *     typographic quotes and dashes, arrows, £ € × and é — 136 glyphs;
+ *   - the weight axis limited to 400–800, the range the CSS actually asks for;
+ *   - the width axis kept whole, 62–125.
  *
- * Both two-family options failed something. Without the preload the display face
- * swapped in late and reflowed every heading on a long page, which put CLS at
- * 0.019 against a 0.02 ceiling — passing with no margin at all, which is not
- * passing. With the preload, four files competed for bandwidth in the window that
- * decides LCP and the landing page went over its 2.0s budget.
+ * 47KB. A character outside the set (a town with a circumflex, say) is still
+ * shown — the browser takes that one glyph from the fallback font — so adding
+ * content can never break the page; regenerate the file when it happens, with
+ * `python3 scripts/subset-font.py` (instructions at the top of that script).
  *
- * One variable file is one request, preloadable without competing with itself, and
- * it holds both numbers comfortably. Hierarchy comes from weight, size and the
- * gold — which on this design there is plenty of.
- *
- * `tabular-nums` is applied in globals.css for the specification tables. Archivo
- * carries proper tabular figures, so the numbers line up down a column.
+ * `font-stretch: 62% 125%` in the @font-face is what lets `font-stretch: 118%`
+ * in the CSS reach the width axis. Without it the browser treats the face as
+ * normal width only.
  */
-export const archivo = Archivo({
-  subsets: ['latin'],
-  display: 'swap',
+export const archivo = localFont({
+  src: [{ path: '../fonts/archivo-kh.woff2', weight: '400 800', style: 'normal' }],
   variable: '--font-archivo',
+  display: 'swap',
   preload: true,
+  declarations: [{ prop: 'font-stretch', value: '62% 125%' }],
   // A metric-matched fallback, which is what holds CLS at zero during the swap.
-  adjustFontFallback: true,
+  adjustFontFallback: 'Arial',
+  fallback: ['ui-sans-serif', 'system-ui', 'Segoe UI', 'Helvetica Neue', 'sans-serif'],
 })

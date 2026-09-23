@@ -1,4 +1,5 @@
-import { emptyPhoto, type Photo, type SpecRow } from './types'
+import { photos } from './photos'
+import type { Photo, SpecRow } from './types'
 
 /**
  * /dustless-sanding — the second differentiator.
@@ -56,9 +57,7 @@ export const dustless = {
     'It does not make a sanding job silent. An extractor running alongside a sander is noisy, and if someone is working from home upstairs it is worth planning which room I am in and when.',
   ],
 
-  photo: emptyPhoto(
-    'The sander with the hose and extractor connected, mid-sand on a wall or a staircase, with the room around it obviously still lived in — furniture in place, no grey film. That contrast is the entire argument.',
-  ),
+  photo: photos.hallwayPrep,
 
   callouts: [
     { x: 34, y: 42, side: 'left' as const, label: 'Extraction at the pad' },

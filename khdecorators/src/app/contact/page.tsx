@@ -33,7 +33,7 @@ export default function ContactPage() {
         <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-16 md:px-8 md:pt-20 md:pb-20">
           <div className="kh-reveal grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-16">
             <div>
-              <p className="annotation text-gold">Contact</p>
+              <p className="kh-eyebrow annotation">Contact</p>
               <h1 className="display mt-4">{contact.h1}</h1>
               <p className="measure mt-6 text-lg leading-relaxed text-paper-dim">{contact.lede}</p>
 

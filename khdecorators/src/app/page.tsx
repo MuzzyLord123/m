@@ -1,20 +1,22 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Band } from '@/components/Band'
+import { Band, Gilded } from '@/components/Band'
 import { CallLink, EmailLink } from '@/components/CallLink'
-import { Drawn } from '@/components/Drawn'
 import { EnquiryForm } from '@/components/EnquiryForm'
+import { Gallery } from '@/components/Gallery'
+import { Hero } from '@/components/Hero'
 import { Needed } from '@/components/Needed'
-import { ReviewList, ReviewsPending } from '@/components/Reviews'
-import { ArrowIcon, BrushDivider, PhoneIcon, SERVICE_ICONS, TickIcon } from '@/components/icons'
-import { ServiceCard, Step, TickList, TrustCard, WorkPhoto } from '@/components/kit'
-import { fill, pageMetadata } from '@/lib/metadata'
+import { PullQuote, ReviewList } from '@/components/Reviews'
+import { ArrowIcon, SERVICE_ICONS } from '@/components/icons'
+import { Diptych, ServiceCard, Step, TickList, TrustCard, WorkPhoto } from '@/components/kit'
+import { fill, pageMetadata, place } from '@/lib/metadata'
 import { areas } from '@content/areas'
 import { home } from '@content/home'
+import { pairs, photos } from '@content/photos'
 import { processSteps } from '@content/process'
-import { homeReviews } from '@content/reviews'
+import { reviews, sourcedReviews } from '@content/reviews'
 import { serviceRows } from '@content/services'
-import { email, phone, region, town } from '@content/site'
+import { email, region, town } from '@content/site'
 import { isPlaceholder } from '@content/types'
 
 export const metadata: Metadata = pageMetadata({
@@ -27,89 +29,127 @@ export const metadata: Metadata = pageMetadata({
 })
 
 /**
- * The home page, in the shape a painter and decorator's website actually takes:
- * hero, reasons to trust him, services as cards, the two things he does that the
- * competition does not, recent work, how a job runs, what customers said, where he
- * works, and a free-quote form.
- *
- * The previous version was this same content arranged as a numbered specification
- * document with an exposed 12-column grid. It was more interesting to look at and
- * it was the wrong thing: a customer looking for a decorator wants to recognise
- * the page, not admire it.
+ * The home page, in the order a customer reads a decorator's site: the work,
+ * why him, what he does, the proof, how it runs, and how to get a price.
  */
 export default function HomePage() {
-  const reviews = homeReviews()
+  // The town goes in the first sentence once it is confirmed. Until then the
+  // sentence says what the old site already says — the north west — rather than
+  // printing a placeholder at the top of the page.
+  const lede = isPlaceholder(town)
+    ? 'I’m Kenny. I paint and decorate houses across the north west of England, and I spray the things a brush cannot do properly — UPVC, garage doors, render and kitchen doors.'
+    : fill(home.hero.lede)
+
+  const featured = sourcedReviews()
+  const pull = featured.find((r) => r.name === 'Jonny Harrop') ?? featured[0]
+  const threeUp = featured.filter((r) => r !== pull).slice(0, 3)
+  const pictured = serviceRows.filter((row) => row.photo)
+  const plain = serviceRows.filter((row) => !row.photo)
 
   return (
     <>
+      <Hero
+        size="full"
+        photo={home.hero.photo}
+        focus="55% 45%"
+        eyebrow="KH Painting & Decorating · North West England"
+        title={`Painter, decorator and spray finisher in ${place()}`}
+        gild="spray finisher"
+        lede={lede}
+        facts={home.hero.facts}
+        plaque={photos.mockTudor.caption}
+        from="hero"
+      />
+
       {/* ============================================================ *
-          Hero
+          Why people ring him — four promises, straight under the fold
           ============================================================ */}
-      <section className="relative overflow-hidden">
-        <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-16 md:px-8 md:pt-20 md:pb-24">
-          <div className="kh-reveal grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <p className="annotation text-gold">
-                {isPlaceholder(town) ? 'Painter & decorator' : `Painter & decorator in ${town}`}
-              </p>
-
-              <h1 className="display mt-4">{fill(home.hero.h1)}</h1>
-
-              <p className="measure mt-6 text-lg leading-relaxed text-paper-dim">
-                {fill(home.hero.lede)}
-              </p>
-
-              <div className="mt-9 flex flex-wrap items-center gap-4">
-                <Link href="#quote" className="kh-btn">
-                  {home.hero.ctaPrimary}
-                </Link>
-                <CallLink className="kh-btn-ghost gap-2" from="hero">
-                  <PhoneIcon className="size-4" />
-                  {home.hero.ctaSecondary} — {phone.label}
-                </CallLink>
-              </div>
-
-              <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-3">
-                {home.hero.facts.map((fact) => (
-                  <li key={fact} className="flex items-center gap-2">
-                    <TickIcon className="size-4 shrink-0 text-gold" />
-                    <span className="annotation">{fact}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <WorkPhoto
-              photo={home.hero.photo}
-              sizes="(min-width: 1024px) 46vw, 100vw"
-              priority
-              ratio="4 / 3"
-            />
-          </div>
-        </Drawn>
+      <section aria-labelledby="trust-heading" className="relative border-b border-rule bg-satin/60">
+        <div className="shell py-16 md:py-20">
+          <h2 id="trust-heading" className="sr-only">
+            Why people ring Kenny
+          </h2>
+          <ul className="kh-reveal grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+            {home.trust.map((item) => (
+              <li key={item.title}>
+                <TrustCard title={item.title} body={item.body} icon={SERVICE_ICONS[item.icon]} />
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       {/* ============================================================ *
-          Why people ring me
+          The two specialisms
           ============================================================ */}
       <Band
-        tone="well"
-        eyebrow="Why people ring me"
-        title="What you get when Kenny does the job"
-        align="centre"
-        divider
+        id="specialist"
+        eyebrow="Specialist work"
+        title={home.specialist.heading}
+        gild="don’t do"
+        standfirst={home.specialist.standfirst}
       >
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {home.trust.map((item) => (
-            <TrustCard
-              key={item.title}
-              title={item.title}
-              body={item.body}
-              icon={SERVICE_ICONS[item.icon]}
-            />
+        <div className="space-y-20 md:space-y-28">
+          {home.specialist.items.map((item, i) => (
+            <article
+              key={item.name}
+              className="grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16"
+            >
+              <WorkPhoto
+                photo={item.photo}
+                ratio="5 / 4"
+                sizes="(min-width: 1024px) 52vw, 100vw"
+                caption={'caption' in item.photo ? String(item.photo.caption) : undefined}
+                className={i % 2 === 1 ? 'lg:order-2' : undefined}
+              />
+              <div>
+                <p aria-hidden="true" className="numeral gilt text-[5.5rem] md:text-[7rem]">
+                  {item.number}
+                </p>
+                <h3 className="display-sm mt-4">{item.name}</h3>
+                <div className="mt-6 space-y-4 text-paper-dim">
+                  {item.body.map((paragraph) => (
+                    <p key={paragraph.slice(0, 24)} className="measure">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+                <TickList className="mt-8" items={item.callouts.map((c) => c.label)} />
+                <p className="mt-10">
+                  <Link href={item.href} className="kh-btn-ghost whitespace-normal text-left">
+                    {item.linkLabel}
+                    <ArrowIcon className="size-4 text-gold" />
+                  </Link>
+                </p>
+              </div>
+            </article>
           ))}
         </div>
       </Band>
+
+      {/* ============================================================ *
+          Before and after — the masking, and what it buys
+          ============================================================ */}
+      <Band
+        id="before-after"
+        tone="well"
+        divider
+        eyebrow="Before and after"
+        title="The masking is the job"
+        gild="the job"
+        standfirst="Two of mine, photographed mid-job and again at the end. The first is what the preparation for spraying actually looks like: every window wrapped, the repairs patched in, the ground sheeted."
+      >
+        <div className="grid gap-14 lg:grid-cols-2 lg:gap-10">
+          {pairs.map((pair) => (
+            <Diptych key={pair.title} title={pair.title} before={pair.before} after={pair.after} />
+          ))}
+        </div>
+      </Band>
+
+      {/* ============================================================ *
+          One review, large — the office repaint finished early
+          ============================================================ */}
+      {pull ? <PullQuote review={pull} /> : null}
 
       {/* ============================================================ *
           Services
@@ -118,67 +158,40 @@ export default function HomePage() {
         id="services"
         eyebrow="What I do"
         title={home.services.heading}
+        gild="for you"
         standfirst={home.services.standfirst}
         align="centre"
       >
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {serviceRows.map((row) => (
-            <ServiceCard
-              key={row.name}
-              href={row.href}
-              name={row.name}
-              summary={row.summary}
-              tag={row.application}
-              icon={SERVICE_ICONS[row.icon]}
-            />
+        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {pictured.map((row) => (
+            <li key={row.name} className="flex">
+              <ServiceCard
+                href={row.href}
+                name={row.name}
+                summary={row.summary}
+                tag={row.application}
+                icon={SERVICE_ICONS[row.icon]}
+                photo={row.photo}
+                focus={row.photo?.focus}
+              />
+            </li>
           ))}
-        </div>
-      </Band>
-
-      {/* ============================================================ *
-          The two specialisms
-          ============================================================ */}
-      <Band
-        id="specialist"
-        tone="well"
-        eyebrow="Specialist work"
-        title={home.specialist.heading}
-        standfirst={home.specialist.standfirst}
-        align="centre"
-        divider
-      >
-        <div className="space-y-16 md:space-y-20">
-          {home.specialist.items.map((item, i) => (
-            <article key={item.name} className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-              {/* The second one puts the photograph on the left, so two feature
-                  blocks in a row do not read as a repeated template. */}
-              <div className={i % 2 === 1 ? 'lg:order-2' : undefined}>
-                <h3 className="display-sm">{item.name}</h3>
-                <div className="mt-5 space-y-4 text-paper-dim">
-                  {item.body.map((paragraph) => (
-                    <p key={paragraph.slice(0, 24)} className="measure">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-
-                <TickList className="mt-7" items={item.callouts.map((c) => c.label)} />
-
-                <p className="mt-8">
-                  <Link
-                    href={item.href}
-                    className="kh-btn-ghost inline-flex gap-2 text-[0.9375rem]"
-                  >
-                    {item.linkLabel}
-                    <ArrowIcon className="size-4" />
-                  </Link>
-                </p>
-              </div>
-
-              <WorkPhoto photo={item.photo} sizes="(min-width: 1024px) 46vw, 100vw" ratio="4 / 3" />
-            </article>
-          ))}
-        </div>
+        </ul>
+        {plain.length > 0 ? (
+          <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {plain.map((row) => (
+              <li key={row.name} className="flex">
+                <ServiceCard
+                  href={row.href}
+                  name={row.name}
+                  summary={row.summary}
+                  tag={row.application}
+                  icon={SERVICE_ICONS[row.icon]}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </Band>
 
       {/* ============================================================ *
@@ -186,65 +199,43 @@ export default function HomePage() {
           ============================================================ */}
       <Band
         id="work"
+        tone="well"
         eyebrow="My own photographs"
         title={home.work.heading}
-        standfirst={home.work.standfirst}
-        align="centre"
+        gild="work"
+        standfirst="Every photograph on this site is one of my jobs. No stock photography, no borrowed pictures — tap any of them to see it larger."
+        divider
       >
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {home.work.items.map((photo, i) => (
-            <WorkPhoto
-              key={photo.brief.slice(0, 24)}
-              photo={photo}
-              sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 100vw"
-              ratio="4 / 3"
-              priority={i === 0 ? false : undefined}
-            />
-          ))}
-        </div>
+        <Gallery items={[...home.work.items]} />
+        <p className="mt-12 flex flex-wrap items-center gap-4">
+          <Link href="/gallery" className="kh-btn-ghost">
+            Every photograph
+            <ArrowIcon className="size-4 text-gold" />
+          </Link>
+          <Link href="#quote" className="kh-btn">
+            {home.work.allLabel}
+          </Link>
+        </p>
       </Band>
 
       {/* ============================================================ *
-          About, in short
+          Reviews
           ============================================================ */}
-      <Band tone="well" eyebrow="About Kenny" title={fill(home.what.heading)} divider>
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-          <div className="space-y-5 text-paper-dim">
-            {home.what.body.map((paragraph) => (
-              <p key={paragraph.slice(0, 24)} className="measure">
-                {fill(paragraph)}
-              </p>
-            ))}
-          </div>
-
-          {/*
-            The facts, as a plain definition list rather than the "specification
-            table" this used to be. Same information, and it no longer looks like a
-            datasheet. Rows still holding an unconfirmed value show a marked gap.
-          */}
-          <div className="kh-card p-6 md:p-8">
-            <h3 className="annotation text-gold">The facts</h3>
-            <dl className="mt-5 space-y-4">
-              {home.what.spec.map((row) => (
-                <div
-                  key={row.label}
-                  className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-baseline gap-4 border-b border-rule pb-4 last:border-b-0 last:pb-0"
-                >
-                  <dt className="annotation">{row.label}</dt>
-                  <dd className="font-medium">
-                    {isPlaceholder(row.value) ? <Needed token={row.value} /> : fill(row.value)}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-
-            <p className="mt-6">
-              <Link href="/about" className="link link-hover-target">
-                More about how I work
-              </Link>
-            </p>
-          </div>
-        </div>
+      <Band
+        id="reviews"
+        eyebrow="Reviews"
+        title={home.reviews.heading}
+        gild="customers say"
+        standfirst={`${reviews.length} reviews, quoted exactly as they were written, with the names as they were published.`}
+        align="centre"
+      >
+        <ReviewList reviews={threeUp} layout="grid" />
+        <p className="mt-12 text-center">
+          <Link href="/reviews" className="kh-btn-ghost">
+            {home.reviews.allLabel}
+            <ArrowIcon className="size-4 text-gold" />
+          </Link>
+        </p>
       </Band>
 
       {/* ============================================================ *
@@ -252,12 +243,14 @@ export default function HomePage() {
           ============================================================ */}
       <Band
         id="process"
+        tone="satin"
         eyebrow="How it works"
         title={home.process.heading}
+        gild="start to finish"
         standfirst={home.process.standfirst}
-        align="centre"
+        divider
       >
-        <ol className="grid gap-5 md:grid-cols-2">
+        <ol className="grid gap-x-14 gap-y-10 md:grid-cols-2">
           {processSteps.map((step) => (
             <Step
               key={step.number}
@@ -271,60 +264,60 @@ export default function HomePage() {
       </Band>
 
       {/* ============================================================ *
-          Reviews
+          About Kenny, and where he works
           ============================================================ */}
-      <Band
-        id="reviews"
-        tone="well"
-        eyebrow="Reviews"
-        title={home.reviews.heading}
-        standfirst={home.reviews.standfirst}
-        align="centre"
-        divider
-      >
-        {reviews.length > 0 ? (
-          <>
-            <ReviewList reviews={reviews} layout="grid" />
-            <p className="mt-10 text-center">
-              <Link href="/reviews" className="kh-btn-ghost inline-flex gap-2">
-                {home.reviews.allLabel}
-                <ArrowIcon className="size-4" />
-              </Link>
-            </p>
-          </>
-        ) : (
-          <ReviewsPending />
-        )}
-      </Band>
+      <Band id="about" eyebrow="About Kenny" title={fill(home.what.heading)} gild="and where">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
+          <div>
+            <div className="space-y-5 text-lg leading-relaxed text-paper-dim">
+              {home.what.body.map((paragraph) => (
+                <p key={paragraph.slice(0, 24)} className="measure">
+                  {isPlaceholder(town) ? paragraph.replace(' working out of {town}', '') : fill(paragraph)}
+                </p>
+              ))}
+            </div>
 
-      {/* ============================================================ *
-          Where I work
-          ============================================================ */}
-      <Band id="areas" eyebrow="Areas covered" title={home.areas.heading}>
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-          <div className="space-y-5 text-paper-dim">
-            {areas.body.map((paragraph) => (
-              <p key={paragraph.slice(0, 24)} className="measure">
-                {fill(paragraph)}
-              </p>
-            ))}
+            <div className="mt-10">
+              <h3 className="annotation text-gold">Where I work</h3>
+              {areas.towns.length > 0 ? (
+                <>
+                  <ul className="mt-5 flex flex-wrap gap-2">
+                    {areas.towns.map((name) => (
+                      <li key={name} className="kh-pill">
+                        {name}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-4 text-sm text-paper-faint">{areas.note}</p>
+                </>
+              ) : (
+                <p className="mt-4 text-paper-dim">
+                  Across {region}. <Needed token="areas.towns" />
+                </p>
+              )}
+            </div>
           </div>
 
-          <div>
-            {areas.towns.length > 0 ? (
-              <>
-                <ul className="flex flex-wrap gap-2">
-                  {areas.towns.map((place) => (
-                    <li key={place} className="kh-pill">
-                      {place}
-                    </li>
-                  ))}
-                </ul>
-                <p className="annotation mt-5 leading-relaxed">{areas.note}</p>
-              </>
-            ) : (
-              <Needed token="areas.towns" inline={false} />
-            )}
+          <div className="kh-card p-7 md:p-9">
+            <h3 className="annotation text-gold">The facts</h3>
+            <dl className="mt-6">
+              {home.what.spec.map((row) => (
+                <div
+                  key={row.label}
+                  className="grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] items-baseline gap-4 border-b border-rule py-4 first:pt-0 last:border-b-0 last:pb-0"
+                >
+                  <dt className="annotation">{row.label}</dt>
+                  <dd className="font-medium">
+                    {isPlaceholder(fill(row.value)) ? <Needed token={fill(row.value)} /> : fill(row.value)}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-8">
+              <Link href="/about" className="link link-hover-target">
+                More about how I work
+              </Link>
+            </p>
           </div>
         </div>
       </Band>
@@ -332,57 +325,44 @@ export default function HomePage() {
       {/* ============================================================ *
           Free quote
           ============================================================ */}
-      <section id="quote" className="kh-well scroll-mt-24">
-        <div className="mx-auto max-w-[78rem] px-5 md:px-8">
-          <BrushDivider />
-        </div>
-        <Drawn className="mx-auto max-w-[78rem] px-5 py-16 md:px-8 md:py-24">
-          <div className="kh-reveal grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-16">
+      <section id="quote" className="kh-well relative scroll-mt-32 overflow-hidden">
+        <div className="kh-moulding" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60rem_30rem_at_85%_0%,rgb(201_162_39/0.1),transparent_65%)]"
+        />
+        <div className="shell relative py-20 md:py-28">
+          <div className="kh-reveal grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-20">
             <div>
-              <p className="annotation text-gold">No obligation</p>
-              <h2 className="display-sm mt-3">{home.quote.heading}</h2>
-              <p className="measure mt-5 text-lg leading-relaxed text-paper-dim">
+              <p className="kh-eyebrow annotation">No obligation</p>
+              <h2 className="display-sm mt-5">
+                <Gilded text={home.quote.heading} gild="free quote" />
+              </h2>
+              <p className="measure mt-6 text-lg leading-relaxed text-paper-dim">
                 {home.quote.standfirst}
               </p>
 
-              <dl className="mt-10 space-y-6">
-                <div>
-                  <dt className="annotation">Phone</dt>
-                  <dd className="mt-2">
-                    <CallLink
-                      className="display-xs text-gold underline decoration-1 underline-offset-4 transition-colors duration-150 hover:text-gold-lift hover:decoration-2"
-                      from="home-quote"
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt className="annotation">Email</dt>
-                  <dd className="mt-2">
-                    <EmailLink className="link link-hover-target" from="home-quote">
-                      {email}
-                    </EmailLink>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="annotation">Area</dt>
-                  <dd className="mt-2 text-paper-dim">
-                    {isPlaceholder(town) ? (
-                      <>
-                        <Needed token="{{TOWN}}" /> and {region}
-                      </>
-                    ) : (
-                      <>
-                        {town} and {region}
-                      </>
-                    )}
-                  </dd>
-                </div>
-              </dl>
+              <div className="mt-12 border-t border-rule pt-8">
+                <p className="annotation">Or ring me</p>
+                <p className="mt-3">
+                  <CallLink
+                    className="gilt display inline-block transition-opacity duration-300 hover:opacity-85"
+                    from="home-quote"
+                  />
+                </p>
+                <p className="mt-4">
+                  <EmailLink className="link link-hover-target" from="home-quote">
+                    {email}
+                  </EmailLink>
+                </p>
+              </div>
             </div>
 
-            <EnquiryForm from="home" />
+            <div className="kh-card p-6 md:p-8">
+              <EnquiryForm from="home" />
+            </div>
           </div>
-        </Drawn>
+        </div>
       </section>
     </>
   )

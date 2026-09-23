@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Band } from '@/components/Band'
 import { CallLink } from '@/components/CallLink'
-import { Drawn } from '@/components/Drawn'
+import { Hero } from '@/components/Hero'
 import { Needed } from '@/components/Needed'
-import { BrushIcon, PhoneIcon, SERVICE_ICONS } from '@/components/icons'
+import { PhoneIcon, SERVICE_ICONS } from '@/components/icons'
 import { TrustCard } from '@/components/kit'
 import { fill, pageMetadata } from '@/lib/metadata'
 import { about } from '@content/about'
-import { phone } from '@content/site'
+import { photos } from '@content/photos'
+import { phone, town } from '@content/site'
 import { isPlaceholder } from '@content/types'
 
 export const metadata: Metadata = pageMetadata({
@@ -30,18 +31,20 @@ export default function AboutPage() {
 
   return (
     <>
-      <section className="relative">
-        <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-14 md:px-8 md:pt-20 md:pb-16">
-          <div className="kh-reveal mx-auto max-w-[46rem] text-center">
-            <p className="annotation flex items-center justify-center gap-2 text-gold">
-              <BrushIcon className="size-5" />
-              About
-            </p>
-            <h1 className="display mt-4">{about.h1}</h1>
-            <p className="mt-6 text-lg leading-relaxed text-paper-dim">{fill(about.lede)}</p>
-          </div>
-        </Drawn>
-      </section>
+      <Hero
+        photo={photos.mockTudorSide}
+        focus="30% 50%"
+        eyebrow="About"
+        title={about.h1}
+        gild="Kenny"
+        lede={
+          isPlaceholder(town)
+            ? about.lede.replace(' based in {town}', '')
+            : fill(about.lede)
+        }
+        plaque="On a job, van on the drive"
+        from="about-hero"
+      />
 
       <Band tone="well" eyebrow="In my own words" title="How I got here, and how I work" divider>
         <div className="mx-auto max-w-[46rem] space-y-5 text-paper-dim">
@@ -74,7 +77,7 @@ export default function AboutPage() {
               >
                 <dt className="annotation">{row.label}</dt>
                 <dd className="font-medium">
-                  {isPlaceholder(row.value) ? <Needed token={row.value} /> : fill(row.value)}
+                  {isPlaceholder(fill(row.value)) ? <Needed token={fill(row.value)} /> : fill(row.value)}
                 </dd>
               </div>
             ))}

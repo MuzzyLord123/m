@@ -120,6 +120,7 @@ export const nav = [
   { href: '/interior-decoration', label: 'Interior' },
   { href: '/exterior-decoration', label: 'Exterior' },
   { href: '/wallpaper-hanging', label: 'Wallpaper' },
+  { href: '/gallery', label: 'Gallery' },
   { href: '/reviews', label: 'Reviews' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },

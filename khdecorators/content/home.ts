@@ -1,4 +1,4 @@
-import { emptyPhoto } from './types'
+import { photos, homeGallery } from './photos'
 
 /**
  * The home page, section by section, in the order they appear.
@@ -35,9 +35,7 @@ export const home = {
      * sides can be set for a wide figure — this one runs the full width of the page
      * beneath the title block, which is where there is room for labels on both sides.
      */
-    photo: emptyPhoto(
-      'The best single spray photograph there is, landscape and wide — UPVC frames or a garage door mid-job, masked, gun in shot. This is the first thing a paid visitor sees on the whole site.',
-    ),
+    photo: photos.mockTudor,
     callouts: [
       { x: 18, y: 34, side: 'left' as const, label: 'Glass and seals masked' },
       { x: 72, y: 30, side: 'right' as const, label: 'Even film, no brush marks' },
@@ -86,14 +84,7 @@ export const home = {
     standfirst:
       'Photographs of my own jobs. There is no stock photography on this site and there never will be — when a slot is empty it says so.',
     allLabel: 'Ask about a job like this',
-    items: [
-      emptyPhoto('UPVC windows sprayed anthracite grey, whole house, square on from the pavement.'),
-      emptyPhoto('A steel up-and-over garage door, finished, shot square on from the drive.'),
-      emptyPhoto('Kitchen doors sprayed and refitted — the finished kitchen from the doorway.'),
-      emptyPhoto('A rendered elevation repainted, whole house in frame, flat daylight.'),
-      emptyPhoto('Hall, stairs and landing finished — the cut-in line at the skirting visible.'),
-      emptyPhoto('A papered chimney breast with the pattern matched across the corner.'),
-    ],
+    items: homeGallery,
   },
 
   /* ---------------------------------------------------------------- *
@@ -136,9 +127,7 @@ export const home = {
           'UPVC windows, garage doors, render, cladding, kitchen doors and furniture. On a hard, non-absorbent surface a brush leaves marks that never level out, because the paint has nothing to sink into. Sprayed, it lands as an even film — into the rebates and the beading at the same thickness as on the flat.',
           'The spraying itself is the quick part. The masking is the job, and the masking is what you are paying for.',
         ],
-        photo: emptyPhoto(
-          'The single best spray photograph available — UPVC frames or a garage door mid-job, masked, gun in shot. This is the most important image on the site.',
-        ),
+        photo: photos.renderGarage,
         // Right side only: this figure sits in a seven-column slot, which has room
         // for one gutter, not two. See the container-query note in Annotated.tsx.
         callouts: [
@@ -156,9 +145,7 @@ export const home = {
           'The sander runs connected to an extractor and the dust is pulled off through the abrasive as it is made, so it goes into a filtered machine instead of into your carpets, your curtains and the top of every picture frame in the house.',
           'It means you can carry on living in the house while I work, and it means the surface I am painting is clean — which shows up in the finish as well as in the hoovering.',
         ],
-        photo: emptyPhoto(
-          'Sander and extractor connected, mid-sand, with the room obviously still lived in and no grey film anywhere. The contrast is the argument.',
-        ),
+        photo: photos.hallwayPrep,
         callouts: [
           { x: 32, y: 34, side: 'right' as const, label: 'Extracted at the pad' },
           { x: 58, y: 56, side: 'right' as const, label: 'Fine dust retained, not blown back' },

@@ -121,6 +121,8 @@ export type ServiceRow = {
     | 'interior'
     | 'shop'
     | 'industrial'
+  /** One of Kenny's photographs for the card, where there is one that fits. */
+  photo?: Photo & { focus?: string }
 }
 
 /**
@@ -191,6 +193,12 @@ export type ServicePage = {
   limits: string[]
   photo: Photo
   callouts: Callout[]
+  /** The small label above the H1. */
+  eyebrow?: string
+  /** A phrase in the H1 to lay in gold leaf. Must appear in it verbatim. */
+  gild?: string
+  /** Which of Kenny's photographs to hang at the foot of the page. */
+  gallery?: 'exterior' | 'interior' | 'wallpaper'
 }
 
 /* ------------------------------------------------------------------ *

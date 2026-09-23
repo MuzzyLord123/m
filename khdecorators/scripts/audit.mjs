@@ -26,6 +26,7 @@ const PAGES = [
   '/interior-decoration',
   '/exterior-decoration',
   '/wallpaper-hanging',
+  '/gallery',
   '/reviews',
   '/about',
   '/contact',
@@ -48,7 +49,12 @@ const browser = await chromium.launch(
 )
 
 for (const [vpName, viewport] of VIEWPORTS) {
-  const context = await browser.newContext({ viewport })
+  // The reveals are SCROLL-LINKED (view timelines), not timed: content below the
+  // viewport sits at its starting opacity until it is scrolled into view, and a
+  // wait does not change that. So axe audits the settled page — which is exactly
+  // what reduced motion renders — and the reveal itself is checked separately
+  // below: scrolled into view, a band must end fully opaque.
+  const context = await browser.newContext({ viewport, reducedMotion: 'reduce' })
   const page = await context.newPage()
 
   for (const path of PAGES) {
@@ -59,8 +65,7 @@ for (const [vpName, viewport] of VIEWPORTS) {
       continue
     }
 
-    // Let the reveals finish, so nothing is audited mid-transition.
-    await page.waitForTimeout(700)
+    await page.waitForTimeout(300)
 
     await page.addScriptTag({ content: axeSource })
     const results = await page.evaluate(async () => {
@@ -97,10 +102,20 @@ for (const [vpName, viewport] of VIEWPORTS) {
           telHrefs: [...document.querySelectorAll('a[href^="tel:"]')].map((a) =>
             a.getAttribute('href'),
           ),
-          // Images must carry alt text and explicit dimensions.
-          badImages: [...document.querySelectorAll('img')].filter(
-            (img) => !img.getAttribute('alt') || !img.getAttribute('width'),
-          ).length,
+          // Images must carry alt text and explicit dimensions. Empty alt is
+          // allowed ONLY where the image is genuinely decorative — inside a link
+          // that already names itself, or hidden from assistive tech — which is
+          // what WCAG asks for; a missing alt attribute is never allowed. A
+          // next/image `fill` image takes its size from its frame, which holds
+          // the layout just as width and height would.
+          badImages: [...document.querySelectorAll('img')].filter((img) => {
+            const alt = img.getAttribute('alt')
+            const decorative =
+              alt === '' &&
+              Boolean(img.closest('a[aria-label], [aria-hidden="true"], [role="presentation"]'))
+            const sized = img.getAttribute('width') || img.getAttribute('data-nimg') === 'fill'
+            return alt === null || (alt === '' && !decorative) || !sized
+          }).length,
         }
       })
 
@@ -140,6 +155,47 @@ for (const [vpName, viewport] of VIEWPORTS) {
   await context.close()
 }
 
+/* ---- Normal motion: a reveal must END fully opaque ------------------ */
+
+{
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+  const page = await context.newPage()
+  await page.goto(base + '/', { waitUntil: 'networkidle' })
+
+  // Scroll each band to the middle of the screen and read it once it has
+  // settled. A scroll-linked reveal that stops short of opacity 1 would leave
+  // text permanently dimmed below its measured contrast.
+  const short = await page.evaluate(async () => {
+    const bands = [...document.querySelectorAll('main .kh-reveal')]
+    let count = 0
+    for (const el of bands) {
+      // Instant: the site scrolls smoothly, and a smooth scroll would still be
+      // travelling when the opacity is read.
+      el.scrollIntoView({ block: 'center', behavior: 'instant' })
+      await new Promise((r) => setTimeout(r, 120))
+      if (Number(getComputedStyle(el).opacity) < 0.99) count++
+    }
+    return { count, of: bands.length }
+  })
+
+  if (short.count > 0) {
+    failures.push(`reveal: ${short.count} of ${short.of} bands still faded when centred on screen`)
+  } else {
+    notes.push(`reveal: all ${short.of} bands fully opaque once in view`)
+  }
+
+  // The hero's timed entrance must have finished within three seconds.
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.waitForTimeout(3000)
+  const heroFaded = await page.evaluate(
+    () => [...document.querySelectorAll('.hero-in')].filter((el) => Number(getComputedStyle(el).opacity) < 0.99).length,
+  )
+  if (heroFaded > 0) failures.push(`hero: ${heroFaded} line(s) still fading after 3s`)
+  else notes.push('hero: entrance complete within 3s')
+
+  await context.close()
+}
+
 /* ---- Reduced motion: content must still be visible ----------------- */
 
 {
@@ -150,14 +206,16 @@ for (const [vpName, viewport] of VIEWPORTS) {
   const page = await context.newPage()
   await page.goto(base + '/', { waitUntil: 'networkidle' })
 
+  // Every animated class on the site: band reveals, photograph reveals, the
+  // hero's staggered lines. Under reduced motion none of them may be faded.
   const hidden = await page.evaluate(() => {
-    const els = [...document.querySelectorAll('.callout-label, .grid-rule, .callout-dot')]
-    return els.filter((el) => Number(getComputedStyle(el).opacity) === 0).length
+    const els = [...document.querySelectorAll('.kh-reveal, .kh-photo-reveal, .hero-in, .gilt')]
+    return els.filter((el) => Number(getComputedStyle(el).opacity) < 0.99).length
   })
 
   if (hidden > 0) {
     failures.push(
-      `prefers-reduced-motion: ${hidden} revealed element(s) still at opacity 0. ` +
+      `prefers-reduced-motion: ${hidden} animated element(s) not fully opaque. ` +
         'Reveals must render in place, not stay hidden.',
     )
   } else {

@@ -21,11 +21,11 @@
  * ------------------------------------------------------------------ */
 
 export const PALETTE = {
-  // Surfaces — the sheen ladder: matt wall, satin panel, recessed well.
-  matt: '#12100E',
-  satin: '#1F1C18',
-  satinHot: '#2B2519',
-  well: '#0A0908',
+  // Surfaces — lacquer: the page, a raised panel, a recess.
+  matt: '#0E0C0A',
+  satin: '#191612',
+  satinHot: '#241E15',
+  well: '#080706',
 
   // Text — three tiers.
   paper: '#EFEAE2',
@@ -40,10 +40,18 @@ export const PALETTE = {
 
   // Lines.
   edge: '#787166',
-  rule: '#2C2823',
+  rule: '#2A2520',
 
   // One status colour.
   alert: '#F47962',
+
+  // The darkest stop in the gold-leaf gradient (--leaf in globals.css). The
+  // gradient is only ever used on display-size lettering, so this stop has to
+  // clear the large-text threshold wherever the light happens to leave it.
+  leafShadow: '#8F6C16',
+  // Its brightest stop, which carries the dark label on the primary button's
+  // hover sheen.
+  leafBurnish: '#FBEEB8',
 }
 
 /* ------------------------------------------------------------------ *
@@ -120,6 +128,10 @@ const PAIRS = [
 
   // --- Large text only -------------------------------------------
   [P.goldDeep, P.matt, 'large', 'Display headings 24px+ only'],
+  [P.leafShadow, P.matt, 'large', 'Gold-leaf lettering at its darkest band, on the page'],
+  [P.leafShadow, P.satin, 'large', 'Gold-leaf lettering at its darkest band, on a panel'],
+  [P.leafShadow, P.well, 'large', 'Gold-leaf lettering at its darkest band, in the footer'],
+  [P.matt, P.leafBurnish, 'body', 'Button label under the passing band of light'],
 
   // --- Status ----------------------------------------------------
   [P.alert, P.matt, 'body', 'Error text'],

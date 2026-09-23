@@ -1,16 +1,12 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Band } from '@/components/Band'
-import { CallLink } from '@/components/CallLink'
-import { Drawn } from '@/components/Drawn'
-import { EnquiryForm } from '@/components/EnquiryForm'
+import { Hero } from '@/components/Hero'
 import { Needed } from '@/components/Needed'
-import { ExtractorIcon, PhoneIcon } from '@/components/icons'
-import { TrustCard, WorkPhoto } from '@/components/kit'
+import { QuoteBand } from '@/components/QuoteBand'
+import { TrustCard } from '@/components/kit'
 import { SERVICE_ICONS } from '@/components/icons'
 import { fill, pageMetadata } from '@/lib/metadata'
 import { dustless } from '@content/dustless'
-import { phone } from '@content/site'
 import { isPlaceholder } from '@content/types'
 
 export const metadata: Metadata = pageMetadata({
@@ -31,43 +27,15 @@ export default function DustlessSandingPage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative">
-        <Drawn className="mx-auto max-w-[78rem] px-5 pt-14 pb-16 md:px-8 md:pt-20 md:pb-20">
-          <div className="kh-reveal grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <p className="annotation flex items-center gap-2 text-gold">
-                <ExtractorIcon className="size-5" />
-                My method
-              </p>
-
-              <h1 className="display mt-4">Dustless sanding</h1>
-
-              <div className="kh-card mt-7 p-6">
-                <p className="display-xs text-gold">{dustless.question}</p>
-                <p className="mt-4 leading-relaxed">{dustless.lede}</p>
-              </div>
-
-              <div className="mt-9 flex flex-wrap items-center gap-4">
-                <CallLink className="kh-btn gap-2" from="dustless-hero">
-                  <PhoneIcon className="size-4" />
-                  Ring Kenny — {phone.label}
-                </CallLink>
-                <Link href="#quote" className="kh-btn-ghost">
-                  Get a free quote
-                </Link>
-              </div>
-            </div>
-
-            <WorkPhoto
-              photo={dustless.photo}
-              sizes="(min-width: 1024px) 46vw, 100vw"
-              priority
-              ratio="4 / 3"
-            />
-          </div>
-        </Drawn>
-      </section>
+      <Hero
+        photo={dustless.photo}
+        eyebrow="My method"
+        title="Dustless sanding"
+        gild="Dustless"
+        lede={`${dustless.question} ${dustless.lede}`}
+        plaque={'caption' in dustless.photo ? String(dustless.photo.caption) : undefined}
+        from="dustless-hero"
+      />
 
       {/* What it means */}
       <Band tone="well" eyebrow="In practice" title="What it means in practice" divider>
@@ -109,7 +77,7 @@ export default function DustlessSandingPage() {
               >
                 <dt className="annotation">{row.label}</dt>
                 <dd className="font-medium">
-                  {isPlaceholder(row.value) ? <Needed token={row.value} /> : fill(row.value)}
+                  {isPlaceholder(fill(row.value)) ? <Needed token={fill(row.value)} /> : fill(row.value)}
                 </dd>
               </div>
             ))}
@@ -132,19 +100,10 @@ export default function DustlessSandingPage() {
         </ul>
       </Band>
 
-      {/* Quote */}
-      <Band
-        id="quote"
-        tone="well"
-        eyebrow="Free quote"
-        title="Ask for a price"
+      <QuoteBand
+        from="dustless-sanding"
         standfirst="The extraction is not an extra and it is not a line on the quote — it is how I work on every job. Tell me what needs doing and I will price the decorating."
-        divider
-      >
-        <div className="max-w-[42rem]">
-          <EnquiryForm from="dustless-sanding" />
-        </div>
-      </Band>
+      />
     </>
   )
 }

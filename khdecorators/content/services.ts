@@ -1,4 +1,5 @@
-import { emptyPhoto, type ServicePage, type ServiceRow } from './types'
+import { photos } from './photos'
+import type { ServicePage, ServiceRow } from './types'
 
 /**
  * The service table on the home page (§03), and the three standard service pages.
@@ -13,6 +14,7 @@ export const serviceRows: ServiceRow[] = [
   {
     href: '/spraying',
     name: 'Exterior spraying',
+    photo: photos.whiteBrickSemi,
     summary: 'Render, cladding, fascias, soffits and gutters. Two coats, sprayed.',
     application: 'Spray',
     icon: 'spray',
@@ -20,6 +22,7 @@ export const serviceRows: ServiceRow[] = [
   {
     href: '/spraying',
     name: 'UPVC & garage door spraying',
+    photo: photos.renderGarage,
     summary: 'Windows, doors, conservatory frames and garage doors, in any colour.',
     application: 'Spray',
     icon: 'spray',
@@ -34,6 +37,7 @@ export const serviceRows: ServiceRow[] = [
   {
     href: '/dustless-sanding',
     name: 'Dustless sanding',
+    photo: photos.hallwayPrep,
     summary: 'Extraction at the pad, so you can stay in the house while I work.',
     application: 'Brush, roller or spray',
     icon: 'extractor',
@@ -41,6 +45,7 @@ export const serviceRows: ServiceRow[] = [
   {
     href: '/interior-decoration',
     name: 'Interior decoration',
+    photo: photos.tealBayLounge,
     summary: 'Walls, ceilings and woodwork. Filling and flatting before any paint.',
     application: 'Brush & roller',
     icon: 'interior',
@@ -48,6 +53,7 @@ export const serviceRows: ServiceRow[] = [
   {
     href: '/exterior-decoration',
     name: 'Exterior decoration',
+    photo: photos.brickFarmhouse,
     summary: 'Render, masonry, woodwork and making good, by hand where it suits.',
     application: 'Brush, roller or spray',
     icon: 'house',
@@ -55,6 +61,7 @@ export const serviceRows: ServiceRow[] = [
   {
     href: '/wallpaper-hanging',
     name: 'Wallpaper hanging',
+    photo: photos.jungleCloakroom,
     summary: 'Lining, plain and patterned papers, and short-notice single walls.',
     application: 'Brush & roller',
     icon: 'wallpaper',
@@ -82,6 +89,9 @@ export const serviceRows: ServiceRow[] = [
 const interior: ServicePage = {
   slug: 'interior-decoration',
   h1: 'Interior decoration',
+  eyebrow: 'Inside the house',
+  gild: 'decoration',
+  gallery: 'interior',
   title: 'Interior painting & decorating in {town} | KH Painting and Decorating',
   description:
     'Interior decorating in {town} and across the north west. Walls, ceilings and woodwork, filled and flatted properly, sanded dustless so you can stay in the house. Ring Kenny on 07538 869832.',
@@ -141,9 +151,7 @@ const interior: ServicePage = {
     'Fresh emulsion is dry to the touch quickly and hard much later. Skirtings want a few days before things get pushed back against them.',
     'I work on my own, so I do one job at a time and I am not on three sites at once. It means the dates are real. It also means I cannot start next week if next week is already somebody else’s.',
   ],
-  photo: emptyPhoto(
-    'A finished room shot from the doorway in daylight — woodwork and walls in the same frame so the cut-in line is visible. A raking-light shot of a flatted, filled wall before paint is just as valuable.',
-  ),
+  photo: photos.bayLounge,
   callouts: [
     { x: 28, y: 38, side: 'left', label: 'Filled, flatted, dust extracted' },
     { x: 72, y: 52, side: 'right', label: 'Cut in by hand, no tape' },
@@ -158,6 +166,9 @@ const interior: ServicePage = {
 const exterior: ServicePage = {
   slug: 'exterior-decoration',
   h1: 'Exterior decoration',
+  eyebrow: 'Outside the house',
+  gild: 'decoration',
+  gallery: 'exterior',
   title: 'Exterior painting & decorating in {town} | KH Painting and Decorating',
   description:
     'Exterior decorating in {town} and across the north west. Render, masonry and woodwork, made good before painting, two coats. Weather-honest dates. Ring Kenny on 07538 869832.',
@@ -212,9 +223,7 @@ const exterior: ServicePage = {
     'Pebbledash that is already coming away will keep coming away. Coating it does not fix the adhesion underneath.',
     'Where there is rot in a window I will show you and tell you honestly whether it is a filler job or a joiner job.',
   ],
-  photo: emptyPhoto(
-    'A finished elevation in flat daylight, the whole house in frame. A close shot of a made-good crack or a repaired sill before painting is worth as much — it shows the part nobody photographs.',
-  ),
+  photo: photos.brickFarmhouse,
   callouts: [
     { x: 24, y: 30, side: 'left', label: 'Growth treated before coating' },
     { x: 70, y: 44, side: 'right', label: 'Cracks raked out and made good' },
@@ -229,6 +238,9 @@ const exterior: ServicePage = {
 const wallpaper: ServicePage = {
   slug: 'wallpaper-hanging',
   h1: 'Wallpaper hanging',
+  eyebrow: 'Papering',
+  gild: 'hanging',
+  gallery: 'wallpaper',
   title: 'Wallpaper hanging in {town} | KH Painting and Decorating',
   description:
     'Wallpaper hung in {town} and across the north west. Lining, plain and patterned papers, feature walls at short notice. Walls prepared properly first. Ring Kenny on 07538 869832.',
@@ -283,9 +295,7 @@ const wallpaper: ServicePage = {
     'Very old, soft plaster can come away when old paper is stripped. It sometimes cannot be avoided, and if it looks likely I will say so before starting.',
     'I hang paper. I do not sell it — you buy the paper you actually want, and I will tell you how many rolls you need before you do.',
   ],
-  photo: emptyPhoto(
-    'A finished papered wall, shot at a slight angle in raking light so the seams are visibly not visible. A chimney breast with a matched pattern is the best possible version of this shot.',
-  ),
+  photo: photos.jungleCloakroom,
   callouts: [
     { x: 30, y: 34, side: 'left', label: 'Seams butted, not overlapped' },
     { x: 68, y: 50, side: 'right', label: 'Set out from a plumb line' },
