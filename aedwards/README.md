@@ -259,12 +259,12 @@ site doesn't compete with itself.
 
 | | mobile | desktop |
 |---|---|---|
-| Performance | 98 | 100 |
+| Performance | 96–99 | 100 |
 | Accessibility | 100 | 100 |
 | Best practices | 100 | 100 |
 | SEO | 100 | 100 |
 | CLS | 0.000 | 0.000 |
-| LCP | 2.2s | 0.6s |
+| LCP | 2.1–2.7s | 0.6s |
 
 Plus zero axe violations across WCAG A/AA/AAA on every page at 1440×900 and
 390×844, and no horizontal overflow at any width from 320px up.
@@ -297,6 +297,62 @@ so that build swaps the enquiry action for a stub and the contact field shows
 the phone number — which is what it does today anyway, since no email address is
 configured. Measured on the exported bundle, served gzipped: mobile 97, desktop
 100, accessibility 100, CLS 0.000.
+
+## The craft pass
+
+A later round of work, asked for as "significantly more premium". No new
+colours, no new typefaces, nothing added to the page — the site was already
+confident, it was just uniform and a little flat. Five things changed.
+
+**Tracking now scales with size.** Every display class carried one fixed
+`-0.02em` across a range running from 44px on a phone to 128px on a desktop.
+Tracking set in em scales with the size, so a fixed em value means the
+*relative* fit of the letters never changes — and large type needs relatively
+tighter fit than small type does. Two breakpoints now take the name from
+-0.018em to -0.038em. It is the single most visible change on the page and it
+costs nothing.
+
+**Optical sizing was tried and rejected.** Bricolage Grotesque carries an `opsz`
+axis, which `next/font` does not request by default. Adding it is one line.
+Measured: +48KB of font data, mobile performance 98 → 97, LCP 2.3s → 2.6s, for
+an effect subtle enough that it is hard to see side by side. Reverted. The
+tracking steps above buy most of the same perceptual gain for nothing.
+
+**The quote marks hang.** The opening mark on a review sits in the margin now,
+so the first letter of what the customer actually wrote lines up with every
+other left edge on the page. Done with a negative `text-indent` rather than
+`hanging-punctuation`, which only Safari implements. Fixing it also turned up a
+real defect: written as `&ldquo;{excerpt}&rdquo;` across three JSX children, the
+source's line breaks became real whitespace in the HTML, so every review would
+have rendered as `“ Turns up…` — a space after an opening quote. It is one text
+node now.
+
+**The review fields are centred.** They were top-aligned like everything else,
+which left the most important content on the site sitting in the upper third of
+a 900px screen with four hundred pixels of nothing under it. The brief's own
+words are that a quote *fills* its field. `Field` takes a `place` prop; only the
+review fields use it.
+
+**The 4.9 is set large.** On a site whose entire argument is thirty-four ratings
+averaging 4.9, that figure was set in the same 15px mono as a date stamp —
+smaller than the strapline above it. It is now the headline fact it actually is,
+with the small mono that qualifies it alongside.
+
+**The fields have a tooth.** Every field is a flat CSS colour, on a website
+whose subject is paint on a wall, and flat colour is the one thing a painted
+surface never is. A 412-byte tiled fractal-noise tile now sits in the body's own
+background layer — on the colour, under every piece of text, so it cannot touch
+the contrast of anything you read. The amplitude was found by looking: 4% is
+invisible, broad mottling reads as a dirty wall at any useful amplitude, 9% fine
+grain is the window. See `globals.css` for what it costs and how to remove it.
+
+Smaller things: one underline treatment for every link on the site rather than
+each one setting its own offset; uppercase mono labels opened from 0.04em to
+0.09em, because capitals set as all-caps at 13px close up and read as a block;
+`text-wrap: balance` on headlines and `pretty` on body copy; a caret that is the
+page's colour rather than the browser's black; a scrollbar that is repainted
+along with everything else; and `text-rendering: optimizeLegibility` removed,
+which was doing nothing modern browsers do not already do.
 
 ## One deliberate departure from the brief
 

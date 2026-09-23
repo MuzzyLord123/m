@@ -60,6 +60,7 @@ type Section = {
   label?: string
   id?: string
   tall?: boolean
+  place?: 'top' | 'centre'
   node: ReactNode
 }
 
@@ -85,7 +86,7 @@ export default function HomePage() {
             <h1 className="t-name">{intro.name}</h1>
           </RevealAtLoad>
           <p className="t-line mt-[clamp(1.5rem,4vh,2.5rem)]">{intro.line}</p>
-          <Rating className="mt-[clamp(2.5rem,7vh,4rem)]" />
+          <Rating prominent className="mt-[clamp(2.5rem,7vh,4rem)]" />
           <a
             href={phone.href}
             className="t-phone tap mt-[clamp(2rem,5vh,3rem)] tabular-nums"
@@ -130,6 +131,7 @@ export default function HomePage() {
     {
       colour: PALETTE.f3,
       label: `Review · ${sourceLabel[darren.source]}`,
+      place: 'centre',
       node: <ReviewBlock review={darren} />,
     },
 
@@ -158,6 +160,7 @@ export default function HomePage() {
     {
       colour: PALETTE.f5,
       label: `Review · ${sourceLabel[andM.source]}`,
+      place: 'centre',
       node: <ReviewBlock review={andM} />,
     },
 
@@ -184,6 +187,7 @@ export default function HomePage() {
     {
       colour: PALETTE.f6,
       label: `Review · ${sourceLabel[lightning.source]}`,
+      place: 'centre',
       node: <ReviewBlock review={lightning} />,
     },
 
@@ -324,6 +328,7 @@ export default function HomePage() {
           label={section.label}
           id={section.id}
           tall={section.tall}
+          place={section.place}
         >
           {section.node}
         </Field>

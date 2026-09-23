@@ -43,6 +43,19 @@ export type FieldProps = {
    * /reviews, where the fields are shorter so the page keeps moving.
    */
   height?: 'screen' | 'row'
+  /**
+   * Where the content sits in the field.
+   *
+   * 'top' is the default and is right for anything with a list or a form under
+   * it: the eye starts high and the empty bottom-right is the composition.
+   *
+   * 'centre' is for the review fields. A quote is not an introduction to a
+   * field, it IS the field — the brief's words — and top-aligning it left the
+   * most important content on the site sitting in the upper third of a 900px
+   * screen with four hundred pixels of nothing under it. Centred, it reads as
+   * the thing the page stopped for.
+   */
+  place?: 'top' | 'centre'
   children: ReactNode
 }
 
@@ -53,6 +66,7 @@ export function Field({
   id,
   tall = false,
   height = 'screen',
+  place = 'top',
   children,
 }: FieldProps) {
   return (
@@ -77,7 +91,9 @@ export function Field({
         style={{ scrollSnapAlign: 'start' }}
         className={
           height === 'screen'
-            ? 'relative flex min-h-[100svh] flex-col justify-start px-[max(1.25rem,4vw)] pt-[clamp(5rem,18svh,11rem)] pb-[clamp(5.5rem,12svh,9rem)]'
+            ? `relative flex min-h-[100svh] flex-col px-[max(1.25rem,4vw)] pt-[clamp(5rem,18svh,11rem)] pb-[clamp(5.5rem,12svh,9rem)] ${
+                place === 'centre' ? 'justify-center' : 'justify-start'
+              }`
             : 'relative flex min-h-[68svh] flex-col justify-center px-[max(1.25rem,4vw)] pt-[clamp(4.5rem,10svh,7rem)] pb-[clamp(5.5rem,10svh,7rem)]'
         }
       >

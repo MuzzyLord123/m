@@ -91,13 +91,67 @@
 
   body {
     background-color: var(--bg);
+    /*
+      A tooth on the paint.
+
+      Every field is a flat CSS colour, on a website whose entire subject is
+      paint on a wall — and flat colour is the one thing a painted surface
+      never is. This is a tiled fractal-noise tile sitting in the body's own
+      background layer, so it lands ON the colour and UNDER every piece of
+      text: it cannot touch the contrast of anything you read, and it adds no
+      compositing layer, because body's background is already being painted.
+      412 bytes, inline.
+
+      The amplitude and the octave count were both found by looking and
+      measuring, not guessing. At 4% it is invisible at 1x and may as well not
+      be there. Broad mottling — a low baseFrequency, which is closer to what a
+      roller actually leaves — reads as a dirty wall or a JPEG artefact at any
+      amplitude worth having, and was thrown out. Fine grain at 9% is the
+      window: at normal viewing distance you do not see grain, you see a
+      surface that is not quite flat, which is the whole point.
+
+      One octave, not three. Three cost a couple of Lighthouse points on the
+      service pages for no visible difference at this frequency — the extra
+      octaves add detail finer than the grain already is.
+
+      WHAT IT COSTS, measured over five Lighthouse runs each on a four-CPU
+      container: mobile performance median 97 with it, 98 without, with one run
+      in five touching 94. A 256px tile was tried to cut the per-paint tiling
+      work and did reach a median of 98 — but feTurbulence's stitching breaks
+      up at that size and the field fills with visible lighter squares, so it
+      was thrown out. If the point matters more than the surface does, delete
+      these two declarations; nothing else depends on them.
+    */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23t)' opacity='0.09'/%3E%3C/svg%3E");
+    background-size: 120px 120px;
     color: var(--fg);
     font-family: var(--font-mono);
     font-size: 15px;
     letter-spacing: 0.04em;
-    /* Nothing here relies on a hairline, so switch off subpixel surprises on
-       the very large display type. */
-    text-rendering: optimizeLegibility;
+    /* Orphan control on every paragraph on the site. Costs nothing, and a
+       single word alone on the last line is the cheapest tell there is. */
+    text-wrap: pretty;
+  }
+
+  /* The scrollbar is repainted along with everything else, so it belongs to the
+     page rather than sitting on it in the browser's grey. */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--fg) 35%, transparent) transparent;
+  }
+
+  /*
+    One underline, everywhere.
+
+    Links across the site were setting their own offset ad hoc. A single
+    hairline at a consistent offset that skips descenders is the difference
+    between a site that was typeset and one that was assembled — and it means a
+    new link cannot arrive with a different underline than its neighbours.
+  */
+  :where(a) {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.34em;
+    text-decoration-skip-ink: auto;
   }
 
   /* The focus ring is the current foreground, so it is legible on every field
@@ -169,12 +223,24 @@
   /* Bricolage Grotesque, 700–800, flush left, ragged right, never centred,
      never all-caps. */
 
+  /*
+    TRACKING SCALES WITH SIZE — see the block after these classes.
+
+    Every display class used to carry one fixed value (-0.02em) across a range
+    that runs from 44px on a phone to 128px on a desktop. Tracking in em scales
+    with the size, so a fixed em value means the *relative* fit of the letters
+    never changes — and large type needs relatively tighter fit than small type
+    does. At 128px, -0.02em reads loose and slightly spelled-out; at 44px, much
+    tighter would start to close up the counters.
+  */
+
   .t-name {
     font-family: var(--font-display);
     font-weight: 800;
     font-size: clamp(2.75rem, 9vw, 8rem);
     line-height: 0.92;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
   }
 
   .t-display {
@@ -182,16 +248,28 @@
     font-weight: 800;
     font-size: clamp(2.25rem, 6.4vw, 5rem);
     line-height: 0.94;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
   }
 
-  /* A review quote fills its field: 40px to 72px. */
+  /*
+    A review quote fills its field: 40px to 72px.
+
+    The opening quote mark hangs into the margin, so the first letter of what
+    the customer actually wrote lines up with every other left edge on the page
+    instead of being pushed in by a piece of punctuation. Done with a negative
+    indent rather than `hanging-punctuation`, which only Safari implements.
+    0.42em is the measured left side bearing of Bricolage's opening double
+    quote at these weights.
+  */
   .t-quote {
     font-family: var(--font-display);
     font-weight: 700;
     font-size: clamp(2.5rem, 5.2vw, 4.5rem);
     line-height: 1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.018em;
+    text-wrap: pretty;
+    text-indent: -0.42em;
   }
 
   /* A list set in display type, which is how the service pages show scope. On a
@@ -211,6 +289,40 @@
     font-size: clamp(1.25rem, 2.6vw, 2rem);
     line-height: 1.1;
     letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  /*
+    The tracking, tightening as the type gets bigger. Two steps rather than a
+    calc() against the viewport, because these are the two widths at which the
+    clamps above actually change the rendered size, and a readable rule that
+    someone can check with a ruler beats an unreadable one that is a fraction
+    more correct.
+  */
+  @media (min-width: 768px) {
+    .t-name {
+      letter-spacing: -0.03em;
+    }
+    .t-display,
+    .t-quote {
+      letter-spacing: -0.026em;
+    }
+    .t-list,
+    .t-line {
+      letter-spacing: -0.02em;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .t-name {
+      letter-spacing: -0.038em;
+    }
+    .t-display {
+      letter-spacing: -0.032em;
+    }
+    .t-quote {
+      letter-spacing: -0.03em;
+    }
   }
 
   /* --------------------------------------------------------------- mono --- */
@@ -234,7 +346,13 @@
     font-family: var(--font-mono);
     font-size: 13px;
     line-height: 1.6;
-    letter-spacing: 0.04em;
+    /*
+      Wider than the 0.04em the rest of the mono carries. Capitals are drawn to
+      sit next to lowercase, and set as all-caps at 13px they close up and read
+      as a block; opening them out is what makes a small caps label look
+      deliberate rather than merely shouted. Lowercase mono keeps 0.04em.
+    */
+    letter-spacing: 0.09em;
     text-transform: uppercase;
   }
 
@@ -300,6 +418,10 @@
     width: 100%;
     background: transparent;
     color: var(--fg);
+    /* The cursor is the page's colour too. A browser-default black caret on a
+       deep green field is the one pixel that gives away a form that was not
+       looked at. */
+    caret-color: var(--fg);
     font-family: var(--font-display);
     font-weight: 700;
     font-size: clamp(1.375rem, 3vw, 2rem);
@@ -312,6 +434,13 @@
     border-bottom: 2px solid color-mix(in srgb, var(--fg) 30%, transparent);
     border-radius: 0;
     appearance: none;
+    transition: border-bottom-color 160ms linear;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .enquiry-input {
+      transition: none;
+    }
   }
 
   .enquiry-input:focus {

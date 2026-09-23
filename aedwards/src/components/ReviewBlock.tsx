@@ -50,8 +50,16 @@ export function ReviewBlock({
   return (
     <div>
       <Reveal>
+        {/*
+          One text node, built in the expression rather than as
+          `&ldquo;{excerpt}&rdquo;` across three JSX children. Written that way
+          the line breaks in the source become real whitespace in the HTML, so
+          the mark renders as “ Turns up… — a space after an opening quote,
+          which also pushes the first word out of the hanging indent by the
+          width of that space.
+        */}
         <blockquote cite={review.sourceUrl} className="t-quote">
-          &ldquo;{review.excerpt}&rdquo;
+          {`“${review.excerpt}”`}
         </blockquote>
       </Reveal>
       {review.job ? <p className="mono-label mt-8">{review.job}</p> : null}

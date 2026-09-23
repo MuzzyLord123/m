@@ -169,12 +169,12 @@ real host and a real network are not a laptop:
 
 | | mobile | desktop |
 |---|---|---|
-| Performance | 98 | 100 |
+| Performance | 96–99 | 100 |
 | Accessibility | 100 | 100 |
 | Best practices | 100 | 100 |
 | SEO | 100 | 100 |
 | CLS | 0.000 | 0.000 |
-| LCP | 2.2s | 0.6s |
+| LCP | 2.1–2.7s | 0.6s |
 
 Contrast is enforced in the code: `content/fields.ts` fails the build if any
 field's text drops below 7:1. Every page has been checked with axe across

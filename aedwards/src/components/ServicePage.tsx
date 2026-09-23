@@ -30,7 +30,7 @@ import { ServiceStructuredData } from './ServiceStructuredData'
  * from what they evidence rather than from their wording.
  */
 
-type Section = { label?: string; tall?: boolean; node: ReactNode }
+type Section = { label?: string; tall?: boolean; place?: 'top' | 'centre'; node: ReactNode }
 
 export function ServicePage({ service }: { service: Service }) {
   const proof = reviewsForService(service.slug)
@@ -97,6 +97,7 @@ export function ServicePage({ service }: { service: Service }) {
       ? proof.map(
           (review): Section => ({
             label: `Review · ${sourceLabel[review.source]}`,
+            place: 'centre',
             node: <ReviewBlock review={review} />,
           }),
         )
@@ -187,6 +188,7 @@ export function ServicePage({ service }: { service: Service }) {
           next={palette[i + 1] ?? null}
           label={section.label}
           tall={section.tall}
+          place={section.place}
         >
           {section.node}
         </Field>
