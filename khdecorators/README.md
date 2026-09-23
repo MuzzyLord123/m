@@ -13,6 +13,8 @@ matter more than this one:
   Console, and the performance figures.
 - **[`CONTENT-NEEDED.md`](./CONTENT-NEEDED.md)** — the one phone call that unblocks
   launch.
+- **[`RUN-ON-YOUR-PC.md`](./RUN-ON-YOUR-PC.md)** — how to run it on your own
+  computer to look at it and fill in the missing bits. No code knowledge needed.
 
 ```bash
 npm install
