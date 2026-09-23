@@ -34,7 +34,7 @@
  *
  * Node 22+, for the global fetch. Needs sharp, which Next already installs.
  */
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
 
@@ -169,16 +169,23 @@ while (queue.length > 0 && pages.length < MAX_PAGES) {
     if (src) tags.push({ src, alt })
   }
 
+  // What the page actually DISPLAYS: its <img> tags and its section backgrounds.
+  // The same picture is also mentioned several more times inside the page's
+  // scripts, each under a different signed token — so collecting every mention
+  // multiplies the requests for nothing, and Google starts refusing them (403)
+  // after a few hundred. ALL_MENTIONS=1 goes back to collecting everything.
+  const displayed = [
+    ...tags.map((t) => unescape(t.src)),
+    ...[...raw.matchAll(/background-image:\s*url\(\s*["']?([^"')]+)/gi)].map((m) => m[1]),
+  ].filter((u) => /^https?:\/\//.test(u))
+  const mentioned = [...raw.matchAll(GOOGLE_IMAGE)].map((m) => m[0])
   const found = new Set(
-    [...raw.matchAll(GOOGLE_IMAGE)]
-      .map((m) => m[0])
+    (process.env.ALL_MENTIONS === '1' ? [...displayed, ...mentioned] : displayed)
       // Sandboxed embed frames live on googleusercontent too; they are not images.
-      .filter((u) => !/-embeds\.googleusercontent\.com|\/embeds\//.test(u)),
+      .filter((u) => !/-embeds\.googleusercontent\.com|\/embeds\//.test(u))
+      // Google Sites' own theme furniture, not his photographs.
+      .filter((u) => !/gstatic\.com|googleapis\.com/.test(u)),
   )
-  // Images hosted anywhere else, if the site uses any.
-  for (const t of tags) {
-    if (/^https?:\/\//.test(t.src) && !/googleusercontent|ggpht/.test(t.src)) found.add(t.src)
-  }
 
   const title = /<title[^>]*>([^<]*)<\/title>/i.exec(raw)?.[1]?.trim() ?? ''
   pages.push({ url: page.finalUrl, title, text: visibleText(raw), tags, images: [...found] })
@@ -204,6 +211,15 @@ while (queue.length > 0 && pages.length < MAX_PAGES) {
 // ---------------------------------------------------------------------------
 // 2. Group every URL by the image it points at, in order of first appearance
 // ---------------------------------------------------------------------------
+
+// Pages named in FIRST go first, so a run that gets throttled part-way through
+// has at least spent its requests where they were most needed.
+const first = (process.env.FIRST ?? '').split(/\s+/).filter(Boolean)
+const rank = (p) => {
+  const i = first.indexOf(new URL(p.url).pathname)
+  return i === -1 ? first.length : i
+}
+pages.sort((a, b) => rank(a) - rank(b))
 
 const images = new Map()
 for (const page of pages) {
@@ -238,20 +254,55 @@ const meanDifference = (a, b) => {
   return sum / a.length
 }
 
+// INCREMENTAL. Google's signed links change on every crawl and it throttles a
+// run after a few hundred requests, so no single run gets everything. Each run
+// therefore ADDS to what the folder already holds: the pictures already there
+// are fingerprinted up front, and a download that turns out to be one of them
+// is dropped rather than written twice.
+try {
+  const previous = JSON.parse(await readFile(path.join(OUT, 'manifest.json'), 'utf8'))
+  for (const entry of previous.images ?? []) {
+    const file = path.join(OUT, entry.file)
+    const meta = await sharp(file).metadata()
+    const tiny = await sharp(file).resize(16, 16, { fit: 'fill' }).greyscale().raw().toBuffer()
+    kept.push({ file: entry.file, aspect: meta.width / meta.height, tiny })
+    manifest.push(entry)
+    n = Math.max(n, Number(/\d+/.exec(entry.file)?.[0] ?? 0))
+  }
+  console.log(`${manifest.length} photographs already in ${OUT}; adding to them.`)
+} catch {
+  // Nothing there yet.
+}
+
+// Polite pacing, and a back-off when Google starts saying no.
+const DELAY_MS = Number(process.env.DELAY_MS ?? 1200)
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+let refusals = 0
+let pauses = 0
+const added = []
+
 for (const [base, info] of images) {
   const sizeable = /googleusercontent|ggpht/.test(base) && !base.includes('?')
-  const variants = sizeable
-    ? [`${base}=s0`, `${base}=w16383-h16383`, `${base}=d`, info.linkedAs]
-    : [...new Set([info.linkedAs, base])]
+  // `=s0` is the file as uploaded; every success so far has come from it. The
+  // link as found is the fallback. Two requests at most, not four.
+  const variants = sizeable ? [`${base}=s0`, info.linkedAs] : [...new Set([info.linkedAs, base])]
 
   let best = null
   const failures = []
   for (const url of variants) {
+    await sleep(DELAY_MS)
     const buffer = await fetchImage(url)
     if (typeof buffer === 'string') {
       failures.push(`${url.slice(-14)} → ${buffer}`)
+      if (buffer === 'HTTP 403' && ++refusals >= 6 && pauses < 4) {
+        pauses++
+        refusals = 0
+        console.log(`  six refusals in a row — pausing 75s (pause ${pauses} of 4)`)
+        await sleep(75_000)
+      }
       continue
     }
+    refusals = 0
     let meta
     try {
       meta = await sharp(buffer).metadata()
@@ -309,6 +360,7 @@ for (const [base, info] of images) {
   const file = `kh-${String(++n).padStart(2, '0')}.${transparent ? 'png' : 'jpg'}`
   await writeFile(path.join(OUT, file), data)
   kept.push({ file, aspect, tiny })
+  added.push(file)
   manifest.push({
     file,
     width: out.width,
@@ -342,7 +394,9 @@ await writeFile(
   `${JSON.stringify({ start: START, fetched: new Date().toISOString(), pages: pages.map((p) => p.url), images: manifest, skipped }, null, 2)}\n`,
 )
 
-console.log(`\n${manifest.length} photographs written to ${OUT}, ${skipped.length} skipped.`)
+console.log(
+  `\n${added.length} new this run (${added.join(', ') || 'none'}); ${manifest.length} in ${OUT} altogether, ${skipped.length} skipped.`,
+)
 for (const s of skipped) {
   console.log(`  skipped …${s.source.slice(-40)} [${(s.pages ?? []).join(' ')}]: ${s.reason}`)
 }

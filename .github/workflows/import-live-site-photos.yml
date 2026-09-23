@@ -25,7 +25,8 @@ concurrency:
 jobs:
   import:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Long, on purpose: requests are paced and back off when Google throttles.
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: khdecorators
@@ -42,6 +43,8 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Download the photographs
+        env:
+          FIRST: /exterior-decoration /wallpaper-hanging /interior-decoration
         run: node scripts/import-live-photos.mjs https://www.khdecorators.uk/ _import
 
       - name: Commit
