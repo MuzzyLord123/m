@@ -51,19 +51,33 @@ const startUrl = new URL(START)
 const bareHost = (h) => h.replace(/^www\./, '')
 const sameSite = (u) => bareHost(u.hostname) === bareHost(startUrl.hostname)
 
-/** Google Sites escapes URLs inside its inline JSON. Undo the common ones. */
+/**
+ * Google escapes URLs inside its inline scripts in three different ways — JSON
+ * `=`, JavaScript `\x3d`, and `\/` — plus HTML entities in attributes.
+ * Undo all of them so one pattern can find every image wherever it is mentioned.
+ */
 const unescape = (s) =>
   s
-    .replace(/\\u003d/gi, '=')
-    .replace(/\\u0026/gi, '&')
-    .replace(/\\u002f/gi, '/')
+    .replace(/\\u([0-9a-f]{4})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\x([0-9a-f]{2})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
     .replace(/\\\//g, '/')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
     .replace(/&amp;/g, '&')
 
-const GOOGLE_IMAGE = /https:\/\/lh\d\.googleusercontent\.com\/[^\s"'()<>\\,]+/g
+/**
+ * Every host Google serves a Sites image from. It has been lh3–lh6 for years,
+ * and newer uploads come from hosts like lh7-rt and lh7-us — so any subdomain.
+ */
+const GOOGLE_IMAGE =
+  /https:\/\/[a-z0-9-]+\.(?:googleusercontent|ggpht)\.com\/[^\s"'()<>\\,]+/g
 
-/** The size suffix is everything after the last `=` in the path. */
-const baseOf = (u) => u.replace(/=[^/=]*$/, '')
+/**
+ * The size suffix (`=w1280`, `=s1600-rw`, `=d`) is the last `=` in the path.
+ * Newer links can carry a `?key=` instead, and stripping that would break the
+ * link, so a URL with a query string is left exactly as it is.
+ */
+const baseOf = (u) => (u.includes('?') ? u : u.replace(/=[a-z][0-9a-z-]*$/i, ''))
 
 async function fetchPage(url) {
   const res = await fetch(url, {
@@ -146,15 +160,36 @@ while (queue.length > 0 && pages.length < MAX_PAGES) {
     if (src) tags.push({ src, alt })
   }
 
-  const found = new Set([...raw.matchAll(GOOGLE_IMAGE)].map((m) => m[0]))
+  const found = new Set(
+    [...raw.matchAll(GOOGLE_IMAGE)]
+      .map((m) => m[0])
+      // Sandboxed embed frames live on googleusercontent too; they are not images.
+      .filter((u) => !/-embeds\.googleusercontent\.com|\/embeds\//.test(u)),
+  )
   // Images hosted anywhere else, if the site uses any.
   for (const t of tags) {
-    if (/^https?:\/\//.test(t.src) && !/googleusercontent/.test(t.src)) found.add(t.src)
+    if (/^https?:\/\//.test(t.src) && !/googleusercontent|ggpht/.test(t.src)) found.add(t.src)
   }
 
   const title = /<title[^>]*>([^<]*)<\/title>/i.exec(raw)?.[1]?.trim() ?? ''
   pages.push({ url: page.finalUrl, title, text: visibleText(raw), tags, images: [...found] })
   console.log(`page ${pages.length}: ${page.finalUrl}  (${found.size} image URLs)`)
+
+  // What the page is actually made of, so a site that embeds its pictures in
+  // some way this script does not expect says so instead of returning nothing.
+  const frames = [...raw.matchAll(/<iframe\b[^>]*\bsrc="([^"]+)"/gi)].map((m) => m[1])
+  const hosts = new Map()
+  for (const m of raw.matchAll(/https?:\/\/([a-z0-9.-]+)\//gi)) {
+    hosts.set(m[1], (hosts.get(m[1]) ?? 0) + 1)
+  }
+  const topHosts = [...hosts].sort((a, b) => b[1] - a[1]).slice(0, 12)
+  console.log(`    <img> tags: ${tags.length}   <iframe>s: ${frames.length}   bytes: ${raw.length}`)
+  for (const t of tags) console.log(`    img  ${t.src.slice(0, 150)}  alt="${t.alt.slice(0, 60)}"`)
+  for (const f of frames) console.log(`    frame ${f.slice(0, 150)}`)
+  console.log(`    hosts: ${topHosts.map(([h, c]) => `${h}×${c}`).join('  ')}`)
+  for (const u of found) console.log(`    found ${u.slice(0, 150)}`)
+  const bg = [...raw.matchAll(/background-image:\s*url\(([^)]+)\)/gi)].map((m) => m[1])
+  for (const b of bg.slice(0, 10)) console.log(`    background ${b.slice(0, 150)}`)
 }
 
 // ---------------------------------------------------------------------------
@@ -195,9 +230,10 @@ const meanDifference = (a, b) => {
 }
 
 for (const [base, info] of images) {
-  const variants = /googleusercontent/.test(base)
+  const sizeable = /googleusercontent|ggpht/.test(base) && !base.includes('?')
+  const variants = sizeable
     ? [`${base}=s0`, `${base}=w16383-h16383`, `${base}=d`, info.linkedAs]
-    : [base]
+    : [...new Set([info.linkedAs, base])]
 
   let best = null
   for (const url of variants) {
@@ -292,4 +328,7 @@ await writeFile(
 )
 
 console.log(`\n${manifest.length} photographs written to ${OUT}, ${skipped.length} skipped.`)
-if (manifest.length === 0) process.exitCode = 1
+for (const s of skipped) console.log(`  skipped ${s.source.slice(0, 110)}: ${s.reason}`)
+// Zero photographs is reported rather than failed: the page text and manifest
+// are still worth having, and they are what says where the pictures went.
+if (manifest.length === 0) console.warn('WARNING: no photographs were found.')
