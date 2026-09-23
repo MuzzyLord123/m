@@ -1,0 +1,58 @@
+name: Import photographs from the live site
+
+# One-shot. Downloads every photograph from the live Google Site at full
+# resolution and commits them to khdecorators/_import/ to be chosen from.
+#
+# It exists because the environment the site is built in cannot reach
+# khdecorators.uk, and GitHub's runners can. Delete this file once the
+# photographs are in; the script it runs stays, and works from any computer.
+
+on:
+  push:
+    branches: [claude/khdecorators-rebuild-qoa7xn]
+    paths:
+      - .github/workflows/import-live-site-photos.yml
+      - khdecorators/scripts/import-live-photos.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: import-live-site-photos
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: khdecorators
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # sharp ships a prebuilt binary, so no install scripts are needed — and
+      # skipping them keeps Playwright from downloading a browser for nothing.
+      - name: Install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Download the photographs
+        run: node scripts/import-live-photos.mjs https://www.khdecorators.uk/ _import
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add _import
+          if git diff --cached --quiet; then
+            echo "Nothing new to commit."
+            exit 0
+          fi
+          git commit -m "Import photographs from the live site, for choosing from"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
