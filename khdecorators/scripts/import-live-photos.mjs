@@ -88,15 +88,24 @@ async function fetchPage(url) {
   return { html: await res.text(), finalUrl: res.url }
 }
 
+/**
+ * Returns the bytes, or a short reason string when there are none. Sends the
+ * site as the referrer: Google's signed `-rt` image links can check it.
+ */
 async function fetchImage(url) {
   try {
-    const res = await fetch(url, { headers: { 'user-agent': UA }, redirect: 'follow' })
-    if (!res.ok) return null
+    const res = await fetch(url, {
+      headers: { 'user-agent': UA, referer: startUrl.href, accept: 'image/*,*/*;q=0.8' },
+      redirect: 'follow',
+    })
+    if (!res.ok) return `HTTP ${res.status}`
     const type = res.headers.get('content-type') ?? ''
-    if (!type.startsWith('image/') && !type.startsWith('application/octet-stream')) return null
+    if (!type.startsWith('image/') && !type.startsWith('application/octet-stream')) {
+      return `not an image (${type || 'no type'})`
+    }
     return Buffer.from(await res.arrayBuffer())
-  } catch {
-    return null
+  } catch (error) {
+    return `network: ${error.message}`
   }
 }
 
@@ -236,13 +245,18 @@ for (const [base, info] of images) {
     : [...new Set([info.linkedAs, base])]
 
   let best = null
+  const failures = []
   for (const url of variants) {
     const buffer = await fetchImage(url)
-    if (!buffer) continue
+    if (typeof buffer === 'string') {
+      failures.push(`${url.slice(-14)} → ${buffer}`)
+      continue
+    }
     let meta
     try {
       meta = await sharp(buffer).metadata()
     } catch {
+      failures.push(`${url.slice(-14)} → undecodable`)
       continue
     }
     // Orientations 5–8 are rotated a quarter turn: the stored width is the height.
@@ -254,12 +268,13 @@ for (const [base, info] of images) {
     }
   }
 
+  const where = [...info.pages].map((p) => new URL(p).pathname)
   if (!best) {
-    skipped.push({ source: base, reason: 'could not be downloaded' })
+    skipped.push({ source: base, reason: `could not be downloaded: ${failures.join('; ')}`, pages: where })
     continue
   }
   if (Math.max(best.width, best.height) < MIN_EDGE) {
-    skipped.push({ source: base, reason: `too small (${best.width}x${best.height})` })
+    skipped.push({ source: base, reason: `too small (${best.width}x${best.height})`, pages: where })
     continue
   }
 
@@ -328,7 +343,14 @@ await writeFile(
 )
 
 console.log(`\n${manifest.length} photographs written to ${OUT}, ${skipped.length} skipped.`)
-for (const s of skipped) console.log(`  skipped ${s.source.slice(0, 110)}: ${s.reason}`)
+for (const s of skipped) {
+  console.log(`  skipped …${s.source.slice(-40)} [${(s.pages ?? []).join(' ')}]: ${s.reason}`)
+}
+// Per page: how many images it mentions, and how many of those arrived.
+for (const page of pages) {
+  const got = manifest.filter((m) => m.pages.includes(page.url)).length
+  console.log(`  ${new URL(page.url).pathname.padEnd(24)} mentions ${page.images.length}, kept ${got}`)
+}
 // Zero photographs is reported rather than failed: the page text and manifest
 // are still worth having, and they are what says where the pictures went.
 if (manifest.length === 0) console.warn('WARNING: no photographs were found.')
