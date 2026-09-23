@@ -44,8 +44,8 @@ jobs:
 
       - name: Download the photographs
         env:
-          # Run 4 got the Exterior gallery; Wallpaper and Interior are still short.
-          FIRST: /wallpaper-hanging /interior-decoration /exterior-decoration
+          # Runs 4 and 5 got the Exterior and Wallpaper galleries; Interior is still short.
+          FIRST: /interior-decoration /wallpaper-hanging /exterior-decoration
           DELAY_MS: '2000'
         run: node scripts/import-live-photos.mjs https://www.khdecorators.uk/ _import
 
