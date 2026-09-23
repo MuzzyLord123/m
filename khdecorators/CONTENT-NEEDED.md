@@ -95,7 +95,7 @@ The site is honest and launchable without them. Each one makes it better.
 
 ### 5. Photographs — three shots still wanted
 
-**51 of his photographs are already on the site**, taken off the old one at the largest
+**56 of his photographs are already on the site**, taken off the old one at the largest
 size Google would give (see `content/photos.ts`) — exteriors, wallpaper, interiors, and
 two before-and-after pairs of render work that are the best proof on the site. What the old
 site did not have, and what would help most:

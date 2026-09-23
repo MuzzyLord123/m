@@ -49,7 +49,7 @@ data, the footer and the contact page at once.
 ### 2. Add a photograph
 
 Every photograph on the site is one of Kenny's, and they all live in one catalogue:
-**`content/photos.ts`**. 51 came off the old site (`scripts/import-live-photos.mjs`, which
+**`content/photos.ts`**. 56 came off the old site (`scripts/import-live-photos.mjs`, which
 also strips the GPS position a phone photo can carry).
 
 1. Put the file in `public/work/` (e.g. `public/work/upvc-hoole.jpg`). Upload the biggest
