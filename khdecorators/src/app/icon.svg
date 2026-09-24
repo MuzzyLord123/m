@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!--
+    The setting-out grid at favicon size: four rules on the matt ground with the
+    third in gold — the same device the site is built from, reduced to the smallest
+    thing that still reads at 16px. No letterforms: "KH" set this small is
+    illegible, and it would need the typeface loading to draw it.
+
+    Colours are literals, and must be kept in step with the @theme block in
+    globals.css by hand.
+  -->
+  <rect width="32" height="32" fill="#12100E"/>
+  <rect x="6" y="4" width="1.5" height="24" fill="#EFEAE2"/>
+  <rect x="12" y="4" width="1.5" height="24" fill="#EFEAE2"/>
+  <rect x="18" y="4" width="1.5" height="24" fill="#C9A227"/>
+  <rect x="24" y="4" width="1.5" height="24" fill="#EFEAE2"/>
+</svg>

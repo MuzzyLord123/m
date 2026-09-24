@@ -1,0 +1,246 @@
+/**
+ * Accessibility and pre-flight audit.
+ *
+ *   node scripts/audit.mjs [baseUrl]
+ *
+ * Runs axe-core over every page at a phone width and a desktop width, checks the things
+ * the brief calls grounds for rejection, and exits non-zero if anything fails. The
+ * accessibility target on this project is 100, not "no serious issues".
+ *
+ * Needs the site running (`npm run build && npm start`). Set CHROMIUM_PATH to use a
+ * Chromium already on the machine instead of downloading one.
+ */
+import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
+import { chromium } from 'playwright'
+
+const require = createRequire(import.meta.url)
+const axeSource = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8')
+
+const base = (process.argv[2] ?? 'http://localhost:3000').replace(/\/$/, '')
+
+const PAGES = [
+  '/',
+  '/spraying',
+  '/dustless-sanding',
+  '/interior-decoration',
+  '/exterior-decoration',
+  '/wallpaper-hanging',
+  '/gallery',
+  '/reviews',
+  '/about',
+  '/contact',
+  '/leave-a-review',
+  '/contact/sent',
+  '/contact/incomplete',
+  '/contact/problem',
+]
+
+const VIEWPORTS = [
+  ['phone', { width: 390, height: 844 }],
+  ['desktop', { width: 1440, height: 1000 }],
+]
+
+const failures = []
+const notes = []
+
+const browser = await chromium.launch(
+  process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
+)
+
+for (const [vpName, viewport] of VIEWPORTS) {
+  // The reveals are SCROLL-LINKED (view timelines), not timed: content below the
+  // viewport sits at its starting opacity until it is scrolled into view, and a
+  // wait does not change that. So axe audits the settled page — which is exactly
+  // what reduced motion renders — and the reveal itself is checked separately
+  // below: scrolled into view, a band must end fully opaque.
+  const context = await browser.newContext({ viewport, reducedMotion: 'reduce' })
+  const page = await context.newPage()
+
+  for (const path of PAGES) {
+    const response = await page.goto(base + path, { waitUntil: 'networkidle' })
+
+    if (!response || response.status() !== 200) {
+      failures.push(`${path} returned ${response ? response.status() : 'no response'}`)
+      continue
+    }
+
+    await page.waitForTimeout(300)
+
+    await page.addScriptTag({ content: axeSource })
+    const results = await page.evaluate(async () => {
+      // @ts-expect-error injected
+      return await window.axe.run(document, {
+        runOnly: {
+          type: 'tag',
+          values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'],
+        },
+      })
+    })
+
+    for (const violation of results.violations) {
+      failures.push(
+        `${vpName} ${path}: [${violation.impact}] ${violation.id} — ${violation.help} ` +
+          `(${violation.nodes.length} node${violation.nodes.length === 1 ? '' : 's'})`,
+      )
+    }
+
+    /* ---- Checks specific to this brief ------------------------------ */
+
+    if (vpName === 'desktop') {
+      const checks = await page.evaluate(() => {
+        const titleText = document.title
+        const html = document.documentElement.outerHTML
+        return {
+          title: titleText,
+          h1Count: document.querySelectorAll('h1').length,
+          // §10: no embedded third-party form, no hotlinked Google-hosted images.
+          hasIframe: document.querySelectorAll('iframe').length,
+          hasGoogleUserContent: /googleusercontent\.com/.test(html),
+          hasAggregateRating: /aggregateRating/.test(html),
+          // The number must be a real tel: link, identical everywhere.
+          telHrefs: [...document.querySelectorAll('a[href^="tel:"]')].map((a) =>
+            a.getAttribute('href'),
+          ),
+          // Images must carry alt text and explicit dimensions. Empty alt is
+          // allowed ONLY where the image is genuinely decorative — inside a link
+          // that already names itself, or hidden from assistive tech — which is
+          // what WCAG asks for; a missing alt attribute is never allowed. A
+          // next/image `fill` image takes its size from its frame, which holds
+          // the layout just as width and height would.
+          badImages: [...document.querySelectorAll('img')].filter((img) => {
+            const alt = img.getAttribute('alt')
+            const decorative =
+              alt === '' &&
+              Boolean(img.closest('a[aria-label], [aria-hidden="true"], [role="presentation"]'))
+            const sized = img.getAttribute('width') || img.getAttribute('data-nimg') === 'fill'
+            return alt === null || (alt === '' && !decorative) || !sized
+          }).length,
+        }
+      })
+
+      if (checks.h1Count !== 1) {
+        failures.push(`${path}: ${checks.h1Count} <h1> elements, expected exactly 1`)
+      }
+      if (checks.hasIframe > 0) {
+        failures.push(`${path}: an <iframe> — no embedded third-party forms or widgets`)
+      }
+      if (checks.hasGoogleUserContent) {
+        failures.push(`${path}: references googleusercontent.com`)
+      }
+      if (checks.hasAggregateRating) {
+        failures.push(`${path}: aggregateRating in the markup`)
+      }
+      if (checks.badImages > 0) {
+        failures.push(`${path}: ${checks.badImages} image(s) missing alt or width`)
+      }
+
+      const wrongTel = checks.telHrefs.filter((h) => h !== 'tel:+447538869832')
+      if (wrongTel.length > 0) {
+        failures.push(`${path}: unexpected tel: link(s) ${wrongTel.join(', ')}`)
+      }
+
+      // Every indexable page must name a service and a place.
+      const indexable = !['/contact/sent', '/contact/incomplete', '/contact/problem'].includes(path)
+      if (indexable) {
+        const hasPlace = /\{\{TOWN\}\}|in [A-Z]/.test(checks.title)
+        if (!hasPlace) failures.push(`${path}: title names no place — "${checks.title}"`)
+        if (!/KH Painting and Decorating/.test(checks.title)) {
+          failures.push(`${path}: title has no business name — "${checks.title}"`)
+        }
+      }
+    }
+  }
+
+  await context.close()
+}
+
+/* ---- Normal motion: a reveal must END fully opaque ------------------ */
+
+{
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+  const page = await context.newPage()
+  await page.goto(base + '/', { waitUntil: 'networkidle' })
+
+  // Scroll each band to the middle of the screen and read it once it has
+  // settled. A scroll-linked reveal that stops short of opacity 1 would leave
+  // text permanently dimmed below its measured contrast.
+  const short = await page.evaluate(async () => {
+    const bands = [...document.querySelectorAll('main .kh-reveal')]
+    let count = 0
+    for (const el of bands) {
+      // Instant: the site scrolls smoothly, and a smooth scroll would still be
+      // travelling when the opacity is read.
+      el.scrollIntoView({ block: 'center', behavior: 'instant' })
+      await new Promise((r) => setTimeout(r, 120))
+      if (Number(getComputedStyle(el).opacity) < 0.99) count++
+    }
+    return { count, of: bands.length }
+  })
+
+  if (short.count > 0) {
+    failures.push(`reveal: ${short.count} of ${short.of} bands still faded when centred on screen`)
+  } else {
+    notes.push(`reveal: all ${short.of} bands fully opaque once in view`)
+  }
+
+  // The hero's timed entrance must have finished within three seconds.
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.waitForTimeout(3000)
+  const heroFaded = await page.evaluate(
+    () => [...document.querySelectorAll('.hero-in')].filter((el) => Number(getComputedStyle(el).opacity) < 0.99).length,
+  )
+  if (heroFaded > 0) failures.push(`hero: ${heroFaded} line(s) still fading after 3s`)
+  else notes.push('hero: entrance complete within 3s')
+
+  await context.close()
+}
+
+/* ---- Reduced motion: content must still be visible ----------------- */
+
+{
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 1000 },
+    reducedMotion: 'reduce',
+  })
+  const page = await context.newPage()
+  await page.goto(base + '/', { waitUntil: 'networkidle' })
+
+  // Every animated class on the site: band reveals, photograph reveals, the
+  // hero's staggered lines. Under reduced motion none of them may be faded.
+  const hidden = await page.evaluate(() => {
+    const els = [...document.querySelectorAll('.kh-reveal, .kh-photo-reveal, .hero-in, .gilt')]
+    return els.filter((el) => Number(getComputedStyle(el).opacity) < 0.99).length
+  })
+
+  if (hidden > 0) {
+    failures.push(
+      `prefers-reduced-motion: ${hidden} animated element(s) not fully opaque. ` +
+        'Reveals must render in place, not stay hidden.',
+    )
+  } else {
+    notes.push('prefers-reduced-motion: everything renders in place')
+  }
+
+  await context.close()
+}
+
+await browser.close()
+
+/* ---- Report -------------------------------------------------------- */
+
+const line = '─'.repeat(72)
+console.log(`\n${line}\nKH Painting and Decorating — audit\n${line}`)
+
+for (const note of notes) console.log(`  ✓ ${note}`)
+
+if (failures.length === 0) {
+  console.log(`  ✓ ${PAGES.length} pages × ${VIEWPORTS.length} widths — no violations`)
+  console.log(`\n${line}\nClean.\n`)
+  process.exit(0)
+}
+
+console.log('\nFailures:')
+for (const failure of failures) console.log(`  ✗ ${failure}`)
+console.log(`\n${line}\n${failures.length} failure(s).\n`)
+process.exit(1)
