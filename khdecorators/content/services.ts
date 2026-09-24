@@ -130,8 +130,8 @@ const interior: ServicePage = {
       body: 'Ceilings, then walls, then woodwork last so nothing lands on a finished surface. Edges cut in with a brush rather than masked, because tape on a fresh wall lifts it.',
     },
     {
-      title: 'Cleared, and checked in daylight',
-      body: 'Sheets up, everything back where it was, and a walk round in daylight with you. Anything you are not happy with I put right then, not on a snagging visit three weeks later.',
+      title: 'Cleared, and looked over with you',
+      body: 'Covers up, everything back where it was, and you look it over with me before I go. Anything you are not happy with I put right then, not on a snagging visit three weeks later.',
     },
   ],
   spec: [

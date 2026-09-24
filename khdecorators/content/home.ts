@@ -27,7 +27,7 @@ export const home = {
       'One man, one job at a time',
       'Photographs at the end of every day',
     ],
-    ctaPrimary: 'Get a free quote',
+    ctaPrimary: 'Ask for a price',
     ctaSecondary: 'Ring Kenny',
 
     /**
@@ -56,7 +56,7 @@ export const home = {
     {
       icon: 'brush' as const,
       title: 'It is me on the job',
-      body: 'Not a team, not a subcontractor in a van with my name on it. The person who quotes your job is the person who does it.',
+      body: 'Not a team, not a subcontractor in a van with my name on it. You deal with me from the first phone call to the last coat.',
     },
     {
       icon: 'extractor' as const,
@@ -94,7 +94,7 @@ export const home = {
     heading: 'What I do, and where',
     body: [
       'I’m a time-served painter and decorator working out of {town}. I do the ordinary work — walls, ceilings, woodwork, papering, the outside of the house — and I do two things most decorators round here don’t: I spray, and I sand with extraction so the dust doesn’t end up through your house.',
-      'It’s me on the job. Not a team, not a subcontractor turning up in a van with my name on it. That means I can only be in one place at a time, so the dates I give you are real ones, and it means the person who quoted the job is the person doing it.',
+      'It’s me on the job. Not a team, not a subcontractor turning up in a van with my name on it. That means I can only be in one place at a time, so the dates I give you are real ones, and it means you deal with one person from the quote to the last coat.',
       'Most of my work comes from people who have had me before, or from their neighbours. That is the way I would rather it stayed, which is a reasonable summary of how I approach a job.',
     ],
     /** Short specification block. Facts, not claims. */
@@ -200,7 +200,7 @@ export const home = {
    * 07 — Quote
    * ---------------------------------------------------------------- */
   quote: {
-    heading: 'Get a free quote',
+    heading: 'Ask for a price',
     standfirst:
       'Tell me what needs doing and roughly when. I read these myself and I answer them myself, usually the same day. If it is easier, ring me — I would rather have a two-minute conversation than a long form.',
   },

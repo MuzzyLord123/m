@@ -208,7 +208,7 @@ const furniture: SprayService = {
   name: 'Furniture and kitchen doors',
   question: 'Can kitchen cupboard doors be sprayed instead of replaced?',
   answer:
-    'If the carcasses and hinges are sound, yes — and it is the single biggest change you can make to a kitchen for the money. Doors, drawer fronts and end panels come off, get degreased, keyed and primed, and go back sprayed. A solid timber or MDF door takes it well. A peeling vinyl-wrapped door does not.',
+    'If the carcasses and hinges are sound, yes — and it is the single biggest change you can make to a kitchen for the money. I take the doors, drawer fronts and end panels off, clean the grease off them, key and prime them, and hang them back sprayed. A solid timber or MDF door takes it well. A peeling vinyl-wrapped door does not.',
   covers: [
     'Kitchen doors, drawer fronts, end panels and cornice',
     'Fitted and freestanding wardrobes',

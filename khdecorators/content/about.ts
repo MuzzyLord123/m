@@ -22,7 +22,7 @@ export const about = {
   lede: 'I’m Kenny. I’m a time-served painter and decorator based in {town}, and I have been doing this long enough to have strong opinions about filler.',
 
   body: [
-    'I work on my own. That is a decision, not a stage I am hoping to grow out of. It means the person who comes to quote your job is the person who does it, that I am only ever on one site at a time, and that if something is not right you are not being passed between a salesman and a subcontractor to get it sorted.',
+    'I work on my own. That is a decision, not a stage I am hoping to grow out of. It means you deal with one person from the quote to the last coat, that I am only ever on one site at a time, and that if something is not right you are not being passed between a salesman and a subcontractor to get it sorted.',
     'Most of what I do is ordinary decorating: walls, ceilings, woodwork, papering, the outside of the house. What I have put the money and the time into is spray finishing and dust extraction, because those are the two things that change the job from the customer’s side rather than just from mine.',
     'Spraying, because there are surfaces a brush cannot do properly — UPVC, a steel garage door, a run of kitchen doors — and on those, hand-painting is a compromise everybody has quietly agreed to accept. Extraction, because the reason people put off decorating is not the paint, it is the fortnight of dust afterwards, and that turns out to be a solvable problem.',
     'I would rather tell you a job is not worth doing than take the work. If a garage door has rusted through, spraying it is money spent on something that needs replacing. If a wall is wet, painting it traps the damp and the coating fails. Saying so costs me the job that day and it is the reason people ring me again.',
@@ -49,7 +49,7 @@ export const about = {
   /** How he works, as short statements. These are commitments, so keep them few. */
   principles: [
     {
-      title: 'Preparation is the job',
+      title: 'The paint goes on last',
       body: 'The paint is the last part and the easiest part. Filling, flatting, caulking and priming are where a job is won, and they are also the parts that are invisible once it is finished — which is precisely why they are the parts that get skipped.',
     },
     {

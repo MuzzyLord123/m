@@ -49,13 +49,13 @@ export const processSteps: ProcessStep[] = [
   {
     number: '06',
     title: 'Cleared up as I go, not at the end',
-    body: 'Sheets down before anything starts, dust extracted as it is made, and the room put back at the end of each day rather than left as a building site until Friday.',
+    body: 'Covers down before anything starts, dust extracted as it is made, and each room usable again at the end of the day rather than left as a building site until Friday.',
     note: 'Daily, not weekly',
   },
   {
     number: '07',
-    title: 'We walk round it together',
-    body: 'In daylight, before I load the van. Anything you are not happy with, I put right then. That is easier for both of us than a phone call a fortnight later.',
+    title: 'Looked over before the van is loaded',
+    body: 'You look it over with me before I pack up. Anything you are not happy with, I put right then — easier for both of us than a phone call a fortnight later.',
     note: 'Before I leave',
   },
 ]
