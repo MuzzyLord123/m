@@ -13,3 +13,6 @@ scripts/_*
 /*.mjs
 !next.config.mjs
 !postcss.config.mjs
+
+# Generated single-file build (scripts/build-single-file.mjs)
+dist
