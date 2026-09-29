@@ -35,7 +35,7 @@ it is a few seconds.
 When it finishes you will see:
 
 ```
-   ▲ Next.js 16.3.0
+   ▲ Next.js 16.3.6
    - Local:  http://localhost:3000
 ```
 
@@ -57,14 +57,16 @@ The two most useful things to change first:
 | ------------------------ | ------------------------ | --------------------- |
 | The town                 | `content/site.ts`        | `{{TOWN}}`            |
 | The towns you cover      | `content/areas.ts`       | `towns: []`           |
-| The reviews              | `content/reviews.ts`     | `reviews: []`         |
+
+The 17 reviews are already in `content/reviews.ts`, copied word for word. Read the
+note at the top of that file before adding a new one.
 
 `README.md` has the longer version, and `CONTENT-NEEDED.md` is the full list of
 what is still missing.
 
-**Photographs:** drop them in the `public/work` folder, then follow
-"Add a photograph" in `README.md`. There is a note in that folder explaining what
-shots are wanted.
+**Photographs:** 55 of Kenny's are already in, taken off the old site. To add more,
+drop them in the `public/work` folder, then follow "Add a photograph" in
+`README.md`. There is a note in that folder saying which shots are still wanted.
 
 ---
 
